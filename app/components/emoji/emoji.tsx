@@ -125,11 +125,19 @@ const Emoji = (props: EmojiProps) => {
     // force a new image to be rendered when the size changes
     const key = Platform.OS === 'android' ? (`${imageUrl}-${height}-${width}`) : null;
 
+    const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
+    const imgSource = {
+        uri: imageUrl,
+        headers: {
+            Authorization: token,
+        },
+    };
+
     return (
         <FastImage
             key={key}
             style={[customEmojiStyle, {width, height}]}
-            source={{uri: imageUrl}}
+            source={imgSource}
             resizeMode={FastImage.resizeMode.contain}
             testID={testID}
         />

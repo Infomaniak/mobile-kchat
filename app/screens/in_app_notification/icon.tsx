@@ -46,7 +46,12 @@ const NotificationIcon = ({author, enablePostIconOverride, fromWebhook, override
     let icon;
     if (client && fromWebhook && !useUserIcon && enablePostIconOverride) {
         if (overrideIconUrl) {
-            const source: Source = {uri: client.getAbsoluteUrl(overrideIconUrl)};
+            const source: Source = {
+                uri: client.getAbsoluteUrl(overrideIconUrl),
+                headers: {
+                    Authorization: client?.getCurrentBearerToken(),
+                },
+            };
             icon = (
                 <FastImage
                     source={source}
@@ -67,7 +72,12 @@ const NotificationIcon = ({author, enablePostIconOverride, fromWebhook, override
             <FastImage
                 key={pictureUrl}
                 style={{width: IMAGE_SIZE, height: IMAGE_SIZE, borderRadius: (IMAGE_SIZE / 2)}}
-                source={{uri: `${serverUrl}${pictureUrl}`}}
+                source={{
+                    uri: `${serverUrl}${pictureUrl}`,
+                    headers: {
+                        Authorization: client?.getCurrentBearerToken(),
+                    },
+                }}
             />
         );
     } else {

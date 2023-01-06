@@ -6,7 +6,9 @@ import {ImageBackground, StyleProp, StyleSheet, View, ViewStyle} from 'react-nat
 import FastImage, {ImageStyle, ResizeMode} from 'react-native-fast-image';
 import Animated, {interpolate, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming} from 'react-native-reanimated';
 
+import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import NetworkManager from '@managers/network_manager';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import Thumbnail from './thumbnail';
@@ -50,6 +52,7 @@ const ProgressiveImage = ({
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const intensity = useSharedValue(0);
+    const serverUrl = useServerUrl();
 
     const defaultOpacity = useDerivedValue(() => (
         interpolate(
@@ -112,6 +115,13 @@ const ProgressiveImage = ({
     }
 
     const containerStyle = {backgroundColor: changeOpacity(theme.centerChannelColor, Number(defaultOpacity.value))};
+    const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
+    const imgSource = {
+        uri: imageUri,
+        headers: {
+            Authorization: token,
+        },
+    };
 
     let image;
     if (thumbnailUri) {
@@ -122,7 +132,7 @@ const ProgressiveImage = ({
                     nativeID={`image-${id}`}
                     resizeMode={resizeMode}
                     onError={onError}
-                    source={{uri: imageUri}}
+                    source={imgSource}
                     style={[
                         StyleSheet.absoluteFill,
                         imageStyle,
@@ -140,13 +150,20 @@ const ProgressiveImage = ({
                 nativeID={`image-${id}`}
                 resizeMode={resizeMode}
                 onError={onError}
-                source={{uri: imageUri}}
+                source={imgSource}
                 style={[StyleSheet.absoluteFill, imageStyle, animatedOpacity]}
                 onLoadEnd={onLoadImageEnd}
                 testID='progressive_image.highResImage'
             />
         );
     }
+
+    const thumbnailSource = {
+        uri: thumbnailUri,
+        headers: {
+            Authorization: token,
+        },
+    };
 
     return (
         <Animated.View
@@ -155,7 +172,7 @@ const ProgressiveImage = ({
             <Thumbnail
                 onError={onError}
                 opacity={defaultOpacity}
-                source={{uri: thumbnailUri}}
+                source={thumbnailSource}
                 style={[
                     thumbnailUri ? StyleSheet.absoluteFill : undefined,
                     imageStyle,

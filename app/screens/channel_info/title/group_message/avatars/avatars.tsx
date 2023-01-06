@@ -51,7 +51,12 @@ const GroupAvatars = ({users}: Props) => {
             <FastImage
                 key={pictureUrl + i.toString()}
                 style={[styles.profile, {transform: [{translateX: -(i * 12)}]}]}
-                source={{uri: `${serverUrl}${pictureUrl}`}}
+                source={{
+                    uri: `${serverUrl}${pictureUrl}`,
+                    headers: {
+                        Authorization: client?.getCurrentBearerToken() ?? '',
+                    },
+                }}
             />
         );
     });

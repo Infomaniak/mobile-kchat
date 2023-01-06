@@ -39,8 +39,10 @@ const Group = ({theme, users}: Props) => {
 
     let client: Client | undefined;
 
+    let accessToken = '';
     try {
         client = NetworkManager.getClient(serverUrl);
+        accessToken = client?.getCurrentBearerToken() ?? '';
     } catch {
         return null;
     }
@@ -53,7 +55,12 @@ const Group = ({theme, users}: Props) => {
                 <FastImage
                     key={pictureUrl + i.toString()}
                     style={[styles.profile, {transform: [{translateX: -(i * 24)}]}]}
-                    source={{uri: `${serverUrl}${pictureUrl}`}}
+                    source={{
+                        uri: `${serverUrl}${pictureUrl}`,
+                        headers: {
+                            Authorization: accessToken,
+                        },
+                    }}
                 />
             );
         });

@@ -12,7 +12,7 @@ import {forceLogoutIfNecessary} from './session';
 
 export const downloadFile = (serverUrl: string, fileId: string, desitnation: string) => { // Let it throw and handle it accordingly
     const client = NetworkManager.getClient(serverUrl);
-    return client.apiClient.download(client.getFileRoute(fileId), desitnation.replace('file://', ''), {timeoutInterval: DOWNLOAD_TIMEOUT});
+    return client.apiClient.download(client.getFileRoute(fileId), desitnation.replace('file://', ''), {headers: {Authorization: client.getCurrentBearerToken()}, timeoutInterval: DOWNLOAD_TIMEOUT});
 };
 
 export const uploadFile = (

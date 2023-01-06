@@ -67,6 +67,9 @@ const ClientFiles = (superclass: any) => class extends superclass {
     ) => {
         const url = this.getFilesRoute();
         const options: UploadRequestOptions = {
+            headers: {
+                Authorization: this.getCurrentBearerToken(),
+            },
             skipBytes,
             method: 'POST',
             multipart: {

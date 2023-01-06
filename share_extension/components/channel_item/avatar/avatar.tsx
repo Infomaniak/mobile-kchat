@@ -47,6 +47,7 @@ const Avatar = ({author, theme}: Props) => {
         );
     }
 
+    let token = null;
     if (author && serverUrl) {
         try {
             const client = NetworkManager.getClient(serverUrl);
@@ -58,14 +59,20 @@ const Avatar = ({author, theme}: Props) => {
             }
 
             pictureUrl = client.getProfilePictureUrl(author.id, lastPictureUpdate);
+            token = client.getCurrentBearerToken();
         } catch {
             // handle below that the client is not set
         }
     }
 
     let icon;
-    if (pictureUrl) {
-        const imgSource = {uri: `${serverUrl}${pictureUrl}`};
+    if (pictureUrl && token) {
+        const imgSource = {
+            uri: `${serverUrl}${pictureUrl}`,
+            headers: {
+                Authorization: token,
+            },
+        };
         icon = (
             <FastImage
                 key={pictureUrl}

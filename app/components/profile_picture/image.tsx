@@ -75,7 +75,12 @@ const Image = ({author, forwardRef, iconSize, size, source, url}: Props) => {
         }
 
         const pictureUrl = client.getProfilePictureUrl(author.id, lastPictureUpdate);
-        const imgSource = source ?? {uri: `${serverUrl}${pictureUrl}`};
+        const imgSource = source ?? {
+            uri: `${serverUrl}${pictureUrl}`,
+            headers: {
+                Authorization: client.getCurrentBearerToken(),
+            },
+        };
         return (
             <AnimatedFastImage
                 key={pictureUrl}

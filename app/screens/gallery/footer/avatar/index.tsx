@@ -9,6 +9,7 @@ import {buildAbsoluteUrl} from '@actions/remote/file';
 import {buildProfileImageUrl} from '@actions/remote/user';
 import CompassIcon from '@components/compass_icon';
 import {useServerUrl} from '@context/server';
+import NetworkManager from '@managers/network_manager';
 import {changeOpacity} from '@utils/theme';
 
 type Props = {
@@ -51,9 +52,10 @@ const Avatar = ({authorId, overrideIconUrl}: Props) => {
 
     let picture;
     if (avatarUri) {
+        const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
         picture = (
             <FastImage
-                source={{uri: avatarUri}}
+                source={{headers: {Authorization: token}, uri: avatarUri}}
                 style={[styles.avatar, styles.avatarRadius]}
             />
         );
