@@ -79,13 +79,6 @@ export default function QuickActions({
                 updateValue={updateValue}
                 focus={focus}
             />
-            <InputAction
-                testID={slashInputActionTestID}
-                disabled={slashDisabled}
-                inputType='slash'
-                updateValue={updateValue}
-                focus={focus}
-            />
             <FileAction
                 testID={fileActionTestID}
                 {...uploadProps}
