@@ -1021,6 +1021,7 @@ export async function getChannelMemberCountsByGroup(serverUrl: string, channelId
 }
 
 export async function getChannelTimezones(serverUrl: string, channelId: string) {
+    return {channelTimezones: []};
     let client: Client;
     try {
         client = NetworkManager.getClient(serverUrl);

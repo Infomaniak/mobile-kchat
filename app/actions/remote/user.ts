@@ -923,6 +923,7 @@ export const fetchTeamAndChannelMembership = async (serverUrl: string, userId: s
 };
 
 export const getAllSupportedTimezones = async (serverUrl: string) => {
+    return [];
     try {
         const client = NetworkManager.getClient(serverUrl);
         const allTzs = await client.getTimezones();
