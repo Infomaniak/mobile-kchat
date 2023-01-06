@@ -327,7 +327,7 @@ const AtMention = ({
 
         let completedDraft;
         if (isSearch) {
-            completedDraft = mentionPart.replace(AT_MENTION_SEARCH_REGEX, `from: ${mention} `);
+            completedDraft = mentionPart.replace(AT_MENTION_SEARCH_REGEX, `from:${mention} `);
         } else {
             completedDraft = mentionPart.replace(AT_MENTION_REGEX, `@${mention} `);
         }
