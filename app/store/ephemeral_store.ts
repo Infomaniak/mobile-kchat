@@ -3,11 +3,14 @@
 
 import {BehaviorSubject} from 'rxjs';
 
+import {KSuiteLimit} from '@components/post_list/limited_messages/limited_messages';
+
 class EphemeralStore {
     theme: Theme | undefined;
     creatingChannel = false;
     creatingDMorGMTeammates: string[] = [];
 
+    private serverLimit: { [x: string]: KSuiteLimit | undefined } = {};
     private pushProxyVerification: {[serverUrl: string]: string | undefined} = {};
     private canJoinOtherTeams: {[serverUrl: string]: BehaviorSubject<boolean>} = {};
 
@@ -142,6 +145,28 @@ class EphemeralStore {
 
     wasNotificationTapped = () => {
         return this.notificationTapped;
+    };
+
+    setServerHasLimit = (serverUrl: string, limitUntil: string | undefined) => {
+        if (limitUntil) {
+            if (this.serverLimit[serverUrl]?.limit !== limitUntil) {
+                this.serverLimit[serverUrl] = {limit: limitUntil, ignored: false};
+            }
+        } else {
+            this.serverLimit[serverUrl] = undefined;
+        }
+    };
+
+    setServerIgnoredLimit = (serverUrl: string, ignored: boolean) => {
+        const currentLimit = this.serverLimit[serverUrl];
+        if (currentLimit) {
+            currentLimit.ignored = ignored;
+            this.serverLimit[serverUrl] = currentLimit;
+        }
+    };
+
+    serverHasLimit = (serverUrl: string) => {
+        return this.serverLimit[serverUrl];
     };
 }
 

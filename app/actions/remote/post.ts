@@ -23,6 +23,7 @@ import {getPostById, getRecentPostsInChannel} from '@queries/servers/post';
 import {getCurrentUserId, getCurrentChannelId} from '@queries/servers/system';
 import {getIsCRTEnabled, prepareThreadsFromReceivedPosts} from '@queries/servers/thread';
 import {queryAllUsers} from '@queries/servers/user';
+import EphemeralStore from '@store/ephemeral_store';
 import {setFetchingThreadState} from '@store/fetching_thread_store';
 import {getValidEmojis, matchEmoticons} from '@utils/emoji/helpers';
 import {isServerError} from '@utils/errors';
@@ -355,6 +356,7 @@ export async function fetchPosts(serverUrl: string, channelId: string, page = 0,
         const client = NetworkManager.getClient(serverUrl);
         const isCRTEnabled = await getIsCRTEnabled(operator.database);
         const data = await client.getPosts(channelId, page, perPage, isCRTEnabled, isCRTEnabled);
+        EphemeralStore.setServerHasLimit(serverUrl, data.has_limitation);
         const result = processPostsFetched(data);
         if (!fetchOnly) {
             const models = await operator.handlePosts({
@@ -408,6 +410,7 @@ export async function fetchPostsBefore(serverUrl: string, channelId: string, pos
         }
         const isCRTEnabled = await getIsCRTEnabled(operator.database);
         const data = await client.getPostsBefore(channelId, postId, 0, perPage, isCRTEnabled, isCRTEnabled);
+        EphemeralStore.setServerHasLimit(serverUrl, data.has_limitation);
         const result = processPostsFetched(data);
 
         if (activeServerUrl === serverUrl) {
@@ -469,6 +472,7 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
     try {
         const isCRTEnabled = await getIsCRTEnabled(operator.database);
         const data = await client.getPostsSince(channelId, since, isCRTEnabled, isCRTEnabled);
+        EphemeralStore.setServerHasLimit(serverUrl, data.has_limitation);
         const result = await processPostsFetched(data);
         if (!fetchOnly) {
             const models = await operator.handlePosts({
@@ -592,6 +596,7 @@ export async function fetchPostThread(serverUrl: string, postId: string, options
             collapsedThreadsExtended: isCRTEnabled,
             ...options,
         });
+        EphemeralStore.setServerHasLimit(serverUrl, data.has_limitation);
         const result = processPostsFetched(data);
         let posts: Model[] = [];
         if (!fetchOnly) {
@@ -662,6 +667,7 @@ export async function fetchPostsAround(serverUrl: string, channelId: string, pos
             order: [],
         };
 
+        EphemeralStore.setServerHasLimit(serverUrl, preData.has_limitation);
         const data = processPostsFetched(preData);
 
         let posts: Model[] = [];

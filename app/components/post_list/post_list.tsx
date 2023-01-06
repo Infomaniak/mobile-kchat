@@ -9,12 +9,14 @@ import Animated from 'react-native-reanimated';
 import {fetchPosts, fetchPostThread} from '@actions/remote/post';
 import CombinedUserActivity from '@components/post_list/combined_user_activity';
 import DateSeparator from '@components/post_list/date_separator';
+import LimitedMessages, {KSuiteLimit} from '@components/post_list/limited_messages/limited_messages';
 import NewMessagesLine from '@components/post_list/new_message_line';
 import Post from '@components/post_list/post';
 import ThreadOverview from '@components/post_list/thread_overview';
 import {Events, Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import EphemeralStore from '@store/ephemeral_store';
 import {getDateForDateLine, preparePostList} from '@utils/post_list';
 
 import {INITIAL_BATCH_TO_RENDER, SCROLL_POSITION_CONFIG, VIEWABILITY_CONFIG} from './config';
@@ -119,6 +121,7 @@ const PostList = ({
     const scrolledToHighlighted = useRef(false);
     const [enableRefreshControl, setEnableRefreshControl] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [limit, setLimit] = useState<KSuiteLimit | undefined>(undefined);
     const theme = useTheme();
     const serverUrl = useServerUrl();
     const orderedPosts = useMemo(() => {
@@ -146,6 +149,7 @@ const PostList = ({
                 }, 400);
             }
         };
+        setLimit(EphemeralStore.serverHasLimit(serverUrl));
 
         const scrollBottomListener = DeviceEventEmitter.addListener(Events.POST_LIST_SCROLL_TO_BOTTOM, scrollToBottom);
 
@@ -169,6 +173,7 @@ const PostList = ({
             await fetchPostThread(serverUrl, rootId, options);
         }
         setRefreshing(false);
+        setLimit(EphemeralStore.serverHasLimit(serverUrl));
     }, [channelId, location, posts, rootId]);
 
     const onScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -207,6 +212,14 @@ const PostList = ({
             onViewableItemsChangedListener.current(viewableItems);
         }
     }, [location]);
+
+    function onCloseLimitView() {
+        if (!limit) {
+            return;
+        }
+        setLimit({limit: limit.limit, ignored: true});
+        EphemeralStore.setServerIgnoredLimit(serverUrl, true);
+    }
 
     const registerScrollEndIndexListener = useCallback((listener: onScrollEndIndexListenerEvent) => {
         onScrollEndIndexListener.current = listener;
@@ -375,6 +388,17 @@ const PostList = ({
                 joinCallBannerVisible={Boolean(joinCallBannerVisible)}
             />
             }
+            {limit && !limit.ignored &&
+                <LimitedMessages
+                    theme={theme}
+                    testID={`${testID}.limited_messages_button`}
+                    currentCallBarVisible={Boolean(currentCallBarVisible)}
+                    joinCallBannerVisible={Boolean(joinCallBannerVisible)}
+                    limitUntil={limit.limit}
+                    onClose={onCloseLimitView}
+                />
+            }
+
         </>
     );
 };
