@@ -3,12 +3,13 @@
 
 import React, {useCallback, useEffect, useState} from 'react';
 import {LayoutChangeEvent, StyleSheet, StyleProp, View, ViewStyle} from 'react-native';
-import Animated, {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
+import Animated, {Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming} from 'react-native-reanimated';
 
 type ProgressBarProps = {
     color: string;
     progress: number;
     style?: StyleProp<ViewStyle>;
+    indeterminate?: boolean;
 }
 
 const styles = StyleSheet.create({
@@ -24,8 +25,19 @@ const styles = StyleSheet.create({
     },
 });
 
-const ProgressBar = ({color, progress, style}: ProgressBarProps) => {
+const ProgressBar = ({color, progress, style, indeterminate}: ProgressBarProps) => {
     const [width, setWidth] = useState(0);
+    const opacity = useSharedValue(0);
+
+    const indeterminateStyle = useAnimatedStyle(() => ({
+        opacity: opacity.value,
+    }), []);
+
+    opacity.value = withRepeat(
+        withTiming(1.0, {duration: 1000, easing: Easing.ease}),
+        -1,
+        true,
+    );
 
     const progressValue = useSharedValue(progress);
 
@@ -59,6 +71,7 @@ const ProgressBar = ({color, progress, style}: ProgressBarProps) => {
                         width,
                     },
                     progressAnimatedStyle,
+                    indeterminate && progress === 1 ? indeterminateStyle : null,
                 ]}
             />
         </View>
@@ -66,3 +79,4 @@ const ProgressBar = ({color, progress, style}: ProgressBarProps) => {
 };
 
 export default ProgressBar;
+

@@ -145,6 +145,7 @@ export default function UploadItem({
                     <ProgressBar
                         progress={progress || 0}
                         color={theme.buttonBg}
+                        indeterminate={true}
                     />
                 </View>
                 }
