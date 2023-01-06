@@ -37,6 +37,7 @@ export default class ClientBase {
         if (csrfToken) {
             this.setCSRFToken(csrfToken);
         }
+        this.requestHeaders['Content-Type'] = 'application/json';
     }
 
     invalidate() {
@@ -73,6 +74,10 @@ export default class ClientBase {
     setBearerToken(bearerToken: string) {
         this.requestHeaders[ClientConstants.HEADER_AUTH] = `${ClientConstants.HEADER_BEARER} ${bearerToken}`;
         setServerCredentials(this.apiClient.baseUrl, bearerToken);
+    }
+
+    getCurrentBearerToken(): string {
+        return this.requestHeaders[ClientConstants.HEADER_AUTH];
     }
 
     setCSRFToken(csrfToken: string) {

@@ -36,7 +36,7 @@ export async function loginEntry({serverUrl, user, deviceToken}: AfterLoginArgs)
 
     if (deviceToken) {
         try {
-            client.attachDevice(deviceToken);
+            await client.attachDevice(deviceToken);
         } catch {
             // do nothing, the token could've failed to attach to the session but is not a blocker
         }

@@ -14,6 +14,7 @@ import DeviceInfo from 'react-native-device-info';
 import LocalConfig from '@assets/config.json';
 import {Client} from '@client/rest';
 import * as ClientConstants from '@client/rest/constants';
+import {BASE_SERVER_URL} from '@client/rest/constants';
 import ClientError from '@client/rest/error';
 import {CERTIFICATE_ERRORS} from '@constants/network';
 import ManagedApp from '@init/managed_app';
@@ -25,6 +26,7 @@ const CLIENT_CERTIFICATE_MISSING_ERROR_CODE = -200;
 
 class NetworkManager {
     private clients: Record<string, Client> = {};
+    private globalClient: Client | null = null;
 
     private DEFAULT_CONFIG = {
         headers: {
@@ -65,6 +67,10 @@ class NetworkManager {
         delete this.clients[serverUrl];
     };
 
+    public invalidateGlobalClient = () => {
+        this.globalClient?.invalidate();
+    };
+
     public getClient = (serverUrl: string) => {
         const client = this.clients[serverUrl];
         if (!client) {
@@ -88,6 +94,22 @@ class NetworkManager {
                     defaultMessage: 'Can’t find this server. Check spelling and URL format.',
                 },
                 url: serverUrl,
+            });
+        }
+
+        return this.clients[serverUrl];
+    };
+
+    public createGlobalClient = async (accessToken: string) => {
+        const serverUrl = BASE_SERVER_URL;
+        const config = await this.buildConfig();
+        try {
+            const {client} = await getOrCreateAPIClient(serverUrl, config, this.clientErrorEventHandler);
+            const csrfToken = await getCSRFFromCookie(serverUrl);
+            this.clients[serverUrl] = new Client(client, serverUrl, accessToken, csrfToken);
+        } catch (error) {
+            throw new ClientError(serverUrl, {
+                message: 'Can’t create global client.',
             });
         }
 

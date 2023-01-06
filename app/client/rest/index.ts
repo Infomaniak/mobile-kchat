@@ -2,6 +2,8 @@
 // See LICENSE.txt for license information.
 
 import ClientCalls, {ClientCallsMix} from '@calls/client/rest';
+import IKClientCalls, {IKClientCallsMix} from '@client/rest/ikcalls';
+import IKClientMultiTeam, {IKClientMultiTeamMix} from '@client/rest/ikteams';
 import ClientPlugins, {ClientPluginsMix} from '@client/rest/plugins';
 import mix from '@utils/mix';
 
@@ -42,7 +44,9 @@ interface Client extends ClientBase,
     ClientUsersMix,
     ClientCallsMix,
     ClientPluginsMix,
-    ClientNPSMix
+    ClientNPSMix,
+    IKClientMultiTeamMix,
+    IKClientCallsMix
 {}
 
 class Client extends mix(ClientBase).with(
@@ -63,6 +67,8 @@ class Client extends mix(ClientBase).with(
     ClientCalls,
     ClientPlugins,
     ClientNPS,
+    IKClientMultiTeam,
+    IKClientCalls,
 ) {
     // eslint-disable-next-line no-useless-constructor
     constructor(apiClient: APIClientInterface, serverUrl: string, bearerToken?: string, csrfToken?: string) {
