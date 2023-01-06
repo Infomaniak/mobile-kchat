@@ -60,10 +60,10 @@ const ServerList = ({servers}: Props) => {
             buttonIcon='plus'
             buttonText={intl.formatMessage({id: 'servers.create_button', defaultMessage: 'Add a server'})}
             onPress={onAddServer}
-            showButton={isTablet}
+            showButton={false}
             showTitle={!isTablet}
             testID='server_list'
-            title={intl.formatMessage({id: 'your.servers', defaultMessage: 'Your servers'})}
+            title={intl.formatMessage({id: 'your.teams', defaultMessage: 'Your teams'})}
         >
             <View style={[styles.container, {marginTop: isTablet ? 12 : 0}]}>
                 <List

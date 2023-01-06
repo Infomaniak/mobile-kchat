@@ -76,6 +76,7 @@ const TIME_TO_CLOSE = toMilliseconds({seconds: 1});
 const ConnectionBanner = ({
     websocketState,
 }: Props) => {
+    return null;
     const intl = useIntl();
     const closeTimeout = useRef<NodeJS.Timeout | null>();
     const openTimeout = useRef<NodeJS.Timeout | null>();

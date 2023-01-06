@@ -70,7 +70,7 @@ export default function ServerIcon({
             >
                 <CompassIcon
                     size={size}
-                    name='server-variant'
+                    name='account-multiple-outline'
                     color={iconColor || changeOpacity(theme.sidebarHeaderTextColor, 0.56)}
                 />
                 <Badge

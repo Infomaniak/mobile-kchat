@@ -7,7 +7,7 @@ import {DeviceEventEmitter, Platform} from 'react-native';
 import {Database, Events} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
-import {getServerCredentials} from '@init/credentials';
+import {getAllServerCredentials, getServerCredentials} from '@init/credentials';
 import PushNotifications from '@init/push_notifications';
 import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
@@ -167,17 +167,29 @@ export const login = async (serverUrl: string, {ldapOnly = false, loginId, mfaTo
 
 export const logout = async (serverUrl: string, skipServerLogout = false, removeServer = false, skipEvents = false) => {
     if (!skipServerLogout) {
-        try {
-            const client = NetworkManager.getClient(serverUrl);
-            await client.logout();
-        } catch (error) {
-            // We want to log the user even if logging out from the server failed
-            logWarning('An error occurred logging out from the server', serverUrl, error);
-        }
-    }
+        const appDatabase = DatabaseManager.appDatabase?.database;
+        const serverCredentials = await getAllServerCredentials();
+        for (const credential of serverCredentials) {
+            const savedServerUrl = credential.serverUrl;
+            try {
+                const client = NetworkManager.getClient(savedServerUrl);
+                let deviceToken: string | undefined;
+                if (appDatabase) {
+                    // eslint-disable-next-line no-await-in-loop
+                    deviceToken = await getDeviceToken();
+                }
+                // eslint-disable-next-line no-await-in-loop
+                await client.logout(deviceToken);
+            } catch (error) {
+                // We want to log the user even if logging out from the server failed
+                logWarning('An error occurred logging out from the server', savedServerUrl, error);
+            }
 
-    if (!skipEvents) {
-        DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl, removeServer});
+            if (!skipEvents) {
+                DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {savedServerUrl, removeServer});
+            }
+        }
+        NetworkManager.invalidateGlobalClient();
     }
 };
 
@@ -203,7 +215,7 @@ export const cancelSessionNotification = async (serverUrl: string) => {
 };
 
 export const scheduleSessionNotification = async (serverUrl: string) => {
-    try {
+    /*try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const sessions = await fetchSessions(serverUrl, 'me');
         const user = await getCurrentUser(database);
@@ -233,7 +245,7 @@ export const scheduleSessionNotification = async (serverUrl: string) => {
     } catch (e) {
         logError('scheduleExpiredNotification', e);
         await forceLogoutIfNecessary(serverUrl, e as ClientError);
-    }
+    }*/
 };
 
 export const sendPasswordResetEmail = async (serverUrl: string, email: string) => {

@@ -208,7 +208,7 @@ Appearance.addChangeListener(() => {
     const theme = getThemeFromState();
     const screens = NavigationStore.getScreensInStack();
 
-    if (screens.includes(Screens.SERVER) || screens.includes(Screens.ONBOARDING)) {
+    if (screens.includes(Screens.SERVER) || screens.includes(Screens.INFOMANIAK_LOGIN) || screens.includes(Screens.INFOMANIAK_NO_TEAMS)) {
         for (const screen of screens) {
             if (appearanceControlledScreens.has(screen)) {
                 Navigation.updateProps(screen, {theme});
@@ -295,6 +295,97 @@ export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}
 
     return Navigation.setRoot({
         root: {stack},
+    });
+}
+
+export function resetToInfomaniakLogin(passProps: LaunchProps) {
+    const theme = getDefaultThemeByAppearance();
+    const isDark = tinyColor(theme.sidebarBg).isDark();
+    StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
+
+    const children = [{
+        component: {
+            id: Screens.INFOMANIAK_LOGIN,
+            name: Screens.INFOMANIAK_LOGIN,
+            passProps: {
+                ...passProps,
+                theme,
+            },
+            options: {
+                layout: {
+                    backgroundColor: theme.centerChannelBg,
+                    componentBackgroundColor: theme.centerChannelBg,
+                },
+                statusBar: {
+                    visible: true,
+                    backgroundColor: theme.sidebarBg,
+                },
+                topBar: {
+                    backButton: {
+                        color: theme.sidebarHeaderTextColor,
+                        title: '',
+                    },
+                    background: {
+                        color: theme.sidebarBg,
+                    },
+                    visible: false,
+                    height: 0,
+                },
+            },
+        },
+    }];
+
+    return Navigation.setRoot({
+        root: {
+            stack: {
+                children,
+            },
+        },
+    });
+}
+
+export function resetToInfomaniakNoTeams() {
+    const theme = getDefaultThemeByAppearance();
+    const isDark = tinyColor(theme.sidebarBg).isDark();
+    StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
+
+    const children = [{
+        component: {
+            id: Screens.INFOMANIAK_NO_TEAMS,
+            name: Screens.INFOMANIAK_NO_TEAMS,
+            passProps: {
+                theme,
+            },
+            options: {
+                layout: {
+                    backgroundColor: theme.centerChannelBg,
+                    componentBackgroundColor: theme.centerChannelBg,
+                },
+                statusBar: {
+                    visible: true,
+                    backgroundColor: theme.sidebarBg,
+                },
+                topBar: {
+                    backButton: {
+                        color: theme.sidebarHeaderTextColor,
+                        title: '',
+                    },
+                    background: {
+                        color: theme.sidebarBg,
+                    },
+                    visible: false,
+                    height: 0,
+                },
+            },
+        },
+    }];
+
+    Navigation.setRoot({
+        root: {
+            stack: {
+                children,
+            },
+        },
     });
 }
 

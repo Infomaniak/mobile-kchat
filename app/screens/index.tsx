@@ -256,4 +256,8 @@ export function registerScreens() {
     Navigation.registerComponent(Screens.ONBOARDING, () => withGestures(withIntl(withManagedConfig(onboardingScreen)), undefined));
     Navigation.registerComponent(Screens.SERVER, () => withGestures(withIntl(withManagedConfig(serverScreen)), undefined));
     Navigation.registerComponent(Screens.HOME, () => withGestures(withSafeAreaInsets(withServerDatabase(withManagedConfig(homeScreen))), undefined));
+    const infomaniakLoginScreen = require('@screens/ik_login').default;
+    const infomaniakNoTeams = require('@screens/ik_no_teams').default;
+    Navigation.registerComponent(Screens.INFOMANIAK_LOGIN, () => withGestures(withIntl(withManagedConfig(infomaniakLoginScreen)), undefined));
+    Navigation.registerComponent(Screens.INFOMANIAK_NO_TEAMS, () => withGestures(withIntl(withManagedConfig(infomaniakNoTeams)), undefined));
 }

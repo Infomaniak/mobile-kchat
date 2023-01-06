@@ -16,7 +16,7 @@ export const getDeviceToken = async (): Promise<string> => {
     try {
         const {database} = DatabaseManager.getAppDatabaseAndOperator();
         const tokens = await database.get<GlobalModel>(GLOBAL).find(GLOBAL_IDENTIFIERS.DEVICE_TOKEN);
-        return tokens?.value || '';
+        return tokens?.value.replace('-v2', '') || '';
     } catch {
         return '';
     }

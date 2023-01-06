@@ -142,14 +142,17 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.mattermost.rnbeta"
+        applicationId "com.infomaniak.chat"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 446
-        versionName "2.0.0"
+        versionCode 67
+        versionName "1.0.0"
         testBuildType System.getProperty('testBuildType', 'debug')
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
+        manifestPlaceholders = [
+                appAuthRedirectScheme: 'com.infomaniak.chat'
+        ]
 
         if (isNewArchitectureEnabled()) {
             // We configure the CMake build only if you decide to opt-in for the New Architecture.
@@ -275,6 +278,7 @@ android {
 }
 
 repositories {
+    jcenter()
     maven {
         url 'https://maven.google.com'
     }
@@ -327,6 +331,8 @@ dependencies {
     androidTestImplementation('com.wix:detox:+')
 
     implementation project(':watermelondb-jsi')
+
+    implementation 'io.noties.markwon:core:4.6.2'
 }
 
 configurations.all {

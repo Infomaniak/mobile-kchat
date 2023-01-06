@@ -7,8 +7,8 @@ buildscript {
         compileSdkVersion = 31
         targetSdkVersion = 31
         supportLibVersion = "31.0.0"
-        kotlinVersion = "1.5.30"
-        kotlin_version = "1.5.30"
+        kotlinVersion = "1.7.20"
+        kotlin_version = "1.7.20"
         firebaseVersion = "21.0.0"
         RNNKotlinVersion = kotlinVersion
         if (System.properties['os.arch'] == "aarch64") {
@@ -73,6 +73,9 @@ allprojects {
             url "https://www.jitpack.io"
         }
         maven {
+            url "https://github.com/jitsi/jitsi-maven-repository/raw/master/releases"
+        }
+        maven {
             url "$rootDir/../node_modules/detox/Detox-android"
         }
         mavenCentral {
@@ -83,6 +86,10 @@ allprojects {
             }
         }
     }
+}
+
+project.ext {
+    excludeAppGlideModule = true
 }
 
 subprojects {

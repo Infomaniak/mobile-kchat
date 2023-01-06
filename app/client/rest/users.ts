@@ -17,7 +17,7 @@ export interface ClientUsersMix {
     setDefaultProfileImage: (userId: string) => Promise<any>;
     login: (loginId: string, password: string, token?: string, deviceId?: string, ldapOnly?: boolean) => Promise<UserProfile>;
     loginById: (id: string, password: string, token?: string, deviceId?: string) => Promise<UserProfile>;
-    logout: () => Promise<any>;
+    logout: (deviceToken?: string) => Promise<any>;
     getProfiles: (page?: number, perPage?: number, options?: Record<string, any>) => Promise<UserProfile[]>;
     getProfilesByIds: (userIds: string[], options?: Record<string, any>) => Promise<UserProfile[]>;
     getProfilesByUsernames: (usernames: string[]) => Promise<UserProfile[]>;
@@ -180,12 +180,15 @@ const ClientUsers = (superclass: any) => class extends superclass {
         return data;
     };
 
-    logout = async () => {
+    logout = async (deviceToken?: string) => {
         this.analytics.trackAPI('api_users_logout');
+        const body: any = {
+            device_id: deviceToken,
+        };
 
         const response = await this.doFetch(
             `${this.getUsersRoute()}/logout`,
-            {method: 'post'},
+            {method: 'post', body},
         );
 
         return response;

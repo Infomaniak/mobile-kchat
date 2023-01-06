@@ -9,6 +9,8 @@ import {Screens, ServerErrors} from '@constants';
 import {isServerError} from '@utils/errors';
 
 export const appearanceControlledScreens = new Set([
+    Screens.INFOMANIAK_LOGIN,
+    Screens.INFOMANIAK_NO_TEAMS,
     Screens.ONBOARDING,
     Screens.SERVER,
     Screens.LOGIN,
