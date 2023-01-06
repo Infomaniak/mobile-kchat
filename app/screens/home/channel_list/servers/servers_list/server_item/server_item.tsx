@@ -155,7 +155,7 @@ const ServerItem = ({
     const [badge, setBadge] = useState<BadgeValues>({isUnread: false, mentions: 0});
     const styles = getStyleSheet(theme);
     const swipeable = useRef<Swipeable>(null);
-    const subscription = useRef<Subscription|undefined>();
+    const subscription = useRef<Subscription | undefined>();
     const viewRef = useRef<View>(null);
     const [showTutorial, setShowTutorial] = useState(false);
     const [itemBounds, setItemBounds] = useState<TutorialItemBounds>({startX: 0, startY: 0, endX: 0, endY: 0});
@@ -371,25 +371,18 @@ const ServerItem = ({
 
     return (
         <>
-            <Swipeable
-                renderRightActions={renderActions}
-                friction={2}
-                onSwipeableWillOpen={onSwipeableWillOpen}
-                ref={swipeable}
-                rightThreshold={40}
+            <View
+                style={containerStyle}
+                ref={viewRef}
+                testID={serverItemTestId}
             >
-                <View
-                    style={containerStyle}
-                    ref={viewRef}
-                    testID={serverItemTestId}
+                <RectButton
+                    onPress={onServerPressed}
+                    style={styles.button}
+                    rippleColor={changeOpacity(theme.centerChannelColor, 0.16)}
                 >
-                    <RectButton
-                        onPress={onServerPressed}
-                        style={styles.button}
-                        rippleColor={changeOpacity(theme.centerChannelColor, 0.16)}
-                    >
-                        <View style={serverStyle}>
-                            {!switching &&
+                    <View style={serverStyle}>
+                        {!switching &&
                             <ServerIcon
                                 badgeBackgroundColor={theme.mentionColor}
                                 badgeBorderColor={theme.mentionBg}
@@ -403,76 +396,52 @@ const ServerItem = ({
                                 style={styles.serverIcon}
                                 testID={`${serverItem}}.server_icon`}
                             />
-                            }
-                            {switching &&
+                        }
+                        {switching &&
                             <Loading
                                 containerStyle={styles.switching}
                                 color={theme.buttonBg}
                                 size={Platform.select({ios: 'small', default: 'large'})}
                             />
-                            }
-                            <View style={styles.details}>
-                                <View style={styles.nameView}>
-                                    <Text
-                                        numberOfLines={1}
-                                        ellipsizeMode='tail'
-                                        style={styles.name}
-                                    >
-                                        {displayName}
-                                    </Text>
-                                    {server.lastActiveAt > 0 && pushProxyStatus !== PUSH_PROXY_STATUS_VERIFIED && (
-                                        <CompassIcon
-                                            name='alert-outline'
-                                            color={theme.errorTextColor}
-                                            size={14}
-                                            style={styles.pushAlert}
-                                        />
-                                    )}
-                                </View>
+                        }
+                        <View style={styles.details}>
+                            <View style={styles.nameView}>
                                 <Text
                                     numberOfLines={1}
-                                    ellipsizeMode='tail'
-                                    style={styles.url}
+                                    ellipsizeMode="tail"
+                                    style={styles.name}
                                 >
-                                    {removeProtocol(stripTrailingSlashes(server.url))}
+                                    {displayName}
                                 </Text>
+                                {server.lastActiveAt > 0 && pushProxyStatus !== PUSH_PROXY_STATUS_VERIFIED && (
+                                    <CompassIcon
+                                        name="alert-outline"
+                                        color={theme.errorTextColor}
+                                        size={14}
+                                        style={styles.pushAlert}
+                                    />
+                                )}
                             </View>
+                            <Text
+                                numberOfLines={1}
+                                ellipsizeMode="tail"
+                                style={styles.url}
+                            >
+                                {removeProtocol(stripTrailingSlashes(server.url))}
+                            </Text>
                         </View>
-                        {!server.lastActiveAt && !switching &&
+                    </View>
+                    {!server.lastActiveAt && !switching &&
                         <View style={styles.logout}>
                             <CompassIcon
-                                name='alert-circle-outline'
+                                name="alert-circle-outline"
                                 size={18}
                                 color={changeOpacity(theme.centerChannelColor, 0.64)}
                             />
                         </View>
-                        }
-                    </RectButton>
-                </View>
-            </Swipeable>
-            {Boolean(pushAlertText && pushProxyStatus !== PUSH_PROXY_STATUS_VERIFIED) && (
-                <Text style={styles.pushAlertText}>
-                    {pushAlertText}
-                </Text>
-            )}
-
-            {server.lastActiveAt > 0 &&
-            <WebSocket
-                serverUrl={server.url}
-            />
-            }
-            {showTutorial &&
-            <TutorialHighlight
-                itemBounds={itemBounds}
-                onDismiss={handleDismissTutorial}
-                onShow={handleShowTutorial}
-            >
-                <TutorialSwipeLeft
-                    message={intl.formatMessage({id: 'server.tutorial.swipe', defaultMessage: 'Swipe left on a server to see more actions'})}
-                    style={isTablet ? styles.tutorialTablet : styles.tutorial}
-                />
-            </TutorialHighlight>
-            }
+                    }
+                </RectButton>
+            </View>
         </>
     );
 };

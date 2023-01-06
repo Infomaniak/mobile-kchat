@@ -198,31 +198,6 @@ const ChannelListHeader = ({
                         />
                     </TouchableWithFeedback>
                 </View>
-                <View style={styles.subHeadingView}>
-                    <Text
-                        numberOfLines={1}
-                        ellipsizeMode='tail'
-                        style={styles.subHeadingStyles}
-                        testID='channel_list_header.server_display_name'
-                    >
-                        {serverDisplayName}
-                    </Text>
-                    {(pushProxyStatus !== PUSH_PROXY_STATUS_VERIFIED) && (
-                        <TouchableWithFeedback
-                            onPress={onPushAlertPress}
-                            testID='channel_list_header.push_alert'
-                            type='opacity'
-                        >
-                            <CompassIcon
-                                name='alert-outline'
-                                color={theme.errorTextColor}
-                                size={14}
-                                style={styles.pushAlert}
-                            />
-                        </TouchableWithFeedback>
-                    )}
-                    <LoadingUnreads/>
-                </View>
             </>
         );
     } else {

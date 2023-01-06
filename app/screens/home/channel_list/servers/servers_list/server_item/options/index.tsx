@@ -32,6 +32,7 @@ const styles = StyleSheet.create({
 });
 
 const ServerOptions = ({onEdit, onLogin, onLogout, onRemove, progress, server}: Props) => {
+    return null;
     const intl = useIntl();
     const theme = useTheme();
     const isLoggedIn = server.lastActiveAt > 0;
