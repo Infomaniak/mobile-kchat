@@ -2,8 +2,8 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import {Image} from 'react-native';
 
-import CompassIcon from '@components/compass_icon';
 import {View as ViewConstants} from '@constants';
 
 type Props = {
@@ -12,10 +12,9 @@ type Props = {
 
 const SystemAvatar = ({theme}: Props) => {
     return (
-        <CompassIcon
-            name='mattermost'
-            color={theme.centerChannelColor}
-            size={ViewConstants.PROFILE_PICTURE_SIZE}
+        <Image
+            style={{width: ViewConstants.PROFILE_PICTURE_SIZE, height: ViewConstants.PROFILE_PICTURE_SIZE}}
+            source={require('@assets/images/icon.png')}
         />
     );
 };

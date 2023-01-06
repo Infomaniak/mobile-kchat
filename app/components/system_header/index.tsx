@@ -63,7 +63,7 @@ const SystemHeader = ({isMilitaryTime, isTimezoneEnabled, createAt, theme, user}
             <View style={styles.displayNameContainer}>
                 <FormattedText
                     id='post_info.system'
-                    defaultMessage='System'
+                    defaultMessage='kChat'
                     style={styles.displayName}
                     testID='post_header.display_name'
                 />
