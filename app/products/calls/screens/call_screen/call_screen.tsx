@@ -16,7 +16,6 @@ import {
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {RTCView} from 'react-native-webrtc';
 
 import {appEntry} from '@actions/remote/entry';
 import {leaveCall, muteMyself, setSpeakerphoneOn, unmuteMyself} from '@calls/actions';
@@ -444,10 +443,6 @@ const CallScreen = ({
                 style={style.screenShareImage}
                 onPress={toggleControlsInLandscape}
             >
-                <RTCView
-                    streamURL={currentCall.screenShareURL}
-                    style={style.screenShareImage}
-                />
                 <FormattedText
                     id={'mobile.calls_viewing_screen'}
                     defaultMessage={'You are viewing {name}\'s screen'}
