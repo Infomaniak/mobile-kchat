@@ -4,6 +4,7 @@
 import {ClientResponse, ClientResponseError, ProgressPromise, UploadRequestOptions} from '@mattermost/react-native-network-client';
 
 import {toMilliseconds} from '@utils/datetime';
+import {generateId} from '@utils/general';
 
 export interface ClientFilesMix {
     getFileUrl: (fileId: string, timestamp: number) => string;
@@ -19,7 +20,7 @@ export interface ClientFilesMix {
         skipBytes?: number,
     ) => () => void;
     searchFiles: (teamId: string, terms: string) => Promise<FileSearchRequest>;
-    searchFilesWithParams: (teamId: string, FileSearchParams: string) => Promise<FileSearchRequest>;
+    searchFilesWithParams: (teamId: string, FileSearchParams: FileSearchParams) => Promise<FileSearchRequest>;
 }
 
 const ClientFiles = (superclass: any) => class extends superclass {
@@ -74,6 +75,7 @@ const ClientFiles = (superclass: any) => class extends superclass {
             method: 'POST',
             multipart: {
                 data: {
+                    client_ids: generateId(),
                     channel_id: channelId,
                 },
             },

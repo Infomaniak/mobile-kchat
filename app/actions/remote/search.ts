@@ -54,11 +54,22 @@ export const searchPosts = async (serverUrl: string, teamId: string, params: Pos
         let postsArray: Post[] = [];
         const data = await client.searchPosts(teamId, params.terms, params.is_or_search);
 
-        const posts = data.posts || {};
+        const posts = data.posts || [];
         const order = data.order || [];
 
         const promises: Array<Promise<Model[]>> = [];
-        postsArray = order.map((id) => posts[id]);
+
+        // IK - Fix mapping from wrong data
+        postsArray = order.flatMap((id) => {
+            const matchedPost = posts.find((post) => {
+                return post.id === id;
+            });
+            if (matchedPost) {
+                return matchedPost;
+            }
+            return [];
+        });
+
         if (postsArray.length) {
             const isCRTEnabled = await getIsCRTEnabled(operator.database);
             if (isCRTEnabled) {
@@ -118,7 +129,7 @@ export const searchPosts = async (serverUrl: string, teamId: string, params: Pos
 export const searchFiles = async (serverUrl: string, teamId: string, params: FileSearchParams): Promise<{files?: FileInfo[]; channels?: string[]; error?: unknown}> => {
     try {
         const client = NetworkManager.getClient(serverUrl);
-        const result = await client.searchFiles(teamId, params.terms);
+        const result = await client.searchFilesWithParams(teamId, params);
         const files = result?.file_infos ? Object.values(result.file_infos) : [];
         const allChannelIds = files.reduce<string[]>((acc, f) => {
             if (f.channel_id) {

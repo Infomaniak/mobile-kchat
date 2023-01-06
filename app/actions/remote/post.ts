@@ -230,6 +230,9 @@ export const retryFailedPost = async (serverUrl: string, post: PostModel) => {
             delete_at: 0,
         } as Post;
 
+        // IK backend doesn't validate failed prop.
+        delete newPost.props.failed;
+
         // Update the local post to reflect the pending state in the UI
         // timestamps will remain the same as the initial attempt for createAt
         // but updateAt will be use for the optimistic post UI
@@ -974,9 +977,19 @@ export async function fetchSavedPosts(serverUrl: string, teamId?: string, channe
     try {
         const userId = await getCurrentUserId(operator.database);
         const data = await client.getSavedPosts(userId, channelId, teamId, page, perPage);
-        const posts = data.posts || {};
+        const posts = data.posts || [];
         const order = data.order || [];
-        const postsArray = order.map((id) => posts[id]);
+
+        // IK - Fix mapping from wrong data
+        const postsArray = order.flatMap((id) => {
+            const matchedPost = posts.find((post) => {
+                return post.id === id;
+            });
+            if (matchedPost) {
+                return matchedPost;
+            }
+            return [];
+        });
 
         if (!postsArray.length) {
             return {
@@ -1056,9 +1069,19 @@ export async function fetchPinnedPosts(serverUrl: string, channelId: string) {
 
     try {
         const data = await client.getPinnedPosts(channelId);
-        const posts = data.posts || {};
+        const posts = data.posts || [];
         const order = data.order || [];
-        const postsArray = order.map((id) => posts[id]);
+
+        // IK - Fix mapping from wrong data
+        const postsArray = order.flatMap((id) => {
+            const matchedPost = posts.find((post) => {
+                return post.id === id;
+            });
+            if (matchedPost) {
+                return matchedPost;
+            }
+            return [];
+        });
 
         if (!postsArray.length) {
             return {
