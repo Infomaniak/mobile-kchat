@@ -74,7 +74,7 @@ const Display = ({currentUser, hasMilitaryTimeFormat, isThemeSwitchingEnabled, i
                 <SettingItem
                     optionName='theme'
                     onPress={goToThemeSettings}
-                    info={theme.type!}
+                    info={theme.ikName!}
                     testID='display_settings.theme.option'
                 />
             )}

@@ -44,6 +44,7 @@ const DisplayTheme = ({allowedThemeKeys, componentId, currentTeamId, currentUser
             value: JSON.stringify(Preferences.THEMES[allowedTheme]),
         };
         savePreference(serverUrl, [pref]);
+        close();
     }, [allowedThemeKeys, currentTeamId, initialTheme, serverUrl]);
 
     useAndroidHardwareBackHandler(componentId, setThemePreference);

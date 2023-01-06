@@ -5,11 +5,12 @@ type LegacyThemeKey = 'default' | 'organization' | 'mattermostDark' | 'windows10
 
 type LegacyThemeType = 'Mattermost' | 'Organization' | 'Mattermost Dark' | 'Windows Dark';
 
-type ThemeKey = 'denim' | 'sapphire' | 'quartz' | 'indigo' | 'onyx' | 'custom';
+type ThemeKey = 'infomaniak' | 'denim' | 'sapphire' | 'quartz' | 'indigo' | 'onyx' | 'custom';
 
-type ThemeType = 'Denim' | 'Sapphire' | 'Quartz' | 'Indigo' | 'Onyx' | 'custom';
+type ThemeType = 'Infomaniak' | 'Denim' | 'Sapphire' | 'Quartz' | 'Indigo' | 'Onyx' | 'custom';
 
 type Theme = {
+    ikName?: string;
     type?: ThemeType | LegacyThemeType;
     sidebarBg: string;
     sidebarText: string;

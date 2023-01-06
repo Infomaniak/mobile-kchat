@@ -438,6 +438,7 @@ export const observeAllowedThemesKeys = (database: Database) => {
     const defaultThemeKeys = Object.keys(Preferences.THEMES);
     return observeConfigValue(database, 'AllowedThemes').pipe(
         switchMap((allowedThemes) => {
+            return of$(['quartz', 'infomaniak', 'onyx']);
             let acceptableThemes = defaultThemeKeys;
             if (allowedThemes) {
                 const allowedThemeKeys = (allowedThemes ?? '').split(',').filter(String);

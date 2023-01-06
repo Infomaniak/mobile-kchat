@@ -73,7 +73,7 @@ export const ThemeTile = ({
     const {width: deviceWidth} = useWindowDimensions();
 
     const layoutStyle = useMemo(() => {
-        const tilesPerLine = isTablet ? 4 : 2;
+        const tilesPerLine = 3;
         const fullWidth = isTablet ? deviceWidth - 40 : deviceWidth;
 
         return {

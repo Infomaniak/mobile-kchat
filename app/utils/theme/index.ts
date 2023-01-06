@@ -210,6 +210,7 @@ export function blendColors(background: string, foreground: string, opacity: num
 }
 
 const themeTypeMap: ThemeTypeMap = {
+    Infomaniak: 'infomaniak',
     Mattermost: 'denim',
     Organization: 'sapphire',
     'Mattermost Dark': 'indigo',
@@ -225,7 +226,7 @@ const themeTypeMap: ThemeTypeMap = {
 // setThemeDefaults will set defaults on the theme for any unset properties.
 export function setThemeDefaults(theme: ExtendedTheme): Theme {
     const themes = Preferences.THEMES as Record<ThemeKey, ExtendedTheme>;
-    const defaultTheme = themes.denim;
+    const defaultTheme = themes.infomaniak;
 
     const processedTheme = {...theme};
 
