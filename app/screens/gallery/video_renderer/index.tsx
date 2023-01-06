@@ -85,7 +85,7 @@ const VideoRenderer = ({height, index, initialIndex, item, isPageActive, onShoul
     }, [onShouldHideControls]);
 
     const onError = useCallback(() => {
-        setHasError(true);
+        setDownloading(true);
     }, []);
 
     const onFullscreenPlayerWillDismiss = useCallback(() => {
