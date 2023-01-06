@@ -201,7 +201,7 @@ export default function UserList({
     }, [loading, theme]);
 
     const renderNoResults = useCallback(() => {
-        if (!showNoResults || !term) {
+        if (!showNoResults || !term || loading) {
             return null;
         }
 

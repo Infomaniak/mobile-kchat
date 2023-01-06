@@ -301,6 +301,7 @@ export default function CreateDirectMessage({
 
     const onSearch = useCallback((text: string) => {
         if (text) {
+            setLoading(true);
             setTerm(text);
             if (searchTimeoutId.current) {
                 clearTimeout(searchTimeoutId.current);
