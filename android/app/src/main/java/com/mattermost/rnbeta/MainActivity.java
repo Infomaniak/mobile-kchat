@@ -1,7 +1,12 @@
 package com.mattermost.rnbeta;
 
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 
 import android.view.KeyEvent;
 import android.content.res.Configuration;
@@ -12,6 +17,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
+import com.mattermost.helpers.CustomPushNotificationHelper;
 import com.reactnativenavigation.NavigationActivity;
 import com.github.emilioicai.hwkeyboardevent.HWKeyboardEventModule;
 
@@ -44,6 +50,20 @@ public class MainActivity extends NavigationActivity {
         super.onCreate(null);
         setContentView(R.layout.launch_screen);
         setHWKeyboardConnected();
+        askForNotificationPermissions();
+    }
+
+    private void askForNotificationPermissions() {
+        // We cannot use compile sdk 33 because of mattermost constraints. So we use this very hacky way to ask for permissions.
+        if (Build.VERSION.SDK_INT >= 33) {
+            String postNotificationPermission = "android.permission.POST_NOTIFICATIONS";
+            if (ContextCompat.checkSelfPermission(this, postNotificationPermission) == PackageManager.PERMISSION_GRANTED) {
+            } else {
+                CustomPushNotificationHelper.createNotificationChannels(this);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "channel_02");
+                NotificationManagerCompat.from(this).notify(1, builder.build());
+            }
+        }
     }
 
     @Override

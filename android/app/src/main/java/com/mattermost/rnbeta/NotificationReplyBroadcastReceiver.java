@@ -16,6 +16,7 @@ import androidx.core.app.Person;
 import android.util.Log;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.UUID;
 
 import okhttp3.Call;
 import okhttp3.MediaType;
@@ -30,6 +31,7 @@ import org.json.JSONException;
 import com.mattermost.helpers.*;
 import com.facebook.react.bridge.ReactApplicationContext;
 
+import com.nozbe.watermelondb.Database;
 import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
 import com.wix.reactnativenotifications.core.notification.PushNotificationProps;
 
@@ -75,14 +77,21 @@ public class NotificationReplyBroadcastReceiver extends BroadcastReceiver {
             rootId = postId;
         }
 
-        if (token == null || serverUrl == null) {
+        String currentUserId = null;
+
+        Database db = DatabaseHelper.Companion.getInstance().getDatabaseForServer(mContext, serverUrl);
+        if (db != null) {
+            currentUserId = DatabaseHelper.Companion.getInstance().queryCurrentUserId(db);
+        }
+
+        if (token == null || serverUrl == null || currentUserId == null) {
             onReplyFailed(notificationId);
             return;
         }
 
         final OkHttpClient client = new OkHttpClient();
         final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-        String json = buildReplyPost(channelId, rootId, message.toString());
+        String json = buildReplyPost(currentUserId.replace("\"", ""), channelId, rootId, message.toString());
         RequestBody body = RequestBody.create(json, JSON);
 
         String postsEndpoint = "/api/v4/posts?set_online=false";
@@ -120,9 +129,11 @@ public class NotificationReplyBroadcastReceiver extends BroadcastReceiver {
         });
     }
 
-    protected String buildReplyPost(String channelId, String rootId, String message) {
+    protected String buildReplyPost(String currentUserId, String channelId, String rootId, String message) {
         try {
             JSONObject json = new JSONObject();
+            json.put("user_id", currentUserId);
+            json.put("pending_post_id", UUID.randomUUID().toString());
             json.put("channel_id", channelId);
             json.put("message", message);
             json.put("root_id", rootId);

@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Objects;
 
+import io.noties.markwon.Markwon;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -81,6 +82,13 @@ public class CustomPushNotificationHelper {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        if (message.trim().isEmpty()) {
+            message = context.getString(R.string.empty_notification_message);
+        } else {
+            final Markwon markwon = Markwon.create(context);
+            message = markwon.toMarkdown(message).toString();
         }
 
         messagingStyle.addMessage(message, timestamp, sender.build());
@@ -315,18 +323,13 @@ public class CustomPushNotificationHelper {
 
     public static int getSmallIconResourceId(Context context, String iconName) {
         if (iconName == null) {
-            iconName = "ic_notification";
+            return R.drawable.ic_notification;
         }
 
         int resourceId = getIconResourceId(context, iconName);
 
         if (resourceId == 0) {
-            iconName = "ic_launcher";
-            resourceId = getIconResourceId(context, iconName);
-
-            if (resourceId == 0) {
-                resourceId = android.R.drawable.ic_dialog_info;
-            }
+            return R.drawable.ic_notification;
         }
 
         return resourceId;

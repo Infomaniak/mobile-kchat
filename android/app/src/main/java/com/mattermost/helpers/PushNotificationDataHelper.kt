@@ -256,7 +256,7 @@ class PushNotificationDataRunnable {
                         val response = value as ReadableMap?
                         if (response != null && !response.getBoolean("ok")) {
                             val error = response.getMap("data")
-                            cont.resumeWith(Result.failure((IOException("Unexpected code ${error?.getInt("status_code")} ${error?.getString("message")}"))))
+                            cont.resumeWith(Result.failure((IOException("Unexpected code"))))
                         } else {
                             cont.resumeWith(Result.success(response))
                         }
