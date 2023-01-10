@@ -16,7 +16,6 @@ import {
     captureException,
     captureJSException,
     initializeSentry,
-    LOGGER_NATIVE,
 } from '@utils/sentry';
 
 import {logWarning} from './log';
@@ -32,7 +31,7 @@ class JavascriptAndNativeErrorHandler {
 
     nativeErrorHandler = (e: string) => {
         logWarning('Handling native error ' + e);
-        captureException(e, LOGGER_NATIVE);
+        captureException(e);
     };
 
     errorHandler = (e: Error | ClientError, isFatal: boolean) => {
