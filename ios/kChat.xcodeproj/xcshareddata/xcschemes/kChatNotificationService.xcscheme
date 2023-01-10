@@ -15,24 +15,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7FC5698528563FDB000B0905"
-               BuildableName = "MattermostShare.appex"
-               BlueprintName = "MattermostShare"
-               ReferencedContainer = "container:Mattermost.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "Mattermost.app"
-               BlueprintName = "Mattermost"
-               ReferencedContainer = "container:Mattermost.xcodeproj">
+               BlueprintIdentifier = "7F581D31221ED5C60099E66B"
+               BuildableName = "kChatNotificationService.appex"
+               BlueprintName = "kChatNotificationService"
+               ReferencedContainer = "container:kChat.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -42,6 +28,15 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "7F581D31221ED5C60099E66B"
+            BuildableName = "kChatNotificationService.appex"
+            BlueprintName = "kChatNotificationService"
+            ReferencedContainer = "container:kChat.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
       <Testables>
       </Testables>
    </TestAction>
@@ -57,16 +52,6 @@
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
       launchAutomaticallySubstyle = "2">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "Mattermost.app"
-            BlueprintName = "Mattermost"
-            ReferencedContainer = "container:Mattermost.xcodeproj">
-         </BuildableReference>
-      </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -74,17 +59,17 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES"
+      askForAppToLaunch = "Yes"
       launchAutomaticallySubstyle = "2">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "Mattermost.app"
-            BlueprintName = "Mattermost"
-            ReferencedContainer = "container:Mattermost.xcodeproj">
+            BlueprintIdentifier = "7F581D31221ED5C60099E66B"
+            BuildableName = "kChatNotificationService.appex"
+            BlueprintName = "kChatNotificationService"
+            ReferencedContainer = "container:kChat.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

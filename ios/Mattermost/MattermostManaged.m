@@ -9,7 +9,7 @@
 #import "AppDelegate.h"
 #import "MattermostManaged.h"
 #import "CreateThumbnail.h"
-#import "Mattermost-Swift.h"
+#import "kChat-Swift.h"
 
 @implementation MattermostManaged
 

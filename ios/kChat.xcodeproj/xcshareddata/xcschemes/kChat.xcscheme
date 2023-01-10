@@ -29,9 +29,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "Mattermost.app"
-               BlueprintName = "Mattermost"
-               ReferencedContainer = "container:Mattermost.xcodeproj">
+               BuildableName = "kChat.app"
+               BlueprintName = "kChat"
+               ReferencedContainer = "container:kChat.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -45,7 +45,7 @@
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
                BuildableName = "MattermostTests.xctest"
                BlueprintName = "MattermostTests"
-               ReferencedContainer = "container:Mattermost.xcodeproj">
+               ReferencedContainer = "container:kChat.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -59,9 +59,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "Mattermost.app"
-            BlueprintName = "Mattermost"
-            ReferencedContainer = "container:Mattermost.xcodeproj">
+            BuildableName = "kChat.app"
+            BlueprintName = "kChat"
+            ReferencedContainer = "container:kChat.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
@@ -72,7 +72,7 @@
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
                BuildableName = "MattermostTests.xctest"
                BlueprintName = "MattermostTests"
-               ReferencedContainer = "container:Mattermost.xcodeproj">
+               ReferencedContainer = "container:kChat.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -92,9 +92,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "Mattermost.app"
-            BlueprintName = "Mattermost"
-            ReferencedContainer = "container:Mattermost.xcodeproj">
+            BuildableName = "kChat.app"
+            BlueprintName = "kChat"
+            ReferencedContainer = "container:kChat.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -109,9 +109,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "Mattermost.app"
-            BlueprintName = "Mattermost"
-            ReferencedContainer = "container:Mattermost.xcodeproj">
+            BuildableName = "kChat.app"
+            BlueprintName = "kChat"
+            ReferencedContainer = "container:kChat.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

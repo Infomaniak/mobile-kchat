@@ -96,7 +96,7 @@ lane :set_app_version do
     )
 
     increment_version_number(
-        xcodeproj: './ios/Mattermost.xcodeproj',
+        xcodeproj: './ios/kChat.xcodeproj',
         version_number: version_number
     )
 
@@ -120,9 +120,9 @@ lane :set_app_build_number do
   ## set the build number for both platforms
   # use the one for iOS if no env variable set
   if ENV['INCREMENT_BUILD_NUMBER'] === 'true'
-    build_number = ENV['BUILD_NUMBER'] || (get_build_number(xcodeproj: './ios/Mattermost.xcodeproj').to_i + 1)
+    build_number = ENV['BUILD_NUMBER'] || (get_build_number(xcodeproj: './ios/kChat.xcodeproj').to_i + 1)
     increment_build_number(
-        xcodeproj: './ios/Mattermost.xcodeproj',
+        xcodeproj: './ios/kChat.xcodeproj',
         build_number: build_number
     )
     android_set_version_code(
@@ -206,10 +206,10 @@ lane :upload_file_to_s3 do |options|
     else
       version_number = os_type == "android" ?
         android_get_version_name(gradle_file: './android/app/build.gradle') :
-        get_version_number(xcodeproj: './ios/Mattermost.xcodeproj', target: 'Mattermost')
+        get_version_number(xcodeproj: './ios/kChat.xcodeproj', target: 'kChat')
       build_number = os_type == "android" ?
         android_get_version_code(gradle_file: './android/app/build.gradle') :
-        get_build_number(xcodeproj: './ios/Mattermost.xcodeproj')
+        get_build_number(xcodeproj: './ios/kChat.xcodeproj')
     end
 
     s3_region = ENV['AWS_REGION']
@@ -249,7 +249,7 @@ lane :upload_file_to_s3 do |options|
       if os_type == 'android'
         install_url = "https://#{s3_bucket_name}/#{s3_folder}/#{pr_file}"
       elsif os_type == 'ios'
-        current_build_number = get_build_number(xcodeproj: './ios/Mattermost.xcodeproj')
+        current_build_number = get_build_number(xcodeproj: './ios/kChat.xcodeproj')
         plist_template = File.read('plist.erb')
         plist_body = ERB.new(plist_template).result(binding)
 
@@ -383,7 +383,7 @@ platform :ios do
     # Set the name for the app
     app_name =  ENV['APP_NAME'] || 'Mattermost Beta'
     update_info_plist(
-        xcodeproj: './ios/Mattermost.xcodeproj',
+        xcodeproj: './ios/kChat.xcodeproj',
         plist_path: 'Mattermost/Info.plist',
         display_name: app_name
     )
@@ -391,13 +391,13 @@ platform :ios do
     # Set the notification service extension bundle identifier
     notification_bundle_id = ENV['NOTIFICATION_SERVICE_IDENTIFIER'] || 'com.mattermost.rnbeta.NotificationService'
     update_app_identifier(
-        xcodeproj: './ios/Mattermost.xcodeproj',
+        xcodeproj: './ios/kChat.xcodeproj',
         plist_path: 'NotificationService/Info.plist',
         app_identifier: notification_bundle_id
     )
 
     find_replace_string(
-        path_to_file: './ios/Mattermost.xcodeproj/project.pbxproj',
+        path_to_file: './ios/kChat.xcodeproj/project.pbxproj',
         old_string: 'com.mattermost.rnbeta.NotificationService',
         new_string: notification_bundle_id
     )
@@ -405,13 +405,13 @@ platform :ios do
     # Set the share extension bundle identifier
     extension_bundle_id = ENV['EXTENSION_APP_IDENTIFIER'] || 'com.mattermost.rnbeta.MattermostShare'
     update_app_identifier(
-        xcodeproj: './ios/Mattermost.xcodeproj',
+        xcodeproj: './ios/kChat.xcodeproj',
         plist_path: 'MattermostShare/Info.plist',
         app_identifier: extension_bundle_id
     )
 
     find_replace_string(
-        path_to_file: './ios/Mattermost.xcodeproj/project.pbxproj',
+        path_to_file: './ios/kChat.xcodeproj/project.pbxproj',
         old_string: 'com.mattermost.rnbeta.MattermostShare',
         new_string: extension_bundle_id
     )
@@ -419,13 +419,13 @@ platform :ios do
     # Set the app bundle id
     app_bundle_id = ENV['MAIN_APP_IDENTIFIER'] || 'com.mattermost.rnbeta'
     update_app_identifier(
-        xcodeproj: './ios/Mattermost.xcodeproj',
+        xcodeproj: './ios/kChat.xcodeproj',
         plist_path: 'Mattermost/Info.plist',
         app_identifier: app_bundle_id
     )
 
     find_replace_string(
-        path_to_file: './ios/Mattermost.xcodeproj/project.pbxproj',
+        path_to_file: './ios/kChat.xcodeproj/project.pbxproj',
         old_string: 'com.mattermost.rnbeta',
         new_string: app_bundle_id
     )
@@ -434,7 +434,7 @@ platform :ios do
     app_scheme = ENV['APP_SCHEME'] || 'mattermost'
     app_auth_scheme = ENV['BETA_BUILD'] == 'true' ? 'mmauthbeta' : 'mmauth'
     update_info_plist(
-        xcodeproj: './ios/Mattermost.xcodeproj',
+        xcodeproj: './ios/kChat.xcodeproj',
         plist_path: 'Mattermost/Info.plist',
         block: proc do |plist|
           urlScheme = plist["CFBundleURLTypes"].find{|scheme| scheme["CFBundleURLName"] == "com.mattermost"}
@@ -445,7 +445,7 @@ platform :ios do
     # If set update the development team
     unless ENV['FASTLANE_TEAM_ID'].nil? || ENV['FASTLANE_TEAM_ID'].empty?
     update_project_team(
-        path: './ios/Mattermost.xcodeproj',
+        path: './ios/kChat.xcodeproj',
         teamid: ENV['FASTLANE_TEAM_ID']
     )
     end
@@ -465,7 +465,7 @@ platform :ios do
     )
 
     update_info_plist(
-      xcodeproj: './ios/Mattermost.xcodeproj',
+      xcodeproj: './ios/kChat.xcodeproj',
       plist_path: 'Mattermost/Info.plist',
       block: proc do |plist|
         plist["AppGroupIdentifier"] = app_group_id
@@ -478,7 +478,7 @@ platform :ios do
     )
 
     update_info_plist(
-      xcodeproj: './ios/Mattermost.xcodeproj',
+      xcodeproj: './ios/kChat.xcodeproj',
       plist_path: 'NotificationService/Info.plist',
       block: proc do |plist|
         plist["AppGroupIdentifier"] = app_group_id
@@ -491,7 +491,7 @@ platform :ios do
     )
 
     update_info_plist(
-      xcodeproj: './ios/Mattermost.xcodeproj',
+      xcodeproj: './ios/kChat.xcodeproj',
       plist_path: 'MattermostShare/Info.plist',
       block: proc do |plist|
         plist["AppGroupIdentifier"] = app_group_id
@@ -506,10 +506,6 @@ platform :ios do
 
   lane :replace_assets do
     if ENV['REPLACE_ASSETS'] == 'true'
-      sh 'cp -R ../dist/assets/release/icons/ios/* ../ios/Mattermost/Images.xcassets/AppIcon.appiconset/'
-      sh 'cp -R ../dist/assets/release/splash_screen/ios/LaunchScreen.storyboard ../ios/SplashScreenResource/LaunchScreen.storyboard'
-      sh 'cp -R ../dist/assets/release/splash_screen/ios/SplashBackground.imageset ../ios/Mattermost/Images.xcassets/'
-      sh 'cp -R ../dist/assets/release/splash_screen/ios/SplashIcon.imageset ../ios/Mattermost/Images.xcassets/'
     end
   end
 
@@ -522,8 +518,8 @@ platform :ios do
   end
 
   error do |lane, exception|
-    version = get_version_number(xcodeproj: './ios/Mattermost.xcodeproj', target: 'Mattermost')
-    build_number = get_build_number(xcodeproj: './ios/Mattermost.xcodeproj')
+    version = get_version_number(xcodeproj: './ios/kChat.xcodeproj', target: 'kChat')
+    build_number = get_build_number(xcodeproj: './ios/kChat.xcodeproj')
     send_message_to_mattermost({
                                    :version_number => version,
                                    :build_number => build_number,
@@ -539,22 +535,22 @@ platform :ios do
   def setup_code_signing
     update_code_signing_settings(
       use_automatic_signing: false,
-      path: './ios/Mattermost.xcodeproj'
+      path: './ios/kChat.xcodeproj'
     )
 
     ENV['MATCH_APP_IDENTIFIER'].split(',').each do |id|
-      target = 'Mattermost'
+      target = 'kChat'
       if id.include? 'NotificationService'
         target = 'NotificationService'
-      elsif id.include? 'MattermostShare'
-        target = 'MattermostShare'
+      elsif id.include? 'ShareExtension'
+        target = 'ShareExtension'
       end
 
       profile = "sigh_#{id}_#{ENV['MATCH_TYPE']}"
       config_mode = ENV['BUILD_FOR_RELEASE'] == 'true' ? 'Release' : 'Debug'
 
       update_project_provisioning(
-          xcodeproj: './ios/Mattermost.xcodeproj',
+          xcodeproj: './ios/kChat.xcodeproj',
           profile: ENV["#{profile}_profile-path"], # optional if you use sigh
           target_filter: ".*#{target}$", # matches name or type of a target
           build_configuration: config_mode,
@@ -568,15 +564,15 @@ platform :ios do
     app_name_sub = app_name.gsub(" ", "_")
     config_mode = ENV['BUILD_FOR_RELEASE'] == 'true' ? 'Release' : 'Debug'
     method = ENV['IOS_BUILD_EXPORT_METHOD'].nil? || ENV['IOS_BUILD_EXPORT_METHOD'].empty? ? 'ad-hoc' : ENV['IOS_BUILD_EXPORT_METHOD']
-   
-    # Need to add xcargs to only notification and 
+
+    # Need to add xcargs to only notification and
     xcargs = ENV['SENTRY_ENABLED'] == 'true' ? "SENTRY_DSN_IOS='#{ENV['SENTRY_DSN_IOS']}' SENTRY_ENABLED='#{ENV['SENTRY_ENABLED']}'" : ''
 
     setup_code_signing
 
     gym(
         clean: true,
-        scheme: 'Mattermost',
+        scheme: 'kChat',
         configuration: config_mode,
         workspace: './ios/Mattermost.xcworkspace',
         export_method: method,
@@ -726,8 +722,6 @@ platform :android do
 
   lane :replace_assets do
     if ENV['REPLACE_ASSETS'] == 'true'
-      sh 'cp -R ../dist/assets/release/icons/android/* ../android/app/src/main/res/'
-      sh 'cp -R ../dist/assets/release/splash_screen/android/* ../android/app/src/main/res/'
     end
   end
 
@@ -915,8 +909,8 @@ def submit_to_testflight(ipa_path)
   end
 
   filename = File.basename(ipa)
-  version_number = get_version_number(xcodeproj: './ios/Mattermost.xcodeproj', target: 'Mattermost')
-  build_number = get_build_number(xcodeproj: './ios/Mattermost.xcodeproj')
+  version_number = get_version_number(xcodeproj: './ios/kChat.xcodeproj', target: 'kChat')
+  build_number = get_build_number(xcodeproj: './ios/kChat.xcodeproj')
   s3_folder = "#{ENV['AWS_FOLDER_NAME']}/#{version_number}/#{build_number}"
   public_link = "https://#{ENV['AWS_BUCKET_NAME']}/#{s3_folder}/#{filename}"
 

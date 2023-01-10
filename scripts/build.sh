@@ -43,6 +43,16 @@ function setup() {
         npm install --ignore-scripts || exit 1
         npx patch-package || exit 1
 
+        COMPASS_ICONS="node_modules/@mattermost/compass-icons/font/compass-icons.ttf"
+        if [ -z "$COMPASS_ICONS" ]; then
+            echo "Compass Icons font not found"
+            exit 1
+        else
+            echo "Configuring Compass Icons font"
+            cp "$COMPASS_ICONS" "assets/fonts/"
+            cp "$COMPASS_ICONS" "android/app/src/main/assets/fonts"
+        fi
+
         if [[ "$1" == "ios"* ]]; then
           echo "Installing Gems"
           npm run ios-gems &> /dev/null || exit 1
@@ -95,11 +105,11 @@ case $1 in
   *)
     echo "Build the mobile app for Android or iOS
     Usage: build.sh <type> [options]
-    
+
     Type:
       apk   Builds Android APK(s)
       ipa   Builds iOS IPA
-      
+
     Options:
       apk: unsigned
       ipa: unsigned or simulator"

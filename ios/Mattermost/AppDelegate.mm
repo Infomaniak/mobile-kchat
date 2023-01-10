@@ -12,7 +12,7 @@
 #import <UserNotifications/UserNotifications.h>
 #import <RNHWKeyboardEvent.h>
 
-#import "Mattermost-Swift.h"
+#import "kChat-Swift.h"
 #import <os/log.h>
 
 #if RCT_NEW_ARCH_ENABLED

@@ -17,22 +17,22 @@
 		27C667AA295241B600E590D5 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C667A8295241B600E590D5 /* Sentry.swift */; };
 		3750F86D296DACD2002DAC87 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3750F867296DACD2002DAC87 /* Localizable.strings */; };
 		3750F86E296DACE3002DAC87 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3750F867296DACD2002DAC87 /* Localizable.strings */; };
+		37B0A413296DC0C50085944B /* Gekidou in Frameworks */ = {isa = PBXBuildFile; productRef = 37B0A412296DC0C50085944B /* Gekidou */; };
 		49AE370126D4455D00EF4E52 /* Gekidou in Frameworks */ = {isa = PBXBuildFile; productRef = 49AE370026D4455D00EF4E52 /* Gekidou */; };
+		4F7523DD23C03726EE36B730 /* libPods-kChat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A27DDBD8F8B05C6F11A7E73 /* libPods-kChat.a */; };
 		536CC6C323E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.m in Sources */ = {isa = PBXBuildFile; fileRef = 536CC6C123E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.m */; };
 		58495E36BF1A4EAB93609E57 /* Metropolis-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 54956DEFEBB74EF78C3A6AE5 /* Metropolis-SemiBold.ttf */; };
-		6C9B1EFD6561083917AF06CF /* libPods-Mattermost.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DEEFB3ED6175724A2653247 /* libPods-Mattermost.a */; };
 		7F0F4B0A24BA173900E14C60 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7F0F4B0924BA173900E14C60 /* LaunchScreen.storyboard */; };
 		7F151D3E221B062700FAD8F3 /* RuntimeUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F151D3D221B062700FAD8F3 /* RuntimeUtils.swift */; };
 		7F1EB88527FDE361002E7EEC /* GekidouWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1EB88427FDE361002E7EEC /* GekidouWrapper.swift */; };
 		7F1EBFCE286F2AE200824AF1 /* MultipleAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1EBFCD286F2AE200824AF1 /* MultipleAttachmentView.swift */; };
 		7F1EBFD0286F2B2C00824AF1 /* RemoveAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1EBFCF286F2B2C00824AF1 /* RemoveAttachmentView.swift */; };
 		7F292A711E8AB73400A450A3 /* SplashScreenResource in Resources */ = {isa = PBXBuildFile; fileRef = 7F292A701E8AB73400A450A3 /* SplashScreenResource */; };
-		7F4288042865D340006B48E1 /* Gekidou in Frameworks */ = {isa = PBXBuildFile; productRef = 7F4288032865D340006B48E1 /* Gekidou */; };
 		7F42880A286672F6006B48E1 /* ServerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F428809286672F6006B48E1 /* ServerService.swift */; };
 		7F42880C2866A9C0006B48E1 /* ChannelService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F42880B2866A9C0006B48E1 /* ChannelService.swift */; };
 		7F537B2928A517580086D6B3 /* NotificationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F537B2828A517580086D6B3 /* NotificationHelper.swift */; };
 		7F581D35221ED5C60099E66B /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F581D34221ED5C60099E66B /* NotificationService.swift */; };
-		7F581D39221ED5C60099E66B /* NotificationService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 7F581D32221ED5C60099E66B /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7F581D39221ED5C60099E66B /* kChatNotificationService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 7F581D32221ED5C60099E66B /* kChatNotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7F7E9F462864E6C60064BFAF /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F7E9F442864E6C60064BFAF /* Color.swift */; };
 		7F7E9F472864E6C60064BFAF /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F7E9F452864E6C60064BFAF /* View.swift */; };
 		7F7E9F4C2864E6EC0064BFAF /* AttachmentModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F7E9F492864E6EB0064BFAF /* AttachmentModel.swift */; };
@@ -85,7 +85,7 @@
 		7FB50D222856E1AB0035ACB5 /* ShareUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB50D212856E1AB0035ACB5 /* ShareUIView.swift */; };
 		7FC5698928563FDB000B0905 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FC5698828563FDB000B0905 /* ShareViewController.swift */; };
 		7FC5698C28563FDB000B0905 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7FC5698A28563FDB000B0905 /* MainInterface.storyboard */; };
-		7FC5699028563FDB000B0905 /* MattermostShare.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 7FC5698628563FDB000B0905 /* MattermostShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7FC5699028563FDB000B0905 /* kChatShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 7FC5698628563FDB000B0905 /* kChatShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7FD482292864D69700A5B18B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7FD482282864D69700A5B18B /* Assets.xcassets */; };
 		7FD4822C2864D73300A5B18B /* OpenGraph in Frameworks */ = {isa = PBXBuildFile; productRef = 7FD4822B2864D73300A5B18B /* OpenGraph */; };
 		7FD4825C2864DC4200A5B18B /* compass-icons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 531BEBC52513E93C00BC05B1 /* compass-icons.ttf */; };
@@ -141,8 +141,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				7FC5699028563FDB000B0905 /* MattermostShare.appex in Embed App Extensions */,
-				7F581D39221ED5C60099E66B /* NotificationService.appex in Embed App Extensions */,
+				7FC5699028563FDB000B0905 /* kChatShareExtension.appex in Embed App Extensions */,
+				7F581D39221ED5C60099E66B /* kChatNotificationService.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -153,7 +153,7 @@
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* MattermostTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MattermostTests.m; sourceTree = "<group>"; };
 		0DB14DFDF6E04FA69FE769DC /* OpenSans-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-SemiBoldItalic.ttf"; path = "../assets/fonts/OpenSans-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* Mattermost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mattermost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07F961A680F5B00A75B9A /* kChat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = kChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Mattermost/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = Mattermost/AppDelegate.mm; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Mattermost/Images.xcassets; sourceTree = "<group>"; };
@@ -184,6 +184,7 @@
 		57CB4735B7E57B50D0B50E16 /* Pods-MattermostTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MattermostTests.debug.xcconfig"; path = "Target Support Files/Pods-MattermostTests/Pods-MattermostTests.debug.xcconfig"; sourceTree = "<group>"; };
 		6561AEAC21CC40B8A72ABB93 /* OpenSans-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-Light.ttf"; path = "../assets/fonts/OpenSans-Light.ttf"; sourceTree = "<group>"; };
 		6BAF8296411D4657B5A0E8F8 /* libRNReactNativeDocViewer.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNReactNativeDocViewer.a; sourceTree = "<group>"; };
+		7836FF65A2EDDE3EBF5E9146 /* Pods-kChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChat.debug.xcconfig"; path = "Target Support Files/Pods-kChat/Pods-kChat.debug.xcconfig"; sourceTree = "<group>"; };
 		7F0F4B0924BA173900E14C60 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = SplashScreenResource/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7F151D3D221B062700FAD8F3 /* RuntimeUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RuntimeUtils.swift; path = Mattermost/RuntimeUtils.swift; sourceTree = "<group>"; };
 		7F151D43221B082A00FAD8F3 /* Mattermost-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Mattermost-Bridging-Header.h"; path = "Mattermost/Mattermost-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -198,7 +199,7 @@
 		7F42880B2866A9C0006B48E1 /* ChannelService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelService.swift; sourceTree = "<group>"; };
 		7F43D6051F6BF9EB001FC614 /* libPods-Mattermost.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libPods-Mattermost.a"; path = "../../../../../../../Library/Developer/Xcode/DerivedData/Mattermost-czlinsdviifujheezzjvmisotjrm/Build/Products/Debug-iphonesimulator/libPods-Mattermost.a"; sourceTree = "<group>"; };
 		7F537B2828A517580086D6B3 /* NotificationHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NotificationHelper.swift; path = Mattermost/NotificationHelper.swift; sourceTree = "<group>"; };
-		7F581D32221ED5C60099E66B /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		7F581D32221ED5C60099E66B /* kChatNotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = kChatNotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F581D34221ED5C60099E66B /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		7F581D36221ED5C60099E66B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F581F77221EEA5A0099E66B /* NotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationService.entitlements; sourceTree = "<group>"; };
@@ -241,7 +242,7 @@
 		7FA9A98D28673EC200AB35A1 /* ShareViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewModel.swift; sourceTree = "<group>"; };
 		7FA9A98F2868BD8800AB35A1 /* LocalFileManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalFileManager.swift; sourceTree = "<group>"; };
 		7FB50D212856E1AB0035ACB5 /* ShareUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareUIView.swift; sourceTree = "<group>"; };
-		7FC5698628563FDB000B0905 /* MattermostShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MattermostShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		7FC5698628563FDB000B0905 /* kChatShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = kChatShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FC5698828563FDB000B0905 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		7FC5698B28563FDB000B0905 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		7FC5698D28563FDB000B0905 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -263,7 +264,7 @@
 		7FFE32BE1FD9CCAA0038C7A0 /* SDWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SDWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FFE32BF1FD9CCAA0038C7A0 /* Sentry.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Sentry.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		81061F4CBB31484A94D5A8EE /* libz.tbd */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
-		8DEEFB3ED6175724A2653247 /* libPods-Mattermost.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Mattermost.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9A27DDBD8F8B05C6F11A7E73 /* libPods-kChat.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-kChat.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC977883E2624E05975CA65B /* OpenSans-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-Regular.ttf"; path = "../assets/fonts/OpenSans-Regular.ttf"; sourceTree = "<group>"; };
 		BE17F630DB5D41FD93F32D22 /* OpenSans-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-LightItalic.ttf"; path = "../assets/fonts/OpenSans-LightItalic.ttf"; sourceTree = "<group>"; };
 		D4B1B363C2414DA19C1AC521 /* OpenSans-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-Bold.ttf"; path = "../assets/fonts/OpenSans-Bold.ttf"; sourceTree = "<group>"; };
@@ -271,6 +272,7 @@
 		EB4F0DF36537B0B21BE962FB /* Pods-Mattermost.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mattermost.debug.xcconfig"; path = "Target Support Files/Pods-Mattermost/Pods-Mattermost.debug.xcconfig"; sourceTree = "<group>"; };
 		F41672974C2907F74BB59B16 /* libPods-Mattermost-MattermostTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Mattermost-MattermostTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FBBEC29EE2D3418D9AC33BD5 /* OpenSans-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-ExtraBoldItalic.ttf"; path = "../assets/fonts/OpenSans-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
+		FF9431EE6D4AD55E58E60FB3 /* Pods-kChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChat.release.xcconfig"; path = "Target Support Files/Pods-kChat/Pods-kChat.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -279,7 +281,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7F98836227FD46A9001C9BFC /* Gekidou in Frameworks */,
-				6C9B1EFD6561083917AF06CF /* libPods-Mattermost.a in Frameworks */,
+				4F7523DD23C03726EE36B730 /* libPods-kChat.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -296,8 +298,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				37B0A413296DC0C50085944B /* Gekidou in Frameworks */,
 				7FD4822C2864D73300A5B18B /* OpenGraph in Frameworks */,
-				7F4288042865D340006B48E1 /* Gekidou in Frameworks */,
 				27C667A529523F0A00E590D5 /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -380,6 +382,8 @@
 				297AAFCCF0BD99FC109DA2BC /* Pods-MattermostTests.release.xcconfig */,
 				7F325D6DAAF1047EB948EFF7 /* Pods-Mattermost-MattermostTests.debug.xcconfig */,
 				182D203F539AF68F1647EFAF /* Pods-Mattermost-MattermostTests.release.xcconfig */,
+				7836FF65A2EDDE3EBF5E9146 /* Pods-kChat.debug.xcconfig */,
+				FF9431EE6D4AD55E58E60FB3 /* Pods-kChat.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -421,8 +425,8 @@
 				7FFE32BF1FD9CCAA0038C7A0 /* Sentry.framework */,
 				7F43D6051F6BF9EB001FC614 /* libPods-Mattermost.a */,
 				81061F4CBB31484A94D5A8EE /* libz.tbd */,
-				8DEEFB3ED6175724A2653247 /* libPods-Mattermost.a */,
 				F41672974C2907F74BB59B16 /* libPods-Mattermost-MattermostTests.a */,
+				9A27DDBD8F8B05C6F11A7E73 /* libPods-kChat.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -671,9 +675,9 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* Mattermost.app */,
-				7F581D32221ED5C60099E66B /* NotificationService.appex */,
-				7FC5698628563FDB000B0905 /* MattermostShare.appex */,
+				13B07F961A680F5B00A75B9A /* kChat.app */,
+				7F581D32221ED5C60099E66B /* kChatNotificationService.appex */,
+				7FC5698628563FDB000B0905 /* kChatShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -681,9 +685,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		13B07F861A680F5B00A75B9A /* Mattermost */ = {
+		13B07F861A680F5B00A75B9A /* kChat */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Mattermost" */;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "kChat" */;
 			buildPhases = (
 				484322B86D8320281D95970F /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
@@ -702,17 +706,17 @@
 				7F581D38221ED5C60099E66B /* PBXTargetDependency */,
 				7FC5698F28563FDB000B0905 /* PBXTargetDependency */,
 			);
-			name = Mattermost;
+			name = kChat;
 			packageProductDependencies = (
 				7F98836127FD46A9001C9BFC /* Gekidou */,
 			);
 			productName = "Hello World";
-			productReference = 13B07F961A680F5B00A75B9A /* Mattermost.app */;
+			productReference = 13B07F961A680F5B00A75B9A /* kChat.app */;
 			productType = "com.apple.product-type.application";
 		};
-		7F581D31221ED5C60099E66B /* NotificationService */ = {
+		7F581D31221ED5C60099E66B /* kChatNotificationService */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7F581D82221ED5C60099E66B /* Build configuration list for PBXNativeTarget "NotificationService" */;
+			buildConfigurationList = 7F581D82221ED5C60099E66B /* Build configuration list for PBXNativeTarget "kChatNotificationService" */;
 			buildPhases = (
 				7F581D2E221ED5C60099E66B /* Sources */,
 				7F581D2F221ED5C60099E66B /* Frameworks */,
@@ -722,18 +726,18 @@
 			);
 			dependencies = (
 			);
-			name = NotificationService;
+			name = kChatNotificationService;
 			packageProductDependencies = (
 				49AE370026D4455D00EF4E52 /* Gekidou */,
 				27C667A229523ECA00E590D5 /* Sentry */,
 			);
 			productName = NotificationService;
-			productReference = 7F581D32221ED5C60099E66B /* NotificationService.appex */;
+			productReference = 7F581D32221ED5C60099E66B /* kChatNotificationService.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		7FC5698528563FDB000B0905 /* MattermostShare */ = {
+		7FC5698528563FDB000B0905 /* kChatShareExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7FC5699328563FDB000B0905 /* Build configuration list for PBXNativeTarget "MattermostShare" */;
+			buildConfigurationList = 7FC5699328563FDB000B0905 /* Build configuration list for PBXNativeTarget "kChatShareExtension" */;
 			buildPhases = (
 				7FC5698228563FDB000B0905 /* Sources */,
 				7FC5698328563FDB000B0905 /* Frameworks */,
@@ -743,14 +747,14 @@
 			);
 			dependencies = (
 			);
-			name = MattermostShare;
+			name = kChatShareExtension;
 			packageProductDependencies = (
 				7FD4822B2864D73300A5B18B /* OpenGraph */,
-				7F4288032865D340006B48E1 /* Gekidou */,
 				27C667A429523F0A00E590D5 /* Sentry */,
+				37B0A412296DC0C50085944B /* Gekidou */,
 			);
 			productName = MattermostShare;
-			productReference = 7FC5698628563FDB000B0905 /* MattermostShare.appex */;
+			productReference = 7FC5698628563FDB000B0905 /* kChatShareExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -798,7 +802,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Mattermost" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "kChat" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -820,9 +824,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				13B07F861A680F5B00A75B9A /* Mattermost */,
-				7F581D31221ED5C60099E66B /* NotificationService */,
-				7FC5698528563FDB000B0905 /* MattermostShare */,
+				13B07F861A680F5B00A75B9A /* kChat */,
+				7F581D31221ED5C60099E66B /* kChatNotificationService */,
+				7FC5698528563FDB000B0905 /* kChatShareExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -918,7 +922,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Mattermost-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-kChat-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -931,7 +935,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Mattermost/Pods-Mattermost-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-kChat/Pods-kChat-frameworks.sh",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/Flipper-DoubleConversion/double-conversion.framework/double-conversion",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/Flipper-Glog/glog.framework/glog",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL-Universal/OpenSSL.framework/OpenSSL",
@@ -946,7 +950,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Mattermost/Pods-Mattermost-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-kChat/Pods-kChat-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		AE4769B235D14E6C9C64EA78 /* Upload Debug Symbols to Sentry */ = {
@@ -969,7 +973,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Mattermost/Pods-Mattermost-resources.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-kChat/Pods-kChat-resources.sh",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Entypo.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf",
@@ -1010,7 +1014,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Mattermost/Pods-Mattermost-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-kChat/Pods-kChat-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -1096,12 +1100,12 @@
 /* Begin PBXTargetDependency section */
 		7F581D38221ED5C60099E66B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 7F581D31221ED5C60099E66B /* NotificationService */;
+			target = 7F581D31221ED5C60099E66B /* kChatNotificationService */;
 			targetProxy = 7F581D37221ED5C60099E66B /* PBXContainerItemProxy */;
 		};
 		7FC5698F28563FDB000B0905 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 7FC5698528563FDB000B0905 /* MattermostShare */;
+			target = 7FC5698528563FDB000B0905 /* kChatShareExtension */;
 			targetProxy = 7FC5698E28563FDB000B0905 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -1132,7 +1136,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EB4F0DF36537B0B21BE962FB /* Pods-Mattermost.debug.xcconfig */;
+			baseConfigurationReference = 7836FF65A2EDDE3EBF5E9146 /* Pods-kChat.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -1164,7 +1168,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.infomaniak.chat;
-				PRODUCT_NAME = Mattermost;
+				PRODUCT_NAME = kChat;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Mattermost/Mattermost-Bridging-Header.h";
@@ -1177,7 +1181,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 25BF2BACE89201DE6E585B7E /* Pods-Mattermost.release.xcconfig */;
+			baseConfigurationReference = FF9431EE6D4AD55E58E60FB3 /* Pods-kChat.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -1206,7 +1210,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.infomaniak.chat;
-				PRODUCT_NAME = Mattermost;
+				PRODUCT_NAME = kChat;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Mattermost/Mattermost-Bridging-Header.h";
@@ -1339,7 +1343,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MattermostShare/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Mattermost;
+				INFOPLIST_KEY_CFBundleDisplayName = kChat;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1350,7 +1354,7 @@
 				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.infomaniak.chat.MattermostShare;
+				PRODUCT_BUNDLE_IDENTIFIER = com.infomaniak.chat.ShareExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -1390,7 +1394,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MattermostShare/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Mattermost;
+				INFOPLIST_KEY_CFBundleDisplayName = kChat;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1400,7 +1404,7 @@
 				);
 				MARKETING_VERSION = 1.0.0;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.infomaniak.chat.MattermostShare;
+				PRODUCT_BUNDLE_IDENTIFIER = com.infomaniak.chat.ShareExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -1514,7 +1518,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Mattermost" */ = {
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "kChat" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
@@ -1523,7 +1527,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7F581D82221ED5C60099E66B /* Build configuration list for PBXNativeTarget "NotificationService" */ = {
+		7F581D82221ED5C60099E66B /* Build configuration list for PBXNativeTarget "kChatNotificationService" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7F581D3A221ED5C60099E66B /* Debug */,
@@ -1532,7 +1536,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7FC5699328563FDB000B0905 /* Build configuration list for PBXNativeTarget "MattermostShare" */ = {
+		7FC5699328563FDB000B0905 /* Build configuration list for PBXNativeTarget "kChatShareExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7FC5699128563FDB000B0905 /* Debug */,
@@ -1541,7 +1545,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Mattermost" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "kChat" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
@@ -1582,11 +1586,11 @@
 			package = 27C667A129523ECA00E590D5 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
 			productName = Sentry;
 		};
-		49AE370026D4455D00EF4E52 /* Gekidou */ = {
+		37B0A412296DC0C50085944B /* Gekidou */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Gekidou;
 		};
-		7F4288032865D340006B48E1 /* Gekidou */ = {
+		49AE370026D4455D00EF4E52 /* Gekidou */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Gekidou;
 		};
