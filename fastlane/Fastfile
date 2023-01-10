@@ -574,7 +574,7 @@ platform :ios do
         clean: true,
         scheme: 'kChat',
         configuration: config_mode,
-        workspace: './ios/Mattermost.xcworkspace',
+        workspace: './ios/kChat.xcworkspace',
         export_method: method,
         skip_profile_detection: true,
         output_name: "#{app_name_sub}.ipa",
