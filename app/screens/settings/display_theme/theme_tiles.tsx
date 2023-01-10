@@ -139,7 +139,7 @@ export const ThemeTiles = ({allowedThemeKeys, onThemeChange, selectedTheme}: The
                             key={themeKey}
                             label={(
                                 <Text style={styles.label}>
-                                    {themeKey}
+                                    {Preferences.THEMES[themeKey].ikName}
                                 </Text>
                             )}
                             action={onThemeChange}

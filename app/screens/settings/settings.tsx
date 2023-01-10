@@ -19,6 +19,7 @@ import {tryOpenURL} from '@utils/url';
 
 import ReportProblem from './report_problem';
 import SettingItem from './setting_item';
+import {gotoSettingsScreen} from '@screens/settings/config';
 
 const CLOSE_BUTTON_ID = 'close-settings';
 
@@ -51,9 +52,8 @@ type SettingsProps = {
 const Settings = ({componentId, helpLink, showHelp, siteName}: SettingsProps) => {
     const theme = useTheme();
     const intl = useIntl();
-    const serverDisplayName = useServerDisplayName();
 
-    const serverName = siteName || serverDisplayName;
+    const serverName = 'kChat';
     const styles = getStyleSheet(theme);
 
     const closeButton = useMemo(() => {
@@ -106,6 +106,22 @@ const Settings = ({componentId, helpLink, showHelp, siteName}: SettingsProps) =>
         goToScreen(screen, title);
     });
 
+    const goToThemeSettings = preventDoubleTap(() => {
+        const screen = Screens.SETTINGS_DISPLAY_THEME;
+        const title = intl.formatMessage({id: 'mobile.display_settings.theme', defaultMessage: 'Theme'});
+        goToScreen(screen, title);
+    });
+
+    const goToNotificationSettingsPush = preventDoubleTap(() => {
+        const screen = Screens.SETTINGS_NOTIFICATION_PUSH;
+        const title = intl.formatMessage({
+            id: 'notification_settings.push_notification',
+            defaultMessage: 'Push Notifications',
+        });
+
+        gotoSettingsScreen(screen, title);
+    });
+
     const openHelp = preventDoubleTap(() => {
         const link = helpLink ? helpLink.toLowerCase() : '';
 
@@ -124,19 +140,15 @@ const Settings = ({componentId, helpLink, showHelp, siteName}: SettingsProps) =>
     return (
         <SettingContainer testID='settings'>
             <SettingItem
-                onPress={goToNotifications}
+                onPress={goToNotificationSettingsPush}
                 optionName='notification'
                 testID='settings.notifications.option'
             />
             <SettingItem
-                onPress={goToDisplaySettings}
-                optionName='display'
-                testID='settings.display.option'
-            />
-            <SettingItem
-                onPress={goToAdvancedSettings}
-                optionName='advanced_settings'
-                testID='settings.advanced_settings.option'
+                optionName='theme'
+                onPress={goToThemeSettings}
+                info={theme.ikName!}
+                testID='display_settings.theme.option'
             />
             <SettingItem
                 icon='information-outline'
@@ -156,7 +168,6 @@ const Settings = ({componentId, helpLink, showHelp, siteName}: SettingsProps) =>
                     type='default'
                 />
             }
-            <ReportProblem siteName={siteName}/>
         </SettingContainer>
     );
 };

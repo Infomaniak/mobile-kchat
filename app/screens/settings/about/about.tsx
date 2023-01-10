@@ -164,20 +164,6 @@ const About = ({config, license}: AboutProps) => {
 
     return (
         <SettingContainer testID='about'>
-            <View style={styles.logoContainer}>
-                <CompassIcon
-                    color={theme.centerChannelColor}
-                    name='mattermost'
-                    size={88}
-                    testID='about.logo'
-                />
-                <Title
-                    config={config}
-                    license={license}
-                />
-                <Subtitle config={config}/>
-                <SettingSeparator lineStyles={styles.lineStyles}/>
-            </View>
             <View style={styles.infoContainer}>
                 <View style={styles.group}>
                     <Text
@@ -237,114 +223,6 @@ const About = ({config, license}: AboutProps) => {
                             id: 'settings.about.database.schema.value',
                             defaultMessage: `${config.SchemaVersion}`,
                         })}
-                    </Text>
-                </View>
-                {license.IsLicensed === 'true' && (
-                    <View style={styles.licenseContainer}>
-                        <FormattedText
-                            defaultMessage='Licensed to: {company}'
-                            id={t('settings.about.licensed')}
-                            style={styles.info}
-                            testID='about.licensee'
-                            values={{company: license.Company}}
-                        />
-                    </View>
-                )}
-                <LearnMore
-                    config={config}
-                    onPress={handleAboutTeam}
-                />
-                {!MATTERMOST_BUNDLE_IDS.includes(DeviceInfo.getBundleId()) &&
-                    <FormattedText
-                        defaultMessage='{site} is powered by Mattermost'
-                        id={t('settings.about.powered_by')}
-                        style={styles.footerText}
-                        testID='about.powered_by'
-                        values={{site: config.SiteName}}
-                    />
-                }
-                <FormattedText
-                    defaultMessage='Copyright 2015-{currentYear} Mattermost, Inc. All rights reserved'
-                    id={t('settings.about.copyright')}
-                    style={[styles.footerText, styles.copyrightText]}
-                    testID='about.copyright'
-                    values={{currentYear: new Date().getFullYear()}}
-                />
-                <View style={styles.tosPrivacyContainer}>
-                    <TosPrivacyContainer
-                        config={config}
-                        onPressPrivacyPolicy={handlePrivacyPolicy}
-                        onPressTOS={handleTermsOfService}
-                    />
-                </View>
-                <View style={styles.noticeContainer}>
-                    <FormattedText
-                        id={t('settings.notice_text')}
-                        defaultMessage='Mattermost is made possible by the open source software used in our {platform} and {mobile}.'
-                        style={styles.footerText}
-                        values={{
-                            platform: (
-                                <FormattedText
-                                    defaultMessage='server'
-                                    id={t('settings.notice_platform_link')}
-                                    onPress={handlePlatformNotice}
-                                    style={styles.noticeLink}
-                                />
-                            ),
-                            mobile: (
-                                <FormattedText
-                                    defaultMessage='mobile apps'
-                                    id={t('settings.notice_mobile_link')}
-                                    onPress={handleMobileNotice}
-                                    style={[styles.noticeLink, {marginLeft: 5}]}
-                                />
-                            ),
-                        }}
-                        testID='about.notice_text'
-                    />
-                </View>
-                <View style={styles.hashContainer}>
-                    <View>
-                        <FormattedText
-                            defaultMessage='Build Hash:'
-                            id={t('about.hash')}
-                            style={styles.footerTitleText}
-                            testID='about.build_hash.title'
-                        />
-                        <Text
-                            style={styles.footerText}
-                            testID='about.build_hash.value'
-                        >
-                            {config.BuildHash}
-                        </Text>
-                    </View>
-                    <View>
-                        <FormattedText
-                            defaultMessage='EE Build Hash:'
-                            id={t('about.hashee')}
-                            style={styles.footerTitleText}
-                            testID='about.build_hash_enterprise.title'
-                        />
-                        <Text
-                            style={styles.footerText}
-                            testID='about.build_hash_enterprise.value'
-                        >
-                            {config.BuildHashEnterprise}
-                        </Text>
-                    </View>
-                </View>
-                <View style={{marginBottom: 20}}>
-                    <FormattedText
-                        defaultMessage='Build Date:'
-                        id={t('about.date')}
-                        style={styles.footerTitleText}
-                        testID='about.build_date.title'
-                    />
-                    <Text
-                        style={styles.footerText}
-                        testID='about.build_date.value'
-                    >
-                        {config.BuildDate}
                     </Text>
                 </View>
             </View>
