@@ -29,6 +29,7 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -185,6 +186,7 @@ public class ShareModule extends ReactContextBaseJavaModule {
         JSONObject json = new JSONObject();
         try {
             json.put("user_id", data.getString("userId"));
+            json.put("pending_post_id", UUID.randomUUID().toString());
             if (data.hasKey("channelId")) {
                 json.put("channel_id", data.getString("channelId"));
             }
@@ -200,7 +202,7 @@ public class ShareModule extends ReactContextBaseJavaModule {
     private void post(String serverUrl, String token, JSONObject postData) throws IOException {
         RequestBody body = RequestBody.create(postData.toString(), JSON);
         Request request = new Request.Builder()
-                .header("Authorization", "BEARER " + token)
+                .header("Authorization", "Bearer " + token)
                 .url(serverUrl + "/api/v4/posts")
                 .post(body)
                 .build();
@@ -209,10 +211,9 @@ public class ShareModule extends ReactContextBaseJavaModule {
 
     private void uploadFiles(String serverUrl, String token, ReadableArray files, JSONObject postData) {
         try {
-            MultipartBody.Builder builder = new MultipartBody.Builder()
-                    .setType(MultipartBody.FORM);
+            JSONArray uploadedFileIds = new JSONArray();
 
-            for(int i = 0 ; i < files.size() ; i++) {
+            for (int i = 0; i < files.size(); i++) {
                 ReadableMap file = files.getMap(i);
                 String mime = file.getString("type");
                 String fullPath = file.getString("value");
@@ -220,38 +221,45 @@ public class ShareModule extends ReactContextBaseJavaModule {
                     String filePath = fullPath.replaceFirst("file://", "");
                     File fileInfo = new File(filePath);
                     if (fileInfo.exists() && mime != null) {
+                        MultipartBody.Builder builder = new MultipartBody.Builder()
+                                .setType(MultipartBody.FORM);
+
                         final MediaType MEDIA_TYPE = MediaType.parse(mime);
                         builder.addFormDataPart("files", file.getString("filename"), RequestBody.create(fileInfo, MEDIA_TYPE));
+                        builder.addFormDataPart("client_ids", UUID.randomUUID().toString());
+                        builder.addFormDataPart("channel_id", postData.getString("channel_id"));
+                        RequestBody body = builder.build();
+                        Request request = new Request.Builder()
+                                .header("Authorization", "Bearer " + token)
+                                .url(serverUrl + "/api/v4/files")
+                                .post(body)
+                                .build();
+
+                        // Uploading files is currently done sequentially
+                        try (Response response = client.newCall(request).execute()) {
+                            if (response.isSuccessful()) {
+                                String responseData = response.body().string();
+                                JSONObject responseJson = new JSONObject(responseData);
+                                JSONArray fileInfoArray = responseJson.getJSONArray("file_infos");
+                                if (fileInfoArray.length() > 0) {
+                                    JSONObject jsonFileInfo = fileInfoArray.getJSONObject(0);
+                                    uploadedFileIds.put(jsonFileInfo.getString("id"));
+                                }
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
 
-            builder.addFormDataPart("channel_id", postData.getString("channel_id"));
-            RequestBody body = builder.build();
-            Request request = new Request.Builder()
-                    .header("Authorization", "BEARER " + token)
-                    .url(serverUrl + "/api/v4/files")
-                    .post(body)
-                    .build();
-
-            try (Response response = client.newCall(request).execute()) {
-                if (response.isSuccessful()) {
-                    String responseData = response.body().string();
-                    JSONObject responseJson = new JSONObject(responseData);
-                    JSONArray fileInfoArray = responseJson.getJSONArray("file_infos");
-                    JSONArray file_ids = new JSONArray();
-                    for(int i = 0 ; i < fileInfoArray.length() ; i++) {
-                        JSONObject fileInfo = fileInfoArray.getJSONObject(i);
-                        file_ids.put(fileInfo.getString("id"));
-                    }
-                    postData.put("file_ids", file_ids);
-                    post(serverUrl, token, postData);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (uploadedFileIds.length() > 0) {
+                postData.put("file_ids", uploadedFileIds);
+                post(serverUrl, token, postData);
             }
-
         } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

@@ -120,6 +120,18 @@ index ca31e20..b45c753 100644
              } else {
                  // On some systems there is some kind of lock on `/databases` folder ¯\_(ツ)_/¯
                  context.getDatabasePath("$name.db").path.replace("/databases", "")
+diff --git a/node_modules/@nozbe/watermelondb/native/android/src/main/java/com/nozbe/watermelondb/DatabaseDriver.kt b/node_modules/@nozbe/watermelondb/native/android/src/main/java/com/nozbe/watermelondb/DatabaseDriver.kt
+index 4bd8998..0b5eadd 100644
+--- a/node_modules/@nozbe/watermelondb/native/android/src/main/java/com/nozbe/watermelondb/DatabaseDriver.kt
++++ b/node_modules/@nozbe/watermelondb/native/android/src/main/java/com/nozbe/watermelondb/DatabaseDriver.kt
+@@ -19,6 +19,7 @@ class DatabaseDriver(context: Context, dbName: String) {
+             is SchemaCompatibility.NeedsSetup -> throw SchemaNeededError()
+             is SchemaCompatibility.NeedsMigration ->
+                 throw MigrationNeededError(compatibility.fromVersion)
++            else -> {}
+         }
+     }
+ 
 diff --git a/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/SupportingFiles/Bridging.h b/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/SupportingFiles/Bridging.h
 index 135118d..8324550 100644
 --- a/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/SupportingFiles/Bridging.h
