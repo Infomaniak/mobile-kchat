@@ -35,6 +35,7 @@ import type PostModel from '@typings/database/models/servers/post';
 import type ThreadModel from '@typings/database/models/servers/thread';
 import type UserModel from '@typings/database/models/servers/user';
 import type {SearchPattern} from '@typings/global/markdown';
+import CallMessage from '@calls/components/calls_custom_message/ik_call_message';
 
 type PostProps = {
     appsEnabled: boolean;
@@ -291,10 +292,7 @@ const Post = ({
         );
     } else if (isCallsPost && !hasBeenDeleted) {
         body = (
-            <CallsCustomMessage
-                serverUrl={serverUrl}
-                post={post}
-            />
+            <CallMessage post={post}/>
         );
     } else {
         body = (

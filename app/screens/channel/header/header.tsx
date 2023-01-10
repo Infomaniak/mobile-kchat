@@ -79,7 +79,7 @@ const ChannelHeader = ({
 
     // NOTE: callsEnabledInChannel will be true/false (not undefined) based on explicit state + the DefaultEnabled system setting
     //   which ultimately comes from channel/index.tsx, and observeIsCallsEnabledInChannel
-    const callsAvailable = callsEnabledInChannel;
+    const callsAvailable = true;
 
     const isDMorGM = isTypeDMorGM(channelType);
     const contextStyle = useMemo(() => ({
