@@ -33,7 +33,7 @@ import NavigationStore from '@store/navigation_store';
 import {isDMorGM, sortChannelsByDisplayName} from '@utils/channel';
 import {getMemberChannelsFromGQLQuery, gqlToClientChannelMembership} from '@utils/graphql';
 import {isTablet} from '@utils/helpers';
-import {logDebug} from '@utils/log';
+import {logDebug, logError} from '@utils/log';
 import {processIsCRTEnabled} from '@utils/thread';
 
 import type ClientError from '@client/rest/error';
@@ -367,7 +367,11 @@ export const registerDeviceToken = async (serverUrl: string) => {
 
     const deviceToken = await getDeviceToken();
     if (deviceToken) {
-        client.attachDevice(deviceToken);
+        try {
+            await client.attachDevice(deviceToken);
+        } catch (e) {
+            logError(JSON.stringify(e));
+        }
     }
 
     return {error: undefined};
