@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Mattermost Beta</string>
+    <string name="app_name">kChat</string>
     <string name="inAppPinCode_title">in-App Pincode</string>
     <string name="inAppPinCode_description">Require users to authenticate as the owner of the phone before using the app. Prompts for fingerprint or passcode when the app first opens and when the app has been in the background for more than 5 minutes.</string>
     <string name="blurApplicationScreen_title">Blur Application Screen</string>
@@ -22,4 +22,5 @@
     <string name="vendor_description">Name of the EMM vendor or company deploying the app. Used in help text when prompting for passcodes so users are aware why the app is being protected.</string>
     <string name="inAppSessionAuth_title">In-App Session Auth</string>
     <string name="inAppSessionAuth_description">Instead of default flow from the mobile browser, enforce SSO with the WebView.</string>
+    <string name="empty_notification_message">Imported something</string>
 </resources>
