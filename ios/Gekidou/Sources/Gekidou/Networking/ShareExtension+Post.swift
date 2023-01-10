@@ -26,15 +26,35 @@ files: [String], completionHandler: @escaping () -> Void) {
                    fileUrl.isFileURL {
                     let filename = fileUrl.lastPathComponent
                     
-                    if let url = URL(string: "\(serverUrl)/api/v4/files?channel_id=\(channelId)&filename=\(filename)"),
+                    if let url = URL(string: "\(serverUrl)/api/v4/files?channel_id=\(channelId)&filename=\(filename)&client_ids=\(UUID().uuidString)"),
                        let token = try? Keychain.default.getToken(for: serverUrl) {
                         var uploadRequest = URLRequest(url: url)
                         uploadRequest.httpMethod = "POST"
                         uploadRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
+                        let boundary = UUID().uuidString
+                        uploadRequest.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+                        
+                        let fileData = try? Data(contentsOf: fileUrl)
+                        var data = Data()
+                        // Add the file data to the raw http request data
+                        data.append("--\(boundary)\r\n".data(using: .utf8)!)
+                        data.append("Content-Disposition: form-data; name=\"files\"; filename=\"\(filename)\"\r\n\r\n".data(using: .utf8)!)
+                        data.append(fileData!)
+                        data.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+                        // do not forget to set the content-length!
+                        uploadRequest.setValue(String(data.count), forHTTPHeaderField: "Content-Length")
+                        
+                        let temporaryURL = FileManager.default.temporaryDirectory.appendingPathExtension(UUID().uuidString)
+                        do {
+                            try data.write(to: temporaryURL)
+                        } catch {
+                            print("Error writing request file")
+                        }
+
                         if let task = backgroundSession?.uploadTask(
                             with: uploadRequest,
-                            fromFile: fileUrl
+                            fromFile: temporaryURL
                         ) {
                             task.resume()
                         }

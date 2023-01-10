@@ -55,7 +55,7 @@ struct InitialView: View {
       }
     }
     .accentColor(.white)
-    .navigationBarTitle("Share to Mattermost", displayMode: .inline)
+    .navigationBarTitle("Share to kChat", displayMode: .inline)
     .navigationBarItems(
       leading: CancelButton(attachments: attachments),
       trailing: PostButton(

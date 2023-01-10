@@ -52,8 +52,12 @@ extension Network {
     
     public func createPost(serverUrl: String, channelId: String, message: String, fileIds: [String], completionHandler: @escaping ResponseHandler) {
         do {
+            let currentUserId = try Gekidou.Database.default.queryCurrentUserId(serverUrl)
+
             if !message.isEmpty || !fileIds.isEmpty {
                 let json: [String: Any] = [
+                    "user_id": currentUserId,
+                    "pending_post_id": UUID().uuidString,
                     "channel_id": channelId,
                     "message": message,
                     "file_ids": fileIds

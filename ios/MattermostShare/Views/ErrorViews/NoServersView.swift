@@ -14,7 +14,7 @@ struct NoServersView: View {
       Text("Not connected to any servers")
         .font(Font.custom("Metropolis-SemiBold", size: 20))
         .foregroundColor(Color.theme.centerChannelColor)
-      Text("To share content, you'll need to be logged in to a Mattermost server.")
+      Text("To share content, you'll need to be logged in to a kChat server.")
         .font(Font.custom("OpenSans", size: 16))
         .foregroundColor(Color.theme.centerChannelColor.opacity(0.72))
     }
