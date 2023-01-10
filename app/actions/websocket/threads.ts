@@ -6,8 +6,8 @@ import EphemeralStore from '@store/ephemeral_store';
 
 export async function handleThreadUpdatedEvent(serverUrl: string, msg: WebSocketMessage): Promise<void> {
     try {
-        const thread: Thread = JSON.parse(msg.data.thread);
-        const teamId = msg.broadcast.team_id;
+        const thread: Thread = msg.data.thread;
+        const teamId = msg.data.team_id;
 
         // Mark it as following
         thread.is_following = true;
@@ -35,7 +35,7 @@ export async function handleThreadReadChangedEvent(serverUrl: string, msg: WebSo
 
             await updateThread(serverUrl, thread_id, data);
         } else {
-            await markTeamThreadsAsRead(serverUrl, msg.broadcast.team_id);
+            await markTeamThreadsAsRead(serverUrl, msg.data.team_id);
         }
     } catch (error) {
         // Do nothing

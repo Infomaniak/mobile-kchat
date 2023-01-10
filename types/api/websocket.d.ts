@@ -17,6 +17,7 @@ type WebSocketMessage<T = any> = {
 
 type ThreadReadChangedData = {
     thread_id: string;
+    team_id: string;
     timestamp: number;
     unread_mentions: number;
     unread_replies: number;

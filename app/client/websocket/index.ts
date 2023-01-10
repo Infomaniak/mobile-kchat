@@ -1,24 +1,33 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {ClientHeaders, getOrCreateWebSocketClient, WebSocketClientInterface, WebSocketReadyState} from '@mattermost/react-native-network-client';
-import {Platform} from 'react-native';
+import Pusher, {Channel} from 'pusher-js/react-native';
 
-import {WebsocketEvents} from '@constants';
 import DatabaseManager from '@database/manager';
+import NetworkManager from '@managers/network_manager';
 import {getConfig} from '@queries/servers/system';
-import {logError, logInfo, logWarning} from '@utils/log';
+import {logError, logInfo} from '@utils/log';
 
 const MAX_WEBSOCKET_FAILS = 7;
 const MIN_WEBSOCKET_RETRY_TIME = 3000; // 3 sec
 
 const MAX_WEBSOCKET_RETRY_TIME = 300000; // 5 mins
 
+enum ConnectionState {
+    initialized = 'initialized',
+    connecting = 'connecting',
+    connected = 'connected',
+    unavailable = 'unavailable',
+    failed = 'failed',
+    disconnected = 'disconnected',
+}
+
 export default class WebSocketClient {
-    private conn?: WebSocketClientInterface;
+    private pusher?: Pusher;
+    private teamChannel?: Channel;
+    private userChannel?: Channel;
     private connectionTimeout: any;
     private connectionId: string;
-    private token: string;
 
     // responseSequence is the number to track a response sent
     // via the websocket. A response will always have the same sequence number
@@ -43,9 +52,8 @@ export default class WebSocketClient {
 
     private serverUrl: string;
 
-    constructor(serverUrl: string, token: string, lastDisconnect = 0) {
+    constructor(serverUrl: string, lastDisconnect = 0) {
         this.connectionId = '';
-        this.token = token;
         this.responseSequence = 1;
         this.serverSequence = 0;
         this.connectFailCount = 0;
@@ -66,7 +74,7 @@ export default class WebSocketClient {
             this.stop = false;
         }
 
-        if (this.conn && this.conn.readyState !== WebSocketReadyState.CLOSED) {
+        if (this.pusher && this.pusher.connection.state !== ConnectionState.disconnected) {
             return;
         }
 
@@ -75,27 +83,39 @@ export default class WebSocketClient {
             return;
         }
 
+        const client = NetworkManager.getClient(this.serverUrl);
+        const user = await client.getMe();
+        if (!user) {
+            return;
+        }
+        const bearerToken = client.getCurrentBearerToken();
+
         const config = await getConfig(database);
-        const connectionUrl = (config.WebsocketURL || this.serverUrl) + '/api/v4/websocket';
+        const connectionUrl = (config.WebsocketURL || this.serverUrl);
 
         if (this.connectingCallback) {
             this.connectingCallback();
         }
 
-        const regex = /^(?:https?|wss?):(?:\/\/)?[^/]*/;
-        const captured = (regex).exec(connectionUrl);
-
-        let origin;
-        if (captured) {
-            origin = captured[0];
-        } else {
-            // If we're unable to set the origin header, the websocket won't connect, but the URL is likely malformed anyway
-            const errorMessage = 'websocket failed to parse origin from ' + connectionUrl;
-            logWarning(errorMessage);
-            return;
-        }
-
         this.url = connectionUrl;
+
+        this.pusher = new Pusher('kchat-key', {
+            wsHost: connectionUrl,
+            httpHost: connectionUrl,
+            authEndpoint: `${this.serverUrl}/broadcasting/auth`,
+            auth: {
+                headers: {
+                    Authorization: bearerToken,
+                    Accept: 'application/json',
+                },
+            },
+            wsPort: 443,
+            wssPort: 443,
+            httpPort: 443,
+            httpsPort: 443,
+            forceTLS: true,
+            enabledTransports: ['ws', 'wss'],
+        });
 
         const reliableWebSockets = config.EnableReliableWebSockets === 'true';
         if (reliableWebSockets) {
@@ -104,44 +124,16 @@ export default class WebSocketClient {
             this.url = `${connectionUrl}?connection_id=${this.connectionId}&sequence_number=${this.serverSequence}`;
         }
 
-        // Manually changing protocol since getOrCreateWebsocketClient does not accept http/s
-        if (this.url.startsWith('https:')) {
-            this.url = 'wss:' + this.url.substr('https:'.length);
-        }
-
-        if (this.url.startsWith('http:')) {
-            this.url = 'ws:' + this.url.substr('http:'.length);
-        }
-
         if (this.connectFailCount === 0) {
             logInfo('websocket connecting to ' + this.url);
         }
 
-        try {
-            const headers: ClientHeaders = {origin};
-            if (Platform.OS === 'android') {
-                // Required to properly handled the reliableWebsocket reconnection
-                // iOS is using he underlying cookieJar
-                headers.Authorization = `Bearer ${this.token}`;
-            }
-            const {client} = await getOrCreateWebSocketClient(this.url, {headers});
-            this.conn = client;
-        } catch (error) {
-            return;
-        }
-
-        this.conn!.onOpen(() => {
+        this.pusher!.connection.bind('connected', () => {
             this.lastConnect = Date.now();
 
             // No need to reset sequence number here.
             if (!reliableWebSockets) {
                 this.serverSequence = 0;
-            }
-
-            if (this.token) {
-                // we check for the platform as a workaround until we fix on the server that further authentications
-                // are ignored
-                this.sendMessage('authentication_challenge', {token: this.token});
             }
 
             if (this.connectFailCount > 0) {
@@ -159,13 +151,13 @@ export default class WebSocketClient {
             this.connectFailCount = 0;
         });
 
-        this.conn!.onClose(() => {
+        this.pusher!.connection.bind('disconnected', () => {
             const now = Date.now();
             if (this.lastDisconnect < this.lastConnect) {
                 this.lastDisconnect = now;
             }
 
-            this.conn = undefined;
+            this.pusher = undefined;
             this.responseSequence = 1;
 
             if (this.connectFailCount === 0) {
@@ -208,7 +200,7 @@ export default class WebSocketClient {
             );
         });
 
-        this.conn!.onError((evt: any) => {
+        this.pusher!.connection.bind('error', (evt: any) => {
             if (evt.url === this.url) {
                 if (this.connectFailCount <= 1) {
                     logError('websocket error', this.url);
@@ -221,58 +213,55 @@ export default class WebSocketClient {
             }
         });
 
-        this.conn!.onMessage((evt: any) => {
-            const msg = evt.message;
+        const onSubscriptionError = (error: any) => {
+            if (this.connectFailCount <= 1) {
+                logError('websocket error', this.url);
+                logError('WEBSOCKET ERROR EVENT', error);
+            }
+
+            if (this.errorCallback) {
+                this.errorCallback(error);
+            }
+        };
+
+        this.subscribeToTeamChannel(user.team_id);
+        this.subscribeToUserChannel(user.user_id);
+
+        this.bindChannelGlobally(this.teamChannel, onSubscriptionError);
+        this.bindChannelGlobally(this.userChannel, onSubscriptionError);
+    }
+
+    subscribeToTeamChannel(teamId: string) {
+        this.teamChannel = this.pusher!.subscribe(`private-team.${teamId}`);
+    }
+
+    subscribeToUserChannel(userId: number) {
+        this.userChannel = this.pusher!.subscribe(`presence-user.${userId}`);
+    }
+
+    bindChannelGlobally(channel: Channel | undefined, onSubscriptionError: (error: any) => void) {
+        channel?.bind_global((evt: any, data: any) => {
+            /*
+            console.log(`The event ${evt} was triggered with data`);
+            console.log(data);
+            */
+            if (!data) {
+                return;
+            }
 
             // This indicates a reply to a websocket request.
             // We ignore sequence number validation of message responses
             // and only focus on the purely server side event stream.
-            if (msg.seq_reply) {
-                if (msg.error) {
-                    logWarning(msg);
+            if (data.seq_reply) {
+                if (data.error) {
+                    console.warn(data); //eslint-disable-line no-console
                 }
             } else if (this.eventCallback) {
-                if (reliableWebSockets) {
-                    // We check the hello packet, which is always the first packet in a stream.
-                    if (msg.event === WebsocketEvents.HELLO && this.reconnectCallback) {
-                        logInfo(this.url, 'got connection id ', msg.data.connection_id);
-
-                        // If we already have a connectionId present, and server sends a different one,
-                        // that means it's either a long timeout, or server restart, or sequence number is not found.
-                        // Then we do the sync calls, and reset sequence number to 0.
-                        if (this.connectionId !== '' && this.connectionId !== msg.data.connection_id) {
-                            logInfo(this.url, 'long timeout, or server restart, or sequence number is not found.');
-                            this.reconnectCallback();
-                            this.serverSequence = 0;
-                        }
-
-                        // If it's a fresh connection, we have to set the connectionId regardless.
-                        // And if it's an existing connection, setting it again is harmless, and keeps the code simple.
-                        this.connectionId = msg.data.connection_id;
-                    }
-
-                    // Now we check for sequence number, and if it does not match,
-                    // we just disconnect and reconnect.
-                    if (msg.seq !== this.serverSequence) {
-                        logInfo(this.url, 'missed websocket event, act_seq=' + msg.seq + ' exp_seq=' + this.serverSequence);
-
-                        // We are not calling this.close() because we need to auto-restart.
-                        this.connectFailCount = 0;
-                        this.responseSequence = 1;
-                        this.conn?.close(); // Will auto-reconnect after MIN_WEBSOCKET_RETRY_TIME.
-                        return;
-                    }
-                } else if (msg.seq !== this.serverSequence && this.reconnectCallback) {
-                    logInfo(this.url, 'missed websocket event, act_seq=' + msg.seq + ' exp_seq=' + this.serverSequence);
-                    this.reconnectCallback();
-                }
-
-                this.serverSequence = msg.seq + 1;
-                this.eventCallback(msg);
+                this.serverSequence = data.seq + 1;
+                this.eventCallback({event: evt, data});
             }
         });
-
-        this.conn.open();
+        channel?.bind('pusher:subscription_error', onSubscriptionError);
     }
 
     public setConnectingCallback(callback: () => void) {
@@ -308,14 +297,13 @@ export default class WebSocketClient {
         this.connectFailCount = 0;
         this.responseSequence = 1;
 
-        if (this.conn && this.conn.readyState === WebSocketReadyState.OPEN) {
-            this.conn.close();
+        if (this.pusher && (this.pusher.connection.state === ConnectionState.connected || this.pusher.connection.state === ConnectionState.connecting)) {
+            this.pusher.disconnect();
         }
     }
 
     public invalidate() {
-        this.conn?.invalidate();
-        this.conn = undefined;
+        this.pusher = undefined;
     }
 
     private sendMessage(action: string, data: any) {
@@ -325,22 +313,22 @@ export default class WebSocketClient {
             data,
         };
 
-        if (this.conn && this.conn.readyState === WebSocketReadyState.OPEN) {
-            this.conn.send(JSON.stringify(msg));
-        } else if (!this.conn || this.conn.readyState === WebSocketReadyState.CLOSED) {
-            this.conn = undefined;
-            this.initialize(this.token);
+        if (this.pusher && this.pusher.connection.state === ConnectionState.connected) {
+            this.userChannel?.trigger(action, msg);
+        } else if (!this.pusher?.connection || this.pusher.connection.state === ConnectionState.disconnected) {
+            this.pusher = undefined;
+            this.initialize();
         }
     }
 
     public sendUserTypingEvent(channelId: string, parentId?: string) {
-        this.sendMessage('user_typing', {
+        this.sendMessage('client-user_typing', {
             channel_id: channelId,
             parent_id: parentId,
         });
     }
 
     public isConnected(): boolean {
-        return this.conn?.readyState === WebSocketReadyState.OPEN; //|| (!this.stop && this.connectFailCount <= 2);
+        return this.pusher?.connection.state === ConnectionState.connected; //|| (!this.stop && this.connectFailCount <= 2);
     }
 }

@@ -58,14 +58,11 @@ export const completeLogin = async (serverUrl: string) => {
     }
 
     // Start websocket
-    const credentials = await getServerCredentials(serverUrl);
-    if (credentials?.token) {
-        WebsocketManager.createClient(serverUrl, credentials.token);
-        systems.push({
-            id: SYSTEM_IDENTIFIERS.WEBSOCKET,
-            value: 0,
-        });
-    }
+    WebsocketManager.createClient(serverUrl);
+    systems.push({
+        id: SYSTEM_IDENTIFIERS.WEBSOCKET,
+        value: 0,
+    });
 
     if (systems.length) {
         operator.handleSystem({systems, prepareRecordsOnly: false});

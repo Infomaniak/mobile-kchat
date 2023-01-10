@@ -70,7 +70,7 @@ import {handleUserRoleUpdatedEvent, handleTeamMemberRoleUpdatedEvent, handleRole
 import {handleLicenseChangedEvent, handleConfigChangedEvent} from './system';
 import {handleLeaveTeamEvent, handleUserAddedToTeamEvent, handleUpdateTeamEvent, handleTeamArchived, handleTeamRestored} from './teams';
 import {handleThreadUpdatedEvent, handleThreadReadChangedEvent, handleThreadFollowChangedEvent} from './threads';
-import {handleUserUpdatedEvent, handleUserTypingEvent} from './users';
+import {handleUserUpdatedEvent, handleUserTypingEvent, handleUserStatusChangeEvent} from './users';
 
 // ESR: 5.37
 const alreadyConnected = new Set<string>();
@@ -281,6 +281,7 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
             break;
 
         case WebsocketEvents.STATUS_CHANGED:
+            handleUserStatusChangeEvent(serverUrl, msg);
             break;
 
         // return dispatch(handleStatusChangedEvent(msg));

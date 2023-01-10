@@ -13,9 +13,9 @@ type WebsocketCategoriesMessage = {
     };
     data: {
         team_id: string;
-        category?: string;
+        category?: CategoryWithChannels;
         category_id: string;
-        updatedCategories?: string;
+        updatedCategories?: [CategoryWithChannels];
         order?: string[];
     };
 }
@@ -32,15 +32,16 @@ export async function handleCategoryCreatedEvent(serverUrl: string, msg: Websock
     let category;
     try {
         if (msg.data.category) {
-            category = JSON.parse(msg.data.category);
+            category = msg.data.category;
             addOrUpdateCategories(serverUrl, [category]);
+            return;
         }
     } catch (e) {
         logError('Category WS: handleCategoryCreatedEvent', e, msg);
+    }
 
-        if (msg.broadcast.team_id) {
-            fetchCategories(serverUrl, msg.broadcast.team_id);
-        }
+    if (msg.data.team_id) {
+        fetchCategories(serverUrl, msg.data.team_id);
     }
 }
 
@@ -49,14 +50,16 @@ export async function handleCategoryUpdatedEvent(serverUrl: string, msg: Websock
 
     try {
         if (msg?.data?.updatedCategories) {
-            categories = JSON.parse(msg.data.updatedCategories);
+            categories = msg.data.updatedCategories;
             addOrUpdateCategories(serverUrl, categories);
+            return;
         }
     } catch (e) {
         logError('Category WS: handleCategoryUpdatedEvent', e, msg);
-        if (msg.broadcast.team_id) {
-            fetchCategories(serverUrl, msg.broadcast.team_id, true);
-        }
+    }
+
+    if (msg.data.team_id) {
+        fetchCategories(serverUrl, msg.data.team_id);
     }
 }
 
@@ -97,6 +100,7 @@ export async function handleCategoryOrderUpdatedEvent(serverUrl: string, msg: We
                 });
             });
             await operator.batchRecords(categories);
+            return;
         }
     } catch (e) {
         logError('Category WS: handleCategoryOrderUpdatedEvent', e, msg);
@@ -104,5 +108,9 @@ export async function handleCategoryOrderUpdatedEvent(serverUrl: string, msg: We
         if (msg.broadcast.team_id) {
             fetchCategories(serverUrl, msg.data.team_id);
         }
+    }
+
+    if (msg.data.team_id) {
+        fetchCategories(serverUrl, msg.data.team_id);
     }
 }

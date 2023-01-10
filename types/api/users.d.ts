@@ -22,6 +22,8 @@ type UserNotifyProps = {
 
 type UserProfile = {
     id: string;
+    user_id: number;
+    team_id: string;
     create_at: number;
     update_at: number;
     delete_at: number;

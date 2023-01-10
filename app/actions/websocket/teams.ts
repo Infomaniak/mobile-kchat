@@ -22,7 +22,7 @@ import {logDebug} from '@utils/log';
 export async function handleTeamArchived(serverUrl: string, msg: WebSocketMessage) {
     try {
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const team: Team = JSON.parse(msg.data.team);
+        const team: Team = msg.data.team;
 
         const membership = (await queryMyTeamsByIds(database, [team.id]).fetch())[0];
         if (membership) {
@@ -49,7 +49,7 @@ export async function handleTeamRestored(serverUrl: string, msg: WebSocketMessag
     try {
         const client = NetworkManager.getClient(serverUrl);
         const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const team: Team = JSON.parse(msg.data.team);
+        const team: Team = msg.data.team;
 
         const teamMembership = await client.getTeamMember(team.id, 'me');
         if (teamMembership && teamMembership.delete_at === 0) {
@@ -112,7 +112,7 @@ export async function handleUpdateTeamEvent(serverUrl: string, msg: WebSocketMes
     }
 
     try {
-        const team: Team = JSON.parse(msg.data.team);
+        const team: Team = msg.data.team;
         database.operator.handleTeam({
             teams: [team],
             prepareRecordsOnly: false,

@@ -49,7 +49,7 @@ class WebsocketManager {
                     }
 
                     try {
-                        this.createClient(serverUrl, token, 0);
+                        this.createClient(serverUrl, 0);
                     } catch (error) {
                         logError('WebsocketManager init error', error);
                     }
@@ -73,8 +73,8 @@ class WebsocketManager {
         delete this.connectedSubjects[serverUrl];
     };
 
-    public createClient = (serverUrl: string, bearerToken: string, storedLastDisconnect = 0) => {
-        const client = new WebSocketClient(serverUrl, bearerToken, storedLastDisconnect);
+    public createClient = (serverUrl: string, storedLastDisconnect = 0) => {
+        const client = new WebSocketClient(serverUrl, storedLastDisconnect);
 
         client.setFirstConnectCallback(() => this.onFirstConnect(serverUrl));
         client.setEventCallback((evt: any) => handleEvent(serverUrl, evt));
@@ -193,6 +193,7 @@ class WebsocketManager {
 
         currentId = setInterval(getStatusForUsers, General.STATUS_INTERVAL);
         this.statusUpdatesIntervalIDs[serverUrl] = currentId;
+        getStatusForUsers();
     }
 
     private stopPeriodicStatusUpdates(serverUrl: string) {

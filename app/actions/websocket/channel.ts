@@ -103,7 +103,7 @@ export async function handleChannelUpdatedEvent(serverUrl: string, msg: any) {
     }
 
     try {
-        const updatedChannel = JSON.parse(msg.data.channel);
+        const updatedChannel = msg.data.channel;
         const models: Model[] = await operator.handleChannel({channels: [updatedChannel], prepareRecordsOnly: true});
         const infoModel = await updateChannelInfoFromChannel(serverUrl, updatedChannel, true);
         if (infoModel.model) {
@@ -145,7 +145,7 @@ export async function handleChannelMemberUpdatedEvent(serverUrl: string, msg: an
     try {
         const models: Model[] = [];
 
-        const updatedChannelMember: ChannelMembership = JSON.parse(msg.data.channelMember);
+        const updatedChannelMember: ChannelMembership = msg.data.channelMember;
         updatedChannelMember.id = updatedChannelMember.channel_id;
 
         const myMemberModel = await updateMyChannelFromWebsocket(serverUrl, updatedChannelMember, true);
@@ -183,7 +183,7 @@ export async function handleDirectAddedEvent(serverUrl: string, msg: WebSocketMe
         let userList: string[] | undefined;
         if ('teammate_ids' in msg.data) { // GM
             try {
-                userList = JSON.parse(msg.data.teammate_ids);
+                userList = msg.data.teammate_ids;
             } catch {
                 // Do nothing
             }
@@ -199,7 +199,7 @@ export async function handleDirectAddedEvent(serverUrl: string, msg: WebSocketMe
     }
 
     try {
-        const {channel_id: channelId} = msg.broadcast;
+        const {channel_id: channelId} = msg.data;
         const channel = await getChannelById(database, channelId);
         if (channel) {
             return; // We already have this channel
@@ -250,8 +250,8 @@ export async function handleUserAddedToChannelEvent(serverUrl: string, msg: any)
     try {
         const {database} = operator;
         const currentUser = await getCurrentUser(database);
-        const userId = msg.data.user_id || msg.broadcast.userId;
-        const channelId = msg.data.channel_id || msg.broadcast.channel_id;
+        const userId = msg.data.user_id || msg.data.userId;
+        const channelId = msg.data.channel_id || msg.data.channel_id;
         const {team_id: teamId} = msg.data;
         const models: Model[] = [];
 
@@ -322,8 +322,8 @@ export async function handleUserRemovedFromChannelEvent(serverUrl: string, msg: 
         const {operator, database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
 
         // Depending on who was removed, the ids may come from one place dataset or the other.
-        const userId = msg.data.user_id || msg.broadcast.user_id;
-        const channelId = msg.data.channel_id || msg.broadcast.channel_id;
+        const userId = msg.data.user_id || msg.data.user_id;
+        const channelId = msg.data.channel_id || msg.data.channel_id;
 
         if (EphemeralStore.isLeavingChannel(channelId)) {
             return;

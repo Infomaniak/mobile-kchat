@@ -31,7 +31,7 @@ export async function handlePreferenceChangedEvent(serverUrl: string, msg: WebSo
     }
 
     try {
-        const preference: PreferenceType = JSON.parse(msg.data.preference);
+        const preference: PreferenceType = msg.data.preference;
         handleSavePostAdded(serverUrl, [preference]);
 
         const hasDiffNameFormatPref = await differsFromLocalNameFormat(database, [preference]);
@@ -62,7 +62,7 @@ export async function handlePreferencesChangedEvent(serverUrl: string, msg: WebS
         return;
     }
     try {
-        const preferences: PreferenceType[] = JSON.parse(msg.data.preferences);
+        const preferences: PreferenceType[] = msg.data.preferences;
         handleSavePostAdded(serverUrl, preferences);
 
         const hasDiffNameFormatPref = await differsFromLocalNameFormat(operator.database, preferences);
@@ -93,7 +93,7 @@ export async function handlePreferencesDeletedEvent(serverUrl: string, msg: WebS
     }
 
     try {
-        const preferences: PreferenceType[] = JSON.parse(msg.data.preferences);
+        const preferences: PreferenceType[] = msg.data.preferences;
         deletePreferences(database, preferences);
     } catch {
         // Do nothing

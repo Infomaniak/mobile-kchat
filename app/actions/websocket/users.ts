@@ -5,7 +5,7 @@ import {Model} from '@nozbe/watermelondb';
 import {DeviceEventEmitter} from 'react-native';
 
 import {updateChannelsDisplayName} from '@actions/local/channel';
-import {fetchMe, fetchUsersByIds} from '@actions/remote/user';
+import {fetchMe, fetchStatusByIds, fetchUsersByIds} from '@actions/remote/user';
 import {General, Events, Preferences} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getTeammateNameDisplaySetting} from '@helpers/api/preference';
@@ -15,6 +15,10 @@ import {queryPreferencesByCategoryAndName} from '@queries/servers/preference';
 import {getConfig, getLicense} from '@queries/servers/system';
 import {getCurrentUser} from '@queries/servers/user';
 import {displayUsername} from '@utils/user';
+
+export async function handleUserStatusChangeEvent(serverUrl: string, msg: WebSocketMessage) {
+    await fetchStatusByIds(serverUrl, [msg.data.user_id]);
+}
 
 export async function handleUserUpdatedEvent(serverUrl: string, msg: WebSocketMessage) {
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
@@ -95,7 +99,7 @@ export async function handleUserTypingEvent(serverUrl: string, msg: WebSocketMes
         const currentUser = await getCurrentUser(database);
         const username = displayUsername(user, currentUser?.locale, teammateDisplayNameSetting);
         const data = {
-            channelId: msg.broadcast.channel_id,
+            channelId: msg.data.channel_id,
             rootId: msg.data.parent_id,
             userId: msg.data.user_id,
             username,

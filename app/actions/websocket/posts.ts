@@ -40,7 +40,7 @@ export async function handleNewPostEvent(serverUrl: string, msg: WebSocketMessag
 
     let post: Post;
     try {
-        post = JSON.parse(msg.data.post);
+        post = msg.data.post;
     } catch {
         return;
     }
@@ -184,7 +184,7 @@ export async function handlePostEdited(serverUrl: string, msg: WebSocketMessage)
 
     let post: Post;
     try {
-        post = JSON.parse(msg.data.post);
+        post = msg.data.post;
     } catch {
         return;
     }
@@ -222,7 +222,7 @@ export async function handlePostDeleted(serverUrl: string, msg: WebSocketMessage
     try {
         const {database} = operator;
 
-        const post: Post = JSON.parse(msg.data.post);
+        const post: Post = msg.data.post;
 
         const models: Model[] = [];
 

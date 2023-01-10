@@ -17,7 +17,7 @@ export async function handleRoleUpdatedEvent(serverUrl: string, msg: WebSocketMe
 
     // only update Role records that exist in the Role Table
     try {
-        const role: Role = JSON.parse(msg.data.role);
+        const role: Role = msg.data.role;
         const dbRole = await getRoleById(operator.database, role.id);
         if (!dbRole) {
             return;
@@ -76,7 +76,7 @@ export async function handleTeamMemberRoleUpdatedEvent(serverUrl: string, msg: W
     }
 
     try {
-        const member: TeamMembership = JSON.parse(msg.data.member);
+        const member: TeamMembership = msg.data.member;
 
         if (member.delete_at > 0) {
             return;
