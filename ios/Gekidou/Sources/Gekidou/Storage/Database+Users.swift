@@ -69,22 +69,19 @@ public struct User: Codable, Hashable {
         status = "offline"
         username = try container.decode(String.self, forKey: .username)
 
-        let notifyPropsData = try container.decodeIfPresent([String: String].self, forKey: .notify_props)
-        if (notifyPropsData != nil) {
+        if let notifyPropsData = try? container.decodeIfPresent([String: Any].self, forKey: .notify_props) {
             notify_props = Database.default.json(from: notifyPropsData) ?? "{}"
         } else {
             notify_props = "{}"
         }
 
-        let propsData = try container.decodeIfPresent([String: String].self, forKey: .props)
-        if (propsData != nil) {
+        if let propsData = try? container.decodeIfPresent([String: Any].self, forKey: .props) {
             props = Database.default.json(from: propsData) ?? "{}"
         } else {
             props = "{}"
         }
         
-        let timezoneData = try container.decodeIfPresent([String: String].self, forKey: .timezone)
-        if (timezoneData != nil) {
+        if let timezoneData = try? container.decodeIfPresent([String: Any].self, forKey: .timezone) {
             timezone = Database.default.json(from: timezoneData) ?? "{}"
         } else {
             timezone = "{}"

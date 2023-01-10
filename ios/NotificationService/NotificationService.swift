@@ -20,10 +20,14 @@ class NotificationService: UNNotificationServiceExtension {
     self.contentHandler = contentHandler
 
     bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
-    if let bestAttemptContent = bestAttemptContent,
-       let jsonData = try? JSONSerialization.data(withJSONObject: bestAttemptContent.userInfo),
-       let ackNotification = try? JSONDecoder().decode(AckNotification.self, from: jsonData) {
-      fetchReceipt(ackNotification)
+    if let bestAttemptContent = bestAttemptContent {
+      do {
+        let jsonData = try JSONSerialization.data(withJSONObject: bestAttemptContent.userInfo)
+        let ackNotification = try JSONDecoder().decode(AckNotification.self, from: jsonData)
+        self.fetchReceipt(ackNotification)
+      } catch {
+        contentHandler(request.content)
+      }
     } else {
       os_log(OSLogType.default, "Mattermost Notifications: bestAttemptContent seems to be empty, will call sendMessageIntent")
       sendMessageIntent(notification: request.content)
@@ -47,6 +51,14 @@ class NotificationService: UNNotificationServiceExtension {
       if let message = json["message"] as? String {
         bestAttemptContent.body = message
       }
+      
+      if bestAttemptContent.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        bestAttemptContent.body = NSLocalizedString("empty_notification_message", comment: "empty_notification_message")
+      } else if #available(iOSApplicationExtension 15, *),
+                let attributedMessage = try? NSAttributedString(markdown: bestAttemptContent.body) {
+        bestAttemptContent.body = attributedMessage.string
+      }
+      
       if let channelName = json["channel_name"] as? String {
         bestAttemptContent.title = channelName
       }

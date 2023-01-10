@@ -1,0 +1,9 @@
+/* 
+  Localizable.strings
+  kChat
+
+  Created by Philippe Weidmann on 16.11.22.
+  Copyright © 2022 Facebook. All rights reserved.
+*/
+
+"empty_notification_message" = "A importé quelque chose";

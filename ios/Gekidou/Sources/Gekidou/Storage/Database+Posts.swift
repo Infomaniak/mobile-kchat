@@ -22,7 +22,7 @@ public struct Post: Codable {
     let message: String
     let type: String
     let props: String
-    let pending_post_id: String
+    let pending_post_id: String?
     let metadata: String
     var prev_post_id: String
     // CRT
@@ -71,8 +71,8 @@ public struct Post: Codable {
         let meta = try values.decode([String:Any].self, forKey: .metadata)
         metadata = Database.default.json(from: meta) ?? "{}"
         type = try values.decode(String.self, forKey: .type)
-        pending_post_id = try values.decode(String.self, forKey: .pending_post_id)
-        let propsData = try values.decode([String:Any].self, forKey: .props)
+        pending_post_id = try values.decodeIfPresent(String.self, forKey: .pending_post_id)
+        let propsData = try? values.decode([String:Any].self, forKey: .props)
         props = Database.default.json(from: propsData) ?? "{}"
         // CRT
         participants = try values.decodeIfPresent([User].self, forKey: .participants) ?? []
