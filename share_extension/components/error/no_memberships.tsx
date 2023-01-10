@@ -38,12 +38,12 @@ const NoMemberships = ({theme}: Props) => {
         <View style={styles.container}>
             <FormattedText
                 id='extension.no_memberships.title'
-                defaultMessage='Not a member of any team yet'
+                defaultMessage='Not a member of any kChat yet'
                 style={styles.title}
             />
             <FormattedText
                 id='extension.no_memberships.description'
-                defaultMessage="To share content, you'll need to be a member of a team on a Mattermost server."
+                defaultMessage="To share content, you'll need to be a member of a team on a kChat server."
                 style={styles.description}
             />
         </View>

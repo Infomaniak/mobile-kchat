@@ -53,7 +53,7 @@ const ShareScreen = ({hasChannelMemberships, initialServerUrl, files, linkPrevie
 
     useEffect(() => {
         navigator.setOptions({
-            title: intl.formatMessage({id: 'share_extension.share_screen.title', defaultMessage: 'Share to Mattermost'}),
+            title: intl.formatMessage({id: 'share_extension.share_screen.title', defaultMessage: 'Share to kChat'}),
         });
     }, [intl.locale]);
 

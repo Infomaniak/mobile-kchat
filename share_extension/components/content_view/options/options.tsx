@@ -30,7 +30,7 @@ const Options = ({channelDisplayName, hasChannels, serverDisplayName, theme}: Pr
     const serverLabel = useMemo(() => {
         return intl.formatMessage({
             id: 'share_extension.server_label',
-            defaultMessage: 'Server',
+            defaultMessage: 'kChat',
         });
     }, [intl.locale]);
 
@@ -44,7 +44,7 @@ const Options = ({channelDisplayName, hasChannels, serverDisplayName, theme}: Pr
     const errorLabel = useMemo(() => {
         return intl.formatMessage({
             id: 'share_extension.channel_error',
-            defaultMessage: 'You are not a member of a team on the selected server. Select another server or open Mattermost to join a team.',
+            defaultMessage: 'You are not a member of a team on the selected kChat. Select another kChat.',
         });
     }, [intl.locale]);
 

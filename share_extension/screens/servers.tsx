@@ -24,7 +24,7 @@ const Servers = ({theme}: Props) => {
 
     useEffect(() => {
         navigator.setOptions({
-            title: intl.formatMessage({id: 'share_extension.servers_screen.title', defaultMessage: 'Select server'}),
+            title: intl.formatMessage({id: 'share_extension.servers_screen.title', defaultMessage: 'Select a kChat'}),
         });
     }, [intl.locale]);
 

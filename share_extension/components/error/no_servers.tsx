@@ -38,12 +38,12 @@ const NoServers = ({theme}: Props) => {
         <View style={styles.container}>
             <FormattedText
                 id='extension.no_servers.title'
-                defaultMessage='Not connected to any servers'
+                defaultMessage='Not connected to any kChat'
                 style={styles.title}
             />
             <FormattedText
                 id='extension.no_servers.description'
-                defaultMessage="To share content, you'll need to be logged in to a Mattermost server."
+                defaultMessage="To share content, you'll need to be logged in to a kChat server."
                 style={styles.description}
             />
         </View>
