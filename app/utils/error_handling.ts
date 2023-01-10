@@ -24,7 +24,8 @@ import {logWarning} from './log';
 class JavascriptAndNativeErrorHandler {
     initializeErrorHandling = () => {
         initializeSentry();
-        setJSExceptionHandler(this.errorHandler, false);
+
+        // setJSExceptionHandler(this.errorHandler, false);
 
         // setNativeExceptionHandler(this.nativeErrorHandler, false);
     };
