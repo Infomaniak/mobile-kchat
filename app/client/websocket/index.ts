@@ -42,6 +42,7 @@ export default class WebSocketClient {
     private firstConnectCallback?: () => void;
     private missedEventsCallback?: () => void;
     private reconnectCallback?: () => void;
+    private reliableReconnectCallback?: () => void;
     private errorCallback?: Function;
     private closeCallback?: (connectFailCount: number, lastDisconnect: number) => void;
     private connectingCallback?: () => void;
@@ -140,8 +141,11 @@ export default class WebSocketClient {
                 logInfo('websocket re-established connection to', this.url);
                 if (!reliableWebSockets && this.reconnectCallback) {
                     this.reconnectCallback();
-                } else if (reliableWebSockets && this.serverSequence && this.missedEventsCallback) {
-                    this.missedEventsCallback();
+                } else if (reliableWebSockets) {
+                    this.reliableReconnectCallback?.();
+                    if (this.serverSequence && this.missedEventsCallback) {
+                        this.missedEventsCallback();
+                    }
                 }
             } else if (this.firstConnectCallback) {
                 logInfo('websocket connected to', this.url);
@@ -282,6 +286,10 @@ export default class WebSocketClient {
 
     public setReconnectCallback(callback: () => void) {
         this.reconnectCallback = callback;
+    }
+
+    public setReliableReconnectCallback(callback: () => void) {
+        this.reliableReconnectCallback = callback;
     }
 
     public setErrorCallback(callback: Function) {
