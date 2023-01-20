@@ -8,11 +8,12 @@
 
 import Foundation
 import Gekidou
+import UserNotifications
 
 @objc class GekidouWrapper: NSObject {
   @objc public static let `default` = GekidouWrapper()
 
-  @objc func postNotificationReceipt(_ userInfo: [AnyHashable:Any]) {
+  @objc func postNotificationReceipt(_ userInfo: [AnyHashable: Any]) {
     Network.default.postNotificationReceipt(userInfo)
   }
   
@@ -34,5 +35,14 @@ import Gekidou
     }
     
     return nil
+  }
+  
+  @objc func askForNotificationPermissions() {
+    Task {
+      let options: UNAuthorizationOptions = [.alert, .sound, .badge, .providesAppNotificationSettings]
+      do {
+        try await UNUserNotificationCenter.current().requestAuthorization(options: options)
+      } catch {}
+    }
   }
 }
