@@ -89,6 +89,10 @@ export async function createPost(serverUrl: string, post: Partial<Post>, files: 
         delete_at: 0,
     } as Post;
 
+    if (newPost.root_id?.length === 0) {
+        delete newPost.root_id;
+    }
+
     if (files.length) {
         const fileIds = files.map((file) => file.id);
 
