@@ -267,7 +267,6 @@
     "mobile.post.delete_title": "Nachricht löschen",
     "mobile.post.failed_delete": "Nachricht löschen",
     "mobile.post.failed_retry": "Erneut versuchen",
-    "mobile.posts_view.moreMsg": "Weitere neue Nachrichten oberhalb",
     "mobile.privacy_link": "Datenschutzbedingungen",
     "mobile.push_notification_reply.button": "Senden",
     "mobile.push_notification_reply.placeholder": "Eine Antwort schreiben...",
@@ -938,6 +937,9 @@
     "join_team.error.message": "Es ist ein Fehler beim Beitritt zum Team aufgetreten",
     "join_team.error.group_error": "Du musst Mitglied einer verknüpften Gruppe sein, um diesem Team beitreten zu können.",
     "connection_banner.connecting": "Verbinde...",
+    "skintone_selector.tooltip.title": "Wählen deinen Standard-Hautton",
+    "skintone_selector.tooltip.description": "Du kannst nun den Hautton auswählen, den du für deine Emojis verwenden möchtest.",
+    "default_skin_tone": "Standard-Hautton",
     "infomaniak.no_team.title": "Sie haben kein kChat, entdecken Sie es mit kSuite",
     "infomaniak.no_team.description": "kSuite integriert alle unsere Produktivitätsanwendungen, einschließlich kChat, um live zu kommunizieren, sich auszutauschen und Ihre Teams zu koordinieren.",
     "infomaniak.no_team.discover_ksuite": "Entdecken Sie kSuite"
