@@ -183,7 +183,7 @@ export const logout = async (serverUrl: string, skipServerLogout = false, remove
             }
 
             if (!skipEvents) {
-                DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {savedServerUrl, removeServer});
+                DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: savedServerUrl, removeServer});
             }
         }
         NetworkManager.invalidateGlobalClient();
