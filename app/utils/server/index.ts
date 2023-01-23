@@ -138,7 +138,7 @@ export async function alertServerLogout(displayName: string, onPress: () => void
         intl.formatMessage({
             id: 'server.logout.alert_title',
             defaultMessage: 'Are you sure you want to log out of {displayName}?',
-        }, {displayName}),
+        }, {displayName: 'kChat'}),
         intl.formatMessage({
             id: 'server.logout.alert_description',
             defaultMessage: 'All associated data will be removed',
