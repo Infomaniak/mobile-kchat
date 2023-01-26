@@ -122,7 +122,7 @@ export function parseDeepLink(deepLinkUrl: string): DeepLinkWithData {
         return {type: DeepLink.Channel, url: deepLinkUrl, data: {serverUrl: match[1], teamName: match[2], channelName: match[3]}};
     }
 
-    match = new RegExp('(.*)\\/([^\\/]+)\\/pl\\/(\\w+)').exec(url);
+    match = new RegExp('(.*)\\/([^\\/]+)\\/pl\\/(.+)').exec(url);
     if (match) {
         return {type: DeepLink.Permalink, url: deepLinkUrl, data: {serverUrl: match[1], teamName: match[2], postId: match[3]}};
     }
