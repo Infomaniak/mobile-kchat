@@ -8,13 +8,14 @@ import {infomaniakLogin} from '@actions/remote/iksession';
 import FormattedText from '@components/formatted_text';
 import {login as displayLoginWebView} from '@init/ikauth';
 import {resetToHome, resetToInfomaniakNoTeams} from '@screens/navigation';
-import {LaunchProps} from '@typings/launch';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 import ServerForm from './form';
 import LogoIllustration from './logo_illustration';
 import WaveIllustration from './wave_illustration';
+
+import type {LaunchProps} from '@typings/launch';
 
 interface ServerProps extends LaunchProps {
     closeButtonId?: string;
@@ -32,8 +33,7 @@ const Server = ({
     const [connecting, setConnecting] = useState(false);
     const [buttonDisabled, setButtonDisabled] = useState(false);
     const styles = getStyleSheet(theme);
-    const isLightMode = true;
-    //const isLightMode = theme.type === 'Infomaniak';
+    const isLightMode = theme.type === 'Infomaniak';
 
     const handleConnect = async () => {
         setButtonDisabled(true);
@@ -83,13 +83,13 @@ const Server = ({
                     </View>
                     <View style={styles.bottomContainer}>
                         <FormattedText
-                            defaultMessage='Bienvenue sur kChat'
-                            id='mobile.components.ik_welcome.msg_title'
+                            defaultMessage="Bienvenue sur kChat"
+                            id="mobile.components.ik_welcome.msg_title"
                             style={styles.title}
                         />
                         <FormattedText
                             defaultMessage="Connectez-vous à votre compte et envoyez des messages depuis l'app."
-                            id='mobile.components.ik_welcome.msg_description'
+                            id="mobile.components.ik_welcome.msg_description"
                             style={styles.description}
                         />
                         <ServerForm
@@ -115,7 +115,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         position: 'absolute',
         width: '100%',
         height: '100%',
-        //backgroundColor: theme.type === 'Infomaniak' ? '#FFFFFF' : '#2D2E30',
+        backgroundColor: theme.type === 'Infomaniak' ? '#FFFFFF' : '#2D2E30',
     },
     flex: {
         margin: 8,
