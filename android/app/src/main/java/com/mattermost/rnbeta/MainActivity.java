@@ -19,6 +19,8 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactActivityDelegate;
 import com.mattermost.helpers.CustomPushNotificationHelper;
 
+import java.util.UUID;
+
 
 public class MainActivity extends NavigationActivity {
     private boolean HWKeyboardConnected = false;
@@ -54,14 +56,14 @@ public class MainActivity extends NavigationActivity {
     }
 
     private void askForNotificationPermissions() {
-        // We cannot use compile sdk 33 because of mattermost constraints. So we use this very hacky way to ask for permissions.
-        if (Build.VERSION.SDK_INT >= 33) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             String postNotificationPermission = "android.permission.POST_NOTIFICATIONS";
             if (ContextCompat.checkSelfPermission(this, postNotificationPermission) == PackageManager.PERMISSION_GRANTED) {
             } else {
                 CustomPushNotificationHelper.createNotificationChannels(this);
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "channel_02");
-                NotificationManagerCompat.from(this).notify(1, builder.build());
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CustomPushNotificationHelper.CHANNEL_MIN_IMPORTANCE_ID);
+                builder.setSmallIcon(R.drawable.ic_notification);
+                NotificationManagerCompat.from(this).notify(UUID.randomUUID().hashCode(), builder.build());
             }
         }
     }
