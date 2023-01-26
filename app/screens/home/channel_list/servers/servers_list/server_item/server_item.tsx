@@ -3,7 +3,7 @@
 
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {Animated, DeviceEventEmitter, Platform, StyleProp, Text, View, ViewStyle} from 'react-native';
+import {Animated, DeviceEventEmitter, InteractionManager, Platform, StyleProp, Text, View, ViewStyle} from 'react-native';
 import {RectButton} from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import {Navigation} from 'react-native-navigation';
@@ -200,18 +200,22 @@ const ServerItem = ({
     const startTutorial = () => {
         viewRef.current?.measureInWindow((x, y, w, h) => {
             const bounds: TutorialItemBounds = {
-                startX: x - 20,
+                startX: x,
                 startY: y,
-                endX: x + w + 20,
+                endX: x + w,
                 endY: y + h,
             };
 
             if (viewRef.current) {
-                setShowTutorial(true);
                 setItemBounds(bounds);
             }
         });
     };
+
+    const onLayout = useCallback(() => {
+        swipeable.current?.close();
+        startTutorial();
+    }, []);
 
     const containerStyle = useMemo(() => {
         const style: StyleProp<ViewStyle> = [styles.container];
@@ -344,12 +348,16 @@ const ServerItem = ({
     }, [server.lastActiveAt, isActive]);
 
     useEffect(() => {
-        let time: NodeJS.Timeout;
         if (highlight && !tutorialWatched) {
-            time = setTimeout(startTutorial, 650);
+            if (isTablet) {
+                setShowTutorial(true);
+                return;
+            }
+            InteractionManager.runAfterInteractions(() => {
+                setShowTutorial(true);
+            });
         }
-        return () => clearTimeout(time);
-    }, [highlight, tutorialWatched]);
+    }, [highlight, tutorialWatched, isTablet]);
 
     const serverItem = `server_list.server_item.${server.displayName.replace(/ /g, '_').toLocaleLowerCase()}`;
     const serverItemTestId = isActive ? `${serverItem}.active` : `${serverItem}.inactive`;
@@ -413,22 +421,7 @@ const ServerItem = ({
                                 >
                                     {displayName}
                                 </Text>
-                                {server.lastActiveAt > 0 && pushProxyStatus !== PUSH_PROXY_STATUS_VERIFIED && (
-                                    <CompassIcon
-                                        name="alert-outline"
-                                        color={theme.errorTextColor}
-                                        size={14}
-                                        style={styles.pushAlert}
-                                    />
-                                )}
                             </View>
-                            <Text
-                                numberOfLines={1}
-                                ellipsizeMode="tail"
-                                style={styles.url}
-                            >
-                                {removeProtocol(stripTrailingSlashes(server.url))}
-                            </Text>
                         </View>
                     </View>
                     {!server.lastActiveAt && !switching &&
