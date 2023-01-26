@@ -14,7 +14,7 @@ export interface IKClientMultiTeamMix {
 
 const IKClientMultiTeam = (superclass: any) => class extends superclass {
     getMultiTeamRoute(): string {
-        return `${this.urlVersion}/servers`;
+        return `${this.getUserRoute('me')}/servers`;
     }
 
     getMultiTeams = async () => {

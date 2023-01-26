@@ -62,15 +62,19 @@ const configureServer = async (teamServer: TeamServer, accessToken: string) => {
 };
 
 export const fetchAndCreateMultiTeam = async (accessToken: string) => {
-    const client = await NetworkManager.createGlobalClient(accessToken);
-    const teamServers = await client.getMultiTeams();
-    await removeServerCredentials(BASE_SERVER_URL);
+    try {
+        const client = await NetworkManager.createGlobalClient(accessToken);
+        const teamServers = await client.getMultiTeams();
+        await removeServerCredentials(BASE_SERVER_URL);
 
-    const serverCreationPromises = [];
-    for (const teamServer of teamServers) {
-        serverCreationPromises.push(configureServer(teamServer, accessToken));
+        const serverCreationPromises = [];
+        for (const teamServer of teamServers) {
+            serverCreationPromises.push(configureServer(teamServer, accessToken));
+        }
+
+        const serverCreationResults = await Promise.all(serverCreationPromises);
+        return serverCreationResults;
+    } catch (e) {
+        return [];
     }
-
-    const serverCreationResults = await Promise.all(serverCreationPromises);
-    return serverCreationResults;
 };
