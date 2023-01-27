@@ -1,6 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import {fetchAndCreateMultiTeam} from '@actions/remote/entry/ikcommon';
+import {syncMultiTeam} from '@actions/remote/entry/ikcommon';
 import DatabaseManager from '@database/manager';
 
 import type ClientError from '@client/rest/error';
@@ -18,7 +18,7 @@ export const infomaniakLogin = async (accessToken: string): Promise<IKLoginActio
     }
 
     try {
-        const createdServerUrls = await fetchAndCreateMultiTeam(accessToken);
+        const createdServerUrls = await syncMultiTeam(accessToken);
         const firstNotNullServerUrl = createdServerUrls.find((serverUrl) => serverUrl !== null);
 
         if (!firstNotNullServerUrl) {
