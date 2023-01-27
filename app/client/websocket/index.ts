@@ -26,6 +26,7 @@ export default class WebSocketClient {
     private pusher?: Pusher;
     private teamChannel?: Channel;
     private userChannel?: Channel;
+    private presenceChannel?: Channel;
     private connectionTimeout: any;
     private connectionId: string;
 
@@ -228,22 +229,25 @@ export default class WebSocketClient {
             }
         };
 
-        this.subscribeToTeamChannel(user.team_id);
-        this.subscribeToUserChannel(user.user_id);
+        this.teamChannel = this.pusher?.subscribe(`private-team.${user.team_id}`);
+        this.userChannel = this.pusher?.subscribe(`presence-user.${user.user_id}`);
 
         this.bindChannelGlobally(this.teamChannel, onSubscriptionError);
         this.bindChannelGlobally(this.userChannel, onSubscriptionError);
     }
 
-    subscribeToTeamChannel(teamId: string) {
-        this.teamChannel = this.pusher!.subscribe(`private-team.${teamId}`);
+    subscribeAndBindPresenceChannel(channelId: string) {
+        this.presenceChannel = this.pusher?.subscribe(`presence-channel.${channelId}`);
+        if (this.presenceChannel) {
+            this.bindChannelGlobally(this.presenceChannel);
+        }
     }
 
-    subscribeToUserChannel(userId: number) {
-        this.userChannel = this.pusher!.subscribe(`presence-user.${userId}`);
+    unsubscribeFromPresenceChannel(channelId: string) {
+        this.pusher?.unsubscribe(`presence-channel.${channelId}`);
     }
 
-    bindChannelGlobally(channel: Channel | undefined, onSubscriptionError: (error: any) => void) {
+    bindChannelGlobally(channel: Channel | undefined, onSubscriptionError: ((error: any) => void) | undefined = undefined) {
         channel?.bind_global((evt: any, data: any) => {
             /*
             console.log(`The event ${evt} was triggered with data`);
@@ -265,7 +269,9 @@ export default class WebSocketClient {
                 this.eventCallback({event: evt, data});
             }
         });
-        channel?.bind('pusher:subscription_error', onSubscriptionError);
+        if (onSubscriptionError) {
+            channel?.bind('pusher:subscription_error', onSubscriptionError);
+        }
     }
 
     public setConnectingCallback(callback: () => void) {

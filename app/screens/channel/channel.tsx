@@ -18,6 +18,7 @@ import {useAppState, useIsTablet} from '@hooks/device';
 import {useDefaultHeaderHeight} from '@hooks/header';
 import {useKeyboardTrackingPaused} from '@hooks/keyboard_tracking';
 import {useTeamSwitch} from '@hooks/team_switch';
+import WebsocketManager from '@managers/websocket_manager';
 import {popTopScreen} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 
@@ -85,7 +86,10 @@ const Channel = ({
             EphemeralStore.removeSwitchingToChannel(channelId);
         }, 500);
 
+        WebsocketManager.getClient(serverUrl)?.subscribeAndBindPresenceChannel(channelId);
+
         return () => {
+            WebsocketManager.getClient(serverUrl)?.unsubscribeFromPresenceChannel(channelId);
             cancelAnimationFrame(raf);
             clearTimeout(t);
             EphemeralStore.removeSwitchingToChannel(channelId);

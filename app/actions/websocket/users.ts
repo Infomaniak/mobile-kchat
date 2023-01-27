@@ -92,7 +92,7 @@ export async function handleUserTypingEvent(serverUrl: string, msg: WebSocketMes
         const license = await getLicense(database);
         const config = await getConfig(database);
 
-        const {users, existingUsers} = await fetchUsersByIds(serverUrl, [msg.data.user_id]);
+        const {users, existingUsers} = await fetchUsersByIds(serverUrl, [msg.data.data.user_id]);
         const user = users?.[0] || existingUsers?.[0];
 
         const namePreference = await queryPreferencesByCategoryAndName(database, Preferences.CATEGORY_DISPLAY_SETTINGS, Preferences.NAME_NAME_FORMAT).fetch();
@@ -100,9 +100,9 @@ export async function handleUserTypingEvent(serverUrl: string, msg: WebSocketMes
         const currentUser = await getCurrentUser(database);
         const username = displayUsername(user, currentUser?.locale, teammateDisplayNameSetting);
         const data = {
-            channelId: msg.data.channel_id,
-            rootId: msg.data.parent_id,
-            userId: msg.data.user_id,
+            channelId: msg.data.data.channel_id,
+            rootId: msg.data.data.parent_id,
+            userId: msg.data.data.user_id,
             username,
             now: Date.now(),
         };

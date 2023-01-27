@@ -30,7 +30,7 @@ const WebsocketEvents = {
     USER_UPDATED: 'user_updated',
     USER_ROLE_UPDATED: 'user_role_updated',
     ROLE_UPDATED: 'role_updated',
-    TYPING: 'typing',
+    TYPING: 'client-user_typing',
     STOP_TYPING: 'stop_typing',
     PREFERENCE_CHANGED: 'preference_changed',
     PREFERENCES_CHANGED: 'preferences_changed',
