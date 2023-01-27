@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.mattermost.helpers.RealPathUtil;
+import com.mattermost.helpers.SplitViewModule;
 import com.mattermost.share.ShareModule;
 import com.wix.reactnativenotifications.RNNotificationsPackage;
 
@@ -84,7 +85,7 @@ public class MainApplication extends NavigationApplication implements INotificat
                     map.put("MattermostManaged", new ReactModuleInfo("MattermostManaged", "com.mattermost.rnbeta.MattermostManagedModule", false, false, false, false, false));
                     map.put("MattermostShare", new ReactModuleInfo("MattermostShare", "com.mattermost.share.ShareModule", false, false, true, false, false));
                     map.put("Notifications", new ReactModuleInfo("Notifications", "com.mattermost.rnbeta.NotificationsModule", false, false, false, false, false));
-                    map.put("SplitView", new ReactModuleInfo("SplitView", "com.mattermost.rnbeta.SplitViewModule", false, false, false, false, false));
+                    map.put("SplitView", new ReactModuleInfo("SplitView", "com.mattermost.helpers.SplitViewModule", false, false, false, false, false));
                     return map;
                   };
                 }

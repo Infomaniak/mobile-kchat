@@ -1,4 +1,4 @@
-package com.mattermost.rnbeta
+package com.mattermost.helpers
 
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter

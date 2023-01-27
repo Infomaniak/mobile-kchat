@@ -1,25 +1,18 @@
 package com.mattermost.rnbeta;
 
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
 
 import android.view.KeyEvent;
 import android.content.res.Configuration;
 
 import com.facebook.react.ReactActivityDelegate;
+import com.mattermost.helpers.FoldableObserver;
 import com.reactnativenavigation.NavigationActivity;
 import com.github.emilioicai.hwkeyboardevent.HWKeyboardEventModule;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactActivityDelegate;
-import com.mattermost.helpers.CustomPushNotificationHelper;
-
-import java.util.UUID;
 
 public class MainActivity extends NavigationActivity {
     private boolean HWKeyboardConnected = false;

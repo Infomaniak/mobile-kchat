@@ -1,4 +1,4 @@
-package com.mattermost.rnbeta
+package com.mattermost.helpers
 
 import android.app.Activity
 import androidx.window.layout.FoldingFeature
