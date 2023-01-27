@@ -7,6 +7,7 @@ import {handleEntryAfterLoadNavigation} from '@actions/remote/entry/common';
 import {deferredAppEntryActions, entry} from '@actions/remote/entry/gql_common';
 import {fetchPostsForChannel, fetchPostThread} from '@actions/remote/post';
 import {fetchStatusByIds} from '@actions/remote/user';
+import {handleTeamSyncEvent} from '@actions/websocket/ikTeams';
 import {loadConfigAndCalls} from '@calls/actions/calls';
 import {
     handleCallChannelDisabled,
@@ -409,6 +410,12 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
         case WebsocketEvents.GROUP_ASSOCIATED_TO_CHANNEL:
             break;
         case WebsocketEvents.GROUP_DISSOCIATED_TO_CHANNEL:
+            break;
+        case WebsocketEvents.KSUITE_ADDED:
+            handleTeamSyncEvent(serverUrl);
+            break;
+        case WebsocketEvents.KSUITE_DELETED:
+            handleTeamSyncEvent(serverUrl);
             break;
     }
 }

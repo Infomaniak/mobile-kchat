@@ -78,5 +78,7 @@ const WebsocketEvents = {
     GROUP_DISSOCIATED_TO_TEAM: 'received_group_not_associated_to_team',
     GROUP_ASSOCIATED_TO_CHANNEL: 'received_group_associated_to_channel',
     GROUP_DISSOCIATED_TO_CHANNEL: 'received_group_not_associated_to_channel',
+    KSUITE_ADDED: 'ksuite_added',
+    KSUITE_DELETED: 'ksuite_deleted',
 };
 export default WebsocketEvents;

@@ -26,6 +26,7 @@ export default class WebSocketClient {
     private pusher?: Pusher;
     private teamChannel?: Channel;
     private userChannel?: Channel;
+    private teamUserChannel?: Channel;
     private presenceChannel?: Channel;
     private connectionTimeout: any;
     private connectionId: string;
@@ -231,9 +232,11 @@ export default class WebSocketClient {
 
         this.teamChannel = this.pusher?.subscribe(`private-team.${user.team_id}`);
         this.userChannel = this.pusher?.subscribe(`presence-user.${user.user_id}`);
+        this.teamUserChannel = this.pusher!.subscribe(`presence-teamUser.${user.id}`);
 
         this.bindChannelGlobally(this.teamChannel, onSubscriptionError);
         this.bindChannelGlobally(this.userChannel, onSubscriptionError);
+        this.bindChannelGlobally(this.teamUserChannel);
     }
 
     subscribeAndBindPresenceChannel(channelId: string) {
