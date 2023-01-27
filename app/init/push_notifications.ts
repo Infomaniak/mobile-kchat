@@ -50,10 +50,9 @@ class PushNotifications {
     async registerIfNeeded() {
         const isRegistered = await Notifications.isRegisteredForRemoteNotifications();
         if (!isRegistered) {
+            await requestNotifications(['alert', 'sound', 'badge']);
             if (Platform.OS === 'android') {
                 Notifications.registerRemoteNotifications();
-            } else {
-                await requestNotifications(['alert', 'sound', 'badge']);
             }
         }
     }

@@ -36,13 +36,4 @@ import UserNotifications
     
     return nil
   }
-  
-  @objc func askForNotificationPermissions() {
-    Task {
-      let options: UNAuthorizationOptions = [.alert, .sound, .badge, .providesAppNotificationSettings]
-      do {
-        try await UNUserNotificationCenter.current().requestAuthorization(options: options)
-      } catch {}
-    }
-  }
 }

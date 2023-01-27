@@ -52,20 +52,6 @@ public class MainActivity extends NavigationActivity {
         super.onCreate(null);
         setContentView(R.layout.launch_screen);
         setHWKeyboardConnected();
-        askForNotificationPermissions();
-    }
-
-    private void askForNotificationPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            String postNotificationPermission = "android.permission.POST_NOTIFICATIONS";
-            if (ContextCompat.checkSelfPermission(this, postNotificationPermission) == PackageManager.PERMISSION_GRANTED) {
-            } else {
-                CustomPushNotificationHelper.createNotificationChannels(this);
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CustomPushNotificationHelper.CHANNEL_MIN_IMPORTANCE_ID);
-                builder.setSmallIcon(R.drawable.ic_notification);
-                NotificationManagerCompat.from(this).notify(UUID.randomUUID().hashCode(), builder.build());
-            }
-        }
     }
 
     @Override

@@ -1,13 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useState} from 'react';
-import {Image, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {BackHandler, Image, View} from 'react-native';
 
 import {infomaniakLogin} from '@actions/remote/iksession';
 import FormattedText from '@components/formatted_text';
 import {login as displayLoginWebView} from '@init/ikauth';
-import {resetToHome, resetToInfomaniakNoTeams} from '@screens/navigation';
+import {popTopScreen, resetToHome, resetToInfomaniakNoTeams} from '@screens/navigation';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
@@ -16,6 +16,8 @@ import LogoIllustration from './logo_illustration';
 import WaveIllustration from './wave_illustration';
 
 import type {LaunchProps} from '@typings/launch';
+import {Screens} from '@constants';
+import PushNotifications from '@init/push_notifications';
 
 interface ServerProps extends LaunchProps {
     closeButtonId?: string;
@@ -51,6 +53,10 @@ const Server = ({
             setConnecting(false);
         }
     };
+
+    useEffect(() => {
+        PushNotifications.registerIfNeeded();
+    }, []);
 
     const goToHome = (serverUrl: string, error?: never) => {
         const hasError = launchError || Boolean(error);

@@ -32,9 +32,7 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
   {
     _allowRotation = YES;
   }
-  
-  [[GekidouWrapper default] askForNotificationPermissions];
-  
+    
   // Clear keychain on first run in case of reinstallation
   if (![[NSUserDefaults standardUserDefaults] objectForKey:@"FirstRun"]) {
 
