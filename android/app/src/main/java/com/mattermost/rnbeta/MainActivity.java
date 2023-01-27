@@ -21,9 +21,9 @@ import com.mattermost.helpers.CustomPushNotificationHelper;
 
 import java.util.UUID;
 
-
 public class MainActivity extends NavigationActivity {
     private boolean HWKeyboardConnected = false;
+    private FoldableObserver foldableObserver = new FoldableObserver(this);
 
     @Override
     protected String getMainComponentName() {
@@ -52,6 +52,19 @@ public class MainActivity extends NavigationActivity {
         super.onCreate(null);
         setContentView(R.layout.launch_screen);
         setHWKeyboardConnected();
+        foldableObserver.onCreate();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        foldableObserver.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        foldableObserver.onStop();
     }
 
     @Override

@@ -39,12 +39,14 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import DatabaseManager from '@database/manager';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
+import {useIsTablet} from '@hooks/device';
 import {
     bottomSheet,
     dismissAllModalsAndPopToScreen,
     dismissBottomSheet,
     goToScreen,
     popTopScreen,
+    setScreensOrientation,
 } from '@screens/navigation';
 import NavigationStore from '@store/navigation_store';
 import {bottomSheetSnapPoint} from '@utils/helpers';
@@ -260,6 +262,7 @@ const CallScreen = ({
     const theme = useTheme();
     const {bottom} = useSafeAreaInsets();
     const {width, height} = useWindowDimensions();
+    const isTablet = useIsTablet();
     const serverUrl = useServerUrl();
     const {EnableRecordings} = useCallsConfig(serverUrl);
     usePermissionsChecker(micPermissionsGranted);
@@ -430,6 +433,16 @@ const CallScreen = ({
 
         return () => listener.remove();
     }, []);
+
+    useEffect(() => {
+        const didDismissListener = Navigation.events().registerComponentDidDisappearListener(async ({componentId: screen}) => {
+            if (componentId === screen) {
+                setScreensOrientation(isTablet);
+            }
+        });
+
+        return () => didDismissListener.remove();
+    }, [isTablet]);
 
     if (!currentCall || !myParticipant) {
         // Note: this happens because the screen is "rendered", even after the screen has been popped, and the
