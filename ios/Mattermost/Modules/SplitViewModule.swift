@@ -3,7 +3,9 @@ import Foundation
 @objc(SplitViewModule)
 class SplitViewModule: RCTEventEmitter {
   var hasListeners = false
-
+  
+  static let isMacOS = ProcessInfo.processInfo.isMacCatalystApp
+  
   @objc
   override static func requiresMainQueueSetup() -> Bool {
     return true
@@ -31,15 +33,18 @@ class SplitViewModule: RCTEventEmitter {
   }
   
   @objc func isRunningInFullScreen() -> Bool {
+    if SplitViewModule.isMacOS {
+      return true
+    }
     guard let w = UIApplication.shared.delegate?.window, let window = w else { return false }
     return window.frame.equalTo(window.screen.bounds)
   }
   
   @objc func isSplitView() {
-    if hasListeners && UIDevice.current.userInterfaceIdiom == .pad {
+    if hasListeners && (UIDevice.current.userInterfaceIdiom == .pad || SplitViewModule.isMacOS) {
       sendEvent(withName: "SplitViewChanged", body: [
         "isSplitView": !isRunningInFullScreen(),
-        "isTablet": UIDevice.current.userInterfaceIdiom == .pad,
+        "isTablet": UIDevice.current.userInterfaceIdiom == .pad || SplitViewModule.isMacOS,
       ])
     }
   }
@@ -49,7 +54,7 @@ class SplitViewModule: RCTEventEmitter {
     DispatchQueue.main.async { [weak self] in
       resolve([
         "isSplitView": !(self?.isRunningInFullScreen() ?? false),
-        "isTablet": UIDevice.current.userInterfaceIdiom == .pad,
+        "isTablet": UIDevice.current.userInterfaceIdiom == .pad || SplitViewModule.isMacOS,
       ])
     }
   }
