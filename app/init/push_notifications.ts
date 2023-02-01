@@ -38,7 +38,7 @@ class PushNotifications {
 
     init(register: boolean) {
         if (register) {
-            Notifications.registerRemoteNotifications();
+            this.registerIfNeeded();
         }
 
         Notifications.events().registerNotificationOpened(this.onNotificationOpened);
@@ -51,9 +51,7 @@ class PushNotifications {
         const isRegistered = await Notifications.isRegisteredForRemoteNotifications();
         if (!isRegistered) {
             await requestNotifications(['alert', 'sound', 'badge']);
-            if (Platform.OS === 'android') {
-                Notifications.registerRemoteNotifications();
-            }
+            Notifications.registerRemoteNotifications();
         }
     }
 
