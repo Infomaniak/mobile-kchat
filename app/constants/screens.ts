@@ -33,6 +33,7 @@ export const IN_APP_NOTIFICATION = 'InAppNotification';
 export const JOIN_TEAM = 'JoinTeam';
 export const LATEX = 'Latex';
 export const LOGIN = 'Login';
+export const MANAGE_CHANNEL_MEMBERS = 'ManageChannelMembers';
 export const MENTIONS = 'Mentions';
 export const MFA = 'MFA';
 export const ONBOARDING = 'Onboarding';
@@ -104,6 +105,7 @@ export default {
     JOIN_TEAM,
     LATEX,
     LOGIN,
+    MANAGE_CHANNEL_MEMBERS,
     MENTIONS,
     MFA,
     ONBOARDING,
@@ -154,6 +156,7 @@ export const MODAL_SCREENS_WITHOUT_BACK = new Set<string>([
     EDIT_SERVER,
     FIND_CHANNELS,
     GALLERY,
+    MANAGE_CHANNEL_MEMBERS,
     INVITE,
     PERMALINK,
 ]);

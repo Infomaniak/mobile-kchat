@@ -6,6 +6,8 @@ import {buildQueryString} from '@utils/helpers';
 
 import {PER_PAGE_DEFAULT} from './constants';
 
+import type ClientBase from './base';
+
 export interface ClientUsersMix {
     createUser: (user: UserProfile, token: string, inviteId: string) => Promise<UserProfile>;
     patchMe: (userPatch: Partial<UserProfile>) => Promise<UserProfile>;
@@ -24,7 +26,7 @@ export interface ClientUsersMix {
     getProfilesInTeam: (teamId: string, page?: number, perPage?: number, sort?: string, options?: Record<string, any>) => Promise<UserProfile[]>;
     getProfilesNotInTeam: (teamId: string, groupConstrained: boolean, page?: number, perPage?: number) => Promise<UserProfile[]>;
     getProfilesWithoutTeam: (page?: number, perPage?: number, options?: Record<string, any>) => Promise<UserProfile[]>;
-    getProfilesInChannel: (channelId: string, page?: number, perPage?: number, sort?: string) => Promise<UserProfile[]>;
+    getProfilesInChannel: (channelId: string, options?: GetUsersOptions) => Promise<UserProfile[]>;
     getProfilesInGroupChannels: (channelsIds: string[]) => Promise<{[x: string]: UserProfile[]}>;
     getProfilesNotInChannel: (teamId: string, channelId: string, groupConstrained: boolean, page?: number, perPage?: number) => Promise<UserProfile[]>;
     getMe: () => Promise<UserProfile>;
@@ -37,7 +39,7 @@ export interface ClientUsersMix {
     getSessions: (userId: string) => Promise<Session[]>;
     checkUserMfa: (loginId: string) => Promise<{mfa_required: boolean}>;
     attachDevice: (deviceId: string) => Promise<any>;
-    searchUsers: (term: string, options: any) => Promise<UserProfile[]>;
+    searchUsers: (term: string, options: SearchUserOptions) => Promise<UserProfile[]>;
     getStatusesByIds: (userIds: string[]) => Promise<UserStatus[]>;
     getStatus: (userId: string) => Promise<UserStatus>;
     updateStatus: (status: UserStatus) => Promise<UserStatus>;
@@ -46,9 +48,9 @@ export interface ClientUsersMix {
     removeRecentCustomStatus: (customStatus: UserCustomStatus) => Promise<{status: string}>;
 }
 
-const ClientUsers = (superclass: any) => class extends superclass {
+const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) => class extends superclass {
     createUser = async (user: UserProfile, token: string, inviteId: string) => {
-        this.analytics.trackAPI('api_users_create');
+        this.analytics?.trackAPI('api_users_create');
 
         const queryParams: any = {};
 
@@ -74,7 +76,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     patchUser = async (userPatch: Partial<UserProfile> & {id: string}) => {
-        this.analytics.trackAPI('api_users_patch');
+        this.analytics?.trackAPI('api_users_patch');
 
         return this.doFetch(
             `${this.getUserRoute(userPatch.id)}/patch`,
@@ -83,7 +85,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     updateUser = async (user: UserProfile) => {
-        this.analytics.trackAPI('api_users_update');
+        this.analytics?.trackAPI('api_users_update');
 
         return this.doFetch(
             `${this.getUserRoute(user.id)}`,
@@ -92,7 +94,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     demoteUserToGuest = async (userId: string) => {
-        this.analytics.trackAPI('api_users_demote_user_to_guest');
+        this.analytics?.trackAPI('api_users_demote_user_to_guest');
 
         return this.doFetch(
             `${this.getUserRoute(userId)}/demote`,
@@ -101,7 +103,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     getKnownUsers = async () => {
-        this.analytics.trackAPI('api_get_known_users');
+        this.analytics?.trackAPI('api_get_known_users');
 
         return this.doFetch(
             `${this.getUsersRoute()}/known`,
@@ -110,7 +112,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     sendPasswordResetEmail = async (email: string) => {
-        this.analytics.trackAPI('api_users_send_password_reset');
+        this.analytics?.trackAPI('api_users_send_password_reset');
 
         return this.doFetch(
             `${this.getUsersRoute()}/password/reset/send`,
@@ -119,7 +121,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     setDefaultProfileImage = async (userId: string) => {
-        this.analytics.trackAPI('api_users_set_default_profile_picture');
+        this.analytics?.trackAPI('api_users_set_default_profile_picture');
 
         return this.doFetch(
             `${this.getUserRoute(userId)}/image`,
@@ -128,10 +130,10 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     login = async (loginId: string, password: string, token = '', deviceId = '', ldapOnly = false) => {
-        this.analytics.trackAPI('api_users_login');
+        this.analytics?.trackAPI('api_users_login');
 
         if (ldapOnly) {
-            this.analytics.trackAPI('api_users_login_ldap');
+            this.analytics?.trackAPI('api_users_login_ldap');
         }
 
         const body: any = {
@@ -159,7 +161,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     loginById = async (id: string, password: string, token = '', deviceId = '') => {
-        this.analytics.trackAPI('api_users_login');
+        this.analytics?.trackAPI('api_users_login');
         const body: any = {
             device_id: deviceId,
             id,
@@ -180,8 +182,8 @@ const ClientUsers = (superclass: any) => class extends superclass {
         return data;
     };
 
-    logout = async (deviceToken?: string) => {
-        this.analytics.trackAPI('api_users_logout');
+    logout = async () => {
+        this.analytics?.trackAPI('api_users_logout');
         const body: any = {
             device_id: deviceToken,
         };
@@ -195,7 +197,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     getProfiles = async (page = 0, perPage = PER_PAGE_DEFAULT, options = {}) => {
-        this.analytics.trackAPI('api_profiles_get');
+        this.analytics?.trackAPI('api_profiles_get');
 
         return this.doFetch(
             `${this.getUsersRoute()}${buildQueryString({page, per_page: perPage, ...options})}`,
@@ -204,7 +206,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     getProfilesByIds = async (userIds: string[], options = {}) => {
-        this.analytics.trackAPI('api_profiles_get_by_ids');
+        this.analytics?.trackAPI('api_profiles_get_by_ids');
 
         return this.doFetch(
             `${this.getUsersRoute()}/ids${buildQueryString(options)}`,
@@ -213,7 +215,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     getProfilesByUsernames = async (usernames: string[]) => {
-        this.analytics.trackAPI('api_profiles_get_by_usernames');
+        this.analytics?.trackAPI('api_profiles_get_by_usernames');
 
         return this.doFetch(
             `${this.getUsersRoute()}/usernames`,
@@ -222,7 +224,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     getProfilesInTeam = async (teamId: string, page = 0, perPage = PER_PAGE_DEFAULT, sort = '', options = {}) => {
-        this.analytics.trackAPI('api_profiles_get_in_team', {team_id: teamId, sort});
+        this.analytics?.trackAPI('api_profiles_get_in_team', {team_id: teamId, sort});
 
         return this.doFetch(
             `${this.getUsersRoute()}${buildQueryString({...options, in_team: teamId, page, per_page: perPage, sort})}`,
@@ -231,7 +233,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     getProfilesNotInTeam = async (teamId: string, groupConstrained: boolean, page = 0, perPage = PER_PAGE_DEFAULT) => {
-        this.analytics.trackAPI('api_profiles_get_not_in_team', {team_id: teamId, group_constrained: groupConstrained});
+        this.analytics?.trackAPI('api_profiles_get_not_in_team', {team_id: teamId, group_constrained: groupConstrained});
 
         const queryStringObj: any = {not_in_team: teamId, page, per_page: perPage};
         if (groupConstrained) {
@@ -245,7 +247,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     getProfilesWithoutTeam = async (page = 0, perPage = PER_PAGE_DEFAULT, options = {}) => {
-        this.analytics.trackAPI('api_profiles_get_without_team');
+        this.analytics?.trackAPI('api_profiles_get_without_team');
 
         return this.doFetch(
             `${this.getUsersRoute()}${buildQueryString({...options, without_team: 1, page, per_page: perPage})}`,
@@ -253,10 +255,10 @@ const ClientUsers = (superclass: any) => class extends superclass {
         );
     };
 
-    getProfilesInChannel = async (channelId: string, page = 0, perPage = PER_PAGE_DEFAULT, sort = '') => {
-        this.analytics.trackAPI('api_profiles_get_in_channel', {channel_id: channelId});
+    getProfilesInChannel = async (channelId: string, options: GetUsersOptions) => {
+        this.analytics?.trackAPI('api_profiles_get_in_channel', {channel_id: channelId});
 
-        const queryStringObj = {in_channel: channelId, page, per_page: perPage, sort};
+        const queryStringObj = {in_channel: channelId, ...options};
         return this.doFetch(
             `${this.getUsersRoute()}${buildQueryString(queryStringObj)}`,
             {method: 'get'},
@@ -264,7 +266,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     getProfilesInGroupChannels = async (channelsIds: string[]) => {
-        this.analytics.trackAPI('api_profiles_get_in_group_channels', {channelsIds});
+        this.analytics?.trackAPI('api_profiles_get_in_group_channels', {channelsIds});
 
         return this.doFetch(
             `${this.getUsersRoute()}/group_channels`,
@@ -273,7 +275,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     getProfilesNotInChannel = async (teamId: string, channelId: string, groupConstrained: boolean, page = 0, perPage = PER_PAGE_DEFAULT) => {
-        this.analytics.trackAPI('api_profiles_get_not_in_channel', {team_id: teamId, channel_id: channelId, group_constrained: groupConstrained});
+        this.analytics?.trackAPI('api_profiles_get_not_in_channel', {team_id: teamId, channel_id: channelId, group_constrained: groupConstrained});
 
         const queryStringObj: any = {in_team: teamId, not_in_channel: channelId, page, per_page: perPage};
         if (groupConstrained) {
@@ -375,7 +377,7 @@ const ClientUsers = (superclass: any) => class extends superclass {
     };
 
     searchUsers = async (term: string, options: any) => {
-        this.analytics.trackAPI('api_search_users');
+        this.analytics?.trackAPI('api_search_users');
 
         return this.doFetch(
             `${this.getUsersRoute()}/search`,

@@ -4,6 +4,7 @@
 import {toMilliseconds} from '@utils/datetime';
 import {generateId} from '@utils/general';
 
+import type ClientBase from './base';
 import type {ClientResponse, ClientResponseError, ProgressPromise, UploadRequestOptions} from '@mattermost/react-native-network-client';
 
 export interface ClientFilesMix {
@@ -23,7 +24,7 @@ export interface ClientFilesMix {
     searchFilesWithParams: (teamId: string, FileSearchParams: FileSearchParams) => Promise<FileSearchRequest>;
 }
 
-const ClientFiles = (superclass: any) => class extends superclass {
+const ClientFiles = <TBase extends Constructor<ClientBase>>(superclass: TBase) => class extends superclass {
     getFileUrl(fileId: string, timestamp: number) {
         let url = `${this.apiClient.baseUrl}${this.getFileRoute(fileId)}`;
         if (timestamp) {
@@ -81,13 +82,17 @@ const ClientFiles = (superclass: any) => class extends superclass {
             },
             timeoutInterval: toMilliseconds({minutes: 3}),
         };
+        if (!file.localPath) {
+            throw new Error('file does not have local path defined');
+        }
+
         const promise = this.apiClient.upload(url, file.localPath, options) as ProgressPromise<ClientResponse>;
         promise.progress!(onProgress).then(onComplete).catch(onError);
         return promise.cancel!;
     };
 
     searchFilesWithParams = async (teamId: string, params: FileSearchParams) => {
-        this.analytics.trackAPI('api_files_search');
+        this.analytics?.trackAPI('api_files_search');
         const endpoint = teamId ? `${this.getTeamRoute(teamId)}/files/search` : `${this.getFilesRoute()}/search`;
         return this.doFetch(endpoint, {method: 'post', body: params});
     };
