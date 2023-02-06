@@ -975,5 +975,7 @@
     "your.servers": "Your servers",
   	"infomaniak.no_team.title": "You have no kChat, discover it with kSuite",
     "infomaniak.no_team.description": "kSuite integrates all our productivity applications including kChat to communicate and coordinate your teams.",
-    "infomaniak.no_team.discover_ksuite": "Discover kSuite"
+    "infomaniak.no_team.discover_ksuite": "Discover kSuite",
+    "infomaniak.quota_exceeded.title": "Create new channels to improve communications with your organization's members",
+    "infomaniak.quota_exceeded.description": "You have reached the limit of public and private channels on your kChat. To create additional channels, you must subscribe to a higher plan."
 }

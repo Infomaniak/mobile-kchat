@@ -7,13 +7,13 @@ import {Keyboard} from 'react-native';
 
 import {createChannel, patchChannel as handlePatchChannel, switchToChannelById} from '@actions/remote/channel';
 import CompassIcon from '@components/compass_icon';
-import {General} from '@constants';
+import {General, Screens} from '@constants';
 import {MIN_CHANNEL_NAME_LENGTH} from '@constants/channel';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import {buildNavigationButton, dismissModal, popTopScreen, setButtons} from '@screens/navigation';
+import {buildNavigationButton, dismissModal, openAsBottomSheet, popTopScreen, setButtons} from '@screens/navigation';
 import {validateDisplayName} from '@utils/channel';
 
 import ChannelInfoForm from './channel_info_form';
@@ -22,6 +22,7 @@ import type ChannelModel from '@typings/database/models/servers/channel';
 import type ChannelInfoModel from '@typings/database/models/servers/channel_info';
 import type {AvailableScreens} from '@typings/screens/navigation';
 import type {ImageResource} from 'react-native-navigation';
+import {INFOMANIAK_CHANNEL_QUOTA_EXCEEDED} from '@constants/screens';
 
 type Props = {
     componentId: AvailableScreens;
@@ -91,24 +92,24 @@ const CreateOrEditChannel = ({
 
     const [appState, dispatch] = useReducer((state: RequestState, action: RequestAction) => {
         switch (action.type) {
-            case RequestActions.START:
-                return {
-                    error: '',
-                    saving: true,
-                };
-            case RequestActions.COMPLETE:
-                return {
-                    error: '',
-                    saving: false,
-                };
-            case RequestActions.FAILURE:
-                return {
-                    error: action.error,
-                    saving: false,
-                };
+        case RequestActions.START:
+            return {
+                error: '',
+                saving: true,
+            };
+        case RequestActions.COMPLETE:
+            return {
+                error: '',
+                saving: false,
+            };
+        case RequestActions.FAILURE:
+            return {
+                error: action.error,
+                saving: false,
+            };
 
-            default:
-                return state;
+        default:
+            return state;
         }
     }, {
         error: '',
@@ -180,10 +181,21 @@ const CreateOrEditChannel = ({
         setCanSave(false);
         const createdChannel = await createChannel(serverUrl, displayName, purpose, header, type);
         if (createdChannel.error) {
-            dispatch({
-                type: RequestActions.FAILURE,
-                error: createdChannel.error as string,
-            });
+            if (createdChannel.error.server_error_id === 'quota-exceeded') {
+                dispatch({type: RequestActions.FAILURE});
+                openAsBottomSheet({
+                    closeButtonId: 'close-quota-exceeded',
+                    screen: Screens.INFOMANIAK_CHANNEL_QUOTA_EXCEEDED,
+                    theme,
+                    title: '',
+                    props: {},
+                });
+            } else {
+                dispatch({
+                    type: RequestActions.FAILURE,
+                    error: createdChannel.error as string,
+                });
+            }
             return;
         }
 

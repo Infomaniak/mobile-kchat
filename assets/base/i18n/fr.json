@@ -941,5 +941,6 @@
     "default_skin_tone": "Teinte de peau par défaut",
     "infomaniak.no_team.title": "Vous ne possédez pas de kChat, découvrez le avec kSuite",
     "infomaniak.no_team.description": "kSuite intègre tous nos applications de productivité dont kChat pour communiquer en direct, partager et coordonner vos équipes.",
-    "infomaniak.no_team.discover_ksuite": "Découvrir kSuite"
+    "infomaniak.quota_exceeded.title": "Créez de nouveaux canaux pour mieux communiquer avec les membres de votre organisation",
+    "infomaniak.quota_exceeded.description": "Vous avez atteint la limite de canaux publics et de canaux privés sur votre kChat. Pour en créer des supplémentaires, vous devez souscrire à une offre supérieure."
 }
