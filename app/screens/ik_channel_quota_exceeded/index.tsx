@@ -51,9 +51,8 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         alignItems: 'center',
     },
     imagePlaceholder: {
-        width: 256,
-        height: undefined,
-        aspectRatio: 1780 / 690,
+        width: undefined,
+        height: 96,
     },
     title: {
         color: theme.centerChannelColor,
@@ -88,6 +87,10 @@ export type IKQuotaExceeded = {
 }
 
 const IKChannelQuotaExceeded = ({closeButtonId, quotaType, componentId}: Props) => {
+    const allImages = {
+        channels: {path: require('@assets/images/channels.png'), ratio: 1780 / 690},
+        storage: {path: require('@assets/images/storage_full_light.png'), ratio: 632 / 651},
+    };
     const sheetRef = useRef<BottomSheetM>(null);
     const theme = useTheme();
     const styles = getStyleSheet(theme);
@@ -114,15 +117,13 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType, componentId}: Props) 
     useAndroidHardwareBackHandler(componentId, handleClose);
     useNavButtonPressed(closeButtonId || '', componentId, close, [close]);
 
-    const allImages = {channels: require('@assets/images/channels.png')};
-
     const renderContent = useCallback(() => {
         return (
             <View style={styles.content}>
                 <View style={styles.iconWrapper}>
                     <Image
-                        style={styles.imagePlaceholder}
-                        source={allImages[quotaType.image]}
+                        style={[styles.imagePlaceholder, {aspectRatio: allImages[quotaType.image].ratio}]}
+                        source={allImages[quotaType.image].path}
                     />
                 </View>
                 <Text style={styles.title}>

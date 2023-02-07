@@ -238,5 +238,9 @@
     "user.settings.general.username": "Nome utente",
     "infomaniak.no_team.title": "Non avete kChat, scopritelo con kSuite",
     "infomaniak.no_team.description": "kSuite integra tutte le nostre applicazioni di produttività, compresa kChat, per comunicare in diretta, condividere e coordinare i vostri team.",
-    "infomaniak.no_team.discover_ksuite": "Scoprire kSuite"
+    "infomaniak.no_team.discover_ksuite": "Scoprire kSuite",
+    "infomaniak.channel_quota_exceeded.title": "Creare nuovi canali per migliorare la comunicazione con i membri dell'organizzazione.",
+    "infomaniak.channel_quota_exceeded.description": "Avete raggiunto il limite di canali pubblici e privati sulla vostra kChat. Per creare altri canali, è necessario sottoscrivere un piano superiore.",
+    "infomaniak.size_quota_exceeded.title": "Aumentare lo spazio di archiviazione della kSuite",
+    "infomaniak.size_quota_exceeded.description": "Il vostro spazio di archiviazione è pieno. Abbonatevi a un'offerta superiore per continuare a inviare file."
 }

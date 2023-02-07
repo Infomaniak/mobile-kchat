@@ -975,5 +975,9 @@
     "channel_info.archive_description.can_view_archived": "Dies wird den Kanal archivieren. Kanalinhalte werden weiterhin für Kanalmitglieder verfügbar sein.\n \nBist du sicher, dass du {term} {name} archivieren möchtest?",
     "infomaniak.no_team.title": "Sie haben kein kChat, entdecken Sie es mit kSuite",
     "infomaniak.no_team.description": "kSuite integriert alle unsere Produktivitätsanwendungen, einschließlich kChat, um live zu kommunizieren, sich auszutauschen und Ihre Teams zu koordinieren.",
-    "infomaniak.no_team.discover_ksuite": "Entdecken Sie kSuite"
+    "infomaniak.no_team.discover_ksuite": "Entdecken Sie kSuite",
+    "infomaniak.channel_quota_exceeded.title": "Schaffung neuer Kanäle zur Verbesserung der Kommunikation mit den Mitgliedern Ihrer Organisation",
+    "infomaniak.channel_quota_exceeded.description": "Sie haben das Limit für öffentliche und private Kanäle in Ihrem kChat erreicht. Um weitere Kanäle zu erstellen, müssen Sie einen höheren Plan abonnieren.",
+    "infomaniak.size_quota_exceeded.title": "Erhöhen Sie den Speicherplatz in Ihrer kSuite",
+    "infomaniak.size_quota_exceeded.description": "Ihr Speicherplatz ist voll. Abonnieren Sie ein höheres Angebot, um weiterhin Dateien zu versenden."
 }

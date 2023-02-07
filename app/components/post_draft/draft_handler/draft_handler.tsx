@@ -5,8 +5,11 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 
 import {addFilesToDraft, removeDraft} from '@actions/local/draft';
+import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
+import {useTheme} from '@context/theme';
 import DraftUploadManager from '@managers/draft_upload_manager';
+import {openAsBottomSheet} from '@screens/navigation';
 import {fileMaxWarning, fileSizeWarning, uploadDisabledWarning} from '@utils/file';
 
 import SendHandler from '../send_handler';
@@ -66,7 +69,24 @@ export default function DraftHandler(props: Props) {
         updateValue('');
     }, [serverUrl, channelId, rootId]);
 
+    const theme = useTheme();
+
     const newUploadError = useCallback((error: React.ReactNode) => {
+        if (error === 'Quota exceeded') {
+            openAsBottomSheet({
+                closeButtonId: 'close-quota-exceeded',
+                screen: Screens.INFOMANIAK_CHANNEL_QUOTA_EXCEEDED,
+                theme,
+                title: '',
+                props: {
+                    quotaType: {
+                        title: 'infomaniak.size_quota_exceeded.title',
+                        description: 'infomaniak.size_quota_exceeded.description',
+                        image: 'storage',
+                    },
+                },
+            });
+        }
         if (uploadErrorTimeout.current) {
             clearTimeout(uploadErrorTimeout.current);
         }

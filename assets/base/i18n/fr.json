@@ -941,6 +941,8 @@
     "default_skin_tone": "Teinte de peau par défaut",
     "infomaniak.no_team.title": "Vous ne possédez pas de kChat, découvrez le avec kSuite",
     "infomaniak.no_team.description": "kSuite intègre tous nos applications de productivité dont kChat pour communiquer en direct, partager et coordonner vos équipes.",
-    "infomaniak.quota_exceeded.title": "Créez de nouveaux canaux pour mieux communiquer avec les membres de votre organisation",
-    "infomaniak.quota_exceeded.description": "Vous avez atteint la limite de canaux publics et de canaux privés sur votre kChat. Pour en créer des supplémentaires, vous devez souscrire à une offre supérieure."
+    "infomaniak.channel_quota_exceeded.title": "Créez de nouveaux canaux pour mieux communiquer avec les membres de votre organisation",
+    "infomaniak.channel_quota_exceeded.description": "Vous avez atteint la limite de canaux publics et de canaux privés sur votre kChat. Pour en créer des supplémentaires, vous devez souscrire à une offre supérieure.",
+    "infomaniak.size_quota_exceeded.title": "Augmentez l’espace de stockage de votre kSuite",
+    "infomaniak.size_quota_exceeded.description": "Votre espace de stockage est plein. Souscrivez à une offre supérieure pour continuer à envoyer des fichiers."
 }

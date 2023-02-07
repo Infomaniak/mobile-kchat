@@ -189,8 +189,8 @@ const CreateOrEditChannel = ({
                     title: '',
                     props: {
                         quotaType: {
-                            title: 'infomaniak.quota_exceeded.title',
-                            description: 'infomaniak.quota_exceeded.description',
+                            title: 'infomaniak.channel_quota_exceeded.title',
+                            description: 'infomaniak.channel_quota_exceeded.description',
                             image: 'channels',
                         },
                     },
