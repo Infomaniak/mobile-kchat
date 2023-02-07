@@ -37,6 +37,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
         animatedContainer: {
             position: 'absolute',
             margin: 8,
+            top: 16,
             backgroundColor: '#F4F6FD',
         },
         cancelContainer: {
@@ -135,10 +136,9 @@ const LimitedMessages = ({
                 >
                     <View style={styles.textContainer}>
                         <FormattedText
-                            id='channel_limitation.messages'
-                            defaultMessage='Messages before {date} may not appear because your kChat has reached the 10,000 message limit. To display more messages, subscribe to a higher plan.'
+                            id='infomaniak.messages_quota_exceeded.description'
+                            defaultMessage='Messages and files older than 3 months are hidden. To view more messages, subscribe to a higher plan.'
                             style={styles.text}
-                            values={{date: new Date(limitUntil).toDateString()}}
                         />
                     </View>
                 </TouchableWithFeedback>

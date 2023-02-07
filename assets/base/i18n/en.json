@@ -994,5 +994,6 @@
   "infomaniak.channel_quota_exceeded.title": "Create new channels to improve communications with your organization's members",
   "infomaniak.channel_quota_exceeded.description": "You have reached the limit of public and private channels on your kChat. To create additional channels, you must subscribe to a higher plan.",
   "infomaniak.size_quota_exceeded.title": "Increase the storage space of your kSuite",
-  "infomaniak.size_quota_exceeded.description": "Your storage space is full. Subscribe to a higher offer to keep sending files."
+  "infomaniak.size_quota_exceeded.description": "Your storage space is full. Subscribe to a higher offer to keep sending files.",
+  "infomaniak.messages_quota_exceeded.description": "Messages and files older than 3 months are hidden. To view more messages, subscribe to a higher plan."
 }
