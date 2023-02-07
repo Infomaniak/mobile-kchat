@@ -75,7 +75,7 @@ export default function DraftHandler(props: Props) {
         if (error === 'Quota exceeded') {
             openAsBottomSheet({
                 closeButtonId: 'close-quota-exceeded',
-                screen: Screens.INFOMANIAK_CHANNEL_QUOTA_EXCEEDED,
+                screen: Screens.INFOMANIAK_QUOTA_EXCEEDED,
                 theme,
                 title: '',
                 props: {

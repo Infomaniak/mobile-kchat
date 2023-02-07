@@ -70,7 +70,7 @@ export const THREAD_OPTIONS = 'ThreadOptions';
 export const USER_PROFILE = 'UserProfile';
 export const INFOMANIAK_LOGIN = 'InfomaniakLogin';
 export const INFOMANIAK_NO_TEAMS = 'InfomaniakNoTeams';
-export const INFOMANIAK_CHANNEL_QUOTA_EXCEEDED = 'InfomaniakChannelQuotaExceeded';
+export const INFOMANIAK_QUOTA_EXCEEDED = 'InfomaniakQuotaExceeded';
 
 export default {
     ABOUT,
@@ -142,7 +142,7 @@ export default {
     USER_PROFILE,
     INFOMANIAK_LOGIN,
     INFOMANIAK_NO_TEAMS,
-    INFOMANIAK_CHANNEL_QUOTA_EXCEEDED,
+    INFOMANIAK_QUOTA_EXCEEDED,
 } as const;
 
 export const MODAL_SCREENS_WITHOUT_BACK = new Set<string>([
@@ -174,7 +174,7 @@ export const SCREENS_AS_BOTTOM_SHEET = new Set<string>([
     THREAD_OPTIONS,
     REACTIONS,
     USER_PROFILE,
-    INFOMANIAK_CHANNEL_QUOTA_EXCEEDED,
+    INFOMANIAK_QUOTA_EXCEEDED,
 ]);
 
 export const NOT_READY = [

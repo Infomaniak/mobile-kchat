@@ -251,8 +251,8 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.CALL:
             screen = withServerDatabase(require('@calls/screens/call_screen').default);
             break;
-        case Screens.INFOMANIAK_CHANNEL_QUOTA_EXCEEDED:
-            screen = withServerDatabase(require('@screens/ik_channel_quota_exceeded').default);
+        case Screens.INFOMANIAK_QUOTA_EXCEEDED:
+            screen = withServerDatabase(require('@screens/ik_quota_exceeded').default);
             break;
     }
 
