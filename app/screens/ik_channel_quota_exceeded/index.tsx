@@ -1,24 +1,26 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback} from 'react';
+import BottomSheetM, {BottomSheetBackdrop, BottomSheetBackdropProps} from '@gorhom/bottom-sheet';
+import React, {useCallback, useRef} from 'react';
 import {useIntl} from 'react-intl';
-import {DeviceEventEmitter, Image, Text, View} from 'react-native';
+import {Image, Text, View} from 'react-native';
 import Button from 'react-native-button';
 
 import FormattedText from '@components/formatted_text';
-import {Events} from '@constants';
 import {useTheme} from '@context/theme';
-import BottomSheet from '@screens/bottom_sheet';
+import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
+import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import {dismissModal} from '@screens/navigation';
 import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
-import {makeStyleSheetFromTheme} from '@utils/theme';
+import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
     componentId: AvailableScreens;
-    onEmojiPress: (emoji: string) => void;
+    quotaType: IKQuotaExceeded;
     closeButtonId: string;
 };
 
@@ -26,6 +28,23 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     contentStyle: {
         flex: 1,
         alignItems: 'center',
+    },
+    bottomSheet: {
+        backgroundColor: theme.centerChannelBg,
+        borderTopStartRadius: 24,
+        borderTopEndRadius: 24,
+        shadowOffset: {
+            width: 0,
+            height: 8,
+        },
+        shadowOpacity: 0.12,
+        shadowRadius: 24,
+        shadowColor: '#000',
+        elevation: 24,
+    },
+    bottomSheetBackground: {
+        backgroundColor: theme.centerChannelBg,
+        borderColor: changeOpacity(theme.centerChannelColor, 0.16),
     },
     iconWrapper: {
         justifyContent: 'center',
@@ -55,9 +74,21 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         width: '100%',
         borderRadius: 8,
     },
+    content: {
+        flex: 1,
+        paddingHorizontal: 20,
+        paddingTop: 20,
+    },
 }));
 
-const IKChannelQuotaExceeded = ({closeButtonId, componentId}: Props) => {
+export type IKQuotaExceeded = {
+    title: string;
+    description: string;
+    image: string;
+}
+
+const IKChannelQuotaExceeded = ({closeButtonId, quotaType, componentId}: Props) => {
+    const sheetRef = useRef<BottomSheetM>(null);
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const intl = useIntl();
@@ -65,23 +96,40 @@ const IKChannelQuotaExceeded = ({closeButtonId, componentId}: Props) => {
     const styleButtonBackground = buttonBackgroundStyle(theme, 'lg', 'primary', 'default');
 
     const handleCloseButton = useCallback(() => {
-        DeviceEventEmitter.emit(Events.CLOSE_BOTTOM_SHEET);
+        handleClose();
     }, []);
+
+    const close = useCallback(() => {
+        dismissModal({componentId});
+    }, [componentId]);
+
+    const handleClose = useCallback(() => {
+        if (sheetRef.current) {
+            sheetRef.current.close();
+        } else {
+            close();
+        }
+    }, []);
+
+    useAndroidHardwareBackHandler(componentId, handleClose);
+    useNavButtonPressed(closeButtonId || '', componentId, close, [close]);
+
+    const allImages = {channels: require('@assets/images/channels.png')};
 
     const renderContent = useCallback(() => {
         return (
-            <>
+            <View style={styles.content}>
                 <View style={styles.iconWrapper}>
                     <Image
                         style={styles.imagePlaceholder}
-                        source={require('@assets/images/channels.png')}
+                        source={allImages[quotaType.image]}
                     />
                 </View>
                 <Text style={styles.title}>
-                    {intl.formatMessage({id: 'infomaniak.quota_exceeded.title', defaultMessage: 'You have no kChat, discover it with kSuite'})}
+                    {intl.formatMessage({id: quotaType.title, defaultMessage: 'You have no kChat, discover it with kSuite'})}
                 </Text>
                 <Text style={styles.description}>
-                    {intl.formatMessage({id: 'infomaniak.quota_exceeded.description', defaultMessage: 'You have no kChat, discover it with kSuite'})}
+                    {intl.formatMessage({id: quotaType.description, defaultMessage: 'You have no kChat, discover it with kSuite'})}
                 </Text>
                 <Button
                     containerStyle={[styles.discoverButton, styleButtonBackground, styles.ikButton]}
@@ -93,19 +141,34 @@ const IKChannelQuotaExceeded = ({closeButtonId, componentId}: Props) => {
                         style={styleButtonText}
                     />
                 </Button>
-            </>
+            </View>
+        );
+    }, []);
+
+    const renderBackdrop = useCallback((props: BottomSheetBackdropProps) => {
+        return (
+            <BottomSheetBackdrop
+                {...props}
+                disappearsOnIndex={-1}
+                appearsOnIndex={0}
+                opacity={0.6}
+            />
         );
     }, []);
 
     return (
-        <BottomSheet
-            renderContent={renderContent}
-            closeButtonId={closeButtonId}
-            componentId={componentId}
-            contentStyle={styles.contentStyle}
-            snapPoints={['55%', '55%']}
-            initialSnapIndex={1}
-        />
+        <BottomSheetM
+            ref={sheetRef}
+            index={0}
+            snapPoints={['55%']}
+            animateOnMount={true}
+            style={styles.bottomSheet}
+            backdropComponent={renderBackdrop}
+            backgroundStyle={styles.bottomSheetBackground}
+            onClose={close}
+        >
+            {renderContent}
+        </BottomSheetM>
     );
 };
 

@@ -22,7 +22,6 @@ import type ChannelModel from '@typings/database/models/servers/channel';
 import type ChannelInfoModel from '@typings/database/models/servers/channel_info';
 import type {AvailableScreens} from '@typings/screens/navigation';
 import type {ImageResource} from 'react-native-navigation';
-import {INFOMANIAK_CHANNEL_QUOTA_EXCEEDED} from '@constants/screens';
 
 type Props = {
     componentId: AvailableScreens;
@@ -188,7 +187,13 @@ const CreateOrEditChannel = ({
                     screen: Screens.INFOMANIAK_CHANNEL_QUOTA_EXCEEDED,
                     theme,
                     title: '',
-                    props: {},
+                    props: {
+                        quotaType: {
+                            title: 'infomaniak.quota_exceeded.title',
+                            description: 'infomaniak.quota_exceeded.description',
+                            image: 'channels',
+                        },
+                    },
                 });
             } else {
                 dispatch({
