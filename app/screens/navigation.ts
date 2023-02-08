@@ -264,7 +264,8 @@ export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}
     const isDark = tinyColor(theme.sidebarBg).isDark();
     StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
 
-    if (passProps.launchType === Launch.AddServer || passProps.launchType === Launch.AddServerFromDeepLink) {
+    // IK only login is not a modal
+    /*if (passProps.launchType === Launch.AddServer || passProps.launchType === Launch.AddServerFromDeepLink) {
         dismissModal({componentId: Screens.SERVER});
         dismissModal({componentId: Screens.LOGIN});
         dismissModal({componentId: Screens.SSO});
@@ -273,7 +274,7 @@ export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}
             Navigation.updateProps(Screens.HOME, {launchType: Launch.DeepLink, extra: passProps.extra});
         }
         return '';
-    }
+    }*/
 
     const stack = {
         children: [{
