@@ -8,19 +8,19 @@ import {generateGroupAssociationId} from '@utils/groups';
 import {logError} from '@utils/log';
 
 type WebsocketGroupMessage = WebSocketMessage<{
-    group?: string; // type Group
+    group?: any; // type Group
 }>
 
 type WebsocketGroupMemberMessage = WebSocketMessage<{
-    group_member?: string; // type GroupMember
+    group_member?: any; // type GroupMember
 }>
 
 type WebsocketGroupTeamMessage = WebSocketMessage<{
-    group_team?: string; // type GroupMember
+    group_team?: any; // type GroupMember
 }>
 
 type WebsocketGroupChannelMessage = WebSocketMessage<{
-    group_channel?: string; // type GroupMember
+    group_channel?: any; // type GroupMember
 }>
 
 type WSMessage = WebsocketGroupMessage | WebsocketGroupMemberMessage | WebsocketGroupTeamMessage | WebsocketGroupChannelMessage
@@ -47,7 +47,7 @@ export async function handleGroupReceivedEvent(serverUrl: string, msg: Websocket
     try {
         if (msg?.data?.group) {
             const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-            group = JSON.parse(msg.data.group);
+            group = msg.data.group;
             operator.handleGroups({groups: [group], prepareRecordsOnly: false});
         }
     } catch (e) {
@@ -61,7 +61,7 @@ export async function handleGroupMemberAddEvent(serverUrl: string, msg: Websocke
     try {
         if (msg?.data?.group_member) {
             const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-            groupMember = JSON.parse(msg.data.group_member);
+            groupMember = msg.data.group_member;
             const group = {id: groupMember.group_id};
 
             operator.handleGroupMembershipsForMember({userId: groupMember.user_id, groups: [group], prepareRecordsOnly: false});
@@ -77,7 +77,7 @@ export async function handleGroupMemberDeleteEvent(serverUrl: string, msg: Webso
     try {
         if (msg?.data?.group_member) {
             const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-            groupMember = JSON.parse(msg.data.group_member);
+            groupMember = msg.data.group_member;
 
             await deleteGroupMembershipById(database, generateGroupAssociationId(groupMember.group_id, groupMember.user_id));
         }
@@ -92,7 +92,7 @@ export async function handleGroupTeamAssociatedEvent(serverUrl: string, msg: Web
     try {
         if (msg?.data?.group_team) {
             const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-            groupTeam = JSON.parse(msg.data.group_team);
+            groupTeam = msg.data.group_team;
             const group = {id: groupTeam.group_id};
 
             operator.handleGroupTeamsForTeam({teamId: groupTeam.team_id, groups: [group], prepareRecordsOnly: false});
@@ -108,7 +108,7 @@ export async function handleGroupTeamDissociateEvent(serverUrl: string, msg: Web
     try {
         if (msg?.data?.group_team) {
             const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-            groupTeam = JSON.parse(msg.data.group_team);
+            groupTeam = msg.data.group_team;
 
             await deleteGroupTeamById(database, generateGroupAssociationId(groupTeam.group_id, groupTeam.team_id));
         }
@@ -123,7 +123,7 @@ export async function handleGroupChannelAssociatedEvent(serverUrl: string, msg: 
     try {
         if (msg?.data?.group_channel) {
             const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-            groupChannel = JSON.parse(msg.data.group_channel);
+            groupChannel = msg.data.group_channel;
             const group = {id: groupChannel.group_id};
 
             operator.handleGroupChannelsForChannel({channelId: groupChannel.channel_id, groups: [group], prepareRecordsOnly: false});
@@ -139,7 +139,7 @@ export async function handleGroupChannelDissociateEvent(serverUrl: string, msg: 
     try {
         if (msg?.data?.group_channel) {
             const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-            groupChannel = JSON.parse(msg.data.group_channel);
+            groupChannel = msg.data.group_channel;
 
             await deleteGroupChannelById(database, generateGroupAssociationId(groupChannel.group_id, groupChannel.channel_id));
         }
