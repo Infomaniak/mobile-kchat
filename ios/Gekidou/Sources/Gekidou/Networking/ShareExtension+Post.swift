@@ -31,8 +31,9 @@ extension ShareExtension {
             )
             for file in files {
                 if let fileUrl = URL(string: file),
-                   fileUrl.isFileURL {
-                    let filename = fileUrl.lastPathComponent
+                   fileUrl.isFileURL,
+                   let filename = fileUrl.lastPathComponent.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) {
+                    
                     
                     if let url = URL(string: "\(serverUrl)/api/v4/files?channel_id=\(channelId)&filename=\(filename)&client_ids=\(UUID().uuidString)") {
                         var uploadRequest = URLRequest(url: url)
