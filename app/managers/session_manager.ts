@@ -25,6 +25,8 @@ import {isMainActivity} from '@utils/helpers';
 import {addNewServer} from '@utils/server';
 
 import type {LaunchType} from '@typings/launch';
+import {logError} from '@utils/log';
+import { syncMultiTeam } from '@actions/remote/entry/ikcommon';
 
 type LogoutCallbackArg = {
     serverUrl: string;
@@ -151,11 +153,24 @@ class SessionManager {
         this.previousAppState = appState;
         switch (appState) {
             case 'active':
+                this.syncMultiTeam();
                 setTimeout(this.cancelAllSessionNotifications, 750);
                 break;
             case 'inactive':
                 this.scheduleAllSessionNotifications();
                 break;
+        }
+    };
+
+    private syncMultiTeam = async () => {
+        try {
+            const credentials = await getAllServerCredentials();
+
+            if (credentials?.length > 0) {
+                await syncMultiTeam(credentials[0].token);
+            }
+        } catch (error) {
+            // do nothing
         }
     };
 

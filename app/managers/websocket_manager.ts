@@ -9,13 +9,11 @@ import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged} from 'rxjs/operators';
 
 import {setCurrentUserStatusOffline} from '@actions/local/user';
-import {syncMultiTeam} from '@actions/remote/entry/ikcommon';
 import {fetchStatusByIds} from '@actions/remote/user';
 import {handleClose, handleEvent, handleFirstConnect, handleReconnect} from '@actions/websocket';
 import WebSocketClient from '@client/websocket';
 import {General} from '@constants';
 import DatabaseManager from '@database/manager';
-import {getAllServerCredentials} from '@init/credentials';
 import {getCurrentUserId} from '@queries/servers/system';
 import {queryAllUsers} from '@queries/servers/user';
 import {toMilliseconds} from '@utils/datetime';
@@ -239,7 +237,6 @@ class WebsocketManager {
                 BackgroundTimer.clearInterval(this.backgroundIntervalId);
             }
             this.isBackgroundTimerRunning = false;
-            this.syncMultiTeam();
             this.openAll();
             this.previousActiveState = isActive;
             return;
@@ -247,18 +244,6 @@ class WebsocketManager {
 
         if (isMain) {
             this.previousActiveState = isActive;
-        }
-    };
-
-    private syncMultiTeam = async () => {
-        try {
-            const credentials = await getAllServerCredentials();
-
-            if (credentials?.length > 0) {
-                await syncMultiTeam(credentials[0].token);
-            }
-        } catch (error) {
-            // do nothing
         }
     };
 
