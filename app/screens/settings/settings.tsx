@@ -136,6 +136,20 @@ const Settings = ({componentId, helpLink, showHelp, siteName}: SettingsProps) =>
         }
     });
 
+    const openFeedback = preventDoubleTap(() => {
+        const feddbackLink = intl.formatMessage({id: 'infomaniak.feedback.url', defaultMessage: 'https://feedback.userreport.com/6b7737f6-0cc1-410f-993f-be2ffbf73a05#ideas/popular'});
+        if (feddbackLink) {
+            const onError = () => {
+                Alert.alert(
+                    intl.formatMessage({id: 'mobile.link.error.title', defaultMessage: 'Error'}),
+                    intl.formatMessage({id: 'mobile.link.error.text', defaultMessage: 'Unable to open the link.'}),
+                );
+            };
+
+            tryOpenURL(feddbackLink, onError);
+        }
+    });
+
     return (
         <SettingContainer testID='settings'>
             <SettingItem
@@ -162,11 +176,18 @@ const Settings = ({componentId, helpLink, showHelp, siteName}: SettingsProps) =>
                     optionLabelTextStyle={{color: theme.linkColor}}
                     onPress={openHelp}
                     optionName='help'
-                    separator={false}
                     testID='settings.help.option'
                     type='default'
                 />
             }
+            <SettingItem
+                optionLabelTextStyle={{color: theme.linkColor}}
+                onPress={openFeedback}
+                optionName='feedback'
+                separator={false}
+                testID='infomaniak.feedback.option'
+                type='default'
+            />
         </SettingContainer>
     );
 };

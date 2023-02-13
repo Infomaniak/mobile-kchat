@@ -67,6 +67,11 @@ export const SettingOptionConfig: Record<string, SettingConfigDetails> = {
         i18nId: t('general_settings.help'),
         testID: 'general_settings.help',
     },
+    feedback: {
+        defaultMessage: 'Feedback',
+        i18nId: t('infomaniak.feedback.title'),
+        testID: 'infomaniak.feedback.option',
+    },
     report_problem: {
         defaultMessage: 'Report a Problem',
         i18nId: t('general_settings.report_problem'),

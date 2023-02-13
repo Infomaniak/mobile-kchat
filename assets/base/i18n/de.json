@@ -980,5 +980,7 @@
     "infomaniak.channel_quota_exceeded.description": "Sie haben das Limit für öffentliche und private Kanäle in Ihrem kChat erreicht. Um weitere Kanäle zu erstellen, müssen Sie einen höheren Plan abonnieren.",
     "infomaniak.size_quota_exceeded.title": "Erhöhen Sie den Speicherplatz in Ihrer kSuite",
     "infomaniak.size_quota_exceeded.description": "Ihr Speicherplatz ist voll. Abonnieren Sie ein höheres Angebot, um weiterhin Dateien zu versenden.",
-    "infomaniak.messages_quota_exceeded.description": "Nachrichten und Dateien, die älter als 3 Monate sind, werden ausgeblendet. Um mehr Nachrichten zu sehen, abonnieren Sie einen höheren Tarif."
+    "infomaniak.messages_quota_exceeded.description": "Nachrichten und Dateien, die älter als 3 Monate sind, werden ausgeblendet. Um mehr Nachrichten zu sehen, abonnieren Sie einen höheren Tarif.",
+    "infomaniak.feedback.title": "Feedback",
+    "infomaniak.feedback.url": "https://feedback.userreport.com/e68afd5f-31f2-4327-af79-fb0b665aee68#ideas/popular"
 }
