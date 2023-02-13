@@ -98,7 +98,12 @@ export async function handleUserTypingEvent(serverUrl: string, msg: WebSocketMes
         const namePreference = await queryDisplayNamePreferences(database, Preferences.NAME_NAME_FORMAT).fetch();
         const teammateDisplayNameSetting = getTeammateNameDisplaySetting(namePreference, config.LockTeammateNameDisplay, config.TeammateNameDisplay, license);
         const currentUser = await getCurrentUser(database);
-        const username = displayUsername(user, currentUser?.locale, teammateDisplayNameSetting);
+        const username = displayUsername(user, currentUser?.locale, teammateDisplayNameSetting, false);
+        if (username.length === 0) {
+            //Do not display unknown user typing
+            return;
+        }
+
         const data = {
             channelId: msg.data.data.channel_id,
             rootId: msg.data.data.parent_id,
