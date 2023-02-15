@@ -156,6 +156,7 @@ function UserListRow({
     }, []);
 
     useEffect(() => {
+        const tutorialWatched = true;
         if (highlight && !tutorialWatched) {
             if (isTablet) {
                 setShowTutorial(true);
