@@ -61,7 +61,7 @@ const configureServer = async (teamServer: TeamServer, accessToken: string) => {
         return serverUrl;
     } catch (e) {
         await removeServerCredentials(serverUrl);
-        throw new Error('Server creation failed');
+        return null;
     }
 };
 
