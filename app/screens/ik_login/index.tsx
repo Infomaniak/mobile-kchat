@@ -89,13 +89,13 @@ const Server = ({
                     </View>
                     <View style={styles.bottomContainer}>
                         <FormattedText
-                            defaultMessage="Bienvenue sur kChat"
-                            id="mobile.components.ik_welcome.msg_title"
+                            defaultMessage="Welcome to kChat"
+                            id="infomaniak.login.title"
                             style={styles.title}
                         />
                         <FormattedText
-                            defaultMessage="Connectez-vous à votre compte et envoyez des messages depuis l'app."
-                            id="mobile.components.ik_welcome.msg_description"
+                            defaultMessage="Log in to your account and send messages from the app."
+                            id="infomaniak.login.description"
                             style={styles.description}
                         />
                         <ServerForm

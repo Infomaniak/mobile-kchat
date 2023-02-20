@@ -982,5 +982,7 @@
     "infomaniak.size_quota_exceeded.description": "Ihr Speicherplatz ist voll. Abonnieren Sie ein höheres Angebot, um weiterhin Dateien zu versenden.",
     "infomaniak.messages_quota_exceeded.description": "Nachrichten und Dateien, die älter als 3 Monate sind, werden ausgeblendet. Um mehr Nachrichten zu sehen, abonnieren Sie einen höheren Tarif.",
     "infomaniak.feedback.title": "Feedback",
-    "infomaniak.feedback.url": "https://feedback.userreport.com/e68afd5f-31f2-4327-af79-fb0b665aee68#ideas/popular"
+    "infomaniak.feedback.url": "https://feedback.userreport.com/e68afd5f-31f2-4327-af79-fb0b665aee68#ideas/popular",
+    "infomaniak.login.title":"Willkommen bei kChat",
+    "infomaniak.login.description": "Melden Sie sich bei Ihrem Konto an und senden Sie Nachrichten über die App."
 }
