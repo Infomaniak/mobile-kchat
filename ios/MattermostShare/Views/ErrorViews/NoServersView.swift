@@ -11,10 +11,10 @@ import SwiftUI
 struct NoServersView: View {
   var body: some View {
     VStack (spacing: 8) {
-      Text("Not connected to any servers")
+      Text("Not connected to any kChat")
         .font(Font.custom("Metropolis-SemiBold", size: 20))
         .foregroundColor(Color.theme.centerChannelColor)
-      Text("To share content, you'll need to be logged in to a kChat server.")
+      Text("To share content, you'll need to be logged in to a kChat.")
         .font(Font.custom("OpenSans", size: 16))
         .foregroundColor(Color.theme.centerChannelColor.opacity(0.72))
     }

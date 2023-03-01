@@ -41,8 +41,8 @@ struct ContentView: View {
       VStack (spacing: 0) {
         if shareViewModel.allServers.count > 1 {
           OptionView(
-            navigationTitle: "Select server",
-            label: "Server",
+            navigationTitle: "Select team",
+            label: "Team",
             value: shareViewModel.server!.displayName
           ) {
             ServerListView()
@@ -69,7 +69,7 @@ struct ContentView: View {
         FloatingTextField(placeholderText: "Enter a message (optional)", text: $message)
       } else {
         ErrorLabelView(
-          error: "You are not a member of a team on the selected server. Select another server or open Mattermost to join a team."
+          error: "No kChat available. Open kChat to join a team."
         )
       }
       

@@ -25,7 +25,7 @@ struct ErrorSharingView: View {
               Text("An error ocurred")
                   .font(Font.custom("Metropolis-SemiBold", size: 20))
                   .foregroundColor(Color.theme.centerChannelColor)
-              Text("There was an error when attempting to share the content to Mattermost.")
+              Text("There was an error when attempting to share the content to kChat.")
                   .font(Font.custom("OpenSans", size: 16))
                   .foregroundColor(Color.theme.centerChannelColor.opacity(0.72))
               Text("Reason: \(error)")
