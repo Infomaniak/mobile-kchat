@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Elias Nahum on 26-06-22.
 //
@@ -9,6 +9,16 @@ import Foundation
 import os.log
 
 extension ShareExtension {
+    func getImportDirectory() -> URL? {
+        guard let appGroupId,
+              let sharedContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupId) else {
+            return nil
+        }
+        let importDirectory = sharedContainer.appendingPathComponent("imports", isDirectory: true)
+        try? FileManager.default.createDirectory(at: importDirectory, withIntermediateDirectories: true)
+        return importDirectory
+    }
+    
     public func uploadFiles(serverUrl: String, channelId: String, message: String,
                             files: [String], completionHandler: @escaping () -> Void) -> String? {
         let id = "mattermost-share-upload-\(UUID().uuidString)"
@@ -19,7 +29,7 @@ extension ShareExtension {
             files: files
         )
         
-        guard let token = try? Keychain.default.getToken(for: serverUrl) else {return "Could not retrieve the session token from the KeyChain"}
+        guard let token = try? Keychain.default.getToken(for: serverUrl) else { return "Could not retrieve the session token from the KeyChain" }
 
         if !files.isEmpty {
             createBackroundSession(id: id)
@@ -32,9 +42,8 @@ extension ShareExtension {
             for file in files {
                 if let fileUrl = URL(string: file),
                    fileUrl.isFileURL,
-                   let filename = fileUrl.lastPathComponent.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) {
-                    
-                    
+                   let filename = fileUrl.lastPathComponent.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
+                   let temporaryURL = getImportDirectory()?.appendingPathComponent(UUID().uuidString) {
                     if let url = URL(string: "\(serverUrl)/api/v4/files?channel_id=\(channelId)&filename=\(filename)&client_ids=\(UUID().uuidString)") {
                         var uploadRequest = URLRequest(url: url)
                         uploadRequest.httpMethod = "POST"
@@ -53,7 +62,6 @@ extension ShareExtension {
                         // do not forget to set the content-length!
                         uploadRequest.setValue(String(data.count), forHTTPHeaderField: "Content-Length")
                         
-                        let temporaryURL = FileManager.default.temporaryDirectory.appendingPathExtension(UUID().uuidString)
                         do {
                             try data.write(to: temporaryURL)
                         } catch {
@@ -114,7 +122,6 @@ extension ShareExtension {
                 id
             )
             return
-            
         }
         
         if let serverUrl = data.serverUrl,
@@ -124,7 +131,7 @@ extension ShareExtension {
                 channelId: channelId,
                 message: data.message,
                 fileIds: data.fileIds,
-                completionHandler: {info, reponse, error in
+                completionHandler: { _, _, _ in
                     self.removeUploadSessionData(id: id)
                     self.deleteUploadedFiles(files: data.files)
                     
@@ -136,7 +143,8 @@ extension ShareExtension {
                         )
                         handler()
                     }
-                })
+                }
+            )
         }
     }
 }
