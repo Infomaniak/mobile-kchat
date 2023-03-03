@@ -182,7 +182,7 @@ const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
         return data;
     };
 
-    logout = async () => {
+    logout = async (deviceToken?: string) => {
         this.analytics?.trackAPI('api_users_logout');
         const body: any = {
             device_id: deviceToken,
