@@ -714,7 +714,7 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - "simdjson (from `../node_modules/@nozbe/simdjson`)"
-  - Starscream (from `https://github.com/mattermost/Starscream.git`, commit `2770c931b2758f26e29b937d547a23122e9c6583`)
+  - Starscream (from `https://github.com/mattermost/Starscream.git`, commit `9575b6781d1262247096af73617ae3acb2b139a0`)
   - "WatermelonDB (from `../node_modules/@nozbe/watermelondb`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -913,7 +913,7 @@ EXTERNAL SOURCES:
   simdjson:
     :path: "../node_modules/@nozbe/simdjson"
   Starscream:
-    :commit: 2770c931b2758f26e29b937d547a23122e9c6583
+    :commit: 9575b6781d1262247096af73617ae3acb2b139a0
     :git: https://github.com/mattermost/Starscream.git
   WatermelonDB:
     :path: "../node_modules/@nozbe/watermelondb"
@@ -922,7 +922,7 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   Starscream:
-    :commit: 2770c931b2758f26e29b937d547a23122e9c6583
+    :commit: 9575b6781d1262247096af73617ae3acb2b139a0
     :git: https://github.com/mattermost/Starscream.git
 
 SPEC CHECKSUMS:
@@ -1038,6 +1038,6 @@ SPEC CHECKSUMS:
   Yoga: 5ed1699acbba8863755998a4245daa200ff3817b
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 1a750107ee5be078bf49c55e9013295938e81486
+PODFILE CHECKSUM: e96a274bafa1a4a20d0b6ea0ebba5fdeac5eb472
 
 COCOAPODS: 1.11.3
