@@ -4,7 +4,7 @@
 import {DeviceEventEmitter} from 'react-native';
 
 import {loginEntry} from '@actions/remote/entry/login';
-import {completeLogin} from '@actions/remote/session';
+import {addPushProxyVerificationStateFromLogin} from '@actions/remote/session';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
 import {BASE_SERVER_URL} from '@client/rest/constants';
 import {Events} from '@constants';
@@ -13,7 +13,6 @@ import {PUSH_PROXY_STATUS_VERIFIED} from '@constants/push_proxy';
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials, removeServerCredentials, setServerCredentials} from '@init/credentials';
 import NetworkManager from '@managers/network_manager';
-import {getDeviceToken} from '@queries/app/global';
 import EphemeralStore from '@store/ephemeral_store';
 
 import type {TeamServer} from '@client/rest/ikteams';
@@ -45,7 +44,6 @@ const configureServer = async (teamServer: TeamServer, accessToken: string) => {
                 displayName: teamServer.display_name,
             },
         });
-        const deviceToken = await getDeviceToken();
         const user = await client.getMe();
         await server?.operator.handleUsers({users: [user], prepareRecordsOnly: false});
         await server?.operator.handleSystem({
@@ -56,8 +54,9 @@ const configureServer = async (teamServer: TeamServer, accessToken: string) => {
             prepareRecordsOnly: false,
         });
 
-        await loginEntry({serverUrl, user, deviceToken});
-        await completeLogin(serverUrl);
+        await addPushProxyVerificationStateFromLogin(serverUrl);
+        await loginEntry({serverUrl});
+        await DatabaseManager.setActiveServerDatabase(serverUrl);
         return serverUrl;
     } catch (e) {
         await removeServerCredentials(serverUrl);
