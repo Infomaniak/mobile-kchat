@@ -3,7 +3,7 @@
 
 import {BehaviorSubject} from 'rxjs';
 
-import {KSuiteLimit} from '@components/post_list/limited_messages/limited_messages';
+import type {KSuiteLimit} from '@components/post_list/limited_messages/limited_messages';
 
 class EphemeralStore {
     theme: Theme | undefined;
@@ -11,8 +11,8 @@ class EphemeralStore {
     creatingDMorGMTeammates: string[] = [];
 
     private serverLimit: { [x: string]: KSuiteLimit | undefined } = {};
-    private pushProxyVerification: {[serverUrl: string]: string | undefined} = {};
-    private canJoinOtherTeams: {[serverUrl: string]: BehaviorSubject<boolean>} = {};
+    private pushProxyVerification: { [serverUrl: string]: string | undefined } = {};
+    private canJoinOtherTeams: { [serverUrl: string]: BehaviorSubject<boolean> } = {};
 
     // As of today, the server sends a duplicated event to add the user to the team.
     // If we do not handle this, this ends up showing some errors in the database, apart
