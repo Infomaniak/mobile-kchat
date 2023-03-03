@@ -2,6 +2,7 @@ package com.mattermost.rnbeta;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import android.view.KeyEvent;
@@ -14,9 +15,11 @@ import com.github.emilioicai.hwkeyboardevent.HWKeyboardEventModule;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactActivityDelegate;
 
+import java.util.Objects;
+
 public class MainActivity extends NavigationActivity {
     private boolean HWKeyboardConnected = false;
-    private FoldableObserver foldableObserver = new FoldableObserver(this);
+    private final FoldableObserver foldableObserver = new FoldableObserver(this);
 
     @Override
     protected String getMainComponentName() {
@@ -32,7 +35,7 @@ public class MainActivity extends NavigationActivity {
     protected ReactActivityDelegate createReactActivityDelegate() {
         return new DefaultReactActivityDelegate(
                 this,
-                getMainComponentName(),
+                Objects.requireNonNull(getMainComponentName()),
                 // If you opted-in for the New Architecture, we enable the Fabric Renderer.
                 DefaultNewArchitectureEntryPoint.getFabricEnabled(), // fabricEnabled
                 // If you opted-in for the New Architecture, we enable Concurrent React (i.e. React 18).
@@ -61,7 +64,7 @@ public class MainActivity extends NavigationActivity {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
         if (newConfig.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO) {

@@ -8,13 +8,19 @@
 
 import Foundation
 import Gekidou
-import UserNotifications
 
 @objc class GekidouWrapper: NSObject {
   @objc public static let `default` = GekidouWrapper()
-
-  @objc func postNotificationReceipt(_ userInfo: [AnyHashable: Any]) {
-    Network.default.postNotificationReceipt(userInfo)
+  
+  @objc func postNotificationReceipt(_ userInfo: [AnyHashable:Any]) {
+    PushNotification.default.postNotificationReceipt(userInfo)
+  }
+  
+  @objc func fetchDataForPushNotification(_ notification: [AnyHashable:Any], withContentHandler contentHander: @escaping ((_ data: Data?) -> Void)) {
+    PushNotification.default.fetchDataForPushNotification(notification, withContentHandler: { data in
+      let jsonData = try? JSONEncoder().encode(data)
+      contentHander(jsonData)
+    })
   }
   
   @objc func attachSession(_ id: String, completionHandler: @escaping () -> Void) {

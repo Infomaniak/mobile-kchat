@@ -6,12 +6,14 @@ import Pusher, {Channel} from 'pusher-js/react-native';
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
 import {getConfig} from '@queries/servers/system';
-import {logError, logInfo} from '@utils/log';
+import {hasReliableWebsocket} from '@utils/config';
+import {toMilliseconds} from '@utils/datetime';
+import {logError, logInfo, logWarning} from '@utils/log';
 
 const MAX_WEBSOCKET_FAILS = 7;
-const MIN_WEBSOCKET_RETRY_TIME = 3000; // 3 sec
-
-const MAX_WEBSOCKET_RETRY_TIME = 300000; // 5 mins
+const WEBSOCKET_TIMEOUT = toMilliseconds({seconds: 30});
+const MIN_WEBSOCKET_RETRY_TIME = toMilliseconds({seconds: 3});
+const MAX_WEBSOCKET_RETRY_TIME = toMilliseconds({minutes: 5});
 
 enum ConnectionState {
     initialized = 'initialized',
@@ -54,6 +56,7 @@ export default class WebSocketClient {
     private url = '';
 
     private serverUrl: string;
+    private hasReliablyReconnect = false;
 
     constructor(serverUrl: string, lastDisconnect = 0) {
         this.connectionId = '';
@@ -148,6 +151,7 @@ export default class WebSocketClient {
                     if (this.serverSequence && this.missedEventsCallback) {
                         this.missedEventsCallback();
                     }
+                    this.hasReliablyReconnect = true;
                 }
             } else if (this.firstConnectCallback) {
                 logInfo('websocket connected to', this.url);
@@ -165,6 +169,7 @@ export default class WebSocketClient {
 
             this.pusher = undefined;
             this.responseSequence = 1;
+            this.hasReliablyReconnect = false;
 
             if (this.connectFailCount === 0) {
                 logInfo('websocket closed', this.url);
@@ -197,7 +202,9 @@ export default class WebSocketClient {
             this.connectionTimeout = setTimeout(
                 () => {
                     if (this.stop) {
-                        clearTimeout(this.connectionTimeout);
+                        if (this.connectionTimeout) {
+                            clearTimeout(this.connectionTimeout);
+                        }
                         return;
                     }
                     this.initialize(opts);
@@ -208,6 +215,7 @@ export default class WebSocketClient {
 
         this.pusher!.connection.bind('error', (evt: any) => {
             if (evt.url === this.url) {
+                this.hasReliablyReconnect = false;
                 if (this.connectFailCount <= 1) {
                     logError('websocket error', this.url);
                     logError('WEBSOCKET ERROR EVENT', evt);
@@ -313,6 +321,7 @@ export default class WebSocketClient {
         this.stop = stop;
         this.connectFailCount = 0;
         this.responseSequence = 1;
+        this.hasReliablyReconnect = false;
 
         if (this.pusher && (this.pusher.connection.state === ConnectionState.connected || this.pusher.connection.state === ConnectionState.connecting)) {
             this.pusher.disconnect();

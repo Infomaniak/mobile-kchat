@@ -26,6 +26,7 @@ class EphemeralStore {
     private switchingToChannel = new Set<string>();
     private currentThreadId = '';
     private notificationTapped = false;
+    private enablingCRT = false;
 
     // Ephemeral control when (un)archiving a channel locally
     addArchivingChannel = (channelId: string) => {
@@ -121,6 +122,14 @@ class EphemeralStore {
 
     removeSwitchingToChannel = (channelId: string) => {
         this.switchingToChannel.delete(channelId);
+    };
+
+    setEnablingCRT = (value: boolean) => {
+        this.enablingCRT = value;
+    };
+
+    isEnablingCRT = () => {
+        return this.enablingCRT;
     };
 
     private getCanJoinOtherTeamsSubject = (serverUrl: string) => {

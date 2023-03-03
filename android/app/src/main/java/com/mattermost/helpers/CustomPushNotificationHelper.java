@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.app.Person;
@@ -28,6 +29,7 @@ import androidx.core.app.RemoteInput;
 import androidx.core.graphics.drawable.IconCompat;
 
 import com.mattermost.rnbeta.*;
+import com.nozbe.watermelondb.Database;
 
 import java.io.IOException;
 import java.util.Date;
@@ -37,6 +39,9 @@ import io.noties.markwon.Markwon;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import static com.mattermost.helpers.database_extension.GeneralKt.getDatabaseForServer;
+import static com.mattermost.helpers.database_extension.UserKt.getLastPictureUpdate;
 
 public class CustomPushNotificationHelper {
     public static final String CHANNEL_HIGH_IMPORTANCE_ID = "channel_01";
@@ -78,7 +83,7 @@ public class CustomPushNotificationHelper {
 
         if (serverUrl != null && !type.equals(CustomPushNotificationHelper.PUSH_TYPE_SESSION)) {
             try {
-                Bitmap avatar = userAvatar(serverUrl, senderId, urlOverride);
+                Bitmap avatar = userAvatar(context, serverUrl, senderId, urlOverride);
                 if (avatar != null) {
                     sender.setIcon(IconCompat.createWithBitmap(avatar));
                 }
@@ -131,6 +136,7 @@ public class CustomPushNotificationHelper {
         notification.addExtras(userInfoBundle);
     }
 
+    @SuppressLint("UnspecifiedImmutableFlag")
     private static void addNotificationReplyAction(Context context, NotificationCompat.Builder notification, Bundle bundle, int notificationId) {
         String postId = bundle.getString("post_id");
         String serverUrl = bundle.getString("server_url");
@@ -187,7 +193,7 @@ public class CustomPushNotificationHelper {
         String groupId = is_crt_enabled && !android.text.TextUtils.isEmpty(rootId) ? rootId : channelId;
 
         addNotificationExtras(notification, bundle);
-        setNotificationIcons(notification, bundle);
+        setNotificationIcons(context, notification, bundle);
         setNotificationMessagingStyle(context, notification, bundle);
         setNotificationGroup(notification, groupId, createSummary);
         setNotificationBadgeType(notification);
@@ -277,7 +283,7 @@ public class CustomPushNotificationHelper {
 
         if (serverUrl != null && !type.equals(CustomPushNotificationHelper.PUSH_TYPE_SESSION)) {
             try {
-                Bitmap avatar = userAvatar(serverUrl, "me", urlOverride);
+                Bitmap avatar = userAvatar(context, serverUrl, "me", urlOverride);
                 if (avatar != null) {
                     sender.setIcon(IconCompat.createWithBitmap(avatar));
                 }
@@ -386,7 +392,7 @@ public class CustomPushNotificationHelper {
         }
     }
 
-    private static void setNotificationIcons(NotificationCompat.Builder notification, Bundle bundle) {
+    private static void setNotificationIcons(Context context, NotificationCompat.Builder notification, Bundle bundle) {
         String channelName = getConversationTitle(bundle);
         String senderName = bundle.getString("sender_name");
         String serverUrl = bundle.getString("server_url");
@@ -397,7 +403,7 @@ public class CustomPushNotificationHelper {
         if (serverUrl != null && channelName.equals(senderName)) {
             try {
                 String senderId = bundle.getString("sender_id");
-                Bitmap avatar = userAvatar(serverUrl, senderId, urlOverride);
+                Bitmap avatar = userAvatar(context, serverUrl, senderId, urlOverride);
                 if (avatar != null) {
                     notification.setLargeIcon(avatar);
                 }
@@ -407,19 +413,33 @@ public class CustomPushNotificationHelper {
         }
     }
 
-    private static Bitmap userAvatar(final String serverUrl, final String userId, final String urlOverride) throws IOException {
+    private static Bitmap userAvatar(final Context context, @NonNull final String serverUrl, final String userId, final String urlOverride) throws IOException {
         try {
             Response response;
+            Double lastUpdateAt = 0.0;
             if (!TextUtils.isEmpty(urlOverride)) {
                 Request request = new Request.Builder().url(urlOverride).build();
                 Log.i("ReactNative", String.format("Fetch override profile image %s", urlOverride));
                 response = client.newCall(request).execute();
             } else {
-                Bitmap cached = bitmapCache.getBitmapFromMemCache(userId);
+                DatabaseHelper dbHelper = DatabaseHelper.Companion.getInstance();
+                if (dbHelper != null) {
+                    Database db = getDatabaseForServer(dbHelper, context, serverUrl);
+                    if (db != null) {
+                        lastUpdateAt = getLastPictureUpdate(db, userId);
+                        if (lastUpdateAt == null) {
+                            lastUpdateAt = 0.0;
+                        }
+                        db.close();
+                    }
+                }
+                Bitmap cached = bitmapCache.bitmap(userId, lastUpdateAt, serverUrl);
                 if (cached != null) {
                     Bitmap bitmap = cached.copy(cached.getConfig(), false);
                     return getCircleBitmap(bitmap);
                 }
+
+                bitmapCache.removeBitmap(userId, serverUrl);
                 String url = String.format("api/v4/users/%s/image", userId);
                 Log.i("ReactNative", String.format("Fetch profile image %s", url));
                 response = Network.getSync(serverUrl, url, null);
@@ -430,7 +450,7 @@ public class CustomPushNotificationHelper {
                 byte[] bytes = Objects.requireNonNull(response.body()).bytes();
                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                 if (TextUtils.isEmpty(urlOverride) && !TextUtils.isEmpty(userId)) {
-                    bitmapCache.addBitmapToMemoryCache(userId, bitmap.copy(bitmap.getConfig(), false));
+                    bitmapCache.insertBitmap(bitmap.copy(bitmap.getConfig(), false), userId, lastUpdateAt, serverUrl);
                 }
                 return getCircleBitmap(bitmap);
             }

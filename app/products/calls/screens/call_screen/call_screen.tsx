@@ -17,10 +17,9 @@ import {
 import {Navigation} from 'react-native-navigation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-import {appEntry} from '@actions/remote/entry';
 import {leaveCall, muteMyself, setSpeakerphoneOn, unmuteMyself} from '@calls/actions';
 import {startCallRecording, stopCallRecording} from '@calls/actions/calls';
-import {recordingAlert, recordingWillBePostedAlert} from '@calls/alerts';
+import {recordingAlert, recordingWillBePostedAlert, recordingErrorAlert} from '@calls/alerts';
 import CallAvatar from '@calls/components/call_avatar';
 import CallDuration from '@calls/components/call_duration';
 import CallsBadge, {CallsBadgeType} from '@calls/components/calls_badge';
@@ -40,6 +39,7 @@ import {useTheme} from '@context/theme';
 import DatabaseManager from '@database/manager';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useIsTablet} from '@hooks/device';
+import WebsocketManager from '@managers/websocket_manager';
 import {
     bottomSheet,
     dismissAllModalsAndPopToScreen,
@@ -356,7 +356,7 @@ const CallScreen = ({
             await popTopScreen(Screens.THREAD);
         }
         await DatabaseManager.setActiveServerDatabase(currentCall.serverUrl);
-        await appEntry(currentCall.serverUrl, Date.now());
+        WebsocketManager.initializeClient(currentCall.serverUrl);
         await goToScreen(Screens.THREAD, callThreadOptionTitle, {rootId: currentCall.threadId});
     }, [currentCall?.serverUrl, currentCall?.threadId, fromThreadScreen, componentId, callThreadOptionTitle]);
 
@@ -372,6 +372,11 @@ const CallScreen = ({
     // - Is the host, recording has started, and recording has ended
     if (isHost && currentCall?.recState?.start_at && currentCall.recState.end_at) {
         recordingWillBePostedAlert(intl);
+    }
+
+    // The host should receive an alert in case of unexpected error.
+    if (isHost && currentCall?.recState?.err) {
+        recordingErrorAlert(intl);
     }
 
     // The user should see the loading only if:

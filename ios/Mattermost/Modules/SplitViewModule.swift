@@ -37,7 +37,10 @@ class SplitViewModule: RCTEventEmitter {
       return true
     }
     guard let w = UIApplication.shared.delegate?.window, let window = w else { return false }
-    return window.frame.equalTo(window.screen.bounds)
+    let screenSize = window.screen.bounds.size.width
+    let frameSize = window.frame.size.width
+    let shouldBeConsideredFullScreen = frameSize >= (screenSize * 0.6)
+    return shouldBeConsideredFullScreen
   }
   
   @objc func isSplitView() {
@@ -64,7 +67,7 @@ class SplitViewModule: RCTEventEmitter {
     DispatchQueue.main.async {
       let appDelegate = UIApplication.shared.delegate as! AppDelegate
       appDelegate.allowRotation = true
-      UIDevice.current.setValue(UIInterfaceOrientation.unknown, forKey: "orientation")
+      UIDevice.current.setValue(UIInterfaceOrientation.unknown.rawValue, forKey: "orientation")
     }
   }
   
@@ -73,8 +76,8 @@ class SplitViewModule: RCTEventEmitter {
     DispatchQueue.main.async {
       let appDelegate = UIApplication.shared.delegate as! AppDelegate
       appDelegate.allowRotation = false
-      UIDevice.current.setValue(UIInterfaceOrientation.unknown, forKey: "orientation")
-      UIDevice.current.setValue(UIInterfaceOrientation.portrait, forKey: "orientation")
+      UIDevice.current.setValue(UIInterfaceOrientation.unknown.rawValue, forKey: "orientation")
+      UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
     }
   }
 }
