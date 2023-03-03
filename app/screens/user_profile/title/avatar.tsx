@@ -9,6 +9,8 @@ import FastImage from 'react-native-fast-image';
 import Animated from 'react-native-reanimated';
 
 import ProfilePicture from '@components/profile_picture';
+import {useServerUrl} from '@context/server';
+import NetworkManager from '@managers/network_manager';
 
 import type UserModel from '@typings/database/models/servers/user';
 
@@ -37,14 +39,17 @@ const getStyles = (size?: number) => {
 
 const UserProfileAvatar = ({enablePostIconOverride, forwardRef, imageSize, user, userIconOverride}: Props) => {
     const styles = useMemo(() => getStyles(imageSize), [imageSize]);
+    const serverUrl = useServerUrl();
 
     if (enablePostIconOverride && userIconOverride) {
+        const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
+        const source = {uri: serverUrl + userIconOverride, headers: {Authorization: token}};
         return (
             <View style={styles.avatar}>
                 <AnimatedFastImage
                     ref={forwardRef}
                     style={styles.avatar}
-                    source={{uri: userIconOverride}}
+                    source={source}
                 />
             </View>
         );
