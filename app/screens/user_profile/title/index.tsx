@@ -161,6 +161,7 @@ const UserProfileTitle = ({
                     />
                     <Text
                         numberOfLines={1}
+                        adjustsFontSizeToFit={true}
                         style={styles.displayName}
                         testID='user_profile.display_name'
                     >
