@@ -19,6 +19,8 @@ import {useAnimatedGestureHandler} from '@hooks/gallery';
 import {clamp, workletNoop} from '@utils/gallery';
 import * as vec from '@utils/gallery/vectors';
 import {calculateDimensions} from '@utils/images';
+import {useServerUrl} from '@context/server';
+import NetworkManager from '@managers/network_manager';
 
 const styles = StyleSheet.create({
     container: {
@@ -100,6 +102,9 @@ const ImageTransformer = (
         targetDimensions, width,
     }: ImageTransformerProps) => {
     const imageSource = typeof source === 'string' ? {uri: source} : source;
+    const serverUrl = useServerUrl();
+    const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
+    imageSource.headers = {Authorization: token};
     const [pinchEnabled, setPinchEnabledState] = useState(true);
     const interactionsEnabled = useSharedValue(false);
 

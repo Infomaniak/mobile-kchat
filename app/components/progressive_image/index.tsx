@@ -53,6 +53,7 @@ const ProgressiveImage = ({
     const styles = getStyleSheet(theme);
     const intensity = useSharedValue(0);
     const serverUrl = useServerUrl();
+    const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
 
     const defaultOpacity = useDerivedValue(() => (
         interpolate(
@@ -81,11 +82,17 @@ const ProgressiveImage = ({
     }, [inViewPort]);
 
     if (isBackgroundImage && imageUri) {
+        const imgSource = {
+            uri: imageUri,
+            headers: {
+                Authorization: token,
+            },
+        };
         return (
             <View style={[styles.defaultImageContainer, style]}>
                 <AnimatedImageBackground
                     key={id}
-                    source={{uri: imageUri}}
+                    source={imgSource}
                     resizeMode={'cover'}
                     style={[StyleSheet.absoluteFill, imageStyle]}
                 >
@@ -96,6 +103,8 @@ const ProgressiveImage = ({
     }
 
     if (defaultSource) {
+        // @ts-ignore
+        defaultSource.headers = {Authorization: token};
         return (
             <View style={[styles.defaultImageContainer, style]}>
                 <AnimatedFastImage
@@ -115,7 +124,6 @@ const ProgressiveImage = ({
     }
 
     const containerStyle = {backgroundColor: changeOpacity(theme.centerChannelColor, Number(defaultOpacity.value))};
-    const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
     const imgSource = {
         uri: imageUri,
         headers: {
