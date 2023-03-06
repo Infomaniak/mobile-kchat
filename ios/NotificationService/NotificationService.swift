@@ -56,6 +56,7 @@ class NotificationService: UNNotificationServiceExtension {
       let overrideUsername = notification.userInfo["override_username"] as? String
       let senderId = notification.userInfo["sender_id"] as? String
       let sender = overrideUsername ?? senderId
+      let fromWebhook = notification.userInfo["from_webhook"] as? String == "true"
 
       guard let serverUrl = notification.userInfo["server_url"] as? String,
               let sender = sender
@@ -68,16 +69,15 @@ class NotificationService: UNNotificationServiceExtension {
       let overrideIconUrl = notification.userInfo["override_icon_url"] as? String
       os_log(OSLogType.default, "Mattermost Notifications: Fetching profile Image in server %{public}@ for sender %{public}@", serverUrl, sender)
         
-      PushNotification.default.fetchProfileImageSync(serverUrl, senderId: sender, overrideIconUrl: overrideIconUrl) {[weak self] data in
+      PushNotification.default.fetchProfileImageSync(serverUrl, senderId: sender, overrideIconUrl: overrideIconUrl, fromWebhook: fromWebhook) {[weak self] data in
         self?.sendMessageIntentCompletion(data)
       }
     }
   }
   
-  private func sendMessageIntentCompletion(_ avatarData: Data?) {
+  private func sendMessageIntentCompletion(_ avatarImage: INImage?) {
     guard let notification = bestAttemptContent else { return }
     if #available(iOSApplicationExtension 15.0, *),
-       let imgData = avatarData,
        let channelId = notification.userInfo["channel_id"] as? String {
       os_log(OSLogType.default, "Mattermost Notifications: creating intent")
 
@@ -89,7 +89,6 @@ class NotificationService: UNNotificationServiceExtension {
       let overrideUsername = notification.userInfo["override_username"] as? String
       let senderId = notification.userInfo["sender_id"] as? String
       let senderIdentifier = overrideUsername ?? senderId
-      let avatar = INImage(imageData: imgData) as INImage?
       let finalSenderName = overrideUsername ?? channelName ?? senderName
 
       var conversationId = channelId
@@ -108,7 +107,7 @@ class NotificationService: UNNotificationServiceExtension {
       let sender = INPerson(personHandle: handle,
                             nameComponents: nil,
                             displayName: finalSenderName,
-                            image: avatar,
+                            image: avatarImage,
                             contactIdentifier: nil,
                             customIdentifier: nil)
 

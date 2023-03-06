@@ -17,6 +17,7 @@
 		27C667AA295241B600E590D5 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C667A8295241B600E590D5 /* Sentry.swift */; };
 		3750F86D296DACD2002DAC87 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3750F867296DACD2002DAC87 /* Localizable.strings */; };
 		3750F86E296DACE3002DAC87 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3750F867296DACD2002DAC87 /* Localizable.strings */; };
+		37AD6C3029B5F239009576A8 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		37B0A413296DC0C50085944B /* Gekidou in Frameworks */ = {isa = PBXBuildFile; productRef = 37B0A412296DC0C50085944B /* Gekidou */; };
 		49AE370126D4455D00EF4E52 /* Gekidou in Frameworks */ = {isa = PBXBuildFile; productRef = 49AE370026D4455D00EF4E52 /* Gekidou */; };
 		4F7523DD23C03726EE36B730 /* libPods-kChat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A27DDBD8F8B05C6F11A7E73 /* libPods-kChat.a */; };
@@ -869,6 +870,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3750F86E296DACE3002DAC87 /* Localizable.strings in Resources */,
+				37AD6C3029B5F239009576A8 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
