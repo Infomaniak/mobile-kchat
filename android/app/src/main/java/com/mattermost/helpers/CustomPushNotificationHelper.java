@@ -302,6 +302,11 @@ public class CustomPushNotificationHelper {
     }
 
     private static String getSenderName(Bundle bundle) {
+        String overrideUsername = bundle.getString("override_username");
+        if (overrideUsername != null) {
+            return overrideUsername;
+        }
+
         String senderName = bundle.getString("sender_name");
         if (senderName != null) {
             return senderName;

@@ -90,6 +90,7 @@ class NotificationService: UNNotificationServiceExtension {
       let senderId = notification.userInfo["sender_id"] as? String
       let senderIdentifier = overrideUsername ?? senderId
       let avatar = INImage(imageData: imgData) as INImage?
+      let finalSenderName = overrideUsername ?? channelName ?? senderName
 
       var conversationId = channelId
       if isCRTEnabled && !rootId.isEmpty {
@@ -106,7 +107,7 @@ class NotificationService: UNNotificationServiceExtension {
       let handle = INPersonHandle(value: senderIdentifier, type: .unknown)
       let sender = INPerson(personHandle: handle,
                             nameComponents: nil,
-                            displayName: channelName ?? senderName,
+                            displayName: finalSenderName,
                             image: avatar,
                             contactIdentifier: nil,
                             customIdentifier: nil)
