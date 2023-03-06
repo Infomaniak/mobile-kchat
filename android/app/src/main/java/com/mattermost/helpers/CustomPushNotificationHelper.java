@@ -16,6 +16,8 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -67,6 +69,8 @@ public class CustomPushNotificationHelper {
         String serverUrl = bundle.getString("server_url");
         String type = bundle.getString("type");
         String urlOverride = bundle.getString("override_icon_url");
+        boolean fromWebhook = bundle.getString("from_webhook") != null && bundle.getString("from_webhook").equals("true");
+
         if (senderId == null) {
             senderId = "sender_id";
         }
@@ -83,7 +87,7 @@ public class CustomPushNotificationHelper {
 
         if (serverUrl != null && !type.equals(CustomPushNotificationHelper.PUSH_TYPE_SESSION)) {
             try {
-                Bitmap avatar = userAvatar(context, serverUrl, senderId, urlOverride);
+                Bitmap avatar = userAvatar(context, serverUrl, senderId, urlOverride, fromWebhook);
                 if (avatar != null) {
                     sender.setIcon(IconCompat.createWithBitmap(avatar));
                 }
@@ -276,6 +280,7 @@ public class CustomPushNotificationHelper {
         final String serverUrl = bundle.getString("server_url");
         final String type = bundle.getString("type");
         String urlOverride = bundle.getString("override_icon_url");
+        boolean fromWebhook = bundle.getString("from_webhook") != null && bundle.getString("from_webhook").equals("true");
 
         Person.Builder sender = new Person.Builder()
                 .setKey(senderId)
@@ -283,7 +288,7 @@ public class CustomPushNotificationHelper {
 
         if (serverUrl != null && !type.equals(CustomPushNotificationHelper.PUSH_TYPE_SESSION)) {
             try {
-                Bitmap avatar = userAvatar(context, serverUrl, "me", urlOverride);
+                Bitmap avatar = userAvatar(context, serverUrl, "me", urlOverride, fromWebhook);
                 if (avatar != null) {
                     sender.setIcon(IconCompat.createWithBitmap(avatar));
                 }
@@ -402,13 +407,14 @@ public class CustomPushNotificationHelper {
         String senderName = bundle.getString("sender_name");
         String serverUrl = bundle.getString("server_url");
         String urlOverride = bundle.getString("override_icon_url");
+        boolean fromWebhook = bundle.getString("from_webhook") != null && bundle.getString("from_webhook").equals("true");
 
         notification.setSmallIcon(R.drawable.ic_notification);
 
         if (serverUrl != null && channelName.equals(senderName)) {
             try {
                 String senderId = bundle.getString("sender_id");
-                Bitmap avatar = userAvatar(context, serverUrl, senderId, urlOverride);
+                Bitmap avatar = userAvatar(context, serverUrl, senderId, urlOverride, fromWebhook);
                 if (avatar != null) {
                     notification.setLargeIcon(avatar);
                 }
@@ -418,14 +424,40 @@ public class CustomPushNotificationHelper {
         }
     }
 
-    private static Bitmap userAvatar(final Context context, @NonNull final String serverUrl, final String userId, final String urlOverride) throws IOException {
+    public static Bitmap drawableToBitmap(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+
+        // We ask for the bounds if they have been set as they would be most
+        // correct, then we check we are  > 0
+        final int width = !drawable.getBounds().isEmpty() ?
+                drawable.getBounds().width() : drawable.getIntrinsicWidth();
+
+        final int height = !drawable.getBounds().isEmpty() ?
+                drawable.getBounds().height() : drawable.getIntrinsicHeight();
+
+        // Now we check we are > 0
+        final Bitmap bitmap = Bitmap.createBitmap(width <= 0 ? 1 : width, height <= 0 ? 1 : height,
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
+    }
+
+    private static Bitmap userAvatar(final Context context, @NonNull final String serverUrl, final String userId, final String urlOverride, final boolean fromWebhook) throws IOException {
         try {
             Response response;
             Double lastUpdateAt = 0.0;
-            if (!TextUtils.isEmpty(urlOverride)) {
-                Request request = new Request.Builder().url(urlOverride).build();
-                Log.i("ReactNative", String.format("Fetch override profile image %s", urlOverride));
-                response = client.newCall(request).execute();
+            if (fromWebhook && TextUtils.isEmpty(urlOverride)) {
+                Bitmap webhookIcon = drawableToBitmap(context.getDrawable(R.drawable.webhook));
+                return webhookIcon;
+            } else if (!TextUtils.isEmpty(urlOverride)) {
+                String imageUrl = serverUrl + urlOverride;
+                Log.i("ReactNative", String.format("Fetch override profile image %s", imageUrl));
+                response = Network.getSync(serverUrl, imageUrl, null);
             } else {
                 DatabaseHelper dbHelper = DatabaseHelper.Companion.getInstance();
                 if (dbHelper != null) {
