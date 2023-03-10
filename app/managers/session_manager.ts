@@ -181,7 +181,11 @@ class SessionManager {
         const activeServerUrl = await DatabaseManager.getActiveServerUrl();
         const activeServerDisplayName = await DatabaseManager.getActiveServerDisplayName();
 
-        await this.terminateSession(serverUrl, removeServer);
+        const serverCredentials = await getAllServerCredentials();
+        for (const credential of serverCredentials) {
+            // eslint-disable-next-line no-await-in-loop
+            await this.terminateSession(credential.serverUrl, true);
+        }
 
         if (activeServerUrl === serverUrl) {
             let displayName = '';

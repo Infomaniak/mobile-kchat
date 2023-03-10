@@ -156,10 +156,9 @@ export const logout = async (serverUrl: string, skipServerLogout = false, remove
                 // We want to log the user even if logging out from the server failed
                 logWarning('An error occurred logging out from the server', savedServerUrl, error);
             }
-
-            if (!skipEvents) {
-                DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: savedServerUrl, removeServer});
-            }
+        }
+        if (!skipEvents) {
+            DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: serverUrl, removeServer});
         }
         NetworkManager.invalidateGlobalClient();
     }
