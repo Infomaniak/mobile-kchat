@@ -233,7 +233,7 @@ public class ShareModule extends ReactContextBaseJavaModule {
 
             RequestBody body = builder.build();
             Request request = new Request.Builder()
-                    .header("Authorization", "BEARER " + token)
+                    .header("Authorization", "Bearer " + token)
                     .url(serverUrl + "/api/v4/files")
                     .post(body)
                     .build();
