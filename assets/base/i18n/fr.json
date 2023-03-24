@@ -993,6 +993,11 @@
     "invite.members.already_member": "",
     "mobile.calls_start_call_exists": "",
     "mobile.calls_not_connected": "",
+    "channel_notification_preferences.notification.thread_replies": "M'avertir des réponses aux fils de discussion que je suis sur cette chaîne",
+    "channel_notification_preferences.notification.mention": "Mentions, messages directs uniquement",
+    "channel_notification_preferences.notification.all": "Tous les nouveaux messages",
+    "channel_notification_preferences.muted_title": "Ce canal est en sourdine",
+    "channel_notification_preferences.muted_content": "Vous pouvez modifier les paramètres de notification, mais vous ne recevrez pas de notifications tant que le canal n'aura pas été désactivé.",
     "infomaniak.no_team.title": "Vous ne possédez pas de kChat, découvrez le avec kSuite",
     "infomaniak.no_team.description": "kSuite intègre tous nos applications de productivité dont kChat pour communiquer en direct, partager et coordonner vos équipes.",
     "infomaniak.channel_quota_exceeded.title": "Créez de nouveaux canaux pour mieux communiquer avec les membres de votre organisation",
@@ -1002,6 +1007,6 @@
     "infomaniak.messages_quota_exceeded.description": "Les messages et fichiers datant de plus de 3 mois sont masqués. Pour afficher plus de messages, souscrivez à une offre supérieure.",
     "infomaniak.feedback.title": "Feedback",
     "infomaniak.feedback.url": "https://feedback.userreport.com/d7b91e08-f79e-4eae-8a5d-f1527c33bd9b#ideas/popular",
-    "infomaniak.login.title":"Bienvenue sur kChat",
+    "infomaniak.login.title": "Bienvenue sur kChat",
     "infomaniak.login.description": "Connectez-vous à votre compte et envoyez des messages depuis l'app."
 }

@@ -27,7 +27,7 @@ import EphemeralStore from '@store/ephemeral_store';
 import {setFetchingThreadState} from '@store/fetching_thread_store';
 import {getValidEmojis, matchEmoticons} from '@utils/emoji/helpers';
 import {isServerError} from '@utils/errors';
-import {logError} from '@utils/log';
+import {logDebug, logError} from '@utils/log';
 import {processPostsFetched} from '@utils/post';
 import {getPostIdsForCombinedUserActivityPost} from '@utils/post_list';
 
@@ -141,6 +141,7 @@ export async function createPost(serverUrl: string, post: Partial<Post>, files: 
     try {
         created = await client.createPost(newPost);
     } catch (error) {
+        logDebug('Error sending a post', error);
         const errorPost = {
             ...newPost,
             id: pendingPostId,
