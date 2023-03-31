@@ -29,6 +29,7 @@ import ReactionBar from './reaction_bar';
 import type PostModel from '@typings/database/models/servers/post';
 import type ThreadModel from '@typings/database/models/servers/thread';
 import type {AvailableScreens} from '@typings/screens/navigation';
+import IKReminderOption from '@screens/post_options/options/ik_reminder_option';
 
 const POST_OPTIONS_BUTTON = 'close-post-options';
 
@@ -73,11 +74,13 @@ const PostOptions = ({
     const shouldRenderFollow = !(sourceScreen !== Screens.CHANNEL || !thread);
     const shouldShowBindings = bindings.length > 0 && !isSystemPost;
 
+    const canShowReminder = !isSystemPost;
+
     const snapPoints = useMemo(() => {
         const items: BottomSheetProps['snapPoints'] = [1];
         const optionsCount = [
             canCopyPermalink, canCopyText, canDelete, canEdit,
-            canMarkAsUnread, canPin, canReply, !isSystemPost, shouldRenderFollow,
+            canMarkAsUnread, canPin, canReply, !isSystemPost, shouldRenderFollow, canShowReminder,
         ].reduce((acc, v) => {
             return v ? acc + 1 : acc;
         }, 0) + (shouldShowBindings ? 0.5 : 0);
@@ -122,6 +125,12 @@ const PostOptions = ({
                     post={post}
                     sourceScreen={sourceScreen}
                 />
+                }
+                {canShowReminder &&
+                    <IKReminderOption
+                        bottomSheetId={Screens.POST_OPTIONS}
+                        post={post}
+                    />
                 }
                 {canCopyPermalink &&
                 <CopyPermalinkOption

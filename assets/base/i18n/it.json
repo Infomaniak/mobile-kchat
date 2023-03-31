@@ -1008,5 +1008,11 @@
     "infomaniak.feedback.title": "Feedback",
     "infomaniak.feedback.url": "https://feedback.userreport.com/066a68a7-e8f9-47a3-8099-18591dbdfd1f#ideas/popular",
     "infomaniak.login.title": "Benvenuti in kChat",
-    "infomaniak.login.description": "Accedete al vostro account e inviate messaggi dall'app."
+    "infomaniak.login.description": "Accedete al vostro account e inviate messaggi dall'app.",
+    "infomaniak.post_info.post_reminder.menu": "Promemoria",
+    "infomaniak.post_info.post_reminder.sub_menu.thirty_minutes": "30 min",
+    "infomaniak.post_info.post_reminder.sub_menu.one_hour": "1 ora",
+    "infomaniak.post_info.post_reminder.sub_menu.two_hours": "2 ore",
+    "infomaniak.post_info.post_reminder.sub_menu.tomorrow": "Domani",
+    "infomaniak.post_info.post_reminder.sub_menu.custom": "Personalizzato"
 }

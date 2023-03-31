@@ -72,6 +72,8 @@ export const INFOMANIAK_LOGIN = 'InfomaniakLogin';
 export const INFOMANIAK_NO_TEAMS = 'InfomaniakNoTeams';
 export const INFOMANIAK_QUOTA_EXCEEDED = 'InfomaniakQuotaExceeded';
 
+export const INFOMANIAK_REMINDER = 'InfomaniakReminder';
+
 export default {
     ABOUT,
     ACCOUNT,
@@ -143,6 +145,7 @@ export default {
     INFOMANIAK_LOGIN,
     INFOMANIAK_NO_TEAMS,
     INFOMANIAK_QUOTA_EXCEEDED,
+    INFOMANIAK_REMINDER,
 } as const;
 
 export const MODAL_SCREENS_WITHOUT_BACK = new Set<string>([
@@ -176,6 +179,7 @@ export const SCREENS_AS_BOTTOM_SHEET = new Set<string>([
     REACTIONS,
     USER_PROFILE,
     INFOMANIAK_QUOTA_EXCEEDED,
+    INFOMANIAK_REMINDER,
 ]);
 
 export const NOT_READY = [

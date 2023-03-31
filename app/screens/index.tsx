@@ -260,6 +260,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.INFOMANIAK_QUOTA_EXCEEDED:
             screen = withServerDatabase(require('@screens/ik_quota_exceeded').default);
             break;
+        case Screens.INFOMANIAK_REMINDER:
+            screen = withServerDatabase(require('@screens/ik_reminder').default);
+            break;
     }
 
     if (screen) {

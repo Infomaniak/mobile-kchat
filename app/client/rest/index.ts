@@ -3,6 +3,7 @@
 
 import ClientCalls, {ClientCallsMix} from '@calls/client/rest';
 import IKClientCalls, {IKClientCallsMix} from '@client/rest/ikcalls';
+import IKClientCustomActions, {IKClientCustomActionsMix} from '@client/rest/ikcustomactions';
 import IKClientMultiTeam, {IKClientMultiTeamMix} from '@client/rest/ikteams';
 import ClientPlugins, {ClientPluginsMix} from '@client/rest/plugins';
 import mix from '@utils/mix';
@@ -46,7 +47,8 @@ interface Client extends ClientBase,
     ClientPluginsMix,
     ClientNPSMix,
     IKClientMultiTeamMix,
-    IKClientCallsMix
+    IKClientCallsMix,
+    IKClientCustomActionsMix
 {}
 
 class Client extends mix(ClientBase).with(
@@ -69,6 +71,7 @@ class Client extends mix(ClientBase).with(
     ClientNPS,
     IKClientMultiTeam,
     IKClientCalls,
+    IKClientCustomActions,
 ) {
     // eslint-disable-next-line no-useless-constructor
     constructor(apiClient: APIClientInterface, serverUrl: string, bearerToken?: string, csrfToken?: string) {
