@@ -8,7 +8,7 @@ export const BOTTOM_SHEET = 'BottomSheet';
 export const BROWSE_CHANNELS = 'BrowseChannels';
 export const CALL = 'Call';
 export const CHANNEL = 'Channel';
-export const CHANNEL_ADD_PEOPLE = 'ChannelAddPeople';
+export const CHANNEL_ADD_MEMBERS = 'ChannelAddMembers';
 export const CHANNEL_INFO = 'ChannelInfo';
 export const CHANNEL_NOTIFICATION_PREFERENCES = 'ChannelNotificationPreferences';
 export const CODE = 'Code';
@@ -80,7 +80,7 @@ export default {
     BROWSE_CHANNELS,
     CALL,
     CHANNEL,
-    CHANNEL_ADD_PEOPLE,
+    CHANNEL_ADD_MEMBERS,
     CHANNEL_INFO,
     CHANNEL_NOTIFICATION_PREFERENCES,
     CODE,
@@ -148,6 +148,7 @@ export default {
 export const MODAL_SCREENS_WITHOUT_BACK = new Set<string>([
     BROWSE_CHANNELS,
     CHANNEL_INFO,
+    CHANNEL_ADD_MEMBERS,
     CREATE_DIRECT_MESSAGE,
     CREATE_TEAM,
     CUSTOM_STATUS,
@@ -178,6 +179,5 @@ export const SCREENS_AS_BOTTOM_SHEET = new Set<string>([
 ]);
 
 export const NOT_READY = [
-    CHANNEL_ADD_PEOPLE,
     CREATE_TEAM,
 ];
