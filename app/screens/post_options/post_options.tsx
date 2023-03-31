@@ -15,6 +15,8 @@ import {useIsTablet} from '@hooks/device';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import BottomSheet from '@screens/bottom_sheet';
 import {dismissBottomSheet} from '@screens/navigation';
+import IKReminderOption from '@screens/post_options/options/ik_reminder_option';
+import IKTranslateOption from '@screens/post_options/options/ik_translate_option';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {isSystemMessage} from '@utils/post';
 
@@ -29,7 +31,6 @@ import ReactionBar from './reaction_bar';
 import type PostModel from '@typings/database/models/servers/post';
 import type ThreadModel from '@typings/database/models/servers/thread';
 import type {AvailableScreens} from '@typings/screens/navigation';
-import IKReminderOption from '@screens/post_options/options/ik_reminder_option';
 
 const POST_OPTIONS_BUTTON = 'close-post-options';
 
@@ -75,12 +76,13 @@ const PostOptions = ({
     const shouldShowBindings = bindings.length > 0 && !isSystemPost;
 
     const canShowReminder = !isSystemPost;
+    const canTranslate = !isSystemPost;
 
     const snapPoints = useMemo(() => {
         const items: BottomSheetProps['snapPoints'] = [1];
         const optionsCount = [
             canCopyPermalink, canCopyText, canDelete, canEdit,
-            canMarkAsUnread, canPin, canReply, !isSystemPost, shouldRenderFollow, canShowReminder,
+            canMarkAsUnread, canPin, canReply, !isSystemPost, shouldRenderFollow, canShowReminder, canTranslate,
         ].reduce((acc, v) => {
             return v ? acc + 1 : acc;
         }, 0) + (shouldShowBindings ? 0.5 : 0);
@@ -158,6 +160,12 @@ const PostOptions = ({
                     isPostPinned={post.isPinned}
                     postId={post.id}
                 />
+                }
+                {canTranslate &&
+                    <IKTranslateOption
+                        bottomSheetId={Screens.POST_OPTIONS}
+                        post={post}
+                    />
                 }
                 {canEdit &&
                 <EditOption

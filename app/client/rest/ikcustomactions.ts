@@ -10,6 +10,7 @@ export type TeamServer = {
 
 export interface IKClientCustomActionsMix {
     addPostReminder: (postId: string, timestamp: number) => Promise<Boolean>;
+    translatePost: (postId: string) => Promise<Boolean>;
 }
 
 const IKClientCustomActions = (superclass: any) => class extends superclass {
@@ -17,6 +18,13 @@ const IKClientCustomActions = (superclass: any) => class extends superclass {
         return this.doFetch(
             `${this.getUserRoute('me')}/posts/${postId}/reminder`,
             {method: 'post', body: {target_time: timestamp}},
+        );
+    };
+
+    translatePost = async (postId: string) => {
+        return this.doFetch(
+            `${this.getPostRoute(postId)}/translate`,
+            {method: 'post'},
         );
     };
 };
