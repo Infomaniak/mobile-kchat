@@ -253,6 +253,23 @@ const renderGuestJoinChannelMessage = ({post, styles, location, intl, theme}: Re
     return renderMessage({post, styles, intl, location, localeHolder, values, theme});
 };
 
+const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: RenderersProps) => {
+    if (!post.props.username) {
+        return null;
+    }
+
+    const username = renderUsername(post.props.username);
+    const permaLink = `[${post.props.link}](${post.props.link})`;
+
+    const localeHolder = {
+        id: t('infomaniak.post.reminder.systemBot'),
+        defaultMessage: 'Hi there, here\'s your reminder about this message from {username}:\n{permaLink}',
+    };
+
+    const values = {username, permaLink};
+    return renderMessage({post, styles, intl, location, localeHolder, values, theme});
+};
+
 const systemMessageRenderers = {
     [Post.POST_TYPES.HEADER_CHANGE]: renderHeaderChangeMessage,
     [Post.POST_TYPES.DISPLAYNAME_CHANGE]: renderDisplayNameChangeMessage,
@@ -261,6 +278,7 @@ const systemMessageRenderers = {
     [Post.POST_TYPES.CHANNEL_UNARCHIVED]: renderUnarchivedMessage,
     [Post.POST_TYPES.GUEST_JOIN_CHANNEL]: renderGuestJoinChannelMessage,
     [Post.POST_TYPES.ADD_GUEST_TO_CHANNEL]: renderAddGuestToChannelMessage,
+    [Post.POST_TYPES.IK_SYSTEM_POST_REMINDER]: renderReminderSystemBotMessage,
 };
 
 export const SystemMessage = ({post, location, author}: SystemMessageProps) => {

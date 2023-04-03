@@ -1014,5 +1014,6 @@
     "infomaniak.post_info.post_reminder.sub_menu.one_hour": "1 ora",
     "infomaniak.post_info.post_reminder.sub_menu.two_hours": "2 ore",
     "infomaniak.post_info.post_reminder.sub_menu.tomorrow": "Domani",
-    "infomaniak.post_info.post_reminder.sub_menu.custom": "Personalizzato"
+    "infomaniak.post_info.post_reminder.sub_menu.custom": "Personalizzato",
+    "infomaniak.post.reminder.systemBot": "Salve, ecco il promemoria di questo messaggio da parte di {username}:\n{permaLink}"
 }

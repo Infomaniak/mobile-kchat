@@ -35,6 +35,8 @@ export const PostTypes: Record<string, string> = {
     SYSTEM_AUTO_RESPONDER: 'system_auto_responder',
     CUSTOM_CALLS: 'custom_calls',
     CUSTOM_CALLS_RECORDING: 'custom_calls_recording',
+
+    IK_SYSTEM_POST_REMINDER: 'system_post_reminder',
 };
 
 export const PostPriorityColors = {
