@@ -1025,5 +1025,6 @@
     "infomaniak.post_info.post_reminder.sub_menu.two_hours": "2 Std",
     "infomaniak.post_info.post_reminder.sub_menu.tomorrow": "Morgen",
     "infomaniak.post_info.post_reminder.sub_menu.custom": "Benutzerdefiniert",
-    "infomanial.post.reminder.systemBot": "Hallo, hier ist Ihre Erinnerung an diese Nachricht von {username}:\n{permaLink}"
+    "infomanial.post.reminder.systemBot": "Hallo, hier ist Ihre Erinnerung an diese Nachricht von {username}:\n{permaLink}",
+    "infomaniak.post_info.post_translate.menu": "Übersetzen"
 }

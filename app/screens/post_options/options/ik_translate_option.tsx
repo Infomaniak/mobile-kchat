@@ -31,7 +31,7 @@ const IKTranslateOption = ({bottomSheetId, post}: Props) => {
 
     return (
         <BaseOption
-            i18nId={t('infomaniak.post_info.post_reminder.menu')}
+            i18nId={t('infomaniak.post_info.post_translate.menu')}
             defaultMessage='Translate'
             onPress={onPress}
             iconName='format-letter-case'
