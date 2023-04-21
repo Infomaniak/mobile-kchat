@@ -10,11 +10,12 @@ import FormattedText from '@components/formatted_text';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import CallManager from '@store/CallManager';
-import PostModel from '@typings/database/models/servers/post';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 import KMeetIcon from './kmeet_icon';
+
+import type PostModel from '@typings/database/models/servers/post';
 
 type CallMessageProps = {
     post: PostModel;
