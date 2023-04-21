@@ -48,7 +48,7 @@ function iosM1() {
     echo "Installing Gems"
     npm run ios-gems-m1 &> /dev/null || exit 1
     echo "Getting Cocoapods dependencies"
-    npm run pod-install-m1 &> /dev/null || exit 1
+    npm run pod-install &> /dev/null
 }
 
 function setup() {
