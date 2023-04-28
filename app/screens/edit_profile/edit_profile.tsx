@@ -3,7 +3,7 @@
 
 import React, {useCallback, useEffect, useMemo} from 'react';
 import {DeviceEventEmitter, StyleSheet} from 'react-native';
-import {Edge, SafeAreaView} from 'react-native-safe-area-context';
+import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 import WebView from 'react-native-webview';
 
 import CompassIcon from '@components/compass_icon';

@@ -2,8 +2,8 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useState} from 'react';
-import {LayoutChangeEvent, StyleSheet, StyleProp, View, ViewStyle} from 'react-native';
-import Animated, {Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming} from 'react-native-reanimated';
+import {type LayoutChangeEvent, StyleSheet, type StyleProp, View, type ViewStyle, Easing} from 'react-native';
+import Animated, {useAnimatedStyle, useSharedValue, withRepeat, withTiming} from 'react-native-reanimated';
 
 type ProgressBarProps = {
     color: string;

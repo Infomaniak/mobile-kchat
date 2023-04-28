@@ -4,17 +4,19 @@
 import {DeviceEventEmitter} from 'react-native';
 
 import {storeMyChannelsForTeam, markChannelAsUnread, markChannelAsViewed, updateLastPostAt} from '@actions/local/channel';
-import {markPostAsDeleted} from '@actions/local/post';
+import {addPostAcknowledgement, markPostAsDeleted, removePostAcknowledgement} from '@actions/local/post';
 import {createThreadFromNewPost, updateThread} from '@actions/local/thread';
 import {fetchChannelStats, fetchMyChannel} from '@actions/remote/channel';
 import {fetchPostAuthors, fetchPostById} from '@actions/remote/post';
 import {fetchThread} from '@actions/remote/thread';
+import {fetchMissingProfilesByIds} from '@actions/remote/user';
 import {ActionType, Events, Screens} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getChannelById, getMyChannel} from '@queries/servers/channel';
 import {getPostById} from '@queries/servers/post';
 import {getCurrentChannelId, getCurrentTeamId, getCurrentUserId} from '@queries/servers/system';
 import {getIsCRTEnabled} from '@queries/servers/thread';
+import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {isTablet} from '@utils/helpers';
 import {isFromWebhook, isSystemMessage, shouldIgnorePost} from '@utils/post';
@@ -162,6 +164,20 @@ export async function handleNewPostEvent(serverUrl: string, msg: WebSocketMessag
         actionType = ActionType.POSTS.RECEIVED_IN_THREAD;
     }
 
+    const outOfOrderWebsocketEvent = EphemeralStore.getLastPostWebsocketEvent(serverUrl, post.id);
+    if (outOfOrderWebsocketEvent?.deleted) {
+        for (const model of models) {
+            if (model._preparedState === 'update') {
+                model.cancelPrepareUpdate();
+            }
+        }
+        return;
+    }
+
+    if (outOfOrderWebsocketEvent?.post) {
+        post = outOfOrderWebsocketEvent.post;
+    }
+
     const postModels = await operator.handlePosts({
         actionType,
         order: [post.id],
@@ -191,7 +207,12 @@ export async function handlePostEdited(serverUrl: string, msg: WebSocketMessage)
     const {database} = operator;
 
     const oldPost = await getPostById(database, post.id);
-    if (oldPost && oldPost.isPinned !== post.is_pinned) {
+    if (!oldPost) {
+        EphemeralStore.addEditingPost(serverUrl, post);
+        return;
+    }
+
+    if (oldPost.isPinned !== post.is_pinned) {
         fetchChannelStats(serverUrl, post.channel_id);
     }
 
@@ -227,6 +248,12 @@ export async function handlePostDeleted(serverUrl: string, msg: WebSocketMessage
         const {database} = operator;
 
         const post: Post = msg.data.post;
+
+        const oldPost = await getPostById(database, post.id);
+        if (!oldPost) {
+            EphemeralStore.addRemovingPost(serverUrl, post.id);
+            return;
+        }
 
         const models: Model[] = [];
 
@@ -298,5 +325,43 @@ export async function handlePostUnread(serverUrl: string, msg: WebSocketMessage)
         const delta = postNumber ? postNumber - messages : messages;
 
         markChannelAsUnread(serverUrl, channelId, delta, mentions, lastViewedAt);
+    }
+}
+
+export async function handlePostAcknowledgementAdded(serverUrl: string, msg: WebSocketMessage) {
+    try {
+        const acknowledgement = JSON.parse(msg.data.acknowledgement);
+        const {user_id, post_id, acknowledged_at} = acknowledgement;
+        const database = DatabaseManager.serverDatabases[serverUrl]?.database;
+        if (!database) {
+            return;
+        }
+        const currentUserId = getCurrentUserId(database);
+        if (EphemeralStore.isAcknowledgingPost(post_id) && currentUserId === user_id) {
+            return;
+        }
+
+        addPostAcknowledgement(serverUrl, post_id, user_id, acknowledged_at);
+        fetchMissingProfilesByIds(serverUrl, [user_id]);
+    } catch (error) {
+        // Do nothing
+    }
+}
+
+export async function handlePostAcknowledgementRemoved(serverUrl: string, msg: WebSocketMessage) {
+    try {
+        const acknowledgement = JSON.parse(msg.data.acknowledgement);
+        const {user_id, post_id} = acknowledgement;
+        const database = DatabaseManager.serverDatabases[serverUrl]?.database;
+        if (!database) {
+            return;
+        }
+        const currentUserId = getCurrentUserId(database);
+        if (EphemeralStore.isUnacknowledgingPost(post_id) && currentUserId === user_id) {
+            return;
+        }
+        await removePostAcknowledgement(serverUrl, post_id, user_id);
+    } catch (error) {
+        // Do nothing
     }
 }

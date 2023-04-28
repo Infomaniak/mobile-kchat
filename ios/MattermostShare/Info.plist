@@ -4,8 +4,6 @@
 <dict>
 	<key>AppGroupIdentifier</key>
 	<string>group.com.infomaniak.chat</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.infomaniak.chat.ShareExtension</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

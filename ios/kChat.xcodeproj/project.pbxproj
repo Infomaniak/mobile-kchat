@@ -23,6 +23,16 @@
 		4F7523DD23C03726EE36B730 /* libPods-kChat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A27DDBD8F8B05C6F11A7E73 /* libPods-kChat.a */; };
 		536CC6C323E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.m in Sources */ = {isa = PBXBuildFile; fileRef = 536CC6C123E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.m */; };
 		58495E36BF1A4EAB93609E57 /* Metropolis-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 54956DEFEBB74EF78C3A6AE5 /* Metropolis-SemiBold.ttf */; };
+		672D988729F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D984629F1927E004228D6 /* InfoPlist.strings */; };
+		672D988829F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D984629F1927E004228D6 /* InfoPlist.strings */; };
+		672D989D29F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D986729F1927F004228D6 /* InfoPlist.strings */; };
+		672D989E29F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D986729F1927F004228D6 /* InfoPlist.strings */; };
+		672D98A329F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987029F1927F004228D6 /* InfoPlist.strings */; };
+		672D98A429F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987029F1927F004228D6 /* InfoPlist.strings */; };
+		672D98A929F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987929F1927F004228D6 /* InfoPlist.strings */; };
+		672D98AA29F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987929F1927F004228D6 /* InfoPlist.strings */; };
+		672D98AB29F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987C29F1927F004228D6 /* InfoPlist.strings */; };
+		672D98AC29F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987C29F1927F004228D6 /* InfoPlist.strings */; };
 		7F0F4B0A24BA173900E14C60 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7F0F4B0924BA173900E14C60 /* LaunchScreen.storyboard */; };
 		7F151D3E221B062700FAD8F3 /* RuntimeUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F151D3D221B062700FAD8F3 /* RuntimeUtils.swift */; };
 		7F1EB88527FDE361002E7EEC /* GekidouWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1EB88427FDE361002E7EEC /* GekidouWrapper.swift */; };
@@ -187,6 +197,11 @@
 		54956DEFEBB74EF78C3A6AE5 /* Metropolis-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Metropolis-SemiBold.ttf"; path = "../assets/fonts/Metropolis-SemiBold.ttf"; sourceTree = "<group>"; };
 		57CB4735B7E57B50D0B50E16 /* Pods-MattermostTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MattermostTests.debug.xcconfig"; path = "Target Support Files/Pods-MattermostTests/Pods-MattermostTests.debug.xcconfig"; sourceTree = "<group>"; };
 		6561AEAC21CC40B8A72ABB93 /* OpenSans-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-Light.ttf"; path = "../assets/fonts/OpenSans-Light.ttf"; sourceTree = "<group>"; };
+		672D984729F1927E004228D6 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = InfoPlist.strings; sourceTree = "<group>"; };
+		672D986829F1927F004228D6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = InfoPlist.strings; sourceTree = "<group>"; };
+		672D987129F1927F004228D6 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = InfoPlist.strings; sourceTree = "<group>"; };
+		672D987A29F1927F004228D6 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = InfoPlist.strings; sourceTree = "<group>"; };
+		672D987D29F1927F004228D6 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = InfoPlist.strings; sourceTree = "<group>"; };
 		6BAF8296411D4657B5A0E8F8 /* libRNReactNativeDocViewer.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNReactNativeDocViewer.a; sourceTree = "<group>"; };
 		7836FF65A2EDDE3EBF5E9146 /* Pods-kChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChat.debug.xcconfig"; path = "Target Support Files/Pods-kChat/Pods-kChat.debug.xcconfig"; sourceTree = "<group>"; };
 		7F0F4B0924BA173900E14C60 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = SplashScreenResource/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -334,6 +349,11 @@
 		0156F464626F49C2977D7982 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				672D984529F1927E004228D6 /* de.lproj */,
+				672D986629F1927F004228D6 /* en.lproj */,
+				672D987829F1927F004228D6 /* es.lproj */,
+				672D986F29F1927F004228D6 /* fr.lproj */,
+				672D987B29F1927F004228D6 /* it.lproj */,
 				531BEBC52513E93C00BC05B1 /* compass-icons.ttf */,
 				7F25B626270F666D00F32373 /* Metropolis-Light.ttf */,
 				7F25B628270F666D00F32373 /* Metropolis-Regular.ttf */,
@@ -436,6 +456,51 @@
 				9A27DDBD8F8B05C6F11A7E73 /* libPods-kChat.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		672D984529F1927E004228D6 /* de.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				672D984629F1927E004228D6 /* InfoPlist.strings */,
+			);
+			name = de.lproj;
+			path = Mattermost/i18n/de.lproj;
+			sourceTree = "<group>";
+		};
+		672D986629F1927F004228D6 /* en.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				672D986729F1927F004228D6 /* InfoPlist.strings */,
+			);
+			name = en.lproj;
+			path = Mattermost/i18n/en.lproj;
+			sourceTree = "<group>";
+		};
+		672D986F29F1927F004228D6 /* fr.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				672D987029F1927F004228D6 /* InfoPlist.strings */,
+			);
+			name = fr.lproj;
+			path = Mattermost/i18n/fr.lproj;
+			sourceTree = "<group>";
+		};
+		672D987829F1927F004228D6 /* es.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				672D987929F1927F004228D6 /* InfoPlist.strings */,
+			);
+			name = es.lproj;
+			path = Mattermost/i18n/es.lproj;
+			sourceTree = "<group>";
+		};
+		672D987B29F1927F004228D6 /* it.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				672D987C29F1927F004228D6 /* InfoPlist.strings */,
+			);
+			name = it.lproj;
+			path = Mattermost/i18n/it.lproj;
 			sourceTree = "<group>";
 		};
 		7F42880528664AB2006B48E1 /* Utils */ = {
@@ -812,10 +877,9 @@
 			};
 			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "kChat" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				English,
 				en,
 				Base,
 				de,
@@ -845,19 +909,24 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				672D98A329F1927F004228D6 /* InfoPlist.strings in Resources */,
 				7F0F4B0A24BA173900E14C60 /* LaunchScreen.storyboard in Resources */,
 				7F292A711E8AB73400A450A3 /* SplashScreenResource in Resources */,
 				7FB31F812710995B0032E2E5 /* Metropolis-Light.ttf in Resources */,
 				7FB31F822710996D0032E2E5 /* Metropolis-Regular.ttf in Resources */,
 				7FB31F842710996D0032E2E5 /* OpenSans-Bold.ttf in Resources */,
 				7FB31F852710996D0032E2E5 /* OpenSans-BoldItalic.ttf in Resources */,
+				672D988729F1927F004228D6 /* InfoPlist.strings in Resources */,
+				672D989D29F1927F004228D6 /* InfoPlist.strings in Resources */,
 				7FB31F862710996D0032E2E5 /* OpenSans-ExtraBold.ttf in Resources */,
 				7FB31F872710996D0032E2E5 /* OpenSans-ExtraBoldItalic.ttf in Resources */,
 				7FB31F882710996D0032E2E5 /* OpenSans-Italic.ttf in Resources */,
+				672D98AB29F1927F004228D6 /* InfoPlist.strings in Resources */,
 				7FB31F892710996D0032E2E5 /* OpenSans-Light.ttf in Resources */,
 				7FB31F8A2710996D0032E2E5 /* OpenSans-LightItalic.ttf in Resources */,
 				7FB31F8B2710996D0032E2E5 /* OpenSans-Regular.ttf in Resources */,
 				3750F86D296DACD2002DAC87 /* Localizable.strings in Resources */,
+				672D98A929F1927F004228D6 /* InfoPlist.strings in Resources */,
 				7FB31F8E2710996D0032E2E5 /* compass-icons.ttf in Resources */,
 				58495E36BF1A4EAB93609E57 /* Metropolis-SemiBold.ttf in Resources */,
 				A94508A396424B2DB778AFE9 /* OpenSans-SemiBold.ttf in Resources */,
@@ -879,10 +948,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				7FD4825D2864DC5800A5B18B /* Metropolis-Light.ttf in Resources */,
+				672D98A429F1927F004228D6 /* InfoPlist.strings in Resources */,
+				672D989E29F1927F004228D6 /* InfoPlist.strings in Resources */,
+				672D98AA29F1927F004228D6 /* InfoPlist.strings in Resources */,
 				7FD4825E2864DC5800A5B18B /* Metropolis-Regular.ttf in Resources */,
 				7FD4825F2864DC5800A5B18B /* Metropolis-SemiBold.ttf in Resources */,
 				7FD482602864DC5800A5B18B /* OpenSans-Bold.ttf in Resources */,
 				7FD482612864DC5800A5B18B /* OpenSans-BoldItalic.ttf in Resources */,
+				672D988829F1927F004228D6 /* InfoPlist.strings in Resources */,
 				7FD482622864DC5800A5B18B /* OpenSans-ExtraBold.ttf in Resources */,
 				7FD482632864DC5900A5B18B /* OpenSans-ExtraBoldItalic.ttf in Resources */,
 				7FD482642864DC5900A5B18B /* OpenSans-Italic.ttf in Resources */,
@@ -890,6 +963,7 @@
 				7FD482662864DC5900A5B18B /* OpenSans-LightItalic.ttf in Resources */,
 				7FD482672864DC5900A5B18B /* OpenSans-Regular.ttf in Resources */,
 				7FD482682864DC5900A5B18B /* OpenSans-SemiBold.ttf in Resources */,
+				672D98AC29F1927F004228D6 /* InfoPlist.strings in Resources */,
 				7FD482692864DC5900A5B18B /* OpenSans-SemiBoldItalic.ttf in Resources */,
 				7FD4825C2864DC4200A5B18B /* compass-icons.ttf in Resources */,
 				7FD482292864D69700A5B18B /* Assets.xcassets in Resources */,
@@ -1133,6 +1207,46 @@
 				3750F86C296DACD2002DAC87 /* fr */,
 			);
 			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		672D984629F1927E004228D6 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				672D984729F1927E004228D6 /* de */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		672D986729F1927F004228D6 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				672D986829F1927F004228D6 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		672D987029F1927F004228D6 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				672D987129F1927F004228D6 /* fr */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		672D987929F1927F004228D6 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				672D987A29F1927F004228D6 /* es */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		672D987C29F1927F004228D6 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				672D987D29F1927F004228D6 /* it */,
+			);
+			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 		7FC5698A28563FDB000B0905 /* MainInterface.storyboard */ = {
@@ -1571,7 +1685,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
 			requirement = {
-				branch = 8.0.0;
+				branch = 8.4.0;
 				kind = branch;
 			};
 		};

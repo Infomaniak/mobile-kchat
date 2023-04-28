@@ -2,9 +2,9 @@
 // See LICENSE.txt for license information.
 
 import {Provider as EMMProvider} from '@mattermost/react-native-emm';
-import React, {ComponentType} from 'react';
+import React, {type ComponentType} from 'react';
 import {IntlProvider} from 'react-intl';
-import {Platform, StyleProp, ViewStyle} from 'react-native';
+import {Platform, type StyleProp, type ViewStyle} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {Navigation} from 'react-native-navigation';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
@@ -175,6 +175,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             break;
         case Screens.POST_OPTIONS:
             screen = withServerDatabase(require('@screens/post_options').default);
+            break;
+        case Screens.POST_PRIORITY_PICKER:
+            screen = withServerDatabase(require('@screens/post_priority_picker').default);
             break;
         case Screens.REACTIONS:
             screen = withServerDatabase(require('@screens/reactions').default);
