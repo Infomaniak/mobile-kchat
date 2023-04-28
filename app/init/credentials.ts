@@ -101,7 +101,7 @@ export const getServerCredentials = async (serverUrl: string): Promise<ServerCre
             const token = credentials.password;
 
             if (token && token !== 'undefined') {
-                const analyticsClient = analytics.create(serverUrl);
+                const analyticsClient = analytics.create();
                 analyticsClient?.setUserId(userId);
 
                 return {serverUrl, userId, token};

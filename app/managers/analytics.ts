@@ -2,8 +2,7 @@
 // See LICENSE.txt for license information.
 
 import MatomoTracker from 'matomo-tracker-react-native';
-
-const clientMap: Record<string, Analytics> = {};
+import {logInfo} from '@utils/log';
 
 export class Analytics {
     matomoTracker: MatomoTracker | null = null;
@@ -116,24 +115,17 @@ export class Analytics {
     }
 }
 
-export function create(serverUrl: string): Analytics {
-    let client = clientMap[serverUrl];
+const client = new Analytics();
 
-    if (client) {
-        return client;
-    }
-
-    client = new Analytics();
-    clientMap[serverUrl] = client;
+export function create(): Analytics {
     return client;
 }
 
-export function get(serverUrl: string): Analytics | undefined {
-    return clientMap[serverUrl];
+export function get(): Analytics {
+    return client;
 }
 
 export function invalidate(serverUrl: string) {
-    delete clientMap[serverUrl];
 }
 
 export default {

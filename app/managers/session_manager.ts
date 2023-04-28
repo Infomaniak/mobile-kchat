@@ -128,7 +128,7 @@ class SessionManager {
             await DatabaseManager.deleteServerDatabase(serverUrl);
         }
 
-        const analyticsClient = analytics.get(serverUrl);
+        const analyticsClient = analytics.get();
         if (analyticsClient) {
             analyticsClient.reset();
             analytics.invalidate(serverUrl);
