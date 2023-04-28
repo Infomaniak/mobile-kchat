@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 import React from 'react';
 import {useIntl} from 'react-intl';
-import {Text, TouchableOpacity, View} from 'react-native';
+import {Platform, Text, TouchableOpacity, View} from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import {GalleryInit} from '@context/gallery';
@@ -161,7 +161,7 @@ const UserProfileTitle = ({
                     />
                     <Text
                         numberOfLines={1}
-                        adjustsFontSizeToFit={true}
+                        adjustsFontSizeToFit={Platform.OS === 'ios'}
                         style={styles.displayName}
                         testID='user_profile.display_name'
                     >
