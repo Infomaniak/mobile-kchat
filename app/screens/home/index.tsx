@@ -145,11 +145,6 @@ export default function HomeScreen(props: HomeProps) {
                         options={{tabBarTestID: 'tab_bar.mentions.tab', freezeOnBlur: true, lazy: true}}
                     />
                     <Tab.Screen
-                        name={Screens.SAVED_MESSAGES}
-                        component={SavedMessages}
-                        options={{tabBarTestID: 'tab_bar.saved_messages.tab', freezeOnBlur: true, lazy: true}}
-                    />
-                    <Tab.Screen
                         name={Screens.ACCOUNT}
                         component={Account}
                         options={{tabBarTestID: 'tab_bar.account.tab', freezeOnBlur: true, lazy: true}}
