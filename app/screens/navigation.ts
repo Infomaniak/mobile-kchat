@@ -830,7 +830,6 @@ export function showOverlay(name: AvailableScreens, passProps = {}, options: Opt
 
     Navigation.showOverlay({
         component: {
-            id: name,
             name,
             passProps,
             options: merge(defaultOptions, options),
