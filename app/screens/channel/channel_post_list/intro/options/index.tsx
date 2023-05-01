@@ -42,22 +42,6 @@ const styles = StyleSheet.create({
 const IntroOptions = ({channelId, header, favorite, canAddMembers}: Props) => {
     return (
         <View style={styles.container}>
-            {canAddMembers &&
-            <AddMembersBox
-                channelId={channelId}
-                containerStyle={[styles.item, styles.margin]}
-                testID='channel_post_list.intro_options.add_members.action'
-                inModal={false}
-            />
-            }
-
-            {header &&
-            <SetHeaderBox
-                channelId={channelId}
-                containerStyle={[styles.item, styles.margin]}
-                testID='channel_post_list.intro_options.set_header.action'
-            />
-            }
             {favorite &&
             <FavoriteBox
                 channelId={channelId}

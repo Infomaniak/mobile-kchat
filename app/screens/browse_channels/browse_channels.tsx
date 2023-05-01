@@ -125,10 +125,6 @@ export default function BrowseChannels(props: Props) {
             rightButtons: [],
         };
 
-        if (canCreateChannels) {
-            buttons.rightButtons = [makeRightButton(theme, intl.formatMessage, createEnabled)];
-        }
-
         setButtons(componentId, buttons);
     }, [closeButton, canCreateChannels, intl.locale, theme, componentId]);
 

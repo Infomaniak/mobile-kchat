@@ -131,7 +131,7 @@ const ChannelListHeader = ({
         const renderContent = () => {
             return (
                 <PlusMenu
-                    canCreateChannels={canCreateChannels}
+                    canCreateChannels={false}
                     canJoinChannels={canJoinChannels}
                     canInvitePeople={canInvitePeople}
                 />
@@ -141,10 +141,6 @@ const ChannelListHeader = ({
         const closeButtonId = 'close-plus-menu';
         let items = 1;
         let separators = 0;
-
-        if (canCreateChannels) {
-            items += 1;
-        }
 
         if (canJoinChannels) {
             items += 1;

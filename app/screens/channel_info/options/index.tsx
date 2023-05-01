@@ -38,20 +38,11 @@ const Options = ({
             <NotificationPreference channelId={channelId}/>
             <PinnedMessages channelId={channelId}/>
             <ChannelFiles channelId={channelId}/>
-            {type !== General.DM_CHANNEL &&
-                <Members channelId={channelId}/>
-            }
-            {canManageMembers &&
-                <AddMembers channelId={channelId}/>
-            }
             {callsEnabled && !isDMorGM && // if calls is not enabled, copy link will show in the channel actions
                 <CopyChannelLinkOption
                     channelId={channelId}
                     testID='channel_info.options.copy_channel_link.option'
                 />
-            }
-            {type !== General.DM_CHANNEL && type !== General.GM_CHANNEL &&
-                <EditChannel channelId={channelId}/>
             }
         </>
     );
