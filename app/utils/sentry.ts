@@ -2,14 +2,14 @@
 // See LICENSE.txt for license information.
 
 import * as Sentry from '@sentry/react-native';
-import {Platform} from 'react-native';
 
 import Config from '@assets/config.json';
+import ClientError from '@client/rest/error';
 import DatabaseManager from '@database/manager';
 import {getConfig} from '@queries/servers/system';
 import {getCurrentUser} from '@queries/servers/user';
+import {getFullErrorMessage} from '@utils/errors';
 
-import {ClientError} from './client_error';
 import {logError, logWarning} from './log';
 
 import type {Database} from '@nozbe/watermelondb';
@@ -36,7 +36,7 @@ export function captureException(error: Error | string) {
     Sentry.captureException(error);
 }
 
-export function captureJSException(error: Error | ClientError, isFatal: boolean) {
+export function captureJSException(error: unknown, isFatal: boolean) {
     if (!Config.SentryEnabled) {
         return;
     }
@@ -61,13 +61,8 @@ function captureClientErrorAsBreadcrumb(error: ClientError, isFatal: boolean) {
             isFatal: String(isFatal),
         },
         level: 'warning',
+        message: getFullErrorMessage(error),
     };
-
-    if (error.intl?.defaultMessage) {
-        breadcrumb.message = error.intl.defaultMessage;
-    } else {
-        breadcrumb.message = error.message;
-    }
 
     if (breadcrumb.data) {
         if (error.server_error_id) {

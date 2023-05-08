@@ -40,7 +40,7 @@ import CallMessage from '@calls/components/calls_custom_message/ik_call_message'
 type PostProps = {
     appsEnabled: boolean;
     canDelete: boolean;
-    currentUser: UserModel;
+    currentUser?: UserModel;
     customEmojiNames: string[];
     differentThreadSequence: boolean;
     hasFiles: boolean;

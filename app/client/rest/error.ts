@@ -5,13 +5,13 @@ import {cleanUrlForLogging} from '@utils/url';
 
 export default class ClientError extends Error {
     url: string;
-    intl: { defaultMessage: string; id: string; values?: any };
-    server_error_id: any;
-    status_code: any;
-    details: Error;
+    intl?: ClientErrorIntl;
+    server_error_id?: string;
+    status_code?: number;
+    details?: unknown;
     responseData?: any;
 
-    constructor(baseUrl: string, data: any, responseData?: any) {
+    constructor(baseUrl: string, data: ClientErrorProps, responseData?: any) {
         super(data.message + ': ' + cleanUrlForLogging(baseUrl, data.url));
 
         this.message = data.message;

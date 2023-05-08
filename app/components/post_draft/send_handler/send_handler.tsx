@@ -16,16 +16,17 @@ import {Events, Screens} from '@constants';
 import {PostPriorityType} from '@constants/post';
 import {NOTIFY_ALL_MEMBERS} from '@constants/post_draft';
 import {useServerUrl} from '@context/server';
+import {get} from '@managers/analytics';
 import DraftUploadManager from '@managers/draft_upload_manager';
 import * as DraftUtils from '@utils/draft';
 import {isReactionMatch} from '@utils/emoji/helpers';
+import {getFullErrorMessage} from '@utils/errors';
 import {preventDoubleTap} from '@utils/tap';
 import {confirmOutOfOfficeDisabled} from '@utils/user';
 
 import DraftInput from '../draft_input';
 
 import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji';
-import {get} from '@managers/analytics';
 
 type Props = {
     testID?: string;
@@ -200,7 +201,7 @@ export default function SendHandler({
         setSendingMessage(false);
 
         if (error) {
-            const errorMessage = typeof (error) === 'string' ? error : error.message;
+            const errorMessage = getFullErrorMessage(error);
             DraftUtils.alertSlashCommandFailed(intl, errorMessage);
             return;
         }

@@ -1,12 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback} from 'react';
+import React from 'react';
 import {useIntl} from 'react-intl';
 
-import {leaveCall} from '@calls/actions';
-import {leaveAndJoinWithAlert, showLimitRestrictedAlert} from '@calls/alerts';
-import {useTryCallsFunction} from '@calls/hooks';
 import OptionBox from '@components/option_box';
 import CallManager from '@store/CallManager';
 import {preventDoubleTap} from '@utils/tap';

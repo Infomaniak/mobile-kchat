@@ -327,7 +327,8 @@ export const observeWebsocketLastDisconnected = (database: Database) => {
 };
 
 export const resetWebSocketLastDisconnected = async (operator: ServerDataOperator, prepareRecordsOnly = false) => {
-    const lastDisconnectedAt = await getWebSocketLastDisconnected(operator.database);
+    const {database} = operator;
+    const lastDisconnectedAt = await getWebSocketLastDisconnected(database);
 
     if (lastDisconnectedAt) {
         return operator.handleSystem({systems: [{
@@ -404,6 +405,19 @@ export async function prepareCommonSystemValues(
         });
     } catch {
         return [];
+    }
+}
+
+export async function setCurrentUserId(operator: ServerDataOperator, userId: string) {
+    try {
+        const models = await prepareCommonSystemValues(operator, {currentUserId: userId});
+        if (models) {
+            await operator.batchRecords(models, 'setCurrentChannelId');
+        }
+
+        return {currentUserId: userId};
+    } catch (error) {
+        return {error};
     }
 }
 
