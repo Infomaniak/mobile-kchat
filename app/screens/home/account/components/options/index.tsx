@@ -56,6 +56,11 @@ const AccountOptions = ({user, enableCustomUserStatuses, isTablet, theme}: Accou
                 <UserPresence
                     currentUser={user}
                 />
+                {enableCustomUserStatuses &&
+                <CustomStatus
+                    isTablet={isTablet}
+                    currentUser={user}
+                />}
             </View>
             <View style={styles.divider}/>
             <View style={styles.group}>
