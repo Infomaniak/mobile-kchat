@@ -96,6 +96,13 @@ export class Analytics {
         this.trackEvent('action', event, props);
     }
 
+    trackNavigation(screen: string) {
+        if (!this.matomoTracker) {
+            return;
+        }
+        this.trackEvent('navigation', screen);
+    }
+
     sanitizeCommand(userInput: string): string {
         const commandList = ['agenda', 'autolink', 'away', 'bot-server', 'code', 'collapse',
             'dnd', 'echo', 'expand', 'export', 'giphy', 'github', 'groupmsg', 'header', 'help',

@@ -18,6 +18,7 @@ import SavedMessages from './saved_messages';
 import Search from './search';
 
 import type {BottomTabBarProps} from '@react-navigation/bottom-tabs';
+import {get} from '@managers/analytics';
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     container: {
@@ -171,6 +172,9 @@ function TabBar({state, descriptors, navigation, theme}: BottomTabBarProps & {th
                     });
                     DeviceEventEmitter.emit('tabPress');
                     if (!isFocused && !event.defaultPrevented) {
+                        const analytics = get();
+                        analytics.trackNavigation(route.name);
+
                         // The `merge: true` option makes sure that the params inside the tab screen are preserved
                         navigation.navigate({params: {direction}, name: route.name, merge: false});
                         NavigationStore.setVisibleTap(route.name);
