@@ -135,6 +135,11 @@ export default function HomeScreen(props: HomeProps) {
                         {() => <ChannelList {...props}/>}
                     </Tab.Screen>
                     <Tab.Screen
+                        name={Screens.SEARCH}
+                        component={Search}
+                        options={{tabBarTestID: 'tab_bar.search.tab', unmountOnBlur: false, freezeOnBlur: true, lazy: true}}
+                    />
+                    <Tab.Screen
                         name={Screens.MENTIONS}
                         component={RecentMentions}
                         options={{tabBarTestID: 'tab_bar.mentions.tab', freezeOnBlur: true, lazy: true}}
