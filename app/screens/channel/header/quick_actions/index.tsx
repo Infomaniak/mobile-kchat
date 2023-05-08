@@ -63,6 +63,11 @@ const ChannelQuickAction = ({channelId, callsEnabled, isDMorGM}: Props) => {
                     showAsLabel={true}
                 />
             }
+            <View style={styles.line}/>
+            <LeaveChannelLabel
+                channelId={channelId}
+                testID='channel.quick_actions.leave_channel.action'
+            />
         </View>
     );
 };

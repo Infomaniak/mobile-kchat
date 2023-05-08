@@ -20,7 +20,11 @@ type Props = {
 const DestructiveOptions = ({channelId, componentId, type}: Props) => {
     return (
         <>
-
+            <LeaveChannelLabel
+                channelId={channelId}
+                isOptionItem={true}
+                testID='channel_info.options.leave_channel.option'
+            />
         </>
     );
 };
