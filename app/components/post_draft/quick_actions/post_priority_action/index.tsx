@@ -13,6 +13,7 @@ import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import {openAsBottomSheet} from '@screens/navigation';
 import {changeOpacity} from '@utils/theme';
+import {get} from '@managers/analytics';
 
 type Props = {
     testID?: string;
@@ -55,6 +56,9 @@ export default function PostPriorityAction({
                 closeButtonId: POST_PRIORITY_PICKER_BUTTON,
             },
         });
+
+        const analytics = get();
+        analytics.trackEvent('New Post', 'priority_button_pressed');
     }, [intl, postPriority, updatePostPriority, theme]);
 
     const iconName = 'alert-circle-outline';

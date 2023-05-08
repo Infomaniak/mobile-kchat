@@ -25,6 +25,7 @@ import {confirmOutOfOfficeDisabled} from '@utils/user';
 import DraftInput from '../draft_input';
 
 import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji';
+import {get} from '@managers/analytics';
 
 type Props = {
     testID?: string;
@@ -152,6 +153,8 @@ export default function SendHandler({
         clearDraft();
         setSendingMessage(false);
         DeviceEventEmitter.emit(Events.POST_LIST_SCROLL_TO_BOTTOM, rootId ? Screens.THREAD : Screens.CHANNEL);
+        const analytics = get();
+        analytics.trackEvent('New Post', 'post_sent');
     }, [files, currentUserId, channelId, rootId, value, clearDraft, postPriority]);
 
     const showSendToAllOrChannelOrHereAlert = useCallback((calculatedMembersCount: number, atHere: boolean) => {

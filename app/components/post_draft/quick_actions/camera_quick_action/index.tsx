@@ -22,6 +22,7 @@ import CameraType from './camera_type';
 
 import type {QuickActionAttachmentProps} from '@typings/components/post_draft_quick_action';
 import type {CameraOptions} from 'react-native-image-picker';
+import {get} from '@managers/analytics';
 
 const style = StyleSheet.create({
     icon: {
@@ -47,6 +48,8 @@ export default function CameraQuickAction({
             onUploadFiles);
 
         picker.attachFileFromCamera(options);
+        const analytics = get();
+        analytics.trackEvent('New Post', 'camera_button_pressed');
     }, [intl, onUploadFiles]);
 
     const renderContent = useCallback(() => {
