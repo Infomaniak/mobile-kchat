@@ -52,6 +52,16 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         textAlign: 'center',
         ...typography('Body', 200, 'Regular'),
     },
+    gptDisclaimerContainer: {
+        backgroundColor: theme.sidebarHeaderBg,
+        borderRadius: 8,
+        marginTop: 8,
+    },
+    gptDisclaimer: {
+        color: theme.centerChannelColor,
+        padding: 8,
+        ...typography('Body', 200, 'Regular'),
+    },
     profilesContainer: {
         justifyContent: 'center',
         alignItems: 'center',
@@ -81,18 +91,29 @@ const DirectChannel = ({channel, currentUserId, isBot, members, theme}: Props) =
     const message = useMemo(() => {
         if (channel.type === General.DM_CHANNEL) {
             return (
-                <FormattedText
-                    defaultMessage={'This is the start of your conversation with {teammate}. Messages and files shared here are not shown to anyone else.'}
-                    id='intro.direct_message'
-                    style={styles.message}
-                    values={{teammate: channel.displayName}}
-                />
+                <>
+                    <FormattedText
+                        defaultMessage={'This is the start of your conversation with {teammate}. Messages and files shared here are not shown to anyone else.'}
+                        id="intro.direct_message"
+                        style={styles.message}
+                        values={{teammate: channel.displayName}}
+                    />
+                    {channel.displayName === 'chat.gpt' && (
+                        <View style={styles.gptDisclaimerContainer}>
+                            <FormattedText
+                                defaultMessage={'ChatGPT is an application developed and hosted by OpenAl. The data is sent and analysed on their servers and not those of Infomaniak. We advise you not to not to share sensitive information. ChatGPT may produce inaccurate information about people, places or facts. This feature is included free of charge in your kChat until 23 Nov. 2023 with a limit of 100 messages per day and per user.'}
+                                id="infomaniak.intro_messages.botGPT"
+                                style={styles.gptDisclaimer}
+                            />
+                        </View>)
+                    }
+                </>
             );
         }
         return (
             <FormattedText
                 defaultMessage={'This is the start of your conversation with this group. Messages and files shared here are not shown to anyone else outside of the group.'}
-                id='intro.group_message'
+                id="intro.group_message"
                 style={styles.message}
             />
         );
@@ -137,15 +158,15 @@ const DirectChannel = ({channel, currentUserId, isBot, members, theme}: Props) =
             <View style={{flexDirection: 'row'}}>
                 <Text
                     style={[styles.title, channel.type === General.GM_CHANNEL ? styles.titleGroup : undefined]}
-                    testID='channel_post_list.intro.display_name'
+                    testID="channel_post_list.intro.display_name"
                 >
                     {channel.displayName}
                 </Text>
                 {isBot &&
-                <BotTag
-                    style={styles.botContainer}
-                    textStyle={styles.botText}
-                />
+                    <BotTag
+                        style={styles.botContainer}
+                        textStyle={styles.botText}
+                    />
                 }
             </View>
             {message}

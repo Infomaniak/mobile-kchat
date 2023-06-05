@@ -1075,5 +1075,6 @@
   "infomaniak.post_info.post_reminder.sub_menu.tomorrow": "Tomorrow",
   "infomaniak.post_info.post_reminder.sub_menu.custom": "Custom",
   "infomaniak.post.reminder.systemBot": "Hi there, here's your reminder about this message from {username}:\n{permaLink}",
-  "infomaniak.post_info.post_translate.menu": "Translate"
+  "infomaniak.post_info.post_translate.menu": "Translate",
+  "infomaniak.intro_messages.botGPT": "ChatGPT is an application developed and hosted by OpenAl. The data is sent and analysed on their servers and not those of Infomaniak. We advise you not to not to share sensitive information. ChatGPT may produce inaccurate information about people, places or facts. This feature is included free of charge in your kChat until 23 Nov. 2023 with a limit of 100 messages per day and per user."
 }
