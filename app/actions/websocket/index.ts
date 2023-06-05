@@ -7,8 +7,8 @@ import {markChannelAsRead} from '@actions/remote/channel';
 import {handleEntryAfterLoadNavigation, registerDeviceToken} from '@actions/remote/entry/common';
 import {deferredAppEntryActions, entry} from '@actions/remote/entry/gql_common';
 import {fetchPostsForChannel, fetchPostThread} from '@actions/remote/post';
-import {handleTeamSyncEvent} from '@actions/websocket/ikTeams';
 import {autoUpdateTimezone} from '@actions/remote/user';
+import {handleTeamSyncEvent} from '@actions/websocket/ikTeams';
 import {loadConfigAndCalls} from '@calls/actions/calls';
 import {
     handleCallChannelDisabled,
@@ -70,7 +70,7 @@ import {handleUserRoleUpdatedEvent, handleTeamMemberRoleUpdatedEvent, handleRole
 import {handleLicenseChangedEvent, handleConfigChangedEvent} from './system';
 import {handleLeaveTeamEvent, handleUserAddedToTeamEvent, handleUpdateTeamEvent, handleTeamArchived, handleTeamRestored} from './teams';
 import {handleThreadUpdatedEvent, handleThreadReadChangedEvent, handleThreadFollowChangedEvent} from './threads';
-import {handleUserUpdatedEvent, handleUserTypingEvent, handleUserStatusChangeEvent} from './users';
+import {handleUserUpdatedEvent, handleUserTypingEvent, handleStatusChangedEvent} from './users';
 
 export async function handleFirstConnect(serverUrl: string) {
     registerDeviceToken(serverUrl);
@@ -278,10 +278,8 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
             break;
 
         case WebsocketEvents.STATUS_CHANGED:
-            handleUserStatusChangeEvent(serverUrl, msg);
+            handleStatusChangedEvent(serverUrl, msg);
             break;
-
-        // return dispatch(handleStatusChangedEvent(msg));
         case WebsocketEvents.TYPING:
             handleUserTypingEvent(serverUrl, msg);
             break;

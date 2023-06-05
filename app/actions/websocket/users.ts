@@ -4,7 +4,8 @@
 import {DeviceEventEmitter} from 'react-native';
 
 import {updateChannelsDisplayName} from '@actions/local/channel';
-import {fetchMe, fetchStatusByIds, fetchUsersByIds} from '@actions/remote/user';
+import {setCurrentUserStatus} from '@actions/local/user';
+import {fetchMe, fetchUsersByIds} from '@actions/remote/user';
 import {General, Events, Preferences} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getTeammateNameDisplaySetting} from '@helpers/api/preference';
@@ -12,14 +13,11 @@ import WebsocketManager from '@managers/websocket_manager';
 import {queryChannelsByTypes, queryUserChannelsByTypes} from '@queries/servers/channel';
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
 import {getConfig, getLicense} from '@queries/servers/system';
-import {getCurrentUser} from '@queries/servers/user';
+import {getCurrentUser, getUserById} from '@queries/servers/user';
 import {displayUsername} from '@utils/user';
 
 import type {Model} from '@nozbe/watermelondb';
-
-export async function handleUserStatusChangeEvent(serverUrl: string, msg: WebSocketMessage) {
-    await fetchStatusByIds(serverUrl, [msg.data.user_id]);
-}
+import {logError} from '@utils/log';
 
 export async function handleUserUpdatedEvent(serverUrl: string, msg: WebSocketMessage) {
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
@@ -123,3 +121,21 @@ export const userTyping = async (serverUrl: string, channelId: string, rootId?: 
     const client = WebsocketManager.getClient(serverUrl);
     client?.sendUserTypingEvent(channelId, rootId);
 };
+
+export async function handleStatusChangedEvent(serverUrl: string, msg: WebSocketMessage) {
+    const newStatus = msg.data.status;
+    try {
+        const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        const user = await getUserById(database, msg.data.user_id);
+        if (!user) {
+            throw new Error(`No user for ${serverUrl}`);
+        }
+
+        user.prepareStatus(newStatus);
+        await operator.batchRecords([user], 'handleStatusChangedEvent');
+        return null;
+    } catch (error) {
+        logError('Failed handleStatusChangedEvent', error);
+        return {error};
+    }
+}

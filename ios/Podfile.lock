@@ -575,7 +575,7 @@ PODS:
     - React-Core
   - RNVectorIcons (9.2.0):
     - React-Core
-  - Rudder (1.14.0)
+  - Rudder (1.15.1)
   - SDWebImage (5.12.6):
     - SDWebImage/Core (= 5.12.6)
   - SDWebImage/Core (5.12.6)
@@ -997,7 +997,7 @@ SPEC CHECKSUMS:
   RNShare: d82e10f6b7677f4b0048c23709bd04098d5aee6c
   RNSVG: 53c661b76829783cdaf9b7a57258f3d3b4c28315
   RNVectorIcons: fcc2f6cb32f5735b586e66d14103a74ce6ad61f8
-  Rudder: 41523d90e7f8040605ca6a803f662a538144c90f
+  Rudder: 41040d4537a178e4e32477b68400f98ca0c354eb
   SDWebImage: a47aea9e3d8816015db4e523daff50cfd294499d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
   Sentry: 16d46dd5ca10e7f4469a2611805a3de123188add
