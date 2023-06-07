@@ -1041,5 +1041,6 @@
     "infomaniak.post_info.post_reminder.sub_menu.custom": "Personalizzato",
     "infomaniak.post.reminder.systemBot": "Salve, ecco il promemoria di questo messaggio da parte di {username}:\n{permaLink}",
     "infomaniak.post_info.post_translate.menu": "Traduci",
-    "infomaniak.intro_messages.botGPT": "ChatGPT è un'intelligenza artificiale sviluppata e ospitata da OpenAI. I dati vengono inviati e analizzati sui loro server e non su quelli di Infomaniak. Si consiglia di non condividere informazioni sensibili. ChatGPT può produrre informazioni imprecise su persone, luoghi o fatti. Questa funzione è inclusa gratuitamente nella vostra kChat fino al 23 novembre 2023 con un limite di 100 messaggi al giorno e per utente."
+    "infomaniak.intro_messages.botGPT": "Per consentirti di testare la potenza di {botName}, fino al {day} novembre, con kChat sono incluse {limit} richieste ChatGPT al giorno. Con la nostra IA, i dati vengono elaborati esclusivamente in Svizzera sui server di Infomaniak. Utilizzando ChatGPT, i dati vengono inviati e analizzati sui server di OpenAI negli Stati Uniti. Ti consigliamo di non condividere informazioni sensibili con ChatGPT e ti ricordiamo che le IA possono generare informazioni inesatte su persone, luoghi o fatti.",
+    "infomaniak.intro_messages.botFalcon": "{botName} è un’IA sovrana. I dati vengono trattati esclusivamente in Svizzera sui server di Infomaniak. Ti ricordiamo che le informazioni generate da {botName} e le IA possono essere imprecise, incomplete o fuorvianti."
 }
