@@ -152,10 +152,6 @@ async function doReconnect(serverUrl: string) {
     }
 
     await deferredAppEntryActions(serverUrl, lastDisconnectedAt, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, initialTeamId);
-
-    dataRetentionCleanup(serverUrl);
-
-    AppsManager.refreshAppBindings(serverUrl);
     return undefined;
 }
 
