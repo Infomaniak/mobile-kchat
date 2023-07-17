@@ -104,6 +104,7 @@ class AppsManager {
     };
 
     fetchBindings = async (serverUrl: string, channelId: string, forThread = false) => {
+        return;
         try {
             const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
             const userId = await getCurrentUserId(database);
@@ -136,6 +137,7 @@ class AppsManager {
     };
 
     refreshAppBindings = async (serverUrl: string) => {
+        return;
         try {
             const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
             const appsEnabled = (await getConfig(database))?.FeatureFlagAppsEnabled === 'true';
