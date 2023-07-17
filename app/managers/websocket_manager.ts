@@ -214,6 +214,11 @@ class WebsocketManager {
 
     private onAppStateChange = async (appState: AppStateStatus) => {
         const isActive = appState === 'active';
+        if (isActive && this.backgroundIntervalId) {
+            this.isBackgroundTimerRunning = false;
+            BackgroundTimer.clearInterval(this.backgroundIntervalId);
+        }
+
         if (isActive === this.previousActiveState) {
             return;
         }
