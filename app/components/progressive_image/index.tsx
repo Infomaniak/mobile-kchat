@@ -9,6 +9,7 @@ import Animated, {interpolate, useAnimatedStyle, useDerivedValue, useSharedValue
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
+import {emptyFunction} from '@utils/general';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import Thumbnail from './thumbnail';
@@ -178,8 +179,9 @@ const ProgressiveImage = ({
         <Animated.View
             style={[styles.defaultImageContainer, style, containerStyle]}
         >
+            {Boolean(thumbnailUri) &&
             <Thumbnail
-                onError={onError}
+                onError={emptyFunction}
                 opacity={defaultOpacity}
                 source={thumbnailSource}
                 style={[
@@ -188,6 +190,7 @@ const ProgressiveImage = ({
                 ]}
                 tintColor={thumbnailUri ? undefined : theme.centerChannelColor}
             />
+            }
             {image}
         </Animated.View>
     );

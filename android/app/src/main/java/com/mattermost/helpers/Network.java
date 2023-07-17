@@ -26,7 +26,7 @@ public class Network {
     private static ReactApplicationContext reactContext;
 
     public static void init(Context context) {
-        reactContext = new ReactApplicationContext(context);
+        final ReactApplicationContext reactContext = (APIClientModule.context == null) ? new ReactApplicationContext(context) : APIClientModule.context;
         clientModule = new APIClientModule(reactContext);
         createClientOptions();
     }

@@ -994,6 +994,7 @@
     "channel_notification_preferences.notification.all": "Tous les nouveaux messages",
     "channel_notification_preferences.muted_title": "Ce canal est en sourdine",
     "channel_notification_preferences.muted_content": "Vous pouvez modifier les paramètres de notification, mais vous ne recevrez pas de notifications tant que le canal n'aura pas été désactivé.",
+    "post_priority.picker.cancel": "Annuler",
     "infomaniak.no_team.title": "Vous ne possédez pas de kChat, découvrez le avec kSuite",
     "infomaniak.no_team.description": "kSuite intègre tous nos applications de productivité dont kChat pour communiquer en direct, partager et coordonner vos équipes.",
     "infomaniak.channel_quota_exceeded.title": "Créez de nouveaux canaux pour mieux communiquer avec les membres de votre organisation",
