@@ -424,7 +424,7 @@ platform :ios do
     )
 
     update_info_plist(
-      xcodeproj: './ios/Mattermost.xcodeproj',
+      xcodeproj: './ios/kChat.xcodeproj',
       plist_path: 'MattermostShare/Info.plist',
       display_name: app_name
     )

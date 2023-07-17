@@ -60,7 +60,7 @@ function setup() {
 
         if [[ "$1" == "ios"* ]]; then
           if [[ $(uname -p) == 'arm' ]]; then
-            installGemsAndPodsM1 || exit 1
+            installGemsAndPods || exit 1
           else
             installGemsAndPods || exit 1
           fi
