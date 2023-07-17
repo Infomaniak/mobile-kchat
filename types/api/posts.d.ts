@@ -90,7 +90,7 @@ type PostProps = {
 
 type PostResponse = {
     order: string[];
-    posts: Post[];
+    posts: IDMappedObjects<Post>;
     prev_post_id?: string;
     has_limitation?: string;
 };
