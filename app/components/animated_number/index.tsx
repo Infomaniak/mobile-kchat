@@ -9,7 +9,7 @@ interface Props {
     fontStyle?: StyleProp<TextStyle>;
     animationDuration?: number;
     easing?: ((input: number) => number) | undefined;
-  }
+}
 
 const NUMBERS = Array(10).fill(null).map((_, i) => i);
 
@@ -66,7 +66,15 @@ const AnimatedNumber = ({
 
     return (
         <>
-            {numberHeight !== 0 && (
+            {numberHeight !== 0 && animateToNumber === prevNumber && (
+                <Text
+                    style={[fontStyle]}
+                    onLayout={setButtonLayout}
+                >
+                    {animateToNumberString}
+                </Text>
+            )}
+            {numberHeight !== 0 && animateToNumber !== prevNumber && (
                 <View style={{flexDirection: 'row'}}>
                     {animateToNumber < 0 && (
                         <Text style={[fontStyle, {height: numberHeight}]}>{'-'}</Text>
@@ -105,12 +113,12 @@ const AnimatedNumber = ({
                 </View>
             )}
             {numberHeight === 0 &&
-            <Text
-                style={[fontStyle]}
-                onLayout={setButtonLayout}
-            >
-                {animateToNumberString}
-            </Text>
+                <Text
+                    style={[fontStyle]}
+                    onLayout={setButtonLayout}
+                >
+                    {animateToNumberString}
+                </Text>
             }
         </>
     );
