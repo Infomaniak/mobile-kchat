@@ -78,7 +78,7 @@ const DocumentFile = forwardRef<DocumentFileRef, DocumentFileProps>(({background
                 openDocument();
             } else {
                 setDownloading(true);
-                downloadTask.current = client?.apiClient.download(client?.getFileRoute(file.id!), path!.replace('file://', ''), {timeoutInterval: DOWNLOAD_TIMEOUT});
+                downloadTask.current = client?.apiClient.download(client?.getFileRoute(file.id!), path!.replace('file://', ''), {headers: {Authorization: client.getCurrentBearerToken()}, timeoutInterval: DOWNLOAD_TIMEOUT});
                 downloadTask.current?.progress?.(setProgress);
 
                 await downloadTask.current;
