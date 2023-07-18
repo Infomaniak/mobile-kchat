@@ -60,7 +60,7 @@ const Server = ({
 
     const goToHome = (serverUrl: string, error?: never) => {
         const hasError = launchError || Boolean(error);
-        resetToHome({extra, launchError: hasError, launchType, serverUrl, time: 0});
+        resetToHome({extra, launchError: hasError, launchType, serverUrl});
     };
 
     return (

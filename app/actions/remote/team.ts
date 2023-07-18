@@ -59,7 +59,18 @@ export async function addUserToTeam(serverUrl: string, teamId: string, userId: s
 
         EphemeralStore.startAddingToTeam(teamId);
         const team = await client.getTeam(teamId);
-        const member = await client.addToTeam(teamId, userId);
+        const user = await client.getMe();
+
+        const member: TeamMembership = {
+            team_id: teamId,
+            user_id: userId,
+            roles: user.roles,
+            delete_at: 0,
+            msg_count: 0,
+            mention_count: 0,
+            scheme_user: false,
+            scheme_admin: false,
+        };
 
         if (!fetchOnly) {
             setTeamLoading(serverUrl, true);
@@ -229,7 +240,7 @@ export async function fetchMyTeam(serverUrl: string, teamId: string, fetchOnly =
     }
 }
 
-export const fetchAllTeams = async (serverUrl: string, page = 0, perPage = PER_PAGE_DEFAULT): Promise<{teams?: Team[]; error?: any}> => {
+export const fetchAllTeams = async (serverUrl: string, page = 0, perPage = PER_PAGE_DEFAULT): Promise<{ teams?: Team[]; error?: any }> => {
     try {
         const client = NetworkManager.getClient(serverUrl);
         const teams = await client.getTeams(page, perPage);
@@ -255,12 +266,13 @@ const recCanJoinTeams = async (client: Client, myTeamsIds: Set<string>, page: nu
 };
 
 const LOAD_MORE_THRESHOLD = 10;
+
 export async function fetchTeamsForComponent(
     serverUrl: string,
     page: number,
     joinedIds?: Set<string>,
     alreadyLoaded: Team[] = [],
-): Promise<{teams: Team[]; hasMore: boolean; page: number}> {
+): Promise<{ teams: Team[]; hasMore: boolean; page: number }> {
     let hasMore = true;
     const {teams, error} = await fetchAllTeams(serverUrl, page, PER_PAGE_DEFAULT);
     if (error || !teams || teams.length < PER_PAGE_DEFAULT) {

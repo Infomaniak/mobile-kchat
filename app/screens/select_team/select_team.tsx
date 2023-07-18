@@ -67,12 +67,9 @@ const SelectTeam = ({
     const loadTeams = useCallback(async () => {
         setLoading(true);
         const resp = await fetchTeamsForComponent(serverUrl, page.current);
-        page.current = resp.page;
-        hasMore.current = resp.hasMore;
-        if (resp.teams.length && mounted.current) {
-            setOtherTeams((cur) => [...cur, ...resp.teams]);
-        }
         setLoading(false);
+        setJoining(true);
+        await addCurrentUserToTeam(serverUrl, resp.teams[0].id);
     }, [serverUrl]);
 
     const onEndReached = useCallback(() => {
@@ -122,14 +119,7 @@ const SelectTeam = ({
     if (joining || (loading && !otherTeams.length)) {
         body = <Loading containerStyle={styles.loading}/>;
     } else if (otherTeams.length) {
-        body = (
-            <TeamList
-                teams={otherTeams}
-                onEndReached={onEndReached}
-                onPress={onTeamPressed}
-                loading={loading}
-            />
-        );
+        body = <Loading containerStyle={styles.loading}/>;
     } else {
         body = (<NoTeams/>);
     }
