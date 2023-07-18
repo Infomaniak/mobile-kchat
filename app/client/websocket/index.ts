@@ -354,6 +354,6 @@ export default class WebSocketClient {
     }
 
     public isConnected(): boolean {
-        return this.pusher?.connection.state === ConnectionState.connected; //|| (!this.stop && this.connectFailCount <= 2);
+        return this.pusher?.connection.state === ConnectionState.connected || (!this.stop && this.connectFailCount <= 2);
     }
 }
