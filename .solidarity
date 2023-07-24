@@ -49,13 +49,6 @@
       },
       {
         "rule": "cli",
-        "binary": "ruby",
-        "semver": ">=2.7.1 <3.0.0",
-        "error": "visit rvm install https://rvm.io/rvm/install",
-        "platform": "darwin"
-      },
-      {
-        "rule": "cli",
         "binary": "pod",
         "semver": "1.12.1",
         "platform": "darwin"
