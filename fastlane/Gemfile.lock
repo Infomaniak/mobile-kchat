@@ -159,13 +159,11 @@ GEM
     memoist (0.16.2)
     mini_magick (4.12.0)
     mini_mime (1.1.2)
-    mini_portile2 (2.8.4)
     multi_json (1.15.0)
     multipart-post (2.3.0)
     nanaimo (0.3.0)
     naturally (2.2.1)
-    nokogiri (1.15.3)
-      mini_portile2 (~> 2.8.2)
+    nokogiri (1.13.10-arm64-darwin)
       racc (~> 1.4)
     optparse (0.1.1)
     os (1.1.4)
@@ -219,7 +217,7 @@ GEM
       xcpretty (~> 0.2, >= 0.0.7)
 
 PLATFORMS
-  ruby
+  arm64-darwin-22
 
 DEPENDENCIES
   dotenv
