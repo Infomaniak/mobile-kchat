@@ -46,6 +46,7 @@ type Props = {
     isTimezoneEnabled: boolean;
     loading: boolean;
     posts: PostModel[];
+    matches?: SearchMatches;
     publicLinkEnabled: boolean;
     scrollPaddingTop: number;
     searchValue: string;
@@ -62,6 +63,7 @@ const Results = ({
     isTimezoneEnabled,
     loading,
     posts,
+    matches,
     publicLinkEnabled,
     scrollPaddingTop,
     searchValue,
@@ -98,18 +100,19 @@ const Results = ({
             }
             {!loading &&
             <Animated.View style={[styles.container, transform]}>
-                <View style={styles.result} >
+                <View style={styles.result}>
                     <PostResults
                         appsEnabled={appsEnabled}
                         currentTimezone={currentTimezone}
                         customEmojiNames={customEmojiNames}
                         isTimezoneEnabled={isTimezoneEnabled}
                         posts={posts}
+                        matches={matches}
                         paddingTop={paddingTop}
                         searchValue={searchValue}
                     />
                 </View>
-                <View style={styles.result} >
+                <View style={styles.result}>
                     <FileResults
                         canDownloadFiles={canDownloadFiles}
                         fileChannels={fileChannels}
