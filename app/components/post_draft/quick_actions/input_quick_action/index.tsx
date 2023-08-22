@@ -8,7 +8,6 @@ import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {ICON_SIZE} from '@constants/post_draft';
 import {useTheme} from '@context/theme';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
-import {get} from '@managers/analytics';
 
 type Props = {
     testID?: string;
@@ -47,8 +46,6 @@ export default function InputQuickAction({
             return '/';
         });
         focus();
-        const analytics = get();
-        analytics.trackEvent('New Post', 'mention_button_pressed');
     }, [inputType]);
 
     const actionTestID = disabled ?

@@ -14,7 +14,6 @@ import PickerUtil from '@utils/file/file_picker';
 import {changeOpacity} from '@utils/theme';
 
 import type {QuickActionAttachmentProps} from '@typings/components/post_draft_quick_action';
-import {get} from '@managers/analytics';
 
 const style = StyleSheet.create({
     icon: {
@@ -51,8 +50,6 @@ export default function ImageQuickAction({
             onUploadFiles);
 
         picker.attachFileFromPhotoGallery(maxFileCount - fileCount);
-        const analytics = get();
-        analytics.trackEvent('New Post', 'gallery_button_pressed');
     }, [onUploadFiles, fileCount, maxFileCount]);
 
     const actionTestID = disabled ? `${testID}.disabled` : testID;

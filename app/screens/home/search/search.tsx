@@ -24,7 +24,6 @@ import {useTheme} from '@context/theme';
 import {useKeyboardHeight} from '@hooks/device';
 import useDidUpdate from '@hooks/did_update';
 import {useCollapsibleHeader} from '@hooks/header';
-import {get} from '@managers/analytics';
 import NavigationStore from '@store/navigation_store';
 import {type FileFilter, FileFilters, filterFileExtensions} from '@utils/file';
 import {TabTypes, type TabType} from '@utils/search';
@@ -165,8 +164,6 @@ const SearchScreen = ({teamId, teams}: Props) => {
     }, []);
 
     const handleModifierTextChange = useCallback((newValue: string) => {
-        const analytics = get();
-        analytics.trackEvent('search', 'handleModifierTextChange|' + newValue);
         setSearchIsFocused(true);
         requestAnimationFrame(() => {
             searchRef.current?.focus?.();

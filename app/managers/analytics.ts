@@ -1,11 +1,17 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import MatomoTracker from 'matomo-tracker-react-native';
-import {logInfo} from '@utils/log';
+import {Dimensions} from 'react-native';
+import DeviceInfo from 'react-native-device-info';
+
+import LocalConfig from '@assets/config.json';
+import {Device} from '@constants';
+import {isSystemAdmin} from '@utils/user';
+
+const clientMap: Record<string, Analytics> = {};
 
 export class Analytics {
-    matomoTracker: MatomoTracker | null = null;
+    analytics: RudderClient | null = null;
     context: any;
     diagnosticId: string | undefined;
 
@@ -18,21 +24,60 @@ export class Analytics {
     };
 
     async init(config: ClientConfig) {
-        this.diagnosticId = config.DiagnosticId;
+        if (LocalConfig.RudderApiKey) {
+            this.analytics = require('@rudderstack/rudder-sdk-react-native').default;
+        }
+
+        if (this.analytics) {
+            const {height, width} = Dimensions.get('window');
+            this.diagnosticId = config.DiagnosticId;
+
+            if (this.diagnosticId) {
+                await this.analytics.setup(LocalConfig.RudderApiKey, {
+                    dataPlaneUrl: 'https://pdat.matterlytics.com',
+                    recordScreenViews: true,
+                    flushQueueSize: 20,
+                });
+
+                this.context = {
+                    app: {
+                        version: DeviceInfo.getVersion(),
+                        build: DeviceInfo.getBuildNumber(),
+                    },
+                    device: {
+                        dimensions: {
+                            height,
+                            width,
+                        },
+                        isTablet: Device.IS_TABLET,
+                        os: DeviceInfo.getSystemVersion(),
+                    },
+                    ip: '0.0.0.0',
+                    server: config.Version,
+                };
+
+                this.analytics.identify(
+                    this.diagnosticId,
+                    this.context,
+                );
+            } else {
+                this.analytics.reset();
+            }
+        }
+
+        return this.analytics;
     }
 
     async reset() {
         this.userId = '';
         this.userRoles = null;
+        if (this.analytics) {
+            await this.analytics.reset();
+        }
     }
 
     setUserId(userId: string) {
         this.userId = userId;
-        this.matomoTracker = new MatomoTracker({
-            urlBase: 'https://analytics.infomaniak.com/',
-            siteId: 13,
-            userId: this.userId,
-        });
     }
 
     setUserRoles(roles: string) {
@@ -40,33 +85,43 @@ export class Analytics {
     }
 
     trackEvent(category: string, event: string, props?: any) {
-        if (!this.matomoTracker) {
+        if (!this.analytics) {
             return;
         }
 
-        this.matomoTracker.trackEvent({
+        const properties = Object.assign({
             category,
-            action: event,
-            userInfo: {
-                uid: this.userId,
-            },
-        });
+            type: event,
+            user_actual_role: this.userRoles && isSystemAdmin(this.userRoles) ? 'system_admin, system_user' : 'system_user',
+            user_actual_id: this.userId,
+        }, props);
+        const options = {
+            context: this.context,
+            anonymousId: '00000000000000000000000000',
+        };
+
+        this.analytics.track(event, properties, options);
     }
 
     recordTime(screenName: string, category: string, userId: string) {
-        if (this.matomoTracker) {
+        if (this.analytics) {
+            const startTime: number = this.tracker[category];
             this.tracker[category] = 0;
-            this.matomoTracker.trackScreenView({
-                name: screenName,
-                userInfo: {
-                    uid: userId,
+            this.analytics.screen(
+                screenName, {
+                    userId: this.diagnosticId,
+                    context: this.context,
+                    properties: {
+                        user_actual_id: userId,
+                        time: Date.now() - startTime,
+                    },
                 },
-            });
+            );
         }
     }
 
     trackAPI(event: string, props?: any) {
-        if (!this.matomoTracker) {
+        if (!this.analytics) {
             return;
         }
 
@@ -74,7 +129,7 @@ export class Analytics {
     }
 
     trackCommand(event: string, command: string, errorMessage?: string) {
-        if (!this.matomoTracker) {
+        if (!this.analytics) {
             return;
         }
 
@@ -90,17 +145,10 @@ export class Analytics {
     }
 
     trackAction(event: string, props?: any) {
-        if (!this.matomoTracker) {
+        if (!this.analytics) {
             return;
         }
         this.trackEvent('action', event, props);
-    }
-
-    trackNavigation(screen: string) {
-        if (!this.matomoTracker) {
-            return;
-        }
-        this.trackEvent('navigation', screen);
     }
 
     sanitizeCommand(userInput: string): string {
@@ -122,17 +170,24 @@ export class Analytics {
     }
 }
 
-const client = new Analytics();
+export function create(serverUrl: string): Analytics {
+    let client = clientMap[serverUrl];
 
-export function create(): Analytics {
+    if (client) {
+        return client;
+    }
+
+    client = new Analytics();
+    clientMap[serverUrl] = client;
     return client;
 }
 
-export function get(): Analytics {
-    return client;
+export function get(serverUrl: string): Analytics | undefined {
+    return clientMap[serverUrl];
 }
 
 export function invalidate(serverUrl: string) {
+    delete clientMap[serverUrl];
 }
 
 export default {

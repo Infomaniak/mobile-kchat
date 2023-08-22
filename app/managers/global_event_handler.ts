@@ -41,9 +41,9 @@ class GlobalEventHandler {
 
     configureAnalytics = async (serverUrl: string, config?: ClientConfig) => {
         if (serverUrl && config?.DiagnosticsEnabled === 'true' && config?.DiagnosticId && LocalConfig.RudderApiKey) {
-            let client = analytics.get();
+            let client = analytics.get(serverUrl);
             if (!client) {
-                client = analytics.create();
+                client = analytics.create(serverUrl);
             }
 
             await client.init(config);

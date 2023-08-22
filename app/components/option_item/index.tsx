@@ -7,7 +7,6 @@ import {type LayoutChangeEvent, Platform, type StyleProp, Switch, Text, type Tex
 import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {useTheme} from '@context/theme';
-import {get} from '@managers/analytics';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
@@ -107,7 +106,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 });
 
 export type OptionItemProps = {
-    action?: (React.Dispatch<React.SetStateAction<string | boolean>>) | ((value: string | boolean) => void);
+    action?: (React.Dispatch<React.SetStateAction<string | boolean>>)|((value: string | boolean) => void);
     arrowStyle?: StyleProp<ViewStyle>;
     containerStyle?: StyleProp<ViewStyle>;
     description?: string;
@@ -241,8 +240,6 @@ const OptionItem = ({
     }
 
     const onPress = useCallback(() => {
-        const analytics = get();
-        analytics.trackAction(testID);
         action?.(value || '');
     }, [value, action]);
 

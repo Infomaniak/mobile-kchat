@@ -30,7 +30,7 @@ export default class ClientBase {
 
     constructor(apiClient: APIClientInterface, serverUrl: string, bearerToken?: string, csrfToken?: string) {
         this.apiClient = apiClient;
-        this.analytics = create();
+        this.analytics = create(serverUrl);
 
         if (bearerToken) {
             this.setBearerToken(bearerToken);
