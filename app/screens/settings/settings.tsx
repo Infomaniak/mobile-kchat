@@ -160,13 +160,6 @@ const Settings = ({componentId, helpLink, showHelp, siteName}: SettingsProps) =>
                 info={theme.ikName!}
                 testID='display_settings.theme.option'
             />
-            <SettingItem
-                icon='information-outline'
-                label={intl.formatMessage({id: 'settings.about', defaultMessage: 'About {appTitle}'}, {appTitle: serverName})}
-                onPress={goToAbout}
-                optionName='about'
-                testID='settings.about.option'
-            />
             {Platform.OS === 'android' && <View style={styles.helpGroup}/>}
             {showHelp &&
                 <SettingItem
