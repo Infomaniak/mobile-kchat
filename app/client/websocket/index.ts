@@ -104,6 +104,8 @@ export default class WebSocketClient {
 
         this.url = connectionUrl;
 
+        Pusher.logToConsole = true;
+
         this.pusher = new Pusher('kchat-key', {
             wsHost: connectionUrl,
             httpHost: connectionUrl,
