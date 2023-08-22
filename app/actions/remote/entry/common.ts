@@ -311,12 +311,12 @@ export async function restDeferredAppEntryActions(
     serverUrl: string, since: number, currentUserId: string, currentUserLocale: string, preferences: PreferenceType[] | undefined,
     config: ClientConfig, license: ClientLicense | undefined, teamData: MyTeamsRequest, chData: MyChannelsRequest | undefined,
     initialTeamId?: string, initialChannelId?: string) {
-    setTimeout(async () => {
-        if (chData?.channels?.length && chData.memberships?.length) {
-            // defer fetching posts for unread channels on initial team
-            fetchPostsForUnreadChannels(serverUrl, chData.channels, chData.memberships, initialChannelId);
-        }
-    }, FETCH_UNREADS_TIMEOUT);
+    // setTimeout(async () => {
+    //     if (chData?.channels?.length && chData.memberships?.length) {
+    //         // defer fetching posts for unread channels on initial team
+    //         fetchPostsForUnreadChannels(serverUrl, chData.channels, chData.memberships, initialChannelId);
+    //     }
+    // }, FETCH_UNREADS_TIMEOUT);
 
     // defer fetch channels and unread posts for other teams
     if (teamData.teams?.length && teamData.memberships?.length) {
