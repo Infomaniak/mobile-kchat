@@ -101,7 +101,7 @@ const AttachmentFields = ({baseTextStyle, blockStyles, channelId, fields, locati
                         imagesMetadata={metadata?.images}
                         location={location}
                         theme={theme}
-                        value={(field.value || '')}
+                        value={(field.value === null ? '' : field.value)}
                     />
                 </View>
             </View>,
