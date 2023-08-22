@@ -20,7 +20,7 @@ export const BREADCRUMB_UNCAUGHT_NON_ERROR = 'uncaught-non-error';
 
 export function initializeSentry() {
     Sentry.init({
-        dsn: 'https://8e20046152204255955994d0f1b5bb4b@sentry-mobile.infomaniak.com/8',
+        dsn: 'https://4110301feed3d3f0ed9ec17aaab149c4@sentry-kchat.infomaniak.com/6',
     });
 }
 
