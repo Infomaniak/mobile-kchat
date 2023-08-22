@@ -22,6 +22,8 @@ import Header from './header';
 
 import type ChannelModel from '@typings/database/models/servers/channel';
 import type {AvailableScreens} from '@typings/screens/navigation';
+import {getCurrentTeamId} from "@queries/servers/system";
+import DatabaseManager from "@database/manager";
 
 const TEST_ID = 'channel_files';
 
@@ -95,10 +97,16 @@ function ChannelFiles({
     useAndroidHardwareBackHandler(componentId, close);
 
     const handleSearch = useCallback(async (searchTerm: string, ftr: FileFilter) => {
+        const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
+        if (!operator) {
+            return;
+        }
+        const {database} = operator;
         const t = Date.now();
         lastSearchRequest.current = t;
         const searchParams = getSearchParams(channel.id, searchTerm, ftr);
-        const {files} = await searchFiles(serverUrl, channel.teamId, searchParams);
+        const teamId = channel?.teamId || (await getCurrentTeamId(database));
+        const {files} = await searchFiles(serverUrl, teamId, searchParams);
         if (lastSearchRequest.current !== t) {
             return;
         }

@@ -93,7 +93,7 @@ const ClientFiles = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
 
     searchFilesWithParams = async (teamId: string, params: FileSearchParams) => {
         this.analytics?.trackAPI('api_files_search');
-        const endpoint = teamId ? `${this.getTeamRoute(teamId)}/files/search` : `${this.getFilesRoute()}/search`;
+        const endpoint = `${this.getTeamRoute(teamId)}/files/search`;
         return this.doFetch(endpoint, {method: 'post', body: params});
     };
 
