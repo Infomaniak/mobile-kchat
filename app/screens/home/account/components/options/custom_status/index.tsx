@@ -76,8 +76,6 @@ const CustomStatus = ({isTablet, currentUser}: CustomStatusProps) => {
     }), []);
 
     const goToCustomStatusScreen = useCallback(preventDoubleTap(() => {
-        const analytics = get();
-        analytics.trackNavigation('Custom Status');
         if (isTablet) {
             DeviceEventEmitter.emit(Events.ACCOUNT_SELECT_TABLET_VIEW, Screens.CUSTOM_STATUS);
         } else {
