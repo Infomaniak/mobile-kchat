@@ -79,7 +79,7 @@ const IKReminder = ({sourceScreen, post, componentId}: Props) => {
                 endTime = currentDate.add(2, 'hours');
                 break;
             case 'tomorrow':
-                endTime = currentDate.add(1, 'day');
+                endTime = currentDate.add(1, 'day').hours(9).minutes(0).seconds(0);
                 break;
         }
 
