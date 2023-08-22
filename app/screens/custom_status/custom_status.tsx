@@ -94,7 +94,7 @@ const calculateExpiryTime = (duration: CustomStatusDuration, currentUser: UserMo
         case 'today':
             return currentTime.endOf('day').toISOString();
         case 'this_week':
-            return currentTime.endOf('week').toISOString();
+            return currentTime.endOf('isoWeek').toISOString();
         case 'date_and_time':
             return expiresAt.toISOString();
         case CustomStatusDurationEnum.DONT_CLEAR:
