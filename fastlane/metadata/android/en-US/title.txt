@@ -1,1 +1,1 @@
-kChat
+Mattermost Beta

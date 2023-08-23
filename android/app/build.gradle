@@ -99,7 +99,7 @@ def reactNativeArchitectures() {
 android {
     ndkVersion rootProject.ext.ndkVersion
     compileSdkVersion rootProject.ext.compileSdkVersion
-    namespace "com.infomaniak.chat"
+    namespace "com.mattermost.rnbeta"
 
     lintOptions {
         checkReleaseBuilds false
