@@ -3,7 +3,7 @@ package com.mattermost.share;
 import android.os.Bundle;
 
 import com.facebook.react.ReactActivity;
-import com.mattermost.rnbeta.MainApplication;
+import com.infomaniak.chat.MainApplication;
 
 public class ShareActivity extends ReactActivity {
     @Override

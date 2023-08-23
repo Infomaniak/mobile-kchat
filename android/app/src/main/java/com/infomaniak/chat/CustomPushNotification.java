@@ -1,4 +1,4 @@
-package com.mattermost.rnbeta;
+package com.infomaniak.chat;
 
 import android.app.Notification;
 import android.app.PendingIntent;

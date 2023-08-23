@@ -1,4 +1,4 @@
-package com.mattermost.rnbeta;
+package com.infomaniak.chat;
 
 import android.app.Activity;
 import android.content.Context;

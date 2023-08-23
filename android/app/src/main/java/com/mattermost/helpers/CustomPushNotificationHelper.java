@@ -30,7 +30,7 @@ import androidx.core.app.Person;
 import androidx.core.app.RemoteInput;
 import androidx.core.graphics.drawable.IconCompat;
 
-import com.mattermost.rnbeta.*;
+import com.infomaniak.chat.*;
 import com.nozbe.watermelondb.Database;
 
 import java.io.IOException;
