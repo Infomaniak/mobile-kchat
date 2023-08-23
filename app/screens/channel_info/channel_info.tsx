@@ -105,15 +105,6 @@ const ChannelInfo = ({
                     canManageMembers={canManageMembers}
                 />
                 <View style={styles.separator}/>
-                {canEnableDisableCalls &&
-                    <>
-                        <ChannelInfoEnableCalls
-                            channelId={channelId}
-                            enabled={isCallsEnabledInChannel}
-                        />
-                        <View style={styles.separator}/>
-                    </>
-                }
                 <ChannelInfoAppBindings
                     channelId={channelId}
                     serverUrl={serverUrl}
