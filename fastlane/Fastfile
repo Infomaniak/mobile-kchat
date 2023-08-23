@@ -751,8 +751,8 @@ platform :android do
       )
     end
 
-    helpers_dir = './android/app/src/main/java/com/mattermost/helpers/'
-    beta_dir = './android/app/src/main/java/com/mattermost/rnbeta/'
+    helpers_dir = './android/app/src/main/java/com/infomaniak/helpers/'
+    beta_dir = './android/app/src/main/java/com/infomaniak/chat/'
     release_dir = "./android/app/src/main/java/#{package_id.gsub '.', '/'}/"
     if release_dir != beta_dir
       unless Dir.exist?(".#{release_dir}")
