@@ -34,14 +34,13 @@ export async function handleCategoryCreatedEvent(serverUrl: string, msg: Websock
         if (msg.data.category) {
             category = msg.data.category;
             addOrUpdateCategories(serverUrl, [category]);
-            return;
         }
     } catch (e) {
         logError('Category WS: handleCategoryCreatedEvent', e, msg);
-    }
 
-    if (msg.data.team_id) {
-        fetchCategories(serverUrl, msg.data.team_id);
+        if (msg.data.team_id) {
+            fetchCategories(serverUrl, msg.data.team_id);
+        }
     }
 }
 
@@ -52,14 +51,12 @@ export async function handleCategoryUpdatedEvent(serverUrl: string, msg: Websock
         if (msg?.data?.updatedCategories) {
             categories = msg.data.updatedCategories;
             addOrUpdateCategories(serverUrl, categories);
-            return;
         }
     } catch (e) {
         logError('Category WS: handleCategoryUpdatedEvent', e, msg);
-    }
-
-    if (msg.data.team_id) {
-        fetchCategories(serverUrl, msg.data.team_id);
+        if (msg.data.team_id) {
+            fetchCategories(serverUrl, msg.data.team_id);
+        }
     }
 }
 
@@ -70,9 +67,9 @@ export async function handleCategoryDeletedEvent(serverUrl: string, msg: Websock
             await deleteCategory(serverUrl, msg.data.category_id);
         }
 
-        if (msg.broadcast.team_id) {
+        if (msg.data.team_id) {
             // Fetch the categories again as channels will have moved
-            fetchCategories(serverUrl, msg.broadcast.team_id);
+            fetchCategories(serverUrl, msg.data.team_id);
         }
     } catch (e) {
         logError('Category WS: handleCategoryDeletedEvent', e, msg);
@@ -98,12 +95,8 @@ export async function handleCategoryOrderUpdatedEvent(serverUrl: string, msg: We
     } catch (e) {
         logError('Category WS: handleCategoryOrderUpdatedEvent', e, msg);
 
-        if (msg.broadcast.team_id) {
+        if (msg.data.team_id) {
             fetchCategories(serverUrl, msg.data.team_id);
         }
-    }
-
-    if (msg.data.team_id) {
-        fetchCategories(serverUrl, msg.data.team_id);
     }
 }
