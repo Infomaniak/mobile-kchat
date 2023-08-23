@@ -292,7 +292,7 @@ export async function handlePostDeleted(serverUrl: string, msg: WebSocketMessage
 }
 
 export async function handlePostUnread(serverUrl: string, msg: WebSocketMessage) {
-    const {channel_id: channelId, team_id: teamId} = msg.broadcast;
+    const {channel_id: channelId, team_id: teamId} = msg.data;
     const {
         mention_count: mentionCount,
         mention_count_root: mentionCountRoot,

@@ -8,10 +8,9 @@ type WebsocketBroadcast = {
     team_id: string;
 }
 
-type WebSocketMessage<T = any> = {
+type WebSocketMessage = {
     event: string;
-    data: T;
-    broadcast: WebsocketBroadcast;
+    data: WebsocketBroadcast;
     seq: number;
 }
 

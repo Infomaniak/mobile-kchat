@@ -28,16 +28,16 @@ type WSMessage = WebsocketGroupMessage | WebsocketGroupMemberMessage | Websocket
 const handleError = (serverUrl: string, e: unknown, msg: WSMessage) => {
     logError(`Group WS: ${msg.event}`, e, msg);
 
-    const {team_id, channel_id, user_id} = msg.broadcast;
+    const {team_id, channel_id, user_id} = msg.data;
 
     if (team_id) {
-        fetchGroupsForTeam(serverUrl, msg.broadcast.team_id);
+        fetchGroupsForTeam(serverUrl, msg.data.team_id);
     }
     if (channel_id) {
-        fetchGroupsForChannel(serverUrl, msg.broadcast.channel_id);
+        fetchGroupsForChannel(serverUrl, msg.data.channel_id);
     }
     if (user_id) {
-        fetchGroupsForMember(serverUrl, msg.broadcast.user_id);
+        fetchGroupsForMember(serverUrl, msg.data.user_id);
     }
 };
 
