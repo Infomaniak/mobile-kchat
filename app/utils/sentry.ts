@@ -22,6 +22,7 @@ export function initializeSentry() {
     Sentry.init({
         dsn: 'https://4110301feed3d3f0ed9ec17aaab149c4@sentry-kchat.infomaniak.com/6',
         tracesSampleRate: 0.01,
+        environment: process.env.NODE_ENV,
     });
 }
 
@@ -99,9 +100,10 @@ const getUserContext = async (database: Database) => {
     const user = await getCurrentUser(database);
 
     return {
+        id: user?.id ?? currentUser.id,
         userID: user?.id ?? currentUser.id,
-        email: '',
-        username: '',
+        email: user?.email,
+        username: user?.username,
         locale: user?.locale ?? currentUser.locale,
         roles: user?.roles ?? currentUser.roles,
     };
@@ -152,6 +154,7 @@ export const addSentryContext = async (serverUrl: string) => {
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const userContext = await getUserContext(database);
         Sentry.setContext('User-Information', userContext);
+        Sentry.setUser(userContext);
 
         const buildContext = await getBuildTags(database);
         Sentry.setContext('App-Build Information', buildContext);
