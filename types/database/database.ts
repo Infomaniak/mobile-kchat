@@ -88,6 +88,7 @@ export type HandlePostsArgs = {
   previousPostId?: string;
   posts?: Post[];
   prepareRecordsOnly?: boolean;
+  forceUpdate?: boolean;
 };
 
 export type HandleThreadsArgs = {

@@ -667,6 +667,7 @@ export async function fetchPostsAround(serverUrl: string, channelId: string, pos
                 actionType: ActionType.POSTS.RECEIVED_AROUND,
                 ...data,
                 prepareRecordsOnly: true,
+                forceUpdate: true,
             });
 
             models.push(...posts);

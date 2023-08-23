@@ -141,9 +141,17 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
      * @param {RawPost[]} handlePosts.posts
      * @param {string | undefined} handlePosts.previousPostId
      * @param {boolean | undefined} handlePosts.prepareRecordsOnly
+     * @param {boolean | undefined} handlePosts.forceUpdate
      * @returns {Promise<Model[]>}
      */
-    handlePosts = async ({actionType, order, posts, previousPostId = '', prepareRecordsOnly = false}: HandlePostsArgs): Promise<Model[]> => {
+    handlePosts = async ({
+                             actionType,
+                             order,
+                             posts,
+                             previousPostId = '',
+                             prepareRecordsOnly = false,
+                             forceUpdate = false,
+                         }: HandlePostsArgs): Promise<Model[]> => {
         const tableName = POST;
 
         // We rely on the posts array; if it is empty, we stop processing
@@ -235,7 +243,7 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             deleteRawValues: pendingPostsToDelete,
             tableName,
             fieldName: 'id',
-            shouldUpdate: (e: PostModel, n: Post) => n.update_at > e.updateAt,
+            shouldUpdate: (e: PostModel, n: Post) => forceUpdate || n.update_at > e.updateAt,
         }));
 
         const preparedPosts = (await this.prepareRecords({
