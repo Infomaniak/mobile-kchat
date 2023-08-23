@@ -15,6 +15,7 @@ import {typography} from '@utils/typography';
 type Props = {
     channelId: string;
     rootId: string;
+    currentUserId: string;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -30,6 +31,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 function Typing({
     channelId,
     rootId,
+    currentUserId,
 }: Props) {
     const typingHeight = useSharedValue(0);
     const typing = useRef<Array<{id: string; now: number; username: string}>>([]);
@@ -55,6 +57,10 @@ function Typing({
 
         const msgRootId = msg.parentId || msg.rootId || '';
         if (rootId !== msgRootId) {
+            return;
+        }
+
+        if (msg.userId === currentUserId) {
             return;
         }
 

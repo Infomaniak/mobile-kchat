@@ -177,6 +177,7 @@ export default function DraftInput({
             <Typing
                 channelId={channelId}
                 rootId={rootId}
+                currentUserId={currentUserId}
             />
             <SafeAreaView
                 edges={SAFE_AREA_VIEW_EDGES}
