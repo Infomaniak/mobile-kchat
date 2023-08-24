@@ -276,7 +276,8 @@ public class CustomPushNotificationHelper {
 
     private static NotificationCompat.MessagingStyle getMessagingStyle(Context context, Bundle bundle) {
         NotificationCompat.MessagingStyle messagingStyle;
-        final String senderId = "me";
+        final String senderId = bundle.getString("sender_id");
+        final String senderName = bundle.getString("sender_name");
         final String serverUrl = bundle.getString("server_url");
         final String type = bundle.getString("type");
         String urlOverride = bundle.getString("override_icon_url");
@@ -284,11 +285,11 @@ public class CustomPushNotificationHelper {
 
         Person.Builder sender = new Person.Builder()
                 .setKey(senderId)
-                .setName("Me");
+                .setName(senderName);
 
         if (serverUrl != null && !type.equals(CustomPushNotificationHelper.PUSH_TYPE_SESSION)) {
             try {
-                Bitmap avatar = userAvatar(context, serverUrl, "me", urlOverride, fromWebhook);
+                Bitmap avatar = userAvatar(context, serverUrl, senderId, urlOverride, fromWebhook);
                 if (avatar != null) {
                     sender.setIcon(IconCompat.createWithBitmap(avatar));
                 }
