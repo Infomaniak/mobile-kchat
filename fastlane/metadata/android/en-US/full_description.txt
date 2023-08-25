@@ -1,19 +1,16 @@
-Requires Mattermost Server v7.8.0+. Older servers may not be able to connect or have unexpected behavior.
+The kChat app requires an Infomaniak account with kSuite which requires a subscription (infomaniak.com/ksuite). It enables you to communicate live with your teams and organise your projects within a unified communication platform.
 
--------
+kChat is available on all devices. It means you can keep in touch with your teams and projects wherever you are.
 
-Mattermost is secure workplace messaging from behind your firewall.
+With the kChat app, you can:
 
-- Discuss topics in private groups, one-to-one or team-wide
-- Easily share and view image files 
-- Connect in-house systems with webhooks and Slack-compatible integrations
+- Communicate with your teams and organise your conversations via public or private channels.
+- Send messages and files or make audio/video calls with one person, a group of people or an entire public or private channel.
+- Mention people in conversations to get their attention.
+- Quickly see the conversations in which you’re mentioned.
+- See at a glance the messages you’ve saved.
+- Easily search for a conversation and specific files.
+- Customise notifications to remain focused on the essentials.
+- Insert gifs, emojis and animations to add fun and emotion when words aren’t enough.
 
-To use this app, you need a URL for a Mattermost server. 
-
--------
-
-Host your own server: https://about.mattermost.com/download 
-
-Terms of Service: http://about.mattermost.com/terms/ 
-
-Contribute to the project: https://github.com/mattermost/mattermost-mobile
+Infomaniak is a Swiss company that’s independent of the web giants. We control our infrastructure and solutions from start to finish so that we never have to make concessions on our values: respect for privacy, no compromise on ecology and social issues. You retain full control of your data and can collaborate and work with peace of mind in a sovereign ecosystem that’s continuously evolving. The kChat app is open source and you can consult its code on the Infomaniak github.

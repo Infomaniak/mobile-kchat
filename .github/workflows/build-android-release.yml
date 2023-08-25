@@ -43,7 +43,7 @@ jobs:
           MATTERMOST_WEBHOOK_URL: "${{ secrets.MM_MOBILE_RELEASE_MATTERMOST_WEBHOOK_URL }}"
           SENTRY_AUTH_TOKEN: "${{ secrets.MM_MOBILE_SENTRY_AUTH_TOKEN }}"
           SENTRY_DSN_ANDROID: ${{ secrets.MM_MOBILE_RELEASE_SENTRY_DSN_ANDROID }}
-          SUPPLY_JSON_KEY: ${{ github.workspace }}/mattermost-mobile-private/android/mattermost-credentials.json
+          SUPPLY_JSON_KEY: ${{ github.workspace }}/mobile-private/android/kchat-credentials.json
         run: |
           echo "::group::Build"
           bundle exec fastlane android build --env android.release

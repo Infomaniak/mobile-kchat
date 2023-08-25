@@ -6,7 +6,7 @@ import FileSystem from 'react-native-fs';
 
 export default {
     DOCUMENTS_PATH: `${FileSystem.CachesDirectoryPath}/Documents`,
-    IS_TABLET: DeviceInfo.isTablet() || DeviceInfo.getDeviceType() === 'Desktop',
+    IS_TABLET: DeviceInfo.isTablet(),
     PUSH_NOTIFY_ANDROID_REACT_NATIVE: 'android_rn',
     PUSH_NOTIFY_APPLE_REACT_NATIVE: 'apple_rn',
 };
