@@ -175,7 +175,6 @@ export default function HomeScreen(props: HomeProps) {
                     />
                 </Tab.Navigator>
             </NavigationContainer>
-            <ServerVersion/>
         </>
     );
 }
