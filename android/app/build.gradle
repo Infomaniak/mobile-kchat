@@ -110,7 +110,7 @@ android {
         applicationId "com.infomaniak.chat"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1_00_011_00
+        versionCode 1_00_011_01
         versionName "1.0.11"
         testBuildType System.getProperty('testBuildType', 'debug')
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
@@ -184,6 +184,8 @@ android {
 }
 
 repositories {
+    jcenter()
+
     maven {
         url 'https://maven.google.com'
     }
@@ -221,6 +223,7 @@ dependencies {
     implementation project(':reactnativenotifications')
     implementation project(':watermelondb')
     implementation project(':watermelondb-jsi')
+    implementation 'io.noties.markwon:core:4.6.2'
 }
 
 configurations.all {

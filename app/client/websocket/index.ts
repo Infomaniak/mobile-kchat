@@ -122,6 +122,7 @@ export default class WebSocketClient {
             httpsPort: 443,
             forceTLS: true,
             enabledTransports: ['ws', 'wss'],
+            cluster: 'eu',
         });
 
         const reliableWebSockets = config.EnableReliableWebSockets === 'true';

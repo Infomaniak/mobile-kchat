@@ -11,8 +11,8 @@
     "RudderApiKey": "",
 
     "SentryEnabled": true,
-    "SentryDsnIos": "https://a1ac25c51de74bbc9ec076f9c53633e1@sentry.infomaniak.com/59",
-    "SentryDsnAndroid": "https://a1ac25c51de74bbc9ec076f9c53633e1@sentry.infomaniak.com/59",
+    "SentryDsnIos": "https://4110301feed3d3f0ed9ec17aaab149c4@sentry-kchat.infomaniak.com/6",
+    "SentryDsnAndroid": "https://4110301feed3d3f0ed9ec17aaab149c4@sentry-kchat.infomaniak.com/6",
     "SentryOptions": {
         "deactivateStacktraceMerging": true,
         "autoBreadcrumbs": {
