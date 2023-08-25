@@ -119,7 +119,7 @@ const LimitedMessages = ({
                     shownTop,
                     shownTop,
                 ],
-                Animated.Extrapolate.CLAMP,
+                'clamp',
             ), {damping: 15}),
         }],
     }), [isTablet, shownTop]);
