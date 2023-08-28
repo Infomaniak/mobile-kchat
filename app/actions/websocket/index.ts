@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {markChannelAsViewed} from '@actions/local/channel';
+import {dataRetentionCleanup} from '@actions/local/systems';
 import {markChannelAsRead} from '@actions/remote/channel';
 import {handleEntryAfterLoadNavigation, registerDeviceToken} from '@actions/remote/entry/common';
 import {deferredAppEntryActions, entry} from '@actions/remote/entry/gql_common';
@@ -33,6 +34,7 @@ import {isSupportedServerCalls} from '@calls/utils';
 import {Screens, WebsocketEvents} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
+import AppsManager from '@managers/apps_manager';
 import {getLastPostInThread} from '@queries/servers/post';
 import {
     getConfig,
@@ -154,6 +156,11 @@ async function doReconnect(serverUrl: string) {
     await deferredAppEntryActions(serverUrl, lastDisconnectedAt, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, initialTeamId);
 
     openAllUnreadChannels(serverUrl);
+
+    dataRetentionCleanup(serverUrl);
+
+    AppsManager.refreshAppBindings(serverUrl);
+
     return undefined;
 }
 
