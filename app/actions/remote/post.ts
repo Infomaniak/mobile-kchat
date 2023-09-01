@@ -462,6 +462,14 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
         }
         const client = NetworkManager.getClient(serverUrl);
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        
+        await operator.database.write(() => {
+            return operator.database.adapter.unsafeExecute({
+                sqls: [
+                    [`DELETE FROM ${MM_TABLES.SERVER.POST} where channel_id = ?`, [channelId]],
+                ],
+            });
+        });
 
         const isCRTEnabled = await getIsCRTEnabled(database);
         const data = await client.getPostsSince(channelId, since, isCRTEnabled, isCRTEnabled);
