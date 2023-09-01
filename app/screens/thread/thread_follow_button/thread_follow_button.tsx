@@ -26,7 +26,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             borderWidth: StyleSheet.hairlineWidth,
             borderRadius: 4,
             paddingVertical: 4.5,
-            paddingHorizontal: 10,
+            paddingHorizontal: 5,
             opacity: 0.72,
             ...Platform.select({
                 android: {
