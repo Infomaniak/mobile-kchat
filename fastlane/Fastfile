@@ -1006,11 +1006,11 @@ def submit_to_testflight(ipa_path)
 
   # Send a build message to Mattermost
   pretext = '#### New iOS released ready to be published'
-  msg = "Release has been cut and is on TestFlight ready to be published.\nDownload link: #{public_link}"
+  msg = "Release has been cut and is on TestFlight ready to be published."
 
   if ENV['BETA_BUILD'] == 'true'
     pretext = '#### New iOS beta published to TestFlight'
-    msg = "Sign up as a beta tester [here](https://testflight.apple.com/join/Q7Rx7K9P).\nDownload link: #{public_link}"
+    msg = "Sign up as a beta tester [here](https://testflight.apple.com/join/0DiHlHVi)."
   end
 
   send_message_to_mattermost({
