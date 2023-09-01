@@ -126,6 +126,15 @@ export async function updateLastDataRetentionRun(serverUrl: string, value?: numb
 export async function dataRetentionCleanup(serverUrl: string) {
     try {
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+
+        const lastRunAt = await getLastGlobalDataRetentionRun(database);
+        const lastCleanedToday = new Date(lastRunAt).toDateString() === new Date().toDateString();
+
+        // Do not run if clean up is already done today
+        if (lastRunAt && lastCleanedToday) {
+            return {error: undefined};
+        }
+
         const isDataRetentionEnabled = await getIsDataRetentionEnabled(database);
         const result = await (isDataRetentionEnabled ? dataRetentionPolicyCleanup(serverUrl) : dataRetentionWithoutPolicyCleanup(serverUrl));
 
@@ -169,7 +178,7 @@ async function dataRetentionPolicyCleanup(serverUrl: string) {
             const {team_id, post_duration} = teamPolicy;
             const channelIds = await queryAllChannelsForTeam(database, team_id).fetchIds();
             if (channelIds.length) {
-                const cutoff = getDataRetentionPolicyCutoff();
+                const cutoff = getDataRetentionPolicyCutoff(post_duration);
                 channelIds.forEach((channelId) => {
                     channelsCutoffs[channelId] = cutoff;
                 });
@@ -178,7 +187,7 @@ async function dataRetentionPolicyCleanup(serverUrl: string) {
 
         // Get channel level cutoff from channel policies
         channelPolicies.forEach(({channel_id, post_duration}) => {
-            channelsCutoffs[channel_id] = getDataRetentionPolicyCutoff();
+            channelsCutoffs[channel_id] = getDataRetentionPolicyCutoff(post_duration);
         });
 
         const conditions = [];
@@ -211,7 +220,7 @@ async function dataRetentionPolicyCleanup(serverUrl: string) {
 async function dataRetentionWithoutPolicyCleanup(serverUrl: string) {
     try {
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const cutoff = getDataRetentionPolicyCutoff(); // 14 days
+        const cutoff = getDataRetentionPolicyCutoff(14); // 14 days
 
         const postIds = await database.get<PostModel>(POST).query(
             Q.where('create_at', Q.lt(cutoff)),
@@ -246,13 +255,12 @@ async function dataRetentionCleanPosts(serverUrl: string, postIds: string[]) {
 }
 
 // Returns cutoff time based on the policy's post_duration
-function getDataRetentionPolicyCutoff() {
+function getDataRetentionPolicyCutoff(postDuration: number) {
     const periodDate = new Date();
-    periodDate.setDate(periodDate.getDate());
-    periodDate.setHours(periodDate.getHours());
-    periodDate.setMinutes(periodDate.getMinutes());
-    periodDate.setSeconds(periodDate.getSeconds());
-
+    periodDate.setDate(periodDate.getDate() - postDuration);
+    periodDate.setHours(0);
+    periodDate.setMinutes(0);
+    periodDate.setSeconds(0);
     return periodDate.getTime();
 }
 
