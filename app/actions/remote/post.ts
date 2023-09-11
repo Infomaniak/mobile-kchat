@@ -460,7 +460,7 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
         }
         const client = NetworkManager.getClient(serverUrl);
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        
+
         await operator.database.write(() => {
             return operator.database.adapter.unsafeExecute({
                 sqls: [
