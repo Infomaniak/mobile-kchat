@@ -865,7 +865,7 @@ platform :android do
   def move_android_to_root
     app_name =  ENV['APP_NAME'] || 'Mattermost Beta'
     app_name_sub = app_name.gsub(" ", "_")
-    build_task = ENV['ANDROID_BUILD_TASK'].nil? || ENV['ANDROID_BUILD_TASK'].empty? ? 'assemble' : ENV['ANDROID_BUILD_TASK']
+    build_task = ENV['ANDROID_BUILD_TASK'].nil? || ENV['ANDROID_BUILD_TASK'].empty? ? 'assemble,bundle' : ENV['ANDROID_BUILD_TASK']
     build_task = build_task.split(",")
 
     if build_task.include?("assemble")
