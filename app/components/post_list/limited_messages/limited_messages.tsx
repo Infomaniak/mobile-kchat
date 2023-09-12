@@ -3,7 +3,7 @@
 
 import React, {useMemo} from 'react';
 import {Platform, View} from 'react-native';
-import Animated, {interpolate, useAnimatedStyle, useSharedValue, withSpring} from 'react-native-reanimated';
+import Animated, {Extrapolate, interpolate, useAnimatedStyle, useSharedValue, withSpring} from 'react-native-reanimated';
 
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
@@ -119,7 +119,7 @@ const LimitedMessages = ({
                     shownTop,
                     shownTop,
                 ],
-                Animated.Extrapolate.CLAMP,
+                Extrapolate.CLAMP,
             ), {damping: 15}),
         }],
     }), [isTablet, shownTop]);
