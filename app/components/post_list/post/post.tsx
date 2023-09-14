@@ -8,7 +8,7 @@ import {Keyboard, Platform, type StyleProp, View, type ViewStyle, TouchableHighl
 import {removePost} from '@actions/local/post';
 import {showPermalink} from '@actions/remote/permalink';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
-import CallsCustomMessage from '@calls/components/calls_custom_message';
+import IkCallsCustomMessage from '@calls/components/ik_calls_custom_message';
 import {isCallsCustomMessage} from '@calls/utils';
 import SystemAvatar from '@components/system_avatar';
 import SystemHeader from '@components/system_header';
@@ -35,7 +35,6 @@ import type PostModel from '@typings/database/models/servers/post';
 import type ThreadModel from '@typings/database/models/servers/thread';
 import type UserModel from '@typings/database/models/servers/user';
 import type {SearchPattern} from '@typings/global/markdown';
-import CallMessage from '@calls/components/calls_custom_message/ik_call_message';
 
 type PostProps = {
     appsEnabled: boolean;
@@ -295,7 +294,10 @@ const Post = ({
         );
     } else if (isCallsPost && !hasBeenDeleted) {
         body = (
-            <CallMessage post={post}/>
+            <IkCallsCustomMessage
+                serverUrl={serverUrl}
+                post={post}
+            />
         );
     } else {
         body = (
