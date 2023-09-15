@@ -1,17 +1,19 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import moment from 'moment-timezone';
 import React from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 import {Divider} from 'react-native-elements';
 
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
+import FormattedTime from '@components/formatted_time';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import CallManager from '@store/CallManager';
+import UserModel from '@typings/database/models/servers/user';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
+import {getUserTimezone} from '@utils/user';
 
 import KMeetIcon from './kmeet_icon';
 
@@ -19,6 +21,8 @@ import type PostModel from '@typings/database/models/servers/post';
 
 type CallMessageProps = {
     post: PostModel;
+    currentUser?: UserModel;
+    isMilitaryTime: boolean;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -78,32 +82,38 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             margin: 4,
             padding: 9,
         },
+        timeText: {
+            ...typography('Body', 75),
+            color: changeOpacity(theme.centerChannelColor, 0.64),
+        },
     };
 });
 
-const CallMessage = (props: CallMessageProps) => {
+export const IkCallsCustomMessage = ({post, currentUser, isMilitaryTime}: CallMessageProps) => {
     const theme = useTheme();
     const serverUrl = useServerUrl();
+    const timezone = getUserTimezone(currentUser);
     const styles = getStyleSheet(theme);
 
-    const startedAt = props.post.props.start_at;
-    const endedAt = props.post.props.end_at;
+    const startedAt = post.props.start_at;
+    const endedAt = post.props.end_at;
     let descriptionText = '';
+    let eventDate = '';
 
     if (startedAt) {
         if (endedAt) {
-            const endedAtDate = moment(endedAt).format('hh:mm');
-            descriptionText = 'Ended at ' + endedAtDate;
+            eventDate = endedAt;
+            descriptionText = 'Ended at';
         } else {
-            const startedAtDate = moment(startedAt).format('hh:mm');
-            descriptionText = 'Started at ' + startedAtDate;
+            eventDate = startedAt;
+            descriptionText = 'Started at';
         }
     }
 
     let callButton = null;
     if (startedAt && !endedAt) {
         const handlePickup = () => {
-            CallManager.startCall(serverUrl, props.post.channelId);
+            CallManager.startCall(serverUrl, post.channelId);
         };
 
         callButton = (
@@ -139,10 +149,18 @@ const CallMessage = (props: CallMessageProps) => {
                 </View>
                 <View>
                     <Text style={styles.systemMessageTitle}>
-                        {props.post.message}
+                        {post.message}
                     </Text>
                     <Text style={styles.systemMessageDescription}>
-                        {descriptionText}
+                        {
+                            descriptionText &&
+                            <FormattedTime
+                                style={styles.timeText}
+                                value={eventDate}
+                                isMilitaryTime={isMilitaryTime}
+                                timezone={timezone}
+                            />
+                        }
                     </Text>
                 </View>
 
@@ -151,5 +169,3 @@ const CallMessage = (props: CallMessageProps) => {
         </View>
     );
 };
-
-export default CallMessage;

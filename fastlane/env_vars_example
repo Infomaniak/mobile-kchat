@@ -50,11 +50,11 @@ export BUILD_FOR_RELEASE=true
 export REPLACE_ASSETS=false
 
 ############ APP IDENTIFIERS ############
-export MAIN_APP_IDENTIFIER=com.mattermost.rnbeta
-export EXTENSION_APP_IDENTIFIER=com.mattermost.rnbeta.MattermostShare
-export NOTIFICATION_SERVICE_IDENTIFIER=com.mattermost.rnbeta.NotificationService
-export IOS_APP_GROUP=group.com.mattermost.rnbeta
-export IOS_ICLOUD_CONTAINER=iCloud.com.mattermost.rnbeta
+export MAIN_APP_IDENTIFIER=com.infomaniak.chat
+export EXTENSION_APP_IDENTIFIER=com.infomaniak.chat.ShareExtension
+export NOTIFICATION_SERVICE_IDENTIFIER=com.infomaniak.chat.NotificationService
+export IOS_APP_GROUP=group.com.infomaniak.chat
+export IOS_ICLOUD_CONTAINER=iCloud.com.infomaniak.chat
 export IOS_BUILD_EXPORT_METHOD=app-store
 
 ############ SET TO TRUE TO UPLOAD THE BUILDS TO TESTFLIGH AND GOOGLE PLAY ############

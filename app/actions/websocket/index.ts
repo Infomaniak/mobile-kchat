@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {markChannelAsViewed} from '@actions/local/channel';
+import {dataRetentionCleanup} from '@actions/local/systems';
 import {markChannelAsRead} from '@actions/remote/channel';
 import {handleEntryAfterLoadNavigation, registerDeviceToken} from '@actions/remote/entry/common';
 import {deferredAppEntryActions, entry} from '@actions/remote/entry/gql_common';
@@ -28,11 +29,13 @@ import {
     handleCallUserUnraiseHand,
     handleCallUserVoiceOff,
     handleCallUserVoiceOn,
+    handleUserDismissedNotification,
 } from '@calls/connection/websocket_event_handlers';
 import {isSupportedServerCalls} from '@calls/utils';
 import {Screens, WebsocketEvents} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
+import AppsManager from '@managers/apps_manager';
 import {getLastPostInThread} from '@queries/servers/post';
 import {
     getConfig,
@@ -154,6 +157,11 @@ async function doReconnect(serverUrl: string) {
     await deferredAppEntryActions(serverUrl, lastDisconnectedAt, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, initialTeamId);
 
     openAllUnreadChannels(serverUrl);
+
+    dataRetentionCleanup(serverUrl);
+
+    AppsManager.refreshAppBindings(serverUrl);
+
     return undefined;
 }
 
@@ -387,6 +395,9 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
         case WebsocketEvents.CALLS_HOST_CHANGED:
             handleCallHostChanged(serverUrl, msg);
             break;
+        case WebsocketEvents.CALLS_USER_DISMISSED_NOTIFICATION:
+            handleUserDismissedNotification(serverUrl, msg);
+            break;
 
         case WebsocketEvents.GROUP_RECEIVED:
             handleGroupReceivedEvent(serverUrl, msg);
@@ -413,6 +424,7 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
         case WebsocketEvents.KSUITE_DELETED:
             handleTeamSyncEvent(serverUrl);
             break;
+
         // Plugins
         case WebsocketEvents.PLUGIN_STATUSES_CHANGED:
         case WebsocketEvents.PLUGIN_ENABLED:

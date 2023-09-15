@@ -9,7 +9,7 @@ import FormattedText from '@components/formatted_text';
 import {BotTag} from '@components/tag';
 import {General} from '@constants';
 import {useServerUrl} from '@context/server';
-import {makeStyleSheetFromTheme} from '@utils/theme';
+import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {getUserIdFromChannelName} from '@utils/user';
 
@@ -53,9 +53,11 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         ...typography('Body', 200, 'Regular'),
     },
     gptDisclaimerContainer: {
-        backgroundColor: theme.sidebarHeaderBg,
-        borderRadius: 8,
         marginTop: 8,
+        borderTopColor: changeOpacity(theme.centerChannelColor, 0.08),
+        borderTopWidth: 2,
+        borderBottomWidth: 2,
+        borderBottomColor: changeOpacity(theme.centerChannelColor, 0.08),
     },
     gptDisclaimer: {
         color: theme.centerChannelColor,
