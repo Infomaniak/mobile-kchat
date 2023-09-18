@@ -48,9 +48,6 @@ const NotificationIcon = ({author, enablePostIconOverride, fromWebhook, override
         if (overrideIconUrl) {
             const source: Source = {
                 uri: client.getAbsoluteUrl(overrideIconUrl),
-                headers: {
-                    Authorization: client?.getCurrentBearerToken(),
-                },
             };
             icon = (
                 <FastImage

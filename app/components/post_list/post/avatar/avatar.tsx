@@ -57,9 +57,6 @@ const Avatar = ({author, enablePostIconOverride, isAutoReponse, location, post}:
         if (overrideIconUrl) {
             const source = {
                 uri: overrideIconUrl,
-                headers: {
-                    Authorization: client?.getCurrentBearerToken() ?? '',
-                },
             };
             iconComponent = (
                 <FastImage
