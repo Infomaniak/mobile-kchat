@@ -278,6 +278,7 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
                         location={location}
                         testID={`${threadItemTestId}.footer`}
                         thread={thread}
+                        fromBot={post.props?.from_webhook}
                     />
                     }
                 </View>

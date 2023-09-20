@@ -20,6 +20,7 @@ type Props = {
     participants: UserModel[];
     testID: string;
     thread: ThreadModel;
+    fromBot: boolean;
 };
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -48,7 +49,8 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const ThreadFooter = ({author, channelId, location, participants, testID, thread}: Props) => {
+const ThreadFooter = ({author, channelId, location, participants, testID, thread, fromBot}: Props) => {
+
     const theme = useTheme();
     const style = getStyleSheet(theme);
 
@@ -83,7 +85,11 @@ const ThreadFooter = ({author, channelId, location, participants, testID, thread
     const participantsList = useMemo(() => {
         if (author && participants?.length) {
             const filteredParticipantsList = participants.filter((participant) => participant.id !== author.id).reverse();
-            filteredParticipantsList.unshift(author);
+
+            if (!fromBot) {
+                filteredParticipantsList.unshift(author);
+            }
+
             return filteredParticipantsList;
         }
         return [];
