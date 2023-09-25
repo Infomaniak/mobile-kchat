@@ -1091,6 +1091,7 @@
   "infomaniak.post_info.post_reminder.sub_menu.one_hour": "1 hour",
   "infomaniak.post_info.post_reminder.sub_menu.two_hours": "2 hours",
   "infomaniak.post_info.post_reminder.sub_menu.tomorrow": "Tomorrow",
+  "infomaniak.post_info.post_reminder.sub_menu.monday": "Monday",
   "infomaniak.post_info.post_reminder.sub_menu.custom": "Custom",
   "infomaniak.post.reminder.systemBot": "Hi there, here's your reminder about this message from {username}:\n{permaLink}",
   "infomaniak.post_info.post_translate.menu": "Translate",

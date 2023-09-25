@@ -1,10 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {BottomSheetProps, BottomSheetScrollView} from '@gorhom/bottom-sheet';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import {type BottomSheetProps, BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import React, {useMemo} from 'react';
-import {ScrollView, Text, View} from 'react-native';
+import {ScrollView} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {BaseOption} from '@components/common_post_options';
@@ -12,10 +11,8 @@ import FormattedText from '@components/formatted_text';
 import {ITEM_HEIGHT} from '@components/option_item';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
-import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import {t} from '@i18n';
 import NetworkManager from '@managers/network_manager';
 import BottomSheet from '@screens/bottom_sheet';
 import {dismissBottomSheet} from '@screens/navigation';
@@ -24,18 +21,15 @@ import {isSystemMessage} from '@utils/post';
 import {typography} from '@utils/typography';
 
 import type PostModel from '@typings/database/models/servers/post';
-import type {AvailableScreens} from '@typings/screens/navigation';
 
 const POST_OPTIONS_BUTTON = 'close-post-options';
 
 type Props = {
-    sourceScreen: AvailableScreens;
     post: PostModel;
     componentId: string;
 };
 
-const IKReminder = ({sourceScreen, post, componentId}: Props) => {
-    const theme = useTheme();
+const IKReminder = ({post, componentId}: Props) => {
     const serverUrl = useServerUrl();
     const {bottom} = useSafeAreaInsets();
     const isTablet = useIsTablet();
@@ -43,10 +37,15 @@ const IKReminder = ({sourceScreen, post, componentId}: Props) => {
     const Scroll = useMemo(() => (isTablet ? ScrollView : BottomSheetScrollView), [isTablet]);
 
     const postReminderTimes = [
-        {id: 'thirty_minutes', label: 'infomaniak.post_info.post_reminder.sub_menu.thirty_minutes', labelDefault: '30 mins'},
+        {
+            id: 'thirty_minutes',
+            label: 'infomaniak.post_info.post_reminder.sub_menu.thirty_minutes',
+            labelDefault: '30 mins',
+        },
         {id: 'one_hour', label: 'infomaniak.post_info.post_reminder.sub_menu.one_hour', labelDefault: '1 hour'},
         {id: 'two_hours', label: 'infomaniak.post_info.post_reminder.sub_menu.two_hours', labelDefault: '2 hours'},
         {id: 'tomorrow', label: 'infomaniak.post_info.post_reminder.sub_menu.tomorrow', labelDefault: 'Tomorrow'},
+        {id: 'monday', label: 'infomaniak.post_info.post_reminder.sub_menu.monday', labelDefault: 'Monday'},
     ];
 
     const close = () => {
@@ -80,6 +79,9 @@ const IKReminder = ({sourceScreen, post, componentId}: Props) => {
                 break;
             case 'tomorrow':
                 endTime = currentDate.add(1, 'day').hours(9).minutes(0).seconds(0);
+                break;
+            case 'monday':
+                endTime = currentDate.startOf('isoWeek').add(1, 'week').hours(9).minutes(0).seconds(0);
                 break;
         }
 
@@ -115,24 +117,6 @@ const IKReminder = ({sourceScreen, post, componentId}: Props) => {
                         testID={item.id}
                     />))
                 }
-                {showCustom &&
-                    <View style={{minHeight: 48, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center'}}>
-                        <Text
-                            style={{
-                                color: theme.centerChannelColor,
-                                ...typography('Body', 200),
-                            }}
-                        >
-                            {t('infomaniak.post_info.post_reminder.sub_menu.tomorrow')}
-                        </Text>
-                        <DateTimePicker
-                            value={new Date()}
-                            display={'compact'}
-                            mode={'date'}
-                            onChange={() => {
-                            }}
-                        />
-                    </View>}
             </Scroll>
         );
     };
