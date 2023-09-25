@@ -15,7 +15,6 @@ public class PushNotification: NSObject {
     @objc public func postNotificationReceipt(_ userInfo: [AnyHashable:Any]) {
         let notification = UNMutableNotificationContent()
         notification.userInfo = userInfo
-        postNotificationReceipt(notification, completionHandler: {_ in})
     }
     
     public func postNotificationReceipt(_ notification: UNMutableNotificationContent, completionHandler: @escaping (_ notification: UNMutableNotificationContent?) -> Void) {
