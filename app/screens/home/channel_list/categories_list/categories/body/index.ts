@@ -58,7 +58,7 @@ const observeCategoryChannels = (category: CategoryModel, myChannels: Observable
 };
 
 const enhanced = withObservables([], ({category, currentUserId, database, isTablet, locale}: EnhanceProps) => {
-    const categoryMyChannels = category.myChannels.observeWithColumns(['last_post_at', 'is_unread']);
+    const categoryMyChannels = category.myChannels.observeWithColumns(['is_unread']);
     const channelsWithMyChannel = observeCategoryChannels(category, categoryMyChannels);
     const currentChannelId = isTablet ? observeCurrentChannelId(database) : of$('');
     const lastUnreadId = isTablet ? observeLastUnreadChannelId(database) : of$(undefined);
