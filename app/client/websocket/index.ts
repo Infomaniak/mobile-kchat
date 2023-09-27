@@ -10,7 +10,6 @@ import {toMilliseconds} from '@utils/datetime';
 import {logError, logInfo} from '@utils/log';
 
 const MAX_WEBSOCKET_FAILS = 7;
-const WEBSOCKET_TIMEOUT = toMilliseconds({seconds: 30});
 const MIN_WEBSOCKET_RETRY_TIME = toMilliseconds({seconds: 3});
 const MAX_WEBSOCKET_RETRY_TIME = toMilliseconds({minutes: 5});
 
@@ -113,15 +112,13 @@ export default class WebSocketClient {
             auth: {
                 headers: {
                     Authorization: bearerToken,
-                    Accept: 'application/json',
                 },
             },
-            wsPort: 443,
-            wssPort: 443,
-            httpPort: 443,
-            httpsPort: 443,
-            forceTLS: true,
             enabledTransports: ['ws', 'wss'],
+            disabledTransports: ['xhr_streaming', 'xhr_polling', 'sockjs'],
+            activityTimeout: 10000,
+            pongTimeout: 5000,
+            unavailableTimeout: 3000,
             cluster: 'eu',
         });
 
@@ -342,17 +339,18 @@ export default class WebSocketClient {
         };
 
         if (this.pusher && this.pusher.connection.state === ConnectionState.connected) {
-            this.userChannel?.trigger(action, msg);
+            this.presenceChannel?.trigger(action, msg);
         } else if (!this.pusher?.connection || this.pusher.connection.state === ConnectionState.disconnected) {
             this.pusher = undefined;
             this.initialize();
         }
     }
 
-    public sendUserTypingEvent(channelId: string, parentId?: string) {
+    public sendUserTypingEvent(userId: string, channelId: string, parentId?: string) {
         this.sendMessage('client-user_typing', {
             channel_id: channelId,
             parent_id: parentId,
+            user_id: userId,
         });
     }
 

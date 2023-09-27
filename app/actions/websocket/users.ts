@@ -4,7 +4,6 @@
 import {DeviceEventEmitter} from 'react-native';
 
 import {updateChannelsDisplayName} from '@actions/local/channel';
-import {setCurrentUserStatus} from '@actions/local/user';
 import {fetchMe, fetchUsersByIds} from '@actions/remote/user';
 import {General, Events, Preferences} from '@constants';
 import DatabaseManager from '@database/manager';
@@ -14,10 +13,10 @@ import {queryChannelsByTypes, queryUserChannelsByTypes} from '@queries/servers/c
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
 import {getConfig, getLicense} from '@queries/servers/system';
 import {getCurrentUser, getUserById} from '@queries/servers/user';
+import {logError} from '@utils/log';
 import {displayUsername} from '@utils/user';
 
 import type {Model} from '@nozbe/watermelondb';
-import {logError} from '@utils/log';
 
 export async function handleUserUpdatedEvent(serverUrl: string, msg: WebSocketMessage) {
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
@@ -119,7 +118,14 @@ export async function handleUserTypingEvent(serverUrl: string, msg: WebSocketMes
 
 export const userTyping = async (serverUrl: string, channelId: string, rootId?: string) => {
     const client = WebsocketManager.getClient(serverUrl);
-    client?.sendUserTypingEvent(channelId, rootId);
+    const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+    const currentUser = await getCurrentUser(database);
+
+    if (!currentUser) {
+        return;
+    }
+
+    client?.sendUserTypingEvent(currentUser.id, channelId, rootId);
 };
 
 export async function handleStatusChangedEvent(serverUrl: string, msg: WebSocketMessage) {
