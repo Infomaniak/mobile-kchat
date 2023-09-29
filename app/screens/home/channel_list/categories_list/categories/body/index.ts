@@ -114,8 +114,8 @@ const enhanced = withObservables([], ({category, currentUserId, database, isTabl
             let channelsW = cwms;
 
             channelsW = filterArchivedChannels(channelsW, channelId);
-            channelsW = filterManuallyClosedDms(channelsW, notifyProps, manuallyClosedDms, currentUserId, unreadId);
             channelsW = filterAutoclosedDMs(category.type, maxDms, currentUserId, channelId, channelsW, autoclose, notifyProps, deactivatedUsers, unreadId);
+            channelsW = filterManuallyClosedDms(channelsW, notifyProps, manuallyClosedDms, currentUserId, unreadId);
 
             return of$(sortChannels(sorting, channelsW, notifyProps, locale));
         }),
