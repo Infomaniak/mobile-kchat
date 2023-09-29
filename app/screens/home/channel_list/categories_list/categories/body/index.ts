@@ -84,6 +84,24 @@ const enhanced = withObservables([], ({category, currentUserId, database, isTabl
         switchMap((mc) => observeNotifyPropsByChannels(database, mc)),
     );
 
+    const hiddenDmPrefs = queryPreferencesByCategoryAndName(database, Preferences.CATEGORIES.DIRECT_CHANNEL_SHOW, undefined, 'false').
+        observeWithColumns(['value']);
+    const hiddenGmPrefs = queryPreferencesByCategoryAndName(database, Preferences.CATEGORIES.GROUP_CHANNEL_SHOW, undefined, 'false').
+        observeWithColumns(['value']);
+    const manuallyClosedPrefs = hiddenDmPrefs.pipe(
+        combineLatestWith(hiddenGmPrefs),
+        switchMap(([dms, gms]) => of$(dms.concat(gms))),
+    );
+
+    const approxViewTimePrefs = queryPreferencesByCategoryAndName(database, Preferences.CATEGORIES.CHANNEL_APPROXIMATE_VIEW_TIME, undefined).
+        observeWithColumns(['value']);
+    const openTimePrefs = queryPreferencesByCategoryAndName(database, Preferences.CATEGORIES.CHANNEL_OPEN_TIME, undefined).
+        observeWithColumns(['value']);
+    const autoclosePrefs = approxViewTimePrefs.pipe(
+        combineLatestWith(openTimePrefs),
+        switchMap(([viewTimes, openTimes]) => of$(viewTimes.concat(openTimes))),
+    );
+
     const categorySorting = category.observe().pipe(
         switchMap((c) => of$(c.sorting)),
         distinctUntilChanged(),
@@ -91,12 +109,13 @@ const enhanced = withObservables([], ({category, currentUserId, database, isTabl
 
     const deactivated = (category.type === DMS_CATEGORY) ? observeDeactivatedUsers(database) : of$(undefined);
     const sortedChannels = channelsWithMyChannel.pipe(
-        combineLatestWith(categorySorting, currentChannelId, lastUnreadId, notifyPropsPerChannel, deactivated, limit),
-        switchMap(([cwms, sorting, channelId, unreadId, notifyProps, deactivatedUsers, maxDms]) => {
+        combineLatestWith(categorySorting, currentChannelId, lastUnreadId, notifyPropsPerChannel, manuallyClosedPrefs, autoclosePrefs, deactivated, limit),
+        switchMap(([cwms, sorting, channelId, unreadId, notifyProps, manuallyClosedDms, autoclose, deactivatedUsers, maxDms]) => {
             let channelsW = cwms;
 
             channelsW = filterArchivedChannels(channelsW, channelId);
-            channelsW = filterAutoclosedDMs(category.type, maxDms, currentUserId, channelId, channelsW, notifyProps, deactivatedUsers, unreadId);
+            channelsW = filterManuallyClosedDms(channelsW, notifyProps, manuallyClosedDms, currentUserId, unreadId);
+            channelsW = filterAutoclosedDMs(category.type, maxDms, currentUserId, channelId, channelsW, autoclose, notifyProps, deactivatedUsers, unreadId);
 
             return of$(sortChannels(sorting, channelsW, notifyProps, locale));
         }),
