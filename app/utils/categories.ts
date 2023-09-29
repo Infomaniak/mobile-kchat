@@ -33,27 +33,21 @@ export const filterArchivedChannels = (channelsWithMyChannel: ChannelWithMyChann
 
 export const filterAutoclosedDMs = (
     categoryType: CategoryType, limit: number, currentUserId: string, currentChannelId: string,
-    channelsWithMyChannel: ChannelWithMyChannel[], preferences: PreferenceModel[],
+    channelsWithMyChannel: ChannelWithMyChannel[],
     notifyPropsPerChannel: Record<string, Partial<ChannelNotifyProps>>,
-    deactivatedUsers?: Map<string, UserModel | undefined >,
+    deactivatedUsers?: Map<string, UserModel | undefined>,
     lastUnreadChannelId?: string,
 ) => {
     if (categoryType !== DMS_CATEGORY) {
         // Only autoclose DMs that haven't been assigned to a category
         return channelsWithMyChannel;
     }
-    const prefMap = preferences.reduce((acc, v) => {
-        const existing = acc.get(v.name);
-        acc.set(v.name, Math.max((v.value as unknown as number) || 0, existing || 0));
-        return acc;
-    }, new Map<string, number>());
     const getLastViewedAt = (cwm: ChannelWithMyChannel) => {
         // The server only ever sets the last_viewed_at to the time of the last post in channel, so we may need
         // to use the preferences added for the previous version of autoclosing DMs.
-        const id = cwm.channel.id;
         return Math.max(
             cwm.myChannel.lastViewedAt,
-            prefMap.get(id) || 0,
+            0,
         );
     };
 
