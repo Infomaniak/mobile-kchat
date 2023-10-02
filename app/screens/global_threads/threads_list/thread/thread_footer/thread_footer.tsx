@@ -83,11 +83,13 @@ const ThreadFooter = ({author, channelId, location, participants, testID, thread
     // threadstarter should be the first one in the avatars list
     const participantsList = useMemo(() => {
         if (author && participants?.length) {
+            if (fromBot) {
+                return participants;
+            }
+
             const filteredParticipantsList = participants.filter((participant) => participant.id !== author.id).reverse();
 
-            if (!fromBot) {
-                filteredParticipantsList.unshift(author);
-            }
+            filteredParticipantsList.unshift(author);
 
             return filteredParticipantsList;
         }
