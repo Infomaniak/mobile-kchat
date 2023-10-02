@@ -15,14 +15,16 @@ class EphemeralStore {
     creatingChannel = false;
     creatingDMorGMTeammates: string[] = [];
 
+    noticeShown = new Set<string>();
+
     private serverLimit: { [x: string]: KSuiteLimit | undefined } = {};
-    private pushProxyVerification: { [serverUrl: string]: string | undefined } = {};
-    private canJoinOtherTeams: { [serverUrl: string]: BehaviorSubject<boolean> } = {};
+    private pushProxyVerification: {[serverUrl: string]: string | undefined} = {};
+    private canJoinOtherTeams: {[serverUrl: string]: BehaviorSubject<boolean>} = {};
 
-    private loadingMessagesForChannel: { [serverUrl: string]: Set<string> } = {};
+    private loadingMessagesForChannel: {[serverUrl: string]: Set<string>} = {};
 
-    private websocketEditingPost: { [serverUrl: string]: { [id: string]: { post: Post; timeout: NodeJS.Timeout } | undefined } | undefined } = {};
-    private websocketRemovingPost: { [serverUrl: string]: Set<string> | undefined } = {};
+    private websocketEditingPost: {[serverUrl: string]: {[id: string]: {post: Post; timeout: NodeJS.Timeout} | undefined} | undefined} = {};
+    private websocketRemovingPost: {[serverUrl: string]: Set<string> | undefined} = {};
 
     // As of today, the server sends a duplicated event to add the user to the team.
     // If we do not handle this, this ends up showing some errors in the database, apart

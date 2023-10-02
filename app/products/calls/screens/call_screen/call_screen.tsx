@@ -476,7 +476,7 @@ const CallScreen = ({
                     {
                         showStartRecording &&
                         <SlideUpPanelItem
-                            icon={'record-circle-outline'}
+                            leftIcon={'record-circle-outline'}
                             onPress={startRecording}
                             text={recordOptionTitle}
                         />
@@ -484,14 +484,14 @@ const CallScreen = ({
                     {
                         showStopRecording &&
                         <SlideUpPanelItem
-                            icon={'record-square-outline'}
+                            leftIcon={'record-square-outline'}
                             onPress={stopRecording}
                             text={stopRecordingOptionTitle}
                             textStyles={style.denimDND}
                         />
                     }
                     <SlideUpPanelItem
-                        icon='message-text-outline'
+                        leftIcon='message-text-outline'
                         onPress={switchToThread}
                         text={callThreadOptionTitle}
                     />
@@ -757,7 +757,6 @@ const CallScreen = ({
                                 iconStyle={[
                                     style.buttonIcon,
                                     isLandscape && style.buttonIconLandscape,
-                                    style.speakerphoneIcon,
                                     currentCall.speakerphoneOn && style.buttonOn,
                                 ]}
                                 buttonTextStyle={style.buttonText}
