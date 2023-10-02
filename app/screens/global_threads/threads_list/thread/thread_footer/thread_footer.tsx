@@ -50,7 +50,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 });
 
 const ThreadFooter = ({author, channelId, location, participants, testID, thread, fromBot}: Props) => {
-
     const theme = useTheme();
     const style = getStyleSheet(theme);
 
