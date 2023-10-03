@@ -57,7 +57,17 @@ const Avatar = ({author, enablePostIconOverride, isAutoReponse, location, post}:
         if (overrideIconUrl) {
             const source = {
                 uri: overrideIconUrl,
+                headers: {
+                    Authorization: client?.getCurrentBearerToken() ?? '',
+                },
             };
+
+            if (typeof post.props?.override_icon_url === 'string' && post.props?.override_icon_url.startsWith('/')) {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                source.headers.Authorization = client?.getCurrentBearerToken();
+            }
+
             iconComponent = (
                 <FastImage
                     source={source}

@@ -48,7 +48,14 @@ const NotificationIcon = ({author, enablePostIconOverride, fromWebhook, override
         if (overrideIconUrl) {
             const source: Source = {
                 uri: client.getAbsoluteUrl(overrideIconUrl),
+                headers: {},
             };
+
+            if (typeof overrideIconUrl === 'string' && overrideIconUrl.startsWith('/')) {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                source.headers.Authorization = client?.getCurrentBearerToken();
+            }
             icon = (
                 <FastImage
                     source={source}
