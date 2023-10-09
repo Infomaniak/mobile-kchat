@@ -93,7 +93,6 @@ const LimitedMessages = ({
     theme,
     currentCallBarVisible,
     joinCallBannerVisible,
-    limitUntil,
     onClose,
 }: Props) => {
     const isTablet = useIsTablet();

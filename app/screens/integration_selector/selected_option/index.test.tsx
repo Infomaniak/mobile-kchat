@@ -41,6 +41,8 @@ describe('components/integration_selector/selected_option', () => {
     it('should match snapshot for userProfile', () => {
         const userProfile: UserProfile = {
             id: '1',
+            user_id: 1,
+            team_id: '1',
             create_at: 1111,
             update_at: 1111,
             delete_at: 0,

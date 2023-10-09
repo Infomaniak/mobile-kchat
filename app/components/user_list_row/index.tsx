@@ -1,10 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {
-    InteractionManager,
     Platform,
     View,
 } from 'react-native';
@@ -73,7 +72,6 @@ function UserListRow({
     id,
     includeMargin,
     isMyUser,
-    highlight,
     isChannelAdmin,
     onPress,
     onLongPress,
@@ -83,7 +81,6 @@ function UserListRow({
     selected,
     showManageMode = false,
     testID,
-    tutorialWatched = false,
     user,
 }: Props) {
     const theme = useTheme();
@@ -112,19 +109,6 @@ function UserListRow({
         setShowTutorial(false);
         storeProfileLongPressTutorial();
     }, []);
-
-    useEffect(() => {
-        const tutorialWatched = true;
-        if (highlight && !tutorialWatched) {
-            if (isTablet) {
-                setShowTutorial(true);
-                return;
-            }
-            InteractionManager.runAfterInteractions(() => {
-                setShowTutorial(true);
-            });
-        }
-    }, [highlight, tutorialWatched, isTablet]);
 
     const handlePress = useCallback((u: UserModel | UserProfile) => {
         onPress?.(u);

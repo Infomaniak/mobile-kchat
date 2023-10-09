@@ -218,7 +218,8 @@ const ChannelMention = ({
 
         let completedDraft: string;
         if (isSearch) {
-            completedDraft = mentionPart.replace(CHANNEL_MENTION_SEARCH_REGEX, `in:${mention} `);
+            const channelOrIn = mentionPart.includes('in:') ? 'in:' : 'channel:';
+            completedDraft = mentionPart.replace(CHANNEL_MENTION_SEARCH_REGEX, `${channelOrIn} ${mention} `);
         } else if (Platform.OS === 'ios') {
             // We are going to set a double ~ on iOS to prevent the auto correct from taking over and replacing it
             // with the wrong value, this is a hack but I could not found another way to solve it

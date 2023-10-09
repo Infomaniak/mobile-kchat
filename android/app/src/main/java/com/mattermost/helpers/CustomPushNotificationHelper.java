@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Objects;
 
-import io.noties.markwon.Markwon;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -70,8 +69,6 @@ public class CustomPushNotificationHelper {
         String serverUrl = bundle.getString("server_url");
         String type = bundle.getString("type");
         String urlOverride = bundle.getString("override_icon_url");
-        boolean fromWebhook = bundle.getString("from_webhook") != null && bundle.getString("from_webhook").equals("true");
-
         if (senderId == null) {
             senderId = "sender_id";
         }
@@ -88,20 +85,13 @@ public class CustomPushNotificationHelper {
 
         if (serverUrl != null && !type.equals(CustomPushNotificationHelper.PUSH_TYPE_SESSION)) {
             try {
-                Bitmap avatar = userAvatar(context, serverUrl, senderId, urlOverride, fromWebhook);
+                Bitmap avatar = userAvatar(context, serverUrl, senderId, urlOverride);
                 if (avatar != null) {
                     sender.setIcon(IconCompat.createWithBitmap(avatar));
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-
-        if (message.trim().isEmpty()) {
-            message = context.getString(R.string.empty_notification_message);
-        } else {
-            final Markwon markwon = Markwon.create(context);
-            message = markwon.toMarkdown(message).toString();
         }
 
         messagingStyle.addMessage(message, timestamp, sender.build());
@@ -278,20 +268,18 @@ public class CustomPushNotificationHelper {
 
     private static NotificationCompat.MessagingStyle getMessagingStyle(Context context, Bundle bundle) {
         NotificationCompat.MessagingStyle messagingStyle;
-        final String senderId = bundle.getString("sender_id");
-        final String senderName = bundle.getString("sender_name");
+        final String senderId = "me";
         final String serverUrl = bundle.getString("server_url");
         final String type = bundle.getString("type");
         String urlOverride = bundle.getString("override_icon_url");
-        boolean fromWebhook = bundle.getString("from_webhook") != null && bundle.getString("from_webhook").equals("true");
 
         Person.Builder sender = new Person.Builder()
                 .setKey(senderId)
-                .setName(senderName);
+                .setName("Me");
 
         if (serverUrl != null && !type.equals(CustomPushNotificationHelper.PUSH_TYPE_SESSION)) {
             try {
-                Bitmap avatar = userAvatar(context, serverUrl, senderId, urlOverride, fromWebhook);
+                Bitmap avatar = userAvatar(context, serverUrl, "me", urlOverride);
                 if (avatar != null) {
                     sender.setIcon(IconCompat.createWithBitmap(avatar));
                 }
@@ -310,11 +298,6 @@ public class CustomPushNotificationHelper {
     }
 
     private static String getSenderName(Bundle bundle) {
-        String overrideUsername = bundle.getString("override_username");
-        if (overrideUsername != null) {
-            return overrideUsername;
-        }
-
         String senderName = bundle.getString("sender_name");
         if (senderName != null) {
             return senderName;
@@ -410,14 +393,13 @@ public class CustomPushNotificationHelper {
         String senderName = bundle.getString("sender_name");
         String serverUrl = bundle.getString("server_url");
         String urlOverride = bundle.getString("override_icon_url");
-        boolean fromWebhook = bundle.getString("from_webhook") != null && bundle.getString("from_webhook").equals("true");
 
         notification.setSmallIcon(R.drawable.ic_notification);
 
         if (serverUrl != null && channelName.equals(senderName)) {
             try {
                 String senderId = bundle.getString("sender_id");
-                Bitmap avatar = userAvatar(context, serverUrl, senderId, urlOverride, fromWebhook);
+                Bitmap avatar = userAvatar(context, serverUrl, senderId, urlOverride);
                 if (avatar != null) {
                     notification.setLargeIcon(avatar);
                 }
@@ -427,40 +409,14 @@ public class CustomPushNotificationHelper {
         }
     }
 
-    public static Bitmap drawableToBitmap(Drawable drawable) {
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable) drawable).getBitmap();
-        }
-
-        // We ask for the bounds if they have been set as they would be most
-        // correct, then we check we are  > 0
-        final int width = !drawable.getBounds().isEmpty() ?
-                drawable.getBounds().width() : drawable.getIntrinsicWidth();
-
-        final int height = !drawable.getBounds().isEmpty() ?
-                drawable.getBounds().height() : drawable.getIntrinsicHeight();
-
-        // Now we check we are > 0
-        final Bitmap bitmap = Bitmap.createBitmap(width <= 0 ? 1 : width, height <= 0 ? 1 : height,
-                Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-
-        return bitmap;
-    }
-
-    private static Bitmap userAvatar(final Context context, @NonNull final String serverUrl, final String userId, final String urlOverride, final boolean fromWebhook) throws IOException {
+    private static Bitmap userAvatar(final Context context, @NonNull final String serverUrl, final String userId, final String urlOverride) throws IOException {
         try {
             Response response;
             Double lastUpdateAt = 0.0;
-            if (fromWebhook && TextUtils.isEmpty(urlOverride)) {
-                Bitmap webhookIcon = drawableToBitmap(context.getDrawable(R.drawable.webhook));
-                return webhookIcon;
-            } else if (!TextUtils.isEmpty(urlOverride)) {
-                String imageUrl = serverUrl + urlOverride;
-                Log.i("ReactNative", String.format("Fetch override profile image %s", imageUrl));
-                response = Network.getSync(serverUrl, imageUrl, null);
+            if (!TextUtils.isEmpty(urlOverride)) {
+                Request request = new Request.Builder().url(urlOverride).build();
+                Log.i("ReactNative", String.format("Fetch override profile image %s", urlOverride));
+                response = client.newCall(request).execute();
             } else {
                 DatabaseHelper dbHelper = DatabaseHelper.Companion.getInstance();
                 if (dbHelper != null) {

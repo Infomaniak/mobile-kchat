@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {toMilliseconds} from '@utils/datetime';
-import {generateId} from '@utils/general';
 
 import type ClientBase from './base';
 import type {ClientResponse, ClientResponseError, ProgressPromise, UploadRequestOptions} from '@mattermost/react-native-network-client';
@@ -21,7 +20,7 @@ export interface ClientFilesMix {
         skipBytes?: number,
     ) => () => void;
     searchFiles: (teamId: string, terms: string) => Promise<FileSearchRequest>;
-    searchFilesWithParams: (teamId: string, FileSearchParams: FileSearchParams) => Promise<FileSearchRequest>;
+    searchFilesWithParams: (teamId: string, FileSearchParams: string) => Promise<FileSearchRequest>;
 }
 
 const ClientFiles = <TBase extends Constructor<ClientBase>>(superclass: TBase) => class extends superclass {
@@ -76,7 +75,6 @@ const ClientFiles = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
             method: 'POST',
             multipart: {
                 data: {
-                    client_ids: generateId(),
                     channel_id: channelId,
                 },
             },

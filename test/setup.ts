@@ -250,7 +250,6 @@ jest.mock('react-native-device-info', () => {
         getModel: () => 'iPhone X',
         hasNotch: () => true,
         isTablet: () => false,
-        getDeviceType: () => 'Phone',
         getApplicationName: () => 'Mattermost',
     };
 });

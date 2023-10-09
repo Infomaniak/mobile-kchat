@@ -161,7 +161,6 @@ async function doReconnect(serverUrl: string) {
     dataRetentionCleanup(serverUrl);
 
     AppsManager.refreshAppBindings(serverUrl);
-
     return undefined;
 }
 

@@ -10,7 +10,6 @@ import HWKeyboardEvent from 'react-native-hw-keyboard-event';
 import {enableFreeze, enableScreens} from 'react-native-screens';
 
 import {autoUpdateTimezone} from '@actions/remote/user';
-import ServerVersion from '@components/server_version';
 import {Events, Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {useAppState} from '@hooks/device';
@@ -176,6 +175,11 @@ export default function HomeScreen(props: HomeProps) {
                         name={Screens.MENTIONS}
                         component={RecentMentions}
                         options={{tabBarTestID: 'tab_bar.mentions.tab', freezeOnBlur: true, lazy: true}}
+                    />
+                    <Tab.Screen
+                        name={Screens.SAVED_MESSAGES}
+                        component={SavedMessages}
+                        options={{tabBarTestID: 'tab_bar.saved_messages.tab', freezeOnBlur: true, lazy: true}}
                     />
                     <Tab.Screen
                         name={Screens.ACCOUNT}

@@ -71,6 +71,20 @@ const ChannelActions = ({
                 testID={testID}
             />
             <View style={styles.separator}/>
+            {isDM &&
+                <SetHeaderBox
+                    channelId={channelId}
+                    inModal={inModal}
+                    testID={`${testID}.set_header.action`}
+                />
+            }
+            {canManageMembers &&
+                <AddMembersBox
+                    channelId={channelId}
+                    inModal={inModal}
+                    testID={`${testID}.add_members.action`}
+                />
+            }
             {!isDM && !callsEnabled &&
                 <>
                     <View style={styles.separator}/>

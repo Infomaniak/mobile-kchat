@@ -3,9 +3,7 @@ import Foundation
 @objc(SplitViewModule)
 class SplitViewModule: RCTEventEmitter {
   var hasListeners = false
-  
-  static let isMacOS = ProcessInfo.processInfo.isMacCatalystApp
-  
+
   @objc
   override static func requiresMainQueueSetup() -> Bool {
     return true
@@ -33,9 +31,6 @@ class SplitViewModule: RCTEventEmitter {
   }
   
   @objc func isRunningInFullScreen() -> Bool {
-    if SplitViewModule.isMacOS {
-      return true
-    }
     guard let w = UIApplication.shared.delegate?.window, let window = w else { return false }
     let screenSize = window.screen.bounds.size.width
     let frameSize = window.frame.size.width
@@ -44,10 +39,10 @@ class SplitViewModule: RCTEventEmitter {
   }
   
   @objc func isSplitView() {
-    if hasListeners && (UIDevice.current.userInterfaceIdiom == .pad || SplitViewModule.isMacOS) {
+    if hasListeners && UIDevice.current.userInterfaceIdiom == .pad {
       sendEvent(withName: "SplitViewChanged", body: [
         "isSplitView": !isRunningInFullScreen(),
-        "isTablet": UIDevice.current.userInterfaceIdiom == .pad || SplitViewModule.isMacOS,
+        "isTablet": UIDevice.current.userInterfaceIdiom == .pad,
       ])
     }
   }
@@ -57,7 +52,7 @@ class SplitViewModule: RCTEventEmitter {
     DispatchQueue.main.async { [weak self] in
       resolve([
         "isSplitView": !(self?.isRunningInFullScreen() ?? false),
-        "isTablet": UIDevice.current.userInterfaceIdiom == .pad || SplitViewModule.isMacOS,
+        "isTablet": UIDevice.current.userInterfaceIdiom == .pad,
       ])
     }
   }

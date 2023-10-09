@@ -5,7 +5,7 @@ import {DeviceEventEmitter} from 'react-native';
 
 import {updateChannelsDisplayName} from '@actions/local/channel';
 import {fetchMe, fetchUsersByIds} from '@actions/remote/user';
-import {General, Events, Preferences} from '@constants';
+import {Events, General, Preferences} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getTeammateNameDisplaySetting} from '@helpers/api/preference';
 import WebsocketManager from '@managers/websocket_manager';
@@ -13,7 +13,6 @@ import {queryChannelsByTypes, queryUserChannelsByTypes} from '@queries/servers/c
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
 import {getConfig, getLicense} from '@queries/servers/system';
 import {getCurrentUser, getUserById} from '@queries/servers/user';
-import {logError} from '@utils/log';
 import {displayUsername} from '@utils/user';
 
 import type {Model} from '@nozbe/watermelondb';
@@ -95,12 +94,7 @@ export async function handleUserTypingEvent(serverUrl: string, msg: WebSocketMes
         const namePreference = await queryDisplayNamePreferences(database, Preferences.NAME_NAME_FORMAT).fetch();
         const teammateDisplayNameSetting = getTeammateNameDisplaySetting(namePreference, config.LockTeammateNameDisplay, config.TeammateNameDisplay, license);
         const currentUser = await getCurrentUser(database);
-        const username = displayUsername(user, currentUser?.locale, teammateDisplayNameSetting, false);
-        if (username.length === 0) {
-            //Do not display unknown user typing
-            return;
-        }
-
+        const username = displayUsername(user, currentUser?.locale, teammateDisplayNameSetting);
         const data = {
             channelId: msg.data.data.channel_id,
             rootId: msg.data.data.parent_id,
@@ -141,7 +135,6 @@ export async function handleStatusChangedEvent(serverUrl: string, msg: WebSocket
         await operator.batchRecords([user], 'handleStatusChangedEvent');
         return null;
     } catch (error) {
-        logError('Failed handleStatusChangedEvent', error);
         return {error};
     }
 }

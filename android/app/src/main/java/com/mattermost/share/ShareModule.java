@@ -29,7 +29,6 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Objects;
 
 import okhttp3.MediaType;
@@ -187,7 +186,6 @@ public class ShareModule extends ReactContextBaseJavaModule {
         JSONObject json = new JSONObject();
         try {
             json.put("user_id", data.getString("userId"));
-            json.put("pending_post_id", UUID.randomUUID().toString());
             if (data.hasKey("channelId")) {
                 json.put("channel_id", data.getString("channelId"));
             }
@@ -228,9 +226,8 @@ public class ShareModule extends ReactContextBaseJavaModule {
                     }
                 }
             }
-            builder.addFormDataPart("client_ids", UUID.randomUUID().toString());
-            builder.addFormDataPart("channel_id", postData.getString("channel_id"));
 
+            builder.addFormDataPart("channel_id", postData.getString("channel_id"));
             RequestBody body = builder.build();
             Request request = new Request.Builder()
                     .header("Authorization", "Bearer " + token)

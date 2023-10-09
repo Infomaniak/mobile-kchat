@@ -17,7 +17,7 @@ import {bottomSheet} from '@screens/navigation';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {sortServersByDisplayName} from '@utils/server';
 
-import ServerList, {AddServerButton} from './servers_list';
+import ServerList from './servers_list';
 
 import type {BottomSheetProps} from '@gorhom/bottom-sheet';
 import type ServersModel from '@typings/database/models/app/servers';

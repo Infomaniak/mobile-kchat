@@ -24,7 +24,7 @@ const WAIT_TO_CLOSE = toMilliseconds({seconds: 5});
 const WAIT_UNTIL_NEXT = toMilliseconds({seconds: 5});
 
 class WebsocketManager {
-    private connectedSubjects: { [serverUrl: string]: BehaviorSubject<WebsocketConnectedState> } = {};
+    private connectedSubjects: {[serverUrl: string]: BehaviorSubject<WebsocketConnectedState>} = {};
 
     private clients: Record<string, WebSocketClient> = {};
     private connectionTimerIDs: Record<string, DebouncedFunc<() => void>> = {};
@@ -42,7 +42,7 @@ class WebsocketManager {
     public init = async (serverCredentials: ServerCredential[]) => {
         this.netConnected = Boolean((await NetInfo.fetch()).isConnected);
         serverCredentials.forEach(
-            ({serverUrl, token}) => {
+            ({serverUrl}) => {
                 try {
                     DatabaseManager.getServerDatabaseAndOperator(serverUrl);
                     this.createClient(serverUrl, 0);
@@ -218,11 +218,6 @@ class WebsocketManager {
 
     private onAppStateChange = async (appState: AppStateStatus) => {
         const isActive = appState === 'active';
-        if (isActive && this.backgroundIntervalId) {
-            this.isBackgroundTimerRunning = false;
-            BackgroundTimer.clearInterval(this.backgroundIntervalId);
-        }
-
         if (isActive === this.previousActiveState) {
             return;
         }

@@ -104,7 +104,6 @@ class AppsManager {
     };
 
     fetchBindings = async (serverUrl: string, channelId: string, forThread = false) => {
-        return;
         try {
             const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
             const userId = await getCurrentUserId(database);

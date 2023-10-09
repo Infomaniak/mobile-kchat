@@ -281,20 +281,20 @@ const OptionItem = ({
                 </View>
             </View>
             {Boolean(actionComponent || info) &&
-                <View style={styles.actionContainer}>
-                    {
-                        Boolean(info) &&
-                        <View style={styles.infoContainer}>
-                            <Text
-                                style={[styles.info, !actionComponent && styles.iconContainer, destructive && {color: theme.dndIndicator}]}
-                                testID={`${testID}.info`}
-                            >
-                                {info}
-                            </Text>
-                        </View>
-                    }
-                    {actionComponent}
-                </View>
+            <View style={styles.actionContainer}>
+                {
+                    Boolean(info) &&
+                    <View style={styles.infoContainer}>
+                        <Text
+                            style={[styles.info, !actionComponent && styles.iconContainer, destructive && {color: theme.dndIndicator}]}
+                            testID={`${testID}.info`}
+                        >
+                            {info}
+                        </Text>
+                    </View>
+                }
+                {actionComponent}
+            </View>
             }
         </View>
     );

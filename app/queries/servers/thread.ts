@@ -7,7 +7,6 @@ import {map, switchMap, distinctUntilChanged} from 'rxjs/operators';
 
 import {Config} from '@constants';
 import {MM_TABLES} from '@constants/database';
-import {PostTypes} from '@constants/post';
 import {processIsCRTAllowed, processIsCRTEnabled} from '@utils/thread';
 
 import {observeChannel} from './channel';

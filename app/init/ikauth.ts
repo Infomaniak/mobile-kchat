@@ -13,7 +13,7 @@ const config = {
     },
     clientId: '20af5539-a4fb-421c-b45a-f43af3d90c14',
     redirectUrl: 'com.infomaniak.chat://oauth2redirect',
-    additionalParameters: {'hide_create_account': ''},
+    additionalParameters: {hide_create_account: ''},
     iosPrefersEphemeralSession: true,
 };
 

@@ -13,9 +13,9 @@ type WebsocketCategoriesMessage = {
     };
     data: {
         team_id: string;
-        category?: CategoryWithChannels;
+        category?: string;
         category_id: string;
-        updatedCategories?: [CategoryWithChannels];
+        updatedCategories?: string;
         order?: string[];
     };
 }

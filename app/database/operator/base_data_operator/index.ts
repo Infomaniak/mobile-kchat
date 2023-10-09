@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {Database, Q} from '@nozbe/watermelondb';
-import BackgroundTimer from 'react-native-background-timer';
 
 import {OperationType} from '@constants/database';
 import {
@@ -190,15 +189,9 @@ export default class BaseDataOperator {
     async batchRecords(models: Model[], description: string): Promise<void> {
         try {
             if (models.length > 0) {
-                const backgroundTaskIdentifier = BackgroundTimer.setInterval(() => {
-                    logWarning('batchRecords timer ran once in background ', description);
-                }, 15000);
-
                 await this.database.write(async (writer) => {
                     await writer.batch(...models);
                 }, description);
-
-                BackgroundTimer.clearInterval(backgroundTaskIdentifier);
             }
         } catch (e) {
             logWarning('batchRecords error ', description, e as Error);

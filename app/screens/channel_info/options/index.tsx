@@ -20,6 +20,7 @@ type Props = {
     type?: ChannelType;
     callsEnabled: boolean;
     canManageMembers: boolean;
+    canManageSettings: boolean;
 }
 
 const Options = ({
@@ -27,6 +28,7 @@ const Options = ({
     type,
     callsEnabled,
     canManageMembers,
+    canManageSettings,
 }: Props) => {
     const isDMorGM = isTypeDMorGM(type);
 
@@ -38,11 +40,20 @@ const Options = ({
             <NotificationPreference channelId={channelId}/>
             <PinnedMessages channelId={channelId}/>
             <ChannelFiles channelId={channelId}/>
+            {type !== General.DM_CHANNEL &&
+                <Members channelId={channelId}/>
+            }
+            {canManageMembers &&
+                <AddMembers channelId={channelId}/>
+            }
             {callsEnabled && !isDMorGM && // if calls is not enabled, copy link will show in the channel actions
                 <CopyChannelLinkOption
                     channelId={channelId}
                     testID='channel_info.options.copy_channel_link.option'
                 />
+            }
+            {canManageSettings &&
+                <EditChannel channelId={channelId}/>
             }
         </>
     );

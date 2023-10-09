@@ -32,7 +32,7 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
   {
     _allowRotation = YES;
   }
-    
+  
   // Clear keychain on first run in case of reinstallation
   if (![[NSUserDefaults standardUserDefaults] objectForKey:@"FirstRun"]) {
 

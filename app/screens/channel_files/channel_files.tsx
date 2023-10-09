@@ -13,7 +13,9 @@ import Search from '@components/search';
 import {General} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import DatabaseManager from '@database/manager';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
+import {getCurrentTeamId} from '@queries/servers/system';
 import {popTopScreen} from '@screens/navigation';
 import {type FileFilter, FileFilters, filterFileExtensions} from '@utils/file';
 import {changeOpacity, getKeyboardAppearanceFromTheme} from '@utils/theme';
@@ -22,8 +24,6 @@ import Header from './header';
 
 import type ChannelModel from '@typings/database/models/servers/channel';
 import type {AvailableScreens} from '@typings/screens/navigation';
-import {getCurrentTeamId} from "@queries/servers/system";
-import DatabaseManager from "@database/manager";
 
 const TEST_ID = 'channel_files';
 

@@ -67,9 +67,6 @@ const PublicChannelIllustration = ({theme}: Props) => {
                 />
                 <Mask
                     id='a'
-                    style={{
-                        maskType: 'alpha',
-                    }}
                     maskUnits='userSpaceOnUse'
                     x={474}
                     y={136}
@@ -103,9 +100,6 @@ const PublicChannelIllustration = ({theme}: Props) => {
                 />
                 <Mask
                     id='b'
-                    style={{
-                        maskType: 'alpha',
-                    }}
                     maskUnits='userSpaceOnUse'
                     x={7}
                     y={135}
@@ -138,9 +132,6 @@ const PublicChannelIllustration = ({theme}: Props) => {
                 />
                 <Mask
                     id='c'
-                    style={{
-                        maskType: 'alpha',
-                    }}
                     maskUnits='userSpaceOnUse'
                     x={336}
                     y={217}
@@ -224,9 +215,6 @@ const PublicChannelIllustration = ({theme}: Props) => {
             />
             <Mask
                 id='a'
-                style={{
-                    maskType: 'alpha',
-                }}
                 maskUnits='userSpaceOnUse'
                 x={474}
                 y={136}
@@ -260,9 +248,6 @@ const PublicChannelIllustration = ({theme}: Props) => {
             />
             <Mask
                 id='b'
-                style={{
-                    maskType: 'alpha',
-                }}
                 maskUnits='userSpaceOnUse'
                 x={7}
                 y={135}
@@ -295,9 +280,6 @@ const PublicChannelIllustration = ({theme}: Props) => {
             />
             <Mask
                 id='c'
-                style={{
-                    maskType: 'alpha',
-                }}
                 maskUnits='userSpaceOnUse'
                 x={336}
                 y={217}

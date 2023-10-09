@@ -2,12 +2,13 @@
 // See LICENSE.txt for license information.
 
 import React, {useEffect, useState} from 'react';
-import {BackHandler, Image, View} from 'react-native';
+import {Image, View} from 'react-native';
 
 import {infomaniakLogin} from '@actions/remote/iksession';
 import FormattedText from '@components/formatted_text';
 import {login as displayLoginWebView} from '@init/ikauth';
-import {popTopScreen, resetToHome, resetToInfomaniakNoTeams} from '@screens/navigation';
+import PushNotifications from '@init/push_notifications';
+import {resetToHome, resetToInfomaniakNoTeams} from '@screens/navigation';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
@@ -16,8 +17,6 @@ import LogoIllustration from './logo_illustration';
 import WaveIllustration from './wave_illustration';
 
 import type {LaunchProps} from '@typings/launch';
-import {Screens} from '@constants';
-import PushNotifications from '@init/push_notifications';
 
 interface ServerProps extends LaunchProps {
     closeButtonId?: string;
@@ -26,7 +25,6 @@ interface ServerProps extends LaunchProps {
 }
 
 const Server = ({
-    componentId,
     extra,
     launchType,
     launchError,
@@ -89,13 +87,13 @@ const Server = ({
                     </View>
                     <View style={styles.bottomContainer}>
                         <FormattedText
-                            defaultMessage="Welcome to kChat"
-                            id="infomaniak.login.title"
+                            defaultMessage='Welcome to kChat'
+                            id='infomaniak.login.title'
                             style={styles.title}
                         />
                         <FormattedText
-                            defaultMessage="Log in to your account and send messages from the app."
-                            id="infomaniak.login.description"
+                            defaultMessage='Log in to your account and send messages from the app.'
+                            id='infomaniak.login.description'
                             style={styles.description}
                         />
                         <ServerForm

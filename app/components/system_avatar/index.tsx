@@ -6,11 +6,7 @@ import {Image} from 'react-native';
 
 import {View as ViewConstants} from '@constants';
 
-type Props = {
-    theme: Theme;
-}
-
-const SystemAvatar = ({theme}: Props) => {
+const SystemAvatar = () => {
     return (
         <Image
             style={{width: ViewConstants.PROFILE_PICTURE_SIZE, height: ViewConstants.PROFILE_PICTURE_SIZE}}

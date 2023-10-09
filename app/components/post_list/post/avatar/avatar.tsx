@@ -57,9 +57,7 @@ const Avatar = ({author, enablePostIconOverride, isAutoReponse, location, post}:
         if (overrideIconUrl) {
             const source = {
                 uri: overrideIconUrl,
-                headers: {
-                    Authorization: client?.getCurrentBearerToken() ?? '',
-                },
+                headers: {},
             };
 
             if (typeof post.props?.override_icon_url === 'string' && post.props?.override_icon_url.startsWith('/')) {

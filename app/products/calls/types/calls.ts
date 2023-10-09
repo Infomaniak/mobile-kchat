@@ -131,9 +131,7 @@ export type CallsConnection = {
     sendReaction: (emoji: EmojiData) => void;
 }
 
-export type ServerCallsConfig = {
-    ICEServers?: string[]; // deprecated
-    ICEServersConfigs?: any;
+export type CallsConfigState = CallsConfig & {
     AllowEnableCalls: boolean;
     pluginEnabled: boolean;
     last_retrieved_at: number;

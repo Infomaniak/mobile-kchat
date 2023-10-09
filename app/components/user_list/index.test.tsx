@@ -14,6 +14,8 @@ describe('components/channel_list_row', () => {
     let database: Database;
     const user: UserProfile = {
         id: '1',
+        user_id: 1,
+        team_id: '1',
         create_at: 1111,
         update_at: 1111,
         delete_at: 0,
@@ -41,6 +43,8 @@ describe('components/channel_list_row', () => {
 
     const user2: UserProfile = {
         id: '2',
+        user_id: 2,
+        team_id: '1',
         create_at: 1111,
         update_at: 1111,
         delete_at: 0,

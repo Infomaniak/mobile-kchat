@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {RTCView} from 'react-native-webrtc';
 
 import {leaveCall, muteMyself, unmuteMyself} from '@calls/actions';
 import {startCallRecording, stopCallRecording} from '@calls/actions/calls';
@@ -564,12 +565,18 @@ const CallScreen = ({
                 style={style.screenShareImage}
                 onPress={toggleControlsInLandscape}
             >
-                <FormattedText
-                    id={'mobile.calls_viewing_screen'}
-                    defaultMessage={'You are viewing {name}\'s screen'}
-                    values={{name: displayUsername(participantsDict[currentCall.screenOn].userModel, intl.locale, teammateNameDisplay)}}
-                    style={style.screenShareText}
+                <RTCView
+                    streamURL={currentCall.screenShareURL}
+                    style={style.screenShareImage}
                 />
+                {!isLandscape &&
+                    <FormattedText
+                        id={'mobile.calls_viewing_screen'}
+                        defaultMessage={'You are viewing {name}\'s screen'}
+                        values={{name: displayUsername(participantsDict[currentCall.screenOn].userModel, intl.locale, teammateNameDisplay)}}
+                        style={style.screenShareText}
+                    />
+                }
             </Pressable>
         );
     }

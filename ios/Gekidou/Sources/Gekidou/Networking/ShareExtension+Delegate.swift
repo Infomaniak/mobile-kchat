@@ -12,10 +12,10 @@ extension ShareExtension: URLSessionDataDelegate {
     func createBackroundSession(id: String, delegateQueue: OperationQueue = OperationQueue()) {
         let config = URLSessionConfiguration.background(withIdentifier: id)
         config.sharedContainerIdentifier = appGroupId
+        config.waitsForConnectivity = true
         config.httpAdditionalHeaders = ["X-Requested-With": "XMLHttpRequest"]
         config.allowsCellularAccess = true
         config.httpMaximumConnectionsPerHost = 10
-        config.sessionSendsLaunchEvents = true
 
         self.backgroundSession = URLSession.init(
             configuration: config,

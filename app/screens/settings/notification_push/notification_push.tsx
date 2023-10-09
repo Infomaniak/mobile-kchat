@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {Platform} from 'react-native';
 
 import {updateMe} from '@actions/remote/user';
@@ -59,14 +59,12 @@ const NotificationPush = ({componentId, currentUser, isCRTEnabled, sendPushNotif
             };
             updateMe(serverUrl, {notify_props});
         }
-    }, [canSaveSettings, notifyProps, pushSend, pushStatus, pushThread, serverUrl]);
+        close();
+    }, [canSaveSettings, close, notifyProps, pushSend, pushStatus, pushThread, serverUrl]);
 
-    useEffect(() => {
-        saveNotificationSettings();
-    }, [canSaveSettings, notifyProps, pushSend, pushStatus, pushThread, serverUrl]);
+    useBackNavigation(saveNotificationSettings);
 
-    useBackNavigation(close);
-    useAndroidHardwareBackHandler(componentId, close);
+    useAndroidHardwareBackHandler(componentId, saveNotificationSettings);
 
     return (
         <SettingContainer testID='push_notification_settings'>

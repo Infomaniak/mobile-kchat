@@ -55,8 +55,6 @@ class NotificationService: UNNotificationServiceExtension {
     if #available(iOSApplicationExtension 15.0, *) {
       let overrideUsername = notification.userInfo["override_username"] as? String
       let senderId = notification.userInfo["sender_id"] as? String
-      let sender = overrideUsername ?? senderId ?? ""
-      let fromWebhook = notification.userInfo["from_webhook"] as? String == "true"
 
       guard let serverUrl = notification.userInfo["server_url"] as? String
       else {
@@ -68,7 +66,7 @@ class NotificationService: UNNotificationServiceExtension {
       let overrideIconUrl = notification.userInfo["override_icon_url"] as? String
       os_log(OSLogType.default, "Mattermost Notifications: Fetching profile Image in server %{public}@ for sender %{public}@", serverUrl, senderId ?? overrideUsername ?? "no sender is set")
       if senderId != nil || overrideIconUrl != nil {
-        PushNotification.default.fetchProfileImageSync(serverUrl, senderId: sender, overrideIconUrl: overrideIconUrl, fromWebhook: fromWebhook) {[weak self] data in
+        PushNotification.default.fetchProfileImageSync(serverUrl, senderId: senderId ?? "", overrideIconUrl: overrideIconUrl) {[weak self] data in
           self?.sendMessageIntentCompletion(data)
         }
       } else {
@@ -77,9 +75,10 @@ class NotificationService: UNNotificationServiceExtension {
     }
   }
   
-  private func sendMessageIntentCompletion(_ avatarImage: INImage?) {
+  private func sendMessageIntentCompletion(_ avatarData: Data?) {
     guard let notification = bestAttemptContent else { return }
     if #available(iOSApplicationExtension 15.0, *),
+       let imgData = avatarData,
        let channelId = notification.userInfo["channel_id"] as? String {
       os_log(OSLogType.default, "Mattermost Notifications: creating intent")
 
@@ -91,7 +90,7 @@ class NotificationService: UNNotificationServiceExtension {
       let overrideUsername = notification.userInfo["override_username"] as? String
       let senderId = notification.userInfo["sender_id"] as? String
       let senderIdentifier = overrideUsername ?? senderId
-      let finalSenderName = overrideUsername ?? channelName ?? senderName
+      let avatar = INImage(imageData: imgData) as INImage?
 
       var conversationId = channelId
       if isCRTEnabled && !rootId.isEmpty {
@@ -108,8 +107,8 @@ class NotificationService: UNNotificationServiceExtension {
       let handle = INPersonHandle(value: senderIdentifier, type: .unknown)
       let sender = INPerson(personHandle: handle,
                             nameComponents: nil,
-                            displayName: finalSenderName,
-                            image: avatarImage,
+                            displayName: channelName ?? senderName,
+                            image: avatar,
                             contactIdentifier: nil,
                             customIdentifier: nil)
 

@@ -6,7 +6,8 @@ import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react
 import FastImage from 'react-native-fast-image';
 
 import {storeOnboardingViewedValue} from '@actions/app/global';
-import {cancelSessionNotification, logout, scheduleSessionNotification} from '@actions/remote/session';
+import {syncMultiTeam} from '@actions/remote/entry/ikcommon';
+import {cancelSessionNotification, logout} from '@actions/remote/session';
 import {Events, Launch} from '@constants';
 import DatabaseManager from '@database/manager';
 import {resetMomentLocale} from '@i18n';
@@ -25,8 +26,6 @@ import {isMainActivity} from '@utils/helpers';
 import {addNewServer} from '@utils/server';
 
 import type {LaunchType} from '@typings/launch';
-import {logError} from '@utils/log';
-import { syncMultiTeam } from '@actions/remote/entry/ikcommon';
 
 type LogoutCallbackArg = {
     serverUrl: string;
@@ -93,12 +92,7 @@ class SessionManager {
     private scheduleAllSessionNotifications = async () => {
         if (!this.scheduling) {
             this.scheduling = true;
-            const serverCredentials = await getAllServerCredentials();
             const promises: Array<Promise<void>> = [];
-            for (const {serverUrl} of serverCredentials) {
-                promises.push(scheduleSessionNotification(serverUrl));
-            }
-
             await Promise.all(promises);
             this.scheduling = false;
         }
@@ -174,7 +168,7 @@ class SessionManager {
         }
     };
 
-    private onLogout = async ({serverUrl, removeServer}: LogoutCallbackArg) => {
+    private onLogout = async ({serverUrl}: LogoutCallbackArg) => {
         if (this.terminatingSessionUrl === serverUrl) {
             return;
         }

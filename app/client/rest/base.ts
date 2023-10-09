@@ -20,10 +20,10 @@ import type {
 } from '@mattermost/react-native-network-client';
 
 export default class ClientBase {
-    analytics: Analytics | undefined;
+    analytics: Analytics|undefined;
     apiClient: APIClientInterface;
     csrfToken = '';
-    requestHeaders: { [x: string]: string } = {};
+    requestHeaders: {[x: string]: string} = {};
     serverVersion = '';
     urlVersion = '/api/v4';
     enableLogging = false;
@@ -235,30 +235,30 @@ export default class ClientBase {
         let request;
         const method = options.method?.toLowerCase();
         switch (method) {
-        case 'get':
-            request = this.apiClient!.get;
-            break;
-        case 'put':
-            request = this.apiClient!.put;
-            break;
-        case 'post':
-            request = this.apiClient!.post;
-            break;
-        case 'patch':
-            request = this.apiClient!.patch;
-            break;
-        case 'delete':
-            request = this.apiClient!.delete;
-            break;
-        default:
-            throw new ClientError(this.apiClient.baseUrl, {
-                message: 'Invalid request method',
-                intl: {
-                    id: t('mobile.request.invalid_request_method'),
-                    defaultMessage: 'Invalid request method',
-                },
-                url,
-            });
+            case 'get':
+                request = this.apiClient!.get;
+                break;
+            case 'put':
+                request = this.apiClient!.put;
+                break;
+            case 'post':
+                request = this.apiClient!.post;
+                break;
+            case 'patch':
+                request = this.apiClient!.patch;
+                break;
+            case 'delete':
+                request = this.apiClient!.delete;
+                break;
+            default:
+                throw new ClientError(this.apiClient.baseUrl, {
+                    message: 'Invalid request method',
+                    intl: {
+                        id: t('mobile.request.invalid_request_method'),
+                        defaultMessage: 'Invalid request method',
+                    },
+                    url,
+                });
         }
 
         const requestOptions: RequestOptions = {
@@ -317,13 +317,11 @@ export default class ClientBase {
             return returnDataOnly ? (response.data || {}) : response;
         }
 
-        throw new ClientError(this.apiClient.baseUrl,
-            {
-                message: response.data?.message as string || `Response with status code ${response.code}`,
-                server_error_id: response.data?.id as string,
-                status_code: response.code,
-                url,
-            },
-            response.data);
+        throw new ClientError(this.apiClient.baseUrl, {
+            message: response.data?.message as string || `Response with status code ${response.code}`,
+            server_error_id: response.data?.id as string,
+            status_code: response.code,
+            url,
+        });
     };
 }

@@ -221,7 +221,7 @@ const CombinedUserActivity = ({
                 underlayColor={changeOpacity(theme.centerChannelColor, 0.1)}
             >
                 <View style={styles.container}>
-                    <SystemAvatar theme={theme}/>
+                    <SystemAvatar/>
                     <View style={styles.content}>
                         <SystemHeader
                             createAt={post.create_at}

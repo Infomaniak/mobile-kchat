@@ -11,7 +11,7 @@ import Gekidou
 
 @objc class GekidouWrapper: NSObject {
   @objc public static let `default` = GekidouWrapper()
-  
+
   @objc func postNotificationReceipt(_ userInfo: [AnyHashable:Any]) {
     PushNotification.default.postNotificationReceipt(userInfo)
   }

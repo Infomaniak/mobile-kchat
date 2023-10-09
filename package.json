@@ -6,10 +6,6 @@
   "author": "Mattermost, Inc.",
   "license": "Apache 2.0",
   "private": true,
-  "engines": {
-    "node": "^18.10.0",
-    "npm": "^9.0.0"
-  },
   "dependencies": {
     "@formatjs/intl-datetimeformat": "6.10.0",
     "@formatjs/intl-getcanonicallocales": "2.2.1",
@@ -237,7 +233,9 @@
     "react-native-walkthrough-tooltip": {
       "@types/react": "^18.2.18"
     },
-    "semver": "7.5.4"
+    "@react-native-community/cli": {
+      "semver": "^6.3.1"
+    }
   },
   "reactNativePermissionsIOS": [
     "Camera",

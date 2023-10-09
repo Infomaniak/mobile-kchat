@@ -5,13 +5,7 @@ import Svg, {Path, Circle} from 'react-native-svg';
 
 import {useTheme} from '@context/theme';
 
-import type {ViewStyle} from 'react-native';
-
-type Props = {
-    style: ViewStyle;
-}
-
-export default function SavedPostsIcon({style}: Props) {
+export default function SavedPostsIcon() {
     const theme = useTheme();
     if (theme.ikName === 'Dark') {
         return (

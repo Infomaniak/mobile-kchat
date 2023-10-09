@@ -11,7 +11,6 @@ import {Events, Screens} from '@constants';
 import {SET_CUSTOM_STATUS_FAILURE} from '@constants/custom_status';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
-import {get} from '@managers/analytics';
 import {showModal} from '@screens/navigation';
 import {preventDoubleTap} from '@utils/tap';
 import {makeStyleSheetFromTheme} from '@utils/theme';

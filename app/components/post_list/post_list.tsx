@@ -9,7 +9,7 @@ import Animated, {type AnimatedStyle} from 'react-native-reanimated';
 import {fetchPosts, fetchPostThread} from '@actions/remote/post';
 import CombinedUserActivity from '@components/post_list/combined_user_activity';
 import DateSeparator from '@components/post_list/date_separator';
-import LimitedMessages, {KSuiteLimit} from '@components/post_list/limited_messages/limited_messages';
+import LimitedMessages, {type KSuiteLimit} from '@components/post_list/limited_messages/limited_messages';
 import NewMessagesLine from '@components/post_list/new_message_line';
 import Post from '@components/post_list/post';
 import ThreadOverview from '@components/post_list/thread_overview';

@@ -8,19 +8,19 @@ import {generateGroupAssociationId} from '@utils/groups';
 import {logError} from '@utils/log';
 
 type WebsocketGroupMessage = WebSocketMessage<{
-    group?: any; // type Group
+    group?: string; // type Group
 }>
 
 type WebsocketGroupMemberMessage = WebSocketMessage<{
-    group_member?: any; // type GroupMember
+    group_member?: string; // type GroupMember
 }>
 
 type WebsocketGroupTeamMessage = WebSocketMessage<{
-    group_team?: any; // type GroupMember
+    group_team?: string; // type GroupMember
 }>
 
 type WebsocketGroupChannelMessage = WebSocketMessage<{
-    group_channel?: any; // type GroupMember
+    group_channel?: string; // type GroupMember
 }>
 
 type WSMessage = WebsocketGroupMessage | WebsocketGroupMemberMessage | WebsocketGroupTeamMessage | WebsocketGroupChannelMessage

@@ -90,7 +90,7 @@ internal suspend fun PushNotificationDataRunnable.Companion.fetchPosts(
 
                         val message = post?.getString("message")
                         findNeededUsernames(message)
-                        /*val props = post?.getArray("props")
+                        val props = post?.getMap("props")
                         val attachments = props?.getArray("attachments")
                         if (attachments != null) {
                             for (i in 0 until attachments.size()) {
@@ -100,7 +100,7 @@ internal suspend fun PushNotificationDataRunnable.Companion.fetchPosts(
                                 findNeededUsernames(pretext)
                                 findNeededUsernames(text)
                             }
-                        }*/
+                        }
 
 
                         if (isCRTEnabled) {

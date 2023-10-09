@@ -41,7 +41,7 @@ function EmptySavedMessages() {
 
     return (
         <View style={styles.container}>
-            <SavedPostsIcon style={styles.icon}/>
+            <SavedPostsIcon/>
             <FormattedText
                 defaultMessage='No saved messages yet'
                 id='saved_messages.empty.title'

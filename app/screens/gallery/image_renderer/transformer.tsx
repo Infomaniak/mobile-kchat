@@ -15,12 +15,12 @@ import Animated, {
 } from 'react-native-reanimated';
 import {SvgUri} from 'react-native-svg';
 
+import {useServerUrl} from '@context/server';
 import {useAnimatedGestureHandler} from '@hooks/gallery';
+import NetworkManager from '@managers/network_manager';
 import {clamp, workletNoop} from '@utils/gallery';
 import * as vec from '@utils/gallery/vectors';
 import {calculateDimensions} from '@utils/images';
-import {useServerUrl} from '@context/server';
-import NetworkManager from '@managers/network_manager';
 
 const styles = StyleSheet.create({
     container: {

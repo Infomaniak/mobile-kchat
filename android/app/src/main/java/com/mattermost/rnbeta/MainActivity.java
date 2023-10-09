@@ -9,7 +9,6 @@ import android.view.KeyEvent;
 import android.content.res.Configuration;
 
 import com.facebook.react.ReactActivityDelegate;
-import com.mattermost.helpers.FoldableObserver;
 import com.reactnativenavigation.NavigationActivity;
 import com.github.emilioicai.hwkeyboardevent.HWKeyboardEventModule;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;

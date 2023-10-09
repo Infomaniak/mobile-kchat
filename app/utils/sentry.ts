@@ -1,7 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import * as Sentry from '@sentry/react-native';
+import {Platform} from 'react-native';
+import {Navigation} from 'react-native-navigation';
 
 import Config from '@assets/config.json';
 import ClientError from '@client/rest/error';
@@ -9,6 +10,7 @@ import DatabaseManager from '@database/manager';
 import {getConfig} from '@queries/servers/system';
 import {getCurrentUser} from '@queries/servers/user';
 import {getFullErrorMessage} from '@utils/errors';
+import {isBetaApp} from '@utils/general';
 
 import {logError, logWarning} from './log';
 
@@ -18,15 +20,44 @@ import type {Breadcrumb} from '@sentry/types';
 export const BREADCRUMB_UNCAUGHT_APP_ERROR = 'uncaught-app-error';
 export const BREADCRUMB_UNCAUGHT_NON_ERROR = 'uncaught-non-error';
 
+let Sentry: any;
 export function initializeSentry() {
+    if (!Sentry) {
+        Sentry = require('@sentry/react-native');
+    }
+
+    const eventFilter = Array.isArray(Config.SentryOptions?.severityLevelFilter) ? Config.SentryOptions.severityLevelFilter : [];
+    const sentryOptions = {...Config.SentryOptions};
+    Reflect.deleteProperty(sentryOptions, 'severityLevelFilter');
+
     Sentry.init({
         dsn: 'https://4110301feed3d3f0ed9ec17aaab149c4@sentry-kchat.infomaniak.com/6',
-        tracesSampleRate: 0.01,
-        environment: process.env.NODE_ENV,
+        environment: isBetaApp ? 'beta' : 'production',
+        sendDefaultPii: true,
+        attachStacktrace: isBetaApp,
+        ...sentryOptions,
+        enableCaptureFailedRequests: false,
+        integrations: [
+            new Sentry.ReactNativeTracing({
+
+                // Pass instrumentation to be used as `routingInstrumentation`
+                routingInstrumentation: new Sentry.ReactNativeNavigationInstrumentation(
+                    Navigation,
+                    {enableTabsInstrumentation: false},
+                ),
+            }),
+        ],
+        beforeSend: (event: Event) => {
+            if (isBetaApp || (event?.level && eventFilter.includes(event.level))) {
+                return event;
+            }
+
+            return null;
+        },
     });
 }
 
-export function captureException(error: Error | string) {
+export function captureException(error: unknown) {
     if (!Config.SentryEnabled) {
         return;
     }

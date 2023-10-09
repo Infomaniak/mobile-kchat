@@ -48,11 +48,9 @@ type SettingsProps = {
 
 //todo: Profile the whole feature - https://mattermost.atlassian.net/browse/MM-39711
 
-const Settings = ({componentId, helpLink, showHelp, siteName}: SettingsProps) => {
+const Settings = ({componentId, helpLink, showHelp}: SettingsProps) => {
     const theme = useTheme();
     const intl = useIntl();
-
-    const serverName = 'kChat';
     const styles = getStyleSheet(theme);
 
     const closeButton = useMemo(() => {
@@ -75,34 +73,6 @@ const Settings = ({componentId, helpLink, showHelp, siteName}: SettingsProps) =>
 
     useAndroidHardwareBackHandler(componentId, close);
     useNavButtonPressed(CLOSE_BUTTON_ID, componentId, close, []);
-
-    const goToNotifications = preventDoubleTap(() => {
-        const screen = Screens.SETTINGS_NOTIFICATION;
-        const title = intl.formatMessage({id: 'settings.notifications', defaultMessage: 'Notifications'});
-
-        goToScreen(screen, title);
-    });
-
-    const goToDisplaySettings = preventDoubleTap(() => {
-        const screen = Screens.SETTINGS_DISPLAY;
-        const title = intl.formatMessage({id: 'settings.display', defaultMessage: 'Display'});
-
-        goToScreen(screen, title);
-    });
-
-    const goToAbout = preventDoubleTap(() => {
-        const screen = Screens.ABOUT;
-        const title = intl.formatMessage({id: 'settings.about', defaultMessage: 'About {appTitle}'}, {appTitle: serverName});
-
-        goToScreen(screen, title);
-    });
-
-    const goToAdvancedSettings = preventDoubleTap(() => {
-        const screen = Screens.SETTINGS_ADVANCED;
-        const title = intl.formatMessage({id: 'settings.advanced_settings', defaultMessage: 'Advanced Settings'});
-
-        goToScreen(screen, title);
-    });
 
     const goToThemeSettings = preventDoubleTap(() => {
         const screen = Screens.SETTINGS_DISPLAY_THEME;

@@ -7,13 +7,13 @@ import {Keyboard} from 'react-native';
 
 import {createChannel, patchChannel as handlePatchChannel, switchToChannelById} from '@actions/remote/channel';
 import CompassIcon from '@components/compass_icon';
-import {General, Screens} from '@constants';
+import {General} from '@constants';
 import {MIN_CHANNEL_NAME_LENGTH} from '@constants/channel';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import {buildNavigationButton, dismissModal, openAsBottomSheet, popTopScreen, setButtons} from '@screens/navigation';
+import {buildNavigationButton, dismissModal, popTopScreen, setButtons} from '@screens/navigation';
 import {validateDisplayName} from '@utils/channel';
 
 import ChannelInfoForm from './channel_info_form';
@@ -91,24 +91,24 @@ const CreateOrEditChannel = ({
 
     const [appState, dispatch] = useReducer((state: RequestState, action: RequestAction) => {
         switch (action.type) {
-        case RequestActions.START:
-            return {
-                error: '',
-                saving: true,
-            };
-        case RequestActions.COMPLETE:
-            return {
-                error: '',
-                saving: false,
-            };
-        case RequestActions.FAILURE:
-            return {
-                error: action.error,
-                saving: false,
-            };
+            case RequestActions.START:
+                return {
+                    error: '',
+                    saving: true,
+                };
+            case RequestActions.COMPLETE:
+                return {
+                    error: '',
+                    saving: false,
+                };
+            case RequestActions.FAILURE:
+                return {
+                    error: action.error,
+                    saving: false,
+                };
 
-        default:
-            return state;
+            default:
+                return state;
         }
     }, {
         error: '',
@@ -180,27 +180,10 @@ const CreateOrEditChannel = ({
         setCanSave(false);
         const createdChannel = await createChannel(serverUrl, displayName, purpose, header, type);
         if (createdChannel.error) {
-            if (createdChannel.error.server_error_id === 'quota-exceeded') {
-                dispatch({type: RequestActions.FAILURE});
-                openAsBottomSheet({
-                    closeButtonId: 'close-quota-exceeded',
-                    screen: Screens.INFOMANIAK_QUOTA_EXCEEDED,
-                    theme,
-                    title: '',
-                    props: {
-                        quotaType: {
-                            title: 'infomaniak.channel_quota_exceeded.title',
-                            description: 'infomaniak.channel_quota_exceeded.description',
-                            image: 'channels',
-                        },
-                    },
-                });
-            } else {
-                dispatch({
-                    type: RequestActions.FAILURE,
-                    error: createdChannel.error as string,
-                });
-            }
+            dispatch({
+                type: RequestActions.FAILURE,
+                error: createdChannel.error as string,
+            });
             return;
         }
 
@@ -219,16 +202,16 @@ const CreateOrEditChannel = ({
             return;
         }
 
-        const patchChannel = {
-            id: channel.id,
-            type: channel.type,
-            display_name: isDirect(channel) ? channel.displayName : displayName,
-            purpose,
+        const patchChannel: ChannelPatch = {
             header,
-        } as Channel;
+            ...!isDirect(channel) && {
+                display_name: displayName,
+                purpose,
+            },
+        };
 
         setCanSave(false);
-        const patchedChannel = await handlePatchChannel(serverUrl, patchChannel);
+        const patchedChannel = await handlePatchChannel(serverUrl, channel.id, patchChannel);
         if (patchedChannel.error) {
             dispatch({
                 type: RequestActions.FAILURE,

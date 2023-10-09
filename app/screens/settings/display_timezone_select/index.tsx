@@ -123,7 +123,7 @@ const SelectTimezones = ({componentId, onBack, currentTimezone}: SelectTimezones
     useEffect(() => {
         // let's get all supported timezones
         const getSupportedTimezones = async () => {
-            const allTzs = await getAllSupportedTimezones(serverUrl);
+            const allTzs = await getAllSupportedTimezones();
             if (allTzs.length > 0) {
                 setTimezones(allTzs);
                 const timezoneIndex = allTzs.findIndex((timezone) => timezone === currentTimezone);

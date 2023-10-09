@@ -16,7 +16,6 @@ import {Events, Screens} from '@constants';
 import {PostPriorityType} from '@constants/post';
 import {NOTIFY_ALL_MEMBERS} from '@constants/post_draft';
 import {useServerUrl} from '@context/server';
-import {get} from '@managers/analytics';
 import DraftUploadManager from '@managers/draft_upload_manager';
 import * as DraftUtils from '@utils/draft';
 import {isReactionMatch} from '@utils/emoji/helpers';

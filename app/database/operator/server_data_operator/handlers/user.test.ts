@@ -53,6 +53,8 @@ describe('*** Operator: User Handlers tests ***', () => {
         const users: UserProfile[] = [
             {
                 id: '9ciscaqbrpd6d8s68k76xb9bte',
+                user_id: 1,
+                team_id: '1',
                 create_at: 1599457495881,
                 update_at: 1607683720173,
                 delete_at: 0,

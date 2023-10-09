@@ -380,6 +380,8 @@ class TestHelper {
         return {
             ...this.fakeUser(),
             id,
+            user_id: 1,
+            team_id: '1',
             create_at: 1507840900004,
             update_at: 1507840900004,
             delete_at: 0,

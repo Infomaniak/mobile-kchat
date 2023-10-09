@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import NetInfo from '@react-native-community/netinfo';
-import {DeviceEventEmitter, Platform} from 'react-native';
+import {DeviceEventEmitter} from 'react-native';
 
 import {Database, Events} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
@@ -177,40 +177,6 @@ export const cancelSessionNotification = async (serverUrl: string) => {
     }
 };
 
-export const scheduleSessionNotification = async (serverUrl: string) => {
-    /*try {
-        const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const sessions = await fetchSessions(serverUrl, 'me');
-        const user = await getCurrentUser(database);
-        const serverName = await getServerDisplayName(serverUrl);
-
-        await cancelSessionNotification(serverUrl);
-
-        if (sessions) {
-            const session = await findSession(serverUrl, sessions);
-
-            if (session) {
-                const sessionId = session.id;
-                const notificationId = scheduleExpiredNotification(serverUrl, session, serverName, user?.locale);
-                operator.handleSystem({
-                    systems: [{
-                        id: SYSTEM_IDENTIFIERS.SESSION_EXPIRATION,
-                        value: {
-                            id: sessionId,
-                            notificationId,
-                            expiresAt: session.expires_at,
-                        },
-                    }],
-                    prepareRecordsOnly: false,
-                });
-            }
-        }
-    } catch (e) {
-        logError('scheduleExpiredNotification', e);
-        await forceLogoutIfNecessary(serverUrl, e);
-    }*/
-};
-
 export const sendPasswordResetEmail = async (serverUrl: string, email: string) => {
     try {
         const client = NetworkManager.getClient(serverUrl);
@@ -266,46 +232,3 @@ export const ssoLogin = async (serverUrl: string, serverDisplayName: string, ser
         return {error, failed: false};
     }
 };
-
-async function findSession(serverUrl: string, sessions: Session[]) {
-    try {
-        const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const expiredSession = await getExpiredSession(database);
-        const deviceToken = await getDeviceToken();
-
-        // First try and find the session by the given identifier  hyqddef7jjdktqiyy36gxa8sqy
-        let session = sessions.find((s) => s.id === expiredSession?.id);
-        if (session) {
-            return session;
-        }
-
-        // Next try and find the session by deviceId
-        if (deviceToken) {
-            session = sessions.find((s) => s.device_id === deviceToken);
-            if (session) {
-                return session;
-            }
-        }
-
-        // Next try and find the session by the CSRF token
-        const csrfToken = await getCSRFFromCookie(serverUrl);
-        if (csrfToken) {
-            session = sessions.find((s) => s.props?.csrf === csrfToken);
-            if (session) {
-                return session;
-            }
-        }
-
-        // Next try and find the session based on the OS
-        // if multiple sessions exists with the same os type this can be inaccurate
-        session = sessions.find((s) => s.props?.os.toLowerCase() === Platform.OS);
-        if (session) {
-            return session;
-        }
-    } catch (e) {
-        logError('findSession', e);
-    }
-
-    // At this point we did not find the session
-    return undefined;
-}

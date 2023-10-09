@@ -3,7 +3,8 @@
 
 import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
-import {Keyboard, Platform, type StyleProp, View, type ViewStyle, TouchableOpacity} from 'react-native';
+import {Keyboard, Platform, type StyleProp, View, type ViewStyle} from 'react-native';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 
 import {deleteSavedPost, savePostPreference} from '@actions/remote/preference';
 import CompassIcon from '@components/compass_icon';

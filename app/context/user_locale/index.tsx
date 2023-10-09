@@ -28,7 +28,6 @@ const UserLocaleProvider = ({locale, children}: Props) => {
     return (
         <Provider value={locale}>
             <IntlProvider
-                onError={() => {}}
                 locale={locale}
                 messages={getTranslations(locale)}
             >
@@ -43,7 +42,6 @@ export function withUserLocale<T extends WithUserLocaleProps>(Component: Compone
             <Consumer>
                 {(locale: string) => (
                     <IntlProvider
-                        onError={() => {}}
                         locale={locale}
                         messages={getTranslations(locale)}
                     >

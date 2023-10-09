@@ -21,8 +21,6 @@ import com.mattermost.helpers.*;
 import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
 import com.wix.reactnativenotifications.core.notification.PushNotificationProps;
 
-import java.util.UUID;
-
 public class NotificationReplyBroadcastReceiver extends BroadcastReceiver {
     private Context mContext;
     private Bundle bundle;
@@ -73,7 +71,6 @@ public class NotificationReplyBroadcastReceiver extends BroadcastReceiver {
         body.putString("channel_id", channelId);
         body.putString("message", message.toString());
         body.putString("root_id", rootId);
-        body.putString("pending_post_id", UUID.randomUUID().toString());
 
         WritableMap options = Arguments.createMap();
         options.putMap("headers", headers);

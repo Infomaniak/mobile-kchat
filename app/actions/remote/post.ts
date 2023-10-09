@@ -84,10 +84,6 @@ export async function createPost(serverUrl: string, post: Partial<Post>, files: 
         delete_at: 0,
     } as Post;
 
-    if (newPost.root_id?.length === 0) {
-        delete newPost.root_id;
-    }
-
     if (files.length) {
         const fileIds = files.map((file) => file.id);
 
@@ -230,9 +226,6 @@ export const retryFailedPost = async (serverUrl: string, post: PostModel) => {
             update_at: timestamp,
             delete_at: 0,
         } as Post;
-
-        // IK backend doesn't validate failed prop.
-        delete newPost.props.failed;
 
         // Update the local post to reflect the pending state in the UI
         // timestamps will remain the same as the initial attempt for createAt
@@ -460,6 +453,7 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
         }
         const client = NetworkManager.getClient(serverUrl);
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+
         const isCRTEnabled = await getIsCRTEnabled(database);
         const data = await client.getPostsSince(channelId, since, isCRTEnabled, isCRTEnabled);
         EphemeralStore.setServerHasLimit(serverUrl, data.has_limitation);
@@ -895,19 +889,9 @@ export async function fetchSavedPosts(serverUrl: string, teamId?: string, channe
 
         const userId = await getCurrentUserId(database);
         const data = await client.getSavedPosts(userId, channelId, teamId, page, perPage);
-        const posts = data.posts || [];
+        const posts = data.posts || {};
         const order = data.order || [];
-
-        // IK - Fix mapping from wrong data
-        const postsArray = order.flatMap((id) => {
-            const matchedPost = posts.find((post) => {
-                return post.id === id;
-            });
-            if (matchedPost) {
-                return matchedPost;
-            }
-            return [];
-        });
+        const postsArray = order.map((id) => posts[id]);
 
         if (!postsArray.length) {
             return {
@@ -980,19 +964,9 @@ export async function fetchPinnedPosts(serverUrl: string, channelId: string) {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
 
         const data = await client.getPinnedPosts(channelId);
-        const posts = data.posts || [];
+        const posts = data.posts || {};
         const order = data.order || [];
-
-        // IK - Fix mapping from wrong data
-        const postsArray = order.flatMap((id) => {
-            const matchedPost = posts.find((post) => {
-                return post.id === id;
-            });
-            if (matchedPost) {
-                return matchedPost;
-            }
-            return [];
-        });
+        const postsArray = order.map((id) => posts[id]);
 
         if (!postsArray.length) {
             return {

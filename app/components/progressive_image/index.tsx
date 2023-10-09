@@ -105,7 +105,6 @@ const ProgressiveImage = ({
     }
 
     if (defaultSource) {
-        // @ts-ignore
         defaultSource.headers = {Authorization: token};
         return (
             <View style={[styles.defaultImageContainer, style]}>

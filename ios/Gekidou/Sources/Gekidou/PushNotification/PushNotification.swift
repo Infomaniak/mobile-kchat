@@ -15,6 +15,7 @@ public class PushNotification: NSObject {
     @objc public func postNotificationReceipt(_ userInfo: [AnyHashable:Any]) {
         let notification = UNMutableNotificationContent()
         notification.userInfo = userInfo
+        postNotificationReceipt(notification, completionHandler: {_ in})
     }
     
     public func postNotificationReceipt(_ notification: UNMutableNotificationContent, completionHandler: @escaping (_ notification: UNMutableNotificationContent?) -> Void) {
@@ -40,12 +41,6 @@ public class PushNotification: NSObject {
                 if let idLoadedNotification = self.parseIdLoadedNotification(data) {
                     if let body = idLoadedNotification["message"] as? String {
                         notification.body = body
-                        if notification.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            notification.body = NSLocalizedString("empty_notification_message", comment: "empty_notification_message")
-                        } else if #available(iOS 15, *),
-                                  let attributedMessage = try? NSAttributedString(markdown: notification.body) {
-                            notification.body = attributedMessage.string
-                        }
                     }
                     
                     if let title = idLoadedNotification["channel_name"] as? String {

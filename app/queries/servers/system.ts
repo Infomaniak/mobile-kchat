@@ -5,7 +5,6 @@ import {Database, Q} from '@nozbe/watermelondb';
 import {of as of$, Observable, combineLatest} from 'rxjs';
 import {switchMap, distinctUntilChanged} from 'rxjs/operators';
 
-import {Preferences} from '@constants';
 import {MM_TABLES, SYSTEM_IDENTIFIERS} from '@constants/database';
 import {PUSH_PROXY_STATUS_UNKNOWN} from '@constants/push_proxy';
 import {isMinimumServerVersion} from '@utils/helpers';
@@ -484,19 +483,9 @@ export const observeOnlyUnreads = (database: Database) => {
 };
 
 export const observeAllowedThemesKeys = (database: Database) => {
-    const defaultThemeKeys = Object.keys(Preferences.THEMES);
     return observeConfigValue(database, 'AllowedThemes').pipe(
-        switchMap((allowedThemes) => {
+        switchMap(() => {
             return of$(['quartz', 'infomaniak', 'onyx']);
-            let acceptableThemes = defaultThemeKeys;
-            if (allowedThemes) {
-                const allowedThemeKeys = (allowedThemes ?? '').split(',').filter(String);
-                if (allowedThemeKeys.length) {
-                    acceptableThemes = defaultThemeKeys.filter((k) => allowedThemeKeys.includes(k));
-                }
-            }
-
-            return of$(acceptableThemes);
         }),
     );
 };

@@ -18,7 +18,6 @@ import SavedMessages from './saved_messages';
 import Search from './search';
 
 import type {BottomTabBarProps} from '@react-navigation/bottom-tabs';
-import {get} from '@managers/analytics';
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     container: {

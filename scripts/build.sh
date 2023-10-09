@@ -60,7 +60,7 @@ function setup() {
 
         if [[ "$1" == "ios"* ]]; then
           if [[ $(uname -p) == 'arm' ]]; then
-            installGemsAndPods || exit 1
+            installGemsAndPodsM1 || exit 1
           else
             installGemsAndPods || exit 1
           fi
@@ -111,11 +111,11 @@ case $1 in
   *)
     echo "Build the mobile app for Android or iOS
     Usage: build.sh <type> [options]
-
+    
     Type:
       apk   Builds Android APK(s)
       ipa   Builds iOS IPA
-
+      
     Options:
       apk: unsigned
       ipa: unsigned or simulator"

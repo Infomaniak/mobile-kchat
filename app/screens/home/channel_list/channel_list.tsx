@@ -3,7 +3,7 @@
 
 import {useManagedConfig} from '@mattermost/react-native-emm';
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {useIntl} from 'react-intl';
 import {BackHandler, DeviceEventEmitter, StyleSheet, ToastAndroid, View} from 'react-native';
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
@@ -11,7 +11,6 @@ import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area
 
 import {refetchCurrentUser} from '@actions/remote/user';
 import AnnouncementBanner from '@components/announcement_banner';
-import ConnectionBanner from '@components/connection_banner';
 import TeamSidebar from '@components/team_sidebar';
 import {Navigation as NavigationConstants, Screens} from '@constants';
 import {useServerUrl} from '@context/server';
@@ -28,8 +27,6 @@ import CategoriesList from './categories_list';
 import Servers from './servers';
 
 import type {LaunchType} from '@typings/launch';
-import ServersModel from '@typings/database/models/app/servers';
-import {subscribeAllServers} from '@database/subscription/servers';
 
 type ChannelProps = {
     hasChannels: boolean;
@@ -79,19 +76,7 @@ const ChannelListScreen = (props: ChannelProps) => {
     const insets = useSafeAreaInsets();
     const serverUrl = useServerUrl();
     const params = route.params as {direction: string};
-    const [canAddOtherServers, setCanAddOtherServers] = useState(false);
-
-    const serversObserver = async (servers: ServersModel[]) => {
-        setCanAddOtherServers(servers.length > 1);
-    };
-
-    useEffect(() => {
-        const subscription = subscribeAllServers(serversObserver);
-
-        return () => {
-            subscription?.unsubscribe();
-        };
-    }, []);
+    const canAddOtherServers = managedConfig?.allowOtherServers !== 'false';
 
     const handleBackPress = useCallback(() => {
         const isHomeScreen = NavigationStore.getVisibleScreen() === Screens.HOME;
@@ -189,7 +174,6 @@ const ChannelListScreen = (props: ChannelProps) => {
                 edges={edges}
                 testID='channel_list.screen'
             >
-                <ConnectionBanner/>
                 {props.isLicensed &&
                     <AnnouncementBanner/>
                 }

@@ -1,9 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 import React from 'react';
-import Svg, {Path, SvgProps} from 'react-native-svg';
+import Svg, {Path} from 'react-native-svg';
 
-const SvgComponent = (props: SvgProps) => (
+const SvgComponent = () => (
     <Svg
         width={32}
         height={32}

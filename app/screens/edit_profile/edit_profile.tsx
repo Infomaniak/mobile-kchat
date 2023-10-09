@@ -33,8 +33,7 @@ const styles = StyleSheet.create({
 const CLOSE_BUTTON_ID = 'close-edit-profile';
 
 const EditProfile = ({
-    componentId, currentUser, isModal, isTablet,
-    lockedFirstName, lockedLastName, lockedNickname, lockedPosition, lockedPicture,
+    componentId, isModal, isTablet,
 }: EditProfileProps) => {
     const serverUrl = useServerUrl();
     const theme = useTheme();
