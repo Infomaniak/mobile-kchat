@@ -29,7 +29,7 @@ class CallManager {
             await this.setCurrentCall(apiCall.url, serverUrl);
         } catch (error) {
             if (error instanceof ClientError) {
-                if (error.responseData.url) {
+                if (error.responseData?.url) {
                     await this.setCurrentCall(error.responseData.url, serverUrl);
                 }
             }
