@@ -3,7 +3,6 @@
 
 import {fetchMissingDirectChannelsInfo, fetchMyChannelsForTeam, handleKickFromChannel, type MyChannelsRequest} from '@actions/remote/channel';
 import {fetchGroupsForMember} from '@actions/remote/groups';
-import {fetchPostsForUnreadChannels} from '@actions/remote/post';
 import {type MyPreferencesRequest, fetchMyPreferences} from '@actions/remote/preference';
 import {fetchRoles} from '@actions/remote/role';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
@@ -310,14 +309,7 @@ export async function entryInitialChannelId(database: Database, requestedChannel
 export async function restDeferredAppEntryActions(
     serverUrl: string, since: number, currentUserId: string, currentUserLocale: string, preferences: PreferenceType[] | undefined,
     config: ClientConfig, license: ClientLicense | undefined, teamData: MyTeamsRequest, chData: MyChannelsRequest | undefined,
-    initialTeamId?: string, initialChannelId?: string) {
-    setTimeout(async () => {
-        if (chData?.channels?.length && chData.memberships?.length) {
-            // defer fetching posts for unread channels on initial team
-            fetchPostsForUnreadChannels(serverUrl, chData.channels, chData.memberships, initialChannelId);
-        }
-    }, FETCH_UNREADS_TIMEOUT);
-
+    initialTeamId?: string) {
     // defer fetch channels and unread posts for other teams
     if (teamData.teams?.length && teamData.memberships?.length) {
         fetchTeamsChannelsAndUnreadPosts(serverUrl, since, teamData.teams, teamData.memberships, initialTeamId);
