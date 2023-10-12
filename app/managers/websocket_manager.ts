@@ -228,11 +228,8 @@ class WebsocketManager {
         if (!isActive && !this.isBackgroundTimerRunning) {
             this.isBackgroundTimerRunning = true;
             this.cancelAllConnections();
-            this.backgroundIntervalId = BackgroundTimer.setInterval(() => {
-                this.closeAll();
-                BackgroundTimer.clearInterval(this.backgroundIntervalId!);
-                this.isBackgroundTimerRunning = false;
-            }, WAIT_TO_CLOSE);
+            this.closeAll();
+            this.isBackgroundTimerRunning = false;
 
             this.previousActiveState = isActive;
             return;

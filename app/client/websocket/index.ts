@@ -171,7 +171,7 @@ export default class WebSocketClient {
             this.hasReliablyReconnect = false;
 
             if (this.connectFailCount === 0) {
-                logInfo('websocket closed', this.url);
+                logInfo('websocket closed', this.serverUrl);
             }
 
             this.connectFailCount++;
