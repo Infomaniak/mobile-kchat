@@ -164,6 +164,8 @@ const ServerItem = ({
 
     if (server.url === server.displayName) {
         displayName = intl.formatMessage({id: 'servers.default', defaultMessage: 'Default Server'});
+
+        return;
     }
 
     const unreadsSubscription = ({myChannels, settings, threadMentionCount, threadUnreads}: UnreadObserverArgs) => {
