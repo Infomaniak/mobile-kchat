@@ -35,7 +35,6 @@ import {isSupportedServerCalls} from '@calls/utils';
 import {Screens, WebsocketEvents} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
-import AppsManager from '@managers/apps_manager';
 import {getLastPostInThread} from '@queries/servers/post';
 import {
     getConfig,
@@ -160,7 +159,6 @@ async function doReconnect(serverUrl: string) {
 
     dataRetentionCleanup(serverUrl);
 
-    AppsManager.refreshAppBindings(serverUrl);
     return undefined;
 }
 
