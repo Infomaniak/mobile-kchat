@@ -9,18 +9,14 @@ import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged} from 'rxjs/operators';
 
 import {setCurrentUserStatus} from '@actions/local/user';
-import {fetchStatusByIds} from '@actions/remote/user';
 import {handleClose, handleEvent, handleFirstConnect, handleReconnect} from '@actions/websocket';
 import WebSocketClient from '@client/websocket';
 import {General} from '@constants';
 import DatabaseManager from '@database/manager';
-import {getCurrentUserId} from '@queries/servers/system';
-import {queryAllUsers} from '@queries/servers/user';
 import {toMilliseconds} from '@utils/datetime';
 import {isMainActivity} from '@utils/helpers';
 import {logError} from '@utils/log';
 
-const WAIT_TO_CLOSE = toMilliseconds({seconds: 5});
 const WAIT_UNTIL_NEXT = toMilliseconds({seconds: 5});
 
 class WebsocketManager {
@@ -157,12 +153,10 @@ class WebsocketManager {
     };
 
     private onFirstConnect = (serverUrl: string) => {
-        this.startPeriodicStatusUpdates(serverUrl);
         this.getConnectedSubject(serverUrl).next('connected');
     };
 
     private onReconnect = async (serverUrl: string) => {
-        this.startPeriodicStatusUpdates(serverUrl);
         this.getConnectedSubject(serverUrl).next('connected');
         const error = await handleReconnect(serverUrl);
         if (error) {
@@ -179,42 +173,8 @@ class WebsocketManager {
         if (connectFailCount <= 1) { // First fail
             await setCurrentUserStatus(serverUrl, General.OFFLINE);
             await handleClose(serverUrl, lastDisconnect);
-
-            this.stopPeriodicStatusUpdates(serverUrl);
         }
     };
-
-    private startPeriodicStatusUpdates(serverUrl: string) {
-        let currentId = this.statusUpdatesIntervalIDs[serverUrl];
-        if (currentId != null) {
-            clearInterval(currentId);
-        }
-
-        const getStatusForUsers = async () => {
-            const database = DatabaseManager.serverDatabases[serverUrl];
-            if (!database) {
-                return;
-            }
-
-            const currentUserId = await getCurrentUserId(database.database);
-            const userIds = (await queryAllUsers(database.database).fetchIds()).filter((id) => id !== currentUserId);
-
-            fetchStatusByIds(serverUrl, userIds);
-        };
-
-        currentId = setInterval(getStatusForUsers, General.STATUS_INTERVAL);
-        this.statusUpdatesIntervalIDs[serverUrl] = currentId;
-        getStatusForUsers();
-    }
-
-    private stopPeriodicStatusUpdates(serverUrl: string) {
-        const currentId = this.statusUpdatesIntervalIDs[serverUrl];
-        if (currentId != null) {
-            clearInterval(currentId);
-        }
-
-        delete this.statusUpdatesIntervalIDs[serverUrl];
-    }
 
     private onAppStateChange = async (appState: AppStateStatus) => {
         const isActive = appState === 'active';
