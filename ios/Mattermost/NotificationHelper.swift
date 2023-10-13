@@ -28,9 +28,6 @@ import UIKit
       removeThreadNotifications(serverUrl: serverUrl, threadId: rootId)
       try? Gekidou.Database.default.resetThreadMentions(serverUrl, rootId)
     }
-    
-    let mentions = Gekidou.Database.default.getTotalMentions()
-    UIApplication.shared.applicationIconBadgeNumber = mentions
   }
   
   @objc func removeChannelNotifications(serverUrl: String, channelId: String) {

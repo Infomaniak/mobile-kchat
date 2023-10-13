@@ -101,9 +101,6 @@ NSString *const ReplyActionID = @"REPLY_ACTION";
 - (void) handleReplySuccess:(NSString *)completionKey completionHandler:(void (^)(void))completionHandler {
   [[RNNotificationsStore sharedInstance] completeAction:completionKey];
   UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-  [center getDeliveredNotificationsWithCompletionHandler:^(NSArray<UNNotification *> * _Nonnull notifications) {
-    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:[notifications count]];
-  }];
 
   dispatch_async(dispatch_get_main_queue(), ^{
     completionHandler();

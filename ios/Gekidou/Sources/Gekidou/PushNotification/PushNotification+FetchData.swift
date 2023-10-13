@@ -198,8 +198,7 @@ extension PushNotification {
                     }
                 }
             }
-            
-            notification.badge = Gekidou.Database.default.getTotalMentions() as NSNumber
+
             contentHandler(notification)
         }
     }
