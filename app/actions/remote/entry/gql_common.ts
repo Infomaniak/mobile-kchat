@@ -298,10 +298,10 @@ export async function deferredAppEntryActions(
         result = await deferredAppEntryGraphQLActions(serverUrl, since, currentUserId, teamData, chData, preferences, config, initialTeamId, initialChannelId);
         if (result.error) {
             logDebug('Error using GraphQL, trying REST', result.error);
-            result = restDeferredAppEntryActions(serverUrl, since, currentUserId, currentUserLocale, preferences, config, license, teamData, chData, initialTeamId, initialChannelId);
+            result = restDeferredAppEntryActions(serverUrl, since, currentUserId, currentUserLocale, preferences, config, license, teamData, chData, initialTeamId);
         }
     } else {
-        result = restDeferredAppEntryActions(serverUrl, since, currentUserId, currentUserLocale, preferences, config, license, teamData, chData, initialTeamId, initialChannelId);
+        result = restDeferredAppEntryActions(serverUrl, since, currentUserId, currentUserLocale, preferences, config, license, teamData, chData, initialTeamId);
     }
 
     autoUpdateTimezone(serverUrl);

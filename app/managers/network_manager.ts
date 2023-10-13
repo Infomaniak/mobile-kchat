@@ -113,6 +113,7 @@ class NetworkManager {
         } catch (error) {
             throw new ClientError(serverUrl, {
                 message: 'Can’t create global client.',
+                url: serverUrl,
             });
         }
 

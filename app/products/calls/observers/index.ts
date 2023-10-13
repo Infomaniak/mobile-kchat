@@ -5,8 +5,7 @@ import {distinctUntilChanged, switchMap, combineLatest, Observable, of as of$} f
 
 import {observeCallsConfig, observeCallsState} from '@calls/state';
 import {License} from '@constants';
-import {observeConfigValue, observeLicense} from '@queries/servers/system';
-import {isMinimumServerVersion} from '@utils/helpers';
+import {observeLicense} from '@queries/servers/system';
 
 import type {Database} from '@nozbe/watermelondb';
 
@@ -16,26 +15,8 @@ export type LimitRestrictedInfo = {
     isCloudStarter: boolean;
 }
 
-export const observeIsCallsEnabledInChannel = (database: Database, serverUrl: string, channelId: Observable<string>) => {
-    const callsDefaultEnabled = observeCallsConfig(serverUrl).pipe(
-        switchMap((config) => of$(config.DefaultEnabled)),
-        distinctUntilChanged(),
-    );
-    const callsStateEnabledDict = observeCallsState(serverUrl).pipe(
-        switchMap((state) => of$(state.enabled)),
-        distinctUntilChanged(), // Did the enabled object ref change? If so, a channel's enabled state has changed.
-    );
-    const callsGAServer = observeConfigValue(database, 'Version').pipe(
-        switchMap((v) => of$(isMinimumServerVersion(v || '', 7, 6))),
-    );
-    return combineLatest([channelId, callsStateEnabledDict, callsDefaultEnabled, callsGAServer]).pipe(
-        switchMap(([id, enabled, defaultEnabled, gaServer]) => {
-            const explicitlyEnabled = enabled.hasOwnProperty(id as string) && enabled[id];
-            const explicitlyDisabled = enabled.hasOwnProperty(id as string) && !enabled[id];
-            return of$(explicitlyEnabled || (!explicitlyDisabled && defaultEnabled) || (!explicitlyDisabled && gaServer));
-        }),
-        distinctUntilChanged(),
-    ) as Observable<boolean>;
+export const observeIsCallsEnabledInChannel = () => {
+    return of$(true);
 };
 
 export const observeIsCallLimitRestricted = (database: Database, serverUrl: string, channelId: string) => {

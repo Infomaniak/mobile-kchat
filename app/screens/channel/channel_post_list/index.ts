@@ -35,7 +35,7 @@ const enhanced = withObservables(['channelId'], ({database, channelId}: {channel
                     return of$([]);
                 }
 
-                const {earliest, latest} = postsInChannel[0];
+                const {latest} = postsInChannel[0];
                 return queryPostsBetween(database, 0, latest, Q.desc, '', channelId, isCRTEnabled ? '' : undefined).observe();
             }),
         ),

@@ -24,6 +24,8 @@ type GQLError = {
 
 type GQLUser = {
     id: string;
+	user_id: number;
+	team_id: string;
 	createAt: number;
 	updateAt: number;
 	deleteAt: number;

@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import BottomSheetM, {BottomSheetBackdrop, BottomSheetBackdropProps} from '@gorhom/bottom-sheet';
+import BottomSheetM, {BottomSheetBackdrop, type BottomSheetBackdropProps} from '@gorhom/bottom-sheet';
 import React, {useCallback, useRef} from 'react';
 import {useIntl} from 'react-intl';
 import {Image, Text, View} from 'react-native';
@@ -83,7 +83,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 export type IKQuotaExceeded = {
     title: string;
     description: string;
-    image: string;
+    image: 'channels' | 'storage';
 }
 
 const IKChannelQuotaExceeded = ({closeButtonId, quotaType, componentId}: Props) => {

@@ -18,6 +18,8 @@ const defaultNotifyProps: UserNotifyProps = {
 export const gqlToClientUser = (u: Partial<GQLUser>): UserProfile => {
     return {
         id: u.id || '',
+        user_id: u.user_id || 0,
+        team_id: u.team_id || '',
         create_at: u.createAt || 0,
         update_at: u.updateAt || 0,
         delete_at: u.deleteAt || 0,

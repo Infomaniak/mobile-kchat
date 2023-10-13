@@ -70,7 +70,7 @@ const enhanced = withObservables([], ({database, serverUrl}: EnhanceProps) => {
         showJoinCallBanner,
         isInACall,
         showIncomingCalls,
-        isCallsEnabledInChannel: observeIsCallsEnabledInChannel(database, serverUrl, channelId),
+        isCallsEnabledInChannel: observeIsCallsEnabledInChannel(),
         dismissedGMasDMNotice,
         channelType,
         currentUserId,

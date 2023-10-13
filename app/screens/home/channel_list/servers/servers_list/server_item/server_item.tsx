@@ -3,14 +3,13 @@
 
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {Animated, DeviceEventEmitter, InteractionManager, Platform, type StyleProp, Text, View, type ViewStyle} from 'react-native';
+import {DeviceEventEmitter, InteractionManager, Platform, type StyleProp, Text, View, type ViewStyle} from 'react-native';
 import {RectButton} from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import {Navigation} from 'react-native-navigation';
 
 import {storeMultiServerTutorial} from '@actions/app/global';
 import {doPing} from '@actions/remote/general';
-import {logout} from '@actions/remote/session';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
 import CompassIcon from '@components/compass_icon';
 import Loading from '@components/loading';
@@ -27,7 +26,7 @@ import WebsocketManager from '@managers/websocket_manager';
 import {getServerByIdentifier} from '@queries/app/servers';
 import {dismissBottomSheet} from '@screens/navigation';
 import {canReceiveNotifications} from '@utils/push_proxy';
-import {alertServerAlreadyConnected, alertServerError, alertServerLogout, alertServerRemove, editServer, loginToServer} from '@utils/server';
+import {alertServerAlreadyConnected, alertServerError, loginToServer} from '@utils/server';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {removeProtocol, stripTrailingSlashes} from '@utils/url';
@@ -164,8 +163,6 @@ const ServerItem = ({
 
     if (server.url === server.displayName) {
         displayName = intl.formatMessage({id: 'servers.default', defaultMessage: 'Default Server'});
-
-        return;
     }
 
     const unreadsSubscription = ({myChannels, settings, threadMentionCount, threadUnreads}: UnreadObserverArgs) => {
@@ -179,24 +176,6 @@ const ServerItem = ({
         mentions += threadMentionCount;
 
         setBadge({isUnread, mentions});
-    };
-
-    const logoutServer = async () => {
-        Navigation.updateProps(Screens.HOME, {extra: undefined});
-        await logout(server.url);
-
-        if (isActive) {
-            dismissBottomSheet();
-        } else {
-            DeviceEventEmitter.emit(Events.SWIPEABLE, '');
-        }
-    };
-
-    const removeServer = async () => {
-        const skipLogoutFromServer = server.lastActiveAt === 0;
-        await dismissBottomSheet();
-        Navigation.updateProps(Screens.HOME, {extra: undefined});
-        await logout(server.url, skipLogoutFromServer, true);
     };
 
     const startTutorial = () => {
@@ -270,19 +249,6 @@ const ServerItem = ({
         storeMultiServerTutorial();
     }, []);
 
-    const handleEdit = useCallback(() => {
-        DeviceEventEmitter.emit(Events.SWIPEABLE, '');
-        editServer(theme, server);
-    }, [server]);
-
-    const handleLogout = useCallback(async () => {
-        alertServerLogout(server.displayName, logoutServer, intl);
-    }, [isActive, intl, server]);
-
-    const handleRemove = useCallback(() => {
-        alertServerRemove(server.displayName, removeServer, intl);
-    }, [isActive, server, intl]);
-
     const handleShowTutorial = useCallback(() => {
         swipeable.current?.openRight();
     }, []);
@@ -309,16 +275,9 @@ const ServerItem = ({
         DeviceEventEmitter.emit(Events.SWIPEABLE, server.url);
     }, [server]);
 
-    const renderActions = useCallback((progress: Animated.AnimatedInterpolation<number>) => {
+    const renderActions = useCallback(() => {
         return (
-            <Options
-                onEdit={handleEdit}
-                onLogin={handleLogin}
-                onLogout={handleLogout}
-                onRemove={handleRemove}
-                progress={progress}
-                server={server}
-            />
+            <Options/>
         );
     }, [isActive, server, theme, intl]);
 

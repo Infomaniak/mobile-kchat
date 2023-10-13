@@ -8,7 +8,6 @@ import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {getAllSupportedTimezones} from '@actions/remote/user';
 import Search from '@components/search';
-import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {popTopScreen} from '@screens/navigation';
@@ -62,7 +61,6 @@ type SelectTimezonesProps = {
 }
 const SelectTimezones = ({componentId, onBack, currentTimezone}: SelectTimezonesProps) => {
     const intl = useIntl();
-    const serverUrl = useServerUrl();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
 

@@ -8,14 +8,12 @@ import {queryCategoriesById} from '@queries/servers/categories';
 import {logError} from '@utils/log';
 
 type WebsocketCategoriesMessage = {
-    broadcast: {
-        team_id: string;
-    };
+    event: string;
     data: {
         team_id: string;
-        category?: string;
+        category?: CategoryWithChannels;
         category_id: string;
-        updatedCategories?: string;
+        updatedCategories?: CategoryWithChannels[];
         order?: string[];
     };
 }

@@ -136,7 +136,6 @@ class AppsManager {
     };
 
     refreshAppBindings = async (serverUrl: string) => {
-        return;
         try {
             const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
             const appsEnabled = (await getConfig(database))?.FeatureFlagAppsEnabled === 'true';

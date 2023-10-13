@@ -24,4 +24,5 @@ interface ClientErrorProps {
     server_error_id?: string;
     status_code?: number;
     message: string;
+    response?: any;
 }

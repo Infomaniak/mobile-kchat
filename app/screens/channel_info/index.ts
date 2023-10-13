@@ -13,7 +13,6 @@ import {observeCurrentChannel} from '@queries/servers/channel';
 import {observeCanManageChannelMembers, observeCanManageChannelSettings} from '@queries/servers/role';
 import {
     observeConfigValue,
-    observeCurrentChannelId,
     observeCurrentTeamId,
     observeCurrentUserId,
 } from '@queries/servers/system';
@@ -98,7 +97,7 @@ const enhanced = withObservables([], ({serverUrl, database}: Props) => {
             return of$(false);
         }),
     );
-    const isCallsEnabledInChannel = observeIsCallsEnabledInChannel(database, serverUrl, observeCurrentChannelId(database));
+    const isCallsEnabledInChannel = observeIsCallsEnabledInChannel();
 
     const canManageMembers = currentUser.pipe(
         combineLatestWith(channelId),

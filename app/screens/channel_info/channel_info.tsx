@@ -5,7 +5,6 @@ import React, {useCallback} from 'react';
 import {ScrollView, View} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
-import ChannelInfoEnableCalls from '@calls/components/channel_info_enable_calls';
 import ChannelActions from '@components/channel_actions';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
@@ -55,7 +54,6 @@ const ChannelInfo = ({
     closeButtonId,
     componentId,
     type,
-    canEnableDisableCalls,
     isCallsEnabledInChannel,
     canManageMembers,
     canManageSettings,

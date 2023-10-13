@@ -322,6 +322,7 @@ export default class ClientBase {
             server_error_id: response.data?.id as string,
             status_code: response.code,
             url,
+            response: response.data,
         });
     };
 }
