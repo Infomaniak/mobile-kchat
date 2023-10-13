@@ -213,7 +213,7 @@ const MoreMessages = ({
     }, [serverUrl, channelId]);
 
     const onPress = useCallback(() => {
-        if (pressed.current) {
+        if (pressed.current || newMessageLineIndex <= 0) {
             return;
         }
 
