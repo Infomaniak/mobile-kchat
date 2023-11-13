@@ -140,8 +140,10 @@ function UserListRow({
     }, [isChannelAdmin, showManageMode, theme]);
 
     const onLayout = useCallback(() => {
-        startTutorial();
-    }, []);
+        if (showTutorial) {
+            startTutorial();
+        }
+    }, [showTutorial]);
 
     const icon = useMemo(() => {
         if (!selectable && !selected) {
@@ -175,17 +177,19 @@ function UserListRow({
                 viewRef={viewRef}
                 padding={20}
                 includeMargin={includeMargin}
+                onLayout={onLayout}
             />
             {showTutorial &&
             <TutorialHighlight
                 itemBounds={itemBounds}
                 onDismiss={handleDismissTutorial}
-                onLayout={onLayout}
             >
+                {Boolean(itemBounds.endX) &&
                 <TutorialLongPress
                     message={formatMessage({id: 'user.tutorial.long_press', defaultMessage: "Long-press on an item to view a user's profile"})}
                     style={isTablet ? style.tutorialTablet : style.tutorial}
                 />
+                }
             </TutorialHighlight>
             }
         </>

@@ -4,21 +4,20 @@
 import React, {useMemo} from 'react';
 import {Platform, View} from 'react-native';
 import Animated, {interpolate, useAnimatedStyle, useSharedValue, withSpring} from 'react-native-reanimated';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
+import {useCallsAdjustment} from '@calls/hooks';
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
-import {CURRENT_CALL_BAR_HEIGHT, JOIN_CALL_BAR_HEIGHT} from '@constants/view';
-import {useIsTablet} from '@hooks/device';
+import {useServerUrl} from '@context/server';
 import {makeStyleSheetFromTheme, hexToHue} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 type Props = {
+    channelId: string;
     theme: Theme;
     testID: string;
-    currentCallBarVisible: boolean;
-    joinCallBannerVisible: boolean;
-    limitUntil: string;
     onClose: () => void;
 }
 
@@ -89,18 +88,22 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 });
 
 const LimitedMessages = ({
+    channelId,
     testID,
     theme,
-    currentCallBarVisible,
-    joinCallBannerVisible,
     onClose,
 }: Props) => {
-    const isTablet = useIsTablet();
+    const serverUrl = useServerUrl();
+    const insets = useSafeAreaInsets();
     const underlayColor = useMemo(() => `hsl(${hexToHue(theme.buttonBg)}, 50%, 38%)`, [theme]);
     const top = useSharedValue(1);
-    const adjustedShownTop = SHOWN_TOP + (currentCallBarVisible ? CURRENT_CALL_BAR_HEIGHT : 0) + (joinCallBannerVisible ? JOIN_CALL_BAR_HEIGHT : 0);
-    const shownTop = adjustedShownTop;
+    const callsAdjustment = useCallsAdjustment(serverUrl, channelId);
+
+    // The final top:
+    const adjustedTop = insets.top + callsAdjustment;
+
     const BARS_FACTOR = Math.abs((1) / (HIDDEN_TOP - SHOWN_TOP));
+
     const styles = getStyleSheet(theme);
     const animatedStyle = useAnimatedStyle(() => ({
         transform: [{
@@ -115,13 +118,13 @@ const LimitedMessages = ({
                 [
                     HIDDEN_TOP,
                     HIDDEN_TOP,
-                    shownTop,
-                    shownTop,
+                    adjustedTop,
+                    adjustedTop,
                 ],
                 'clamp',
             ), {damping: 15}),
         }],
-    }), [isTablet, shownTop]);
+    }), [adjustedTop]);
 
     return (
         <Animated.View style={[styles.animatedContainer, styles.roundBorder, animatedStyle]}>
