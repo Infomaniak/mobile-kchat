@@ -166,8 +166,12 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
         return null;
     }
 
-    const threadStarterName = displayUsername(author, intl.locale, teammateNameDisplay);
+    let threadStarterName = displayUsername(author, intl.locale, teammateNameDisplay);
     const threadItemTestId = `${testID}.thread_item.${thread.id}`;
+
+    if (post?.props.override_username) {
+        threadStarterName = post.props.override_username;
+    }
 
     const needBadge = thread.unreadMentions || thread.unreadReplies;
     let badgeComponent;
