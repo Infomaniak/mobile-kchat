@@ -107,6 +107,7 @@ const Header = (props: HeaderProps) => {
                         usernameOverride={post.props?.override_username}
                         showCustomStatusEmoji={showCustomStatusEmoji}
                         customStatus={customStatus!}
+                        isWebHook={isWebHook}
                     />
                     {(!isSystemPost || isAutoResponse) &&
                     <HeaderTag

@@ -26,6 +26,7 @@ type HeaderDisplayNameProps = {
     usernameOverride?: string;
     showCustomStatusEmoji: boolean;
     customStatus: UserCustomStatus;
+    isWebHook?: boolean;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -65,7 +66,7 @@ const HeaderDisplayName = ({
     location, rootPostAuthor,
     shouldRenderReplyButton, theme,
     userIconOverride, userId, usernameOverride,
-    showCustomStatusEmoji, customStatus,
+    showCustomStatusEmoji, customStatus, isWebHook,
 }: HeaderDisplayNameProps) => {
     const dimensions = useWindowDimensions();
     const intl = useIntl();
@@ -75,7 +76,7 @@ const HeaderDisplayName = ({
         const screen = Screens.USER_PROFILE;
         const title = intl.formatMessage({id: 'mobile.routes.user_profile', defaultMessage: 'Profile'});
         const closeButtonId = 'close-user-profile';
-        const props = {closeButtonId, userId, channelId, location, userIconOverride, usernameOverride};
+        const props = {closeButtonId, userId, channelId, location, userIconOverride, usernameOverride, isWebHook};
 
         Keyboard.dismiss();
         openAsBottomSheet({screen, title, theme, closeButtonId, props});

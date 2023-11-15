@@ -8,6 +8,7 @@ import {StyleSheet, View} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Animated from 'react-native-reanimated';
 
+import CompassIcon from '@components/compass_icon';
 import ProfilePicture from '@components/profile_picture';
 import {useServerUrl} from '@context/server';
 import NetworkManager from '@managers/network_manager';
@@ -23,6 +24,7 @@ type Props = {
     imageSize?: number;
     user: UserModel;
     userIconOverride?: string;
+    isWebHook?: boolean;
 }
 
 const DEFAULT_IMAGE_SIZE = 96;
@@ -37,7 +39,7 @@ const getStyles = (size?: number) => {
     });
 };
 
-const UserProfileAvatar = ({enablePostIconOverride, forwardRef, imageSize, user, userIconOverride}: Props) => {
+const UserProfileAvatar = ({enablePostIconOverride, forwardRef, imageSize, user, userIconOverride, isWebHook}: Props) => {
     const styles = useMemo(() => getStyles(imageSize), [imageSize]);
     const serverUrl = useServerUrl();
 
@@ -54,6 +56,13 @@ const UserProfileAvatar = ({enablePostIconOverride, forwardRef, imageSize, user,
                     source={source}
                 />
             </View>
+        );
+    } else if (isWebHook) {
+        return (
+            <CompassIcon
+                name='webhook'
+                size={DEFAULT_IMAGE_SIZE}
+            />
         );
     }
 

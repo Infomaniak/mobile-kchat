@@ -35,6 +35,7 @@ type Props = {
     userIconOverride?: string;
     usernameOverride?: string;
     hideGuestTags: boolean;
+    isWebHook?: boolean;
 }
 
 export const HEADER_TEXT_HEIGHT = 30;
@@ -71,7 +72,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 const UserProfileTitle = ({
     enablePostIconOverride, enablePostUsernameOverride, headerText,
     imageSize, isChannelAdmin, isSystemAdmin, isTeamAdmin,
-    teammateDisplayName, user, userIconOverride, usernameOverride, hideGuestTags,
+    teammateDisplayName, user, userIconOverride, usernameOverride, hideGuestTags, isWebHook,
 }: Props) => {
     const galleryIdentifier = `${user.id}-avatarPreview`;
     const intl = useIntl();
@@ -148,6 +149,7 @@ const UserProfileTitle = ({
                                 imageSize={imageSize || undefined}
                                 user={user}
                                 userIconOverride={userIconOverride}
+                                isWebHook={isWebHook}
                             />
                         </TouchableOpacity>
                     </Animated.View>

@@ -22,6 +22,7 @@ import type {WithDatabaseArgs} from '@typings/database/database';
 type EnhancedProps = WithDatabaseArgs & {
     userId: string;
     channelId?: string;
+    isWebHook?: boolean;
 }
 
 const enhanced = withObservables([], ({channelId, database, userId}: EnhancedProps) => {

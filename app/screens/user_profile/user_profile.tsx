@@ -46,6 +46,7 @@ type Props = {
     userIconOverride?: string;
     usernameOverride?: string;
     hideGuestTags: boolean;
+    isWebHook?: boolean;
 }
 
 const TITLE_HEIGHT = 118;
@@ -86,6 +87,7 @@ const UserProfile = ({
     userIconOverride,
     usernameOverride,
     hideGuestTags,
+    isWebHook,
 }: Props) => {
     const {formatMessage, locale} = useIntl();
     const serverUrl = useServerUrl();
@@ -107,7 +109,7 @@ const UserProfile = ({
         localTime = mtz.tz(Date.now(), timezone).format(format);
     }
 
-    const showCustomStatus = isCustomStatusEnabled && Boolean(customStatus) && !user.isBot && !isCustomStatusExpired(user);
+    const showCustomStatus = isCustomStatusEnabled && Boolean(customStatus) && !user.isBot && !isCustomStatusExpired(user) && !isWebHook;
     const showUserProfileOptions = (!isDirectMessage || !channelContext) && !override && !manageMode;
     const showNickname = Boolean(user.nickname) && !override && !user.isBot && !manageMode;
     const showPosition = Boolean(user.position) && !override && !user.isBot && !manageMode;
@@ -178,6 +180,7 @@ const UserProfile = ({
                     userIconOverride={userIconOverride}
                     usernameOverride={usernameOverride}
                     hideGuestTags={hideGuestTags}
+                    isWebHook={isWebHook}
                 />
                 {showUserProfileOptions &&
                     <UserProfileOptions
