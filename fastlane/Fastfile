@@ -1039,7 +1039,6 @@ def submit_to_google_play(file_path)
           skip_upload_changelogs: true,
           skip_upload_images: true,
           skip_upload_screenshots: true,
-          release_status: 'draft',
           timeout: 600
       )
     end
@@ -1059,7 +1058,6 @@ def submit_to_google_play(file_path)
             skip_upload_changelogs: true,
             skip_upload_images: true,
             skip_upload_screenshots: true,
-            release_status: 'draft',
             timeout: 600
         )
       end
