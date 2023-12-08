@@ -1029,9 +1029,12 @@ def submit_to_google_play(file_path)
   filenames = []
   if(file_path.include?("aab"))
     aab_filename = Dir.glob(file_path).select { |f| File.file? f}.first
+    version_number = android_get_version_name(gradle_file: './android/app/build.gradle')
+    build_number = android_get_version_code(gradle_file: './android/app/build.gradle')
     unless ENV['SUPPLY_JSON_KEY'].nil? || ENV['SUPPLY_JSON_KEY'].empty?
       supply(
           package_name: ENV['MAIN_APP_IDENTIFIER'] || ENV['SUPPLY_PACKAGE_NAME'],
+          version_name: "#{build_number} (#{version_number})",
           track: ENV['SUPPLY_TRACK'] || 'alpha',
           aab: aab_filename,
           skip_upload_apk: true,
