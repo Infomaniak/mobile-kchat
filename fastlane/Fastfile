@@ -1027,14 +1027,15 @@ end
 
 def submit_to_google_play(file_path)
   filenames = []
+  version_number = android_get_version_name(gradle_file: './android/app/build.gradle')
+  build_number = android_get_version_code(gradle_file: './android/app/build.gradle')
+
   if(file_path.include?("aab"))
     aab_filename = Dir.glob(file_path).select { |f| File.file? f}.first
-    version_number = android_get_version_name(gradle_file: './android/app/build.gradle')
-    build_number = android_get_version_code(gradle_file: './android/app/build.gradle')
     unless ENV['SUPPLY_JSON_KEY'].nil? || ENV['SUPPLY_JSON_KEY'].empty?
       supply(
           package_name: ENV['MAIN_APP_IDENTIFIER'] || ENV['SUPPLY_PACKAGE_NAME'],
-          version_name: "#{build_number} (#{version_number})",
+          version_name: "#{build_number.gsub('_', '')} (#{version_number})",
           track: ENV['SUPPLY_TRACK'] || 'alpha',
           aab: aab_filename,
           skip_upload_apk: true,
@@ -1054,6 +1055,7 @@ def submit_to_google_play(file_path)
       unless ENV['SUPPLY_JSON_KEY'].nil? || ENV['SUPPLY_JSON_KEY'].empty?
         supply(
             package_name: ENV['MAIN_APP_IDENTIFIER'] || ENV['SUPPLY_PACKAGE_NAME'],
+            version_name: "#{build_number.gsub('_', '')} (#{version_number})",
             track: ENV['SUPPLY_TRACK'] || 'alpha',
             apk_paths: apks,
             skip_upload_aab: true,
@@ -1070,8 +1072,6 @@ def submit_to_google_play(file_path)
     end
   end
 
-  version_number = android_get_version_name(gradle_file: './android/app/build.gradle')
-  build_number = android_get_version_code(gradle_file: './android/app/build.gradle')
   s3_folder = "#{ENV['AWS_FOLDER_NAME']}/#{version_number}/#{build_number}"
   public_path = "https://#{ENV['AWS_BUCKET_NAME']}/#{s3_folder}"
   links = (filenames.map { |f| "* #{public_path}/#{f}"}).join("\n")
