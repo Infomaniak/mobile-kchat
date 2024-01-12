@@ -1,4 +1,5 @@
 assets/override
+assets/fonts/SuisseIntl*.ttf
 dist
 build-ios
 *.zip

@@ -34,10 +34,10 @@ export const getMarkdownTextStyles = makeStyleSheetFromTheme((theme: Theme) => {
 
     return {
         emph: {
-            fontFamily: 'OpenSans-Italic',
+            fontFamily: 'SuisseIntl-RegularItalic',
         },
         strong: {
-            fontFamily: 'OpenSans-SemiBold',
+            fontFamily: 'SuisseIntl-SemiBold',
             fontWeight: '600',
         },
         del: {
@@ -45,7 +45,7 @@ export const getMarkdownTextStyles = makeStyleSheetFromTheme((theme: Theme) => {
         },
         link: {
             color: theme.linkColor,
-            fontFamily: 'OpenSans',
+            fontFamily: 'SuisseIntl-Regular',
         },
         heading1: {
             ...typography('Heading', 700),
@@ -98,15 +98,15 @@ export const getMarkdownTextStyles = makeStyleSheetFromTheme((theme: Theme) => {
             fontFamily: codeFont,
         },
         mention: {
-            fontFamily: 'OpenSans',
+            fontFamily: 'SuisseIntl-Regular',
             color: theme.linkColor,
         },
         error: {
-            fontFamily: 'OpenSans',
+            fontFamily: 'SuisseIntl-Regular',
             color: theme.errorTextColor,
         },
         table_header_row: {
-            fontFamily: 'OpenSans-Bold',
+            fontFamily: 'SuisseIntl-SemiBold',
         },
         mention_highlight: {
             color: theme.mentionHighlightLink,

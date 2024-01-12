@@ -14,7 +14,7 @@ import {StyleSheet, Text} from 'react-native';
 const setFontFamily = () => {
     const styles = StyleSheet.create({
         defaultText: {
-            fontFamily: 'OpenSans',
+            fontFamily: 'SuisseIntl-Regular',
             fontSize: 16,
         },
     });

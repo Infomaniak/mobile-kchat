@@ -195,7 +195,7 @@ Navigation.setDefaultOptions({
     },
     topBar: {
         title: {
-            fontFamily: 'Metropolis-SemiBold',
+            fontFamily: 'SuisseIntl-SemiBold',
             fontSize: 18,
             fontWeight: '600',
         },
@@ -203,7 +203,7 @@ Navigation.setDefaultOptions({
             enableMenu: false,
         },
         subtitle: {
-            fontFamily: 'OpenSans',
+            fontFamily: 'SuisseIntl-Regular',
             fontSize: 12,
             fontWeight: '400',
         },
@@ -801,7 +801,7 @@ export async function dismissAllModals() {
 
 export const buildNavigationButton = (id: string, testID: string, icon?: ImageResource, text?: string): OptionsTopBarButton => ({
     fontSize: 16,
-    fontFamily: 'OpenSans-SemiBold',
+    fontFamily: 'SuisseIntl-SemiBold',
     fontWeight: '600',
     id,
     icon,

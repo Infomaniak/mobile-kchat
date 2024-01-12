@@ -23,3 +23,17 @@ runs:
         npm run ios-gems
         npm run pod-install
         echo "::endgroup::"
+
+    - name: ci/checkout-private-repo
+      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+      with:
+        repository: infomaniak/mobile-private
+        token: ${{ env.MATTERMOST_BUILD_GH_TOKEN }}
+        path: ${{ github.workspace }}/mobile-private
+
+    - name: ci/append-fonts-to-build
+      shell: bash
+      run: |
+        echo "::group::append-fonts-to-build"
+        cp ${{ github.workspace }}/mobile-private/fonts/* assets/fonts/
+        echo "::endgroup::"

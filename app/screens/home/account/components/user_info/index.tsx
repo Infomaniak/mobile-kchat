@@ -34,14 +34,14 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             fontSize: 28,
             lineHeight: 36,
             color: theme.sidebarText,
-            fontFamily: 'Metropolis-SemiBold',
+            fontFamily: 'SuisseIntl-SemiBold',
             marginTop: 16,
         },
         textUserName: {
             fontSize: 16,
             lineHeight: 24,
             color: theme.sidebarText,
-            fontFamily: 'OpenSans',
+            fontFamily: 'SuisseIntl-Regular',
             marginTop: 4,
         },
     };

@@ -47,3 +47,10 @@ runs:
         echo ${STORE_ALIAS} | tee -a android/gradle.properties > /dev/null
         echo ${STORE_PASSWORD} | tee -a android/gradle.properties > /dev/null
         echo "::endgroup::"
+
+    - name: ci/append-fonts-to-build
+      shell: bash
+      run: |
+        echo "::group::append-fonts-to-build"
+        cp ${{ github.workspace }}/mobile-private/fonts/* assets/fonts/
+        echo "::endgroup::"

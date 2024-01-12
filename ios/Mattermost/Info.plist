@@ -99,6 +99,9 @@
 		<string>Metropolis-SemiBold.ttf</string>
 		<string>Metropolis-Light.ttf</string>
 		<string>compass-icons.ttf</string>
+		<string>SuisseIntl-Regular.ttf</string>
+		<string>SuisseIntl-RegularItalic.ttf</string>
+		<string>SuisseIntl-SemiBold.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

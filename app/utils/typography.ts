@@ -15,6 +15,9 @@ const fontFamily = StyleSheet.create({
     Metropolis: {
         fontFamily: 'Metropolis',
     },
+    SuisseIntl: {
+        fontFamily: 'SuisseIntl',
+    },
 });
 
 const fontStyle = StyleSheet.create({
@@ -105,7 +108,7 @@ export const typography = (
         style = type === 'Heading' ? 'SemiBold' : 'Regular';
     }
 
-    const font = type === 'Heading' && size > 100 ? fontFamily.Metropolis : fontFamily.OpenSans;
+    const font = fontFamily.SuisseIntl;
 
     const typeStyle = {
         ...font,

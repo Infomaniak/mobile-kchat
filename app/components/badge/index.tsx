@@ -134,6 +134,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 4,
         overflow: 'hidden',
         borderWidth: 2,
-        fontFamily: 'OpenSans-Bold',
+        fontFamily: 'SuisseIntl-SemiBold',
     },
 });

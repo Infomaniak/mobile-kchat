@@ -36,7 +36,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
     errorText: {
         color: theme.errorTextColor,
-        fontFamily: 'OpenSans',
+        fontFamily: 'SuisseIntl-Regular',
         fontSize: 12,
         lineHeight: 16,
         paddingVertical: 5,
@@ -53,7 +53,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         position: 'absolute',
         color: changeOpacity(theme.centerChannelColor, 0.64),
         left: 16,
-        fontFamily: 'OpenSans',
+        fontFamily: 'SuisseIntl-Regular',
         fontSize: 16,
         zIndex: 10,
         maxWidth: 315,
@@ -66,7 +66,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
     textInput: {
         flexDirection: 'row',
-        fontFamily: 'OpenSans',
+        fontFamily: 'SuisseIntl-Regular',
         fontSize: 16,
         paddingTop: 12,
         paddingBottom: 12,

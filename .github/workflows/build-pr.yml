@@ -34,6 +34,8 @@ jobs:
 
       - name: ci/prepare-ios-build
         uses: ./.github/actions/prepare-ios-build
+        env:
+          MATTERMOST_BUILD_GH_TOKEN: "${{ secrets.MATTERMOST_BUILD_GH_TOKEN }}"
 
       - name: ci/output-ssh-private-key
         shell: bash

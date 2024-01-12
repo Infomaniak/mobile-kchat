@@ -27,7 +27,7 @@ const getStyleFromTheme = makeStyleSheetFromTheme((theme: Theme) => ({
         marginLeft: 6,
         textAlign: 'center',
         color: changeOpacity(theme.centerChannelColor, 0.64),
-        fontFamily: 'OpenSans',
+        fontFamily: 'SuisseIntl-Regular',
         fontSize: 12,
         top: -2,
     },

@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     message: {
         color: '#FFFFFF',
         fontSize: 13,
-        fontFamily: 'OpenSans',
+        fontFamily: 'SuisseIntl-Regular',
     },
     titleContainer: {
         flex: 1,

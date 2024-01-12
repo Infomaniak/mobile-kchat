@@ -30,7 +30,7 @@ const getStyleFromTheme = makeStyleSheetFromTheme((theme: Theme) => {
         },
         text: {
             color: theme.centerChannelColor,
-            fontFamily: 'OpenSans-SemiBold',
+            fontFamily: 'SuisseIntl-SemiBold',
             fontSize: 10,
             textTransform: 'uppercase',
         },
