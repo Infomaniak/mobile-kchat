@@ -398,6 +398,7 @@ class TestHelper {
                 first_name: 'true',
                 channel: 'true',
                 mention_keys: '',
+                highlight_keys: '',
             },
             last_picture_update: 0,
             position: '',

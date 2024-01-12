@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {type BottomSheetProps, BottomSheetScrollView} from '@gorhom/bottom-sheet';
+import {BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import React, {useMemo} from 'react';
 import {ScrollView} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -57,7 +57,7 @@ const IKReminder = ({post, componentId}: Props) => {
     const isSystemPost = isSystemMessage(post);
 
     const snapPoints = useMemo(() => {
-        const items: BottomSheetProps['snapPoints'] = [1];
+        const items: Array<string | number> = [1];
         const optionsCount = postReminderTimes.length + (showCustom ? 1 : 0);
 
         items.push(bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT, bottom) + 50);

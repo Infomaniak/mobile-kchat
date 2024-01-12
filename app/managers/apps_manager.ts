@@ -6,8 +6,10 @@ import {switchMap, distinctUntilChanged} from 'rxjs/operators';
 
 import DatabaseManager from '@database/manager';
 import {getChannelById} from '@queries/servers/channel';
-import {getConfig, getCurrentTeamId, getCurrentUserId, observeConfigBooleanValue} from '@queries/servers/system';
+import {getConfig, getCurrentChannelId, getCurrentTeamId, getCurrentUserId, observeConfigBooleanValue} from '@queries/servers/system';
 import {validateBindings} from '@utils/apps';
+import {getFullErrorMessage} from '@utils/errors';
+import {logDebug} from '@utils/log';
 
 import NetworkManager from './network_manager';
 
@@ -102,29 +104,58 @@ class AppsManager {
     };
 
     fetchBindings = async (serverUrl: string, channelId: string, forThread = false) => {
-        const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const userId = await getCurrentUserId(database);
-        const channel = await getChannelById(database, channelId);
-        let teamId = channel?.teamId;
-        if (!teamId) {
-            teamId = await getCurrentTeamId(database);
-        }
+        try {
+            const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+            const userId = await getCurrentUserId(database);
+            const channel = await getChannelById(database, channelId);
+            let teamId = channel?.teamId;
+            if (!teamId) {
+                teamId = await getCurrentTeamId(database);
+            }
 
-        const client = NetworkManager.getClient(serverUrl);
-        const fetchedBindings = await client.getAppsBindings(userId, channelId, teamId);
-        const validatedBindings = validateBindings(fetchedBindings);
-        const bindingsToStore = validatedBindings.length ? validatedBindings : emptyBindings;
+            const client = NetworkManager.getClient(serverUrl);
+            const fetchedBindings = await client.getAppsBindings(userId, channelId, teamId);
+            const validatedBindings = validateBindings(fetchedBindings);
+            const bindingsToStore = validatedBindings.length ? validatedBindings : emptyBindings;
 
-        const enabled = this.getEnabledSubject(serverUrl);
-        if (!enabled.value) {
-            enabled.next(true);
+            const enabled = this.getEnabledSubject(serverUrl);
+            if (!enabled.value) {
+                enabled.next(true);
+            }
+            if (forThread) {
+                this.getThreadsBindingsSubject(serverUrl).next({channelId, bindings: bindingsToStore});
+                this.threadCommandForms[serverUrl] = {};
+            } else {
+                this.getBindingsSubject(serverUrl).next(bindingsToStore);
+                this.commandForms[serverUrl] = {};
+            }
+        } catch (error) {
+            logDebug('error on fetchBindings', getFullErrorMessage(error));
+            this.handleError(serverUrl);
         }
-        if (forThread) {
-            this.getThreadsBindingsSubject(serverUrl).next({channelId, bindings: bindingsToStore});
-            this.threadCommandForms[serverUrl] = {};
-        } else {
-            this.getBindingsSubject(serverUrl).next(bindingsToStore);
-            this.commandForms[serverUrl] = {};
+    };
+
+    refreshAppBindings = async (serverUrl: string) => {
+        try {
+            const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+            const appsEnabled = (await getConfig(database))?.FeatureFlagAppsEnabled === 'true';
+            if (!appsEnabled) {
+                this.getEnabledSubject(serverUrl).next(false);
+                this.clearServer(serverUrl);
+            }
+
+            const channelId = await getCurrentChannelId(database);
+
+            // We await here, since errors on this call may clear the thread bindings
+            await this.fetchBindings(serverUrl, channelId);
+
+            const threadChannelId = this.getThreadsBindingsSubject(serverUrl).value.channelId;
+            if (threadChannelId) {
+                await this.fetchBindings(serverUrl, threadChannelId, true);
+            }
+        } catch (error) {
+            logDebug('Error refreshing apps', error);
+            this.handleError(serverUrl);
         }
     };
 

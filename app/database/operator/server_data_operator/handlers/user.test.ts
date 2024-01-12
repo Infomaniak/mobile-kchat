@@ -76,6 +76,7 @@ describe('*** Operator: User Handlers tests ***', () => {
                     first_name: 'true',
                     mark_unread: 'mention',
                     mention_keys: '',
+                    highlight_keys: '',
                     push: 'mention',
                     channel: 'true',
                     auto_responder_active: 'false',

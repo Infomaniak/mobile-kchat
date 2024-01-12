@@ -19,7 +19,6 @@ import {sortServersByDisplayName} from '@utils/server';
 
 import ServerList from './servers_list';
 
-import type {BottomSheetProps} from '@gorhom/bottom-sheet';
 import type ServersModel from '@typings/database/models/app/servers';
 import type {UnreadMessages, UnreadSubscription} from '@typings/database/subscriptions';
 
@@ -121,10 +120,10 @@ const Servers = React.forwardRef<ServersRef>((_, ref) => {
             const maxSnapPoint = Math.min(
                 maxScreenHeight,
                 bottomSheetSnapPoint(registeredServers.current.length, SERVER_ITEM_HEIGHT, bottom) + TITLE_HEIGHT + BUTTON_HEIGHT +
-                    (registeredServers.current.filter((s: ServersModel) => s.lastActiveAt).length * PUSH_ALERT_TEXT_HEIGHT),
+                (registeredServers.current.filter((s: ServersModel) => s.lastActiveAt).length * PUSH_ALERT_TEXT_HEIGHT),
             );
 
-            const snapPoints: BottomSheetProps['snapPoints'] = [
+            const snapPoints: Array<string | number> = [
                 1,
                 maxSnapPoint,
             ];

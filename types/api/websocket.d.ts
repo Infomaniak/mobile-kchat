@@ -6,6 +6,7 @@ type WebsocketBroadcast = {
     user_id: string;
     channel_id: string;
     team_id: string;
+    session_id: string;
 }
 
 type WebSocketMessage<T = any> = {

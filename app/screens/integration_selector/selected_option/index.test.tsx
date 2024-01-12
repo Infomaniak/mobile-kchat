@@ -61,6 +61,7 @@ describe('components/integration_selector/selected_option', () => {
                 email: 'true',
                 first_name: 'true',
                 mention_keys: 'false',
+                highlight_keys: '',
                 push: 'mention',
                 push_status: 'ooo',
             },

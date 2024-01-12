@@ -40,6 +40,7 @@ const ChannelActions = ({
     channelId,
     channelType,
     inModal = false,
+    dismissChannelInfo,
     callsEnabled,
     canManageMembers,
     testID,
@@ -100,6 +101,7 @@ const ChannelActions = ({
                     <ChannelInfoStartButton
                         serverUrl={serverUrl}
                         channelId={channelId}
+                        dismissChannelInfo={dismissChannelInfo}
                     />
                 </>
             }

@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {Platform} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 
 import Config from '@assets/config.json';
@@ -21,19 +22,36 @@ export const BREADCRUMB_UNCAUGHT_NON_ERROR = 'uncaught-non-error';
 
 let Sentry: any;
 export function initializeSentry() {
+    if (!Config.SentryEnabled) {
+        return;
+    }
+
     if (!Sentry) {
         Sentry = require('@sentry/react-native');
     }
+
+    const dsn = getDsn();
+
+    if (!dsn) {
+        logWarning('Sentry is enabled, but not configured on this platform');
+        return;
+    }
+
+    const mmConfig = {
+        environment: isBetaApp ? 'beta' : 'production',
+        tracesSampleRate: isBetaApp ? 1.0 : 0.2,
+        sampleRate: isBetaApp ? 1.0 : 0.2,
+        attachStacktrace: isBetaApp, // For Beta, stack traces are automatically attached to all messages logged
+    };
 
     const eventFilter = Array.isArray(Config.SentryOptions?.severityLevelFilter) ? Config.SentryOptions.severityLevelFilter : [];
     const sentryOptions = {...Config.SentryOptions};
     Reflect.deleteProperty(sentryOptions, 'severityLevelFilter');
 
     Sentry.init({
-        dsn: 'https://4110301feed3d3f0ed9ec17aaab149c4@sentry-kchat.infomaniak.com/6',
-        environment: isBetaApp ? 'beta' : 'production',
-        sendDefaultPii: true,
-        attachStacktrace: isBetaApp,
+        dsn,
+        sendDefaultPii: false,
+        ...mmConfig,
         ...sentryOptions,
         enableCaptureFailedRequests: false,
         integrations: [
@@ -54,6 +72,16 @@ export function initializeSentry() {
             return null;
         },
     });
+}
+
+function getDsn() {
+    if (Platform.OS === 'android') {
+        return Config.SentryDsnAndroid;
+    } else if (Platform.OS === 'ios') {
+        return Config.SentryDsnIos;
+    }
+
+    return '';
 }
 
 export function captureException(error: unknown) {
