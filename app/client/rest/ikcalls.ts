@@ -13,8 +13,8 @@ export type ApiCall = {
 export interface IKClientCallsMix {
     getIKCalls: () => Promise<[ApiCall]>;
     leaveCall: (conferenceId: string) => Promise<ApiCall>;
-    declineCall: (channelId: string) => Promise<ApiCall>;
-    answerCall: (channelId: string) => Promise<ApiCall>;
+    declineCall: (conferenceId: string) => Promise<ApiCall>;
+    answerCall: (conferenceId: string) => Promise<ApiCall>;
     startCall: (channelId: string) => Promise<ApiCall>;
 }
 

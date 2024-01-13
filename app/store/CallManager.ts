@@ -35,6 +35,19 @@ class CallManager {
             }
         }
     };
+    answerCall = async (serverUrl: string, channelId: string) => {
+        const client = NetworkManager.getClient(serverUrl);
+        try {
+            const apiCall = await client.answerCall(channelId);
+            await this.setCurrentCall(apiCall.url, serverUrl);
+        } catch (error) {
+            if (error instanceof ClientError) {
+                if (error?.response?.url) {
+                    await this.setCurrentCall(error.response.url, serverUrl);
+                }
+            }
+        }
+    };
     private setCurrentCall = async (callUrl: string, serverUrl: string) => {
         let kMeetCallUrl = callUrl;
         try {

@@ -113,7 +113,7 @@ export const IkCallsCustomMessage = ({post, currentUser, isMilitaryTime}: CallMe
     let callButton = null;
     if (startedAt && !endedAt) {
         const handlePickup = () => {
-            CallManager.startCall(serverUrl, post.channelId);
+            CallManager.answerCall(serverUrl, post.props.conference_id);
         };
 
         callButton = (
