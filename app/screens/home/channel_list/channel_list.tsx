@@ -10,6 +10,7 @@ import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
 import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {refetchCurrentUser} from '@actions/remote/user';
+import FloatingCallContainer from '@calls/components/floating_call_container';
 import AnnouncementBanner from '@components/announcement_banner';
 import TeamSidebar from '@components/team_sidebar';
 import {Navigation as NavigationConstants, Screens} from '@constants';
@@ -39,6 +40,7 @@ type ChannelProps = {
     coldStart?: boolean;
     currentUserId?: string;
     hasCurrentUser: boolean;
+    showIncomingCalls: boolean;
 };
 
 const edges: Edge[] = ['bottom', 'left', 'right'];
@@ -194,6 +196,12 @@ const ChannelListScreen = (props: ChannelProps) => {
                         />
                         {isTablet &&
                             <AdditionalTabletView/>
+                        }
+                        {props.showIncomingCalls && !isTablet &&
+                            <FloatingCallContainer
+                                showIncomingCalls={props.showIncomingCalls}
+                                channelsScreen={true}
+                            />
                         }
                     </Animated.View>
                 </View>
