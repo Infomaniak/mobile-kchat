@@ -53,7 +53,6 @@
         android:windowSoftInputMode="adjustResize"
         android:launchMode="singleTask"
         android:exported="true"
-        android:taskAffinity=""
       >
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
