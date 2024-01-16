@@ -586,6 +586,10 @@ PODS:
     - React-CoreModules
     - React-RCTImage
     - React-RCTText
+  - rn-fetch-blob (0.12.0):
+    - React-Core
+  - RNAudioRecorderPlayer (3.6.5):
+    - React-Core
   - RNCClipboard (1.12.1):
     - React-Core
   - RNDateTimePicker (7.6.1):
@@ -763,6 +767,8 @@ DEPENDENCIES:
   - ReactNativeIncallManager (from `../node_modules/react-native-incall-manager`)
   - ReactNativeKeyboardTrackingView (from `../node_modules/react-native-keyboard-tracking-view`)
   - ReactNativeNavigation (from `../node_modules/react-native-navigation`)
+  - rn-fetch-blob (from `../node_modules/rn-fetch-blob`)
+  - RNAudioRecorderPlayer (from `../node_modules/react-native-audio-recorder-player`)
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
@@ -944,6 +950,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-keyboard-tracking-view"
   ReactNativeNavigation:
     :path: "../node_modules/react-native-navigation"
+  rn-fetch-blob:
+    :path: "../node_modules/rn-fetch-blob"
+  RNAudioRecorderPlayer:
+    :path: "../node_modules/react-native-audio-recorder-player"
   RNCClipboard:
     :path: "../node_modules/@react-native-clipboard/clipboard"
   RNDateTimePicker:
@@ -1076,6 +1086,8 @@ SPEC CHECKSUMS:
   ReactNativeIncallManager: 2385505fa5dfdbbc78925e3b8d23b30ce0cde40e
   ReactNativeKeyboardTrackingView: 02137fac3b2ebd330d74fa54ead48b14750a2306
   ReactNativeNavigation: e748d4b1bfb8dbe9c23081a37babc14a9ac2f990
+  rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
+  RNAudioRecorderPlayer: ba0aca62cd47c6f878313fdadb0edb23ef9dbf90
   RNCClipboard: d77213bfa269013bf4b857b7a9ca37ee062d8ef1
   RNDateTimePicker: 8fb39263b721223e095248acaf6f406d5b7f6713
   RNDeviceInfo: bf8a32acbcb875f568217285d1793b0e8588c974

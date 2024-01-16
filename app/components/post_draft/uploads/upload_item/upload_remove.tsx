@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-import {View, Platform} from 'react-native';
+import {View, Platform, type StyleProp, type ViewStyle} from 'react-native';
 
 import {removeDraftFile} from '@actions/local/draft';
 import CompassIcon from '@components/compass_icon';
@@ -16,6 +16,7 @@ type Props = {
     channelId: string;
     rootId: string;
     clientId: string;
+    containerStyle?: StyleProp<ViewStyle>;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
@@ -30,7 +31,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         },
         removeButton: {
             borderRadius: 12,
-            alignSelf: 'center',
             marginTop: Platform.select({
                 ios: 5.4,
                 android: 4.75,
@@ -44,6 +44,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
 
 export default function UploadRemove({
     channelId,
+    containerStyle,
     rootId,
     clientId,
 }: Props) {
@@ -58,7 +59,7 @@ export default function UploadRemove({
 
     return (
         <TouchableWithFeedback
-            style={style.tappableContainer}
+            style={[style.tappableContainer, containerStyle]}
             onPress={onPress}
             type={'opacity'}
         >

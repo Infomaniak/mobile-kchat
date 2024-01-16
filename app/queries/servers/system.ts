@@ -517,6 +517,12 @@ export const observeAllowedThemesKeys = (database: Database) => {
     );
 };
 
+export const observeVoiceMessagesEnabled = (database: Database) => {
+    return observeConfig(database).pipe(
+        switchMap((c) => of$(c?.ExperimentalEnableVoiceMessage === 'true' && c?.FeatureFlagEnableVoiceMessages === 'true')),
+    );
+};
+
 export const getExpiredSession = async (database: Database) => {
     try {
         const session = await database.get<SystemModel>(SYSTEM).find(SYSTEM_IDENTIFIERS.SESSION_EXPIRATION);

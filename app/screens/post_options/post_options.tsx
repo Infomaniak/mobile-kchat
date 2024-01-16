@@ -10,6 +10,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {CopyPermalinkOption, FollowThreadOption, ReplyOption, SaveOption} from '@components/common_post_options';
 import {ITEM_HEIGHT} from '@components/option_item';
 import {Screens} from '@constants';
+import {PostTypes} from '@constants/post';
 import {REACTION_PICKER_HEIGHT, REACTION_PICKER_MARGIN} from '@constants/reaction_picker';
 import {useIsTablet} from '@hooks/device';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
@@ -96,7 +97,7 @@ const PostOptions = ({
         return items;
     }, [
         canAddReaction, canCopyPermalink, canCopyText,
-        canDelete, canEdit, shouldRenderFollow, shouldShowBindings,
+        canDelete, canEdit && post.type !== PostTypes.VOICE_MESSAGE, shouldRenderFollow, shouldShowBindings,
         canMarkAsUnread, canPin, canReply, isSystemPost, bottom,
     ]);
 
@@ -167,7 +168,7 @@ const PostOptions = ({
                         post={post}
                     />
                 }
-                {canEdit &&
+                {canEdit && post.type !== PostTypes.VOICE_MESSAGE &&
                 <EditOption
                     bottomSheetId={Screens.POST_OPTIONS}
                     post={post}

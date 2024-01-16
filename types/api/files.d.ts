@@ -23,6 +23,7 @@ type FileInfo = {
     user_id: string;
     width: number;
     postProps?: Record<string, any>;
+    is_voice_recording?: boolean;
 };
 
 type FilesState = {

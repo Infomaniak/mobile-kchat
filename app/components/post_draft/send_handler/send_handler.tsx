@@ -13,7 +13,7 @@ import {handleReactionToLatestPost} from '@actions/remote/reactions';
 import {setStatus} from '@actions/remote/user';
 import {handleCallsSlashCommand} from '@calls/actions/calls';
 import {Events, Screens} from '@constants';
-import {PostPriorityType} from '@constants/post';
+import {PostPriorityType, PostTypes} from '@constants/post';
 import {NOTIFY_ALL_MEMBERS} from '@constants/post_draft';
 import {useServerUrl} from '@context/server';
 import DraftUploadManager from '@managers/draft_upload_manager';
@@ -30,7 +30,6 @@ import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji
 type Props = {
     testID?: string;
     channelId: string;
-    channelType?: ChannelType;
     rootId: string;
     canShowPostPriority?: boolean;
     setIsFocused: (isFocused: boolean) => void;
@@ -69,7 +68,6 @@ export const INITIAL_PRIORITY = {
 export default function SendHandler({
     testID,
     channelId,
-    channelType,
     currentUserId,
     enableConfirmNotificationsToChannel,
     files,
@@ -90,8 +88,6 @@ export default function SendHandler({
     updateCursorPosition,
     updatePostInputTop,
     setIsFocused,
-    persistentNotificationInterval,
-    persistentNotificationMaxRecipients,
     postPriority,
 }: Props) {
     const intl = useIntl();
@@ -136,6 +132,7 @@ export default function SendHandler({
             channel_id: channelId,
             root_id: rootId,
             message: value,
+            type: (files[0]?.is_voice_recording ? PostTypes.VOICE_MESSAGE : '') as PostType,
         } as Post;
 
         if (!rootId && (
@@ -271,7 +268,6 @@ export default function SendHandler({
         <DraftInput
             testID={testID}
             channelId={channelId}
-            channelType={channelType}
             currentUserId={currentUserId}
             rootId={rootId}
             canShowPostPriority={canShowPostPriority}
@@ -288,8 +284,6 @@ export default function SendHandler({
             updatePostInputTop={updatePostInputTop}
             postPriority={postPriority}
             updatePostPriority={handlePostPriority}
-            persistentNotificationInterval={persistentNotificationInterval}
-            persistentNotificationMaxRecipients={persistentNotificationMaxRecipients}
             setIsFocused={setIsFocused}
         />
     );

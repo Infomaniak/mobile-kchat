@@ -26,6 +26,10 @@ export const CURRENT_CALL_BAR_HEIGHT = 60;
 export const CALL_ERROR_BAR_HEIGHT = 52;
 export const CALL_NOTIFICATION_BAR_HEIGHT = 40;
 
+export const VOICE_MESSAGE_CARD_RATIO = 0.72;
+export const MIC_SIZE = 40;
+export const WAVEFORM_HEIGHT = 40;
+
 export const ANNOUNCEMENT_BAR_HEIGHT = 40;
 
 export const HOME_PADDING = {
@@ -50,5 +54,8 @@ export default {
     LARGE_HEADER_TITLE_HEIGHT,
     SUBTITLE_HEIGHT,
     KEYBOARD_TRACKING_OFFSET,
+    VOICE_MESSAGE_CARD_RATIO,
+    MIC_SIZE,
+    WAVEFORM_HEIGHT,
 };
 
