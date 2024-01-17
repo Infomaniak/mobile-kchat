@@ -596,7 +596,7 @@ const Markdown = ({
     };
 
     const parser = useRef(new Parser({urlFilter, minimumHashtagLength})).current;
-    const renderer = useMemo(createRenderer, [theme, textStyles]);
+    const renderer = useMemo(createRenderer, [theme, textStyles, imagesMetadata]);
     let ast = parser.parse(value.toString());
 
     ast = combineTextNodes(ast);
