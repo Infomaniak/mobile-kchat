@@ -56,7 +56,7 @@ const ChannelInfoStartButton = ({
             onPress={preventDoubleTap(() => {
                 CallManager.startCall(serverUrl, channelId);
             })}
-            text={startText + msgPostfix}
+            text={startText}
             iconName='phone'
             activeText={joinText + msgPostfix}
             activeIconName='phone-in-talk'
