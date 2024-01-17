@@ -20,6 +20,7 @@ import {toMilliseconds} from '@utils/datetime';
 import {isMainActivity} from '@utils/helpers';
 import {logError} from '@utils/log';
 
+const WAIT_TO_CLOSE = toMilliseconds({seconds: 2});
 const WAIT_UNTIL_NEXT = toMilliseconds({seconds: 5});
 
 class WebsocketManager {
@@ -69,6 +70,10 @@ class WebsocketManager {
     };
 
     public createClient = (serverUrl: string, storedLastDisconnect = 0) => {
+        if (this.clients[serverUrl]) {
+            this.invalidateClient(serverUrl);
+        }
+
         const client = new WebSocketClient(serverUrl, storedLastDisconnect);
 
         client.setFirstConnectCallback(() => this.onFirstConnect(serverUrl));
@@ -178,10 +183,17 @@ class WebsocketManager {
         if (connectFailCount <= 1) { // First fail
             await setCurrentUserStatus(serverUrl, General.OFFLINE);
             await handleClose(serverUrl, lastDisconnect);
+
+            this.stopPeriodicStatusUpdates(serverUrl);
         }
     };
 
     private startPeriodicStatusUpdates(serverUrl: string) {
+        let currentId = this.statusUpdatesIntervalIDs[serverUrl];
+        if (currentId != null) {
+            clearInterval(currentId);
+        }
+
         const getStatusForUsers = async () => {
             const database = DatabaseManager.serverDatabases[serverUrl];
             if (!database) {
@@ -194,7 +206,18 @@ class WebsocketManager {
             fetchStatusByIds(serverUrl, userIds);
         };
 
+        currentId = setInterval(getStatusForUsers, General.STATUS_INTERVAL);
+        this.statusUpdatesIntervalIDs[serverUrl] = currentId;
         getStatusForUsers();
+    }
+
+    private stopPeriodicStatusUpdates(serverUrl: string) {
+        const currentId = this.statusUpdatesIntervalIDs[serverUrl];
+        if (currentId != null) {
+            clearInterval(currentId);
+        }
+
+        delete this.statusUpdatesIntervalIDs[serverUrl];
     }
 
     private onAppStateChange = async (appState: AppStateStatus) => {
@@ -209,8 +232,11 @@ class WebsocketManager {
         if (!isActive && !this.isBackgroundTimerRunning) {
             this.isBackgroundTimerRunning = true;
             this.cancelAllConnections();
-            this.closeAll();
-            this.isBackgroundTimerRunning = false;
+            this.backgroundIntervalId = BackgroundTimer.setInterval(() => {
+                this.closeAll();
+                BackgroundTimer.clearInterval(this.backgroundIntervalId!);
+                this.isBackgroundTimerRunning = false;
+            }, WAIT_TO_CLOSE);
 
             this.previousActiveState = isActive;
             return;
