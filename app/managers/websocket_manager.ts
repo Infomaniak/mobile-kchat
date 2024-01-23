@@ -8,11 +8,9 @@ import BackgroundTimer from 'react-native-background-timer';
 import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged} from 'rxjs/operators';
 
-import {setCurrentUserStatus} from '@actions/local/user';
 import {fetchStatusByIds} from '@actions/remote/user';
 import {handleClose, handleEvent, handleFirstConnect, handleReconnect} from '@actions/websocket';
 import WebSocketClient from '@client/websocket';
-import {General} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getCurrentUserId} from '@queries/servers/system';
 import {queryAllUsers} from '@queries/servers/user';
@@ -31,7 +29,6 @@ class WebsocketManager {
     private isBackgroundTimerRunning = false;
     private netConnected = false;
     private previousActiveState: boolean;
-    private statusUpdatesIntervalIDs: Record<string, NodeJS.Timeout> = {};
     private backgroundIntervalId: number | undefined;
     private firstConnectionSynced: Record<string, boolean> = {};
 
@@ -70,10 +67,6 @@ class WebsocketManager {
     };
 
     public createClient = (serverUrl: string, storedLastDisconnect = 0) => {
-        if (this.clients[serverUrl]) {
-            this.invalidateClient(serverUrl);
-        }
-
         const client = new WebSocketClient(serverUrl, storedLastDisconnect);
 
         client.setFirstConnectCallback(() => this.onFirstConnect(serverUrl));
@@ -180,20 +173,12 @@ class WebsocketManager {
 
     private onWebsocketClose = async (serverUrl: string, connectFailCount: number, lastDisconnect: number) => {
         this.getConnectedSubject(serverUrl).next('not_connected');
-        if (connectFailCount <= 1) { // First fail
-            await setCurrentUserStatus(serverUrl, General.OFFLINE);
+        if (connectFailCount <= 1) {
             await handleClose(serverUrl, lastDisconnect);
-
-            this.stopPeriodicStatusUpdates(serverUrl);
         }
     };
 
     private startPeriodicStatusUpdates(serverUrl: string) {
-        let currentId = this.statusUpdatesIntervalIDs[serverUrl];
-        if (currentId != null) {
-            clearInterval(currentId);
-        }
-
         const getStatusForUsers = async () => {
             const database = DatabaseManager.serverDatabases[serverUrl];
             if (!database) {
@@ -206,18 +191,7 @@ class WebsocketManager {
             fetchStatusByIds(serverUrl, userIds);
         };
 
-        currentId = setInterval(getStatusForUsers, General.STATUS_INTERVAL);
-        this.statusUpdatesIntervalIDs[serverUrl] = currentId;
         getStatusForUsers();
-    }
-
-    private stopPeriodicStatusUpdates(serverUrl: string) {
-        const currentId = this.statusUpdatesIntervalIDs[serverUrl];
-        if (currentId != null) {
-            clearInterval(currentId);
-        }
-
-        delete this.statusUpdatesIntervalIDs[serverUrl];
     }
 
     private onAppStateChange = async (appState: AppStateStatus) => {
