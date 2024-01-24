@@ -169,7 +169,7 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
     let threadStarterName = displayUsername(author, intl.locale, teammateNameDisplay);
     const threadItemTestId = `${testID}.thread_item.${thread.id}`;
 
-    if (post?.props.override_username) {
+    if (post?.props?.override_username) {
         threadStarterName = post.props.override_username;
     }
 
