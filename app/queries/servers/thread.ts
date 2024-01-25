@@ -118,7 +118,7 @@ export const prepareThreadsFromReceivedPosts = async (operator: ServerDataOperat
     let processedThreads: Set<string> | undefined;
 
     posts.forEach((post: Post) => {
-        if (!post.root_id && ['', PostTypes.CUSTOM_CALLS].includes(post.type)) {
+        if (!post.root_id && ['', PostTypes.CUSTOM_CALLS, PostTypes.SLACK_ATTACHMENT].includes(post.type)) {
             threads.push({
                 id: post.id,
                 participants: post.participants,
