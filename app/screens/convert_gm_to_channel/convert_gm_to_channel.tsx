@@ -4,7 +4,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 
-import {fetchChannelMemberships, fetchGroupMessageMembersCommonTeams} from '@actions/remote/channel';
+import {fetchChannelMemberships} from '@actions/remote/channel';
 import {PER_PAGE_DEFAULT} from '@client/rest/constants';
 import Loading from '@components/loading';
 import {useServerUrl} from '@context/server';
@@ -74,9 +74,7 @@ const ConvertGMToChannel = ({
     const {formatMessage} = useIntl();
 
     const [loadingAnimationTimeout, setLoadingAnimationTimeout] = useState(false);
-    const [commonTeamsFetched, setCommonTeamsFetched] = useState(false);
     const [channelMembersFetched, setChannelMembersFetched] = useState(false);
-    const [commonTeams, setCommonTeams] = useState<Team[]>([]);
     const [profiles, setProfiles] = useState<UserProfile[]>([]);
 
     const serverUrl = useServerUrl();
@@ -86,16 +84,6 @@ const ConvertGMToChannel = ({
 
     useEffect(() => {
         loadingAnimationTimeoutRef.current = setTimeout(() => setLoadingAnimationTimeout(true), loadingIndicatorTimeout);
-        async function work() {
-            const {teams} = await fetchGroupMessageMembersCommonTeams(serverUrl, channelId);
-            if (!teams || !mounted.current) {
-                return;
-            }
-            setCommonTeams(teams);
-            setCommonTeamsFetched(true);
-        }
-
-        work();
 
         return () => {
             clearTimeout(loadingAnimationTimeoutRef.current);
@@ -129,7 +117,7 @@ const ConvertGMToChannel = ({
         });
     }, [serverUrl, channelId, currentUserId]);
 
-    const showLoader = !loadingAnimationTimeout || !commonTeamsFetched || !channelMembersFetched;
+    const showLoader = !loadingAnimationTimeout || !channelMembersFetched;
 
     if (showLoader) {
         return (
@@ -145,7 +133,6 @@ const ConvertGMToChannel = ({
 
     return (
         <ConvertGMToChannelForm
-            commonTeams={commonTeams}
             profiles={profiles}
             channelId={channelId}
         />
