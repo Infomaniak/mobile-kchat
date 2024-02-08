@@ -8,6 +8,7 @@
 #import <ReactNativeNavigation/ReactNativeNavigation.h>
 #import <UserNotifications/UserNotifications.h>
 #import <RNHWKeyboardEvent.h>
+#import "ExpoModulesCore-Swift.h"
 
 #import "kChat-Swift.h"
 #import <os/log.h>
@@ -31,7 +32,7 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
   {
     _allowRotation = YES;
   }
-  
+
   // Clear keychain on first run in case of reinstallation
   if (![[NSUserDefaults standardUserDefaults] objectForKey:@"FirstRun"]) {
 
@@ -78,7 +79,7 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
   NSString* action = [userInfo objectForKey:@"type"];
   BOOL isClearAction = (action && [action isEqualToString: NOTIFICATION_CLEAR_ACTION]);
   BOOL isTestAction = (action && [action isEqualToString: NOTIFICATION_TEST_ACTION]);
-  
+
   if (isTestAction) {
     completionHandler(UIBackgroundFetchResultNoData);
     return;
@@ -94,7 +95,7 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
     [RNNotifications didReceiveBackgroundNotification:userInfo withCompletionHandler:completionHandler];
     return;
   }
-  
+
   if (state != UIApplicationStateActive) {
     [[GekidouWrapper default] fetchDataForPushNotification:userInfo withContentHandler:^(NSData * _Nullable data) {
       NSMutableDictionary *notification = [userInfo mutableCopy];
@@ -157,7 +158,7 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
 {
   NSMutableArray<id<RCTBridgeModule>> *extraModules = [NSMutableArray new];
   [extraModules addObjectsFromArray:[ReactNativeNavigation extraModulesForBridge:bridge]];
-  
+
   // You can inject any extra modules that you would like here, more information at:
   // https://facebook.github.io/react-native/docs/native-modules-ios.html#dependency-injection
   return extraModules;
@@ -173,9 +174,9 @@ RNHWKeyboardEvent *hwKeyEvent = nil;
   if (hwKeyEvent == nil) {
     hwKeyEvent = [[RNHWKeyboardEvent alloc] init];
   }
-  
+
   NSMutableArray *commands = [NSMutableArray new];
-  
+
   if ([hwKeyEvent isListening]) {
     UIKeyCommand *enter = [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(sendEnter:)];
     UIKeyCommand *shiftEnter = [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:UIKeyModifierShift action:@selector(sendShiftEnter:)];
@@ -193,12 +194,12 @@ RNHWKeyboardEvent *hwKeyEvent = nil;
       [shiftEnter setWantsPriorityOverSystemBehavior:YES];
       [findChannels setWantsPriorityOverSystemBehavior:YES];
     }
-    
+
     [commands addObject: enter];
     [commands addObject: shiftEnter];
     [commands addObject: findChannels];
   }
-  
+
   return commands;
 }
 

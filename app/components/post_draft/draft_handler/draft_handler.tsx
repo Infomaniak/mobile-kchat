@@ -152,6 +152,15 @@ export default function DraftHandler(props: Props) {
         }
     }, [files]);
 
+    useEffect(() => {
+        if (uploadError && files?.[0].is_voice_recording) {
+            setUploadError(intl.formatMessage({
+                id: 'mobile.file_upload.voice_record_error',
+                defaultMessage: 'Recording failed, please try again.',
+            }));
+        }
+    }, [uploadError, files]);
+
     return (
         <SendHandler
             testID={testID}

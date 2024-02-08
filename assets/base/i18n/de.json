@@ -569,6 +569,7 @@
     "mobile.error_handler.button": "Neustarten",
     "mobile.error_handler.description": "\nTippe auf Neustarten um die App neu zu öffnen. Nach dem Neustart kannst Du das Problem über das Einstellungsmenü melden.\n",
     "mobile.error_handler.title": "Ein unerwarteter Fehler ist aufgetreten",
+    "mobile.file_upload.voice_record_error": "Aufnahme fehlgeschlagen, bitte versuchen Sie es erneut.",
     "mobile.file_upload.disabled2": "Hochladen von Dateien über die mobile App ist deaktiviert.",
     "mobile.file_upload.max_warning": "Uploads sind auf maximal {count} Dateien beschränkt.",
     "mobile.files_paste.error_description": "Fehler beim Einfügen der Datei(en). Bitte erneut versuchen.",

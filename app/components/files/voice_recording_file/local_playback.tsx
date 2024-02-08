@@ -1,20 +1,20 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {TouchableOpacity, View} from 'react-native';
 
+import Slider from '@app/components/slider';
 import {useAudioPlayerContext} from '@app/context/audio_player';
-import useAudioPlayer from '@app/hooks/audio_player';
+import {mmssss} from '@app/utils/datetime';
 import CompassIcon from '@components/compass_icon';
-import SoundWave from '@components/post_draft/draft_input/voice_input/sound_wave';
 import TimeElapsed from '@components/post_draft/draft_input/voice_input/time_elapsed';
 import {MIC_SIZE} from '@constants/view';
 import {useTheme} from '@context/theme';
 import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
-import type PostModel from '@typings/database/models/servers/post';
+import type {PlayBackType} from 'react-native-audio-recorder-player';
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
     return {
@@ -25,46 +25,46 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             width: MIC_SIZE,
             alignItems: 'center',
             justifyContent: 'center',
-            marginLeft: 12,
+            marginRight: 12,
         },
         playBackContainer: {
             flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+            width: '100%',
         },
     };
 });
 
-type Props = {
-    post?: PostModel;
-    isDraft?: boolean;
-}
-
-const PlayBack = ({post, isDraft = false}: Props) => {
+const LocalPlayBack = () => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
 
-    const [timing, setTiming] = useState('');
-    const [playingId, setPlayingId] = useState<string | undefined>();
+    const [timing, setTiming] = useState('00:00');
+    const [status, setStatus] = useState<'stopped' | 'playing' | 'buffering'>('stopped');
+    const [duration, setDuration] = useState<number>(0);
+    const [progress, setProgress] = useState<number>(0);
 
-    const {playAudio, pauseAudio, playing} = useAudioPlayerContext();
-    const {formatter} = useAudioPlayer();
+    const {loadAudio, pauseAudio, playing} = useAudioPlayerContext();
 
-    useEffect(() => {
-        return () => {
+    const isPlaying = playing === 'draft' && status === 'playing';
+
+    const listener = (e: PlayBackType) => {
+        // Set timing and ms progress for progress bar
+
+        setDuration(e.duration);
+        setProgress(e.currentPosition);
+        setTiming(mmssss(e.currentPosition));
+
+        if (e.currentPosition === e.duration) {
             pauseAudio();
-        };
-    }, []);
-
-    const isPlaying = (isDraft && playing === 'draft') || playing === playingId;
-
-    useEffect(() => {
-        if (!isPlaying && playing) {
-            setTiming('');
+            setStatus('stopped');
+            return;
         }
-    }, [playing]);
 
-    const listener = (e: any) => {
-        setTiming(formatter(Math.floor(e.currentPosition)).substring(0, 5));
+        // Otherwise must be playing
+        setStatus('playing');
     };
 
     return (
@@ -73,22 +73,13 @@ const PlayBack = ({post, isDraft = false}: Props) => {
         >
             <TouchableOpacity
                 style={styles.mic}
-                onPress={preventDoubleTap(async () => {
+                onPress={preventDoubleTap(() => {
                     if (isPlaying) {
                         pauseAudio();
                         return;
                     }
 
-                    if (isDraft) {
-                        playAudio(undefined, listener);
-                        return;
-                    }
-
-                    const ids = await post?.files.fetchIds();
-                    if (ids) {
-                        setPlayingId(ids[0]);
-                        playAudio(ids[0], listener);
-                    }
+                    loadAudio(undefined, listener);
                 })}
             >
                 <CompassIcon
@@ -97,10 +88,16 @@ const PlayBack = ({post, isDraft = false}: Props) => {
                     size={24}
                 />
             </TouchableOpacity>
-            <SoundWave animating={isPlaying}/>
+            <Slider
+                value={(progress && duration) ? (progress / duration) * 100 : 0}
+
+                // WIP: Thumb for seeking
+                // onValueCommit={(val) => seekTo(duration ? (duration * val) / 100 : 0)}
+                width='50%'
+            />
             <TimeElapsed time={timing}/>
         </View>
     );
 };
 
-export default PlayBack;
+export default LocalPlayBack;

@@ -9,7 +9,7 @@ type TimeElapsedProps = {
 
 const TimeElapsed = ({time = '00:00'}: TimeElapsedProps) => {
     return (
-        <Text>
+        <Text style={[{marginLeft: 12}]}>
             {time}
         </Text>
     );

@@ -4,9 +4,9 @@
 import React, {useCallback, useState} from 'react';
 import {type LayoutChangeEvent, type StyleProp, View, type ViewStyle} from 'react-native';
 
+import RemotePlayback from '@app/components/files/voice_recording_file/remote_playback';
 import {PostTypes} from '@app/constants/post';
 import Files from '@components/files';
-import PlayBack from '@components/files/voice_recording_file/playback';
 import FormattedText from '@components/formatted_text';
 import JumboEmoji from '@components/jumbo_emoji';
 import {Screens} from '@constants';
@@ -192,7 +192,7 @@ const Body = ({
         if (voiceMessageEnabled && post.type === PostTypes.VOICE_MESSAGE) {
             body = (
                 <View style={style.messageBody}>
-                    <PlayBack post={post}/>
+                    <RemotePlayback post={post}/>
                     <View style={style.ackAndReactionsContainer}>
                         {hasReactions && showAddReaction &&
                             <Reactions

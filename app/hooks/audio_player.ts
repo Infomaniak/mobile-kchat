@@ -1,71 +1,66 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useState, useEffect} from 'react';
-import AudioRecorderPlayer from 'react-native-audio-recorder-player';
-import RNFetchBlob from 'rn-fetch-blob';
+import {useState} from 'react';
+import AudioRecorderPlayer, {type PlayBackType} from 'react-native-audio-recorder-player';
 
 import {buildFileUrl} from '@actions/remote/file';
 import {useServerUrl} from '@app/context/server';
-import {logInfo} from '@app/utils/log';
-import {urlSafeBase64Encode} from '@app/utils/security';
+import {logError, logInfo} from '@app/utils/log';
 import NetworkManager from '@managers/network_manager';
-
-const audioPlayer = new AudioRecorderPlayer();
 
 const useAudioPlayer = () => {
     const [playing, setPlaying] = useState<string | null>(null);
+    const [player, setPlayer] = useState<AudioRecorderPlayer>(new AudioRecorderPlayer());
+    const [localAudioURI, storeLocalAudioURI] = useState<string | undefined>();
     const serverUrl = useServerUrl();
     const client = NetworkManager.getClient(serverUrl);
 
-    useEffect(() => {
-        return () => {
-            audioPlayer.stopPlayer();
-            audioPlayer.removePlayBackListener();
-        };
-    }, []);
-
-    const playAudio = async (audioId?: string, playBackListener?: (e: any) => void) => {
-        let internalUrl;
-        if (audioId) {
-            const dir = RNFetchBlob.fs.dirs.CacheDir;
-            const uri = buildFileUrl(serverUrl, audioId);
-            const path = `${dir}/${urlSafeBase64Encode(uri)}.m4a`;
-
-            const res = await RNFetchBlob.config({
-                fileCache: false,
-                appendExt: 'm4a',
-                path,
-            }).fetch('GET', uri, {Authorization: client.getCurrentBearerToken()});
-
-            internalUrl = `file://${res.path()}`;
-        }
-
+    const loadAudio = async (audioId?: string, playBackListener?: (e: PlayBackType) => void) => {
         try {
-            await audioPlayer.stopPlayer();
-            audioPlayer.removePlayBackListener();
-            setPlaying(audioId || 'draft');
-            await audioPlayer.startPlayer(
-                internalUrl ?? undefined,
-            );
-            audioPlayer.addPlayBackListener((e: any) => {
-                if (e.currentPosition === e.duration) {
-                    setPlaying(null);
-                }
-                playBackListener?.(e);
+            const uri = audioId ? buildFileUrl(serverUrl, audioId) : localAudioURI!;
+            const headers = {Authorization: client.getCurrentBearerToken()};
+
+            await player.startPlayer(uri, headers);
+
+            player.addPlayBackListener((status) => {
+                playBackListener?.(status);
             });
+
+            setPlayer(player);
+            setPlaying(audioId || 'draft');
         } catch (error) {
             // eslint-disable-next-line no-console
+            console.log('error', error);
             logInfo(error);
         }
     };
 
-    const pauseAudio = () => {
-        audioPlayer.pausePlayer();
-        setPlaying(null);
+    const pauseAudio = async () => {
+        try {
+            await player?.stopPlayer();
+            await player?.removePlayBackListener();
+        } catch (error) {
+            logError(error);
+        }
     };
 
-    return {playAudio, pauseAudio, playing, formatter: audioPlayer.mmssss};
+    const playAudio = async () => {
+        // try {
+        //     await player?.playAsync();
+        // } catch (error) {
+        //     // eslint-disable-next-line no-console
+        //     console.warn(error);
+        // }
+    };
+
+    const seekTo = () => {
+        // if (player) {
+        //     // player.setPositionAsync(ms);
+        // }
+    };
+
+    return {loadAudio, pauseAudio, playAudio, seekTo, storeLocalAudioURI, playing};
 };
 
 export default useAudioPlayer;

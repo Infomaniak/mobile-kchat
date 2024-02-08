@@ -573,6 +573,7 @@
   "mobile.error_handler.button": "Relaunch",
   "mobile.error_handler.description": "\nTap relaunch to open the app again. After restart, you can report the problem from the settings menu.\n",
   "mobile.error_handler.title": "Unexpected error occurred",
+  "mobile.file_upload.voice_record_error": "Recording failed, please try again.",
   "mobile.file_upload.disabled2": "File uploads from mobile are disabled.",
   "mobile.file_upload.max_warning": "Uploads limited to {count} files maximum.",
   "mobile.files_paste.error_description": "An error occurred while pasting the file(s). Please try again.",
