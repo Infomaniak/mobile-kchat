@@ -5,7 +5,7 @@ import React, {useCallback, useMemo} from 'react';
 import {StyleSheet, Text, useWindowDimensions, View} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
-import PlayBack from '@components/files/voice_recording_file/playback';
+import LocalPlayBack from '@components/files/voice_recording_file/local_playback';
 import {MIC_SIZE, VOICE_MESSAGE_CARD_RATIO} from '@constants/view';
 import {useTheme} from '@context/theme';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -57,7 +57,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             width: MIC_SIZE,
             alignItems: 'center',
             justifyContent: 'center',
-            marginLeft: 12,
+            marginLeft: 7,
         },
         playBackContainer: {
             flexDirection: 'row',
@@ -105,7 +105,7 @@ const VoiceRecordingFile = ({file, uploading}: Props) => {
                 isVoiceMessage && voiceStyle,
             ]}
         >
-            {uploading ? getUploadingView() : <PlayBack isDraft={true}/>}
+            {uploading ? getUploadingView() : <LocalPlayBack/>}
         </View>
     );
 };

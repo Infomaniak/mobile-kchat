@@ -11,6 +11,7 @@ import {executeCommand, handleGotoLocation} from '@actions/remote/command';
 import {createPost} from '@actions/remote/post';
 import {handleReactionToLatestPost} from '@actions/remote/reactions';
 import {setStatus} from '@actions/remote/user';
+import {deleteDeviceFile} from '@app/utils/file';
 import {handleCallsSlashCommand} from '@calls/actions/calls';
 import {Events, Screens} from '@constants';
 import {PostPriorityType, PostTypes} from '@constants/post';
@@ -123,7 +124,7 @@ export default function SendHandler({
         updateDraftPriority(serverUrl, channelId, rootId, priority);
     }, [serverUrl, rootId]);
 
-    const doSubmitMessage = useCallback(() => {
+    const doSubmitMessage = useCallback(async () => {
         const postFiles = files.filter((f) => !f.failed);
         const post = {
             user_id: currentUserId,
@@ -144,6 +145,10 @@ export default function SendHandler({
         }
 
         createPost(serverUrl, post, postFiles);
+
+        if (files[0]?.is_voice_recording && files[0]?.localPath) {
+            await deleteDeviceFile(files[0]?.localPath);
+        }
 
         clearDraft();
         setSendingMessage(false);

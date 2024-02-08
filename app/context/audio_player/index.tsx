@@ -5,15 +5,25 @@ import React, {createContext, useContext, type PropsWithChildren} from 'react';
 import useAudioPlayer from '@app/hooks/audio_player';
 
 export const AudioPlayerContext = createContext<{
-    playAudio: Function;
+    loadAudio: Function;
     pauseAudio: Function;
+    playAudio: Function;
+    seekTo: Function;
+    storeLocalAudioURI: Function | null;
     playing: string | null;
-}>({playAudio: () => null, pauseAudio: () => null, playing: null});
+}>({
+    loadAudio: () => null,
+    pauseAudio: () => null,
+    playAudio: () => null,
+    seekTo: () => null,
+    storeLocalAudioURI: null,
+    playing: null,
+});
 
 export const AudioPlayerProvider = ({children}: PropsWithChildren) => {
-    const {playAudio, pauseAudio, playing} = useAudioPlayer();
+    const {loadAudio, pauseAudio, playAudio, seekTo, storeLocalAudioURI, playing} = useAudioPlayer();
     return (
-        <AudioPlayerContext.Provider value={{playAudio, pauseAudio, playing}}>
+        <AudioPlayerContext.Provider value={{loadAudio, pauseAudio, playAudio, seekTo, storeLocalAudioURI, playing}}>
             {children}
         </AudioPlayerContext.Provider>
     );

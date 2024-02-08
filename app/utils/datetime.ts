@@ -32,3 +32,18 @@ export function toMilliseconds({days, hours, minutes, seconds}: {days?: number; 
     const totalSeconds = (totalMinutes * 60) + (seconds || 0);
     return totalSeconds * 1000;
 }
+
+function pad(num: number) {
+    return ('0' + num).slice(-2);
+}
+
+export function mmssss(milisecs: number) {
+    const secs = Math.floor(milisecs / 1000);
+    const minutes = Math.floor(secs / 60);
+    const seconds = secs % 60;
+
+    // const miliseconds = Math.floor((milisecs % 1000) / 10);
+    // return pad(minutes) + ':' + pad(seconds) + ':' + pad(miliseconds);
+
+    return pad(minutes) + ':' + pad(seconds);
+}

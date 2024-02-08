@@ -3,6 +3,7 @@
 
 import React, {useCallback, useRef, useState} from 'react';
 import {type LayoutChangeEvent, Platform, ScrollView, View} from 'react-native';
+import Permissions, {openSettings} from 'react-native-permissions';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import QuickActions from '@components/post_draft/quick_actions';
@@ -132,8 +133,30 @@ export default function DraftInput({
         updatePostInputTop(e.nativeEvent.layout.height);
     }, []);
 
-    const onPresRecording = useCallback(() => {
-        setRecording(true);
+    const onPresRecording = useCallback(async () => {
+        const check = await Permissions.check(Platform.OS === 'ios' ? Permissions.PERMISSIONS.IOS.MICROPHONE : Permissions.PERMISSIONS.ANDROID.RECORD_AUDIO);
+
+        if (check === 'blocked') {
+            openSettings();
+        }
+
+        if (check === 'granted') {
+            setRecording(true);
+        }
+
+        if (check === 'unavailable') {
+            const permission = await Permissions.request(Platform.OS === 'ios' ? Permissions.PERMISSIONS.IOS.MICROPHONE : Permissions.PERMISSIONS.ANDROID.RECORD_AUDIO);
+
+            if (permission === 'granted') {
+                setTimeout(() => {
+                    setRecording(true);
+                }, 500);
+            }
+
+            if (permission === 'unavailable') {
+                openSettings();
+            }
+        }
     }, []);
 
     const onCloseRecording = useCallback(() => {

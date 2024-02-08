@@ -162,7 +162,6 @@ function Uploads({
                 >
                     {Boolean(uploadFileError) &&
                     <View style={style.errorTextContainer}>
-
                         <Text style={style.warning}>
                             {uploadFileError}
                         </Text>

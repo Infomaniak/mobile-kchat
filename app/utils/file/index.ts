@@ -198,6 +198,19 @@ async function deleteFilesInDir(directory: string) {
     }
 }
 
+export async function deleteDeviceFile(filePath: string): Promise<boolean> {
+    if (await fileExists(filePath)) {
+        try {
+            await FileSystem.unlink(filePath);
+            return true;
+        } catch (error) {
+            logError('Could not delete file', error, filePath);
+        }
+    }
+
+    return false;
+}
+
 export function lookupMimeType(filename: string) {
     if (!Object.keys(extensions).length) {
         populateMaps();

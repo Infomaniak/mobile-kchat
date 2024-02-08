@@ -1,14 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {random} from 'lodash';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View} from 'react-native';
-import Animated, {cancelAnimation, Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withRepeat, withSpring} from 'react-native-reanimated';
+import Animated, {useAnimatedStyle, useSharedValue, withSpring} from 'react-native-reanimated';
 
-import {WAVEFORM_HEIGHT} from '@constants/view';
+import {VOICE_MIN_AMPLITUDE, WAVEFORM_HEIGHT} from '@constants/view';
 import {useTheme} from '@context/theme';
-import useDidUpdate from '@hooks/did_update';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
@@ -18,80 +16,73 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             width: 165,
             flexDirection: 'row',
             overflow: 'hidden',
-            justifyContent: 'center',
+            justifyContent: 'flex-end',
             alignItems: 'center',
+            marginLeft: 15,
         },
         singleBar: {
             height: WAVEFORM_HEIGHT,
             width: 2,
             backgroundColor: theme.buttonBg,
-            marginRight: 1,
+            marginRight: 3,
+            borderTopLeftRadius: 2,
+            borderTopRightRadius: 2,
+            borderBottomLeftRadius: 2,
+            borderBottomRightRadius: 2,
         },
     };
 });
 
 type SoundWaveProps = {
-    animating?: boolean;
+    amplitudes: Array<{ metering: number; isNew: boolean }>;
 };
 
-const SoundWave = ({animating = true}: SoundWaveProps) => {
+type ItemProps = {
+    amplitude: number;
+    isNew: boolean;
+};
+
+const SoundItem = ({amplitude, isNew}: ItemProps) => {
+    const theme = useTheme();
+    const styles = getStyleSheet(theme);
+    const scaleHeightAnimation = useSharedValue(6);
+    const opacityAnimation = useSharedValue(1);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        height: scaleHeightAnimation.value,
+        opacity: opacityAnimation.value,
+    }));
+
+    const value = Math.max(-VOICE_MIN_AMPLITUDE, amplitude);
+    const amplitudePercentage = Math.max(0.3, (value + VOICE_MIN_AMPLITUDE) / VOICE_MIN_AMPLITUDE);
+    const height = amplitudePercentage * 20;
+
+    useEffect(() => {
+        scaleHeightAnimation.value = isNew ? withSpring(height, {duration: 1000}) : height;
+        opacityAnimation.value = isNew ? withSpring(1, {duration: 500}) : 1;
+    }, [height, isNew]);
+
+    return (
+        <Animated.View
+            style={[
+                styles.singleBar,
+                animatedStyle,
+            ]}
+        />);
+};
+
+const SoundWave = ({amplitudes}: SoundWaveProps) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
 
-    const animatedValue = useSharedValue(5);
-
-    const animatedStyles = useAnimatedStyle(() => {
-        const newHeight = interpolate(
-            animatedValue.value,
-            [5, 40],
-            [0, 40],
-            Extrapolation.EXTEND,
-        );
-        return {
-            height: newHeight,
-        };
-    }, []);
-
-    useDidUpdate(() => {
-        if (animating) {
-            animatedValue.value = withRepeat(
-                withSpring(40, {
-                    damping: 10,
-                    mass: 0.6,
-                    overshootClamping: true,
-                }),
-                800,
-                true,
-            );
-        } else {
-            cancelAnimation(animatedValue);
-        }
-    }, [animating]);
-
-    const getAudioBars = () => {
-        const bars = [];
-        for (let i = 0; i < 50; i++) {
-            let height;
-            if (random(i, 50) % 2 === 0) {
-                height = random(5, 30);
-            }
-            bars.push(
-                <Animated.View
-                    key={i}
-                    style={[
-                        styles.singleBar,
-                        {height},
-                        !height && animatedStyles,
-                    ]}
-                />,
-            );
-        }
-        return bars;
-    };
-
     return (
         <View style={styles.container}>
-            {getAudioBars()}
+            {amplitudes.map((item, idx) => (
+                <SoundItem
+                    key={idx}
+                    amplitude={item.metering}
+                    isNew={item.isNew}
+                />))}
         </View>
     );
 };

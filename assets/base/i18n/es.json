@@ -504,6 +504,7 @@
     "mobile.error_handler.button": "Reiniciar",
     "mobile.error_handler.description": "\nPresiona reiniciar para abrir la aplicación de nuevo. Después de reiniciar, puedes reportar el problema desde el menú de configuración.\n",
     "mobile.error_handler.title": "Ocurrió un error inesperado",
+    "mobile.file_upload.voice_record_error": "Error de grabación, inténtelo de nuevo.",
     "mobile.file_upload.disabled2": "la subida de archivos desde móvil están deshabilitadas.",
     "mobile.file_upload.max_warning": "Se pueden subir un máximo de {count} archivos.",
     "mobile.files_paste.error_description": "Ocurrió un error mientras se pegaba(n) archivo(s). Por favor inténtelo de nuevo.",
