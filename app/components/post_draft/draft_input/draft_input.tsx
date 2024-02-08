@@ -1,11 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {Audio} from 'expo-av';
 import React, {useCallback, useRef, useState} from 'react';
 import {type LayoutChangeEvent, Platform, ScrollView, View} from 'react-native';
-import Permissions, {openSettings} from 'react-native-permissions';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
+import {logError} from '@app/utils/log';
 import QuickActions from '@components/post_draft/quick_actions';
 import PostPriorityLabel from '@components/post_priority/post_priority_label';
 import {useTheme} from '@context/theme';
@@ -128,36 +129,25 @@ export default function DraftInput({
     const [recording, setRecording] = useState(false);
     const theme = useTheme();
     const style = getStyleSheet(theme);
+    const [permissionResponse, requestPermission] = Audio.usePermissions();
 
     const handleLayout = useCallback((e: LayoutChangeEvent) => {
         updatePostInputTop(e.nativeEvent.layout.height);
     }, []);
 
-    const onPresRecording = useCallback(async () => {
-        const check = await Permissions.check(Platform.OS === 'ios' ? Permissions.PERMISSIONS.IOS.MICROPHONE : Permissions.PERMISSIONS.ANDROID.RECORD_AUDIO);
+    const onPresRecording = async () => {
+        try {
+            if (permissionResponse?.status !== 'granted') {
+                await requestPermission();
+            }
 
-        if (check === 'blocked') {
-            openSettings();
-        }
+            await new Promise((resolve) => setTimeout(resolve, 500));
 
-        if (check === 'granted') {
             setRecording(true);
+        } catch (err) {
+            logError('Failed to start recording', err);
         }
-
-        if (check === 'unavailable') {
-            const permission = await Permissions.request(Platform.OS === 'ios' ? Permissions.PERMISSIONS.IOS.MICROPHONE : Permissions.PERMISSIONS.ANDROID.RECORD_AUDIO);
-
-            if (permission === 'granted') {
-                setTimeout(() => {
-                    setRecording(true);
-                }, 500);
-            }
-
-            if (permission === 'unavailable') {
-                openSettings();
-            }
-        }
-    }, []);
+    };
 
     const onCloseRecording = useCallback(() => {
         setRecording(false);
