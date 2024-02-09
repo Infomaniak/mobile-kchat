@@ -1,12 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Audio} from 'expo-av';
 import React, {useCallback, useRef, useState} from 'react';
 import {type LayoutChangeEvent, Platform, ScrollView, View} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
-import {logError} from '@app/utils/log';
+import {logInfo} from '@app/utils/log';
 import QuickActions from '@components/post_draft/quick_actions';
 import PostPriorityLabel from '@components/post_priority/post_priority_label';
 import {useTheme} from '@context/theme';
@@ -129,25 +128,41 @@ export default function DraftInput({
     const [recording, setRecording] = useState(false);
     const theme = useTheme();
     const style = getStyleSheet(theme);
-    const [permissionResponse, requestPermission] = Audio.usePermissions();
 
     const handleLayout = useCallback((e: LayoutChangeEvent) => {
         updatePostInputTop(e.nativeEvent.layout.height);
     }, []);
 
-    const onPresRecording = async () => {
-        try {
-            if (permissionResponse?.status !== 'granted') {
-                await requestPermission();
-            }
+    const onPresRecording = useCallback(async () => {
+        const permission = Platform.select({
+            ios: Permissions.PERMISSIONS.IOS.MICROPHONE,
+            android: Permissions.PERMISSIONS.ANDROID.RECORD_AUDIO,
+        });
 
-            await new Promise((resolve) => setTimeout(resolve, 500));
-
-            setRecording(true);
-        } catch (err) {
-            logError('Failed to start recording', err);
+        if (!permission) {
+            logInfo('Could not select a platform');
+            return;
         }
-    };
+
+        const check = await Permissions.check(permission);
+
+        if (check === 'blocked') {
+            openSettings();
+        }
+
+        if (check === 'granted') {
+            setRecording(true);
+        }
+
+        if (check === 'denied') {
+            const result = await Permissions.request(permission);
+
+            if (result === 'granted') {
+                await new Promise((resolve) => setTimeout(resolve, 500));
+                setRecording(true);
+            }
+        }
+    }, []);
 
     const onCloseRecording = useCallback(() => {
         setRecording(false);
