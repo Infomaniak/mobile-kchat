@@ -2,10 +2,10 @@
 // See LICENSE.txt for license information.
 
 import React, {useEffect} from 'react';
-import {View} from 'react-native';
+import {Platform, View} from 'react-native';
 import Animated, {useAnimatedStyle, useSharedValue, withSpring} from 'react-native-reanimated';
 
-import {VOICE_MIN_AMPLITUDE, WAVEFORM_HEIGHT} from '@constants/view';
+import {VOICE_MIN_AMPLITUDE_ANDROID, VOICE_MIN_AMPLITUDE_IOS, WAVEFORM_HEIGHT} from '@constants/view';
 import {useTheme} from '@context/theme';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
@@ -53,8 +53,9 @@ const SoundItem = ({amplitude, isNew}: ItemProps) => {
         opacity: opacityAnimation.value,
     }));
 
-    const value = Math.max(-VOICE_MIN_AMPLITUDE, amplitude);
-    const amplitudePercentage = Math.max(0.3, (value + VOICE_MIN_AMPLITUDE) / VOICE_MIN_AMPLITUDE);
+    const minAmplitude = Platform.OS === 'ios' ? VOICE_MIN_AMPLITUDE_IOS : VOICE_MIN_AMPLITUDE_ANDROID;
+    const value = Math.max(-minAmplitude, amplitude);
+    const amplitudePercentage = Math.max(0.3, (value + minAmplitude) / minAmplitude);
     const height = amplitudePercentage * 20;
 
     useEffect(() => {

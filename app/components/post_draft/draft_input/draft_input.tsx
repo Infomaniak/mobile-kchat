@@ -3,6 +3,7 @@
 
 import React, {useCallback, useRef, useState} from 'react';
 import {type LayoutChangeEvent, Platform, ScrollView, View} from 'react-native';
+import Permissions, {openSettings} from 'react-native-permissions';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {logInfo} from '@app/utils/log';
@@ -157,6 +158,10 @@ export default function DraftInput({
             if (result === 'granted') {
                 await new Promise((resolve) => setTimeout(resolve, 500));
                 setRecording(true);
+            }
+
+            if (Platform.OS === 'android' && result === 'blocked') {
+                openSettings();
             }
         }
     }, []);
