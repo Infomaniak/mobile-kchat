@@ -21,6 +21,7 @@ import CompassIcon from '@components/compass_icon';
 import {Events} from '@constants';
 import {GALLERY_FOOTER_HEIGHT, VIDEO_INSET} from '@constants/gallery';
 import {useServerUrl} from '@context/server';
+import NetworkManager from '@managers/network_manager';
 import {changeOpacity} from '@utils/theme';
 
 import DownloadWithAction from '../footer/download_with_action';
@@ -66,6 +67,7 @@ const VideoRenderer = ({height, index, initialIndex, item, isPageActive, onShoul
     const fullscreen = useSharedValue(false);
     const {bottom} = useSafeAreaInsets();
     const serverUrl = useServerUrl();
+    const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
     const videoRef = useAnimatedRef<Video>();
     const showControls = useRef(!(initialIndex === index));
     const captionsEnabled = useContext(CaptionsEnabledContext);
@@ -74,7 +76,7 @@ const VideoRenderer = ({height, index, initialIndex, item, isPageActive, onShoul
     const [videoUri, setVideoUri] = useState(item.uri);
     const [downloading, setDownloading] = useState(false);
     const [hasError, setHasError] = useState(false);
-    const source = useMemo(() => ({uri: videoUri}), [videoUri]);
+    const source = useMemo(() => ({uri: videoUri, headers: {Authorization: token}}), [videoUri, token]);
     const {tracks, selected} = useMemo(() => getTranscriptionUri(serverUrl, item.postProps), [serverUrl, item.postProps]);
 
     const setFullscreen = (value: boolean) => {

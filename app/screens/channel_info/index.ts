@@ -117,7 +117,7 @@ const enhanced = withObservables([], ({serverUrl, database}: Props) => {
     );
 
     const isConvertGMFeatureAvailable = observeConfigValue(database, 'Version').pipe(
-        switchMap((version) => of$(isMinimumServerVersion(version || '', 9, 1))),
+        switchMap(() => of$(true)),
     );
 
     return {

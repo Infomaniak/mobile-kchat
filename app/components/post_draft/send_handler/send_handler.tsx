@@ -11,9 +11,10 @@ import {executeCommand, handleGotoLocation} from '@actions/remote/command';
 import {createPost} from '@actions/remote/post';
 import {handleReactionToLatestPost} from '@actions/remote/reactions';
 import {setStatus} from '@actions/remote/user';
+import {deleteDeviceFile} from '@app/utils/file';
 import {handleCallsSlashCommand} from '@calls/actions/calls';
 import {Events, Screens} from '@constants';
-import {PostPriorityType} from '@constants/post';
+import {PostPriorityType, PostTypes} from '@constants/post';
 import {NOTIFY_ALL_MEMBERS} from '@constants/post_draft';
 import {useServerUrl} from '@context/server';
 import DraftUploadManager from '@managers/draft_upload_manager';
@@ -30,7 +31,6 @@ import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji
 type Props = {
     testID?: string;
     channelId: string;
-    channelType?: ChannelType;
     rootId: string;
     canShowPostPriority?: boolean;
     setIsFocused: (isFocused: boolean) => void;
@@ -39,7 +39,6 @@ type Props = {
     currentUserId: string;
     cursorPosition: number;
     enableConfirmNotificationsToChannel?: boolean;
-    isTimezoneEnabled: boolean;
     maxMessageLength: number;
     membersCount?: number;
     useChannelMentions: boolean;
@@ -69,11 +68,9 @@ export const INITIAL_PRIORITY = {
 export default function SendHandler({
     testID,
     channelId,
-    channelType,
     currentUserId,
     enableConfirmNotificationsToChannel,
     files,
-    isTimezoneEnabled,
     maxMessageLength,
     membersCount = 0,
     cursorPosition,
@@ -90,8 +87,6 @@ export default function SendHandler({
     updateCursorPosition,
     updatePostInputTop,
     setIsFocused,
-    persistentNotificationInterval,
-    persistentNotificationMaxRecipients,
     postPriority,
 }: Props) {
     const intl = useIntl();
@@ -129,13 +124,14 @@ export default function SendHandler({
         updateDraftPriority(serverUrl, channelId, rootId, priority);
     }, [serverUrl, rootId]);
 
-    const doSubmitMessage = useCallback(() => {
+    const doSubmitMessage = useCallback(async () => {
         const postFiles = files.filter((f) => !f.failed);
         const post = {
             user_id: currentUserId,
             channel_id: channelId,
             root_id: rootId,
             message: value,
+            type: (files[0]?.is_voice_recording ? PostTypes.VOICE_MESSAGE : '') as PostType,
         } as Post;
 
         if (!rootId && (
@@ -150,19 +146,23 @@ export default function SendHandler({
 
         createPost(serverUrl, post, postFiles);
 
+        if (files[0]?.is_voice_recording && files[0]?.localPath) {
+            await deleteDeviceFile(files[0]?.localPath);
+        }
+
         clearDraft();
         setSendingMessage(false);
         DeviceEventEmitter.emit(Events.POST_LIST_SCROLL_TO_BOTTOM, rootId ? Screens.THREAD : Screens.CHANNEL);
     }, [files, currentUserId, channelId, rootId, value, clearDraft, postPriority]);
 
     const showSendToAllOrChannelOrHereAlert = useCallback((calculatedMembersCount: number, atHere: boolean) => {
-        const notifyAllMessage = DraftUtils.buildChannelWideMentionMessage(intl, calculatedMembersCount, Boolean(isTimezoneEnabled), channelTimezoneCount, atHere);
+        const notifyAllMessage = DraftUtils.buildChannelWideMentionMessage(intl, calculatedMembersCount, channelTimezoneCount, atHere);
         const cancel = () => {
             setSendingMessage(false);
         };
 
         DraftUtils.alertChannelWideMention(intl, notifyAllMessage, doSubmitMessage, cancel);
-    }, [intl, isTimezoneEnabled, channelTimezoneCount, doSubmitMessage]);
+    }, [intl, channelTimezoneCount, doSubmitMessage]);
 
     const sendCommand = useCallback(async () => {
         if (value.trim().startsWith('/call')) {
@@ -271,7 +271,6 @@ export default function SendHandler({
         <DraftInput
             testID={testID}
             channelId={channelId}
-            channelType={channelType}
             currentUserId={currentUserId}
             rootId={rootId}
             canShowPostPriority={canShowPostPriority}
@@ -288,8 +287,6 @@ export default function SendHandler({
             updatePostInputTop={updatePostInputTop}
             postPriority={postPriority}
             updatePostPriority={handlePostPriority}
-            persistentNotificationInterval={persistentNotificationInterval}
-            persistentNotificationMaxRecipients={persistentNotificationMaxRecipients}
             setIsFocused={setIsFocused}
         />
     );

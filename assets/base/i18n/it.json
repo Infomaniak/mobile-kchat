@@ -523,6 +523,7 @@
     "mobile.error_handler.button": "Riavvia",
     "mobile.error_handler.description": "\nClicca riavvia per aprire di nuovo l'app. Dopo il riavvio, puoi segnalare il problema dal menu impostazioni.\n",
     "mobile.error_handler.title": "Rilevato errore non previsto",
+    "mobile.file_upload.voice_record_error": "Registrazione non riuscita, riprovare.",
     "mobile.file_upload.disabled2": "Il caricamento di file dal cellulare è disabilitato.",
     "mobile.file_upload.max_warning": "Numero massimo di file caricabili limitato a 5.",
     "mobile.files_paste.error_description": "Si è verificato un errore incollando il file. Riprovare.",

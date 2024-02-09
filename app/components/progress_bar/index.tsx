@@ -9,6 +9,7 @@ type ProgressBarProps = {
     color: string;
     progress: number;
     style?: StyleProp<ViewStyle>;
+    bgColor?: string;
 }
 
 const styles = StyleSheet.create({
@@ -24,7 +25,7 @@ const styles = StyleSheet.create({
     },
 });
 
-const ProgressBar = ({color, progress, style}: ProgressBarProps) => {
+const ProgressBar = ({color, bgColor, progress, style}: ProgressBarProps) => {
     const [width, setWidth] = useState(0);
 
     const progressValue = useSharedValue(progress);
@@ -49,7 +50,9 @@ const ProgressBar = ({color, progress, style}: ProgressBarProps) => {
     return (
         <View
             onLayout={onLayout}
-            style={[styles.container, style]}
+            style={[styles.container, style, {
+                backgroundColor: bgColor,
+            }]}
         >
             <Animated.View
                 style={[

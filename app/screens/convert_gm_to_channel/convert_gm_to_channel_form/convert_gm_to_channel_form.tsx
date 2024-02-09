@@ -11,6 +11,8 @@ import Loading from '@components/loading';
 import {ServerErrors} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import DatabaseManager from '@database/manager';
+import {getCurrentTeamId} from '@queries/servers/system';
 import {isErrorWithMessage, isServerError} from '@utils/errors';
 import {logError} from '@utils/log';
 import {preventDoubleTap} from '@utils/tap';
@@ -19,9 +21,6 @@ import {displayUsername} from '@utils/user';
 
 import {ChannelNameInput} from '../channel_name_input';
 import MessageBox from '../message_box/message_box';
-import {TeamSelector} from '../team_selector';
-
-import {NoCommonTeamForm} from './no_common_teams_form';
 
 const getStyleFromTheme = makeStyleSheetFromTheme((theme: Theme) => {
     return {
@@ -45,7 +44,6 @@ const getStyleFromTheme = makeStyleSheetFromTheme((theme: Theme) => {
 
 type Props = {
     channelId: string;
-    commonTeams: Team[];
     profiles: UserProfile[];
     locale?: string;
     teammateNameDisplay?: string;
@@ -53,7 +51,6 @@ type Props = {
 
 export const ConvertGMToChannelForm = ({
     channelId,
-    commonTeams,
     profiles,
     locale,
     teammateNameDisplay,
@@ -61,16 +58,16 @@ export const ConvertGMToChannelForm = ({
     const theme = useTheme();
     const styles = getStyleFromTheme(theme);
     const serverUrl = useServerUrl();
-    const {formatList, formatMessage} = useIntl();
+    const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+    const {formatMessage} = useIntl();
 
-    const [selectedTeam, setSelectedTeam] = useState<Team>(commonTeams[0]);
     const [newChannelName, setNewChannelName] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [channelNameErrorMessage, setChannelNameErrorMessage] = useState<string>('');
     const [conversionInProgress, setConversionInProgress] = useState(false);
 
     const userDisplayNames = useMemo(() => profiles.map((profile) => displayUsername(profile, locale, teammateNameDisplay)), [profiles, teammateNameDisplay, locale]);
-    const submitButtonEnabled = !conversionInProgress && selectedTeam && newChannelName.trim();
+    const submitButtonEnabled = !conversionInProgress && newChannelName.trim();
 
     const handleOnPress = useCallback(preventDoubleTap(async () => {
         if (!submitButtonEnabled) {
@@ -79,7 +76,8 @@ export const ConvertGMToChannelForm = ({
 
         setConversionInProgress(true);
 
-        const {updatedChannel, error} = await convertGroupMessageToPrivateChannel(serverUrl, channelId, selectedTeam.id, newChannelName);
+        const teamId = await getCurrentTeamId(database);
+        const {updatedChannel, error} = await convertGroupMessageToPrivateChannel(serverUrl, channelId, teamId, newChannelName);
         if (error) {
             if (isServerError(error) && error.server_error_id === ServerErrors.DUPLICATE_CHANNEL_NAME && isErrorWithMessage(error)) {
                 setChannelNameErrorMessage(error.message);
@@ -101,15 +99,9 @@ export const ConvertGMToChannelForm = ({
         }
 
         setErrorMessage('');
-        switchToChannelById(serverUrl, updatedChannel.id, selectedTeam.id);
+        switchToChannelById(serverUrl, updatedChannel.id);
         setConversionInProgress(false);
-    }), [selectedTeam, newChannelName, submitButtonEnabled]);
-
-    if (commonTeams.length === 0) {
-        return (
-            <NoCommonTeamForm containerStyles={styles.container}/>
-        );
-    }
+    }), [newChannelName, submitButtonEnabled]);
 
     const messageBoxHeader = formatMessage({
         id: 'channel_info.convert_gm_to_channel.warning.header',
@@ -128,7 +120,8 @@ export const ConvertGMToChannelForm = ({
 
     const confirmButtonText = conversionInProgress ? textConverting : textConvert;
     const defaultUserDisplayNames = formatMessage({id: 'channel_info.convert_gm_to_channel.warning.body.yourself', defaultMessage: 'yourself'});
-    const memberNames = profiles.length > 0 ? formatList(userDisplayNames) : defaultUserDisplayNames;
+
+    const memberNames = profiles.length > 0 ? userDisplayNames.join(' ') : defaultUserDisplayNames;
     const messageBoxBody = formatMessage({
         id: 'channel_info.convert_gm_to_channel.warning.bodyXXXX',
         defaultMessage: 'You are about to convert the Group Message with {memberNames} to a Channel. This cannot be undone.',
@@ -149,14 +142,6 @@ export const ConvertGMToChannelForm = ({
                 header={messageBoxHeader}
                 body={messageBoxBody}
             />
-            {
-                commonTeams.length > 1 &&
-                <TeamSelector
-                    commonTeams={commonTeams}
-                    onSelectTeam={setSelectedTeam}
-                    selectedTeamId={selectedTeam?.id}
-                />
-            }
             <ChannelNameInput
                 onChange={setNewChannelName}
                 error={channelNameErrorMessage}

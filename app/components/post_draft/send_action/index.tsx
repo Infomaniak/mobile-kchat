@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useMemo} from 'react';
-import {View} from 'react-native';
+import {type StyleProp, View, type ViewStyle} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
@@ -13,6 +13,7 @@ type Props = {
     testID: string;
     disabled: boolean;
     sendMessage: () => void;
+    containerStyle?: StyleProp<ViewStyle>;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {

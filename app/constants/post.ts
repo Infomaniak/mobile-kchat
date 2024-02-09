@@ -36,6 +36,10 @@ export const PostTypes: Record<string, string> = {
     CUSTOM_CALLS: 'custom_call',
     CUSTOM_CALLS_RECORDING: 'custom_calls_recording',
 
+    SLACK_ATTACHMENT: 'slack_attachment',
+
+    VOICE_MESSAGE: 'voice',
+
     IK_SYSTEM_POST_REMINDER: 'system_post_reminder',
 };
 

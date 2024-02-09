@@ -38,7 +38,6 @@ type Props = {
     highlightPinnedOrSaved?: boolean;
     isCRTEnabled?: boolean;
     isPostAcknowledgementEnabled?: boolean;
-    isTimezoneEnabled: boolean;
     lastViewedAt: number;
     location: string;
     nativeID: string;
@@ -91,7 +90,6 @@ const PostList = ({
     highlightPinnedOrSaved = true,
     isCRTEnabled,
     isPostAcknowledgementEnabled,
-    isTimezoneEnabled,
     lastViewedAt,
     location,
     nativeID,
@@ -114,8 +112,8 @@ const PostList = ({
     const theme = useTheme();
     const serverUrl = useServerUrl();
     const orderedPosts = useMemo(() => {
-        return preparePostList(posts, lastViewedAt, showNewMessageLine, currentUserId, currentUsername, shouldShowJoinLeaveMessages, isTimezoneEnabled, currentTimezone, location === Screens.THREAD, savedPostIds);
-    }, [posts, lastViewedAt, showNewMessageLine, currentTimezone, currentUsername, shouldShowJoinLeaveMessages, isTimezoneEnabled, location, savedPostIds]);
+        return preparePostList(posts, lastViewedAt, showNewMessageLine, currentUserId, currentUsername, shouldShowJoinLeaveMessages, currentTimezone, location === Screens.THREAD, savedPostIds);
+    }, [posts, lastViewedAt, showNewMessageLine, currentTimezone, currentUsername, shouldShowJoinLeaveMessages, location, savedPostIds]);
 
     const initialIndex = useMemo(() => {
         return orderedPosts.findIndex((i) => i.type === 'start-of-new-messages');
@@ -236,7 +234,7 @@ const PostList = ({
                     <DateSeparator
                         key={item.value}
                         date={getDateForDateLine(item.value)}
-                        timezone={isTimezoneEnabled ? currentTimezone : null}
+                        timezone={currentTimezone}
                     />
                 );
             case 'thread-overview':
@@ -287,7 +285,7 @@ const PostList = ({
                 return (<Post {...postProps}/>);
             }
         }
-    }, [appsEnabled, currentTimezone, customEmojiNames, highlightPinnedOrSaved, isCRTEnabled, isPostAcknowledgementEnabled, isTimezoneEnabled, shouldRenderReplyButton, theme]);
+    }, [appsEnabled, currentTimezone, customEmojiNames, highlightPinnedOrSaved, isCRTEnabled, isPostAcknowledgementEnabled, shouldRenderReplyButton, theme]);
 
     const scrollToIndex = useCallback((index: number, animated = true, applyOffset = true) => {
         listRef.current?.scrollToIndex({
