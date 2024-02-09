@@ -61,10 +61,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         },
         inputContentContainer: {
             alignItems: 'stretch',
-            paddingTop: Platform.select({
-                ios: 7,
-                android: 0,
-            }),
+            paddingTop: 7,
         },
         inputWrapper: {
             alignItems: 'flex-end',

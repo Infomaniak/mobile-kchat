@@ -27,6 +27,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             flexDirection: 'row',
             borderWidth: StyleSheet.hairlineWidth,
             borderColor: changeOpacity(theme.centerChannelColor, 0.56),
+            marginBottom: 1,
             shadowColor: '#000',
             shadowOpacity: 0.08,
             shadowRadius: 6,
