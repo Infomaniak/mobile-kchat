@@ -29,7 +29,8 @@ export const CALL_NOTIFICATION_BAR_HEIGHT = 40;
 export const VOICE_MESSAGE_CARD_RATIO = 0.72;
 export const MIC_SIZE = 40;
 export const WAVEFORM_HEIGHT = 40;
-export const VOICE_MIN_AMPLITUDE = 35;
+export const VOICE_MIN_AMPLITUDE_ANDROID = 45;
+export const VOICE_MIN_AMPLITUDE_IOS = 65;
 
 export const ANNOUNCEMENT_BAR_HEIGHT = 40;
 
