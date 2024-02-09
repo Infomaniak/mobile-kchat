@@ -9,14 +9,6 @@
   "engines": {
     "node": "^18.10.0"
   },
-  "expo": {
-    "autolinking": {
-      "exclude": [
-        "expo-keep-awake",
-        "expo-font"
-      ]
-    }
-  },
   "dependencies": {
     "@calls/common": "github:mattermost/calls-common",
     "@formatjs/intl-datetimeformat": "6.12.0",
@@ -53,7 +45,6 @@
     "deep-equal": "2.2.3",
     "deepmerge": "4.3.1",
     "emoji-regex": "10.3.0",
-    "expo": "^49.0.0",
     "fuse.js": "7.0.0",
     "html-entities": "2.4.0",
     "jail-monkey": "2.8.0",

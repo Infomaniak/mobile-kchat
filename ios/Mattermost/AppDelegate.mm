@@ -8,7 +8,6 @@
 #import <ReactNativeNavigation/ReactNativeNavigation.h>
 #import <UserNotifications/UserNotifications.h>
 #import <RNHWKeyboardEvent.h>
-#import "ExpoModulesCore-Swift.h"
 
 #import "kChat-Swift.h"
 #import <os/log.h>
