@@ -76,6 +76,7 @@ const LocalPlayBack = () => {
                 onPress={preventDoubleTap(() => {
                     if (isPlaying) {
                         pauseAudio();
+                        setStatus('stopped');
                         return;
                     }
 
