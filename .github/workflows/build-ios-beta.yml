@@ -9,7 +9,7 @@ on:
       - build-beta-sim-[0-9]+
 
 env:
-  NODE_VERSION: 18.7.0
+  NODE_VERSION: 20.11.0
   TERM: xterm
 
 jobs:
@@ -17,18 +17,18 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: ci/checkout-repo
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
       - name: ci/test
         uses: ./.github/actions/test
 
   build-and-deploy-ios-beta:
-    runs-on: macos-12
+    runs-on: macos-14
     if: ${{ !contains(github.ref_name, 'beta-sim') }}
     needs:
       - test
     steps:
       - name: ci/checkout-repo
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
 
       - name: ci/output-ssh-private-key
         shell: bash
