@@ -59,7 +59,7 @@ const enhance = withObservables(['post'], ({database, post}: WithDatabaseArgs & 
 });
 
 const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
-    const {id, width} = files[0];
+    const {id = null, width = 0} = files[0] ?? {};
     const theme = useTheme();
     const styles = getStyleSheet(theme);
 
