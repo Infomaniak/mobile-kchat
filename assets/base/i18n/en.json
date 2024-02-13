@@ -755,6 +755,7 @@
   "mobile.tos_link": "Terms of Service",
   "mobile.user_list.deactivated": "Deactivated",
   "mobile.write_storage_permission_denied_description": "Save files to your device. Open Settings to grant {applicationName} write access to files on this device.",
+  "mobile.vocals.load_error": "Your audio file could not be loaded.",
   "modal.manual_status.auto_responder.message_": "Would you like to switch your status to \"{status}\" and disable Automatic Replies?",
   "modal.manual_status.auto_responder.message_away": "Would you like to switch your status to \"Away\" and disable Automatic Replies?",
   "modal.manual_status.auto_responder.message_dnd": "Would you like to switch your status to \"Do Not Disturb\" and disable Automatic Replies?",
