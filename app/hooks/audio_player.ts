@@ -21,6 +21,7 @@ const useAudioPlayer = () => {
             const uri = audioId ? buildFileUrl(serverUrl, audioId) : localAudioURI!;
             const headers = {Authorization: client.getCurrentBearerToken()};
 
+            // TODO: Delete this condition once ticket #285760 is solved
             if (audioId) {
                 const exist = await fetch(uri, {method: 'HEAD', headers});
 
