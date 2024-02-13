@@ -16,10 +16,18 @@ const useAudioPlayer = () => {
     const serverUrl = useServerUrl();
     const client = NetworkManager.getClient(serverUrl);
 
-    const loadAudio = async (audioId?: string, playBackListener?: (e: PlayBackType) => void) => {
+    const loadAudio = async (audioId?: string, playBackListener?: (e: PlayBackType) => void, onLoadError?: () => void) => {
         try {
             const uri = audioId ? buildFileUrl(serverUrl, audioId) : localAudioURI!;
             const headers = {Authorization: client.getCurrentBearerToken()};
+
+            const exist = await fetch(uri, {method: 'HEAD', headers});
+
+            if (!exist.ok) {
+                onLoadError?.();
+                logInfo(`File with id : ${audioId} does not exist`);
+                return;
+            }
 
             await player.startPlayer(uri, headers);
 
