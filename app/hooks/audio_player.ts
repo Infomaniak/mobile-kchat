@@ -21,12 +21,14 @@ const useAudioPlayer = () => {
             const uri = audioId ? buildFileUrl(serverUrl, audioId) : localAudioURI!;
             const headers = {Authorization: client.getCurrentBearerToken()};
 
-            const exist = await fetch(uri, {method: 'HEAD', headers});
+            if (audioId) {
+                const exist = await fetch(uri, {method: 'HEAD', headers});
 
-            if (!exist.ok) {
-                onLoadError?.();
-                logInfo(`File with id : ${audioId} does not exist`);
-                return;
+                if (!exist.ok) {
+                    onLoadError?.();
+                    logInfo(`File with id : ${audioId} does not exist`);
+                    return;
+                }
             }
 
             await player.startPlayer(uri, headers);
