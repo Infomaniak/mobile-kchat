@@ -16,6 +16,7 @@ export interface ClientPostsMix {
     getPostThread: (postId: string, options: FetchPaginatedThreadOptions) => Promise<PostResponse>;
     getPosts: (channelId: string, page?: number, perPage?: number, collapsedThreads?: boolean, collapsedThreadsExtended?: boolean) => Promise<PostResponse>;
     getPostsSince: (channelId: string, since: number, collapsedThreads?: boolean, collapsedThreadsExtended?: boolean) => Promise<PostResponse>;
+    getDeletedPostsIds: (channelId: string, since?: number) => Promise<string[]>;
     getPostsBefore: (channelId: string, postId?: string, page?: number, perPage?: number, collapsedThreads?: boolean, collapsedThreadsExtended?: boolean) => Promise<PostResponse>;
     getPostsAfter: (channelId: string, postId: string, page?: number, perPage?: number, collapsedThreads?: boolean, collapsedThreadsExtended?: boolean) => Promise<PostResponse>;
     getFileInfosForPost: (postId: string) => Promise<FileInfo[]>;
@@ -109,6 +110,13 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     getPostsSince = async (channelId: string, since: number, collapsedThreads = false, collapsedThreadsExtended = false) => {
         return this.doFetch(
             `${this.getChannelRoute(channelId)}/posts${buildQueryString({since, collapsedThreads, collapsedThreadsExtended})}`,
+            {method: 'get'},
+        );
+    };
+
+    getDeletedPostsIds = async (channelId: string, since?: number) => {
+        return this.doFetch(
+            `${this.getChannelRoute(channelId)}/deleted_posts${buildQueryString({since})}`,
             {method: 'get'},
         );
     };
