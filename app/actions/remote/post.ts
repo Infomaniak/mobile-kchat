@@ -303,8 +303,8 @@ export async function fetchPostsForChannel(serverUrl: string, channelId: string,
             deletedPostAction = fetchDeletedPostsIds(serverUrl, channelId, since);
             actionType = ActionType.POSTS.RECEIVED_SINCE;
         } else {
-            deletedPostAction = fetchDeletedPostsIds(serverUrl, channelId);
             postAction = fetchPosts(serverUrl, channelId, 0, General.POST_CHUNK_SIZE, true);
+            deletedPostAction = fetchDeletedPostsIds(serverUrl, channelId);
             actionType = ActionType.POSTS.RECEIVED_IN_CHANNEL;
         }
 
@@ -1100,7 +1100,7 @@ export async function deletePersistedPosts(serverUrl: string, channelId: string,
 
             if (!dbPost) {
                 EphemeralStore.addRemovingPost(serverUrl, postId);
-                return;
+                continue;
             }
 
             const model = dbPost.prepareUpdate((p) => {
