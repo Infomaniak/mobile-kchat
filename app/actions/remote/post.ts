@@ -297,7 +297,6 @@ export async function fetchPostsForChannel(serverUrl: string, channelId: string,
         const myChannel = await getMyChannel(database, channelId);
         const postsInChannel = await getRecentPostsInChannel(database, channelId);
         const since = myChannel?.lastFetchedAt || postsInChannel?.[0]?.createAt || 0;
-
         if (since) {
             postAction = fetchPostsSince(serverUrl, channelId, since, true);
             deletedPostAction = fetchDeletedPostsIds(serverUrl, channelId, since);
@@ -313,7 +312,6 @@ export async function fetchPostsForChannel(serverUrl: string, channelId: string,
         if (deletedPosts.length) {
             await deletePersistedPosts(serverUrl, channelId, deletedPosts);
         }
-
         const data = await postAction;
         if (data.error) {
             throw data.error;
