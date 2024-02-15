@@ -1117,29 +1117,6 @@ export async function deletePersistedPosts(serverUrl: string, channelId: string,
             if (model) {
                 models.push(model);
             }
-
-            // update thread when a reply is deleted and CRT is enabled
-            // if (dbPost?.rootId) {
-            //     // eslint-disable-next-line no-await-in-loop
-            //     const isCRTEnabled = await getIsCRTEnabled(database);
-            //     if (isCRTEnabled) {
-            //         // Update reply_count of the thread;
-            //         // Note: reply_count includes current deleted count, So subtract 1 from reply_count
-            //         const {model: threadModel} = await updateThread(serverUrl, oldPost?.rootId, {reply_count: post.reply_count - 1}, true);
-            //         if (threadModel) {
-            //             models.push(threadModel);
-            //         }
-
-            //         const channel = await getChannelById(database, post.channel_id);
-            //         if (channel) {
-            //             let {teamId} = channel;
-            //             if (!teamId) {
-            //                 teamId = await getCurrentTeamId(database); // In case of DM/GM
-            //             }
-            //             fetchThread(serverUrl, teamId, oldPost?.rootId);
-            //         }
-            //     }
-            // }
         }
 
         if (models.length) {
