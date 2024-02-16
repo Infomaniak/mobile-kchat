@@ -3,7 +3,8 @@
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import React, {useState} from 'react';
-import {TouchableOpacity, View} from 'react-native';
+import {useIntl} from 'react-intl';
+import {Text, TouchableOpacity, View} from 'react-native';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
@@ -40,6 +41,11 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             position: 'relative',
             width: '100%',
         },
+        error: {
+            color: theme.errorTextColor,
+            textAlign: 'center',
+            marginTop: 3,
+        },
     };
 });
 
@@ -59,12 +65,15 @@ const enhance = withObservables(['post'], ({database, post}: WithDatabaseArgs & 
 });
 
 const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
-    const {id, width} = files[0];
+    const {id = null, width = 0} = files[0] ?? {};
+
     const theme = useTheme();
+    const intl = useIntl();
     const styles = getStyleSheet(theme);
 
     const [timing, setTiming] = useState(mmssss(width));
     const [progress, setProgress] = useState(0);
+    const [error, setError] = useState('');
     const [status, setStatus] = useState<'stopped' | 'playing' | 'buffering'>('stopped');
 
     const {loadAudio, pauseAudio, playing} = useAudioPlayerContext();
@@ -85,43 +94,45 @@ const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
         setStatus('playing');
     };
 
+    const handleLoadError = () => {
+        setError(intl.formatMessage({
+            id: 'mobile.vocals.load_error',
+            defaultMessage: 'Your audio file could not be loaded.',
+        }));
+    };
+
     return (
-        <View
-            style={styles.playBackContainer}
-        >
-            <TouchableOpacity
-                style={styles.mic}
-                onPress={preventDoubleTap(async () => {
-                    setStatus('stopped');
-
-                    if (isPlaying) {
-                        pauseAudio();
-                        return;
-                    }
-
-                    loadAudio(id, listener);
-                })}
+        <View>
+            <View
+                style={styles.playBackContainer}
             >
-                <CompassIcon
-                    color={theme.buttonBg}
-                    name={isPlaying ? 'pause' : 'play'}
-                    size={24}
+                <TouchableOpacity
+                    style={styles.mic}
+                    onPress={preventDoubleTap(async () => {
+                        setStatus('stopped');
+                        setError('');
+
+                        if (isPlaying) {
+                            pauseAudio();
+                            return;
+                        }
+
+                        loadAudio(id, listener, handleLoadError);
+                    })}
+                >
+                    <CompassIcon
+                        color={theme.buttonBg}
+                        name={isPlaying ? 'pause' : 'play'}
+                        size={24}
+                    />
+                </TouchableOpacity>
+                <Slider
+                    value={(progress && width) ? (progress / width) * 100 : 0}
+                    width='60%'
                 />
-            </TouchableOpacity>
-            <Slider
-                value={(progress && width) ? (progress / width) * 100 : 0}
-
-                // WIP: Thumb for panning
-                // disabled={playing !== id}
-                // onValueCommit={(val) => {
-                //     seekTo((width * val) / 100);
-                //     playAudio();
-                // }}
-                // onStart={() => pauseAudio()}
-
-                width='60%'
-            />
-            <TimeElapsed time={timing}/>
+                <TimeElapsed time={timing}/>
+            </View>
+            {error && <Text style={styles.error}>{error}</Text>}
         </View>
     );
 };

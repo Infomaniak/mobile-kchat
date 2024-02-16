@@ -4,7 +4,7 @@
 
 /* eslint-disable max-lines */
 
-import {markChannelAsUnread, updateLastPostAt} from '@actions/local/channel';
+import {markChannelAsUnread, updateLastPostAt, updateMyChannelLastFetchedAt} from '@actions/local/channel';
 import {addPostAcknowledgement, removePost, removePostAcknowledgement, storePostsForChannel} from '@actions/local/post';
 import {addRecentReaction} from '@actions/local/reactions';
 import {createThreadFromNewPost} from '@actions/local/thread';
@@ -292,18 +292,26 @@ export async function fetchPostsForChannel(serverUrl: string, channelId: string,
         }
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         let postAction: Promise<PostsRequest>|undefined;
+        let deletedPostAction: Promise<string[]>|undefined;
         let actionType: string|undefined;
         const myChannel = await getMyChannel(database, channelId);
         const postsInChannel = await getRecentPostsInChannel(database, channelId);
         const since = myChannel?.lastFetchedAt || postsInChannel?.[0]?.createAt || 0;
         if (since) {
             postAction = fetchPostsSince(serverUrl, channelId, since, true);
+            deletedPostAction = fetchDeletedPostsIds(serverUrl, channelId, since);
             actionType = ActionType.POSTS.RECEIVED_SINCE;
         } else {
             postAction = fetchPosts(serverUrl, channelId, 0, General.POST_CHUNK_SIZE, true);
+            deletedPostAction = fetchDeletedPostsIds(serverUrl, channelId);
             actionType = ActionType.POSTS.RECEIVED_IN_CHANNEL;
         }
 
+        const deletedPosts = await deletedPostAction;
+
+        if (deletedPosts.length) {
+            await deletePersistedPosts(serverUrl, channelId, deletedPosts);
+        }
         const data = await postAction;
         if (data.error) {
             throw data.error;
@@ -491,6 +499,18 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
         if (!fetchOnly) {
             EphemeralStore.stopLoadingMessagesForChannel(serverUrl, channelId);
         }
+    }
+}
+
+export async function fetchDeletedPostsIds(serverUrl: string, channelId: string, since?: number): Promise<string[]> {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        const data = await client.getDeletedPostsIds(channelId, since);
+        return data;
+    } catch (error) {
+        logDebug('error on fetchDeletedPosts', getFullErrorMessage(error));
+        forceLogoutIfNecessary(serverUrl, error as ClientErrorProps);
+        return [];
     }
 }
 
@@ -1064,5 +1084,41 @@ export async function unacknowledgePost(serverUrl: string, postId: string) {
         return {error};
     } finally {
         EphemeralStore.unsetUnacknowledgingPost(postId);
+    }
+}
+
+export async function deletePersistedPosts(serverUrl: string, channelId: string, postsIds: string[]) {
+    try {
+        const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        const models: Model[] = [];
+
+        for (const postId of postsIds) {
+            // eslint-disable-next-line no-await-in-loop
+            const dbPost = await getPostById(database, postId);
+
+            if (!dbPost) {
+                EphemeralStore.addRemovingPost(serverUrl, postId);
+                continue;
+            }
+
+            const model = dbPost.prepareUpdate((p) => {
+                p.deleteAt = Date.now();
+                p.message = '';
+                p.messageSource = '';
+                p.metadata = null;
+                p.props = undefined;
+            });
+
+            if (model) {
+                models.push(model);
+            }
+        }
+
+        if (models.length) {
+            await updateMyChannelLastFetchedAt(serverUrl, channelId, Date.now());
+            await operator.batchRecords(models, 'handlePostDeleted');
+        }
+    } catch (error) {
+        // Do nothing
     }
 }
