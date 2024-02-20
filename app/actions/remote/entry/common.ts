@@ -17,7 +17,7 @@ import {getPreferenceValue, getTeammateNameDisplaySetting} from '@helpers/api/pr
 import {selectDefaultTeam} from '@helpers/api/team';
 import {DEFAULT_LOCALE} from '@i18n';
 import NetworkManager from '@managers/network_manager';
-import {getDeviceToken} from '@queries/app/global';
+import {getDeviceToken, getDevicePublicKey} from '@queries/app/global';
 import {getChannelById, queryAllChannelsForTeam, queryChannelsById} from '@queries/servers/channel';
 import {prepareModels, truncateCrtRelatedTables} from '@queries/servers/entry';
 import {getHasCRTChanged} from '@queries/servers/preference';
@@ -410,8 +410,9 @@ export const registerDeviceToken = async (serverUrl: string) => {
         const client = NetworkManager.getClient(serverUrl);
 
         const deviceToken = await getDeviceToken();
+        const publicKey = await getDevicePublicKey();
         if (deviceToken) {
-            client.attachDevice(deviceToken);
+            client.attachDevice(deviceToken, publicKey);
         }
         return {};
     } catch (error) {

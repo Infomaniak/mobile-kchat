@@ -14,7 +14,7 @@ import {
 } from 'react-native-notifications';
 import {requestNotifications} from 'react-native-permissions';
 
-import {storeDeviceToken} from '@actions/app/global';
+import {storeDeviceToken, storeDevicePublicKey} from '@actions/app/global';
 import {markChannelAsViewed} from '@actions/local/channel';
 import {updateThread} from '@actions/local/thread';
 import {backgroundNotification, openNotification} from '@actions/remote/notifications';
@@ -266,6 +266,7 @@ class PushNotifications {
             }
 
             storeDeviceToken(`${prefix}-v2:${deviceToken}`);
+            storeDevicePublicKey();
 
             // Store the device token in the default database
             this.requestNotificationReplyPermissions();

@@ -22,6 +22,16 @@ export const getDeviceToken = async (): Promise<string> => {
     }
 };
 
+export const getDevicePublicKey = async (): Promise<string> => {
+    try {
+        const {database} = DatabaseManager.getAppDatabaseAndOperator();
+        const publicKey = await database.get<GlobalModel>(GLOBAL).find(GLOBAL_IDENTIFIERS.PUBLIC_KEY);
+        return publicKey?.value || '';
+    } catch {
+        return '';
+    }
+};
+
 export const queryGlobalValue = (key: string) => {
     try {
         const {database} = DatabaseManager.getAppDatabaseAndOperator();
