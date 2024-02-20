@@ -21,16 +21,17 @@ type EnhanceProps = WithDatabaseArgs & {
 }
 
 const enhanced = withObservables([], ({database, serverUrl}: EnhanceProps) => {
+    const channel = observeCurrentChannel(database);
     const channelId = observeCurrentChannelId(database);
     const dismissedGMasDMNotice = queryPreferencesByCategoryAndName(database, Preferences.CATEGORIES.SYSTEM_NOTICE, Preferences.NOTICES.GM_AS_DM).observe();
-    const channelType = observeCurrentChannel(database).pipe(switchMap((c) => of$(c?.type)));
+    const channelType = channel.pipe(switchMap((c) => of$(c?.type)));
     const currentUserId = observeCurrentUserId(database);
     const hasGMasDMFeature = observeHasGMasDMFeature(database);
 
     return {
         channelId,
         ...observeCallStateInChannel(serverUrl, database, channelId),
-        isCallsEnabledInChannel: observeIsCallsEnabledInChannel(),
+        isCallsEnabledInChannel: observeIsCallsEnabledInChannel(currentUserId, channel),
         dismissedGMasDMNotice,
         channelType,
         currentUserId,
