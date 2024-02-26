@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: [ self-hosted, macOS, test ]
     steps:
       - name: ci/checkout-repo
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
@@ -15,7 +15,7 @@ jobs:
         uses: ./.github/actions/test
 
   build-ios-unsigned:
-    runs-on: macos-14-large
+    runs-on: [ self-hosted, macOS, test ]
     needs:
       - test
     steps:
@@ -50,7 +50,7 @@ jobs:
           name: Mattermost-unsigned.ipa
 
   build-android-unsigned:
-    runs-on: ubuntu-22.04
+    runs-on: [ self-hosted, macOS, test ]
     needs:
       - test
     steps:
@@ -76,7 +76,7 @@ jobs:
           name: Mattermost-unsigned.apk
 
   release:
-    runs-on: ubuntu-22.04
+    runs-on: [ self-hosted, macOS, test ]
     needs:
       - build-ios-unsigned
       - build-android-unsigned
