@@ -15,7 +15,7 @@ jobs:
         uses: ./.github/actions/test
 
   build-ios-unsigned:
-    runs-on: macos-14
+    runs-on: macos-14-large
     needs:
       - test
     steps:
@@ -85,8 +85,6 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
 
       - uses: ruby/setup-ruby@22fdc77bf4148f810455b226c90fb81b5cbc00a7 # v1.171.0
-        with:
-          ruby-version: "2.7"
 
       - name: release/setup-fastlane-dependencies
         run: bundle install
