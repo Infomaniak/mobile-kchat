@@ -11,7 +11,7 @@ env:
 
 jobs:
   test:
-    runs-on: [ self-hosted, macOS, test ]
+    runs-on: [ self-hosted, macOS ]
     if: ${{ github.event.label.name == 'Build Apps for PR' || github.event.label.name == 'Build App for iOS' || github.event.label.name == 'Build App for Android' }}
     steps:
       - name: ci/checkout-repo
@@ -22,7 +22,7 @@ jobs:
         uses: ./.github/actions/test
 
   build-ios-pr:
-    runs-on: [ self-hosted, macOS, test ]
+    runs-on: [ self-hosted, macOS ]
     if: ${{ github.event.label.name == 'Build Apps for PR' || github.event.label.name == 'Build App for iOS' }}
     needs:
       - test
@@ -68,7 +68,7 @@ jobs:
           path: "*.ipa"
 
   build-android-pr:
-    runs-on: [ self-hosted, macOS, test ]
+    runs-on: [ self-hosted, macOS ]
     if: ${{ github.event.label.name == 'Build Apps for PR' || github.event.label.name == 'Build App for Android' }}
     needs:
       - test
