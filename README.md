@@ -14,6 +14,7 @@ The kChat app requires an Infomaniak account with kSuite. It enables you to comm
 - Make sure that xcode & xcode command line tools is installed and up to date.
 - Android studio must be installed & configured
 - Make sure to install cocoapods package installed using `brew install cocoapods`
+- Whitelist this path `/Users/{username}/Library/Developer/Xcode/DerivedData` within your simulator to avoid simulator errors
 
 ## Install open jdk
 
