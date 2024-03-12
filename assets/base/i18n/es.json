@@ -1008,5 +1008,8 @@
     "video.download": "Descargar video",
     "video.download_description": "Para poder ver el vídeo, es necesario descargarlo.",
     "video.failed_description": "Ocurrió un error al intentar reproducir el video.",
-    "your.servers": "Tus servidores"
+    "your.servers": "Tus servidores",
+    "display_theme.tile.auto": "Automático",
+    "display_theme.tile.dark": "Oscuro",
+    "display_theme.tile.light": "Claro"
 }

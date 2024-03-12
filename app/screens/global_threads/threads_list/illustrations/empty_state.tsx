@@ -4,12 +4,14 @@
 import React from 'react';
 import Svg, {Path, Circle} from 'react-native-svg';
 
+import {isDarkTheme} from '@app/utils/theme';
+
 type Props = {
     theme: Theme;
 };
 
 function EmptyStateIllustration({theme}: Props) {
-    if (theme.ikName === 'Dark') {
+    if (isDarkTheme(theme)) {
         return (
             <Svg
                 width={128}

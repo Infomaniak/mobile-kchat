@@ -1040,5 +1040,9 @@
     "video.download": "Scarica il video",
     "video.download_description": "Questo video deve essere scaricato per poter essere riprodotto.",
     "video.failed_description": "Si è verificato un errore durante il tentativo di riproduzione del video.",
-    "your.servers": "I tuoi team"
+    "your.servers": "I tuoi team",
+    "display_theme.tile.auto": "Automatico",
+    "display_theme.tile.dark": "Scuro",
+    "display_theme.tile.light": "Chiaro"
+
 }

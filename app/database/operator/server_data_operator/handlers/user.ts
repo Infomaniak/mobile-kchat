@@ -72,7 +72,11 @@ const UserHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
                 return res;
             }
 
-            if (p.category !== exist.category || p.name !== exist.name || p.value !== exist.value) {
+            if (exist.value.includes('"forced":true') && !p.value.includes('"forced":true')) {
+                return res;
+            }
+
+            if ((p.category !== exist.category || p.name !== exist.name || p.value !== exist.value)) {
                 res.push(p);
             }
 

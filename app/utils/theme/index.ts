@@ -3,9 +3,10 @@
 
 import deepEqual from 'deep-equal';
 import merge from 'deepmerge';
-import {StatusBar, StyleSheet} from 'react-native';
+import {Appearance, StatusBar, StyleSheet} from 'react-native';
 import tinyColor from 'tinycolor2';
 
+import {getDefaultThemeByAppearance} from '@app/context/theme';
 import {Preferences} from '@constants';
 import {MODAL_SCREENS_WITHOUT_BACK, SCREENS_AS_BOTTOM_SHEET, SCREENS_WITH_TRANSPARENT_BACKGROUND} from '@constants/screens';
 import EphemeralStore from '@store/ephemeral_store';
@@ -243,6 +244,19 @@ export function setThemeDefaults(theme: ExtendedTheme): Theme {
 
     const processedTheme = {...theme};
 
+    if (theme.ksuiteTheme) {
+        switch (theme.ksuiteTheme) {
+            case 'dark':
+                return Preferences.THEMES.onyx;
+            case 'light':
+                return Preferences.THEMES.infomaniak;
+            case 'auto': {
+                const preferredTheme = getDefaultThemeByAppearance();
+                return {...preferredTheme, ksuiteTheme: 'auto', type: theme.type, ikName: theme.ikName};
+            }
+        }
+    }
+
     // If this is a system theme, return the source theme object matching the theme preference type
     if (theme.type && theme.type !== 'custom' && Object.keys(themeTypeMap).includes(theme.type)) {
         return Preferences.THEMES[themeTypeMap[theme.type]];
@@ -284,4 +298,12 @@ export const updateThemeIfNeeded = (theme: Theme, force = false) => {
             setNavigationStackStyles(theme);
         });
     }
+};
+
+export const isDarkTheme = (theme: Theme) => {
+    if (theme.ksuiteTheme === 'dark' || (theme.ksuiteTheme === 'auto' && Appearance.getColorScheme() === 'dark')) {
+        return true;
+    }
+
+    return false;
 };
