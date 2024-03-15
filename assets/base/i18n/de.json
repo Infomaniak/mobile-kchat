@@ -1135,5 +1135,6 @@
     "video.download": "Video herunterladen",
     "video.download_description": "Dieses Video muss heruntergeladen werden, um es abzuspielen.",
     "video.failed_description": "Beim Abspielen des Videos ist ein Fehler aufgetreten.",
-    "your.servers": "Deine Server"
+    "your.servers": "Deine Server",
+    "guest_banner.text": "Es gibt {count} externe Benutzer in diesem Gespräch."
 }

@@ -401,6 +401,8 @@ export async function handleUserRemovedFromChannelEvent(serverUrl: string, msg: 
         }
 
         operator.batchRecords(models, 'handleUserRemovedFromChannelEvent');
+
+        await fetchChannelStats(serverUrl, channelId, false);
     } catch (error) {
         logDebug('cannot handle user removed from channel websocket event', error);
     }

@@ -1008,5 +1008,6 @@
     "video.download": "Descargar video",
     "video.download_description": "Para poder ver el vídeo, es necesario descargarlo.",
     "video.failed_description": "Ocurrió un error al intentar reproducir el video.",
-    "your.servers": "Tus servidores"
+    "your.servers": "Tus servidores",
+    "guest_banner.text": "Hay {count} {count, plural, one {usuario externo} other {usuarios externos}} en esta conversación."
 }
