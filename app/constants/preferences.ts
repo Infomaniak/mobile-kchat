@@ -89,6 +89,7 @@ const Preferences = {
             mentionHighlightBg: '#ffd470',
             mentionHighlightLink: '#1b1d22',
             codeTheme: 'github',
+            guestBannerBackground: '#F4F6FD',
         },
         denim: {
             type: 'Denim',
@@ -116,6 +117,7 @@ const Preferences = {
             mentionHighlightBg: '#ffd470',
             mentionHighlightLink: '#1b1d22',
             codeTheme: 'github',
+            guestBannerBackground: '#F4F6FD',
         },
         sapphire: {
             type: 'Sapphire',
@@ -171,6 +173,7 @@ const Preferences = {
             mentionHighlightBg: '#7ff0f0',
             mentionHighlightLink: '#0d6e6e',
             codeTheme: 'github',
+            guestBannerBackground: '#F4F6FD',
         },
         indigo: {
             type: 'Indigo',
@@ -198,6 +201,7 @@ const Preferences = {
             mentionHighlightBg: '#133a91',
             mentionHighlightLink: '#a4f4f4',
             codeTheme: 'github',
+            guestBannerBackground: '#1B1D22',
         },
         onyx: {
             ikName: 'Dark',
@@ -226,6 +230,7 @@ const Preferences = {
             mentionHighlightBg: '#0d6e6e',
             mentionHighlightLink: '#a4f4f4',
             codeTheme: 'monokai',
+            guestBannerBackground: '#1B1D22',
         },
     } as Record<ThemeKey, Theme>,
 };

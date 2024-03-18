@@ -1040,5 +1040,6 @@
     "video.download": "Scarica il video",
     "video.download_description": "Questo video deve essere scaricato per poter essere riprodotto.",
     "video.failed_description": "Si è verificato un errore durante il tentativo di riproduzione del video.",
-    "your.servers": "I tuoi team"
+    "your.servers": "I tuoi team",
+    "guest_banner.text": "{count, plural, one {C'è 1 utente esterno in questa conversazione.} other {Ci sono # utenti esterni in questa conversazione.}}"
 }
