@@ -114,7 +114,6 @@
     "channel_info.archive_failed": "Beim Versuch, den Kanal {displayName} zu archivieren, ist ein Fehler aufgetreten",
     "channel_info.archive_title": "{term} archivieren",
     "channel_info.channel_auto_follow_threads": "Allen Unterhaltungen in diesem Kanal folgen",
-    "channel_info.channel_auto_follow_threads_failed": "Beim Versuch, allen Unterhaltungen im Kanal {displayName} automatisch zu verfolgen, ist ein Fehler aufgetreten",
     "channel_info.channel_files": "Dateien",
     "channel_info.close": "Schliessen",
     "channel_info.close_dm": "Direktnachricht schließen",
@@ -847,6 +846,7 @@
     "persistent_notifications.confirm.description": "Die @mentioned Empfänger werden {interval, plural, one {jede Minute} other {alle {interval} Minuten}} benachrichtigt, bis sie die Nachricht bestätigt oder darauf geantwortet haben.",
     "persistent_notifications.confirm.send": "Senden",
     "persistent_notifications.confirm.title": "Dauerhafte Benachrichtigungen senden",
+    "persistent_notifications.dm_channel.description": "{username} werden alle {interval, plural, one {minute} other {{interval} Minuten }}benachrichtigt, bis sie die Nachricht bestätigt oder beantwortet haben.",
     "persistent_notifications.error.max_recipients.description": "Du kannst dauerhafte Benachrichtigungen an maximal {max} Empfänger senden. In deiner Nachricht sind {count} Empfänger angegeben. Du musst die genannten Empfänger ändern, bevor du senden kannst.",
     "persistent_notifications.error.max_recipients.title": "Zu viele Empfänger",
     "persistent_notifications.error.no_mentions.description": "Es sind keine Empfänger in deiner Nachricht erwähnt. Du musst Erwähnungen hinzufügen, um dauerhafte Benachrichtigungen senden zu können.",
@@ -1138,5 +1138,6 @@
     "your.servers": "Deine Server",
     "display_theme.tile.auto": "Automatisch",
     "display_theme.tile.dark": "Dunkel",
-    "display_theme.tile.light": "Hell"
+    "display_theme.tile.light": "Hell",
+    "guest_banner.text": "Es gibt {count} externe Benutzer in diesem Gespräch."
 }

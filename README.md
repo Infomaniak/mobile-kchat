@@ -22,9 +22,9 @@ The kChat app requires an Infomaniak account with kSuite. It enables you to comm
 2. Then run those commands to update your PATH :
 
 ```
-  sudo ln -sfn /opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk # Create a symlink so that your java wrappers can find this jdk
-  echo 'export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"' >> ~/.zshrc
-  export CPPFLAGS="-I/opt/homebrew/opt/openjdk@11/include"
+sudo ln -sfn /opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk # Create a symlink so that your java wrappers can find this jdk
+echo 'export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"' >> ~/.zshrc
+export CPPFLAGS="-I/opt/homebrew/opt/openjdk@11/include"
 ```
 
 ## Project installation :

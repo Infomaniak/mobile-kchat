@@ -1043,6 +1043,6 @@
     "your.servers": "I tuoi team",
     "display_theme.tile.auto": "Automatico",
     "display_theme.tile.dark": "Scuro",
-    "display_theme.tile.light": "Chiaro"
-
+    "display_theme.tile.light": "Chiaro",
+    "guest_banner.text": "{count, plural, one {C'è 1 utente esterno in questa conversazione.} other {Ci sono # utenti esterni in questa conversazione.}}"
 }
