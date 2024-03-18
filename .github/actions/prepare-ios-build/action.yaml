@@ -10,8 +10,8 @@ runs:
       shell: bash
       run: |
         echo "::group::install-os-deps"
-        brew install --overwrite python@3.12
-        brew install watchman
+        /opt/homebrew/bin/brew install --overwrite python@3.12
+        /opt/homebrew/bin/brew install watchman
         echo "::endgroup::"
 
     - name: ci/prepare-mobile-build
