@@ -63,8 +63,9 @@ const Preferences = {
     ADVANCED_SEND_ON_CTRL_ENTER: 'send_on_ctrl_enter',
     THEMES: {
         infomaniak: {
-            ikName: 'Medium',
+            ikName: 'Light',
             type: 'Infomaniak',
+            ksuiteTheme: 'light',
             sidebarBg: '#292E3D',
             sidebarText: '#e0e0e0',
             sidebarUnreadText: '#ffffff',
@@ -147,8 +148,9 @@ const Preferences = {
             codeTheme: 'github',
         },
         quartz: {
-            ikName: 'Light',
+            ikName: 'Automatic',
             type: 'Quartz',
+            ksuiteTheme: 'auto',
             sidebarBg: '#f4f4f6',
             sidebarText: '#090a0b',
             sidebarUnreadText: '#2d3039',
@@ -206,6 +208,7 @@ const Preferences = {
         onyx: {
             ikName: 'Dark',
             type: 'Onyx',
+            ksuiteTheme: 'dark',
             sidebarBg: '#121317',
             sidebarText: '#ffffff',
             sidebarUnreadText: '#ffffff',

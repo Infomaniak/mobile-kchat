@@ -4,12 +4,14 @@
 import * as React from 'react';
 import Svg, {Path, Rect, Circle, Mask, G} from 'react-native-svg';
 
+import {isDarkTheme} from '@app/utils/theme';
+
 type Props = {
     theme: Theme;
 };
 
 const PrivateChannelIllustration = ({theme}: Props) => {
-    if (theme.ikName === 'Dark') {
+    if (isDarkTheme(theme)) {
         return (
             <Svg
                 width={152}

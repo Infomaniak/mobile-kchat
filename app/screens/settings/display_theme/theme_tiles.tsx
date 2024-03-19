@@ -2,7 +2,8 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useMemo} from 'react';
-import {Text, TouchableOpacity, useWindowDimensions, View} from 'react-native';
+import {useIntl} from 'react-intl';
+import {Appearance, Text, TouchableOpacity, useWindowDimensions, View} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
 import {Preferences} from '@constants';
@@ -11,7 +12,7 @@ import {useIsTablet} from '@hooks/device';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import ThemeThumbnail from './theme_thumbnail';
+import illustrations from './illustrations';
 
 const TILE_PADDING = 8;
 
@@ -31,8 +32,8 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         },
         check: {
             position: 'absolute',
-            right: 5,
-            bottom: 5,
+            right: 10,
+            bottom: 7,
             color: theme.sidebarTextActiveBorder,
         },
         label: {
@@ -90,6 +91,8 @@ export const ThemeTile = ({
         action(actionValue);
     }, [action, actionValue]);
 
+    const Tile = useMemo(() => illustrations[theme.ksuiteTheme as keyof typeof illustrations], []);
+
     return (
         <TouchableOpacity
             onPress={onPressHandler}
@@ -97,11 +100,11 @@ export const ThemeTile = ({
             testID={testID}
         >
             <View style={[styles.imageWrapper, layoutStyle.thumbnail]}>
-                <ThemeThumbnail
+                <Tile
+                    width={layoutStyle.thumbnail.width}
                     borderColorBase={selected ? activeTheme.buttonBg : activeTheme.centerChannelBg}
                     borderColorMix={selected ? activeTheme.buttonBg : changeOpacity(activeTheme.centerChannelColor, 0.16)}
-                    theme={theme}
-                    width={layoutStyle.thumbnail.width}
+                    isDark={activeTheme.ksuiteTheme === 'dark' || (activeTheme.ksuiteTheme === 'auto' && Appearance.getColorScheme() === 'dark')}
                 />
                 {selected && (
                     <CompassIcon
@@ -124,6 +127,7 @@ type ThemeTilesProps = {
 }
 export const ThemeTiles = ({allowedThemeKeys, onThemeChange, selectedTheme}: ThemeTilesProps) => {
     const theme = useTheme();
+    const intl = useIntl();
 
     const styles = getStyleSheet(theme);
     return (
@@ -139,12 +143,12 @@ export const ThemeTiles = ({allowedThemeKeys, onThemeChange, selectedTheme}: The
                             key={themeKey}
                             label={(
                                 <Text style={styles.label}>
-                                    {Preferences.THEMES[themeKey].ikName}
+                                    {intl.formatMessage({id: `display_theme.tile.${Preferences.THEMES[themeKey].ksuiteTheme}`, defaultMessage: Preferences.THEMES[themeKey].ikName})}
                                 </Text>
                             )}
                             action={onThemeChange}
                             actionValue={themeKey}
-                            selected={selectedTheme?.toLowerCase() === themeKey.toLowerCase()}
+                            selected={selectedTheme?.toLowerCase() === Preferences.THEMES[themeKey].ksuiteTheme}
                             testID={`theme_display_settings.${themeKey}.option`}
                             theme={Preferences.THEMES[themeKey]}
                             activeTheme={theme}

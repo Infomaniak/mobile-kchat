@@ -1136,5 +1136,8 @@
     "video.download_description": "Dieses Video muss heruntergeladen werden, um es abzuspielen.",
     "video.failed_description": "Beim Abspielen des Videos ist ein Fehler aufgetreten.",
     "your.servers": "Deine Server",
+    "display_theme.tile.auto": "Automatisch",
+    "display_theme.tile.dark": "Dunkel",
+    "display_theme.tile.light": "Hell",
     "guest_banner.text": "Es gibt {count} externe Benutzer in diesem Gespräch."
 }

@@ -9,9 +9,12 @@ type ThemeKey = 'infomaniak' | 'denim' | 'sapphire' | 'quartz' | 'indigo' | 'ony
 
 type ThemeType = 'Infomaniak' | 'Denim' | 'Sapphire' | 'Quartz' | 'Indigo' | 'Onyx' | 'custom';
 
+type KsuiteThemeKey = 'dark' | 'light' | 'auto'
+
 type Theme = {
     ikName?: string;
     type?: ThemeType | LegacyThemeType;
+    ksuiteTheme?: KsuiteThemeKey;
     sidebarBg: string;
     sidebarText: string;
     sidebarUnreadText: string;

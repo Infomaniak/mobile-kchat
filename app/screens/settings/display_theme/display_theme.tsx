@@ -3,7 +3,7 @@
 
 import React, {useCallback, useMemo, useState, useEffect} from 'react';
 
-import {savePreference} from '@actions/remote/preference';
+import {saveThemePreference} from '@actions/local/preferences';
 import SettingContainer from '@components/settings/container';
 import {Preferences} from '@constants';
 import {useServerUrl} from '@context/server';
@@ -20,14 +20,12 @@ type DisplayThemeProps = {
     allowedThemeKeys: string[];
     componentId: AvailableScreens;
     currentTeamId: string;
-    currentUserId: string;
 }
-const DisplayTheme = ({allowedThemeKeys, componentId, currentTeamId, currentUserId}: DisplayThemeProps) => {
+const DisplayTheme = ({allowedThemeKeys, componentId, currentTeamId}: DisplayThemeProps) => {
     const serverUrl = useServerUrl();
     const theme = useTheme();
     const initialTheme = useMemo(() => theme, [/* dependency array should remain empty */]);
     const [newTheme, setNewTheme] = useState<string | undefined>(undefined);
-
     const close = () => popTopScreen(componentId);
 
     useEffect(() => {
@@ -43,14 +41,7 @@ const DisplayTheme = ({allowedThemeKeys, componentId, currentTeamId, currentUser
     const setThemePreference = useCallback(() => {
         const allowedTheme = allowedThemeKeys.find((tk) => tk === newTheme);
         const themeJson = Preferences.THEMES[allowedTheme as ThemeKey] || initialTheme;
-
-        const pref: PreferenceType = {
-            category: Preferences.CATEGORIES.THEME,
-            name: currentTeamId,
-            user_id: currentUserId,
-            value: JSON.stringify(themeJson),
-        };
-        savePreference(serverUrl, [pref]);
+        saveThemePreference(themeJson);
     }, [allowedThemeKeys, currentTeamId, theme.type, serverUrl, newTheme]);
 
     const onAndroidBack = () => {
@@ -65,7 +56,7 @@ const DisplayTheme = ({allowedThemeKeys, componentId, currentTeamId, currentUser
             <ThemeTiles
                 allowedThemeKeys={allowedThemeKeys}
                 onThemeChange={setNewTheme}
-                selectedTheme={theme.type}
+                selectedTheme={theme.ksuiteTheme}
             />
             {initialTheme.type === 'custom' && (
                 <CustomTheme

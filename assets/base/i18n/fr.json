@@ -1106,5 +1106,8 @@
     "video.download_description": "Cette vidéo doit être téléchargée pour être lue.",
     "video.failed_description": "Une erreur s'est produite lors de la tentative de lecture de la vidéo.",
     "your.servers": "Vos équipes",
+    "display_theme.tile.auto": "Automatique",
+    "display_theme.tile.dark": "Sombre",
+    "display_theme.tile.light": "Clair",
     "guest_banner.text": "Il y a {count} {count, plural, one {utilisateur externe} other {utilisateurs externes}} dans cette conversation."
 }
