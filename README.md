@@ -53,4 +53,4 @@ Open xcode and select `Xcode > Settings > Locations` and make sure that the drop
 
 ### SSL errors with ruby
 
-Add this line within your `.zprofile` : `PKG_CONFIG_PATH=/opt/homebrew/opt/openssl@1.1/lib/pkgconfig rvm reinstall 3.0.6 --with-openssl-lib=/opt/homebrew/opt/openssl@1.1 --with-openssl-include=/opt/homebrew/opt/openssl@1.1`
+Install Ruby by running `PKG_CONFIG_PATH=/opt/homebrew/opt/openssl@1.1/lib/pkgconfig rvm reinstall 3.0.6 --with-openssl-lib=/opt/homebrew/opt/openssl@1.1 --with-openssl-include=/opt/homebrew/opt/openssl@1.1`
