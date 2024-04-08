@@ -6,6 +6,7 @@ import {type LayoutChangeEvent, Platform, ScrollView, View} from 'react-native';
 import Permissions, {openSettings} from 'react-native-permissions';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
+import GuestBanner from '@app/components/guest_banner';
 import {logInfo} from '@app/utils/log';
 import QuickActions from '@components/post_draft/quick_actions';
 import PostPriorityLabel from '@components/post_priority/post_priority_label';
@@ -62,7 +63,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         },
         inputContentContainer: {
             alignItems: 'stretch',
-            paddingTop: 7,
         },
         inputWrapper: {
             alignItems: 'flex-end',
@@ -75,6 +75,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             borderColor: changeOpacity(theme.centerChannelColor, 0.20),
             borderTopLeftRadius: 12,
             borderTopRightRadius: 12,
+            overflow: 'hidden',
         },
         actionsContainer: {
             display: 'flex',
@@ -235,6 +236,7 @@ export default function DraftInput({
                     showsVerticalScrollIndicator={false}
                     style={style.inputContainer}
                 >
+                    <GuestBanner channelId={channelId}/>
                     {Boolean(postPriority?.priority) && (
                         <View style={style.postPriorityLabel}>
                             <PostPriorityLabel label={postPriority!.priority}/>

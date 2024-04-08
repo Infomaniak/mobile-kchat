@@ -97,7 +97,7 @@ const enhanced = withObservables([], ({serverUrl, database}: Props) => {
             return of$(false);
         }),
     );
-    const isCallsEnabledInChannel = observeIsCallsEnabledInChannel();
+    const isCallsEnabledInChannel = observeIsCallsEnabledInChannel(userId, channel);
 
     const canManageMembers = currentUser.pipe(
         combineLatestWith(channelId),

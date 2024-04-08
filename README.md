@@ -14,6 +14,7 @@ The kChat app requires an Infomaniak account with kSuite. It enables you to comm
 - Make sure that xcode & xcode command line tools is installed and up to date.
 - Android studio must be installed & configured
 - Make sure to install cocoapods package installed using `brew install cocoapods`
+- Whitelist this path `/Users/{username}/Library/Developer/Xcode/DerivedData` within your simulator to avoid simulator errors
 
 ## Install open jdk
 
@@ -21,9 +22,9 @@ The kChat app requires an Infomaniak account with kSuite. It enables you to comm
 2. Then run those commands to update your PATH :
 
 ```
-  sudo ln -sfn /opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk # Create a symlink so that your java wrappers can find this jdk
-  echo 'export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"' >> ~/.zshrc
-  export CPPFLAGS="-I/opt/homebrew/opt/openjdk@11/include"
+sudo ln -sfn /opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk # Create a symlink so that your java wrappers can find this jdk
+echo 'export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"' >> ~/.zshrc
+export CPPFLAGS="-I/opt/homebrew/opt/openjdk@11/include"
 ```
 
 ## Project installation :
@@ -52,4 +53,31 @@ Open xcode and select `Xcode > Settings > Locations` and make sure that the drop
 
 ### SSL errors with ruby
 
-Add this line within your `.zprofile` : `PKG_CONFIG_PATH=/opt/homebrew/opt/openssl@1.1/lib/pkgconfig rvm reinstall 2.7.6 --with-openssl-lib=/opt/homebrew/opt/openssl@1.1 --with-openssl-include=/opt/homebrew/opt/openssl@1.1`
+Install Ruby by running `PKG_CONFIG_PATH=/opt/homebrew/opt/openssl@1.1/lib/pkgconfig rvm reinstall 3.0.6 --with-openssl-lib=/opt/homebrew/opt/openssl@1.1 --with-openssl-include=/opt/homebrew/opt/openssl@1.1`
+
+## Contribution
+
+If you wish to contribute code to the Mattermost base repository to fix issues or add new features, follow these steps:
+
+### Prerequisites
+
+Before you begin, ensure you have:
+
+- A valid GitHub account.
+- Been added to the Infomaniak GitHub group.
+
+### Steps:
+
+1. First, add two remote repositories to your local GitHub folder using the following commands:
+   - `git remote add upstream https://github.com/mattermost/mattermost-mobile.git` (used to pull the latest changes from upstream)
+   - `git remote add fork https://github.com/Infomaniak/mobile-kchat.git` (used to create the PR onto upstream)
+
+2. Next, pull the main upstream branch to ensure you have the latest changes from upstream.
+
+3. Once you have cloned the upstream branch in your projects, switch to this branch using `git checkout {name of the branch}`.
+
+4. Create your own local branch from the upstream branch using `git checkout -b {name of the branch}`.
+
+5. After applying your changes, push them to the remote fork to create a PR on Mattermost using `git push fork {name of the branch}`.
+
+6. Follow the PR instructions to provide Mattermost with the necessary information to review your code thoroughly.

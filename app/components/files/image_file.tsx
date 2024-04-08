@@ -5,7 +5,7 @@ import React, {useCallback, useMemo, useState} from 'react';
 import {StyleSheet, useWindowDimensions, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
-import {buildFilePreviewUrl, buildFileThumbnailUrl} from '@actions/remote/file';
+import {buildFilePreviewUrl, buildFileThumbnailUrl, buildFileUrl} from '@actions/remote/file';
 import CompassIcon from '@components/compass_icon';
 import ProgressiveImage from '@components/progressive_image';
 import {useServerUrl} from '@context/server';
@@ -102,7 +102,7 @@ const ImageFile = ({
             } else {
                 props.thumbnailUri = buildFileThumbnailUrl(serverUrl, file.id);
             }
-            props.imageUri = buildFilePreviewUrl(serverUrl, file.id);
+            props.imageUri = isGif ? buildFileUrl(serverUrl, file.id) : buildFilePreviewUrl(serverUrl, file.id);
             props.inViewPort = inViewPort;
         }
         return props;

@@ -3,11 +3,12 @@
 import React from 'react';
 import Svg, {Path, Circle} from 'react-native-svg';
 
+import {isDarkTheme} from '@app/utils/theme';
 import {useTheme} from '@context/theme';
 
 export default function SavedPostsIcon() {
     const theme = useTheme();
-    if (theme.ikName === 'Dark') {
+    if (isDarkTheme(theme)) {
         return (
             <Svg
                 width={155}

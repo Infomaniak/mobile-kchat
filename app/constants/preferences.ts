@@ -63,8 +63,9 @@ const Preferences = {
     ADVANCED_SEND_ON_CTRL_ENTER: 'send_on_ctrl_enter',
     THEMES: {
         infomaniak: {
-            ikName: 'Medium',
+            ikName: 'Light',
             type: 'Infomaniak',
+            ksuiteTheme: 'light',
             sidebarBg: '#292E3D',
             sidebarText: '#e0e0e0',
             sidebarUnreadText: '#ffffff',
@@ -89,6 +90,7 @@ const Preferences = {
             mentionHighlightBg: '#ffd470',
             mentionHighlightLink: '#1b1d22',
             codeTheme: 'github',
+            guestBannerBackground: '#F4F6FD',
         },
         denim: {
             type: 'Denim',
@@ -116,6 +118,7 @@ const Preferences = {
             mentionHighlightBg: '#ffd470',
             mentionHighlightLink: '#1b1d22',
             codeTheme: 'github',
+            guestBannerBackground: '#F4F6FD',
         },
         sapphire: {
             type: 'Sapphire',
@@ -145,8 +148,9 @@ const Preferences = {
             codeTheme: 'github',
         },
         quartz: {
-            ikName: 'Light',
+            ikName: 'Automatic',
             type: 'Quartz',
+            ksuiteTheme: 'auto',
             sidebarBg: '#f4f4f6',
             sidebarText: '#090a0b',
             sidebarUnreadText: '#2d3039',
@@ -171,6 +175,7 @@ const Preferences = {
             mentionHighlightBg: '#7ff0f0',
             mentionHighlightLink: '#0d6e6e',
             codeTheme: 'github',
+            guestBannerBackground: '#F4F6FD',
         },
         indigo: {
             type: 'Indigo',
@@ -198,11 +203,13 @@ const Preferences = {
             mentionHighlightBg: '#133a91',
             mentionHighlightLink: '#a4f4f4',
             codeTheme: 'github',
+            guestBannerBackground: '#1B1D22',
         },
         onyx: {
             ikName: 'Dark',
             type: 'Onyx',
-            sidebarBg: '#121317',
+            ksuiteTheme: 'dark',
+            sidebarBg: '#19171D',
             sidebarText: '#ffffff',
             sidebarUnreadText: '#ffffff',
             sidebarTextHoverBg: '#25262a',
@@ -216,7 +223,7 @@ const Preferences = {
             dndIndicator: '#d24b4e',
             mentionBg: '#1c58d9',
             mentionColor: '#ffffff',
-            centerChannelBg: '#090a0b',
+            centerChannelBg: '#1A1D21',
             centerChannelColor: '#dddfe4',
             newMessageSeparator: '#1adbdb',
             linkColor: '#5d89ea',
@@ -226,6 +233,7 @@ const Preferences = {
             mentionHighlightBg: '#0d6e6e',
             mentionHighlightLink: '#a4f4f4',
             codeTheme: 'monokai',
+            guestBannerBackground: '#1f2328',
         },
     } as Record<ThemeKey, Theme>,
 };

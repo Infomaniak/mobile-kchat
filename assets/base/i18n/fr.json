@@ -1,4 +1,5 @@
 {
+    "your.teams": "Vos équipes",
     "about.date": "Date de compilation :",
     "about.enterpriseEditionLearn": "Pour en savoir plus sur l’Enterprise Edition : ",
     "about.enterpriseEditionSt": "Communication moderne derrière votre pare-feu.",
@@ -113,7 +114,6 @@
     "channel_info.archive_failed": "Une erreur s'est produite lors de la tentative d'archiver le canal {displayName}",
     "channel_info.archive_title": "Archiver {term}",
     "channel_info.channel_auto_follow_threads": "Suivre tous les fils de ce canal",
-    "channel_info.channel_auto_follow_threads_failed": "Une erreur s'est produite lors de la tentative de suivi de tous les fils de ce canal {displayName}",
     "channel_info.channel_files": "Fichiers",
     "channel_info.close": "Fermer",
     "channel_info.close_dm": "Fermer le message direct",
@@ -1105,5 +1105,9 @@
     "video.download": "Télécharger une vidéo",
     "video.download_description": "Cette vidéo doit être téléchargée pour être lue.",
     "video.failed_description": "Une erreur s'est produite lors de la tentative de lecture de la vidéo.",
-    "your.servers": "Vos équipes"
+    "your.servers": "Vos équipes",
+    "display_theme.tile.auto": "Automatique",
+    "display_theme.tile.dark": "Sombre",
+    "display_theme.tile.light": "Clair",
+    "guest_banner.text": "Il y a {count} {count, plural, one {utilisateur externe} other {utilisateurs externes}} dans cette conversation."
 }

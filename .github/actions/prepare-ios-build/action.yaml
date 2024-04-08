@@ -10,7 +10,8 @@ runs:
       shell: bash
       run: |
         echo "::group::install-os-deps"
-        brew install watchman
+        /opt/homebrew/bin/brew install --overwrite python@3.12
+        /opt/homebrew/bin/brew install watchman
         echo "::endgroup::"
 
     - name: ci/prepare-mobile-build
@@ -19,7 +20,7 @@ runs:
     - name: ci/install-pods-dependencies
       shell: bash
       run: |
-        echo "::group::install-pods-dependencies"        
+        echo "::group::install-pods-dependencies"
         npm run ios-gems
         npm run pod-install
         echo "::endgroup::"

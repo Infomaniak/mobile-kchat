@@ -23,7 +23,7 @@ type WithThemeProps = {
     theme: Theme;
 }
 
-export function getDefaultThemeByAppearance(): Theme {
+export function getDefaultThemeByAppearance() {
     if (Appearance.getColorScheme() === 'dark') {
         return Preferences.THEMES.onyx;
     }
@@ -73,14 +73,18 @@ const ThemeProvider = ({currentTeamId, children, themes}: Props) => {
         setTheme(getTheme(currentTeamId, themes));
     }, [currentTeamId, themes]);
 
-    return (<Provider value={theme}>{children}</Provider>);
+    return (
+        <Provider value={theme}>
+            {children}
+        </Provider>
+    );
 };
 
 export function withTheme<T extends WithThemeProps>(Component: ComponentType<T>): ComponentType<T> {
     return function ThemeComponent(props) {
         return (
             <Consumer>
-                {(theme: Theme) => (
+                {(theme) => (
                     <Component
                         {...props}
                         theme={theme}

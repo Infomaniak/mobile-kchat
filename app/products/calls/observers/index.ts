@@ -3,6 +3,7 @@
 
 import {distinctUntilChanged, switchMap, combineLatest, Observable, of as of$} from 'rxjs';
 
+import {getUserIdFromChannelName} from '@app/utils/user';
 import {
     observeCallsConfig,
     observeCallsState,
@@ -11,12 +12,13 @@ import {
     observeIncomingCalls,
 } from '@calls/state';
 import {fillUserModels, userIds} from '@calls/utils';
-import {License} from '@constants';
+import {General, License} from '@constants';
 import DatabaseManager from '@database/manager';
 import {observeLicense} from '@queries/servers/system';
 import {queryUsersById} from '@queries/servers/user';
 import UserModel from '@typings/database/models/servers/user';
 
+import type {ChannelModel} from '@app/database/models/server';
 import type {CallSession} from '@calls/types/calls';
 import type {Database} from '@nozbe/watermelondb';
 
@@ -26,8 +28,12 @@ export type LimitRestrictedInfo = {
     isCloudStarter: boolean;
 }
 
-export const observeIsCallsEnabledInChannel = () => {
-    return of$(true);
+export const observeIsCallsEnabledInChannel = (userId: Observable<string>, channel: Observable<ChannelModel | undefined>) => {
+    return combineLatest([userId, channel]).pipe(switchMap(([id, c]) => {
+        const teammateId = (c?.type === General.DM_CHANNEL) ? getUserIdFromChannelName(id, c?.name) : undefined;
+        const isOwnDirectMessage = (c?.type === General.DM_CHANNEL) && id === teammateId;
+        return of$(!isOwnDirectMessage);
+    }));
 };
 
 export const observeIsCallLimitRestricted = (database: Database, serverUrl: string, channelId: string) => {
