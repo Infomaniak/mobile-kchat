@@ -69,7 +69,6 @@ export const syncMultiTeam = async (accessToken: string) => {
         const client = await NetworkManager.createGlobalClient(accessToken);
         const teamServers = await client.getMultiTeams();
         await removeServerCredentials(BASE_SERVER_URL);
-        await DatabaseManager.deleteServerDatabase(BASE_SERVER_URL);
 
         const serverCredentials = await getAllServerCredentials();
         const serverCreationPromises = [];
@@ -90,7 +89,6 @@ export const syncMultiTeam = async (accessToken: string) => {
         return serverCreationResults;
     } catch (e) {
         await removeServerCredentials(BASE_SERVER_URL);
-        await DatabaseManager.deleteServerDatabase(BASE_SERVER_URL);
 
         return [];
     }
