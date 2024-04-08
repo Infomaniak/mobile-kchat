@@ -30,6 +30,7 @@ import MarkdownTableCell, {type MarkdownTableCellProps} from './markdown_table_c
 import MarkdownTableImage from './markdown_table_image';
 import MarkdownTableRow, {type MarkdownTableRowProps} from './markdown_table_row';
 import {addListItemIndices, combineTextNodes, highlightMentions, highlightWithoutNotification, highlightSearchPatterns, parseTaskLists, pullOutImages} from './transform';
+import {removeUnwantedCharacters} from './utils';
 
 import type {
     MarkdownAtMentionRenderer, MarkdownBaseRenderer, MarkdownBlockStyles, MarkdownChannelMentionRenderer,
@@ -601,7 +602,7 @@ const Markdown = ({
 
     const parser = useRef(new Parser({urlFilter, minimumHashtagLength})).current;
     const renderer = useMemo(createRenderer, [theme, textStyles, imagesMetadata]);
-    let ast = parser.parse(value.toString());
+    let ast = parser.parse(removeUnwantedCharacters(value.toString()));
 
     ast = combineTextNodes(ast);
     ast = addListItemIndices(ast);
