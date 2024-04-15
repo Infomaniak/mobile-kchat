@@ -47,6 +47,17 @@ export PATH=$PATH:$ANDROID_HOME/tools/bin
 export PATH=$PATH:$ANDROID_HOME/emulator
 ```
 
+## 'git config user.email' matches '.+@.+'
+
+```
+git config --global user.email johndoe@example.com
+```
+
+### Binary 'watchman' not found
+```
+brew install watchman
+```
+
 ### Xcode build binary error >= 13
 
 Open xcode and select `Xcode > Settings > Locations` and make sure that the dropdown "command line tools" is correctly set.
