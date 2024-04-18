@@ -3,7 +3,7 @@
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$, from} from 'rxjs';
-import {switchMap, toArray} from 'rxjs/operators';
+import {switchMap} from 'rxjs/operators';
 
 import {observeRecentPostsInChannel} from '@app/queries/servers/post';
 import {observeChannel} from '@queries/servers/channel';
@@ -19,9 +19,7 @@ const enhance = withObservables(['post'], ({database, post}: WithDatabaseArgs & 
     recentPosts: observeRecentPostsInChannel(database, post.channelId).pipe(
         switchMap(
             (posts: PostModel[]) => (posts ? from(posts) : of$(null)),
-        ),
-        toArray(),
-    ).toPromise(),
+        )),
     currentUser: observeCurrentUser(database),
     channelType: observeChannel(database, post.channelId).pipe(
         switchMap(
@@ -29,5 +27,4 @@ const enhance = withObservables(['post'], ({database, post}: WithDatabaseArgs & 
         ),
     ),
 }));
-
 export default withDatabase(enhance(AddMembers));

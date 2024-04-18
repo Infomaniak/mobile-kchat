@@ -24,7 +24,7 @@ type AddMembersProps = {
     location: string;
     post: PostModel;
     theme: Theme;
-    recentPosts: Promise<PostModel[]>;
+    recentPosts: PostModel | null;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -83,7 +83,7 @@ const AddMembers = ({channelType, currentUser, location, post, theme, recentPost
 
     const handleNotifyChannelMember = async () => {
         if (post && post.channelId && currentUser) {
-            const recentPostsData: PostModel[] = await recentPosts;
+            const recentPostsData = await recentPosts;
             const previousPostId = (recentPostsData as any)._raw?.id;
             notifyChannelMember(serverUrl, post.channelId, userIds, previousPostId);
             removePost(serverUrl, post);
