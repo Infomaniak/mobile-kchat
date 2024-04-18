@@ -2,22 +2,30 @@
 // See LICENSE.txt for license information.
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
-import {of as of$} from 'rxjs';
-import {switchMap} from 'rxjs/operators';
+import {of as of$, from} from 'rxjs';
+import {switchMap, toArray} from 'rxjs/operators';
 
+import {observeRecentPostsInChannel} from '@app/queries/servers/post';
 import {observeChannel} from '@queries/servers/channel';
 import {observeCurrentUser} from '@queries/servers/user';
 
 import AddMembers from './add_members';
 
 import type {WithDatabaseArgs} from '@typings/database/database';
+import type ChannelModel from '@typings/database/models/servers/channel';
 import type PostModel from '@typings/database/models/servers/post';
 
 const enhance = withObservables(['post'], ({database, post}: WithDatabaseArgs & {post: PostModel}) => ({
+    recentPosts: observeRecentPostsInChannel(database, post.channelId).pipe(
+        switchMap(
+            (posts: PostModel[]) => (posts ? from(posts) : of$(null)),
+        ),
+        toArray(),
+    ).toPromise(),
     currentUser: observeCurrentUser(database),
     channelType: observeChannel(database, post.channelId).pipe(
         switchMap(
-            (channel) => (channel ? of$(channel.type) : of$(null)),
+            (channel: ChannelModel) => (channel ? of$(channel.type) : of$(null)),
         ),
     ),
 }));

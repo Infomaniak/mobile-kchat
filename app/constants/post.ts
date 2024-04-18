@@ -4,6 +4,7 @@
 import {toMilliseconds} from '@utils/datetime';
 
 export const PostTypes: Record<string, string> = {
+    USER_MENTIONED_IN_CHANNEL: 'system_mentioned_channel',
     CHANNEL_DELETED: 'system_channel_deleted',
     CHANNEL_UNARCHIVED: 'system_channel_restored',
     DISPLAYNAME_CHANGE: 'system_displayname_change',

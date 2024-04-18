@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {Database, Model, Q, Query} from '@nozbe/watermelondb';
-import {of as of$, combineLatestWith} from 'rxjs';
+import {of as of$, combineLatestWith, from} from 'rxjs';
 import {switchMap, distinctUntilChanged} from 'rxjs/operators';
 
 import {MM_TABLES} from '@constants/database';
@@ -180,6 +180,22 @@ export const getRecentPostsInChannel = async (database: Database, channelId: str
         return queryPostsChunk(database, channelId, recent.earliest, recent.latest, false, includeDeleted).fetch();
     }
     return [];
+};
+
+export const getRecentPostsInChannelToNotify = (database: Database, channelId: string, includeDeleted = false) => {
+    return from(queryPostsInChannel(database, channelId).fetch()).pipe(
+        switchMap((chunks: any) => {
+            if (chunks.length) {
+                const recent = chunks[0];
+                return from(queryPostsChunk(database, channelId, recent.earliest, recent.latest, false, includeDeleted).fetch());
+            }
+            return of$([]);
+        }),
+    );
+};
+
+export const observeRecentPostsInChannel = (database: Database, channelId: string) => {
+    return getRecentPostsInChannelToNotify(database, channelId);
 };
 
 export const queryPostsById = (database: Database, postIds: string[], sort?: Q.SortOrder) => {

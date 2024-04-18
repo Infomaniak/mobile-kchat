@@ -6,7 +6,7 @@ import {useIntl} from 'react-intl';
 import {Text} from 'react-native';
 
 import {removePost, sendAddToChannelEphemeralPost} from '@actions/local/post';
-import {addMembersToChannel} from '@actions/remote/channel';
+import {addMembersToChannel, notifyChannelMember} from '@actions/remote/channel';
 import FormattedText from '@components/formatted_text';
 import AtMention from '@components/markdown/at_mention';
 import {General} from '@constants';
@@ -24,6 +24,7 @@ type AddMembersProps = {
     location: string;
     post: PostModel;
     theme: Theme;
+    recentPosts: Promise<PostModel[]>;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -36,7 +37,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const AddMembers = ({channelType, currentUser, location, post, theme}: AddMembersProps) => {
+const AddMembers = ({channelType, currentUser, location, post, theme, recentPosts}: AddMembersProps) => {
     const intl = useIntl();
     const styles = getStyleSheet(theme);
     const textStyles = getMarkdownTextStyles(theme);
@@ -80,6 +81,15 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
         }
     };
 
+    const handleNotifyChannelMember = async () => {
+        if (post && post.channelId && currentUser) {
+            const recentPostsData: PostModel[] = await recentPosts;
+            const previousPostId = (recentPostsData as any)._raw?.id;
+            notifyChannelMember(serverUrl, post.channelId, userIds, previousPostId);
+            removePost(serverUrl, post);
+        }
+    };
+
     const generateAtMentions = (names: string[]) => {
         if (names.length === 1) {
             return (
@@ -97,6 +107,7 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
                         key={key}
                         id={'post_body.check_for_out_of_channel_mentions.link.and'}
                         defaultMessage={' and '}
+                        style={styles.message}
                     />
                 );
             }
@@ -147,13 +158,23 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
 
     let outOfChannelMessageID = '';
     let outOfChannelMessageText = '';
+    let notificationMessageTextId = '';
+    let notificationOrMessageTextId = '';
+    let historyMessageId = '';
+
     const outOfChannelAtMentions = generateAtMentions(usernames);
     if (usernames.length === 1) {
         outOfChannelMessageID = t('post_body.check_for_out_of_channel_mentions.message.one');
         outOfChannelMessageText = 'was mentioned but is not in the channel. Would you like to ';
+        notificationOrMessageTextId = t('post_body.check_for_out_of_channel_groups_mentions_choice.message');
+        notificationMessageTextId = t('post_body.check_for_out_of_channel_groups_mentions_notify.message');
+        historyMessageId = t('post_body.check_for_out_of_channel_mentions.message_last');
     } else if (usernames.length > 1) {
         outOfChannelMessageID = t('post_body.check_for_out_of_channel_mentions.message.multiple');
         outOfChannelMessageText = 'were mentioned but they are not in the channel. Would you like to ';
+        notificationOrMessageTextId = t('post_body.check_for_out_of_channel_groups_mentions_choice.message.multiple');
+        notificationMessageTextId = t('post_body.check_for_out_of_channel_groups_mentions_notify.message.multiple');
+        historyMessageId = t('post_body.check_for_out_of_channel_mentions.message_last.multiple');
     }
 
     let outOfGroupsMessageID = '';
@@ -166,32 +187,77 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
 
     let outOfChannelMessage = null;
     if (usernames.length) {
-        outOfChannelMessage = (
-            <Text>
-                {outOfChannelAtMentions}
-                {' '}
-                <FormattedText
-                    id={outOfChannelMessageID}
-                    defaultMessage={outOfChannelMessageText}
-                    style={styles.message}
-                />
-                <Text
-                    style={textStyles.link}
-                    testID='add_channel_member_link'
-                    onPress={handleAddChannelMember}
-                >
+        if (channelType === General.OPEN_CHANNEL) {
+            outOfChannelMessage = (
+                <Text>
+                    {outOfChannelAtMentions}
+                    {' '}
                     <FormattedText
-                        id={linkId}
-                        defaultMessage={linkText}
+                        id={outOfChannelMessageID}
+                        defaultMessage={outOfChannelMessageText}
+                        style={styles.message}
+                    />
+                    <Text
+                        style={textStyles.link}
+                        testID='add_channel_member_link'
+                        onPress={handleAddChannelMember}
+                    >
+                        <FormattedText
+                            id={linkId}
+                            defaultMessage={linkText}
+                        />
+                    </Text>
+                    {' '}
+                    <FormattedText
+                        style={styles.message}
+                        id={notificationOrMessageTextId}
+                        defaultMessage='or '
+                    />
+                    {' '}
+                    <Text
+                        onPress={handleNotifyChannelMember}
+                    >
+                        <FormattedText
+                            style={textStyles.link}
+                            id={notificationMessageTextId}
+                            defaultMessage={'notify them'}
+                        />
+                    </Text>
+                    <FormattedText
+                        id={historyMessageId}
+                        defaultMessage={'? They will have access to all message history.'}
+                        style={styles.message}
                     />
                 </Text>
-                <FormattedText
-                    id={'post_body.check_for_out_of_channel_mentions.message_last'}
-                    defaultMessage={'? They will have access to all message history.'}
-                    style={styles.message}
-                />
-            </Text>
-        );
+            );
+        } else {
+            outOfChannelMessage = (
+                <Text>
+                    {outOfChannelAtMentions}
+                    {' '}
+                    <FormattedText
+                        id={outOfChannelMessageID}
+                        defaultMessage={outOfChannelMessageText}
+                        style={styles.message}
+                    />
+                    <Text
+                        style={textStyles.link}
+                        testID='add_channel_member_link'
+                        onPress={handleAddChannelMember}
+                    >
+                        <FormattedText
+                            id={linkId}
+                            defaultMessage={linkText}
+                        />
+                    </Text>
+                    <FormattedText
+                        id={historyMessageId}
+                        defaultMessage={'? They will have access to all message history.'}
+                        style={styles.message}
+                    />
+                </Text>
+            );
+        }
     }
 
     let outOfGroupsMessage = null;

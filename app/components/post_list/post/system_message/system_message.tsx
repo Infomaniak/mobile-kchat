@@ -239,6 +239,21 @@ const renderAddGuestToChannelMessage = ({post, location, styles, intl, theme}: R
     return renderMessage({post, styles, intl, location, localeHolder, values, theme});
 };
 
+const renderUserMentionedInChannelMessage = ({post, styles, intl, theme, location}: RenderersProps) => {
+    const username = renderUsername(post.props.username);
+    const channelDisplayName = post.props.channel_name;
+    const postLink = post.props.post_link;
+
+    const localeHolder = {
+        id: t('api.channel.mention.user_mentioned_in_channel'),
+        defaultMessage: '{username} a mentionné votre nom dans le canal ~{channelDisplayName} \n{postLink}',
+    };
+
+    const values = {username, channelDisplayName, postLink};
+
+    return renderMessage({post, styles, intl, location, localeHolder, values, theme});
+};
+
 const renderGuestJoinChannelMessage = ({post, styles, location, intl, theme}: RenderersProps, hideGuestTags: boolean) => {
     if (!post.props.username) {
         return null;
@@ -278,6 +293,7 @@ const systemMessageRenderers = {
     [Post.POST_TYPES.CHANNEL_DELETED]: renderArchivedMessage,
     [Post.POST_TYPES.CHANNEL_UNARCHIVED]: renderUnarchivedMessage,
     [Post.POST_TYPES.IK_SYSTEM_POST_REMINDER]: renderReminderSystemBotMessage,
+    [Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL]: renderUserMentionedInChannelMessage,
 };
 
 export const SystemMessage = ({post, location, author, hideGuestTags}: SystemMessageProps & { hideGuestTags: boolean}) => {
@@ -292,6 +308,9 @@ export const SystemMessage = ({post, location, author, hideGuestTags}: SystemMes
     }
     if (post.type === Post.POST_TYPES.ADD_GUEST_TO_CHANNEL) {
         return renderAddGuestToChannelMessage({post, author, location, styles, intl, theme}, hideGuestTags);
+    }
+    if (post.type === Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL) {
+        return renderUserMentionedInChannelMessage({post, styles, intl, location, theme});
     }
 
     const renderer = systemMessageRenderers[post.type];
