@@ -61,18 +61,14 @@ export async function handleUserUpdatedEvent(serverUrl: string, msg: WebSocketMe
     } else {
         const channels = await queryUserChannelsByTypes(database, user.id, [General.DM_CHANNEL, General.GM_CHANNEL]).fetch();
 
-        if (isGuest(user.roles)) {
-            const currentChannel = await getCurrentChannel(database);
-
-            if (!currentChannel) {
-                return;
-            }
-
+        const currentChannel = await getCurrentChannel(database);
+        if (currentChannel && [General.OPEN_CHANNEL, General.PRIVATE_CHANNEL].includes(currentChannel.type as any)) {
+            const databaseUser = await getUserById(database, user.id);
             const channelMembers = await queryChannelMembers(database, currentChannel.id);
             const isInChannel = await channelMembers.some((m) => m.userId === user.id);
-            const databaseUser = await getUserById(database, user.id);
 
-            if (isInChannel && (!databaseUser || databaseUser.deleteAt !== user.delete_at) && [General.OPEN_CHANNEL, General.PRIVATE_CHANNEL].includes(currentChannel.type as any)) {
+            if (isInChannel &&
+                (!databaseUser || databaseUser.deleteAt !== user.delete_at || isGuest(databaseUser.roles) !== isGuest(user.roles))) {
                 await fetchChannelStats(serverUrl, currentChannel.id);
             }
         }
