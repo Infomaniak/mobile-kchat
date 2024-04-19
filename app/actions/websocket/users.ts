@@ -4,16 +4,17 @@
 import {DeviceEventEmitter} from 'react-native';
 
 import {updateChannelsDisplayName} from '@actions/local/channel';
+import {fetchChannelStats} from '@actions/remote/channel';
 import {fetchMe, fetchUsersByIds} from '@actions/remote/user';
 import {Events, General, Preferences} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getTeammateNameDisplaySetting} from '@helpers/api/preference';
 import WebsocketManager from '@managers/websocket_manager';
-import {queryChannelsByTypes, queryUserChannelsByTypes} from '@queries/servers/channel';
+import {getCurrentChannel, queryChannelsByTypes, queryUserChannelsByTypes} from '@queries/servers/channel';
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
 import {getConfig, getLicense} from '@queries/servers/system';
 import {getCurrentUser, getUserById} from '@queries/servers/user';
-import {displayUsername} from '@utils/user';
+import {displayUsername, isGuest} from '@utils/user';
 
 import type {Model} from '@nozbe/watermelondb';
 
@@ -59,6 +60,16 @@ export async function handleUserUpdatedEvent(serverUrl: string, msg: WebSocketMe
         }
     } else {
         const channels = await queryUserChannelsByTypes(database, user.id, [General.DM_CHANNEL, General.GM_CHANNEL]).fetch();
+
+        if (isGuest(user.roles)) {
+            const currentChannel = await getCurrentChannel(database);
+            const databaseUser = await getUserById(database, user.id);
+
+            if (currentChannel && (!databaseUser || databaseUser.deleteAt !== user.delete_at) && [General.OPEN_CHANNEL, General.PRIVATE_CHANNEL].includes(currentChannel.type as any)) {
+                await fetchChannelStats(serverUrl, currentChannel.id);
+            }
+        }
+
         if (channels.length) {
             const {models} = await updateChannelsDisplayName(serverUrl, channels, [user], true);
             if (models?.length) {
