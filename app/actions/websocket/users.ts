@@ -10,7 +10,7 @@ import {Events, General, Preferences} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getTeammateNameDisplaySetting} from '@helpers/api/preference';
 import WebsocketManager from '@managers/websocket_manager';
-import {getCurrentChannel, queryChannelsByTypes, queryUserChannelsByTypes} from '@queries/servers/channel';
+import {getCurrentChannel, queryChannelMembers, queryChannelsByTypes, queryUserChannelsByTypes} from '@queries/servers/channel';
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
 import {getConfig, getLicense} from '@queries/servers/system';
 import {getCurrentUser, getUserById} from '@queries/servers/user';
@@ -63,9 +63,16 @@ export async function handleUserUpdatedEvent(serverUrl: string, msg: WebSocketMe
 
         if (isGuest(user.roles)) {
             const currentChannel = await getCurrentChannel(database);
+
+            if (!currentChannel) {
+                return;
+            }
+
+            const channelMembers = await queryChannelMembers(database, currentChannel.id);
+            const isInChannel = await channelMembers.some((m) => m.userId === user.id);
             const databaseUser = await getUserById(database, user.id);
 
-            if (currentChannel && (!databaseUser || databaseUser.deleteAt !== user.delete_at) && [General.OPEN_CHANNEL, General.PRIVATE_CHANNEL].includes(currentChannel.type as any)) {
+            if (isInChannel && (!databaseUser || databaseUser.deleteAt !== user.delete_at) && [General.OPEN_CHANNEL, General.PRIVATE_CHANNEL].includes(currentChannel.type as any)) {
                 await fetchChannelStats(serverUrl, currentChannel.id);
             }
         }
