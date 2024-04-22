@@ -30,6 +30,7 @@
   "api.channel.add_guest.added": "{addedUsername} added to the channel as a guest by {username}.",
   "api.channel.add_member.added": "{addedUsername} added to the channel by {username}.",
   "api.channel.guest_join_channel.post_and_forget": "{username} joined the channel as a guest.",
+  "api.channel.mention.user_mentioned_in_channel": "{username} mentioned your name in the channel ~{channelDisplayName} \n{postLink}",
   "apps.error": "Error: {error}",
   "apps.error.command.field_missing": "Required fields missing: `{fieldName}`.",
   "apps.error.command.same_channel": "Channel repeated for field `{fieldName}`: `{option}`.",

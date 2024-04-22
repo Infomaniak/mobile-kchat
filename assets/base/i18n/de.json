@@ -30,6 +30,7 @@
     "api.channel.add_guest.added": "{addedUsername} durch {username} zum Kanal als Gast hinzugefügt.",
     "api.channel.add_member.added": "{addedUsername} durch {username} zum Kanal hinzugefügt.",
     "api.channel.guest_join_channel.post_and_forget": "{username} nimmt als Gast am Kanal teil.",
+    "api.channel.mention.user_mentioned_in_channel": "{username} hat Ihren Namen im Kanal ~{channelDisplayName} erwähnt \n{postLink}",
     "apps.error": "Fehler: {error}",
     "apps.error.command.field_missing": "Erforderliche Felder fehlen: `{fieldName}`.",
     "apps.error.command.same_channel": "Kanal wiederholt für Feld `{fieldName}`: `{option}`.",

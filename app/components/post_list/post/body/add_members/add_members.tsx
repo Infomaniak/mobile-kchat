@@ -24,7 +24,6 @@ type AddMembersProps = {
     location: string;
     post: PostModel;
     theme: Theme;
-    recentPosts: PostModel | null;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -37,7 +36,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const AddMembers = ({channelType, currentUser, location, post, theme, recentPosts}: AddMembersProps) => {
+const AddMembers = ({channelType, currentUser, location, post, theme}: AddMembersProps) => {
     const intl = useIntl();
     const styles = getStyleSheet(theme);
     const textStyles = getMarkdownTextStyles(theme);
@@ -83,9 +82,7 @@ const AddMembers = ({channelType, currentUser, location, post, theme, recentPost
 
     const handleNotifyChannelMember = async () => {
         if (post && post.channelId && currentUser) {
-            const recentPostsData = await recentPosts;
-            const previousPostId = (recentPostsData as any)._raw?.id;
-            notifyChannelMember(serverUrl, post.channelId, userIds, previousPostId);
+            notifyChannelMember(serverUrl, post.channelId, userIds, post.props.add_channel_member.original_post_id);
             removePost(serverUrl, post);
         }
     };

@@ -246,7 +246,7 @@ const renderUserMentionedInChannelMessage = ({post, styles, intl, theme, locatio
 
     const localeHolder = {
         id: t('api.channel.mention.user_mentioned_in_channel'),
-        defaultMessage: '{username} a mentionné votre nom dans le canal ~{channelDisplayName} \n{postLink}',
+        defaultMessage: '{username} mentioned your name in the channel ~{channelDisplayName} \n{postLink}',
     };
 
     const values = {username, channelDisplayName, postLink};

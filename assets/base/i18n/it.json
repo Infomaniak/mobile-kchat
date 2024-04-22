@@ -30,6 +30,7 @@
     "api.channel.add_guest.added": "{addedUsername} aggiunto al canale come ospite da {username}.",
     "api.channel.add_member.added": "{addedUsername} aggiunto al canale da {username}.",
     "api.channel.guest_join_channel.post_and_forget": "{username} si è unito al canale come ospite.",
+    "api.channel.mention.user_mentioned_in_channel": "{username} ha menzionato il tuo nome nel canale ~{channelDisplayName} \n{postLink}",
     "apps.error": "Errore: {error}",
     "apps.error.command.field_missing": "Campo richiesto mancante: `{fieldName}`.",
     "apps.error.command.same_channel": "Canale ripetuto per il campo `{fieldName}`: `{option}`.",
