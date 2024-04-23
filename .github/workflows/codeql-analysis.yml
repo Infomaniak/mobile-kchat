@@ -17,7 +17,7 @@ jobs:
     permissions:
       security-events: write
     name: Analyze
-    runs-on: [ self-hosted, macOS ]
+    runs-on: [ self-hosted, macOS, Android ]
 
     strategy:
       fail-fast: false
