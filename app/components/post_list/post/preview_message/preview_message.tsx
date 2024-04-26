@@ -178,6 +178,7 @@ export const PreviewMessage = ({channelDisplayName, post, theme, user, postLink,
                         <FormattedRelativeTime
                             value={embed.data.post.create_at}
                             testID='post_header.date_time'
+                            updateIntervalInSeconds={1}
                             style={styles.time}
                         />
                     </View>

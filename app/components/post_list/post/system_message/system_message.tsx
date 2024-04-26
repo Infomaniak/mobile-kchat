@@ -69,6 +69,7 @@ const renderUsername = (value = '') => {
 
 const renderMessage = ({location, post, styles, intl, localeHolder, theme, values, skipMarkdown = false}: RenderMessageProps) => {
     const {containerStyle, messageStyle, textStyles} = styles;
+    let previewUserId = null;
 
     if (skipMarkdown) {
         return (
@@ -76,6 +77,10 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
                 {intl.formatMessage(localeHolder, values)}
             </Text>
         );
+    }
+
+    if (post.metadata && post.metadata.embeds && post.metadata.embeds.length > 0) {
+        previewUserId = post.metadata.embeds[0].data.post.user_id;
     }
 
     return (
@@ -96,6 +101,7 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
                         textStyles={textStyles}
                         channelDisplayName={post.props.channel_name}
                         post={post}
+                        previewUserId={previewUserId}
                         theme={theme}
                         postLink={post.props.post_link}
                         location={location}
