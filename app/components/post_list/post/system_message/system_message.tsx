@@ -7,6 +7,7 @@ import {type StyleProp, Text, type TextStyle, View, type ViewStyle} from 'react-
 
 import Markdown from '@components/markdown';
 import {postTypeMessages} from '@components/post_list/combined_user_activity/messages';
+import PreviewMessage from '@components/post_list/post/preview_message';
 import {Post} from '@constants';
 import {useTheme} from '@context/theme';
 import {t} from '@i18n';
@@ -88,6 +89,20 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
                 value={intl.formatMessage(localeHolder, values)}
                 theme={theme}
             />
+            {post.type === Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL && (
+                <View>
+                    <PreviewMessage
+                        baseTextStyle={messageStyle}
+                        textStyles={textStyles}
+                        channelDisplayName={post.props.channel_name}
+                        post={post}
+                        theme={theme}
+                        postLink={post.props.post_link}
+                        location={location}
+                    />
+                </View>
+
+            )}
         </View>
     );
 };
