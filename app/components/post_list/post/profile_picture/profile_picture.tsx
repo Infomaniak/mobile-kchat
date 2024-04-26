@@ -14,7 +14,6 @@ type ProfilePictureProps = {
     author: any;
     source?: Source;
 }
-const AnimatedFastImage = Animated.createAnimatedComponent(FastImage);
 const AnimatedImage = Animated.createAnimatedComponent(RNImage);
 
 export const ProfilePictureMessage = ({author, source}: ProfilePictureProps) => {
@@ -45,7 +44,7 @@ export const ProfilePictureMessage = ({author, source}: ProfilePictureProps) => 
         }
 
         return (
-            <AnimatedFastImage
+            <FastImage
                 key={pictureUrl}
                 source={imgSource}
                 style={{width: 30, height: 30, borderRadius: 50, marginRight: 8}}
