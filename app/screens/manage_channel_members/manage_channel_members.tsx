@@ -84,13 +84,13 @@ export default function ManageChannelMembers({
 
     const searchTimeoutId = useRef<NodeJS.Timeout | null>(null);
     const mounted = useRef(false);
+    const hasMoreProfiles = useRef(true);
+    const pageRef = useRef(0);
 
     const [isManageMode, setIsManageMode] = useState(false);
     const [profiles, setProfiles] = useState<UserProfile[]>(EMPTY);
-    const hasMoreProfiles = useRef(false);
     const [channelMembers, setChannelMembers] = useState<ChannelMembership[]>(EMPTY_MEMBERS);
     const [searchResults, setSearchResults] = useState<UserProfile[]>(EMPTY);
-    const [page, setPage] = useState(0);
     const [loading, setLoading] = useState(true);
     const [term, setTerm] = useState('');
     const [searchedTerm, setSearchedTerm] = useState('');
@@ -108,16 +108,6 @@ export default function ManageChannelMembers({
     }, [componentId]);
 
     useAndroidHardwareBackHandler(componentId, close);
-
-    const addProfiles = (values: UserProfile[]) => {
-        const newProfiles = [...profiles, ...values];
-        setProfiles(newProfiles);
-    };
-
-    const addMembers = (values: ChannelMembership[]) => {
-        const newMembers = [...channelMembers, ...values];
-        setChannelMembers(newMembers);
-    };
 
     const handleSelectProfile = useCallback(async (profile: UserProfile) => {
         if (profile.id === currentUserId && isManageMode) {
@@ -243,42 +233,42 @@ export default function ManageChannelMembers({
 
     useNavButtonPressed(MANAGE_BUTTON, componentId, toggleManageEnabled, [toggleManageEnabled]);
 
+    const getFetchChannelMembers = useCallback(async () => {
+        const options: GetUsersOptions = {sort: 'admin', active: true, per_page: PER_PAGE_DEFAULT, page: pageRef.current};
+        const {users, members} = await fetchChannelMemberships(serverUrl, channelId, options, true);
+
+        if (!mounted.current) {
+            return;
+        }
+
+        if (users.length < PER_PAGE_DEFAULT) {
+            hasMoreProfiles.current = false;
+        }
+
+        if (users.length) {
+            setChannelMembers((prev) => [...prev, ...members]);
+            setProfiles((prev) => [...prev, ...users]);
+        }
+
+        setLoading(false);
+    }, [serverUrl, channelId]);
+
     const handleReachedBottom = useCallback(() => {
         if (hasMoreProfiles.current && !loading && !searchedTerm) {
+            pageRef.current += 1;
             setLoading(true);
-            setPage((p) => p + 1);
+            getFetchChannelMembers();
         }
-    }, [loading, searchedTerm]);
-
-    const getFetchChannelMembers = useCallback(() => {
-        const options: GetUsersOptions = {sort: 'admin', active: true, per_page: PER_PAGE_DEFAULT, page};
-        fetchChannelMemberships(serverUrl, channelId, options, true).then(({users, members}) => {
-            if (!mounted.current) {
-                return;
-            }
-
-            if (users.length >= PER_PAGE_DEFAULT) {
-                hasMoreProfiles.current = true;
-            }
-            if (users.length < PER_PAGE_DEFAULT) {
-                hasMoreProfiles.current = false;
-            }
-            if (users.length) {
-                addProfiles(users);
-                addMembers(members);
-            }
-
-            setLoading(false);
-        });
-    }, [page, addProfiles, addMembers]);
+    }, [loading, searchedTerm, getFetchChannelMembers]);
 
     useEffect(() => {
         mounted.current = true;
         getFetchChannelMembers();
+
         return () => {
             mounted.current = false;
         };
-    }, [page]);
+    }, []);
 
     useEffect(() => {
         if (canManageAndRemoveMembers) {

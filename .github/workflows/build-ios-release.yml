@@ -14,7 +14,7 @@ env:
 
 jobs:
   test:
-    runs-on: [ self-hosted, macOS ]
+    runs-on: [ self-hosted, macOS, iOS ]
     steps:
       - name: ci/checkout-repo
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
@@ -22,7 +22,7 @@ jobs:
         uses: ./.github/actions/test
 
   build-and-deploy-ios-release:
-    runs-on: [ self-hosted, macOS ]
+    runs-on: [ self-hosted, macOS, iOS ]
     if: ${{ !contains(github.ref_name, 'release-sim') }}
     needs:
       - test

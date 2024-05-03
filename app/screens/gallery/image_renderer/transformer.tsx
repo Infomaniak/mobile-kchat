@@ -435,7 +435,7 @@ const ImageTransformer = (
             return (
                 evt.numberOfPointers === 1 &&
                     (typeof outerGestureHandlerActive === 'undefined' ? true : !outerGestureHandlerActive.value) &&
-                    interactionsEnabled.value && scale.value === 1
+                    interactionsEnabled.value
             );
         },
 
