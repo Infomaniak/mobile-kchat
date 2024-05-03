@@ -3,7 +3,7 @@
 
 import {FlatList} from '@stream-io/flat-list-mvcp';
 import React, {type ReactElement, useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {DeviceEventEmitter, type ListRenderItemInfo, Platform, type StyleProp, StyleSheet, type ViewStyle} from 'react-native';
+import {DeviceEventEmitter, type ListRenderItemInfo, Platform, type StyleProp, StyleSheet, type ViewStyle, type NativeSyntheticEvent, type NativeScrollEvent} from 'react-native';
 import Animated, {type AnimatedStyle} from 'react-native-reanimated';
 
 import {fetchPosts, fetchPostThread} from '@actions/remote/post';
@@ -21,6 +21,7 @@ import {getDateForDateLine, preparePostList} from '@utils/post_list';
 
 import {INITIAL_BATCH_TO_RENDER, SCROLL_POSITION_CONFIG, VIEWABILITY_CONFIG} from './config';
 import MoreMessages from './more_messages';
+import ScrollToEndView from './scroll_to_end_view';
 
 import type {PostListItem, PostListOtherItem, ViewableItemsChanged, ViewableItemsChangedListenerEvent} from '@typings/components/post_list';
 import type PostModel from '@typings/database/models/servers/post';
@@ -62,6 +63,8 @@ type ScrollIndexFailed = {
     highestMeasuredFrameIndex: number;
     averageItemLength: number;
 };
+
+const CONTENT_OFFSET_THRESHOLD = 160;
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 const keyExtractor = (item: PostListItem | PostListOtherItem) => (item.type === 'post' ? item.value.currentPost.id : item.value);
@@ -109,6 +112,8 @@ const PostList = ({
     const scrolledToHighlighted = useRef(false);
     const [refreshing, setRefreshing] = useState(false);
     const [limit, setLimit] = useState<KSuiteLimit | undefined>(undefined);
+    const [showScrollToEndBtn, setShowScrollToEndBtn] = useState(false);
+    const [lastPostId, setLastPostId] = useState<string | undefined>(posts[0]?.id);
     const theme = useTheme();
     const serverUrl = useServerUrl();
     const orderedPosts = useMemo(() => {
@@ -118,6 +123,15 @@ const PostList = ({
     const initialIndex = useMemo(() => {
         return orderedPosts.findIndex((i) => i.type === 'start-of-new-messages');
     }, [orderedPosts]);
+
+    const isNewMessage = useMemo(() => {
+        if (!lastPostId) {
+            // Avoid flash when the channel loads without posts
+            // e.g. The first time we navigate to a channel
+            return false;
+        }
+        return posts[0]?.id !== lastPostId;
+    }, [posts[0]?.id, lastPostId]);
 
     useEffect(() => {
         const t = setTimeout(() => {
@@ -162,6 +176,14 @@ const PostList = ({
         setRefreshing(false);
         setLimit(EphemeralStore.serverHasLimit(serverUrl));
     }, [channelId, location, posts, rootId]);
+
+    const onScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        const {y} = event.nativeEvent.contentOffset;
+        if (y === 0) {
+            setLastPostId(posts[0]?.id);
+        }
+        setShowScrollToEndBtn(y > CONTENT_OFFSET_THRESHOLD);
+    }, [posts[0]?.id]);
 
     const onScrollToIndexFailed = useCallback((info: ScrollIndexFailed) => {
         const index = Math.min(info.highestMeasuredFrameIndex, info.index);
@@ -296,6 +318,10 @@ const PostList = ({
         });
     }, []);
 
+    const onScrollToEnd = useCallback(() => {
+        listRef.current?.scrollToOffset({offset: 0, animated: true});
+    }, []);
+
     useEffect(() => {
         const t = setTimeout(() => {
             if (highlightedId && orderedPosts && !scrolledToHighlighted.current) {
@@ -332,6 +358,7 @@ const PostList = ({
                 nativeID={nativeID}
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.9}
+                onScroll={onScroll}
                 onScrollToIndexFailed={onScrollToIndexFailed}
                 onViewableItemsChanged={onViewableItemsChanged}
                 ref={listRef}
@@ -345,6 +372,14 @@ const PostList = ({
                 refreshing={refreshing}
                 onRefresh={disablePullToRefresh ? undefined : onRefresh}
             />
+            {location !== Screens.PERMALINK &&
+            <ScrollToEndView
+                onPress={onScrollToEnd}
+                isNewMessage={isNewMessage}
+                showScrollToEndBtn={showScrollToEndBtn}
+                location={location}
+            />
+            }
             {showMoreMessages &&
             <MoreMessages
                 channelId={channelId}

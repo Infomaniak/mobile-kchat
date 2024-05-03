@@ -6,6 +6,7 @@ import React, {useMemo} from 'react';
 import {ScrollView} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
+import {useTheme} from '@app/context/theme';
 import {BaseOption} from '@components/common_post_options';
 import FormattedText from '@components/formatted_text';
 import {ITEM_HEIGHT} from '@components/option_item';
@@ -33,6 +34,7 @@ const IKReminder = ({post, componentId}: Props) => {
     const serverUrl = useServerUrl();
     const {bottom} = useSafeAreaInsets();
     const isTablet = useIsTablet();
+    const theme = useTheme();
     const showCustom = false;
     const Scroll = useMemo(() => (isTablet ? ScrollView : BottomSheetScrollView), [isTablet]);
 
@@ -103,7 +105,7 @@ const IKReminder = ({post, componentId}: Props) => {
         return (
             <Scroll bounces={false}>
                 <FormattedText
-                    style={{...typography('Heading', 600, 'SemiBold')}}
+                    style={{...typography('Heading', 600, 'SemiBold'), color: theme.centerChannelColor}}
                     id='infomaniak.post_info.post_reminder.menu'
                     defaultMessage='Remind'
                 />

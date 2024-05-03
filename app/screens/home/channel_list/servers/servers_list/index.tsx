@@ -6,6 +6,7 @@ import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {FlatList, StyleSheet, View, type ListRenderItemInfo} from 'react-native';
 
+import {BASE_SERVER_URL} from '@app/client/rest/constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
@@ -47,6 +48,8 @@ const ServerList = ({servers}: Props) => {
         addNewServer(theme);
     }, [servers]);
 
+    const filteredServers = useMemo(() => servers.filter((s) => s.url !== BASE_SERVER_URL), [servers]);
+
     const renderServer = useCallback(({item: t, index}: ListRenderItemInfo<ServersModel>) => {
         return (
             <ServerItem
@@ -71,7 +74,7 @@ const ServerList = ({servers}: Props) => {
         >
             <View style={[styles.container, {marginTop: isTablet ? 12 : 0}]}>
                 <List
-                    data={servers}
+                    data={filteredServers}
                     style={styles.serverList}
                     renderItem={renderServer}
                     keyExtractor={keyExtractor}
