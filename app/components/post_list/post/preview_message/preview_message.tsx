@@ -12,12 +12,12 @@ import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useShowMoreAnimatedStyle} from '@hooks/show_more';
 import {handleDeepLink, matchDeepLink} from '@utils/deep_link';
-import {makeStyleSheetFromTheme, blendColors, changeOpacity} from '@utils/theme';
-import {typography} from '@utils/typography';
 import {tryOpenURL, normalizeProtocol} from '@utils/url';
 import {displayUsername} from '@utils/user';
 
 import ShowMoreButton from '../body/message/show_more_button';
+
+import {getStyleSheet} from './styles';
 
 import type {UserModel} from '@app/database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
@@ -34,44 +34,6 @@ type PreviewMessageProps = {
     siteURL: string;
 };
 
-const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
-    previewMessageContainer: {
-        borderWidth: 1,
-        borderColor: blendColors(theme.centerChannelBg, theme.centerChannelColor, 0.3),
-        marginTop: 5,
-        marginBottom: 5,
-        marginLeft: 5,
-        marginRight: 5,
-        padding: 11,
-        borderRadius: 4,
-    },
-    previewHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 6,
-    },
-    displayNameHeader: {
-        marginRight: 5,
-    },
-    channelDisplayName: {
-        color: changeOpacity(theme.centerChannelColor, 0.64),
-        marginTop: 10,
-    },
-    message: {
-        marginBottom: 20,
-        color: theme.centerChannelColor,
-        ...typography('Body', 200),
-        lineHeight: undefined,
-    },
-    profilePicture: {
-        width: 30, height: 30, borderRadius: 50, marginRight: 8,
-    },
-    time: {
-        color: changeOpacity(theme.centerChannelColor, 0.64),
-        ...typography('Body', 25),
-        marginBottom: 4,
-    },
-}));
 const SHOW_MORE_HEIGHT = 54;
 
 export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, post, theme, user, postLink, location, siteURL, textStyles}) => {
