@@ -97,14 +97,13 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
             {post.type === Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL && (
                 <View>
                     <PreviewMessage
-                        baseTextStyle={messageStyle}
-                        textStyles={textStyles}
                         channelDisplayName={post.props.channel_name}
                         post={post}
                         previewUserId={previewUserId}
                         theme={theme}
                         postLink={post.props.post_link}
                         location={location}
+                        textStyles={textStyles}
                     />
                 </View>
 

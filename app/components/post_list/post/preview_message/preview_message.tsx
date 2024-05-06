@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 import React, {useCallback, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {Text, View, Alert, TouchableOpacity, type StyleProp, type TextStyle, type LayoutChangeEvent, useWindowDimensions, ScrollView} from 'react-native';
+import {Text, View, Alert, TouchableOpacity, type LayoutChangeEvent, useWindowDimensions, ScrollView} from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import ProfilePicture from '@app/components/post_list/post/profile_picture/profile_picture';
@@ -29,7 +29,6 @@ type PreviewMessageProps = {
     user?: UserModel;
     postLink: string;
     location: string;
-    baseTextStyle: StyleProp<TextStyle>;
     textStyles?: MarkdownTextStyles;
     siteURL: string;
     };
@@ -56,6 +55,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         },
         channelDisplayName: {
             color: changeOpacity(theme.centerChannelColor, 0.64),
+            marginTop: 10,
         },
         message: {
             marginBottom: 20,
@@ -68,13 +68,14 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         },
         time: {
             color: changeOpacity(theme.centerChannelColor, 0.64),
-            ...typography('Body', 75),
+            ...typography('Body', 25),
+            marginBottom: 4,
         },
     };
 });
 const SHOW_MORE_HEIGHT = 54;
 
-export const PreviewMessage = ({channelDisplayName, post, theme, user, postLink, location, baseTextStyle, textStyles, siteURL}: PreviewMessageProps) => {
+export const PreviewMessage = ({channelDisplayName, post, theme, user, postLink, location, siteURL, textStyles}: PreviewMessageProps) => {
     const [open, setOpen] = useState(false);
     const [layoutWidth, setLayoutWidth] = useState(0);
     const [height, setHeight] = useState<number|undefined>();
@@ -167,12 +168,12 @@ export const PreviewMessage = ({channelDisplayName, post, theme, user, postLink,
                             style={styles.displayNameHeader}
                         >
                             <Markdown
-                                baseTextStyle={baseTextStyle}
+                                baseTextStyle={styles.message}
                                 value={displayName}
                                 theme={theme}
                                 location={location}
-                                textStyles={textStyles}
                                 disableGallery={true}
+                                textStyles={textStyles}
                             />
                         </Text>
                         <FormattedRelativeTime
@@ -193,16 +194,15 @@ export const PreviewMessage = ({channelDisplayName, post, theme, user, postLink,
                         >
                             <View
                                 onLayout={onLayout}
-                                style={styles.message}
                             >
                                 <Markdown
                                     baseTextStyle={styles.message}
                                     value={message}
                                     theme={theme}
                                     location={location}
-                                    textStyles={textStyles}
                                     layoutWidth={layoutWidth}
                                     imagesMetadata={post.metadata.embeds[0].data.post.metadata.images}
+                                    textStyles={textStyles}
                                 />
                             </View>
                         </ScrollView>

@@ -18,7 +18,7 @@ type PostType =
     | 'system_purpose_change'
     | 'system_remove_from_channel';
 
-type PostEmbedType = 'image' | 'message_attachment' | 'opengraph';
+type PostEmbedType = 'image' | 'message_attachment' | 'opengraph' | 'permalink';
 
 type PostAcknowledgement = {
     post_id: string;
