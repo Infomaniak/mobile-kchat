@@ -94,7 +94,7 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
                 value={intl.formatMessage(localeHolder, values)}
                 theme={theme}
             />
-            {post.type === Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL && (
+            {post.type === Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL && previewUserId && (
                 <View>
                     <PreviewMessage
                         channelDisplayName={post.props.channel_name}
@@ -106,7 +106,6 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
                         textStyles={textStyles}
                     />
                 </View>
-
             )}
         </View>
     );

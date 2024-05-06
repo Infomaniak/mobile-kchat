@@ -340,28 +340,26 @@ const Post = ({
         );
     } else {
         body = (
-            <>
-                <Body
-                    appsEnabled={appsEnabled}
-                    hasFiles={hasFiles}
-                    hasReactions={hasReactions}
-                    highlight={Boolean(highlightedStyle)}
-                    highlightReplyBar={highlightReplyBar}
-                    isCRTEnabled={isCRTEnabled}
-                    isEphemeral={isEphemeral}
-                    isFirstReply={isFirstReply}
-                    isJumboEmoji={isJumboEmoji}
-                    isLastReply={isLastReply}
-                    isPendingOrFailed={isPendingOrFailed}
-                    isPostAcknowledgementEnabled={isPostAcknowledgementEnabled}
-                    isPostAddChannelMember={isPostAddChannelMember}
-                    location={location}
-                    post={post}
-                    searchPatterns={searchPatterns}
-                    showAddReaction={showAddReaction}
-                    theme={theme}
-                />
-            </>
+            <Body
+                appsEnabled={appsEnabled}
+                hasFiles={hasFiles}
+                hasReactions={hasReactions}
+                highlight={Boolean(highlightedStyle)}
+                highlightReplyBar={highlightReplyBar}
+                isCRTEnabled={isCRTEnabled}
+                isEphemeral={isEphemeral}
+                isFirstReply={isFirstReply}
+                isJumboEmoji={isJumboEmoji}
+                isLastReply={isLastReply}
+                isPendingOrFailed={isPendingOrFailed}
+                isPostAcknowledgementEnabled={isPostAcknowledgementEnabled}
+                isPostAddChannelMember={isPostAddChannelMember}
+                location={location}
+                post={post}
+                searchPatterns={searchPatterns}
+                showAddReaction={showAddReaction}
+                theme={theme}
+            />
         );
     }
 

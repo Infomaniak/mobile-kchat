@@ -1,6 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useMemo, useState, type FC} from 'react';
 import {useIntl} from 'react-intl';
 import {Text, View, Alert, TouchableOpacity, type LayoutChangeEvent, useWindowDimensions, ScrollView} from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -22,6 +22,7 @@ import ShowMoreButton from '../body/message/show_more_button';
 import type {UserModel} from '@app/database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 import type {MarkdownTextStyles} from '@typings/global/markdown';
+
 type PreviewMessageProps = {
     channelDisplayName: string;
     post: PostModel;
@@ -31,69 +32,69 @@ type PreviewMessageProps = {
     location: string;
     textStyles?: MarkdownTextStyles;
     siteURL: string;
-    };
+};
 
-const getStyleSheet = makeStyleSheetFromTheme((theme) => {
-    return {
-        previewMessageContainer: {
-            borderWidth: 1,
-            borderColor: blendColors(theme.centerChannelBg, theme.centerChannelColor, 0.3),
-            marginTop: 5,
-            marginBottom: 5,
-            marginLeft: 5,
-            marginRight: 5,
-            padding: 11,
-            borderRadius: 4,
-        },
-        previewHeader: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginBottom: 6,
-        },
-        displayNameHeader: {
-            marginRight: 5,
-        },
-        channelDisplayName: {
-            color: changeOpacity(theme.centerChannelColor, 0.64),
-            marginTop: 10,
-        },
-        message: {
-            marginBottom: 20,
-            color: theme.centerChannelColor,
-            ...typography('Body', 200),
-            lineHeight: undefined,
-        },
-        profilePicture: {
-            width: 30, height: 30, borderRadius: 50, marginRight: 8,
-        },
-        time: {
-            color: changeOpacity(theme.centerChannelColor, 0.64),
-            ...typography('Body', 25),
-            marginBottom: 4,
-        },
-    };
-});
+const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
+    previewMessageContainer: {
+        borderWidth: 1,
+        borderColor: blendColors(theme.centerChannelBg, theme.centerChannelColor, 0.3),
+        marginTop: 5,
+        marginBottom: 5,
+        marginLeft: 5,
+        marginRight: 5,
+        padding: 11,
+        borderRadius: 4,
+    },
+    previewHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 6,
+    },
+    displayNameHeader: {
+        marginRight: 5,
+    },
+    channelDisplayName: {
+        color: changeOpacity(theme.centerChannelColor, 0.64),
+        marginTop: 10,
+    },
+    message: {
+        marginBottom: 20,
+        color: theme.centerChannelColor,
+        ...typography('Body', 200),
+        lineHeight: undefined,
+    },
+    profilePicture: {
+        width: 30, height: 30, borderRadius: 50, marginRight: 8,
+    },
+    time: {
+        color: changeOpacity(theme.centerChannelColor, 0.64),
+        ...typography('Body', 25),
+        marginBottom: 4,
+    },
+}));
 const SHOW_MORE_HEIGHT = 54;
 
-export const PreviewMessage = ({channelDisplayName, post, theme, user, postLink, location, siteURL, textStyles}: PreviewMessageProps) => {
+export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, post, theme, user, postLink, location, siteURL, textStyles}) => {
     const [open, setOpen] = useState(false);
     const [layoutWidth, setLayoutWidth] = useState(0);
     const [height, setHeight] = useState<number|undefined>();
     const styles = getStyleSheet(theme);
     const dimensions = useWindowDimensions();
-    const maxHeight = Math.round((dimensions.height * 0.5) + SHOW_MORE_HEIGHT);
-    const animatedStyle = useShowMoreAnimatedStyle(height, maxHeight, open);
-    const embed = getEmbed();
     const intl = useIntl();
     const serverUrl = useServerUrl();
     const {formatMessage} = intl;
-    let displayName = '';
 
     const onPress = () => setOpen(!open);
 
-    if (user) {
-        displayName = displayUsername(user, undefined, 'full_name', true);
-    }
+    const maxHeight = useMemo(() => {
+        return Math.round((dimensions.height * 0.5) + SHOW_MORE_HEIGHT);
+    }, [dimensions]);
+
+    const displayName = useMemo(() => {
+        return user ? displayUsername(user, undefined, 'full_name', true) : '';
+    }, [user]);
+
+    const animatedStyle = useShowMoreAnimatedStyle(height, maxHeight, open);
 
     const onLayout = useCallback((event: LayoutChangeEvent) => {
         setHeight(event.nativeEvent.layout.height);
@@ -102,20 +103,22 @@ export const PreviewMessage = ({channelDisplayName, post, theme, user, postLink,
         }
     }, []);
 
-    function getEmbedFromMetadata(metadata: PostMetadata) {
+    const getEmbedFromMetadata = (metadata: PostMetadata) => {
         if (!metadata || !metadata.embeds || metadata.embeds.length === 0) {
             return null;
         }
         return metadata.embeds[0];
-    }
+    };
 
-    function getEmbed() {
+    const getEmbed = () => {
         const {metadata} = post;
         if (metadata) {
             return getEmbedFromMetadata(metadata);
         }
         return null;
-    }
+    };
+
+    const embed = getEmbed();
 
     const handlePress = async () => {
         const url = normalizeProtocol(postLink);
