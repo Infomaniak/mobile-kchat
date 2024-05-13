@@ -155,23 +155,14 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
 
     let outOfChannelMessageID = '';
     let outOfChannelMessageText = '';
-    let notificationMessageTextId = '';
-    let notificationOrMessageTextId = '';
-    let historyMessageId = '';
 
     const outOfChannelAtMentions = generateAtMentions(usernames);
     if (usernames.length === 1) {
         outOfChannelMessageID = t('post_body.check_for_out_of_channel_mentions.message.one');
         outOfChannelMessageText = 'was mentioned but is not in the channel. Would you like to ';
-        notificationOrMessageTextId = t('post_body.check_for_out_of_channel_groups_mentions_choice.message');
-        notificationMessageTextId = t('post_body.check_for_out_of_channel_groups_mentions_notify.message');
-        historyMessageId = t('post_body.check_for_out_of_channel_mentions.message_last');
     } else if (usernames.length > 1) {
         outOfChannelMessageID = t('post_body.check_for_out_of_channel_mentions.message.multiple');
         outOfChannelMessageText = 'were mentioned but they are not in the channel. Would you like to ';
-        notificationOrMessageTextId = t('post_body.check_for_out_of_channel_groups_mentions_choice.message.multiple');
-        notificationMessageTextId = t('post_body.check_for_out_of_channel_groups_mentions_notify.message.multiple');
-        historyMessageId = t('post_body.check_for_out_of_channel_mentions.message_last.multiple');
     }
 
     let outOfGroupsMessageID = '';
@@ -207,8 +198,8 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
                     {' '}
                     <FormattedText
                         style={styles.message}
-                        id={notificationOrMessageTextId}
-                        defaultMessage='or '
+                        id={'post_body.check_for_out_of_channel_groups_mentions_choice.message'}
+                        defaultMessage='or'
                     />
                     {' '}
                     <Text
@@ -216,13 +207,19 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
                     >
                         <FormattedText
                             style={textStyles.link}
-                            id={notificationMessageTextId}
-                            defaultMessage={'notify them'}
+                            id={'post_body.check_for_out_of_channel_groups_mentions_notify.message'}
+                            defaultMessage={'{count, plural, one {le notifier} other {les notifier}}'}
+                            values={{
+                                count: usernames.length,
+                            }}
                         />
                     </Text>
                     <FormattedText
-                        id={historyMessageId}
-                        defaultMessage={'? They will have access to all message history.'}
+                        id={'post_body.check_for_out_of_channel_mentions.message'}
+                        defaultMessage={'{count, plural, one {? He will then have access to all the message history for this channel.} other {? They will then have access to all the message history for this channel.}}'}
+                        values={{
+                            count: usernames.length,
+                        }}
                         style={styles.message}
                     />
                 </Text>
@@ -248,7 +245,7 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
                         />
                     </Text>
                     <FormattedText
-                        id={historyMessageId}
+                        id={'post_body.check_for_out_of_channel_mentions.message_last'}
                         defaultMessage={'? They will have access to all message history.'}
                         style={styles.message}
                     />
