@@ -21,5 +21,4 @@ const enhance = withObservables(['post'], ({database, post}: WithDatabaseArgs & 
         ),
     ),
 }));
-
 export default withDatabase(enhance(AddMembers));

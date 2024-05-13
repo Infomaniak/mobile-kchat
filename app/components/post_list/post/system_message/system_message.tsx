@@ -7,6 +7,7 @@ import {type StyleProp, Text, type TextStyle, View, type ViewStyle} from 'react-
 
 import Markdown from '@components/markdown';
 import {postTypeMessages} from '@components/post_list/combined_user_activity/messages';
+import PreviewMessage from '@components/post_list/post/preview_message';
 import {Post} from '@constants';
 import {useTheme} from '@context/theme';
 import {t} from '@i18n';
@@ -68,6 +69,7 @@ const renderUsername = (value = '') => {
 
 const renderMessage = ({location, post, styles, intl, localeHolder, theme, values, skipMarkdown = false}: RenderMessageProps) => {
     const {containerStyle, messageStyle, textStyles} = styles;
+    let previewUserId = null;
 
     if (skipMarkdown) {
         return (
@@ -75,6 +77,10 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
                 {intl.formatMessage(localeHolder, values)}
             </Text>
         );
+    }
+
+    if (post.metadata && post.metadata.embeds && post.metadata.embeds.length > 0) {
+        previewUserId = post.metadata.embeds[0].data.post.user_id;
     }
 
     return (
@@ -88,6 +94,19 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
                 value={intl.formatMessage(localeHolder, values)}
                 theme={theme}
             />
+            {post.type === Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL && previewUserId && (
+                <View>
+                    <PreviewMessage
+                        channelDisplayName={post.props.channel_name}
+                        post={post}
+                        previewUserId={previewUserId}
+                        theme={theme}
+                        postLink={post.props.post_link}
+                        location={location}
+                        textStyles={textStyles}
+                    />
+                </View>
+            )}
         </View>
     );
 };
@@ -239,6 +258,21 @@ const renderAddGuestToChannelMessage = ({post, location, styles, intl, theme}: R
     return renderMessage({post, styles, intl, location, localeHolder, values, theme});
 };
 
+const renderUserMentionedInChannelMessage = ({post, styles, intl, theme, location}: RenderersProps) => {
+    const username = renderUsername(post.props.username);
+    const channelDisplayName = post.props.channel_name;
+    const postLink = post.props.post_link;
+
+    const localeHolder = {
+        id: t('api.channel.mention.user_mentioned_in_channel'),
+        defaultMessage: '{username} mentioned your name in the channel ~{channelDisplayName} \n{postLink}',
+    };
+
+    const values = {username, channelDisplayName, postLink};
+
+    return renderMessage({post, styles, intl, location, localeHolder, values, theme});
+};
+
 const renderGuestJoinChannelMessage = ({post, styles, location, intl, theme}: RenderersProps, hideGuestTags: boolean) => {
     if (!post.props.username) {
         return null;
@@ -278,6 +312,7 @@ const systemMessageRenderers = {
     [Post.POST_TYPES.CHANNEL_DELETED]: renderArchivedMessage,
     [Post.POST_TYPES.CHANNEL_UNARCHIVED]: renderUnarchivedMessage,
     [Post.POST_TYPES.IK_SYSTEM_POST_REMINDER]: renderReminderSystemBotMessage,
+    [Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL]: renderUserMentionedInChannelMessage,
 };
 
 export const SystemMessage = ({post, location, author, hideGuestTags}: SystemMessageProps & { hideGuestTags: boolean}) => {
@@ -292,6 +327,9 @@ export const SystemMessage = ({post, location, author, hideGuestTags}: SystemMes
     }
     if (post.type === Post.POST_TYPES.ADD_GUEST_TO_CHANNEL) {
         return renderAddGuestToChannelMessage({post, author, location, styles, intl, theme}, hideGuestTags);
+    }
+    if (post.type === Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL) {
+        return renderUserMentionedInChannelMessage({post, styles, intl, location, theme});
     }
 
     const renderer = systemMessageRenderers[post.type];

@@ -33,6 +33,7 @@ export interface ClientChannelsMix {
     getChannelMember: (channelId: string, userId: string) => Promise<ChannelMembership>;
     getChannelMembersByIds: (channelId: string, userIds: string[]) => Promise<ChannelMembership[]>;
     addToChannel: (userId: string, channelId: string, postRootId?: string) => Promise<ChannelMembership>;
+    notifyUser: (channelId: string, userIds: string[], postId?: string) => Promise<any>;
     removeFromChannel: (userId: string, channelId: string) => Promise<any>;
     getChannelStats: (channelId: string) => Promise<ChannelStats>;
     getChannelMemberCountsByGroup: (channelId: string, includeTimezones: boolean) => Promise<ChannelMemberCountByGroup[]>;
@@ -252,6 +253,14 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
         const member = {user_id: userId, channel_id: channelId, post_root_id: postRootId};
         return this.doFetch(
             `${this.getChannelMembersRoute(channelId)}`,
+            {method: 'post', body: member},
+        );
+    };
+
+    notifyUser = async (channelId: string, userIds: string[], postId: string) => {
+        const member = {post_id: postId, user_ids: userIds};
+        return this.doFetch(
+            `${this.getChannelMembersRoute(channelId)}/invite`,
             {method: 'post', body: member},
         );
     };
