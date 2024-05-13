@@ -7,6 +7,7 @@ import {type StyleProp, Text, type TextStyle, View, type ViewStyle} from 'react-
 
 import Markdown from '@components/markdown';
 import {postTypeMessages} from '@components/post_list/combined_user_activity/messages';
+import PreviewMessage from '@components/post_list/post/preview_message';
 import {Post} from '@constants';
 import {useTheme} from '@context/theme';
 import {t} from '@i18n';
@@ -68,6 +69,7 @@ const renderUsername = (value = '') => {
 
 const renderMessage = ({location, post, styles, intl, localeHolder, theme, values, skipMarkdown = false}: RenderMessageProps) => {
     const {containerStyle, messageStyle, textStyles} = styles;
+    let previewUserId = null;
 
     if (skipMarkdown) {
         return (
@@ -75,6 +77,10 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
                 {intl.formatMessage(localeHolder, values)}
             </Text>
         );
+    }
+
+    if (post.metadata && post.metadata.embeds && post.metadata.embeds.length > 0) {
+        previewUserId = post.metadata.embeds[0].data.post.user_id;
     }
 
     return (
@@ -88,6 +94,19 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
                 value={intl.formatMessage(localeHolder, values)}
                 theme={theme}
             />
+            {post.type === Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL && previewUserId && (
+                <View>
+                    <PreviewMessage
+                        channelDisplayName={post.props.channel_name}
+                        post={post}
+                        previewUserId={previewUserId}
+                        theme={theme}
+                        postLink={post.props.post_link}
+                        location={location}
+                        textStyles={textStyles}
+                    />
+                </View>
+            )}
         </View>
     );
 };
