@@ -183,7 +183,7 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
                     <Text
                         style={styles.channelDisplayName}
                     >
-                        {`~${channelDisplayName}`}
+                        {channelDisplayName === '' ? `~${displayName}` : `~${channelDisplayName}`}
                     </Text>
                 </View>
             </TouchableOpacity>
