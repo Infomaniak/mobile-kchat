@@ -24,10 +24,9 @@ export const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
     },
     channelDisplayName: {
         color: changeOpacity(theme.centerChannelColor, 0.64),
-        marginTop: 10,
+        marginTop: 15,
     },
     message: {
-        marginBottom: 20,
         color: theme.centerChannelColor,
         ...typography('Body', 200),
         lineHeight: undefined,

@@ -6,6 +6,7 @@ import {Text, View, Alert, TouchableOpacity, type LayoutChangeEvent, useWindowDi
 import Animated from 'react-native-reanimated';
 
 import ProfilePicture from '@app/components/post_list/post/profile_picture/profile_picture';
+import Files from '@components/files';
 import FormattedRelativeTime from '@components/formatted_relative_time';
 import Markdown from '@components/markdown';
 import {Screens} from '@constants';
@@ -166,8 +167,15 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
                                     theme={theme}
                                     location={location}
                                     layoutWidth={layoutWidth}
-                                    imagesMetadata={post.metadata.embeds[0].data.post.metadata.images}
+                                    imagesMetadata={post.metadata.embeds[0].data.post}
                                     textStyles={textStyles}
+                                    isEdited={embed.data.post.edit_at}
+                                />
+                                <Files
+                                    layoutWidth={layoutWidth}
+                                    location={location}
+                                    post={embed.data.post}
+                                    isReplyPost={false}
                                 />
                             </View>
                         </ScrollView>
