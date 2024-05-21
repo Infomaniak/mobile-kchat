@@ -39,6 +39,7 @@ import com.facebook.soloader.SoLoader;
 import com.mattermost.flipper.ReactNativeFlipper;
 import com.mattermost.networkclient.RCTOkHttpClientFactory;
 import com.nozbe.watermelondb.jsi.WatermelonDBJSIPackage;
+import com.oney.WebRTCModule.WebRTCModuleOptions;
 
 public class MainApplication extends NavigationApplication implements INotificationsApplication {
   public static MainApplication instance;
@@ -146,6 +147,11 @@ public class MainApplication extends NavigationApplication implements INotificat
           DefaultNewArchitectureEntryPoint.load();
       }
       ReactNativeFlipper.initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+
+    // @jitsi/react-native-sdk setup
+    // Ref https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#android
+    WebRTCModuleOptions options = WebRTCModuleOptions.getInstance();
+    options.enableMediaProjectionService = true;
   }
 
   @Override
