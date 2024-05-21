@@ -88,12 +88,14 @@ const FilteredList = ({
 
     const totalLocalResults = channelsMatchStart.length + channelsMatch.length + usersMatchStart.length;
 
+    const normalize = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
     const search = async () => {
         onLoading(true);
         if (mounted.current) {
             setRemoteChannels({archived: [], startWith: [], matches: []});
         }
-        const lowerCasedTerm = (term.startsWith('@') ? term.substring(1) : term).toLowerCase();
+        const lowerCasedTerm = normalize((term.startsWith('@') ? term.substring(1) : term).toLowerCase());
         if ((channelsMatchStart.length + channelsMatch.length) < MAX_RESULTS) {
             if (restrictDirectMessage) {
                 searchProfiles(serverUrl, lowerCasedTerm, {team_id: currentTeamId, allow_inactive: true});
@@ -111,17 +113,18 @@ const FilteredList = ({
                         if (existingChannelIds.has(c.id) || !teamIds.has(c.team_id)) {
                             return [s, m, a];
                         }
+                        const lowerCasedDisplayName = normalize(c.display_name.toLowerCase());
                         if (!c.delete_at) {
-                            if (c.display_name.toLowerCase().startsWith(lowerCasedTerm)) {
+                            if (lowerCasedDisplayName.startsWith(lowerCasedTerm)) {
                                 return [[...s, c], m, a];
                             }
-                            if (c.display_name.toLowerCase().includes(lowerCasedTerm)) {
+                            if (lowerCasedDisplayName.includes(lowerCasedTerm)) {
                                 return [s, [...m, c], a];
                             }
                             return [s, m, a];
                         }
 
-                        if (c.display_name.toLowerCase().includes(lowerCasedTerm)) {
+                        if (lowerCasedDisplayName.includes(lowerCasedTerm)) {
                             return [s, m, [...a, c]];
                         }
 
