@@ -1,67 +1,69 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-//import JitsiMeet from '@philippeweidmann/react-native-jitsimeet';
-
-import {Linking} from 'react-native';
-
 import ClientError from '@client/rest/error';
-import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
-import {getCurrentUser} from '@queries/servers/user';
-import {logError, logInfo} from '@utils/log';
+import {logError} from '@utils/log';
 
-import type {UserModel} from '@database/models/server';
+import type {ApiCall} from '@app/client/rest/ikcalls';
 
-export type Call = {
-    id: string;
-    url: string;
-    serverUrl: string;
-    channelId: string;
-    users: UserModel[];
-}
+export type Call = ApiCall & {server_url: string}
+
+/**
+ * Extract the kMeet server_url from the ApiCall response
+ * add it to the returned object
+ */
+const withServerUrl = (call: ApiCall): Call => ({
+    ...call,
+    server_url: call.url.replace(`/${call.channel_id}`, ''),
+});
 
 class CallManager {
-    startCall = async (serverUrl: string, channelId: string) => {
-        const client = NetworkManager.getClient(serverUrl);
+    startCall = async (serverUrl: string, channelId: string, allowAnswer = true): Promise<Call | null> => {
         try {
-            const apiCall = await client.startCall(channelId);
-            await this.setCurrentCall(apiCall.url, serverUrl);
+            return withServerUrl(await NetworkManager.getClient(serverUrl).startCall(channelId));
         } catch (error) {
-            if (error instanceof ClientError) {
-                if (error?.response?.url) {
-                    await this.setCurrentCall(error.response.url, serverUrl);
-                }
+            // If this call already exists start a new one
+            if (
+                allowAnswer &&
+                error instanceof ClientError &&
+                error?.status_code === 409 &&
+                typeof error?.response?.id === 'string'
+            ) {
+                const conferenceId = error.response.id;
+                return this.answerCall(serverUrl, conferenceId);
             }
-        }
-    };
-    answerCall = async (serverUrl: string, channelId: string) => {
-        const client = NetworkManager.getClient(serverUrl);
-        try {
-            const apiCall = await client.answerCall(channelId);
-            await this.setCurrentCall(apiCall.url, serverUrl);
-        } catch (error) {
-            if (error instanceof ClientError) {
-                if (error?.response?.url) {
-                    await this.setCurrentCall(error.response.url, serverUrl);
-                }
-            }
-        }
-    };
-    private setCurrentCall = async (callUrl: string, serverUrl: string) => {
-        let kMeetCallUrl = callUrl;
-        try {
-            const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-            const currentUser = await getCurrentUser(database);
-            if (currentUser) {
-                kMeetCallUrl += '?username=' + currentUser.username;
-            }
-        } catch (error) {
             logError(error);
         }
 
-        logInfo('CallManager.setCurrentCall', kMeetCallUrl);
-        await Linking.openURL(kMeetCallUrl);
+        return null;
+    };
+
+    answerCall = async (serverUrl: string, conferenceId: string, channelId?: string): Promise<Call | null> => {
+        try {
+            return withServerUrl(await NetworkManager.getClient(serverUrl).answerCall(conferenceId));
+        } catch (error) {
+            // Start a new call if this one no longer exists
+            if (
+                typeof channelId === 'string' &&
+                error instanceof ClientError &&
+                error?.status_code === 404
+            ) {
+                return this.startCall(serverUrl, channelId, false);
+            }
+            logError(error);
+        }
+
+        return null;
+    };
+
+    leaveCall = async (serverUrl: string, conferenceId: string): Promise<Call | null> => {
+        try {
+            return withServerUrl(await NetworkManager.getClient(serverUrl).leaveCall(conferenceId));
+        } catch (error) {
+            // logError(error);
+            return null;
+        }
     };
 }
 
