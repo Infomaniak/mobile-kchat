@@ -1,14 +1,17 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import React from 'react';
-import {Text, TouchableOpacity, View} from 'react-native';
+import React, {useCallback} from 'react';
+import {useIntl} from 'react-intl';
+import {Text, TouchableOpacity, Platform, View} from 'react-native';
 import {Divider} from 'react-native-elements';
 
+import {Screens} from '@app/constants';
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
 import FormattedTime from '@components/formatted_time';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import {allOrientations, dismissAllModalsAndPopToScreen} from '@screens/navigation';
 import CallManager from '@store/CallManager';
 import UserModel from '@typings/database/models/servers/user';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -17,7 +20,9 @@ import {getUserTimezone} from '@utils/user';
 
 import KMeetIcon from './kmeet_icon';
 
+import type {CallPassedProps} from '../../screens/call_screen/call_screen';
 import type PostModel from '@typings/database/models/servers/post';
+import type {Options} from 'react-native-navigation';
 
 type CallMessageProps = {
     post: PostModel;
@@ -94,11 +99,46 @@ export const IkCallsCustomMessage = ({post, currentUser, isMilitaryTime}: CallMe
     const serverUrl = useServerUrl();
     const timezone = getUserTimezone(currentUser);
     const styles = getStyleSheet(theme);
+    const intl = useIntl();
+    const {formatMessage} = intl;
 
+    const channelId = post.channelId;
+    const conferenceId = post.props.conference_id;
     const startedAt = post.props.start_at;
     const endedAt = post.props.end_at;
     let descriptionText = '';
     let eventDate = '';
+
+    /**
+     * Upon pressing "Join call", answer and join the kMeet
+     * Pop the CALL screen
+     */
+    const onJoinCall = useCallback(async () => {
+        // Answer the call via API
+        const call = await CallManager.answerCall(serverUrl, conferenceId, channelId);
+
+        if (call !== null) {
+            // Pop the CALL screen
+            const title = formatMessage({id: 'mobile.calls_call_screen', defaultMessage: 'Call'});
+            const passedProps: CallPassedProps = {
+                serverUrl: call.server_url,
+                channelId: call.channel_id,
+                conferenceId,
+            };
+            const options: Options = {
+                layout: {
+                    backgroundColor: '#000',
+                    componentBackgroundColor: '#000',
+                    orientation: allOrientations,
+                },
+                topBar: {
+                    background: {color: '#000'},
+                    visible: Platform.OS === 'android',
+                },
+            };
+            await dismissAllModalsAndPopToScreen(Screens.CALL, title, passedProps, options);
+        }
+    }, [conferenceId, formatMessage, serverUrl]);
 
     if (startedAt) {
         if (endedAt) {
@@ -112,17 +152,13 @@ export const IkCallsCustomMessage = ({post, currentUser, isMilitaryTime}: CallMe
 
     let callButton = null;
     if (startedAt && !endedAt) {
-        const handlePickup = () => {
-            CallManager.answerCall(serverUrl, post.props.conference_id);
-        };
-
         callButton = (
             <View>
                 <Divider/>
                 <View style={styles.joinCallContainer}>
                     <View/>
                     <TouchableOpacity
-                        onPress={handlePickup}
+                        onPress={onJoinCall}
                         style={styles.joinCallButton}
                     >
                         <FormattedText
