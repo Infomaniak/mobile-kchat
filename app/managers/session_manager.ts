@@ -38,16 +38,7 @@ class SessionManager {
     private terminatingSessionUrl: undefined|string;
 
     constructor() {
-        if (Platform.OS === 'android') {
-            AppState.addEventListener('blur', () => {
-                this.onAppStateChange('inactive');
-            });
-            AppState.addEventListener('focus', () => {
-                this.onAppStateChange('active');
-            });
-        } else {
-            AppState.addEventListener('change', this.onAppStateChange);
-        }
+        AppState.addEventListener('change', this.onAppStateChange);
 
         DeviceEventEmitter.addListener(Events.SERVER_LOGOUT, this.onLogout);
         DeviceEventEmitter.addListener(Events.SESSION_EXPIRED, this.onSessionExpired);
@@ -150,6 +141,7 @@ class SessionManager {
                 this.syncMultiTeam();
                 setTimeout(this.cancelAllSessionNotifications, 750);
                 break;
+            case 'background':
             case 'inactive':
                 this.scheduleAllSessionNotifications();
                 break;
