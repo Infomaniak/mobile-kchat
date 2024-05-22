@@ -4,16 +4,17 @@
 import {DeviceEventEmitter} from 'react-native';
 
 import {updateChannelsDisplayName} from '@actions/local/channel';
+import {fetchChannelStats} from '@actions/remote/channel';
 import {fetchMe, fetchUsersByIds} from '@actions/remote/user';
 import {Events, General, Preferences} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getTeammateNameDisplaySetting} from '@helpers/api/preference';
 import WebsocketManager from '@managers/websocket_manager';
-import {queryChannelsByTypes, queryUserChannelsByTypes} from '@queries/servers/channel';
+import {getCurrentChannel, queryChannelMembers, queryChannelsByTypes, queryUserChannelsByTypes} from '@queries/servers/channel';
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
 import {getConfig, getLicense} from '@queries/servers/system';
 import {getCurrentUser, getUserById} from '@queries/servers/user';
-import {displayUsername} from '@utils/user';
+import {displayUsername, isGuest} from '@utils/user';
 
 import type {Model} from '@nozbe/watermelondb';
 
@@ -59,6 +60,19 @@ export async function handleUserUpdatedEvent(serverUrl: string, msg: WebSocketMe
         }
     } else {
         const channels = await queryUserChannelsByTypes(database, user.id, [General.DM_CHANNEL, General.GM_CHANNEL]).fetch();
+
+        const currentChannel = await getCurrentChannel(database);
+        if (currentChannel && [General.OPEN_CHANNEL, General.PRIVATE_CHANNEL].includes(currentChannel.type as any)) {
+            const databaseUser = await getUserById(database, user.id);
+            const channelMembers = await queryChannelMembers(database, currentChannel.id);
+            const isInChannel = await channelMembers.some((m) => m.userId === user.id);
+
+            if (isInChannel &&
+                (!databaseUser || databaseUser.deleteAt !== user.delete_at || isGuest(databaseUser.roles) !== isGuest(user.roles))) {
+                await fetchChannelStats(serverUrl, currentChannel.id);
+            }
+        }
+
         if (channels.length) {
             const {models} = await updateChannelsDisplayName(serverUrl, channels, [user], true);
             if (models?.length) {
