@@ -16,6 +16,7 @@ import {handleDeepLink, matchDeepLink} from '@utils/deep_link';
 import {tryOpenURL, normalizeProtocol} from '@utils/url';
 import {displayUsername} from '@utils/user';
 
+import MessageAttachment from '../body/content/message_attachments/message_attachment';
 import ShowMoreButton from '../body/message/show_more_button';
 
 import {getStyleSheet} from './styles';
@@ -53,10 +54,6 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
         return Math.round((dimensions.height * 0.5) + SHOW_MORE_HEIGHT);
     }, [dimensions]);
 
-    const displayName = useMemo(() => {
-        return user ? displayUsername(user, undefined, 'full_name', true) : '';
-    }, [user]);
-
     const animatedStyle = useShowMoreAnimatedStyle(height, maxHeight, open);
 
     const onLayout = useCallback((event: LayoutChangeEvent) => {
@@ -82,6 +79,16 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
     };
 
     const embed = getEmbed();
+
+    const displayName = useMemo(() => {
+        if (user) {
+            if (embed?.data.post.props.from_webhook === 'true') {
+                return embed.data.post.props.override_username;
+            }
+            return displayUsername(user, undefined, 'full_name', true);
+        }
+        return '';
+    }, [user, embed?.data.post.props.from_webhook, embed?.data.post.props.override_username]);
 
     const handlePress = async () => {
         const url = normalizeProtocol(postLink);
@@ -171,6 +178,18 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
                                     textStyles={textStyles}
                                     isEdited={embed.data.post.edit_at}
                                 />
+
+                                {embed?.data?.post?.props?.attachments?.[0] && (
+                                    <MessageAttachment
+                                        attachment={embed?.data?.post?.props?.attachments?.[0]}
+                                        channelId={post.channelId}
+                                        layoutWidth={layoutWidth}
+                                        location={location}
+                                        metadata={post.metadata}
+                                        postId={post.id}
+                                        theme={theme}
+                                    />
+                                )}
                                 <Files
                                     layoutWidth={layoutWidth}
                                     location={location}
