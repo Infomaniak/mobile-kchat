@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {NativeModules, Platform} from 'react-native';
+
 import {fetchMissingDirectChannelsInfo, fetchMyChannelsForTeam, handleKickFromChannel, type MyChannelsRequest} from '@actions/remote/channel';
 import {fetchGroupsForMember} from '@actions/remote/groups';
 import {type MyPreferencesRequest, fetchMyPreferences} from '@actions/remote/preference';
@@ -31,6 +33,8 @@ import {logDebug} from '@utils/log';
 import {processIsCRTEnabled} from '@utils/thread';
 
 import type {Database, Model} from '@nozbe/watermelondb';
+
+const {CallManagerModule} = NativeModules;
 
 export type AppEntryData = {
     initialTeamId: string;
@@ -409,9 +413,15 @@ export const registerDeviceToken = async (serverUrl: string) => {
     try {
         const client = NetworkManager.getClient(serverUrl);
 
+        let pushKitToken: string | undefined;
+        if (Platform.OS === 'ios') {
+            const pushKitTokenResult = await CallManagerModule.getToken();
+            pushKitToken = pushKitTokenResult[0];
+        }
+
         const deviceToken = await getDeviceToken();
         if (deviceToken) {
-            client.attachDevice(deviceToken);
+            client.attachDevice(deviceToken, pushKitToken);
         }
         return {};
     } catch (error) {

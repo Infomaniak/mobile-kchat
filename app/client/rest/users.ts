@@ -38,7 +38,7 @@ export interface ClientUsersMix {
     autocompleteUsers: (name: string, teamId: string, channelId?: string, options?: Record<string, any>) => Promise<{users: UserProfile[]; out_of_channel?: UserProfile[]}>;
     getSessions: (userId: string) => Promise<Session[]>;
     checkUserMfa: (loginId: string) => Promise<{mfa_required: boolean}>;
-    attachDevice: (deviceId: string) => Promise<any>;
+    attachDevice: (deviceId: string, puskKitId?: string) => Promise<any>;
     searchUsers: (term: string, options: SearchUserOptions) => Promise<UserProfile[]>;
     getStatusesByIds: (userIds: string[]) => Promise<UserStatus[]>;
     getStatus: (userId: string) => Promise<UserStatus>;
@@ -369,10 +369,10 @@ const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
         );
     };
 
-    attachDevice = async (deviceId: string) => {
+    attachDevice = async (deviceId: string, pushKitId?: string) => {
         return this.doFetch(
             `${this.getUsersRoute()}/sessions/device`,
-            {method: 'put', body: {device_id: deviceId}},
+            {method: 'put', body: {device_id: deviceId, pushkit_id: pushKitId}},
         );
     };
 
