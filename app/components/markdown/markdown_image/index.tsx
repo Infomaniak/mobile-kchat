@@ -88,8 +88,8 @@ const MarkdownImage = ({
     const uri = source.startsWith('/') ? serverUrl + source : source;
 
     const fileInfo = useMemo(() => {
-        const link = decodeURIComponent(uri);
-        let filename = parseUrl(link.substr(link.lastIndexOf('/'))).pathname.replace('/', '');
+        const link = uri;
+        let filename = parseUrl(link.substring(link.lastIndexOf('/'))).pathname.replace('/', '');
         let extension = metadata?.format || filename.split('.').pop();
         if (extension === filename) {
             const ext = filename.indexOf('.') === -1 ? '.png' : filename.substring(filename.lastIndexOf('.'));
