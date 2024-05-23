@@ -1,38 +1,20 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {withObservables} from '@nozbe/watermelondb/react';
-import {of as of$} from 'rxjs';
-import {distinctUntilChanged, switchMap} from 'rxjs/operators';
+import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
+import {mergeMap} from 'rxjs/operators';
 
-import {observeCurrentSessionsDict} from '@calls/observers';
 import CallScreen from '@calls/screens/call_screen/call_screen';
-import {observeCurrentCall, observeGlobalCallsState} from '@calls/state';
-import DatabaseManager from '@database/manager';
-import {observeTeammateNameDisplay} from '@queries/servers/user';
+import {observeCurrentUserId} from '@queries/servers/system';
+import {observeUser} from '@queries/servers/user';
 
-const enhanced = withObservables([], () => {
-    const currentCall = observeCurrentCall();
-    const database = currentCall.pipe(
-        switchMap((call) => of$(call ? call.serverUrl : '')),
-        distinctUntilChanged(),
-        switchMap((url) => of$(DatabaseManager.serverDatabases[url]?.database)),
-    );
-    const micPermissionsGranted = observeGlobalCallsState().pipe(
-        switchMap((gs) => of$(gs.micPermissionsGranted)),
-        distinctUntilChanged(),
-    );
-    const teammateNameDisplay = database.pipe(
-        switchMap((db) => (db ? observeTeammateNameDisplay(db) : of$(''))),
-        distinctUntilChanged(),
-    );
+import type {WithDatabaseArgs} from '@typings/database/database';
 
-    return {
-        currentCall,
-        sessionsDict: observeCurrentSessionsDict(),
-        micPermissionsGranted,
-        teammateNameDisplay,
-    };
+const enhance = withObservables([], ({database: datab}: WithDatabaseArgs) => {
+    const currentUserId = observeCurrentUserId(datab);
+    const currentUser = currentUserId.pipe(mergeMap((userId) => observeUser(datab, userId)));
+
+    return {currentUser};
 });
 
-export default enhanced(CallScreen);
+export default withDatabase(enhance(CallScreen));
