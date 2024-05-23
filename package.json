@@ -7,7 +7,7 @@
   "license": "Apache 2.0",
   "private": true,
   "engines": {
-    "node": "^20.0.0"
+    "node": "^20.13.1"
   },
   "dependencies": {
     "@amplitude/react-native": "2.7.0",
