@@ -5,3 +5,4 @@
 #import <React/RCTEventEmitter.h>
 #import <React/RCTConstants.h>
 #import "AppDelegate.h"
+#import <CallKit/CallKit.h>
