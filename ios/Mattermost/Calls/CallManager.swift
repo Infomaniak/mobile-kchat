@@ -15,15 +15,15 @@ struct MeetCall {
   var answered = false
 }
 
-@objc public class CallManager: NSObject {
+public class CallManager: NSObject {
   @objc public static let shared = CallManager()
 
   private let callProvider: CXProvider
   private let voipRegistry: PKPushRegistry
 
   private var currentCalls = [UUID: MeetCall]()
-  
-  private(set) var token: String?
+
+  @objc public private(set) var token: String?
 
   override private init() {
     let configuration: CXProviderConfiguration
