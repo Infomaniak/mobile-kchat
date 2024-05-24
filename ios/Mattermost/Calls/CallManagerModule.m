@@ -11,7 +11,9 @@
 #import "CallManagerModule.h"
 #import "kChat-Swift.h"
 
-@implementation CallManagerModule
+@implementation CallManagerModule {
+  bool hasListeners;
+}
 
 RCT_EXPORT_MODULE();
 
@@ -22,5 +24,26 @@ RCT_EXPORT_METHOD(getToken:(RCTPromiseResolveBlock)resolve
   resolve(@[token]);
 }
 
+-(void)startObserving {
+    hasListeners = YES;
+}
+
+-(void)stopObserving {
+    hasListeners = NO;
+}
+
+- (void)callAnsweredEvent:(NSString *)serverId channelId: (NSString *)channelId
+{
+  if (hasListeners) {
+    [self sendEventWithName:@"CallAnswered" body:@{@"serverId": serverId,  @"channelId": channelId}];
+  }
+}
+
+- (void)callDeclinedEvent:(NSString *)serverId conferenceId: (NSString *)conferenceId
+{
+  if (hasListeners) {
+    [self sendEventWithName:@"CallDeclined" body:@{@"serverId": serverId,  @"conferenceId": conferenceId}];
+  }
+}
 @end
 

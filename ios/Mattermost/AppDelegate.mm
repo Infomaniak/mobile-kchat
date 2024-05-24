@@ -25,6 +25,12 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
   os_log(OS_LOG_DEFAULT, "Mattermost session ATTACHED from handleEventsForBackgroundURLSession!! identifier=%{public}@", identifier);
 }
 
+- (BOOL)application:(UIApplication *)application willFinishLaunchingWithOptions:(NSDictionary<UIApplicationLaunchOptionsKey,id> *)launchOptions
+{
+  [[CallManager shared] registerForVoIPPushes];
+  return YES;
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   if ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad )

@@ -7,6 +7,9 @@
 //
 
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
 
-@interface CallManagerModule : NSObject <RCTBridgeModule>
+@interface CallManagerModule : RCTEventEmitter <RCTBridgeModule>
+- (void)callAnsweredEvent:(NSString *)serverUrl channelId: (NSString *)channelId;
+- (void)callDeclinedEvent:(NSString *)serverUrl conferenceId: (NSString *)conferenceId;
 @end

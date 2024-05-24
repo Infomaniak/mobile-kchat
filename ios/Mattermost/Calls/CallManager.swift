@@ -11,7 +11,9 @@ import Foundation
 
 struct MeetCall {
   let localUUID: UUID
-  let remoteUUID: String
+  let serverId: String
+  let channelId: String
+  let conferenceId: String
   var answered = false
 }
 
@@ -24,6 +26,8 @@ public class CallManager: NSObject {
   private var currentCalls = [UUID: MeetCall]()
 
   @objc public private(set) var token: String?
+
+  private let callManagerModule = CallManagerModule()
 
   override private init() {
     let configuration: CXProviderConfiguration
@@ -44,32 +48,23 @@ public class CallManager: NSObject {
     registerForVoIPPushes()
   }
 
-  func registerForVoIPPushes() {
+  @objc public func registerForVoIPPushes() {
     voipRegistry.delegate = self
     voipRegistry.desiredPushTypes = [.voIP]
   }
 
-  @objc public func reportIncomingCall(remoteUUID: String, callName: String, completion: @escaping () -> Void) {
+  func reportIncomingCall(call: MeetCall, callName: String, completion: @escaping () -> Void) {
     let update = CXCallUpdate()
     update.remoteHandle = CXHandle(type: .generic, value: callName)
 
-    let localUUID = UUID()
-    let meetCall = MeetCall(localUUID: localUUID, remoteUUID: remoteUUID)
-
-    callProvider.reportNewIncomingCall(with: localUUID, update: update) { error in
+    callProvider.reportNewIncomingCall(with: call.localUUID, update: update) { error in
       guard error == nil else {
         completion()
         return
       }
 
-      self.currentCalls[localUUID] = meetCall
+      self.currentCalls[call.localUUID] = call
       completion()
-    }
-  }
-
-  @objc public func testCall() {
-    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-      //self.reportIncomingCall(remoteUUID: "", callName: "kChat-dev") {}
     }
   }
 }
@@ -77,19 +72,22 @@ public class CallManager: NSObject {
 extension CallManager: CXProviderDelegate {
   public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
     // TODO: Start call RN Side
-    // startCallRN()
+    guard let existingCall = currentCalls[action.callUUID] else { return }
+    callManagerModule.callAnsweredEvent(existingCall.serverId, channelId: existingCall.channelId)
     currentCalls[action.callUUID]?.answered = true
     action.fulfill()
   }
 
   public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
     // TODO: Stop call RN Side
-    // stopCallRN()
-    currentCalls[action.callUUID]?.answered = false // Maybe clear the list ?
+    guard let existingCall = currentCalls[action.callUUID] else { return }
+    callManagerModule.callDeclinedEvent(existingCall.serverId, conferenceId: existingCall.conferenceId)
     action.fulfill()
   }
 
-  public func providerDidReset(_ provider: CXProvider) {}
+  public func providerDidReset(_ provider: CXProvider) {
+    print("providerDidReset")
+  }
 }
 
 extension CallManager: PKPushRegistryDelegate {
@@ -99,8 +97,6 @@ extension CallManager: PKPushRegistryDelegate {
     let tokenParts = pushCredentials.token.map { data in String(format: "%02.2hhx", data) }
     let token = tokenParts.joined()
     self.token = token
-    // TODO: Forward push credentials to server with RN
-    // registerForVoipPush(pushCredentials.token)
   }
 
   public func pushRegistry(
@@ -111,13 +107,20 @@ extension CallManager: PKPushRegistryDelegate {
   ) {
     guard type == .voIP else { return }
 
-    guard let remoteCallUUID = payload.dictionaryPayload["callUUID"] as? String,
-          let callName = payload.dictionaryPayload["callName"] as? String else {
+    guard let serverId = payload.dictionaryPayload["server_id"] as? String,
+          let channelId = payload.dictionaryPayload["channel_id"] as? String,
+          let conferenceId = payload.dictionaryPayload["conference_id"] as? String,
+          let channelName = payload.dictionaryPayload["channel_name"] as? String else {
       return
     }
 
-    reportIncomingCall(remoteUUID: remoteCallUUID, callName: callName) {
+    let meetCall = MeetCall(localUUID: UUID(), serverId: serverId, channelId: channelId, conferenceId: conferenceId)
+    reportIncomingCall(call: meetCall, callName: channelName) {
       completion()
     }
+  }
+
+  public func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {
+    print("pushRegistry didInvalidatePushTokenFor")
   }
 }
