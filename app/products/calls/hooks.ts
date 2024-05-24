@@ -8,6 +8,7 @@ import {useIntl} from 'react-intl';
 import {Alert, Platform} from 'react-native';
 import Permissions from 'react-native-permissions';
 
+import {Screens} from '@app/constants';
 import {initializeVoiceTrack} from '@calls/actions/calls';
 import {
     setMicPermissionsGranted,
@@ -28,9 +29,13 @@ import {useServerUrl} from '@context/server';
 import {useAppState} from '@hooks/device';
 import NetworkManager from '@managers/network_manager';
 import {queryAllActiveServers} from '@queries/app/servers';
+import {allOrientations, dismissAllModalsAndPopToScreen} from '@screens/navigation';
+import CallManager from '@store/CallManager';
 import {getFullErrorMessage} from '@utils/errors';
 
+import type {CallPassedProps} from '@calls/screens/call_screen/call_screen';
 import type {Client} from '@client/rest';
+import type {Options} from 'react-native-navigation';
 
 export const useTryCallsFunction = (fn: () => void) => {
     const intl = useIntl();
@@ -154,4 +159,50 @@ export const useCallsAdjustment = (serverUrl: string, channelId: string): number
         (callQualityAlert ? CALL_ERROR_BAR_HEIGHT + 8 : 0) +
         (joinCallBannerVisible ? JOIN_CALL_BAR_HEIGHT + 8 : 0) +
         callsIncomingAdjustment;
+};
+
+/**
+ * Create an "onCall" callback that joins a kMeet and pop the call screen
+ */
+export const useOnCall = () => {
+    const serverUrl = useServerUrl();
+    const intl = useIntl();
+    const {formatMessage} = intl;
+
+    /**
+     * Triggers a "Join/Start call" on a kMeet
+     *  -> Answer/Start the kMeet
+     *  -> Pop the CALL screen
+     *
+     * If the conferenceId is know it should
+     * be passed as an arg to trigger a "Join call" instead of a "Start call"
+     */
+    const onCall = useCallback(async (channelId: string, conferenceId?: string) => {
+        // Answer the call via API
+        const call = typeof conferenceId === 'string' ? await CallManager.answerCall(serverUrl, conferenceId, channelId) : await CallManager.startCall(serverUrl, channelId);
+
+        if (call !== null) {
+            // Pop the CALL screen
+            const title = formatMessage({id: 'mobile.calls_call_screen', defaultMessage: 'Call'});
+            const passedProps: CallPassedProps = {
+                serverUrl: call.server_url,
+                channelId: call.channel_id,
+                conferenceId,
+            };
+            const options: Options = {
+                layout: {
+                    backgroundColor: '#000',
+                    componentBackgroundColor: '#000',
+                    orientation: allOrientations,
+                },
+                topBar: {
+                    background: {color: '#000'},
+                    visible: Platform.OS === 'android',
+                },
+            };
+            await dismissAllModalsAndPopToScreen(Screens.CALL, title, passedProps, options);
+        }
+    }, [formatMessage, serverUrl]);
+
+    return onCall;
 };
