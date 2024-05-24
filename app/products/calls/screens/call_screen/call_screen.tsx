@@ -33,6 +33,11 @@ export type InjectedProps = {
 type Props = PassedProps & InjectedProps
 type UserStatus = ReturnType<typeof getUserCustomStatus>
 
+const kMeetStatus = {
+    emoji: 'product-kmeet',
+    duration: CustomStatusDurationEnum.DONT_CLEAR,
+} as Pick<UserCustomStatus, 'emoji' | 'duration'>;
+
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
 const useTransientRef = <T extends unknown>(value: T): RefObject<T> => {
     const ref = useRef<T>(value);
@@ -96,6 +101,16 @@ const isStatusEqual = (aStatus: UserStatus, bStatus: UserStatus, currentUser: Us
     return (a.emoji === b.emoji && a.text === b.text && a.expires_at === b.expires_at);
 };
 
+/**
+ * Test if a status is "In a meeting"
+ */
+const isStatusKMeet = (status: UserStatus): boolean =>
+    typeof status !== 'undefined' &&
+    status.emoji === kMeetStatus.emoji && (
+        status.duration === CustomStatusDurationEnum.DONT_CLEAR ||
+        status.duration === null
+    );
+
 const CallScreen = ({
     channelId,
     conferenceId,
@@ -103,7 +118,7 @@ const CallScreen = ({
     serverUrl: kMeetServerUrl,
     userInfo,
 }: Props) => {
-    const intl = useIntl();
+    const {formatMessage} = useIntl();
     const jitsiMeeting = useRef<JitsiRefProps | null>(null);
     const serverUrl = useServerUrl();
 
@@ -129,7 +144,7 @@ const CallScreen = ({
 
             updateLocalCustomStatus(serverUrl, currentUserRef.current!, status);
         }
-    }, [intl, serverUrl]);
+    }, [serverUrl]);
 
     /**
      * Handle setting-up the "In a call" custom status
@@ -139,19 +154,22 @@ const CallScreen = ({
     const updateStatus = useCallback(async () => {
         // Save previous status
         // /!\ This one needs to be absolute since ending the status in 1 hour after the
-        // call ended might not result in the same time
+        // call ended might not be the same time
         statusBeforeCallRef.current = asAbsoluteStatus(getUserCustomStatus(currentUserRef.current!), currentUserRef.current!);
 
         // Overwrite status with kMeet
         doUpdateStatus({
-            emoji: 'product-kmeet',
-            text: intl.formatMessage({id: 'custom_status.suggestions.in_a_meeting', defaultMessage: 'In a meeting'}),
-            duration: CustomStatusDurationEnum.DONT_CLEAR,
+            ...kMeetStatus,
+            text: formatMessage({id: 'custom_status.suggestions.in_a_meeting', defaultMessage: 'In a meeting'}),
         });
-    }, [intl]);
+    }, [formatMessage]);
     const restoreStatus = useMemo(
         () => debounce(() => {
-            doUpdateStatus(statusBeforeCallRef.current);
+            // Only restore the previous status if the user did not cleared the "kMeet" status
+            // this prevents statuses being restored out of nowhere
+            if (isStatusKMeet(getUserCustomStatus(currentUserRef.current!))) {
+                doUpdateStatus(statusBeforeCallRef.current);
+            }
         }, 2000, true /* Immediate */),
         [doUpdateStatus],
     );
