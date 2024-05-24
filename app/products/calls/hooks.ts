@@ -35,7 +35,7 @@ import {allOrientations, dismissAllModalsAndPopToScreen} from '@screens/navigati
 import CallManager from '@store/CallManager';
 import {getFullErrorMessage} from '@utils/errors';
 
-import type {Props as CallProps} from '@calls/screens/call_screen';
+import type {PassedProps} from '@calls/screens/call_screen/call_screen';
 import type {Client} from '@client/rest';
 import type {Options} from 'react-native-navigation';
 
@@ -183,7 +183,7 @@ export const useOnCall = () => {
     const onCall = useCallback(async (channelId: string, conferenceId?: string) => {
         /* eslint-disable multiline-ternary */
         try {
-            const [user, call] = await Promise.all([
+            const [userProfile, call] = await Promise.all([
 
                 // Get current user profile
                 await client.getMe(),
@@ -200,7 +200,7 @@ export const useOnCall = () => {
                 const title = formatMessage({id: 'mobile.calls_call_screen', defaultMessage: 'Call'});
 
                 // - passedProps
-                const passedProps: CallProps = {
+                const passedProps: PassedProps = {
                     serverUrl: call.server_url,
                     channelId: call.channel_id,
                     conferenceId,
@@ -210,23 +210,23 @@ export const useOnCall = () => {
                      * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#userinfo
                      */
                     userInfo: {
-                        avatarURL: typeof user.public_picture_url === 'string' ?
-                            user.public_picture_url : // Public picture if available
+                        avatarURL: typeof userProfile.public_picture_url === 'string' ?
+                            userProfile.public_picture_url : // Public picture if available
                             /**
                              * API proxied image if not
                              * Ref. app/components/profile_picture/image.tsx
                              */
                             (() => {
-                                const lastPictureUpdate = ('lastPictureUpdate' in user) ?
-                                    (user.lastPictureUpdate as number) :
-                                    user.last_picture_update || 0;
+                                const lastPictureUpdate = ('lastPictureUpdate' in userProfile) ?
+                                    (userProfile.lastPictureUpdate as number) :
+                                    userProfile.last_picture_update || 0;
 
-                                const pictureUrl = client.getProfilePictureUrl(user.id, lastPictureUpdate);
+                                const pictureUrl = client.getProfilePictureUrl(userProfile.id, lastPictureUpdate);
 
                                 return `${serverUrl}${pictureUrl}`;
                             })(),
-                        displayName: getFullName(user),
-                        email: user.email,
+                        displayName: getFullName(userProfile),
+                        email: userProfile.email,
                     },
                 };
 
