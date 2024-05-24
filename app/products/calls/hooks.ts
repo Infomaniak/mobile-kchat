@@ -9,6 +9,8 @@ import {Alert, Platform} from 'react-native';
 import Permissions from 'react-native-permissions';
 
 import {Screens} from '@app/constants';
+import {logError} from '@app/utils/log';
+import {getFullName} from '@app/utils/user';
 import {initializeVoiceTrack} from '@calls/actions/calls';
 import {
     setMicPermissionsGranted,
@@ -33,7 +35,7 @@ import {allOrientations, dismissAllModalsAndPopToScreen} from '@screens/navigati
 import CallManager from '@store/CallManager';
 import {getFullErrorMessage} from '@utils/errors';
 
-import type {CallPassedProps} from '@calls/screens/call_screen/call_screen';
+import type {Props as CallProps} from '@calls/screens/call_screen';
 import type {Client} from '@client/rest';
 import type {Options} from 'react-native-navigation';
 
@@ -166,6 +168,7 @@ export const useCallsAdjustment = (serverUrl: string, channelId: string): number
  */
 export const useOnCall = () => {
     const serverUrl = useServerUrl();
+    const client = NetworkManager.getClient(serverUrl);
     const intl = useIntl();
     const {formatMessage} = intl;
 
@@ -178,31 +181,76 @@ export const useOnCall = () => {
      * be passed as an arg to trigger a "Join call" instead of a "Start call"
      */
     const onCall = useCallback(async (channelId: string, conferenceId?: string) => {
-        // Answer the call via API
-        const call = typeof conferenceId === 'string' ? await CallManager.answerCall(serverUrl, conferenceId, channelId) : await CallManager.startCall(serverUrl, channelId);
+        /* eslint-disable multiline-ternary */
+        try {
+            const [user, call] = await Promise.all([
 
-        if (call !== null) {
-            // Pop the CALL screen
-            const title = formatMessage({id: 'mobile.calls_call_screen', defaultMessage: 'Call'});
-            const passedProps: CallPassedProps = {
-                serverUrl: call.server_url,
-                channelId: call.channel_id,
-                conferenceId,
-            };
-            const options: Options = {
-                layout: {
-                    backgroundColor: '#000',
-                    componentBackgroundColor: '#000',
-                    orientation: allOrientations,
-                },
-                topBar: {
-                    background: {color: '#000'},
-                    visible: Platform.OS === 'android',
-                },
-            };
-            await dismissAllModalsAndPopToScreen(Screens.CALL, title, passedProps, options);
+                // Get current user profile
+                await client.getMe(),
+
+                // Start/Answer the call via API
+                typeof conferenceId === 'string' ?
+                    await CallManager.answerCall(serverUrl, conferenceId, channelId) :
+                    await CallManager.startCall(serverUrl, channelId),
+            ]);
+
+            if (call !== null) {
+                // Setup CALL screen props
+                // - title
+                const title = formatMessage({id: 'mobile.calls_call_screen', defaultMessage: 'Call'});
+
+                // - passedProps
+                const passedProps: CallProps = {
+                    serverUrl: call.server_url,
+                    channelId: call.channel_id,
+                    conferenceId,
+
+                    /**
+                     * Compute the JitsiMeeting `userInfo`
+                     * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#userinfo
+                     */
+                    userInfo: {
+                        avatarURL: typeof user.public_picture_url === 'string' ?
+                            user.public_picture_url : // Public picture if available
+                            /**
+                             * API proxied image if not
+                             * Ref. app/components/profile_picture/image.tsx
+                             */
+                            (() => {
+                                const lastPictureUpdate = ('lastPictureUpdate' in user) ?
+                                    (user.lastPictureUpdate as number) :
+                                    user.last_picture_update || 0;
+
+                                const pictureUrl = client.getProfilePictureUrl(user.id, lastPictureUpdate);
+
+                                return `${serverUrl}${pictureUrl}`;
+                            })(),
+                        displayName: getFullName(user),
+                        email: user.email,
+                    },
+                };
+
+                // - options
+                const options: Options = {
+                    layout: {
+                        backgroundColor: '#000',
+                        componentBackgroundColor: '#000',
+                        orientation: allOrientations,
+                    },
+                    topBar: {
+                        background: {color: '#000'},
+                        visible: Platform.OS === 'android',
+                    },
+                };
+
+                // Pop the CALL screen
+                await dismissAllModalsAndPopToScreen(Screens.CALL, title, passedProps, options);
+            }
+        } catch (err) {
+            logError(err);
         }
-    }, [formatMessage, serverUrl]);
+        /* eslint-enable multiline-ternary */
+    }, [client, formatMessage, serverUrl]);
 
     return onCall;
 };

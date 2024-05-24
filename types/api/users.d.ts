@@ -50,6 +50,7 @@ type UserProfile = {
     status?: string;
     bot_description?: string;
     bot_last_icon_update?: number;
+    public_picture_url?: string;
 };
 
 type UsersState = {

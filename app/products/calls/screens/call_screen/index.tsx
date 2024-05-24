@@ -2,34 +2,23 @@
 // See LICENSE.txt for license information.
 
 import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
-import React, {useCallback, useEffect, useMemo, useRef} from 'react';
+import React, {useCallback, useEffect, useRef, type ComponentProps} from 'react';
 
 import {switchToChannelById} from '@actions/remote/channel';
 import {useServerUrl} from '@app/context/server';
-import NetworkManager from '@managers/network_manager';
 import CallManager from '@store/CallManager';
-import {getFullName} from '@utils/user';
 
-import type UserModel from '@typings/database/models/servers/user';
-
-// Props injected by decorators
-export type CallInjectedProps = {
-    currentUser?: UserModel;
-};
-
-// Props passed by goToScreen()
-export type CallPassedProps = {
-    serverUrl?: string;
-    channelId?: string;
+export type Props = {
+    serverUrl: string;
+    channelId: string;
     conferenceId?: string;
+    userInfo: ComponentProps<typeof JitsiMeeting>['userInfo'];
 };
-
-export type Props = CallPassedProps & CallInjectedProps;
 
 const CallScreen = ({
     serverUrl: kMeetServerUrl,
     channelId,
-    currentUser,
+    userInfo,
     conferenceId,
 }: Props) => {
     const jitsiMeeting = useRef<JitsiRefProps | null>(null);
@@ -68,43 +57,6 @@ const CallScreen = ({
         // Leave call on unmount
         return leaveCall;
     }, [leaveCall]);
-
-    /**
-     * Compute the JitsiMeeting `userInfo`
-     * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#userinfo
-     */
-    const userInfo = useMemo(
-        () =>
-            (typeof currentUser === 'undefined' ? undefined : {
-
-                // - avatarURL
-                // Ref. app/components/profile_picture/image.tsx
-                avatarURL: (() => {
-                    const client = NetworkManager.getClient(serverUrl);
-                    const lastPictureUpdate =
-                              (currentUser.isBot ? currentUser.props?.bot_last_icon_update : currentUser.lastPictureUpdate) || 0;
-                    const pictureUrl = client.getProfilePictureUrl(
-                        currentUser.id,
-                        lastPictureUpdate,
-                    );
-
-                    return `${serverUrl}${pictureUrl}`;
-                })(),
-
-                // - displayName
-                displayName: getFullName(currentUser),
-
-                // - email
-                email: currentUser.email,
-            }),
-        [currentUser],
-    );
-
-    // This should not happend as those props are passed by
-    // clicking on the "(Join) Call" button
-    if (typeof kMeetServerUrl !== 'string' || typeof channelId !== 'string') {
-        return null;
-    }
 
     return (
         <JitsiMeeting
