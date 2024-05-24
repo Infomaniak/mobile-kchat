@@ -77,6 +77,7 @@ export const INFOMANIAK_NO_TEAMS = 'InfomaniakNoTeams';
 export const INFOMANIAK_QUOTA_EXCEEDED = 'InfomaniakQuotaExceeded';
 
 export const INFOMANIAK_REMINDER = 'InfomaniakReminder';
+export const TRANSCRIPTION = 'Transcription';
 
 export default {
     ABOUT,
@@ -154,6 +155,7 @@ export default {
     INFOMANIAK_NO_TEAMS,
     INFOMANIAK_QUOTA_EXCEEDED,
     INFOMANIAK_REMINDER,
+    TRANSCRIPTION,
 } as const;
 
 export const MODAL_SCREENS_WITHOUT_BACK = new Set<string>([
