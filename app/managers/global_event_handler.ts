@@ -5,6 +5,7 @@ import {Alert, DeviceEventEmitter, Linking, NativeEventEmitter, NativeModules} f
 import semver from 'semver';
 
 import {switchToChannelById} from '@actions/remote/channel';
+import CallManager from '@app/store/CallManager';
 import LocalConfig from '@assets/config.json';
 import {Device, Events, Sso} from '@constants';
 import {MIN_REQUIRED_VERSION} from '@constants/supported_server';
@@ -22,8 +23,8 @@ import {getIntlShape} from '@utils/general';
 
 type LinkingCallbackArg = {url: string};
 
-const {SplitView} = NativeModules;
-const splitViewEmitter = new NativeEventEmitter(SplitView);
+const splitViewEmitter = new NativeEventEmitter(NativeModules.SplitView);
+const callManagerEmitter = new NativeEventEmitter(NativeModules.CallManager);
 
 class GlobalEventHandler {
     JavascriptAndNativeErrorHandler: jsAndNativeErrorHandler | undefined;
@@ -31,6 +32,7 @@ class GlobalEventHandler {
     constructor() {
         DeviceEventEmitter.addListener(Events.SERVER_VERSION_CHANGED, this.onServerVersionChanged);
         DeviceEventEmitter.addListener(Events.CONFIG_CHANGED, this.onServerConfigChanged);
+        callManagerEmitter.addListener('CallAnswered', this.onCallAnswered);
         splitViewEmitter.addListener('SplitViewChanged', this.onSplitViewChanged);
         Linking.addEventListener('url', this.onDeepLink);
     }
@@ -86,6 +88,20 @@ class GlobalEventHandler {
                     {cancelable: false},
                 );
             }
+        }
+    };
+
+    onCallAnswered = async (event: CallAnsweredEvent) => {
+        const serverUrl = await DatabaseManager.getServerUrlFromIdentifier(event.serverId);
+        if (typeof serverUrl === 'string') {
+            CallManager.onCall(serverUrl, event.channelId);
+        }
+    };
+
+    onCallDeclined = async (event: CallDeclinedEvent) => {
+        const serverUrl = await DatabaseManager.getServerUrlFromIdentifier(event.serverId);
+        if (typeof serverUrl === 'string') {
+            CallManager.declineCall(serverUrl, event.conferenceId);
         }
     };
 
