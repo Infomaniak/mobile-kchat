@@ -34,7 +34,7 @@ type Props = PassedProps & InjectedProps
 type UserStatus = ReturnType<typeof getUserCustomStatus>
 
 const kMeetStatus = {
-    emoji: 'product-kmeet',
+    emoji: 'kmeet',
     duration: CustomStatusDurationEnum.DONT_CLEAR,
 } as Pick<UserCustomStatus, 'emoji' | 'duration'>;
 
