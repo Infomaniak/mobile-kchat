@@ -4,9 +4,10 @@
 import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
 
+import CallManager from '@app/store/CallManager';
 import {leaveCall} from '@calls/actions';
 import {leaveAndJoinWithAlert, showLimitRestrictedAlert} from '@calls/alerts';
-import {useOnCall, useTryCallsFunction} from '@calls/hooks';
+import {useTryCallsFunction} from '@calls/hooks';
 import OptionBox from '@components/option_box';
 
 import type {LimitRestrictedInfo} from '@calls/observers';
@@ -29,7 +30,6 @@ const ChannelInfoStartButton = ({
     limitRestrictedInfo,
 }: Props) => {
     const intl = useIntl();
-    const onCall = useOnCall();
     const {formatMessage} = intl;
     const isLimitRestricted = limitRestrictedInfo.limitRestricted;
 
@@ -54,7 +54,7 @@ const ChannelInfoStartButton = ({
     return (
         <OptionBox
             onPress={() => {
-                onCall(channelId);
+                CallManager.onCall(serverUrl, channelId);
             }}
             text={startText}
             iconName='phone'
