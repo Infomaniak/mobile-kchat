@@ -5,6 +5,7 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
+import {observeChannel} from '@app/queries/servers/channel';
 import {IkCallsCustomMessage} from '@calls/components/ik_calls_custom_message/ik_call_custom_message';
 import {Preferences} from '@constants';
 import {getDisplayNamePreferenceAsBool} from '@helpers/api/preference';
@@ -16,11 +17,15 @@ import type PostModel from '@typings/database/models/servers/post';
 
 type OwnProps = {
     serverUrl: string;
+    channelType: ChannelType;
     post: PostModel;
 }
 
-const enhanced = withObservables(['post'], ({database}: OwnProps & WithDatabaseArgs) => {
+const enhanced = withObservables(['post'], ({database, post}: OwnProps & WithDatabaseArgs) => {
     const currentUser = observeCurrentUser(database);
+    const channelType = observeChannel(database, post.channelId).pipe(
+        switchMap((c) => of$(c?.type)),
+    );
     const isMilitaryTime = queryDisplayNamePreferences(database).observeWithColumns(['value']).pipe(
         switchMap(
             (preferences) => of$(getDisplayNamePreferenceAsBool(preferences, Preferences.USE_MILITARY_TIME)),
@@ -28,6 +33,7 @@ const enhanced = withObservables(['post'], ({database}: OwnProps & WithDatabaseA
     );
 
     return {
+        channelType,
         currentUser,
         isMilitaryTime,
     };
