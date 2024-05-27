@@ -290,6 +290,14 @@ export type HandleDraftArgs = PrepareOnly & {
   drafts?: Draft[];
 };
 
+export type HandleConferencesArgs = PrepareOnly & {
+  conferences: Conference[];
+}
+
+export type HandleConferenceParticipantsArgs = PrepareOnly & {
+  conferencesParticipants: ConferenceParticipant[];
+}
+
 export type LoginArgs = {
   config: Partial<ClientConfig>;
   ldapOnly?: boolean;
