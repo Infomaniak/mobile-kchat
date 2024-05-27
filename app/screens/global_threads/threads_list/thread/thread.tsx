@@ -83,7 +83,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
         },
         threadText: {
             overflow: 'hidden',
-            maxHeight: 40,
+            maxHeight: 50,
         },
         channelNameContainer: {
             backgroundColor: changeOpacity(theme.centerChannelColor, 0.08),

@@ -7,7 +7,6 @@ export const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
         flexDirection: 'row',
         borderColor: blendColors(theme.centerChannelBg, theme.centerChannelColor, 0.3),
         borderWidth: 1,
-        width: 350,
         alignItems: 'center',
         height: 65,
         paddingLeft: 6,
