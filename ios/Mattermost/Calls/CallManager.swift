@@ -15,7 +15,6 @@ struct MeetCall {
   let channelId: String
   let conferenceId: String
   let conferenceJWT: String
-  var answered = false
 }
 
 public class CallManager: NSObject {
@@ -29,6 +28,8 @@ public class CallManager: NSObject {
   @objc public private(set) var token: String?
 
   @objc var callAnsweredCallback: ((String, String, String) -> Void)?
+  @objc var callEndedCallback: ((String, String) -> Void)?
+  @objc var callMutedCallback: ((String, Bool) -> Void)?
 
   override private init() {
     let configuration: CXProviderConfiguration
@@ -54,8 +55,14 @@ public class CallManager: NSObject {
     voipRegistry.desiredPushTypes = [.voIP]
   }
 
+  @objc public func reportCallEnded(conferenceId: String) {
+    guard let existingCall = currentCalls.first(where: {$0.value.conferenceId == conferenceId})?.value else { return }
+    callProvider.reportCall(with: existingCall.localUUID, endedAt: Date(), reason: .remoteEnded)
+  }
+
   func reportIncomingCall(call: MeetCall, callName: String, completion: @escaping () -> Void) {
     let update = CXCallUpdate()
+    update.hasVideo = true
     update.remoteHandle = CXHandle(type: .generic, value: callName)
 
     callProvider.reportNewIncomingCall(with: call.localUUID, update: update) { error in
@@ -72,17 +79,20 @@ public class CallManager: NSObject {
 
 extension CallManager: CXProviderDelegate {
   public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
-    // TODO: Start call RN Side
     guard let existingCall = currentCalls[action.callUUID] else { return }
     callAnsweredCallback?(existingCall.serverId, existingCall.channelId, existingCall.conferenceJWT)
-    currentCalls[action.callUUID]?.answered = true
     action.fulfill()
   }
 
   public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
-    // TODO: Stop call RN Side
     guard let existingCall = currentCalls[action.callUUID] else { return }
-    // callManagerModule?.callDeclinedEvent(existingCall.serverId, conferenceId: existingCall.conferenceId)
+    callEndedCallback?(existingCall.serverId, existingCall.conferenceId)
+    action.fulfill()
+  }
+
+  public func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
+    guard let existingCall = currentCalls[action.callUUID] else { return }
+    callMutedCallback?(existingCall.serverId, action.isMuted)
     action.fulfill()
   }
 
@@ -109,14 +119,16 @@ extension CallManager: PKPushRegistryDelegate {
   ) {
     guard type == .voIP else { return }
 
+    print("Received voip notification \(payload.dictionaryPayload)")
     guard let serverId = payload.dictionaryPayload["server_id"] as? String,
           let channelId = payload.dictionaryPayload["channel_id"] as? String,
           let conferenceId = payload.dictionaryPayload["conference_id"] as? String,
+          let localUUID = UUID(uuidString: channelId),
           let channelName = payload.dictionaryPayload["channel_name"] as? String,
           let conferenceJWT = payload.dictionaryPayload["conference_jwt"] as? String else {
       return
     }
-    
+
     let meetCall = MeetCall(
       localUUID: UUID(),
       serverId: serverId,
