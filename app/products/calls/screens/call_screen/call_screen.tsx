@@ -5,7 +5,7 @@ import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
 import moment from 'moment';
 import React, {useCallback, useEffect, useMemo, useRef, type ComponentProps, type RefObject} from 'react';
 import {useIntl} from 'react-intl';
-import {DeviceEventEmitter} from 'react-native';
+import {DeviceEventEmitter, NativeModules, Platform} from 'react-native';
 
 import {updateLocalCustomStatus} from '@actions/local/user';
 import {switchToChannelById} from '@actions/remote/channel';
@@ -13,6 +13,7 @@ import {unsetCustomStatus, updateCustomStatus} from '@actions/remote/user';
 import {CustomStatusDurationEnum, SET_CUSTOM_STATUS_FAILURE} from '@app/constants/custom_status';
 import {useServerUrl} from '@app/context/server';
 import {calculateExpiryTime} from '@app/screens/custom_status/custom_status';
+import {logError} from '@app/utils/log';
 import {getUserCustomStatus, getUserTimezone} from '@app/utils/user';
 import {debounce} from '@helpers/api/general';
 import CallManager from '@store/CallManager';
@@ -30,7 +31,7 @@ export type InjectedProps = {
     currentUser: UserModel;
 }
 
-type Props = PassedProps & InjectedProps
+type Props = PassedProps & InjectedProps & { autoUpdateStatus: boolean }
 type UserStatus = ReturnType<typeof getUserCustomStatus>
 
 const kMeetStatus = {
@@ -112,6 +113,7 @@ const isStatusKMeet = (status: UserStatus): boolean =>
     );
 
 const CallScreen = ({
+    autoUpdateStatus = false,
     channelId,
     conferenceId,
     currentUser,
@@ -180,7 +182,9 @@ const CallScreen = ({
      */
     const leaveCallRef = useTransientRef(() => {
         // Restore previous status
-        restoreStatus();
+        if (autoUpdateStatus) {
+            restoreStatus();
+        }
 
         // Return back to the channel where this meeting has been started
         if (typeof channelId === 'string') {
@@ -199,7 +203,9 @@ const CallScreen = ({
     // EFFECTS
     useEffect(() => {
         // Update the status upon mounting the CALL screen
-        updateStatus();
+        if (autoUpdateStatus) {
+            updateStatus();
+        }
 
         // Leave call on unmount
         return () => {
@@ -221,6 +227,10 @@ const CallScreen = ({
              * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#eventlisteners
              */
             eventListeners={{
+
+                // onAudioMutedChanged: (isMuted: boolean) => {
+                //     NativeModules.CallManager.mute(isMuted);
+                // },
                 onReadyToClose: () => {
                     leaveCallRef.current!();
                 },
@@ -245,7 +255,7 @@ const CallScreen = ({
                 // 'server-url-change.enabled': false,
 
                 // Disable CallKit. Maybe only disable on Android ?
-                'call-integration.enabled': Platform.OS === 'android'
+                'call-integration.enabled': Platform.OS === 'android',
             }}
             ref={jitsiMeeting}
             style={{flex: 1}}
