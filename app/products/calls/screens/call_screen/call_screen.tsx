@@ -24,6 +24,7 @@ export type PassedProps = {
     serverUrl: string;
     channelId: string;
     conferenceId?: string;
+    conferenceJWT?: string;
     userInfo: ComponentProps<typeof JitsiMeeting>['userInfo'];
 };
 
@@ -116,6 +117,7 @@ const CallScreen = ({
     autoUpdateStatus = false,
     channelId,
     conferenceId,
+    conferenceJWT,
     currentUser,
     serverUrl: kMeetServerUrl,
     userInfo,
@@ -235,6 +237,8 @@ const CallScreen = ({
                 subject: 'kMeet',
                 disableModeratorIndicator: true,
             }}
+
+            token={conferenceJWT}
 
             /**
              * Setup the JitsiMeeting event listeners

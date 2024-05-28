@@ -109,7 +109,10 @@ class CallManager {
      * If the conferenceId is know it should
      * be passed as an arg to trigger a "Join call" instead of a "Start call"
      */
-    onCall = async (serverUrl: string, channelId: string, conferenceId?: string) => {
+    onCall = async (
+        serverUrl: string, channelId: string,
+        {conferenceId, conferenceJWT}: { conferenceId?: string; conferenceJWT?: string } = {},
+    ) => {
         /* eslint-disable multiline-ternary */
         try {
             const client = NetworkManager.getClient(serverUrl);
@@ -135,6 +138,7 @@ class CallManager {
                     serverUrl: call.server_url,
                     channelId: call.channel_id,
                     conferenceId,
+                    conferenceJWT,
 
                     /**
                      * Compute the JitsiMeeting `userInfo`
