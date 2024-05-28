@@ -28,7 +28,7 @@ const Transcription: FC<Props> = ({closeButtonId, transcriptDatas}) => {
 
     const snapPoints = useMemo(() => {
         const items: Array<string | number> = [1];
-        const segmentsCount = transcriptDatas.segments.length;
+        const segmentsCount = transcriptDatas.transcript.segments.length;
 
         items.push(bottomSheetSnapPoint(segmentsCount, ITEM_HEIGHT, bottom) + 50);
         return items;
@@ -39,7 +39,7 @@ const Transcription: FC<Props> = ({closeButtonId, transcriptDatas}) => {
             <>
                 <FormattedText
                     style={styles.title}
-                    id={'mobile.vocals.loading_transcript'}
+                    id={'mobile.vocals.transcript_title'}
                     defaultMessage='Audio Transcript (auto-generated)'
                 />
                 <View
@@ -52,7 +52,7 @@ const Transcription: FC<Props> = ({closeButtonId, transcriptDatas}) => {
                         showsVerticalScrollIndicator={false}
                         showsHorizontalScrollIndicator={false}
                     >
-                        {transcriptDatas.segments.map((segment, index) => {
+                        {transcriptDatas.transcript.segments.map((segment, index) => {
                             const minutes = Math.floor(segment.start / 60);
                             const seconds = Math.floor(segment.start % 60);
                             const time = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;

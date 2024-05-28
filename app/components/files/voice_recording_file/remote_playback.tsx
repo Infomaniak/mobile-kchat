@@ -8,10 +8,12 @@ import {Text, TouchableOpacity, View, Keyboard} from 'react-native';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
+import {fetchTranscriptData} from '@actions/remote/channel';
 import FormattedText from '@app/components/formatted_text';
 import Slider from '@app/components/slider';
 import {Screens} from '@app/constants';
 import {useAudioPlayerContext} from '@app/context/audio_player';
+import {useServerUrl} from '@app/context/server';
 import {observeFilesForPost} from '@app/queries/servers/file';
 import {openAsBottomSheet} from '@app/screens/navigation';
 import {mmssss} from '@app/utils/datetime';
@@ -47,6 +49,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             borderColor: blendColors(theme.centerChannelBg, theme.centerChannelColor, 0.3),
             borderRadius: 6,
             padding: 7,
+            marginTop: 5,
         },
         error: {
             color: theme.errorTextColor,
@@ -84,21 +87,20 @@ const enhance = withObservables(['post'], ({database, post}: WithDatabaseArgs & 
 
 const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
     const {id = null, width = 0} = files[0] ?? {};
-
     const theme = useTheme();
     const intl = useIntl();
     const styles = getStyleSheet(theme);
     const textStyles = getMarkdownTextStyles(theme);
-
     const [timing, setTiming] = useState(mmssss(width));
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState('');
     const [status, setStatus] = useState<'stopped' | 'playing' | 'buffering'>('stopped');
     const [transcript, setTranscript] = useState('');
     const [transcriptDatas, setTranscriptDatas] = useState({});
-    const [loadingTranscript, setLoadingTranscript] = useState(false);
-
+    const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
+    const [hasFetchedTranscript, setHasFetchedTranscript] = useState(false);
     const {loadAudio, pauseAudio, playing} = useAudioPlayerContext();
+    const serverUrl = useServerUrl();
 
     const isPlaying = playing === id && status === 'playing';
 
@@ -123,177 +125,34 @@ const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
         }));
     };
 
-    const transcriptData = {
-        task: 'transcribe',
-        language: 'english',
-        duration: 8.470000267028809,
-        text: 'The beach was a popular spot on a hot summer day. People were swimming in the ocean, building sandcastles, and playing beach volleyball. People were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanvPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the oceanPeople were swimming in the ocean',
-        segments: [
-            {
-                id: 0,
-                seek: 0,
-                start: 0.0,
-                end: 3.319999933242798,
-                text: ' The beach was a popular spot on a hot summer day.',
-                tokens: [
-                    50364, 440, 7534, 390, 257, 3743, 4008, 322, 257, 2368, 4266, 786, 13, 50530,
-                ],
-                temperature: 0.0,
-                avg_logprob: -0.2860786020755768,
-                compression_ratio: 1.2363636493682861,
-                no_speech_prob: 0.00985979475080967,
-            },
-            {
-                id: 1,
-                seek: 3.5,
-                start: 3.5,
-                end: 6.0,
-                text: 'People were swimming in the ocean,',
-                tokens: [
-                    12345, 678, 910, 1112, 1314, 1516, 1718, 1920,
-                ],
-                temperature: 0.1,
-                avg_logprob: -0.3,
-                compression_ratio: 1.2,
-                no_speech_prob: 0.01,
-            },
-            {
-                id: 2,
-                seek: 6.5,
-                start: 6.5,
-                end: 8.0,
-                text: 'building sandcastles, and playing beach volleyball.',
-                tokens: [
-                    2122, 2324, 2526, 2728, 2930, 3132, 3334, 3536,
-                ],
-                temperature: 0.2,
-                avg_logprob: -0.4,
-                compression_ratio: 1.3,
-                no_speech_prob: 0.02,
-            },
-            {
-                id: 0,
-                seek: 0,
-                start: 0.0,
-                end: 3.319999933242798,
-                text: ' The beach was a popular spot on a hot summer day.',
-                tokens: [
-                    50364, 440, 7534, 390, 257, 3743, 4008, 322, 257, 2368, 4266, 786, 13, 50530,
-                ],
-                temperature: 0.0,
-                avg_logprob: -0.2860786020755768,
-                compression_ratio: 1.2363636493682861,
-                no_speech_prob: 0.00985979475080967,
-            },
-            {
-                id: 0,
-                seek: 0,
-                start: 0.0,
-                end: 3.319999933242798,
-                text: ' The beach was a popular spot on a hot summer day.',
-                tokens: [
-                    50364, 440, 7534, 390, 257, 3743, 4008, 322, 257, 2368, 4266, 786, 13, 50530,
-                ],
-                temperature: 0.0,
-                avg_logprob: -0.2860786020755768,
-                compression_ratio: 1.2363636493682861,
-                no_speech_prob: 0.00985979475080967,
-            },
-            {
-                id: 0,
-                seek: 0,
-                start: 0.0,
-                end: 3.319999933242798,
-                text: ' The beach was a popular spot on a hot summer day.',
-                tokens: [
-                    50364, 440, 7534, 390, 257, 3743, 4008, 322, 257, 2368, 4266, 786, 13, 50530,
-                ],
-                temperature: 0.0,
-                avg_logprob: -0.2860786020755768,
-                compression_ratio: 1.2363636493682861,
-                no_speech_prob: 0.00985979475080967,
-            },
-            {
-                id: 0,
-                seek: 0,
-                start: 0.0,
-                end: 3.319999933242798,
-                text: ' The beach was a popular spot on a hot summer day.',
-                tokens: [
-                    50364, 440, 7534, 390, 257, 3743, 4008, 322, 257, 2368, 4266, 786, 13, 50530,
-                ],
-                temperature: 0.0,
-                avg_logprob: -0.2860786020755768,
-                compression_ratio: 1.2363636493682861,
-                no_speech_prob: 0.00985979475080967,
-            },
-            {
-                id: 0,
-                seek: 0,
-                start: 0.0,
-                end: 3.319999933242798,
-                text: ' The beach was a popular spot on a hot summer day.',
-                tokens: [
-                    50364, 440, 7534, 390, 257, 3743, 4008, 322, 257, 2368, 4266, 786, 13, 50530,
-                ],
-                temperature: 0.0,
-                avg_logprob: -0.2860786020755768,
-                compression_ratio: 1.2363636493682861,
-                no_speech_prob: 0.00985979475080967,
-            },
-            {
-                id: 0,
-                seek: 0,
-                start: 0.0,
-                end: 3.319999933242798,
-                text: ' The beach was a popular spot on a hot summer day.',
-                tokens: [
-                    50364, 440, 7534, 390, 257, 3743, 4008, 322, 257, 2368, 4266, 786, 13, 50530,
-                ],
-                temperature: 0.0,
-                avg_logprob: -0.2860786020755768,
-                compression_ratio: 1.2363636493682861,
-                no_speech_prob: 0.00985979475080967,
-            },
-            {
-                id: 0,
-                seek: 0,
-                start: 0.0,
-                end: 3.319999933242798,
-                text: ' The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day. a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.The beach was a popular spot on a hot summer day.',
-                tokens: [
-                    50364, 440, 7534, 390, 257, 3743, 4008, 322, 257, 2368, 4266, 786, 13, 50530,
-                ],
-                temperature: 0.0,
-                avg_logprob: -0.2860786020755768,
-                compression_ratio: 1.2363636493682861,
-                no_speech_prob: 0.00985979475080967,
-            },
-
-        ],
-    };
-
-    const fetchTranscript = async () => {
-        setLoadingTranscript(true);
-        setTimeout(async () => {
-            if (transcript) {
-                setTranscript('');
-                setLoadingTranscript(false);
-                return;
-            }
-            setTranscript(transcriptData.text);
-            setTranscriptDatas(transcriptData);
-            setLoadingTranscript(false);
-        }, 2000);
-    };
-
-    const toggleTranscript = () => {
-        if (transcript) {
+    const fetchTranscript = () => {
+        if (isTranscriptOpen) {
             setTranscript('');
-            setLoadingTranscript(false);
-        } else {
-            fetchTranscript();
-            setLoadingTranscript(true);
+            setIsTranscriptOpen(false);
+            return;
+        }
+        if (!hasFetchedTranscript && serverUrl && files[0]?.id) {
+            fetchTranscriptData(serverUrl, files[0].id).
+                then((trans) => {
+                    if (!trans.transcript.text) {
+                        setError(intl.formatMessage({
+                            id: 'mobile.vocals.transcript.error',
+                            defaultMessage: 'The audio is empty.',
+                        }));
+                        return;
+                    }
+                    setTranscript(trans.transcript.text);
+                    setTranscriptDatas(trans.transcript);
+                    setIsTranscriptOpen(true);
+                    setHasFetchedTranscript(true);
+                }).catch((err) => {
+                    if (err.status === 429) {
+                        setError(intl.formatMessage({
+                            id: 'mobile.vocals.transcript.too_many',
+                            defaultMessage: 'Too many requests, please wait...',
+                        }));
+                    }
+                });
         }
     };
 
@@ -343,16 +202,10 @@ const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
                     color={theme.buttonBg}
                     name='menu'
                     size={24}
-                    onPress={toggleTranscript}
+                    onPress={fetchTranscript}
                 />
             </View>
             <View style={styles.centeredView}>
-                {loadingTranscript &&
-                <FormattedText
-                    style={styles.transcriptText}
-                    id={'mobile.vocals.loading_transcript'}
-                    defaultMessage='Transcribing...'
-                />}
                 {transcript && (
                     <View>
                         <Text style={styles.transcriptText}>

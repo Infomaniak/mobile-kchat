@@ -573,6 +573,17 @@ export async function fetchMissingDirectChannelsInfo(serverUrl: string, directCh
     }
 }
 
+export async function fetchTranscriptData(serverUrl: string, file_id: string) {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        const transcript = await client.getTranscript(file_id);
+        return {transcript};
+    } catch (error) {
+        logDebug('error on fetchTranscript', getFullErrorMessage(error));
+        return {error};
+    }
+}
+
 export async function fetchDirectChannelsInfo(serverUrl: string, directChannels: ChannelModel[]) {
     const database = DatabaseManager.serverDatabases[serverUrl]?.database;
     if (!database) {

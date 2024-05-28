@@ -24,6 +24,7 @@ export const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
     },
     text: {
         flexShrink: 1,
+        color: theme.centerChannelColor,
     },
     transcriptContainer: {
         flexDirection: 'row',
