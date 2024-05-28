@@ -416,7 +416,7 @@ export const registerDeviceToken = async (serverUrl: string) => {
         let pushKitToken: string | undefined;
         if (Platform.OS === 'ios') {
             const pushKitTokenResult = await CallManagerModule.getToken();
-            pushKitToken = pushKitTokenResult[0];
+            pushKitToken = pushKitTokenResult;
         }
 
         const deviceToken = await getDeviceToken();

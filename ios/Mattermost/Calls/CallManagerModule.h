@@ -10,6 +10,6 @@
 #import <React/RCTEventEmitter.h>
 
 @interface CallManagerModule : RCTEventEmitter <RCTBridgeModule>
-- (void)callAnsweredEvent:(NSString *)serverUrl channelId: (NSString *)channelId;
+- (void)callAnsweredEvent:(NSString *)serverUrl channelId: (NSString *)channelId conferenceJWT: (NSString *)conferenceJWT;
 - (void)callDeclinedEvent:(NSString *)serverUrl conferenceId: (NSString *)conferenceId;
 @end

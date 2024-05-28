@@ -24,7 +24,7 @@ import {getIntlShape} from '@utils/general';
 type LinkingCallbackArg = {url: string};
 
 const splitViewEmitter = new NativeEventEmitter(NativeModules.SplitView);
-const callManagerEmitter = new NativeEventEmitter(NativeModules.CallManager);
+const callManagerEmitter = new NativeEventEmitter(NativeModules.CallManagerModule);
 
 class GlobalEventHandler {
     JavascriptAndNativeErrorHandler: jsAndNativeErrorHandler | undefined;

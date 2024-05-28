@@ -11,7 +11,11 @@
 #import "CallManagerModule.h"
 #import "kChat-Swift.h"
 
-@implementation CallManagerModule {
+static NSString * const kCallAnswered  = @"CallAnswered";
+static NSString * const kCallDeclined  = @"CallDeclined";
+
+@implementation CallManagerModule
+{
   bool hasListeners;
 }
 
@@ -21,29 +25,38 @@ RCT_EXPORT_METHOD(getToken:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
   NSString *token = [[CallManager shared] token];
-  resolve(@[token]);
+  resolve(token);
 }
 
 -(void)startObserving {
     hasListeners = YES;
+  
+  [[CallManager shared] setCallAnsweredCallback:^(NSString * _Nonnull serverId, NSString * _Nonnull channelId, NSString * _Nonnull conferenceJWT) {
+    [self callAnsweredEvent:serverId channelId:channelId conferenceJWT:conferenceJWT];
+  }];
 }
 
 -(void)stopObserving {
     hasListeners = NO;
 }
 
-- (void)callAnsweredEvent:(NSString *)serverId channelId: (NSString *)channelId
+- (void)callAnsweredEvent:(NSString *)serverId channelId: (NSString *)channelId conferenceJWT: (NSString *)conferenceJWT
 {
   if (hasListeners) {
-    [self sendEventWithName:@"CallAnswered" body:@{@"serverId": serverId,  @"channelId": channelId}];
+    [self sendEventWithName:kCallAnswered body:@{@"serverId": serverId,  @"channelId": channelId, @"conferenceJWT": conferenceJWT}];
   }
 }
 
 - (void)callDeclinedEvent:(NSString *)serverId conferenceId: (NSString *)conferenceId
 {
   if (hasListeners) {
-    [self sendEventWithName:@"CallDeclined" body:@{@"serverId": serverId,  @"conferenceId": conferenceId}];
+    [self sendEventWithName:kCallDeclined body:@{@"serverId": serverId,  @"conferenceId": conferenceId}];
   }
 }
+
+- (NSArray<NSString *> *)supportedEvents  {
+  return @[kCallAnswered, kCallDeclined];
+}
+
 @end
 

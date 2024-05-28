@@ -14,6 +14,7 @@ struct MeetCall {
   let serverId: String
   let channelId: String
   let conferenceId: String
+  let conferenceJWT: String
   var answered = false
 }
 
@@ -27,7 +28,7 @@ public class CallManager: NSObject {
 
   @objc public private(set) var token: String?
 
-  private let callManagerModule = CallManagerModule()
+  @objc var callAnsweredCallback: ((String, String, String) -> Void)?
 
   override private init() {
     let configuration: CXProviderConfiguration
@@ -73,7 +74,7 @@ extension CallManager: CXProviderDelegate {
   public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
     // TODO: Start call RN Side
     guard let existingCall = currentCalls[action.callUUID] else { return }
-    callManagerModule.callAnsweredEvent(existingCall.serverId, channelId: existingCall.channelId)
+    callAnsweredCallback?(existingCall.serverId, existingCall.channelId, existingCall.conferenceJWT)
     currentCalls[action.callUUID]?.answered = true
     action.fulfill()
   }
@@ -81,7 +82,7 @@ extension CallManager: CXProviderDelegate {
   public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
     // TODO: Stop call RN Side
     guard let existingCall = currentCalls[action.callUUID] else { return }
-    callManagerModule.callDeclinedEvent(existingCall.serverId, conferenceId: existingCall.conferenceId)
+    // callManagerModule?.callDeclinedEvent(existingCall.serverId, conferenceId: existingCall.conferenceId)
     action.fulfill()
   }
 
@@ -96,6 +97,7 @@ extension CallManager: PKPushRegistryDelegate {
 
     let tokenParts = pushCredentials.token.map { data in String(format: "%02.2hhx", data) }
     let token = tokenParts.joined()
+    print("PushKit Token \(token)")
     self.token = token
   }
 
@@ -110,11 +112,18 @@ extension CallManager: PKPushRegistryDelegate {
     guard let serverId = payload.dictionaryPayload["server_id"] as? String,
           let channelId = payload.dictionaryPayload["channel_id"] as? String,
           let conferenceId = payload.dictionaryPayload["conference_id"] as? String,
-          let channelName = payload.dictionaryPayload["channel_name"] as? String else {
+          let channelName = payload.dictionaryPayload["channel_name"] as? String,
+          let conferenceJWT = payload.dictionaryPayload["conference_jwt"] as? String else {
       return
     }
-
-    let meetCall = MeetCall(localUUID: UUID(), serverId: serverId, channelId: channelId, conferenceId: conferenceId)
+    
+    let meetCall = MeetCall(
+      localUUID: UUID(),
+      serverId: serverId,
+      channelId: channelId,
+      conferenceId: conferenceId,
+      conferenceJWT: conferenceJWT
+    )
     reportIncomingCall(call: meetCall, callName: channelName) {
       completion()
     }
