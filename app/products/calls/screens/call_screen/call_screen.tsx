@@ -121,7 +121,7 @@ const CallScreen = ({
     userInfo,
 }: Props) => {
     const {formatMessage} = useIntl();
-    const jitsiMeeting = useRef<JitsiRefProps | null>(null);
+    const jitsiMeetingRef = useRef<JitsiRefProps | null>(null);
     const serverUrl = useServerUrl();
 
     /**
@@ -195,8 +195,8 @@ const CallScreen = ({
             CallManager.leaveCall(serverUrl, conferenceId);
         }
 
-        if (jitsiMeeting.current) {
-            jitsiMeeting.current.close();
+        if (jitsiMeetingRef.current) {
+            jitsiMeetingRef.current.close();
         }
 
         // Notify CallKit about the end of the call
@@ -224,6 +224,11 @@ const CallScreen = ({
 
     return (
         <JitsiMeeting
+
+            ref={(jitsiMeeting) => {
+                jitsiMeetingRef.current = jitsiMeeting;
+                CallManager.registerJitsiMeeting(jitsiMeeting);
+            }}
 
             // Ref. https://github.com/jitsi/jitsi-meet/blob/master/config.js
             config={{
@@ -266,7 +271,6 @@ const CallScreen = ({
                 // Disable CallKit. Maybe only disable on Android ?
                 'call-integration.enabled': Platform.OS === 'android',
             }}
-            ref={jitsiMeeting}
             style={{flex: 1}}
             room={channelId}
             serverURL={kMeetServerUrl}

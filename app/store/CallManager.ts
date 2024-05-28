@@ -9,10 +9,12 @@ import ClientError from '@client/rest/error';
 import {getTranslations, t} from '@i18n';
 import NetworkManager from '@managers/network_manager';
 import {allOrientations, dismissAllModalsAndPopToScreen} from '@screens/navigation';
-import {logError, logWarning} from '@utils/log';
+import {logError} from '@utils/log';
 
 import type {ApiCall} from '@app/client/rest/ikcalls';
 import type {PassedProps} from '@calls/screens/call_screen/call_screen';
+import type {JitsiRefProps} from '@jitsi/react-native-sdk';
+import type {MutableRefObject} from 'react';
 import type {Options} from 'react-native-navigation';
 
 export type Call = ApiCall & {server_url: string}
@@ -27,6 +29,11 @@ const withServerUrl = (call: ApiCall): Call => ({
 });
 
 class CallManager {
+    jitsiMeetingRef: MutableRefObject<JitsiRefProps | null> = {current: null};
+    registerJitsiMeeting = (jitsiMeeting: JitsiRefProps | null) => {
+        this.jitsiMeetingRef.current = jitsiMeeting;
+    };
+
     startCall = async (serverUrl: string, channelId: string, allowAnswer = true): Promise<Call | null> => {
         try {
             return withServerUrl(await NetworkManager.getClient(serverUrl).startCall(channelId));
@@ -83,7 +90,15 @@ class CallManager {
     };
 
     muteCall = (isMuted: boolean) => {
-        logWarning('TODO implement stub CallManager.muteCall', {isMuted});
+        const jitsiMeeting = this.jitsiMeetingRef.current;
+        if (
+            jitsiMeeting !== null &&
+            typeof jitsiMeeting.setAudioMuted === 'function'
+        ) {
+            jitsiMeeting.setAudioMuted(isMuted);
+        } else {
+            logError(`Could not ${isMuted ? '' : 'un'}mute, JitsiMeeting not found`);
+        }
     };
 
     /**
