@@ -8,3 +8,9 @@ export type Transcript = {
         }>;
     };
 };
+export type TranscriptData = {
+    segments: Array<{
+        text: string;
+        start: number;
+    }>;
+};

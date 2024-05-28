@@ -127,10 +127,11 @@ const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
 
     const fetchTranscript = () => {
         if (isTranscriptOpen) {
-            setTranscript('');
             setIsTranscriptOpen(false);
             return;
         }
+        setIsTranscriptOpen(true);
+
         if (!hasFetchedTranscript && serverUrl && files[0]?.id) {
             fetchTranscriptData(serverUrl, files[0].id).
                 then((trans) => {
@@ -141,7 +142,7 @@ const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
                         }));
                         return;
                     }
-                    setTranscript(trans.transcript.text);
+                    setTranscript(trans.transcript.text.trim());
                     setTranscriptDatas(trans.transcript);
                     setIsTranscriptOpen(true);
                     setHasFetchedTranscript(true);
@@ -206,7 +207,7 @@ const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
                 />
             </View>
             <View style={styles.centeredView}>
-                {transcript && (
+                {transcript && isTranscriptOpen && (
                     <View>
                         <Text style={styles.transcriptText}>
                             {transcript.length > 200 ? transcript.substring(0, 200) + '...' : transcript}
