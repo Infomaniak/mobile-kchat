@@ -198,6 +198,15 @@ const CallScreen = ({
         if (jitsiMeeting.current) {
             jitsiMeeting.current.close();
         }
+
+        // Notify CallKit about the end of the call
+        try {
+            if (Platform.OS === 'ios') {
+                NativeModules.CallManagerModule.reportCallEnded(conferenceId);
+            }
+        } catch (error) {
+            logError(error);
+        }
     });
 
     // EFFECTS
