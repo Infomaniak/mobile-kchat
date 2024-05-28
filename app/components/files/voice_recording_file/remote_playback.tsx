@@ -19,6 +19,7 @@ import {openAsBottomSheet} from '@app/screens/navigation';
 import {mmssss} from '@app/utils/datetime';
 import {getMarkdownTextStyles} from '@app/utils/markdown';
 import CompassIcon from '@components/compass_icon';
+import Loading from '@components/loading';
 import TimeElapsed from '@components/post_draft/draft_input/voice_input/time_elapsed';
 import {MIC_SIZE} from '@constants/view';
 import {useTheme} from '@context/theme';
@@ -38,11 +39,12 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             width: MIC_SIZE,
             alignItems: 'center',
             justifyContent: 'center',
-            marginRight: 12,
+            marginRight: 2,
         },
         playBackContainer: {
             flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'space-evenly',
             position: 'relative',
             width: '100%',
             borderWidth: 1,
@@ -98,6 +100,7 @@ const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
     const [transcript, setTranscript] = useState('');
     const [transcriptDatas, setTranscriptDatas] = useState({});
     const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
+    const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
     const [hasFetchedTranscript, setHasFetchedTranscript] = useState(false);
     const {loadAudio, pauseAudio, playing} = useAudioPlayerContext();
     const serverUrl = useServerUrl();
@@ -133,8 +136,10 @@ const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
         setIsTranscriptOpen(true);
 
         if (!hasFetchedTranscript && serverUrl && files[0]?.id) {
+            setIsLoadingTranscript(true);
             fetchTranscriptData(serverUrl, files[0].id).
                 then((trans) => {
+                    setIsLoadingTranscript(false);
                     if (!trans.transcript.text) {
                         setError(intl.formatMessage({
                             id: 'mobile.vocals.transcript.error',
@@ -147,6 +152,8 @@ const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
                     setIsTranscriptOpen(true);
                     setHasFetchedTranscript(true);
                 }).catch((err) => {
+                    setIsLoadingTranscript(false);
+
                     if (err.status === 429) {
                         setError(intl.formatMessage({
                             id: 'mobile.vocals.transcript.too_many',
@@ -199,12 +206,16 @@ const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
                     width='60%'
                 />
                 <TimeElapsed time={timing}/>
-                <CompassIcon
-                    color={theme.buttonBg}
-                    name='menu'
-                    size={24}
-                    onPress={fetchTranscript}
-                />
+                {isLoadingTranscript ? (
+                    <Loading/>
+                ) : (
+                    <CompassIcon
+                        color={theme.buttonBg}
+                        name='menu'
+                        size={24}
+                        onPress={fetchTranscript}
+                    />
+                )}
             </View>
             <View style={styles.centeredView}>
                 {transcript && isTranscriptOpen && (
