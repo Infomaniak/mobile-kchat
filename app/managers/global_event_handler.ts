@@ -33,6 +33,7 @@ class GlobalEventHandler {
         DeviceEventEmitter.addListener(Events.SERVER_VERSION_CHANGED, this.onServerVersionChanged);
         DeviceEventEmitter.addListener(Events.CONFIG_CHANGED, this.onServerConfigChanged);
         callManagerEmitter.addListener('CallAnswered', this.onCallAnswered);
+        callManagerEmitter.addListener('CallEnded', this.onCallEnded);
         splitViewEmitter.addListener('SplitViewChanged', this.onSplitViewChanged);
         Linking.addEventListener('url', this.onDeepLink);
     }
@@ -98,11 +99,15 @@ class GlobalEventHandler {
         }
     };
 
-    onCallDeclined = async (event: CallDeclinedEvent) => {
+    onCallEnded = async (event: CallEndedEvent) => {
         const serverUrl = await DatabaseManager.getServerUrlFromIdentifier(event.serverId);
         if (typeof serverUrl === 'string') {
             CallManager.declineCall(serverUrl, event.conferenceId);
         }
+    };
+
+    onCallMuted = async (event: CallMutedEvent) => {
+        CallManager.muteCall(event.isMuted);
     };
 
     onSplitViewChanged = async (result: SplitViewResult) => {

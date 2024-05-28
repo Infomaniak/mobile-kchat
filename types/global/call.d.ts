@@ -6,7 +6,11 @@ type CallAnsweredEvent = {
     channelId: string;
 }
 
-type CallDeclinedEvent = {
+type CallEndedEvent = {
     serverId: string;
     conferenceId: string;
+}
+
+type CallMutedEvent = {
+    isMuted: boolean;
 }

@@ -9,7 +9,7 @@ import ClientError from '@client/rest/error';
 import {getTranslations, t} from '@i18n';
 import NetworkManager from '@managers/network_manager';
 import {allOrientations, dismissAllModalsAndPopToScreen} from '@screens/navigation';
-import {logError} from '@utils/log';
+import {logError, logWarning} from '@utils/log';
 
 import type {ApiCall} from '@app/client/rest/ikcalls';
 import type {PassedProps} from '@calls/screens/call_screen/call_screen';
@@ -80,6 +80,10 @@ class CallManager {
             // logError(error);
             return null;
         }
+    };
+
+    muteCall = (isMuted: boolean) => {
+        logWarning('TODO implement stub CallManager.muteCall', {isMuted});
     };
 
     /**
