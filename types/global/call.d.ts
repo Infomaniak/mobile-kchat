@@ -4,6 +4,7 @@
 type CallAnsweredEvent = {
     serverId: string;
     channelId: string;
+    conferenceJWT: string;
 }
 
 type CallEndedEvent = {

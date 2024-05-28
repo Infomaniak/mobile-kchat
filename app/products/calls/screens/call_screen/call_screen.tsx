@@ -243,6 +243,9 @@ const CallScreen = ({
 
                 // 'lobby-mode.enabled': false,
                 // 'server-url-change.enabled': false,
+
+                // Disable CallKit. Maybe only disable on Android ?
+                'call-integration.enabled': Platform.OS === 'android'
             }}
             ref={jitsiMeeting}
             style={{flex: 1}}
