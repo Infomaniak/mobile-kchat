@@ -28,6 +28,7 @@ export interface ClientChannelsMix {
     getMyChannels: (teamId: string, includeDeleted?: boolean, lastDeleteAt?: number) => Promise<Channel[]>;
     getMyChannelMember: (channelId: string) => Promise<ChannelMembership>;
     getMyChannelMembers: (teamId: string) => Promise<ChannelMembership[]>;
+    getTranscript: (file_id: string) => Promise<any>;
     getChannelMembers: (channelId: string, page?: number, perPage?: number) => Promise<ChannelMembership[]>;
     getChannelTimezones: (channelId: string) => Promise<string[]>;
     getChannelMember: (channelId: string, userId: string) => Promise<ChannelMembership>;
@@ -254,6 +255,13 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
         return this.doFetch(
             `${this.getChannelMembersRoute(channelId)}`,
             {method: 'post', body: member},
+        );
+    };
+
+    getTranscript = async (file_id: string) => {
+        return this.doFetch(
+            `${this.getFileRoute(file_id)}/transcript`,
+            {method: 'post'},
         );
     };
 

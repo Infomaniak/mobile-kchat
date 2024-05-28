@@ -3,13 +3,25 @@
 import React from 'react';
 import {Text} from 'react-native';
 
+import {makeStyleSheetFromTheme} from '@app/utils/theme';
+import {useTheme} from '@context/theme';
+
 type TimeElapsedProps = {
     time: string;
 };
+export const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
+    time: {
+        color: theme.centerChannelColor,
+        marginLeft: 12,
+        marginRight: 5,
+    },
+}));
 
 const TimeElapsed = ({time = '00:00'}: TimeElapsedProps) => {
+    const theme = useTheme();
+    const styles = getStyleSheet(theme);
     return (
-        <Text style={[{marginLeft: 12}]}>
+        <Text style={styles.time}>
             {time}
         </Text>
     );
