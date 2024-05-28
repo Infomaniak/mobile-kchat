@@ -10,24 +10,29 @@ import {z} from 'zod';
 import FormattedRelativeTime from '@app/components/formatted_relative_time';
 import {useServerUrl} from '@app/context/server';
 import CallManager from '@app/store/CallManager';
+import {isDarkTheme} from '@app/utils/theme';
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
 import FormattedTime from '@components/formatted_time';
 import {useTheme} from '@context/theme';
 import UserModel from '@typings/database/models/servers/user';
-import {isTypeDMorGM} from '@utils/channel';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {getUserTimezone} from '@utils/user';
 
 import KMeetIcon from './kmeet_icon';
+import IkCallsParticipantIcon from './participant_icon';
 
+import type ConferenceParticipantModel from '@app/database/models/server/conference_participant';
 import type PostModel from '@typings/database/models/servers/post';
 
 type CallMessageProps = {
-    channelType: ChannelType;
     currentUser?: UserModel;
+    isDM: boolean;
     isMilitaryTime: boolean;
+    participants: ConferenceParticipantModel[];
+    participantCount: number;
+    participantUsers: UserModel[];
     post: PostModel;
 }
 
@@ -55,13 +60,14 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
         container: {
             borderWidth: 0.25,
             borderColor: changeOpacity(theme.centerChannelColor, 0.6),
-            backgroundColor: changeOpacity(theme.centerChannelColor, 0),
             borderRadius: 4,
             marginTop: 8,
             marginBottom: 8,
         },
-        containerDark: {
-            backgroundColor: changeOpacity(theme.centerChannelColor, 0.06),
+        participantContainer: {
+            flexDirection: 'row',
+            marginTop: 4,
+            marginBottom: 8,
         },
         systemMessageTitle: {
             color: theme.centerChannelColor,
@@ -80,7 +86,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
         iconMessageContainer: {
             flexDirection: 'row',
             padding: 16,
-            paddingTop: 2,
+            paddingTop: 10,
         },
         joinCallContainer: {
             flexDirection: 'row',
@@ -120,8 +126,17 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-export const IkCallsCustomMessage = ({channelType, currentUser, isMilitaryTime, post}: CallMessageProps) => {
+export const IkCallsCustomMessage = ({
+    currentUser,
+    isDM,
+    isMilitaryTime,
+    participants,
+    participantCount,
+    participantUsers,
+    post,
+}: CallMessageProps) => {
     const theme = useTheme();
+    const isDark = isDarkTheme(theme);
     const timezone = getUserTimezone(currentUser);
     const serverUrl = useServerUrl();
     const styles = getStyleSheet(theme);
@@ -146,9 +161,6 @@ export const IkCallsCustomMessage = ({channelType, currentUser, isMilitaryTime, 
             diff(moment.tz(timezone), 'minutes')) > 60,
         [eventDate, timezone],
     );
-
-    // const isFromCurrentUser = post.userId === currentUser?.id;
-    const isDM = isTypeDMorGM(channelType);
 
     /**
      * Compute bold message
@@ -176,10 +188,34 @@ export const IkCallsCustomMessage = ({channelType, currentUser, isMilitaryTime, 
     /**
      * Darken button background
      */
-    const containerStyles = [styles.container] as Object[];
-    if (status !== 'calling' && status !== 'joined') {
-        containerStyles.push(styles.containerDark);
-    }
+    const backgroundColor = (() => {
+        if (status === 'calling' || status === 'joined') {
+            return theme.centerChannelBg;
+        }
+        return isDark ? '#262A30' : '#F0F0F0';
+    })();
+    const containerStyles = [styles.container, {backgroundColor}];
+
+    /**
+     * Link ConferenceParticipant and User
+     */
+    const conferenceParticipantWithUsers = useMemo(
+        () => {
+            const usersById = participantUsers.reduce(
+                (obj, user) => {
+                    obj[user.id] = user;
+                    return obj;
+                },
+                {} as Record<UserModel['id'], UserModel>,
+            );
+
+            return participants.map((participant) => ({
+                ...participant,
+                user: usersById[participant.userId],
+            })) as Array<ConferenceParticipantModel & { user?: UserModel }>;
+        },
+        [],
+    );
 
     let callButton = null;
     if (startedAt && !endedAt) {
@@ -216,13 +252,35 @@ export const IkCallsCustomMessage = ({channelType, currentUser, isMilitaryTime, 
                     <KMeetIcon/>
                 </View>
                 <View>
-                    <Text style={styles.systemMessageTitle}>
-                        {status === 'calling'}
-                    </Text>
                     <FormattedText
                         style={styles.systemMessageTitle}
                         {...titleProps}
                     />
+                    {
+                        conferenceParticipantWithUsers.length > 0 &&
+                        <View style={styles.participantContainer}>
+                            {conferenceParticipantWithUsers.map((participant, i) => (
+                                <IkCallsParticipantIcon
+                                    key={participant._raw.id}
+                                    isFirst={i === 0}
+                                    backgroundColor={backgroundColor}
+                                    size={36}
+                                    statusSize={10}
+                                    participant={participant}
+                                />
+                            ))}
+                            {
+                                participantCount > 3 &&
+                                <IkCallsParticipantIcon
+                                    key='overflow'
+                                    isFirst={false}
+                                    backgroundColor={backgroundColor}
+                                    size={36}
+                                    participant={participantCount - 3}
+                                />
+                            }
+                        </View>
+                    }
                     <Text style={styles.systemMessageDescription}>
                         {
                             isEventOlderThanAnHour ? (
