@@ -12,6 +12,8 @@
   "about.teamEditiont1": "Enterprise Edition",
   "account.logout": "Log out",
   "account.logout_from": "Log out of {serverName}",
+  "account.server_preprod": "Switch to NEXT",
+  "account.server_prod": "Switch to STABLE",
   "account.settings": "Settings",
   "account.your_profile": "Your Profile",
   "alert.channel_deleted.description": "The channel {displayName} has been archived.",

@@ -12,6 +12,8 @@
     "about.teamEditiont1": "Édition Entreprise",
     "account.logout": "Se déconnecter",
     "account.logout_from": "Se déconnecter de {serverName}",
+    "account.server_preprod": "Passer à la version NEXT",
+    "account.server_prod": "Passer à la version STABLE",
     "account.settings": "Paramètres",
     "account.your_profile": "Votre profil",
     "alert.channel_deleted.description": "Le canal {displayName} a été archivé.",

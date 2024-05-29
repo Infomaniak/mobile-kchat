@@ -574,6 +574,8 @@ Allez dans Réglages > Touch ID et code.";
 "announcment_banner.okay" = "Ok";
 "alert.removed_from_team.description" = "Vous avez été supprimé de l'équipe {displayName}.";
 "account.logout" = "Se déconnecter";
+"account.server_preprod" = "Passer à la version NEXT";
+"account.server_prod" = "Passer à la version STABLE";
 "channel_info.mobile_notifications" = "Notifications mobiles";
 "channel_info.mention" = "Mention";
 "channel_info.members" = "Membres";
