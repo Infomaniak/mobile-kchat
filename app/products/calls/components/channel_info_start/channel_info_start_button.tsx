@@ -54,7 +54,7 @@ const ChannelInfoStartButton = ({
     return (
         <OptionBox
             onPress={() => {
-                CallManager.onCall(serverUrl, channelId);
+                CallManager.onCall(serverUrl, channelId, {initiator: 'internal'});
             }}
             text={startText}
             iconName='phone'

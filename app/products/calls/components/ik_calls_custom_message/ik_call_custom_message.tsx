@@ -195,7 +195,7 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
                     <View/>
                     <TouchableOpacity
                         onPress={() => {
-                            CallManager.onCall(serverUrl, channelId, {conferenceId});
+                            CallManager.onCall(serverUrl, channelId, {conferenceId, initiator: 'internal'});
                         }}
                         style={styles.joinCallButton}
                     >

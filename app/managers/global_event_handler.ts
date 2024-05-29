@@ -95,7 +95,7 @@ class GlobalEventHandler {
     onCallAnswered = async (event: CallAnsweredEvent) => {
         const serverUrl = await DatabaseManager.getServerUrlFromIdentifier(event.serverId);
         if (typeof serverUrl === 'string') {
-            CallManager.onCall(serverUrl, event.channelId);
+            CallManager.onCall(serverUrl, event.channelId, {initiator: 'native'});
         }
     };
 

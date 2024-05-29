@@ -8,17 +8,19 @@ import {useIntl} from 'react-intl';
 import {DeviceEventEmitter, NativeModules, Platform} from 'react-native';
 
 import {updateLocalCustomStatus} from '@actions/local/user';
-import {switchToChannelById} from '@actions/remote/channel';
+import {fetchChannelMemberships, switchToChannelById} from '@actions/remote/channel';
 import {unsetCustomStatus, updateCustomStatus} from '@actions/remote/user';
 import {CustomStatusDurationEnum, SET_CUSTOM_STATUS_FAILURE} from '@app/constants/custom_status';
-import {useServerUrl} from '@app/context/server';
+import {useServerId, useServerUrl} from '@app/context/server';
 import {useTransientRef} from '@app/hooks/utils';
 import {calculateExpiryTime} from '@app/screens/custom_status/custom_status';
 import {logError} from '@app/utils/log';
 import {getUserCustomStatus, getUserTimezone} from '@app/utils/user';
 import {debounce} from '@helpers/api/general';
 import CallManager from '@store/CallManager';
+import {isDMorGM} from '@utils/channel';
 
+import type ChannelModel from '@typings/database/models/servers/channel';
 import type UserModel from '@typings/database/models/servers/user';
 
 export type PassedProps = {
@@ -26,10 +28,12 @@ export type PassedProps = {
     channelId: string;
     conferenceId?: string;
     conferenceJWT?: string;
+    initiator?: 'native' | 'internal';
     userInfo: ComponentProps<typeof JitsiMeeting>['userInfo'];
 };
 
 export type InjectedProps = {
+    channel: ChannelModel;
     currentUser: UserModel;
 }
 
@@ -107,15 +111,42 @@ const isStatusKMeet = (status: UserStatus): boolean =>
         status.duration === null
     );
 
+/**
+ * Native reporters, notify native/OS about a state change
+ */
+const nativeReporters = {
+    callStarted: (serverId: string, channelId: string, conferenceId: string, callName: string) => {
+        try {
+            if (Platform.OS === 'ios') { // Only for CallKit
+                NativeModules.CallManagerModule.reportCallStarted(serverId, channelId, conferenceId, callName);
+            }
+        } catch (error) {
+            logError(error);
+        }
+    },
+    callEnded: (conferenceId: string) => {
+        try {
+            if (Platform.OS === 'ios') { // Only for CallKit
+                NativeModules.CallManagerModule.reportCallEnded(conferenceId);
+            }
+        } catch (error) {
+            logError(error);
+        }
+    },
+};
+
 const CallScreen = ({
     autoUpdateStatus = false,
+    channel,
     channelId,
     conferenceId,
     conferenceJWT,
     currentUser,
+    initiator,
     serverUrl: kMeetServerUrl,
     userInfo,
 }: Props) => {
+    const serverId = useServerId();
     const {formatMessage} = useIntl();
     const jitsiMeetingRef = useRef<JitsiRefProps | null>(null);
     const serverUrl = useServerUrl();
@@ -189,19 +220,13 @@ const CallScreen = ({
 
         if (typeof conferenceId === 'string') {
             CallManager.leaveCall(serverUrl, conferenceId);
+
+            // Notify CallKit about the end of the call
+            nativeReporters.callEnded(conferenceId);
         }
 
         if (jitsiMeetingRef.current) {
             jitsiMeetingRef.current.close();
-        }
-
-        // Notify CallKit about the end of the call
-        try {
-            if (Platform.OS === 'ios') {
-                NativeModules.CallManagerModule.reportCallEnded(conferenceId);
-            }
-        } catch (error) {
-            logError(error);
         }
     });
 
@@ -210,6 +235,29 @@ const CallScreen = ({
         // Update the status upon mounting the CALL screen
         if (autoUpdateStatus) {
             updateStatus();
+        }
+
+        // Report that the call started only if the initiator is not native
+        //  -> internal is react-native
+        if (
+            initiator !== 'native' &&
+            typeof channelId === 'string' &&
+            typeof conferenceId === 'string'
+        ) {
+            (async function getCallName() {
+                let callName = `~${channel.name}`; // GM
+
+                // Find the target user's username for DM calls
+                if (isDMorGM(channel)) {
+                    const {users} = await fetchChannelMemberships(serverUrl, channelId, {per_page: 2});
+                    const targetUser = users.find((user) => user.id !== currentUser.id); // eslint-disable-line max-nested-callbacks
+                    if (targetUser) {
+                        callName = `@${targetUser.username}`; // DM
+                    }
+                }
+
+                nativeReporters.callStarted(serverId, channelId, conferenceId, callName);
+            }());
         }
 
         // Leave call on unmount

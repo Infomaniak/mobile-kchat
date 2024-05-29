@@ -111,7 +111,8 @@ class CallManager {
      */
     onCall = async (
         serverUrl: string, channelId: string,
-        {conferenceId, conferenceJWT}: { conferenceId?: string; conferenceJWT?: string } = {},
+        {conferenceId, conferenceJWT, initiator}:
+        { conferenceId?: string; conferenceJWT?: string; initiator?: 'native' | 'internal' } = {},
     ) => {
         /* eslint-disable multiline-ternary */
         try {
@@ -139,6 +140,7 @@ class CallManager {
                     channelId: call.channel_id,
                     conferenceId: call.id,
                     conferenceJWT,
+                    initiator,
 
                     /**
                      * Compute the JitsiMeeting `userInfo`
