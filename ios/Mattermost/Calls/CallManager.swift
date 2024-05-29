@@ -21,6 +21,7 @@ public class CallManager: NSObject {
   @objc public static let shared = CallManager()
 
   private let callProvider: CXProvider
+  private let callController: CXCallController
   private let voipRegistry: PKPushRegistry
 
   private var currentCalls = [UUID: MeetCall]()
@@ -44,6 +45,7 @@ public class CallManager: NSObject {
 
     callProvider = CXProvider(configuration: configuration)
     voipRegistry = PKPushRegistry(queue: nil)
+    callController = CXCallController()
     super.init()
     callProvider.setDelegate(self, queue: nil)
 
@@ -56,8 +58,28 @@ public class CallManager: NSObject {
   }
 
   @objc public func reportCallEnded(conferenceId: String) {
-    guard let existingCall = currentCalls.first(where: {$0.value.conferenceId == conferenceId})?.value else { return }
-    callProvider.reportCall(with: existingCall.localUUID, endedAt: Date(), reason: .remoteEnded)
+    guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
+    callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .remoteEnded)
+  }
+
+  @objc public func reportCallStarted(serverId: String, channelId: String, conferenceId: String, callName: String) {
+    let call = MeetCall(
+      localUUID: UUID(),
+      serverId: serverId,
+      channelId: channelId,
+      conferenceId: conferenceId,
+      conferenceJWT: ""
+    )
+    currentCalls[call.localUUID] = call
+    callProvider.reportOutgoingCall(with: call.localUUID, startedConnectingAt: Date(timeIntervalSinceNow: -3))
+    callProvider.reportOutgoingCall(with: call.localUUID, connectedAt: Date())
+
+    let startCallAction = CXStartCallAction(call: call.localUUID, handle: CXHandle(type: .generic, value: callName))
+    callController.requestTransaction(with: [startCallAction]) { error in
+      if let error {
+        print("An error occured starting call \(error)")
+      }
+    }
   }
 
   func reportIncomingCall(call: MeetCall, callName: String, completion: @escaping () -> Void) {
@@ -123,7 +145,6 @@ extension CallManager: PKPushRegistryDelegate {
     guard let serverId = payload.dictionaryPayload["server_id"] as? String,
           let channelId = payload.dictionaryPayload["channel_id"] as? String,
           let conferenceId = payload.dictionaryPayload["conference_id"] as? String,
-          let localUUID = UUID(uuidString: channelId),
           let channelName = payload.dictionaryPayload["channel_name"] as? String,
           let conferenceJWT = payload.dictionaryPayload["conference_jwt"] as? String else {
       return
