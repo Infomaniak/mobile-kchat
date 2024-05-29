@@ -665,6 +665,7 @@
     "mobile.open_dm.error": "Der Direktnachrichtenkanal mit {displayName} konnte nicht geöffnet werden. Bitte überprüfe deine Verbindung und versuche es erneut.",
     "mobile.open_gm.error": "Der Gruppennachrichtenkanal mit diesen Benutzern konnte nicht geöffnet werden. Bitte überprüfe deine Verbindung und versuchen es erneut.",
     "mobile.participants.header": "Teilnehmer der Unterhaltung",
+    "mobile.call_participants.header": "Teilnehmer Anrufen",
     "mobile.permission_denied_dismiss": "Nicht erlauben",
     "mobile.permission_denied_retry": "Einstellungen",
     "mobile.post.cancel": "Abbrechen",

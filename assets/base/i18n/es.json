@@ -595,6 +595,7 @@
     "mobile.open_dm.error": "No hemos podido abrir un mensaje directo con {displayName}. Compruebe su conexión e inténtelo de nuevo.",
     "mobile.open_gm.error": "No pudimos abrir el canal del grupo con esos usuarios. Por favor revisa tu conexión e intenta de nuevo.",
     "mobile.participants.header": "Participantes del hilo",
+    "mobile.call_participants.header": "Convocatoria Participantes",
     "mobile.permission_denied_dismiss": "No Permitir",
     "mobile.permission_denied_retry": "Configuración",
     "mobile.post.cancel": "Cancelar",

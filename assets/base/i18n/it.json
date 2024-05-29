@@ -608,6 +608,7 @@
     "mobile.open_dm.error": "Non è stato possibile aprire un messaggio diretto con {displayName}. Controllare la connessione e riprovare.",
     "mobile.open_gm.error": "Impossibile aprire un messaggio di gruppo con questi utenti. Controlla la tua connessione e riprova.",
     "mobile.participants.header": "Partecipanti al thread",
+    "mobile.call_participants.header": "Partecipanti al chiamati",
     "mobile.permission_denied_dismiss": "Non consentire",
     "mobile.permission_denied_retry": "Impostazioni",
     "mobile.post.cancel": "Annulla",

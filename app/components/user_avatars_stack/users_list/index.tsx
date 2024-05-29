@@ -27,11 +27,11 @@ type ItemProps = {
     user: UserModel;
 }
 
-const Item = ({channelId, location, user}: ItemProps) => {
+export const useOpenUserProfile = (channelId: string, location: string) => {
     const intl = useIntl();
     const theme = useTheme();
 
-    const openUserProfile = useCallback(async (u: UserModel | UserProfile) => {
+    return useCallback(async (u: UserModel | UserProfile) => {
         await dismissBottomSheet(Screens.BOTTOM_SHEET);
         const screen = Screens.USER_PROFILE;
         const title = intl.formatMessage({id: 'mobile.routes.user_profile', defaultMessage: 'Profile'});
@@ -41,14 +41,14 @@ const Item = ({channelId, location, user}: ItemProps) => {
         Keyboard.dismiss();
         openAsBottomSheet({screen, title, theme, closeButtonId, props});
     }, [location, channelId, theme, intl]);
-
-    return (
-        <UserItem
-            user={user}
-            onUserPress={openUserProfile}
-        />
-    );
 };
+
+const Item = ({channelId, location, user}: ItemProps) => (
+    <UserItem
+        user={user}
+        onUserPress={useOpenUserProfile(channelId, location)}
+    />
+);
 
 const UsersList = ({channelId, location, type = 'FlatList', users}: Props) => {
     const [enabled, setEnabled] = useState(type === 'BottomSheetFlatList');

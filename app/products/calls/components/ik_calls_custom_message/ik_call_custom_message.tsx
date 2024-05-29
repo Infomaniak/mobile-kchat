@@ -11,6 +11,7 @@ import FormattedRelativeTime from '@app/components/formatted_relative_time';
 import {useServerUrl} from '@app/context/server';
 import CallManager from '@app/store/CallManager';
 import {isDarkTheme} from '@app/utils/theme';
+import IkCallsParticipantStack from '@calls/components/ik_calls_participant_stack';
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
 import FormattedTime from '@components/formatted_time';
@@ -21,20 +22,8 @@ import {typography} from '@utils/typography';
 import {getUserTimezone} from '@utils/user';
 
 import KMeetIcon from './kmeet_icon';
-import IkCallsParticipantIcon from './participant_icon';
 
-import type ConferenceParticipantModel from '@app/database/models/server/conference_participant';
 import type PostModel from '@typings/database/models/servers/post';
-
-type CallMessageProps = {
-    currentUser?: UserModel;
-    isDM: boolean;
-    isMilitaryTime: boolean;
-    participants: ConferenceParticipantModel[];
-    participantCount: number;
-    participantUsers: UserModel[];
-    post: PostModel;
-}
 
 const CallStatus = z.enum(['calling', 'joined', 'ended', 'missed', 'declined']);
 type CallStatus = z.infer<typeof CallStatus>
@@ -123,18 +112,19 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             ...typography('Body', 75),
             color: changeOpacity(theme.centerChannelColor, 0.64),
         },
+        callParticipants: {
+            marginTop: 4,
+            marginBottom: 8,
+        },
     };
 });
 
-export const IkCallsCustomMessage = ({
-    currentUser,
-    isDM,
-    isMilitaryTime,
-    participants,
-    participantCount,
-    participantUsers,
-    post,
-}: CallMessageProps) => {
+export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: {
+    currentUser?: UserModel;
+    isDM: boolean;
+    isMilitaryTime: boolean;
+    post: PostModel;
+}) => {
     const theme = useTheme();
     const isDark = isDarkTheme(theme);
     const timezone = getUserTimezone(currentUser);
@@ -196,27 +186,6 @@ export const IkCallsCustomMessage = ({
     })();
     const containerStyles = [styles.container, {backgroundColor}];
 
-    /**
-     * Link ConferenceParticipant and User
-     */
-    const conferenceParticipantWithUsers = useMemo(
-        () => {
-            const usersById = participantUsers.reduce(
-                (obj, user) => {
-                    obj[user.id] = user;
-                    return obj;
-                },
-                {} as Record<UserModel['id'], UserModel>,
-            );
-
-            return participants.map((participant) => ({
-                ...participant,
-                user: usersById[participant.userId],
-            })) as Array<ConferenceParticipantModel & { user?: UserModel }>;
-        },
-        [],
-    );
-
     let callButton = null;
     if (startedAt && !endedAt) {
         callButton = (
@@ -257,29 +226,15 @@ export const IkCallsCustomMessage = ({
                         {...titleProps}
                     />
                     {
-                        conferenceParticipantWithUsers.length > 0 &&
-                        <View style={styles.participantContainer}>
-                            {conferenceParticipantWithUsers.map((participant, i) => (
-                                <IkCallsParticipantIcon
-                                    key={participant._raw.id}
-                                    isFirst={i === 0}
-                                    backgroundColor={backgroundColor}
-                                    size={36}
-                                    statusSize={10}
-                                    participant={participant}
-                                />
-                            ))}
-                            {
-                                participantCount > 3 &&
-                                <IkCallsParticipantIcon
-                                    key='overflow'
-                                    isFirst={false}
-                                    backgroundColor={backgroundColor}
-                                    size={36}
-                                    participant={participantCount - 3}
-                                />
-                            }
-                        </View>
+                        !isDM &&
+                        typeof channelId === 'string' &&
+                        typeof conferenceId === 'string' &&
+                        <IkCallsParticipantStack
+                            style={styles.callParticipants}
+                            channelId={channelId}
+                            conferenceId={conferenceId}
+                            backgroundColor={backgroundColor}
+                        />
                     }
                     <Text style={styles.systemMessageDescription}>
                         {

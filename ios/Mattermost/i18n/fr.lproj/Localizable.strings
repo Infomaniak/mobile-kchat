@@ -700,6 +700,7 @@ Une mise à niveau du serveur est requise pour utiliser l'application kChat. Veu
 "mobile.post_info.unsave" = "Ne pas enregistrer";
 "mobile.post_info.save" = "Enregistrer";
 "mobile.participants.header" = "Participants au fil de discussion";
+"mobile.call_participants.header" = "Participants à la conference";
 "mobile.open_dm.error" = "Nous n'avons pas pu ouvrir de message direct avec {displayName}. Veuillez vérifier votre connexion et réessayer.";
 "mobile.onboarding.sign_in_to_get_started" = "Connectez-vous pour démarrer";
 "mobile.onboarding.sign_in" = "Se connecter";
