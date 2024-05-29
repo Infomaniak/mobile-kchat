@@ -12,14 +12,12 @@ import OptionItem from '@components/option_item';
 import {useServerUrl} from '@context/server';
 import {preventDoubleTap} from '@utils/tap';
 
-const BG_COLOR = '#7974B4';
-const COLOR = '#FFFFFF';
+const COLOR = '#7974B4';
 
 const COOKIE_NAME = 'KCHAT_NEXT';
 const COOKIE_USE_WEBKIT = false;
 
 const styles = StyleSheet.create({
-    container: {backgroundColor: BG_COLOR},
     labelText: {color: COLOR},
 });
 
@@ -84,7 +82,6 @@ const Next = () => {
 
             iconColor={COLOR}
             optionLabelTextStyle={styles.labelText}
-            containerStyle={styles.container}
         />
     ) : null;
 };
