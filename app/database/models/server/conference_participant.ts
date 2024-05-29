@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {field, immutableRelation} from '@nozbe/watermelondb/decorators';
+import {experimentalFailsafe, field, immutableRelation} from '@nozbe/watermelondb/decorators';
 import Model, {type Associations} from '@nozbe/watermelondb/Model';
 
 import {MM_TABLES} from '@constants/database';
@@ -55,5 +55,5 @@ export default class ConferenceParticipantModel extends Model implements Confere
     @immutableRelation(CONFERENCE, 'id') conference!: Relation<ConferenceModel>;
 
     /** user : The related record to the User model */
-    @immutableRelation(USER, 'user_id') user!: Relation<UserModel>;
+    @experimentalFailsafe(undefined) @immutableRelation(USER, 'user_id') user!: Relation<UserModel>;
 }

@@ -9,7 +9,6 @@ import {useTheme} from '@context/theme';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import type ConferenceParticipantModel from '@app/database/models/server/conference_participant';
-import type UserModel from '@typings/database/models/servers/user';
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
@@ -22,21 +21,17 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 });
 
 const IkCallsParticipantStackStatusIcon = ({
-    participant,
+    status,
     size = 14,
     padding = 2,
     style: baseStyle = {},
 }: {
-    participant: (ConferenceParticipantModel & { user?: UserModel }) | number;
+    status?: ConferenceParticipantModel['status'];
     size?: number;
     padding?: number;
     style?: StyleProp<ViewStyle>;
 }) => {
     const theme = useTheme();
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore: Find the proper way to do that
-    const status = participant?._raw?.status as ConferenceParticipantModel['status'] | undefined;
 
     // Merge static and dynamic styles
     const style = getStyleSheet(theme);

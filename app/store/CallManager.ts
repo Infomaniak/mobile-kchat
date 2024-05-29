@@ -137,7 +137,7 @@ class CallManager {
                 const passedProps: PassedProps = {
                     serverUrl: call.server_url,
                     channelId: call.channel_id,
-                    conferenceId,
+                    conferenceId: call.id,
                     conferenceJWT,
 
                     /**

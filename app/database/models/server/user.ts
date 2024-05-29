@@ -22,6 +22,7 @@ const {
     CHANNEL,
     CHANNEL_MEMBERSHIP,
     CONFERENCE,
+    CONFERENCE_PARTICIPANT,
     POST,
     PREFERENCE,
     REACTION,
@@ -49,6 +50,9 @@ export default class UserModel extends Model implements UserModelInterface {
 
         /** A USER can be associated with multiple CONFERENCE (relationship is 1:N) */
         [CONFERENCE]: {type: 'has_many', foreignKey: 'user_id'},
+
+        /** A USER can be a participant of multiple CONFERENCE (relationship is 1:N) */
+        [CONFERENCE_PARTICIPANT]: {type: 'has_many', foreignKey: 'user_id'},
 
         /** USER has a 1:N relationship with POST.  A user can author multiple posts */
         [POST]: {type: 'has_many', foreignKey: 'user_id'},

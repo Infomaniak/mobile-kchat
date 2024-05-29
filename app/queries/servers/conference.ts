@@ -7,9 +7,6 @@ import {Database as DatabaseConstants} from '@constants';
 
 import type ConferenceParticipantModel from '@typings/database/models/servers/conference_participant';
 
-// import {of as of$} from 'rxjs';
-// import {switchMap} from 'rxjs/operators';
-
 const {CONFERENCE_PARTICIPANT} = DatabaseConstants.MM_TABLES.SERVER;
 
 export const observeConferenceParticipants = (database: Database, conferenceId: string, limit?: number) => {

@@ -3,7 +3,7 @@
 
 import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
 import moment from 'moment';
-import React, {useCallback, useEffect, useMemo, useRef, type ComponentProps, type RefObject} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, type ComponentProps} from 'react';
 import {useIntl} from 'react-intl';
 import {DeviceEventEmitter, NativeModules, Platform} from 'react-native';
 
@@ -12,6 +12,7 @@ import {switchToChannelById} from '@actions/remote/channel';
 import {unsetCustomStatus, updateCustomStatus} from '@actions/remote/user';
 import {CustomStatusDurationEnum, SET_CUSTOM_STATUS_FAILURE} from '@app/constants/custom_status';
 import {useServerUrl} from '@app/context/server';
+import {useTransientRef} from '@app/hooks/utils';
 import {calculateExpiryTime} from '@app/screens/custom_status/custom_status';
 import {logError} from '@app/utils/log';
 import {getUserCustomStatus, getUserTimezone} from '@app/utils/user';
@@ -39,13 +40,6 @@ const kMeetStatus = {
     emoji: 'kmeet',
     duration: CustomStatusDurationEnum.DONT_CLEAR,
 } as Pick<UserCustomStatus, 'emoji' | 'duration'>;
-
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
-const useTransientRef = <T extends unknown>(value: T): RefObject<T> => {
-    const ref = useRef<T>(value);
-    ref.current = value;
-    return ref;
-};
 
 /**
  * Convert possible "duration" status to a specific "date_and_time"

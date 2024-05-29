@@ -6,16 +6,17 @@ import {useIntl} from 'react-intl';
 import {StyleSheet, TouchableOpacity, View, type StyleProp, type ViewStyle} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
+import Loading from '@app/components/loading';
 import IkCallsParticipantStackIcon from '@calls/components/ik_calls_participant_stack/icon';
+import IkCallsParticipantStackIconOverflow from '@calls/components/ik_calls_participant_stack/icon_overflow';
 import IkCallsParticipantStackList from '@calls/components/ik_calls_participant_stack/list';
-import {useParticipantsLinkedToUser} from '@calls/components/ik_calls_participant_stack/list/list';
+import {useFetchParticipantUsers} from '@calls/components/ik_calls_participant_stack/list/list';
 import FormattedText from '@components/formatted_text';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import {TITLE_HEIGHT} from '@screens/bottom_sheet/content';
 import {bottomSheet} from '@screens/navigation';
-import UserModel from '@typings/database/models/servers/user';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {preventDoubleTap} from '@utils/tap';
 import {makeStyleSheetFromTheme} from '@utils/theme';
@@ -24,12 +25,16 @@ import {typography} from '@utils/typography';
 import type ConferenceParticipantModel from '@app/database/models/server/conference_participant';
 
 const ROW_HEIGHT = 40;
+export const RENDERED_CONFERENCE_PARTICIPANT_COUNT = 3;
 
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         marginTop: 4,
         marginBottom: 8,
+    },
+    loadingContainer: {
+        margin: 8,
     },
 });
 
@@ -46,9 +51,8 @@ export const IkCallsParticipantStack = ({
     backgroundColor,
     channelId,
     conferenceId,
-    participants: baseParticipants,
+    participants,
     participantCount,
-    users,
     style: baseContainerStyle,
 }: {
     backgroundColor: string;
@@ -56,15 +60,13 @@ export const IkCallsParticipantStack = ({
     conferenceId: string;
     participants: ConferenceParticipantModel[];
     participantCount: number;
-    users: UserModel[];
     style?: StyleProp<ViewStyle>;
 }) => {
-    const theme = useTheme();
-    const {formatMessage} = useIntl();
-    const style = getStyleSheet(theme);
-    const isTablet = useIsTablet();
     const {bottom} = useSafeAreaInsets();
-    const participants = useParticipantsLinkedToUser(baseParticipants, users);
+    const {formatMessage} = useIntl();
+    const isTablet = useIsTablet();
+    const theme = useTheme();
+    const style = getStyleSheet(theme);
 
     const showParticipantList = useCallback(preventDoubleTap(() => {
         const renderContent = () => (
@@ -102,28 +104,39 @@ export const IkCallsParticipantStack = ({
         });
     }), [bottom, channelId, conferenceId, isTablet, participantCount, style]);
 
+    // EFFECTS
+    const loading = useFetchParticipantUsers(participants);
+
     return participants.length === 0 ? null : (
         <TouchableOpacity
             onPress={showParticipantList}
             style={baseContainerStyle}
         >
             <View style={styles.container}>
-                {participants.map((participant, i) => (
-                    <IkCallsParticipantStackIcon
-                        key={participant._raw.id}
-                        isFirst={i === 0}
-                        backgroundColor={backgroundColor}
-                        participant={participant}
-                    />
-                ))}
                 {
-                    participantCount > 3 &&
-                    <IkCallsParticipantStackIcon
-                        key='overflow'
-                        isFirst={false}
-                        backgroundColor={backgroundColor}
-                        participant={participantCount - 3}
-                    />
+                    loading ? (
+                        <Loading containerStyle={styles.loadingContainer}/>
+                    ) : (
+                        <>
+                            {participants.map((participant, i) => (
+                                <IkCallsParticipantStackIcon
+                                    key={participant.id}
+                                    isFirst={i === 0}
+                                    backgroundColor={backgroundColor}
+                                    participant={participant}
+                                />
+                            ))}
+                            {
+                                participantCount > RENDERED_CONFERENCE_PARTICIPANT_COUNT &&
+                                <IkCallsParticipantStackIconOverflow
+                                    key='overflow'
+                                    isFirst={false}
+                                    backgroundColor={backgroundColor}
+                                    count={participantCount - RENDERED_CONFERENCE_PARTICIPANT_COUNT}
+                                />
+                            }
+                        </>
+                    )
                 }
             </View>
         </TouchableOpacity>

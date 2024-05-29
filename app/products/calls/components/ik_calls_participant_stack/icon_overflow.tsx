@@ -1,26 +1,18 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {withObservables} from '@nozbe/watermelondb/react';
 import React, {useMemo} from 'react';
-import {type StyleProp, View, type ViewStyle, Platform} from 'react-native';
-import {of as of$} from 'rxjs';
+import {type StyleProp, View, type ViewStyle, Text, Platform} from 'react-native';
 
 import IkCallsParticipantStackStatusIcon from '@calls/components/ik_calls_participant_stack/status_icon';
-import Image from '@components/profile_picture/image';
-import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {makeStyleSheetFromTheme} from '@utils/theme';
+import {typography} from '@utils/typography';
 
-import type ConferenceParticipantModel from '@app/database/models/server/conference_participant';
-import type UserModel from '@typings/database/models/servers/user';
-
-type IkCallsParticipantStackIconProps = {
-    participant: ConferenceParticipantModel;
-    user?: UserModel;
+type IkCallsParticipantStackIconOverflowProps = {
+    count: number;
     backgroundColor?: string;
     containerStyle?: StyleProp<ViewStyle>;
-    iconSize?: number;
     isFirst?: boolean;
     size?: number;
     statusSize?: number;
@@ -38,6 +30,10 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             justifyContent: 'center',
             alignItems: 'center',
         },
+        count: {
+            color: theme.centerChannelBg,
+            ...typography('Heading', 200, 'SemiBold'),
+        },
         iconContainer: {
             position: 'absolute',
             bottom: -STATUS_BUFFER,
@@ -52,19 +48,16 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const IkCallsParticipantStackIcon = ({
-    participant,
-    user,
+const IkCallsParticipantStackIconOverflow = ({
+    count,
     backgroundColor,
     containerStyle: baseContainerStyle,
-    iconSize,
     isFirst = true,
     size = 36,
     statusSize = 14,
     statusStyle,
-}: IkCallsParticipantStackIconProps) => {
+}: IkCallsParticipantStackIconOverflowProps) => {
     const theme = useTheme();
-    const serverUrl = useServerUrl();
 
     // Merge static and dynamic styles
     const style = getStyleSheet(theme);
@@ -75,10 +68,17 @@ const IkCallsParticipantStackIcon = ({
             borderRadius: size / 2,
             width: size,
             height: size,
-            backgroundColor,
+            backgroundColor: '#ADB1BE',
+            borderWidth: 1.5,
+            borderColor: backgroundColor || theme.centerChannelBg,
         },
         baseContainerStyle,
     ], [style, backgroundColor, baseContainerStyle, size]);
+
+    const countStyle = useMemo(() => [
+        style.count,
+        {fontSize: Math.floor(14 - (Math.floor(Math.log10(count)) * 1.5))},
+    ], [style, count]);
 
     const iconContainerStyle = useMemo(() => [
         style.iconContainer,
@@ -90,30 +90,15 @@ const IkCallsParticipantStackIcon = ({
 
     return (
         <View style={viewStyle}>
-
-            <Image
-                author={user}
-                iconSize={iconSize}
-                size={size - 3}
-                url={serverUrl}
-            />
-
+            <Text style={countStyle}>{'+'}{count}</Text>
             <View style={iconContainerStyle}>
                 <IkCallsParticipantStackStatusIcon
-                    status={participant.status}
                     size={statusSize}
                     style={statusStyle}
                 />
             </View>
-
         </View>
     );
 };
 
-const enhance = withObservables(['participant'], ({participant}: {
-    participant: ConferenceParticipantModel;
-}) => ({
-    participant,
-    user: participant.user || of$(undefined),
-}));
-export default enhance(IkCallsParticipantStackIcon);
+export default IkCallsParticipantStackIconOverflow;

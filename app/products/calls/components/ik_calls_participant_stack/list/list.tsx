@@ -2,61 +2,85 @@
 // See LICENSE.txt for license information.
 
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
-import React, {useCallback, useMemo} from 'react';
-import {type ListRenderItemInfo} from 'react-native';
+import {withObservables} from '@nozbe/watermelondb/react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {StyleSheet, type ListRenderItemInfo} from 'react-native';
+import {of as of$} from 'rxjs';
 
+import {fetchUsersByIds} from '@actions/remote/user';
 import {useOpenUserProfile} from '@app/components/user_avatars_stack/users_list';
+import {useServerUrl} from '@app/context/server';
 import IkCallsParticipantStackStatusIcon from '@calls/components/ik_calls_participant_stack/status_icon';
-import UserItem from '@components/user_item';
-import UserModel from '@typings/database/models/servers/user';
+import Loading from '@components/loading';
+import BaseUserItem from '@components/user_item';
 
 import type ConferenceParticipantModel from '@app/database/models/server/conference_participant';
 
-type ConferenceParticipantWithUser = ConferenceParticipantModel & { user?: UserModel };
+/**
+ * Enhance <UserItem /> with the user relation from Participant
+ */
+const enhance = withObservables(['participant'], ({participant}: {
+    participant: ConferenceParticipantModel;
+}) => ({
+    participant,
+    user: participant.user || of$(undefined),
+}));
+const UserItem = enhance(BaseUserItem);
 
 /**
- * Link ConferenceParticipantModel with UserModel
+ * Get a list of users corresponding to a list of participants
+ * return the loading state
  */
-export const useParticipantsLinkedToUser = (participants: ConferenceParticipantModel[], users: UserModel[]) => useMemo(
-    () => {
-        const usersById = users.reduce(
-            (obj, user) => {
-                obj[user.id] = user;
-                return obj;
-            },
-            {} as Record<UserModel['id'], UserModel>,
-        );
+export const useFetchParticipantUsers = (participants: ConferenceParticipantModel[]) => {
+    const serverUrl = useServerUrl();
 
-        return participants.map((participant) => ({
-            ...participant,
-            user: usersById[participant.userId],
-        })) as Array<ConferenceParticipantModel & { user?: UserModel }>;
+    // Save the mounted status
+    const mountedRef = useRef(true);
+    useEffect(() => () => {
+        mountedRef.current = false;
+    }, []);
+
+    // Asynchronous call should not set state on an unmounted component
+    const [participantUsersVersion, setParticipantUsersVersion] = useState(0);
+    useEffect(() => {
+        const userIds = participants.map((p) => p.userId);
+
+        (async () => {
+            await fetchUsersByIds(serverUrl, userIds);
+            if (mountedRef.current) {
+                setParticipantUsersVersion((v) => v + 1); // eslint-disable-line max-nested-callbacks
+            }
+        })();
+    }, [participants]);
+
+    return participantUsersVersion === 0;
+};
+
+const style = StyleSheet.create({
+    loadingContainer: {
+        marginTop: 24,
     },
-    [participants, users],
-);
+});
 
 export const IkCallsParticipantStackList = ({
     channelId,
     location,
-    participants: baseParticipants,
+    participants,
     rowHeight = 40,
-    users,
 }: {
     channelId: string;
     location: string;
     participants: ConferenceParticipantModel[];
     rowHeight: number;
-    users: UserModel[];
 }) => {
-    const participants = useParticipantsLinkedToUser(baseParticipants, users);
     const openUserProfile = useOpenUserProfile(channelId, location);
 
-    const renderItem = useCallback(({item}: ListRenderItemInfo<ConferenceParticipantWithUser>) => (
+    const renderItem = useCallback(({item}: ListRenderItemInfo<ConferenceParticipantModel>) => (
         <UserItem
-            user={item.user}
+            participant={item}
             rightDecorator={
                 <IkCallsParticipantStackStatusIcon
-                    participant={item}
+                    status={item.status}
                     padding={6}
                     size={rowHeight - 12}
                 />
@@ -65,7 +89,15 @@ export const IkCallsParticipantStackList = ({
         />
     ), [openUserProfile]);
 
-    return (
+    // EFFECTS
+    const loading = useFetchParticipantUsers(participants);
+
+    return loading ? (
+        <Loading
+            size='large'
+            containerStyle={style.loadingContainer}
+        />
+    ) : (
         <BottomSheetFlatList
             data={participants}
             renderItem={renderItem}
