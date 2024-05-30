@@ -4,7 +4,7 @@
 
 import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
 import moment from 'moment';
-import React, {useCallback, useEffect, useMemo, useRef, type ComponentProps} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, type ComponentProps, type MutableRefObject} from 'react';
 import {useIntl} from 'react-intl';
 import {DeviceEventEmitter, NativeModules, Platform} from 'react-native';
 
@@ -37,6 +37,11 @@ export type InjectedProps = {
     channel: ChannelModel;
     currentUser: UserModel;
 }
+
+export type CallScreenHandle = {
+  muteCall: (isMuted: boolean) => void;
+  muteVideo: (isMuted: boolean) => void;
+};
 
 type Props = PassedProps & InjectedProps & { autoUpdateStatus: boolean }
 type UserStatus = ReturnType<typeof getUserCustomStatus>
@@ -113,6 +118,19 @@ const isStatusKMeet = (status: UserStatus): boolean =>
     );
 
 /**
+ * Test if setting a new value to a ref would change it
+ * returns true if it does, false otherwise
+ */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
+const hasUpdatedRef = <T extends unknown>(ref: MutableRefObject<T>, newValue: T): boolean => {
+    if (ref.current !== newValue) {
+        ref.current = newValue;
+        return true;
+    }
+    return false;
+};
+
+/**
  * Native reporters, notify native/OS about a state change
  */
 const nativeReporters = {
@@ -169,6 +187,9 @@ const CallScreen = ({
     const {formatMessage} = useIntl();
     const jitsiMeetingRef = useRef<JitsiRefProps | null>(null);
     const serverUrl = useServerUrl();
+    const audioMutedRef = useRef(false);
+    const videoMutedRef = useRef(false);
+    const conferenceJoinedRef = useRef(false);
 
     /**
      * Compare current status and new (arg) status
@@ -193,6 +214,7 @@ const CallScreen = ({
             updateLocalCustomStatus(serverUrl, currentUserRef.current!, status);
         }
     }, [serverUrl]);
+    const doUpdateStatusRef = useTransientRef(doUpdateStatus);
 
     /**
      * Handle setting-up the "In a call" custom status
@@ -215,12 +237,36 @@ const CallScreen = ({
         () => debounce(() => {
             // Only restore the previous status if the user did not cleared the "kMeet" status
             // this prevents statuses being restored out of nowhere
-            if (isStatusKMeet(getUserCustomStatus(currentUserRef.current!))) {
-                doUpdateStatus(statusBeforeCallRef.current);
+            if (
+                typeof doUpdateStatusRef.current === 'function' &&
+                isStatusKMeet(getUserCustomStatus(currentUserRef.current!))
+            ) {
+                doUpdateStatusRef.current(statusBeforeCallRef.current);
             }
         }, 2000, true /* Immediate */),
-        [doUpdateStatus],
+        [],
     );
+
+    /**
+     * Mute audio/video prevent triggering a callback if
+     * the state already matches the newState
+     */
+    const muteCall = useCallback((isMuted: boolean) => {
+        if (
+            hasUpdatedRef(audioMutedRef, isMuted) &&
+            typeof jitsiMeetingRef.current?.setAudioMuted === 'function'
+        ) {
+            jitsiMeetingRef.current.setAudioMuted(isMuted);
+        }
+    }, []);
+    const muteVideo = useCallback((isMuted: boolean) => {
+        if (
+            hasUpdatedRef(videoMutedRef, isMuted) &&
+            typeof jitsiMeetingRef.current?.setVideoMuted === 'function'
+        ) {
+            jitsiMeetingRef.current.setVideoMuted(isMuted);
+        }
+    }, []);
 
     /**
      * Close the current JitsiMeeting
@@ -238,6 +284,7 @@ const CallScreen = ({
         }
 
         if (typeof conferenceId === 'string') {
+            // Notify the API that the user left the call
             CallManager.leaveCall(serverUrl, conferenceId);
 
             // Notify CallKit about the end of the call
@@ -249,49 +296,72 @@ const CallScreen = ({
         }
     });
 
-    // EFFECTS
-    useEffect(() => {
-        // Update the status upon mounting the CALL screen
-        if (autoUpdateStatus) {
-            updateStatus();
-        }
+    /**
+     * Setup the JitsiMeeting event listeners
+     * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#eventlisteners
+     */
+    const eventListeners = useMemo(() => ({
+        onConferenceJoined: () => {
+            conferenceJoinedRef.current = true;
 
-        // Report that the call started only if the initiator is not native
-        //  -> internal is react-native
-        if (
-            initiator !== 'native' &&
-            typeof channelId === 'string' &&
-            typeof conferenceId === 'string'
-        ) {
-            (async function getCallName() {
-                let callName = `~${channel.name}`; // GM
+            if (autoUpdateStatus) {
+                updateStatus();
+            }
 
-                // Find the target user's username for DM calls
-                if (isDMorGM(channel)) {
-                    const {users} = await fetchChannelMemberships(serverUrl, channelId, {per_page: 2});
-                    const targetUser = users.find((user) => user.id !== currentUser.id); // eslint-disable-line max-nested-callbacks
-                    if (targetUser) {
-                        callName = `@${targetUser.username}`; // DM
+            // Report that the call started only if the initiator is not native
+            //  -> 'internal' initiator means react-native
+            if (
+                initiator !== 'native' &&
+                typeof channelId === 'string' &&
+                typeof conferenceId === 'string'
+            ) {
+                (async function getCallName() {
+                    let callName = `~${channel.name}`; // GM
+
+                    // Find the target user's username for DM calls
+                    if (isDMorGM(channel)) {
+                        const {users} = await fetchChannelMemberships(serverUrl, channelId, {per_page: 2});
+                        const targetUser = users.find((user) => user.id !== currentUser.id); // eslint-disable-line max-nested-callbacks
+                        if (targetUser) {
+                            callName = `@${targetUser.username}`; // DM
+                        }
                     }
-                }
 
-                nativeReporters.callStarted(serverId, channelId, conferenceId, callName);
-            }());
-        }
-
-        // Leave call on unmount
-        return () => {
+                    nativeReporters.callStarted(serverId, channelId, conferenceId, callName);
+                }());
+            }
+        },
+        onAudioMutedChanged: (isMuted: boolean) => {
+            if (
+                hasUpdatedRef(audioMutedRef, isMuted) &&
+                conferenceJoinedRef.current && typeof conferenceId === 'string'
+            ) {
+                nativeReporters.callMuted(conferenceId, isMuted);
+            }
+        },
+        onVideoMutedChanged: (isMuted: boolean) => {
+            if (
+                hasUpdatedRef(audioMutedRef, isMuted) &&
+                conferenceJoinedRef.current && typeof conferenceId === 'string'
+            ) {
+                nativeReporters.callVideoMuted(conferenceId, isMuted);
+            }
+        },
+        onReadyToClose: () => {
             leaveCallRef.current!();
-        };
+        },
+    }), []);
+
+    // EFFECTS
+    // Register to allow functions from being called by the CallManager
+    useEffect(() => {
+        CallManager.registerCallScreen({muteCall, muteVideo});
     }, []);
 
     return (
         <JitsiMeeting
 
-            ref={(jitsiMeeting) => {
-                jitsiMeetingRef.current = jitsiMeeting;
-                CallManager.registerJitsiMeeting(jitsiMeeting);
-            }}
+            ref={jitsiMeetingRef}
 
             // Ref. https://github.com/jitsi/jitsi-meet/blob/master/config.js
             config={{
@@ -305,16 +375,7 @@ const CallScreen = ({
              * Setup the JitsiMeeting event listeners
              * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#eventlisteners
              */
-            eventListeners={{
-                onAudioMutedChanged: (isMuted: boolean) => {
-                    if (typeof conferenceId === 'string') {
-                        nativeReporters.callMuted(conferenceId, isMuted);
-                    }
-                },
-                onReadyToClose: () => {
-                    leaveCallRef.current!();
-                },
-            }}
+            eventListeners={eventListeners}
             flags={{
 
                 // Prevent inviting new peoples

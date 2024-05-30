@@ -15,3 +15,5 @@ type CallEndedEvent = {
 type CallMutedEvent = {
     isMuted: 'true' | 'false';
 }
+
+type CallVideoMutedEvent = CallMutedEvent

@@ -35,6 +35,7 @@ class GlobalEventHandler {
         callManagerEmitter.addListener('CallAnswered', this.onCallAnswered);
         callManagerEmitter.addListener('CallEnded', this.onCallEnded);
         callManagerEmitter.addListener('CallMuted', this.onCallMuted);
+        callManagerEmitter.addListener('CallVideoMuted', this.onCallMuted);
         splitViewEmitter.addListener('SplitViewChanged', this.onSplitViewChanged);
         Linking.addEventListener('url', this.onDeepLink);
     }
@@ -108,6 +109,10 @@ class GlobalEventHandler {
     };
 
     onCallMuted = async (event: CallMutedEvent) => {
+        CallManager.muteCall(event.isMuted === 'true');
+    };
+
+    onCallVideoMuted = async (event: CallMutedEvent) => {
         CallManager.muteCall(event.isMuted === 'true');
     };
 
