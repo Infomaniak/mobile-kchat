@@ -148,7 +148,7 @@ public class MainApplication extends NavigationApplication implements INotificat
       }
       ReactNativeFlipper.initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
 
-    // @jitsi/react-native-sdk setup
+    // @tdwio/jitsi-react-native-sdk setup
     // Ref https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#android
     WebRTCModuleOptions options = WebRTCModuleOptions.getInstance();
     options.enableMediaProjectionService = true;

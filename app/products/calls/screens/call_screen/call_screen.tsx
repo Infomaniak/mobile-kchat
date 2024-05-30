@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 /* eslint max-lines: off */
 
-import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
+import {JitsiMeeting, type JitsiRefProps} from '@tdwio/jitsi-react-native-sdk';
 import moment from 'moment';
 import React, {useCallback, useEffect, useMemo, useRef, type ComponentProps} from 'react';
 import {useIntl} from 'react-intl';
