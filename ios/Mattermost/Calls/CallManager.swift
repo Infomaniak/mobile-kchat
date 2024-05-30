@@ -57,10 +57,10 @@ public class CallManager: NSObject {
     voipRegistry.desiredPushTypes = [.voIP]
   }
   
-  @objc public func reportCallMuted(conferenceId: String, muted: Bool) {
+  @objc public func reportCallMuted(conferenceId: String, isMuted: Bool) {
     guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
 
-    let muteCallAction = CXSetMutedCallAction(call: existingCall.localUUID, muted: muted)
+    let muteCallAction = CXSetMutedCallAction(call: existingCall.localUUID, muted: isMuted)
     callController.requestTransaction(with: [muteCallAction]) { error in
       if let error {
         print("An error occured muting call \(error)")
