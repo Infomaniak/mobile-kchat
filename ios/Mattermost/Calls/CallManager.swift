@@ -70,6 +70,14 @@ public class CallManager: NSObject {
 
   @objc public func reportCallEnded(conferenceId: String) {
     guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
+    
+    let endCallAction = CXEndCallAction(call: existingCall.localUUID)
+    callController.requestTransaction(with: [endCallAction]) { error in
+      if let error {
+        print("An error occured ending call \(error)")
+      }
+    }
+    
     callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .remoteEnded)
   }
 
