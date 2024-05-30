@@ -133,6 +133,13 @@ const nativeReporters = {
             logError(error);
         }
     },
+    callMuted: (isMuted: boolean) => {
+        try {
+            NativeModules.CallManagerModule.reportCallMuted(isMuted);
+        } catch (error) {
+            logError(error);
+        }
+    },
 };
 
 const CallScreen = ({
@@ -288,9 +295,11 @@ const CallScreen = ({
              */
             eventListeners={{
 
+                // NOTE: Disabled as it's not currently possible on iOS ?
                 // onAudioMutedChanged: (isMuted: boolean) => {
-                //     NativeModules.CallManager.mute(isMuted);
+                //     nativeReporters.callMuted(isMuted);
                 // },
+
                 onReadyToClose: () => {
                     leaveCallRef.current!();
                 },
