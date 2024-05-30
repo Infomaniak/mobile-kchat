@@ -1,23 +1,19 @@
 package com.mattermost.rnbeta;
 
-import android.Manifest;
 import android.content.Intent;
-import android.os.Build;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-
-import android.provider.Settings;
-import android.view.KeyEvent;
-import android.content.res.Configuration;
 
 import com.facebook.react.ReactActivityDelegate;
-import com.reactnativenavigation.NavigationActivity;
-import com.github.emilioicai.hwkeyboardevent.HWKeyboardEventModule;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactActivityDelegate;
+import com.github.emilioicai.hwkeyboardevent.HWKeyboardEventModule;
+import com.reactnativenavigation.NavigationActivity;
 
 import java.util.Objects;
 

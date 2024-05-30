@@ -39,130 +39,130 @@ import java.util.List;
 import java.util.Map;
 
 public class MainApplication extends NavigationApplication implements INotificationsApplication {
-  public static MainApplication instance;
+    public static MainApplication instance;
 
-  public Boolean sharedExtensionIsOpened = false;
-  private final ReactNativeHost mReactNativeHost =
-    new DefaultReactNativeHost(this) {
-      @Override
-      public boolean getUseDeveloperSupport() {
-        return BuildConfig.DEBUG;
-      }
+    public Boolean sharedExtensionIsOpened = false;
+    private final ReactNativeHost mReactNativeHost =
+            new DefaultReactNativeHost(this) {
+                @Override
+                public boolean getUseDeveloperSupport() {
+                    return BuildConfig.DEBUG;
+                }
 
-      @Override
-      protected List<ReactPackage> getPackages() {
-        List<ReactPackage> packages = new PackageList(this).getPackages();
-        // Packages that cannot be autolinked yet can be added manually here, for example:
-        // packages.add(new MyReactNativePackage());
-        packages.add(new RNNotificationsPackage(MainApplication.this));
+                @Override
+                protected List<ReactPackage> getPackages() {
+                    List<ReactPackage> packages = new PackageList(this).getPackages();
+                    // Packages that cannot be autolinked yet can be added manually here, for example:
+                    // packages.add(new MyReactNativePackage());
+                    packages.add(new RNNotificationsPackage(MainApplication.this));
 
+                    packages.add(
+                            new TurboReactPackage() {
 
-          packages.add(
-                  new TurboReactPackage() {
+                                @Override
+                                public NativeModule getModule(String name, ReactApplicationContext reactContext) {
+                                    switch (name) {
+                                        case "MattermostManaged":
+                                            return MattermostManagedModule.getInstance(reactContext);
+                                        case "MattermostShare":
+                                            return ShareModule.getInstance(reactContext);
+                                        case "Notifications":
+                                            return NotificationsModule.getInstance(instance, reactContext);
+                                        case "SplitView":
+                                            return SplitViewModule.getInstance(reactContext);
+                                        case "CallManagerModule":
+                                            return CallManagerModule.getInstance(reactContext);
+                                        default:
+                                            throw new IllegalArgumentException("Could not find module " + name);
+                                    }
+                                }
 
-                      @Override
-                      public NativeModule getModule(String name, ReactApplicationContext reactContext) {
-                          switch (name) {
-                              case "MattermostManaged":
-                                  return MattermostManagedModule.getInstance(reactContext);
-                              case "MattermostShare":
-                                  return ShareModule.getInstance(reactContext);
-                              case "Notifications":
-                                  return NotificationsModule.getInstance(instance, reactContext);
-                              case "SplitView":
-                                  return SplitViewModule.getInstance(reactContext);
-                              case "CallManagerModule":
-                                  return CallManagerModule.getInstance(reactContext);
-                              default:
-                                  throw new IllegalArgumentException("Could not find module " + name);
-                          }
-                      }
+                                @Override
+                                public ReactModuleInfoProvider getReactModuleInfoProvider() {
+                                    return () -> {
+                                        Map<String, ReactModuleInfo> map = new HashMap<>();
+                                        map.put("MattermostManaged", new ReactModuleInfo("MattermostManaged", "com.mattermost.rnbeta.MattermostManagedModule", false, false, false, false, false));
+                                        map.put("MattermostShare", new ReactModuleInfo("MattermostShare", "com.mattermost.share.ShareModule", false, false, true, false, false));
+                                        map.put("Notifications", new ReactModuleInfo("Notifications", "com.mattermost.rnbeta.NotificationsModule", false, false, false, false, false));
+                                        map.put("SplitView", new ReactModuleInfo("SplitView", "com.mattermost.rnbeta.SplitViewModule", false, false, false, false, false));
+                                        map.put("CallManagerModule", new ReactModuleInfo("CallManagerModule", "com.mattermost.rnbeta.CallManagerModule", false, false, false, false, false));
+                                        return map;
+                                    };
+                                }
+                            }
+                    );
 
-                      @Override
-                      public ReactModuleInfoProvider getReactModuleInfoProvider() {
-                          return () -> {
-                              Map<String, ReactModuleInfo> map = new HashMap<>();
-                              map.put("MattermostManaged", new ReactModuleInfo("MattermostManaged", "com.mattermost.rnbeta.MattermostManagedModule", false, false, false, false, false));
-                              map.put("MattermostShare", new ReactModuleInfo("MattermostShare", "com.mattermost.share.ShareModule", false, false, true, false, false));
-                              map.put("Notifications", new ReactModuleInfo("Notifications", "com.mattermost.rnbeta.NotificationsModule", false, false, false, false, false));
-                              map.put("SplitView", new ReactModuleInfo("SplitView", "com.mattermost.rnbeta.SplitViewModule", false, false, false, false, false));
-                              map.put("CallManagerModule", new ReactModuleInfo("CallManagerModule", "com.mattermost.rnbeta.CallManagerModule", false, false, false, false, false));
-                              return map;
-                          };
-                      }
-                  }
-          );
+                    return packages;
+                }
 
-        return packages;
-      }
+                @Override
+                protected JSIModulePackage getJSIModulePackage() {
+                    return (reactApplicationContext, jsContext) -> {
+                        List<JSIModuleSpec> modules = Collections.emptyList();
+                        modules.addAll(new WatermelonDBJSIPackage().getJSIModules(reactApplicationContext, jsContext));
 
-      @Override
-      protected JSIModulePackage getJSIModulePackage() {
-        return (reactApplicationContext, jsContext) -> {
-          List<JSIModuleSpec> modules = Collections.emptyList();
-          modules.addAll(new WatermelonDBJSIPackage().getJSIModules(reactApplicationContext, jsContext));
+                        return modules;
+                    };
+                }
 
-          return modules;
-        };
-      }
+                @Override
+                protected String getJSMainModuleName() {
+                    return "index";
+                }
 
-      @Override
-      protected String getJSMainModuleName() {
-        return "index";
-      }
+                @Override
+                protected boolean isNewArchEnabled() {
+                    return BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
+                }
 
-        @Override
-        protected boolean isNewArchEnabled() {
-            return BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
+                @Override
+                protected Boolean isHermesEnabled() {
+                    return BuildConfig.IS_HERMES_ENABLED;
+                }
+            };
+
+    @Override
+    public ReactNativeHost getReactNativeHost() {
+        return mReactNativeHost;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        instance = this;
+        Context context = getApplicationContext();
+
+        // Delete any previous temp files created by the app
+        File tempFolder = new File(context.getCacheDir(), RealPathUtil.CACHE_DIR_NAME);
+        RealPathUtil.deleteTempFiles(tempFolder);
+        Log.i("ReactNative", "Cleaning temp cache " + tempFolder.getAbsolutePath());
+
+        // Tells React Native to use our RCTOkHttpClientFactory which builds an OKHttpClient
+        // with a cookie jar defined in APIClientModule and an interceptor to intercept all
+        // requests that originate from React Native's OKHttpClient
+        OkHttpClientProvider.setOkHttpClientFactory(new RCTOkHttpClientFactory());
+
+        SoLoader.init(this, /* native exopackage */ false);
+        if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
+            // If you opted-in for the New Architecture, we load the native entry point for this app.
+            DefaultNewArchitectureEntryPoint.load();
         }
-        @Override
-        protected Boolean isHermesEnabled() {
-            return BuildConfig.IS_HERMES_ENABLED;
-        }
-    };
+        ReactNativeFlipper.initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
 
-  @Override
-  public ReactNativeHost getReactNativeHost() {
-    return mReactNativeHost;
-  }
+        // @jitsi/react-native-sdk setup
+        // Ref https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#android
+        WebRTCModuleOptions options = WebRTCModuleOptions.getInstance();
+        options.enableMediaProjectionService = true;
+    }
 
-  @Override
-  public void onCreate() {
-    super.onCreate();
-    instance = this;
-    Context context = getApplicationContext();
-
-    // Delete any previous temp files created by the app
-    File tempFolder = new File(context.getCacheDir(), RealPathUtil.CACHE_DIR_NAME);
-    RealPathUtil.deleteTempFiles(tempFolder);
-    Log.i("ReactNative", "Cleaning temp cache " + tempFolder.getAbsolutePath());
-
-    // Tells React Native to use our RCTOkHttpClientFactory which builds an OKHttpClient
-    // with a cookie jar defined in APIClientModule and an interceptor to intercept all
-    // requests that originate from React Native's OKHttpClient
-    OkHttpClientProvider.setOkHttpClientFactory(new RCTOkHttpClientFactory());
-
-      SoLoader.init(this, /* native exopackage */ false);
-      if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
-          // If you opted-in for the New Architecture, we load the native entry point for this app.
-          DefaultNewArchitectureEntryPoint.load();
-      }
-      ReactNativeFlipper.initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
-
-    // @jitsi/react-native-sdk setup
-    // Ref https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#android
-    WebRTCModuleOptions options = WebRTCModuleOptions.getInstance();
-    options.enableMediaProjectionService = true;
-  }
-
-  @Override
-  public IPushNotification getPushNotification(Context context, Bundle bundle, AppLifecycleFacade defaultFacade, AppLaunchHelper defaultAppLaunchHelper) {
-    return new CustomPushNotification(
-            context,
-            bundle,
-            defaultFacade,
-            defaultAppLaunchHelper,
-            new JsIOHelper()
-    );
-  }
+    @Override
+    public IPushNotification getPushNotification(Context context, Bundle bundle, AppLifecycleFacade defaultFacade, AppLaunchHelper defaultAppLaunchHelper) {
+        return new CustomPushNotification(
+                context,
+                bundle,
+                defaultFacade,
+                defaultAppLaunchHelper,
+                new JsIOHelper()
+        );
+    }
 }
