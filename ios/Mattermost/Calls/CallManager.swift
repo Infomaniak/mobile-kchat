@@ -18,6 +18,8 @@ struct MeetCall {
 }
 
 public class CallManager: NSObject {
+  static let videoEnabledByDefault = true
+
   @objc public static let shared = CallManager()
 
   private let callProvider: CXProvider
@@ -56,7 +58,7 @@ public class CallManager: NSObject {
     voipRegistry.delegate = self
     voipRegistry.desiredPushTypes = [.voIP]
   }
-  
+
   @objc public func reportCallMuted(conferenceId: String, isMuted: Bool) {
     guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
 
@@ -68,16 +70,24 @@ public class CallManager: NSObject {
     }
   }
 
+  @objc public func reportCallVideoMuted(conferenceId: String, isMuted: Bool) {
+    guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
+
+    let update = CXCallUpdate()
+    update.hasVideo = isMuted
+    callProvider.reportCall(with: existingCall.localUUID, updated: update)
+  }
+
   @objc public func reportCallEnded(conferenceId: String) {
     guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
-    
+
     let endCallAction = CXEndCallAction(call: existingCall.localUUID)
     callController.requestTransaction(with: [endCallAction]) { error in
       if let error {
         print("An error occured ending call \(error)")
       }
     }
-    
+
     callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .remoteEnded)
   }
 
@@ -94,6 +104,7 @@ public class CallManager: NSObject {
     callProvider.reportOutgoingCall(with: call.localUUID, connectedAt: Date())
 
     let startCallAction = CXStartCallAction(call: call.localUUID, handle: CXHandle(type: .generic, value: callName))
+    startCallAction.isVideo = CallManager.videoEnabledByDefault
     callController.requestTransaction(with: [startCallAction]) { error in
       if let error {
         print("An error occured starting call \(error)")
@@ -103,7 +114,7 @@ public class CallManager: NSObject {
 
   func reportIncomingCall(call: MeetCall, callName: String, completion: @escaping () -> Void) {
     let update = CXCallUpdate()
-    update.hasVideo = true
+    update.hasVideo = CallManager.videoEnabledByDefault
     update.remoteHandle = CXHandle(type: .generic, value: callName)
 
     callProvider.reportNewIncomingCall(with: call.localUUID, update: update) { error in

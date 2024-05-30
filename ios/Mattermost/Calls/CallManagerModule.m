@@ -57,6 +57,15 @@ RCT_EXPORT_METHOD(reportCallMuted: (NSString*)conferenceId
   resolve(@[]);
 }
 
+RCT_EXPORT_METHOD(reportCallVideoMuted: (NSString*)conferenceId
+                  isMuted:(BOOL) isMuted
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+  [[CallManager shared] reportCallVideoMutedWithConferenceId:conferenceId isMuted:isMuted];
+  resolve(@[]);
+}
+
 -(void)startObserving {
     hasListeners = YES;
   
