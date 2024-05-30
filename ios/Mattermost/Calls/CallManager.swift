@@ -56,6 +56,17 @@ public class CallManager: NSObject {
     voipRegistry.delegate = self
     voipRegistry.desiredPushTypes = [.voIP]
   }
+  
+  @objc public func reportCallMuted(conferenceId: String, muted: Bool) {
+    guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
+
+    let muteCallAction = CXSetMutedCallAction(call: existingCall.localUUID, muted: muted)
+    callController.requestTransaction(with: [muteCallAction]) { error in
+      if let error {
+        print("An error occured muting call \(error)")
+      }
+    }
+  }
 
   @objc public func reportCallEnded(conferenceId: String) {
     guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
