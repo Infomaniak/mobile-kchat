@@ -133,9 +133,9 @@ const nativeReporters = {
             logError(error);
         }
     },
-    callMuted: (isMuted: boolean) => {
+    callMuted: (conferenceId: string, isMuted: boolean) => {
         try {
-            NativeModules.CallManagerModule.reportCallMuted(isMuted);
+            NativeModules.CallManagerModule.reportCallMuted(conferenceId, isMuted);
         } catch (error) {
             logError(error);
         }
@@ -294,12 +294,11 @@ const CallScreen = ({
              * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#eventlisteners
              */
             eventListeners={{
-
-                // NOTE: Disabled as it's not currently possible on iOS ?
-                // onAudioMutedChanged: (isMuted: boolean) => {
-                //     nativeReporters.callMuted(isMuted);
-                // },
-
+                onAudioMutedChanged: (isMuted: boolean) => {
+                    if (typeof conferenceId === 'string') {
+                        nativeReporters.callMuted(conferenceId, isMuted);
+                    }
+                },
                 onReadyToClose: () => {
                     leaveCallRef.current!();
                 },
