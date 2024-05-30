@@ -1,10 +1,15 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import React, {useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Text, TouchableOpacity, View, Keyboard} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
@@ -54,19 +59,19 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             marginTop: 5,
         },
         error: {
-            color: theme.errorTextColor,
-            textAlign: 'center',
+            color: theme.centerChannelColor,
+            textAlign: 'left',
             marginTop: 3,
         },
         transcriptText: {
             color: theme.centerChannelColor,
             fontSize: 13,
-            justifyContent: 'center',
+            textAlign: 'left',
             paddingTop: 5,
             overflow: 'hidden',
         },
         centeredView: {
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'center',
         },
     };
@@ -209,24 +214,26 @@ const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
                 {isLoadingTranscript ? (
                     <Loading/>
                 ) : (
-                    <CompassIcon
-                        color={theme.buttonBg}
-                        name='menu'
+                    <Icon
+                        name='subject'
                         size={24}
                         onPress={fetchTranscript}
+                        color={changeOpacity(theme.centerChannelColor, 0.64)}
                     />
                 )}
             </View>
             <View style={styles.centeredView}>
                 {transcript && isTranscriptOpen && (
                     <View>
-                        <Text style={styles.transcriptText}>
+                        <Text
+                            style={styles.transcriptText}
+                            onPress={renderContent}
+                        >
                             {transcript.length > 200 ? transcript.substring(0, 200) + '...' : transcript}
                             <FormattedText
                                 style={{...textStyles.link, fontSize: 13}}
                                 id={'mobile.vocals.loading_transcript'}
                                 defaultMessage=' View transcript...'
-                                onPress={renderContent}
                             />
                         </Text>
                     </View>
