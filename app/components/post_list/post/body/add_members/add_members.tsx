@@ -6,7 +6,7 @@ import {useIntl} from 'react-intl';
 import {Text} from 'react-native';
 
 import {removePost, sendAddToChannelEphemeralPost} from '@actions/local/post';
-import {addMembersToChannel} from '@actions/remote/channel';
+import {addMembersToChannel, notifyChannelMember} from '@actions/remote/channel';
 import FormattedText from '@components/formatted_text';
 import AtMention from '@components/markdown/at_mention';
 import {General} from '@constants';
@@ -80,6 +80,13 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
         }
     };
 
+    const handleNotifyChannelMember = async () => {
+        if (post && post.channelId && currentUser) {
+            notifyChannelMember(serverUrl, post.channelId, userIds, post.props.add_channel_member.original_post_id);
+            removePost(serverUrl, post);
+        }
+    };
+
     const generateAtMentions = (names: string[]) => {
         if (names.length === 1) {
             return (
@@ -97,6 +104,7 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
                         key={key}
                         id={'post_body.check_for_out_of_channel_mentions.link.and'}
                         defaultMessage={' and '}
+                        style={styles.message}
                     />
                 );
             }
@@ -147,6 +155,7 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
 
     let outOfChannelMessageID = '';
     let outOfChannelMessageText = '';
+
     const outOfChannelAtMentions = generateAtMentions(usernames);
     if (usernames.length === 1) {
         outOfChannelMessageID = t('post_body.check_for_out_of_channel_mentions.message.one');
@@ -166,32 +175,83 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
 
     let outOfChannelMessage = null;
     if (usernames.length) {
-        outOfChannelMessage = (
-            <Text>
-                {outOfChannelAtMentions}
-                {' '}
-                <FormattedText
-                    id={outOfChannelMessageID}
-                    defaultMessage={outOfChannelMessageText}
-                    style={styles.message}
-                />
-                <Text
-                    style={textStyles.link}
-                    testID='add_channel_member_link'
-                    onPress={handleAddChannelMember}
-                >
+        if (channelType === General.OPEN_CHANNEL) {
+            outOfChannelMessage = (
+                <Text>
+                    {outOfChannelAtMentions}
+                    {' '}
                     <FormattedText
-                        id={linkId}
-                        defaultMessage={linkText}
+                        id={outOfChannelMessageID}
+                        defaultMessage={outOfChannelMessageText}
+                        style={styles.message}
+                    />
+                    <Text
+                        style={textStyles.link}
+                        testID='add_channel_member_link'
+                        onPress={handleAddChannelMember}
+                    >
+                        <FormattedText
+                            id={linkId}
+                            defaultMessage={linkText}
+                        />
+                    </Text>
+                    {' '}
+                    <FormattedText
+                        style={styles.message}
+                        id={'post_body.check_for_out_of_channel_groups_mentions_choice.message'}
+                        defaultMessage='or'
+                    />
+                    {' '}
+                    <Text
+                        onPress={handleNotifyChannelMember}
+                    >
+                        <FormattedText
+                            style={textStyles.link}
+                            id={'post_body.check_for_out_of_channel_groups_mentions_notify.message'}
+                            defaultMessage={'{count, plural, one {le notifier} other {les notifier}}'}
+                            values={{
+                                count: usernames.length,
+                            }}
+                        />
+                    </Text>
+                    <FormattedText
+                        id={'post_body.check_for_out_of_channel_mentions.message'}
+                        defaultMessage={'{count, plural, one {? He will then have access to all the message history for this channel.} other {? They will then have access to all the message history for this channel.}}'}
+                        values={{
+                            count: usernames.length,
+                        }}
+                        style={styles.message}
                     />
                 </Text>
-                <FormattedText
-                    id={'post_body.check_for_out_of_channel_mentions.message_last'}
-                    defaultMessage={'? They will have access to all message history.'}
-                    style={styles.message}
-                />
-            </Text>
-        );
+            );
+        } else {
+            outOfChannelMessage = (
+                <Text>
+                    {outOfChannelAtMentions}
+                    {' '}
+                    <FormattedText
+                        id={outOfChannelMessageID}
+                        defaultMessage={outOfChannelMessageText}
+                        style={styles.message}
+                    />
+                    <Text
+                        style={textStyles.link}
+                        testID='add_channel_member_link'
+                        onPress={handleAddChannelMember}
+                    >
+                        <FormattedText
+                            id={linkId}
+                            defaultMessage={linkText}
+                        />
+                    </Text>
+                    <FormattedText
+                        id={'post_body.check_for_out_of_channel_mentions.message_last'}
+                        defaultMessage={'? They will have access to all message history.'}
+                        style={styles.message}
+                    />
+                </Text>
+            );
+        }
     }
 
     let outOfGroupsMessage = null;

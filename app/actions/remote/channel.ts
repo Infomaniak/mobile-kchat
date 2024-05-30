@@ -184,6 +184,18 @@ export async function addMembersToChannel(serverUrl: string, channelId: string, 
     }
 }
 
+export async function notifyChannelMember(serverUrl: string, channelId: string, userIds: string[], postId?: string) {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        const notifications = await client.notifyUser(channelId, userIds, postId);
+        return {notifications};
+    } catch (error) {
+        logDebug('error on notifyMembersInChannel', getFullErrorMessage(error));
+        forceLogoutIfNecessary(serverUrl, error);
+        return {error};
+    }
+}
+
 export async function fetchChannelByName(serverUrl: string, teamId: string, channelName: string, fetchOnly = false) {
     try {
         const client = NetworkManager.getClient(serverUrl);

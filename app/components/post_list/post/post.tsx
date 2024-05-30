@@ -8,8 +8,10 @@ import {Keyboard, Platform, type StyleProp, View, type ViewStyle, TouchableHighl
 import {removePost} from '@actions/local/post';
 import {showPermalink} from '@actions/remote/permalink';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
+import {getMarkdownTextStyles} from '@app/utils/markdown';
 import IkCallsCustomMessage from '@calls/components/ik_calls_custom_message';
 import {isCallsCustomMessage} from '@calls/utils';
+import PreviewMessage from '@components/post_list/post/preview_message';
 import SystemAvatar from '@components/system_avatar';
 import SystemHeader from '@components/system_header';
 import {POST_TIME_TO_FAIL} from '@constants/post';
@@ -120,6 +122,7 @@ const Post = ({
     const theme = useTheme();
     const isTablet = useIsTablet();
     const styles = getStyleSheet(theme);
+    const textStyles = getMarkdownTextStyles(theme);
     const isAutoResponder = fromAutoResponder(post);
     const isPendingOrFailed = isPostPendingOrFailed(post);
     const isFailed = isPostFailed(post);
@@ -298,6 +301,42 @@ const Post = ({
                 serverUrl={serverUrl}
                 post={post}
             />
+        );
+    } else if (post.metadata && post.metadata.embeds && post.metadata.embeds.length > 0 && post.metadata.embeds[0].type === 'permalink') {
+        const postLink = `/${post.metadata.embeds[0].data.team_name}/pl/${post.metadata.embeds[0].data.post_id}`;
+        body = (
+            <>
+                <Body
+                    appsEnabled={appsEnabled}
+                    hasFiles={hasFiles}
+                    hasReactions={hasReactions}
+                    highlight={Boolean(highlightedStyle)}
+                    highlightReplyBar={highlightReplyBar}
+                    isCRTEnabled={isCRTEnabled}
+                    isEphemeral={isEphemeral}
+                    isFirstReply={isFirstReply}
+                    isJumboEmoji={isJumboEmoji}
+                    isLastReply={isLastReply}
+                    isPendingOrFailed={isPendingOrFailed}
+                    isPostAcknowledgementEnabled={isPostAcknowledgementEnabled}
+                    isPostAddChannelMember={isPostAddChannelMember}
+                    location={location}
+                    post={post}
+                    searchPatterns={searchPatterns}
+                    showAddReaction={showAddReaction}
+                    theme={theme}
+                />
+
+                <PreviewMessage
+                    post={post}
+                    channelDisplayName={post.metadata.embeds[0].data.channel_display_name}
+                    theme={theme}
+                    location={location}
+                    postLink={postLink}
+                    previewUserId={post.metadata.embeds[0].data.post.user_id}
+                    textStyles={textStyles}
+                />
+            </>
         );
     } else {
         body = (
