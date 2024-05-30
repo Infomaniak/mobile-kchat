@@ -13,7 +13,7 @@ import {logError} from '@utils/log';
 
 import type {ApiCall} from '@app/client/rest/ikcalls';
 import type {PassedProps} from '@calls/screens/call_screen/call_screen';
-import type {JitsiRefProps} from '@tdwio/jitsi-react-native-sdk';
+import type {JitsiRefProps} from '@jitsi/react-native-sdk';
 import type {MutableRefObject} from 'react';
 import type {Options} from 'react-native-navigation';
 

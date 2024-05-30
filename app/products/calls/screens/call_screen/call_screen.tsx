@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 /* eslint max-lines: off */
 
-import {JitsiMeeting, type JitsiRefProps} from '@tdwio/jitsi-react-native-sdk';
+import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
 import moment from 'moment';
 import React, {useCallback, useEffect, useMemo, useRef, type ComponentProps} from 'react';
 import {useIntl} from 'react-intl';
@@ -136,7 +136,18 @@ const nativeReporters = {
     },
     callMuted: (conferenceId: string, isMuted: boolean) => {
         try {
-            NativeModules.CallManagerModule.reportCallMuted(conferenceId, isMuted);
+            if (Platform.OS === 'ios') { // Only for CallKit
+                NativeModules.CallManagerModule.reportCallMuted(conferenceId, isMuted);
+            }
+        } catch (error) {
+            logError(error);
+        }
+    },
+    callVideoMuted: (conferenceId: string, isMuted: boolean) => {
+        try {
+            if (Platform.OS === 'ios') { // Only for CallKit
+                NativeModules.CallManagerModule.reportCallVideoMuted(conferenceId, isMuted);
+            }
         } catch (error) {
             logError(error);
         }

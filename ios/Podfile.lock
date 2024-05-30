@@ -758,7 +758,7 @@ DEPENDENCIES:
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - jail-monkey (from `../node_modules/jail-monkey`)
-  - "jitsi-meet-rnsdk (from `../node_modules/@tdwio/jitsi-react-native-sdk`)"
+  - "jitsi-meet-rnsdk (from `../node_modules/@jitsi/react-native-sdk`)"
   - libevent (~> 2.1.12)
   - "mattermost-react-native-turbo-log (from `../node_modules/@mattermost/react-native-turbo-log`)"
   - OpenSSL-Universal (= 1.1.1100)
@@ -911,7 +911,7 @@ EXTERNAL SOURCES:
   jail-monkey:
     :path: "../node_modules/jail-monkey"
   jitsi-meet-rnsdk:
-    :path: "../node_modules/@tdwio/jitsi-react-native-sdk"
+    :path: "../node_modules/@jitsi/react-native-sdk"
   mattermost-react-native-turbo-log:
     :path: "../node_modules/@mattermost/react-native-turbo-log"
   RCT-Folly:
@@ -1131,7 +1131,7 @@ SPEC CHECKSUMS:
   hermes-engine: 9180d43df05c1ed658a87cc733dc3044cf90c00a
   HMSegmentedControl: 34c1f54d822d8308e7b24f5d901ec674dfa31352
   jail-monkey: a71b35d482a70ecba844a90f002994012cf12a5d
-  jitsi-meet-rnsdk: aeaac12cd85ec8cbb1fa94e5c05fd72e9a1f7971
+  jitsi-meet-rnsdk: 76832ef9f54bd7ee79673fe541b7acd680dc3dc5
   JitsiWebRTC: 3a41671ef65a51d7204323814b055a2690b921c7
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
