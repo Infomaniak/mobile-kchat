@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 /* eslint max-lines: off */
+/* eslint-disable max-nested-callbacks */
 
 import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
 import moment from 'moment';
@@ -321,13 +322,35 @@ const CallScreen = ({
                     // Find the target user's username for DM calls
                     if (isDMorGM(channel)) {
                         const {users} = await fetchChannelMemberships(serverUrl, channelId, {per_page: 2});
-                        const targetUser = users.find((user) => user.id !== currentUser.id); // eslint-disable-line max-nested-callbacks
+                        const targetUser = users.find((user) => user.id !== currentUser.id);
                         if (targetUser) {
                             callName = `@${targetUser.username}`; // DM
                         }
                     }
 
                     nativeReporters.callStarted(serverId, channelId, conferenceId, callName);
+
+                    // Also report about the audio/video mute status if toggled
+                    const callbacks = [] as Array<() => void>;
+                    if (audioMutedRef.current) {
+                        callbacks.push(() => {
+                            nativeReporters.callMuted(conferenceId, true);
+                        });
+                    }
+                    if (videoMutedRef.current) {
+                        callbacks.push(() => {
+                            nativeReporters.callVideoMuted(conferenceId, true);
+                        });
+                    }
+
+                    // Trigger the update after a delay
+                    if (callbacks.length) {
+                        setTimeout(() => {
+                            for (const callback of callbacks) {
+                                callback();
+                            }
+                        }, 100);
+                    }
                 }());
             }
         },
@@ -341,7 +364,7 @@ const CallScreen = ({
         },
         onVideoMutedChanged: (isMuted: boolean) => {
             if (
-                hasUpdatedRef(audioMutedRef, isMuted) &&
+                hasUpdatedRef(videoMutedRef, isMuted) &&
                 conferenceJoinedRef.current && typeof conferenceId === 'string'
             ) {
                 nativeReporters.callVideoMuted(conferenceId, isMuted);
