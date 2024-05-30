@@ -169,11 +169,11 @@ export async function handleNewPostEvent(serverUrl: string, msg: WebSocketMessag
 
     const outOfOrderWebsocketEvent = EphemeralStore.getLastPostWebsocketEvent(serverUrl, post.id);
     if (outOfOrderWebsocketEvent?.deleted) {
-        for (const model of models) {
-            if (model._preparedState === 'update') {
-                model.cancelPrepareUpdate();
-            }
-        }
+        // for (const model of models) {
+        //     if (model._preparedState === 'update') {
+        //         model.cancelPrepareUpdate();
+        //     }
+        // }
         return;
     }
 

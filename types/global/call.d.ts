@@ -13,5 +13,5 @@ type CallEndedEvent = {
 }
 
 type CallMutedEvent = {
-    isMuted: boolean;
+    isMuted: 'true' | 'false';
 }

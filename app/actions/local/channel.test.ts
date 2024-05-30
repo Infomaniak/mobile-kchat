@@ -388,9 +388,10 @@ describe('switchToChannel', () => {
         const listenerCallback = jest.fn();
         const listener = DeviceEventEmitter.addListener(Navigation.NAVIGATION_HOME, listenerCallback);
         const {models, error} = await switchToChannel(serverUrl, channelId, teamId, false, true);
-        for (const model of models!) {
-            model.cancelPrepareUpdate();
-        }
+
+        // for (const model of models!) {
+        //     model.cancelPrepareUpdate();
+        // }
         listener.remove();
 
         const {systemValues, teamHistory, channelHistory, member} = await queryDatabaseValues(operator.database, teamId, channelId);
