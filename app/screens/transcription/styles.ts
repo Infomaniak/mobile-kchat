@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {changeOpacity, makeStyleSheetFromTheme} from '@app/utils/theme';
-import {typography} from '@app/utils/typography';
 
 export const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
     title: {
@@ -18,15 +17,14 @@ export const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
     },
     time: {
         color: changeOpacity(theme.centerChannelColor, 0.64),
-        ...typography('Body', 25),
-        marginBottom: 4,
         fontSize: 14,
     },
     text: {
-        flexShrink: 1,
         color: theme.centerChannelColor,
+        lineHeight: 20,
     },
     transcriptContainer: {
         flexDirection: 'row',
+        margin: 4,
     },
 }));
