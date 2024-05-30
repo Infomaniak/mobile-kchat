@@ -34,6 +34,7 @@ class GlobalEventHandler {
         DeviceEventEmitter.addListener(Events.CONFIG_CHANGED, this.onServerConfigChanged);
         callManagerEmitter.addListener('CallAnswered', this.onCallAnswered);
         callManagerEmitter.addListener('CallEnded', this.onCallEnded);
+        callManagerEmitter.addListener('CallMuted', this.onCallMuted);
         splitViewEmitter.addListener('SplitViewChanged', this.onSplitViewChanged);
         Linking.addEventListener('url', this.onDeepLink);
     }
