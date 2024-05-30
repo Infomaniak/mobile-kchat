@@ -2,4 +2,7 @@
 <resources>
     <string name="app_name">kChat</string>
     <string name="empty_notification_message">Ha importato qualcosa</string>
+    <string name="callkChatDescription">Chiamata vocale kChat</string>
+    <string name="declineCall">Rifiutare</string>
+    <string name="acceptCall">Accettare</string>
 </resources>

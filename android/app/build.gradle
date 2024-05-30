@@ -182,6 +182,10 @@ android {
             }
         }
     }
+
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 repositories {
@@ -216,6 +220,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation "com.google.firebase:firebase-messaging:$firebaseVersion"
+    implementation 'com.airbnb.android:lottie:6.4.0'
 
     androidTestImplementation('com.wix:detox:+')
     implementation project(':reactnativenotifications')

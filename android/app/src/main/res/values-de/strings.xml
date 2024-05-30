@@ -2,4 +2,7 @@
 <resources>
     <string name="app_name">kChat</string>
     <string name="empty_notification_message">Hat etwas getan</string>
+    <string name="callkChatDescription">kChat Sprachanruf</string>
+    <string name="declineCall">Ablehnen</string>
+    <string name="acceptCall">Annehmen</string>
 </resources>

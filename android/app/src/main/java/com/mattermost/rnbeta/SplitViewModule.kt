@@ -10,6 +10,7 @@ class SplitViewModule(private var reactContext: ReactApplicationContext) : React
     companion object {
         private var instance: SplitViewModule? = null
 
+        @JvmStatic
         fun getInstance(reactContext: ReactApplicationContext): SplitViewModule {
             if (instance == null) {
                 instance = SplitViewModule(reactContext)
@@ -20,11 +21,11 @@ class SplitViewModule(private var reactContext: ReactApplicationContext) : React
             return instance!!
         }
 
+        @JvmStatic
         fun getInstance(): SplitViewModule? {
             return instance
         }
     }
-
 
     override fun getName() = "SplitView"
 

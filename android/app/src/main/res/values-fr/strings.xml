@@ -2,4 +2,7 @@
 <resources>
     <string name="app_name">kChat</string>
     <string name="empty_notification_message">A importé quelque chose</string>
+    <string name="callkChatDescription">Appel vocal kChat</string>
+    <string name="declineCall">Refuser</string>
+    <string name="acceptCall">Accepter</string>
 </resources>

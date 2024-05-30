@@ -4,42 +4,39 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.facebook.react.PackageList;
+import com.facebook.react.ReactNativeHost;
+import com.facebook.react.ReactPackage;
+import com.facebook.react.TurboReactPackage;
+import com.facebook.react.bridge.JSIModulePackage;
+import com.facebook.react.bridge.JSIModuleSpec;
+import com.facebook.react.bridge.NativeModule;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
+import com.facebook.react.defaults.DefaultReactNativeHost;
+import com.facebook.react.module.model.ReactModuleInfo;
+import com.facebook.react.module.model.ReactModuleInfoProvider;
+import com.facebook.react.modules.network.OkHttpClientProvider;
+import com.facebook.soloader.SoLoader;
+import com.mattermost.flipper.ReactNativeFlipper;
+import com.mattermost.helpers.RealPathUtil;
+import com.mattermost.networkclient.RCTOkHttpClientFactory;
+import com.mattermost.share.ShareModule;
+import com.nozbe.watermelondb.jsi.WatermelonDBJSIPackage;
+import com.oney.WebRTCModule.WebRTCModuleOptions;
+import com.reactnativenavigation.NavigationApplication;
+import com.wix.reactnativenotifications.RNNotificationsPackage;
+import com.wix.reactnativenotifications.core.AppLaunchHelper;
+import com.wix.reactnativenotifications.core.AppLifecycleFacade;
+import com.wix.reactnativenotifications.core.JsIOHelper;
+import com.wix.reactnativenotifications.core.notification.INotificationsApplication;
+import com.wix.reactnativenotifications.core.notification.IPushNotification;
+
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.mattermost.helpers.RealPathUtil;
-import com.mattermost.share.ShareModule;
-import com.wix.reactnativenotifications.RNNotificationsPackage;
-
-import com.reactnativenavigation.NavigationApplication;
-import com.wix.reactnativenotifications.core.notification.INotificationsApplication;
-import com.wix.reactnativenotifications.core.notification.IPushNotification;
-import com.wix.reactnativenotifications.core.AppLaunchHelper;
-import com.wix.reactnativenotifications.core.AppLifecycleFacade;
-import com.wix.reactnativenotifications.core.JsIOHelper;
-
-import com.facebook.react.PackageList;
-import com.facebook.react.ReactPackage;
-import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
-import com.facebook.react.defaults.DefaultReactNativeHost;
-import com.facebook.react.ReactNativeHost;
-import com.facebook.react.TurboReactPackage;
-import com.facebook.react.bridge.JSIModuleSpec;
-import com.facebook.react.bridge.NativeModule;
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.JSIModulePackage;
-import com.facebook.react.module.model.ReactModuleInfo;
-import com.facebook.react.module.model.ReactModuleInfoProvider;
-import com.facebook.react.modules.network.OkHttpClientProvider;
-import com.facebook.soloader.SoLoader;
-
-import com.mattermost.flipper.ReactNativeFlipper;
-import com.mattermost.networkclient.RCTOkHttpClientFactory;
-import com.nozbe.watermelondb.jsi.WatermelonDBJSIPackage;
-import com.oney.WebRTCModule.WebRTCModuleOptions;
 
 public class MainApplication extends NavigationApplication implements INotificationsApplication {
   public static MainApplication instance;
@@ -60,37 +57,41 @@ public class MainApplication extends NavigationApplication implements INotificat
         packages.add(new RNNotificationsPackage(MainApplication.this));
 
 
-        packages.add(
-          new TurboReactPackage() {
-                @Override
-                public NativeModule getModule(String name, ReactApplicationContext reactContext) {
-                  switch (name) {
-                  case "MattermostManaged":
-                      return MattermostManagedModule.getInstance(reactContext);
-                  case "MattermostShare":
-                    return ShareModule.getInstance(reactContext);
-                  case "Notifications":
-                    return NotificationsModule.getInstance(instance, reactContext);
-                  case "SplitView":
-                      return SplitViewModule.Companion.getInstance(reactContext);
-                  default:
-                    throw new IllegalArgumentException("Could not find module " + name);
-                  }
-                }
+          packages.add(
+                  new TurboReactPackage() {
 
-                @Override
-                public ReactModuleInfoProvider getReactModuleInfoProvider() {
-                  return () -> {
-                    Map<String, ReactModuleInfo> map = new HashMap<>();
-                    map.put("MattermostManaged", new ReactModuleInfo("MattermostManaged", "com.mattermost.rnbeta.MattermostManagedModule", false, false, false, false, false));
-                    map.put("MattermostShare", new ReactModuleInfo("MattermostShare", "com.mattermost.share.ShareModule", false, false, true, false, false));
-                    map.put("Notifications", new ReactModuleInfo("Notifications", "com.mattermost.rnbeta.NotificationsModule", false, false, false, false, false));
-                    map.put("SplitView", new ReactModuleInfo("SplitView", "com.mattermost.rnbeta.SplitViewModule", false, false, false, false, false));
-                    return map;
-                  };
-                }
-              }
-        );
+                      @Override
+                      public NativeModule getModule(String name, ReactApplicationContext reactContext) {
+                          switch (name) {
+                              case "MattermostManaged":
+                                  return MattermostManagedModule.getInstance(reactContext);
+                              case "MattermostShare":
+                                  return ShareModule.getInstance(reactContext);
+                              case "Notifications":
+                                  return NotificationsModule.getInstance(instance, reactContext);
+                              case "SplitView":
+                                  return SplitViewModule.getInstance(reactContext);
+                              case "CallManagerModule":
+                                  return CallManagerModule.getInstance(reactContext);
+                              default:
+                                  throw new IllegalArgumentException("Could not find module " + name);
+                          }
+                      }
+
+                      @Override
+                      public ReactModuleInfoProvider getReactModuleInfoProvider() {
+                          return () -> {
+                              Map<String, ReactModuleInfo> map = new HashMap<>();
+                              map.put("MattermostManaged", new ReactModuleInfo("MattermostManaged", "com.mattermost.rnbeta.MattermostManagedModule", false, false, false, false, false));
+                              map.put("MattermostShare", new ReactModuleInfo("MattermostShare", "com.mattermost.share.ShareModule", false, false, true, false, false));
+                              map.put("Notifications", new ReactModuleInfo("Notifications", "com.mattermost.rnbeta.NotificationsModule", false, false, false, false, false));
+                              map.put("SplitView", new ReactModuleInfo("SplitView", "com.mattermost.rnbeta.SplitViewModule", false, false, false, false, false));
+                              map.put("CallManagerModule", new ReactModuleInfo("CallManagerModule", "com.mattermost.rnbeta.CallManagerModule", false, false, false, false, false));
+                              return map;
+                          };
+                      }
+                  }
+          );
 
         return packages;
       }

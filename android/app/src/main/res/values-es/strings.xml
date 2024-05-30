@@ -2,4 +2,7 @@
 <resources>
     <string name="app_name">kChat</string>
     <string name="empty_notification_message">Importó algo</string>
+    <string name="callkChatDescription">Llamada de voz kChat</string>
+    <string name="declineCall">Rechazar</string>
+    <string name="acceptCall">Aceptar</string>
 </resources>
