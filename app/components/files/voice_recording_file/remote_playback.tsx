@@ -1,9 +1,5 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
-// See LICENSE.txt for license information.
-// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
-// See LICENSE.txt for license information.
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import React, {useState} from 'react';
@@ -229,7 +225,7 @@ const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
                             style={styles.transcriptText}
                             onPress={renderContent}
                         >
-                            {transcript.length > 200 ? transcript.substring(0, 200) + '...' : transcript}
+                            {transcript.length > 200 ? transcript.substring(0, 200) + '...' : transcript + ' '}
                             <FormattedText
                                 style={{...textStyles.link, fontSize: 13}}
                                 id={'mobile.vocals.loading_transcript'}
