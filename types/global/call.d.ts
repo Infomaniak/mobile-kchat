@@ -8,7 +8,7 @@ type CallAnsweredEvent = {
 }
 
 type CallEndedEvent = {
-    serverUrl: string;
+    serverId: string;
     conferenceId: string;
 }
 

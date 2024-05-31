@@ -6,6 +6,7 @@ import {Platform} from 'react-native';
 import {Screens} from '@app/constants';
 import {getFullName} from '@app/utils/user';
 import ClientError from '@client/rest/error';
+import DatabaseManager from '@database/manager';
 import {getTranslations, t} from '@i18n';
 import NetworkManager from '@managers/network_manager';
 import {allOrientations, dismissAllModalsAndPopToScreen} from '@screens/navigation';
@@ -71,15 +72,22 @@ class CallManager {
         return null;
     };
 
-    leaveCallScreen = (
-        {serverUrl, conferenceId}: CallEndedEvent,
-        ...args: Parameters<CallScreenHandle['leaveCall']>
-    ): void => {
+    /**
+     * Try to leave the current call screen,
+     * if unavailable decline the call via API
+     */
+    leaveCallScreen = async (
+        {serverId, conferenceId}: CallEndedEvent,
+        initiator: 'native' | 'internal' = 'native',
+    ): Promise<void> => {
         const leaveCall = this.callScreenRef.current?.leaveCall;
         if (typeof leaveCall === 'function') {
-            leaveCall(...args);
+            leaveCall(initiator);
         } else {
-            this.leaveCall(serverUrl, conferenceId);
+            const serverUrl = await DatabaseManager.getServerUrlFromIdentifier(serverId);
+            if (typeof serverUrl === 'string') {
+                this.leaveCall(serverUrl, conferenceId);
+            }
         }
     };
 

@@ -102,7 +102,7 @@ class GlobalEventHandler {
     };
 
     onCallEnded = async (event: CallEndedEvent) => {
-        CallManager.leaveCallScreen(event, 'native');
+        CallManager.leaveCallScreen(event);
     };
 
     onCallMuted = async (event: CallMutedEvent) => {
