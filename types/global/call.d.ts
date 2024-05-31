@@ -7,10 +7,7 @@ type CallAnsweredEvent = {
     conferenceJWT: string;
 }
 
-type CallEndedEvent = {
-    serverId: string;
-    conferenceId: string;
-}
+type CallEndedEvent = {}
 
 type CallMutedEvent = {
     isMuted: 'true' | 'false';
