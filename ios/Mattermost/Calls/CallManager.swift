@@ -15,6 +15,17 @@ struct MeetCall {
   let channelId: String
   let conferenceId: String
   let conferenceJWT: String
+  
+  init(serverId: String, channelId: String, conferenceId: String, conferenceJWT: String) {
+    guard let conferenceUUID = UUID(uuidString: conferenceId) else {
+      fatalError("Couldn't convert conference UUID \(conferenceId)")
+    }
+    self.localUUID = conferenceUUID
+    self.serverId = serverId
+    self.channelId = channelId
+    self.conferenceId = conferenceId
+    self.conferenceJWT = conferenceJWT
+  }
 }
 
 public class CallManager: NSObject {
@@ -93,7 +104,6 @@ public class CallManager: NSObject {
 
   @objc public func reportCallStarted(serverId: String, channelId: String, conferenceId: String, callName: String) {
     let call = MeetCall(
-      localUUID: UUID(),
       serverId: serverId,
       channelId: channelId,
       conferenceId: conferenceId,
@@ -181,7 +191,6 @@ extension CallManager: PKPushRegistryDelegate {
     }
 
     let meetCall = MeetCall(
-      localUUID: UUID(),
       serverId: serverId,
       channelId: channelId,
       conferenceId: conferenceId,
