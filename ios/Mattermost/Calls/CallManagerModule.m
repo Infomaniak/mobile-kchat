@@ -73,8 +73,8 @@ RCT_EXPORT_METHOD(reportCallVideoMuted: (NSString*)conferenceId
     [self callAnsweredEvent:serverId channelId:channelId conferenceJWT:conferenceJWT];
   }];
   
-  [[CallManager shared] setCallEndedCallback:^() {
-    [self callEndedEvent];
+  [[CallManager shared] setCallEndedCallback:^(NSString * _Nonnull serverId, NSString * _Nonnull conferenceId) {
+    [self callEndedEvent:serverId channelId:conferenceId];
   }];
   
   [[CallManager shared] setCallMutedCallback:^(BOOL isMuted) {
@@ -93,10 +93,10 @@ RCT_EXPORT_METHOD(reportCallVideoMuted: (NSString*)conferenceId
   }
 }
 
-- (void)callEndedEvent
+- (void)callEndedEvent:(NSString *)serverId channelId: (NSString *)conferenceId
 {
   if (hasListeners) {
-    [self sendEventWithName:kCallEnded body:@{}];
+    [self sendEventWithName:kCallEnded body:@{@"serverId": serverId, @"conferenceId": conferenceId}];
   }
 }
 
