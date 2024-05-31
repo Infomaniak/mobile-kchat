@@ -142,7 +142,7 @@ export async function dataRetentionCleanup(serverUrl: string) {
             await updateLastDataRetentionRun(serverUrl);
         }
 
-        // await database.unsafeVacuum();
+        await database.unsafeVacuum();
 
         return result;
     } catch (error) {
