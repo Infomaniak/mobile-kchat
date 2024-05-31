@@ -2,11 +2,11 @@
 // See LICENSE.txt for license information.
 
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
-import {Keyboard, type ListRenderItemInfo, type NativeScrollEvent, type NativeSyntheticEvent, PanResponder} from 'react-native';
-import {FlatList} from 'react-native-gesture-handler';
+import {Keyboard, type ListRenderItemInfo} from 'react-native';
 
+import GestureResponsiveFlatList from '@app/components/user_avatars_stack/users_list/gesture_responsive_flat_list';
 import UserItem from '@components/user_item';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
@@ -51,29 +51,6 @@ const Item = ({channelId, location, user}: ItemProps) => (
 );
 
 const UsersList = ({channelId, location, type = 'FlatList', users}: Props) => {
-    const [enabled, setEnabled] = useState(type === 'BottomSheetFlatList');
-    const [direction, setDirection] = useState<'down' | 'up'>('down');
-    const listRef = useRef<FlatList>(null);
-    const prevOffset = useRef(0);
-    const panResponder = useRef(PanResponder.create({
-        onMoveShouldSetPanResponderCapture: (evt, g) => {
-            const dir = prevOffset.current < g.dy ? 'down' : 'up';
-            prevOffset.current = g.dy;
-            if (!enabled && dir === 'up') {
-                setEnabled(true);
-            }
-            setDirection(dir);
-            return false;
-        },
-    })).current;
-
-    const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
-        if (e.nativeEvent.contentOffset.y <= 0 && enabled && direction === 'down') {
-            setEnabled(false);
-            listRef.current?.scrollToOffset({animated: true, offset: 0});
-        }
-    }, [enabled, direction]);
-
     const renderItem = useCallback(({item}: ListRenderItemInfo<UserModel>) => (
         <Item
             channelId={channelId}
@@ -93,15 +70,9 @@ const UsersList = ({channelId, location, type = 'FlatList', users}: Props) => {
     }
 
     return (
-        <FlatList
+        <GestureResponsiveFlatList
             data={users}
-            ref={listRef}
             renderItem={renderItem}
-            onScroll={onScroll}
-            overScrollMode={'always'}
-            scrollEnabled={enabled}
-            scrollEventThrottle={60}
-            {...panResponder.panHandlers}
         />
     );
 };

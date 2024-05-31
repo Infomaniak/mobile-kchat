@@ -9,6 +9,7 @@ import {of as of$} from 'rxjs';
 
 import {fetchUsersByIds} from '@actions/remote/user';
 import {useOpenUserProfile} from '@app/components/user_avatars_stack/users_list';
+import GestureResponsiveFlatList from '@app/components/user_avatars_stack/users_list/gesture_responsive_flat_list';
 import {useServerUrl} from '@app/context/server';
 import IkCallsParticipantStackStatusIcon from '@calls/components/ik_calls_participant_stack/status_icon';
 import Loading from '@components/loading';
@@ -67,11 +68,13 @@ export const IkCallsParticipantStackList = ({
     location,
     participants,
     rowHeight = 40,
+    type = 'FlatList',
 }: {
     channelId: string;
     location: string;
     participants: ConferenceParticipantModel[];
     rowHeight: number;
+    type?: BottomSheetList;
 }) => {
     const openUserProfile = useOpenUserProfile(channelId, location);
 
@@ -91,17 +94,29 @@ export const IkCallsParticipantStackList = ({
 
     // EFFECTS
     const loading = useFetchParticipantUsers(participants);
+    if (loading) {
+        return (
+            <Loading
+                size='large'
+                containerStyle={style.loadingContainer}
+            />
+        );
+    }
 
-    return loading ? (
-        <Loading
-            size='large'
-            containerStyle={style.loadingContainer}
-        />
-    ) : (
-        <BottomSheetFlatList
+    if (type === 'BottomSheetFlatList') {
+        return (
+            <BottomSheetFlatList
+                data={participants}
+                renderItem={renderItem}
+                overScrollMode='always'
+            />
+        );
+    }
+
+    return (
+        <GestureResponsiveFlatList
             data={participants}
             renderItem={renderItem}
-            overScrollMode='always'
         />
     );
 };
