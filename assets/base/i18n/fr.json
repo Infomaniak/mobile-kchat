@@ -840,6 +840,8 @@
     "plus_menu.open_direct_message.title": "Ouvrir un message direct",
     "post.options.title": "Options",
     "post.reactions.title": "Réactions",
+    "postList.scrollToBottom.newMessages": "Nouveaux messages",
+    "postList.scrollToBottom.newReplies": "Nouvelles réponses",
     "post_body.check_for_out_of_channel_groups_mentions_notify.message": "{count, plural, one {le notifier} other {les notifier}}",
     "post_body.check_for_out_of_channel_groups_mentions_choice.message": "ou",
     "post_body.check_for_out_of_channel_groups_mentions.message": "n'a pas été notifié par cette mention. L'utilisateur n'est pas dans le canal et ne peut pas être ajouté à ce canal, car il ne fait pas partie des groupes liés. Pour l'ajouter à ce canal, l'utilisateur doit être ajouté aux groupes liés.",
