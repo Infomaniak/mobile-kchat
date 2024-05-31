@@ -270,7 +270,6 @@ const PostList = ({
             case 'user-activity': {
                 const postProps = {
                     currentUsername,
-                    key: item.value,
                     postId: item.value,
                     location,
                     style: styles.container,
@@ -279,7 +278,12 @@ const PostList = ({
                     theme,
                 };
 
-                return (<CombinedUserActivity {...postProps}/>);
+                return (
+                    <CombinedUserActivity
+                        key={item.value}
+                        {...postProps}
+                    />
+                );
             }
             default: {
                 const post = item.value.currentPost;
@@ -293,7 +297,6 @@ const PostList = ({
                     highlight: highlightedId === post.id,
                     highlightPinnedOrSaved,
                     isSaved,
-                    key: post.id,
                     location,
                     nextPost,
                     post,
@@ -304,7 +307,12 @@ const PostList = ({
                     testID: `${testID}.post`,
                 };
 
-                return (<Post {...postProps}/>);
+                return (
+                    <Post
+                        key={post.id}
+                        {...postProps}
+                    />
+                );
             }
         }
     }, [appsEnabled, currentTimezone, customEmojiNames, highlightPinnedOrSaved, isCRTEnabled, isPostAcknowledgementEnabled, shouldRenderReplyButton, theme]);
