@@ -3,6 +3,7 @@
 
 import React from 'react';
 
+import {changeOpacity} from '@app/utils/theme';
 import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {useTheme} from '@context/theme';
@@ -37,7 +38,7 @@ function RecordButton({onPress, testID}: Props) {
             type={'opacity'}
         >
             <CompassIcon
-                color={theme.centerChannelColor}
+                color={changeOpacity(theme.centerChannelColor, 0.64)}
                 name='microphone'
                 size={24}
             />

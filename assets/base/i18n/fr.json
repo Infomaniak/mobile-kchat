@@ -731,7 +731,7 @@
     "mobile.user_list.deactivated": "Désactivé",
     "mobile.write_storage_permission_denied_description": "Enregistrer des fichiers dans votre appareil. Ouvrez les paramètres pour autoriser {applicationName} à accéder en écriture aux fichiers sur cet appareil.",
     "mobile.vocals.load_error": "Votre fichier audio n'a pas pu être chargé.",
-    "mobile.vocals.loading_transcript": " Voir le transcript...",
+    "mobile.vocals.loading_transcript": "Voir la transcription...",
     "mobile.vocals.transcript_title": "Transcription audio (générée automatiquement)",
     "mobile.vocals.transcript.too_many": "Trop de demandes, veuillez patienter...",
     "mobile.vocals.transcript.error": "L'audio est vide.",

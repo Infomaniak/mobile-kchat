@@ -62,10 +62,13 @@ const Transcription: FC<Props> = ({closeButtonId, transcriptDatas}) => {
                                     key={index}
                                     style={styles.transcriptContainer}
                                 >
-                                    <Text style={styles.time}>
-                                        {time}
-                                    </Text>
-                                    <Text style={styles.text}>
+                                    <Text
+                                        style={styles.text}
+                                    >
+                                        <Text style={styles.time}>
+                                            {time}
+                                        </Text>
+
                                         {` ${segment.text.trim()}`}
                                     </Text>
                                 </View>
