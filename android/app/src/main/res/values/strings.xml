@@ -26,4 +26,7 @@
     <string name="callkChatDescription">kChat voice call</string>
     <string name="declineCall">Decline</string>
     <string name="acceptCall">Accept</string>
+    <string name="notificationCallFrom">Call from %1$s</string>
+    <string name="notificationChannelName">Call notification</string>
+    <string name="notificationChannelDescription">Display a notification if you’re receiving a call</string>
 </resources>

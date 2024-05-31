@@ -50,7 +50,7 @@ public class MainActivity extends NavigationActivity {
 
         //TODO Create a dialog to ask the user to authorize the "Draw over the app" permission
         // needed for calls
-        checkForOverlayPermission();
+        //checkForOverlayPermission();
     }
 
     @Override

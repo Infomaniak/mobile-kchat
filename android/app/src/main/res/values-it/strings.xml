@@ -5,4 +5,7 @@
     <string name="callkChatDescription">Chiamata vocale kChat</string>
     <string name="declineCall">Rifiutare</string>
     <string name="acceptCall">Accettare</string>
+    <string name="notificationCallFrom">Chiamata da %1$s</string>
+    <string name="notificationChannelName">Notifica di chiamata</string>
+    <string name="notificationChannelDescription">Visualizza una notifica se si sta ricevendo una chiamata</string>
 </resources>

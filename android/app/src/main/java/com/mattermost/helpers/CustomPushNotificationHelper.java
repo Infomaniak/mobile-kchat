@@ -16,8 +16,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -394,7 +392,7 @@ public class CustomPushNotificationHelper {
         String serverUrl = bundle.getString("server_url");
         String urlOverride = bundle.getString("override_icon_url");
 
-        notification.setSmallIcon(R.drawable.ic_notification);
+        notification.setSmallIcon(R.drawable.ic_kchat_notification);
 
         if (serverUrl != null && channelName.equals(senderName)) {
             try {

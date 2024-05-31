@@ -1,6 +1,8 @@
 package com.mattermost.rnbeta
 
 import android.app.KeyguardManager
+import android.app.KeyguardManager.KeyguardDismissCallback
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -9,7 +11,9 @@ import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.mattermost.rnbeta.CustomPushNotification.NOTIFICATION_ID_CALL
 import com.mattermost.rnbeta.databinding.ActivityCallBinding
 
 class CallActivity : AppCompatActivity() {
@@ -44,11 +48,11 @@ class CallActivity : AppCompatActivity() {
                 channelId = channelId!!,
                 conferenceJWT = conferenceJWT!!
             )
-            finish()
+            leaveActivityGracefully()
         }
         declineButton.setOnClickListener {
             callManagerModule?.callEnded(serverId = serverId!!, conferenceId = conferenceId!!)
-            finish()
+            leaveActivityGracefully()
         }
 
         localBroadcastManager.registerReceiver(
@@ -57,12 +61,22 @@ class CallActivity : AppCompatActivity() {
         )
     }
 
+    private fun leaveActivityGracefully() {
+        NotificationManagerCompat.from(this@CallActivity).cancel(NOTIFICATION_ID_CALL)
+        finish()
+    }
+
     private fun configureActivityOverLockScreen() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
             val keyguardManager = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
-            keyguardManager.requestDismissKeyguard(this, null)
+            keyguardManager.requestDismissKeyguard(this, object : KeyguardDismissCallback() {
+                override fun onDismissSucceeded() {
+                    super.onDismissSucceeded()
+                    callManagerModule?.callEnded(serverId = serverId!!, conferenceId = conferenceId!!)
+                }
+            })
         } else {
             this.window.addFlags(
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
@@ -79,5 +93,36 @@ class CallActivity : AppCompatActivity() {
 
     companion object {
         const val BROADCAST_RECEIVER_CALL_CANCELED_TAG = "CallCanceledReceiver"
+    }
+}
+
+class ActiveCallServiceReceiver : BroadcastReceiver() {
+
+    private val callManagerModule by lazy { CallManagerModule.getInstance() }
+
+    override fun onReceive(context: Context, intent: Intent) {
+        val channelId  = intent.getStringExtra("channelId")
+        val serverId = intent.getStringExtra("serverId")
+        val conferenceId = intent.getStringExtra("conferenceId")
+        val conferenceJWT = intent.getStringExtra("conferenceJWT")
+
+        when (intent.action) {
+            ACTION_DECLINE -> {
+                callManagerModule?.callEnded(serverId = serverId!!, conferenceId = conferenceId!!)
+            }
+            ACTION_ACCEPT -> {
+                callManagerModule?.callAnswered(
+                    serverId = serverId!!,
+                    channelId = channelId!!,
+                    conferenceJWT = conferenceJWT!!
+                )
+            }
+        }
+        NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID_CALL)
+    }
+
+    companion object {
+        const val ACTION_DECLINE = "DECLINE"
+        const val ACTION_ACCEPT = "ACCEPT"
     }
 }
