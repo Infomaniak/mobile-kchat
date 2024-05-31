@@ -48,6 +48,24 @@ RCT_EXPORT_METHOD(reportCallEnded: (NSString*)conferenceId
   resolve(@[]);
 }
 
+RCT_EXPORT_METHOD(reportCallMuted: (NSString*)conferenceId
+                  isMuted:(BOOL) isMuted
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+  [[CallManager shared] reportCallMutedWithConferenceId:conferenceId isMuted:isMuted];
+  resolve(@[]);
+}
+
+RCT_EXPORT_METHOD(reportCallVideoMuted: (NSString*)conferenceId
+                  isMuted:(BOOL) isMuted
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+  [[CallManager shared] reportCallVideoMutedWithConferenceId:conferenceId isMuted:isMuted];
+  resolve(@[]);
+}
+
 -(void)startObserving {
     hasListeners = YES;
   
@@ -85,7 +103,7 @@ RCT_EXPORT_METHOD(reportCallEnded: (NSString*)conferenceId
 - (void)callMutedEvent:(NSString *)serverId isMuted: (BOOL) isMuted
 {
   if (hasListeners) {
-    [self sendEventWithName:kCallMuted body:@{@"serverId": serverId, @"isMuted": isMuted ? @"true" : @"false"}];
+    [self sendEventWithName:kCallMuted body:@{@"isMuted": isMuted ? @"true" : @"false"}];
   }
 }
 
