@@ -197,6 +197,7 @@ const CallScreen = ({
     const audioMutedRef = useRef(false);
     const videoMutedRef = useRef(false);
     const conferenceJoinedRef = useRef(false);
+    const leavingRef = useRef(false);
 
     /**
      * Compare current status and new (arg) status
@@ -280,28 +281,30 @@ const CallScreen = ({
      * Also trigger the "leaveCall" API
      */
     const leaveCallRef = useTransientRef((leaveInitiator: 'internal' | 'native' = 'internal') => {
-        // Restore previous status
-        if (autoUpdateStatus) {
-            restoreStatus();
-        }
-
-        // Return back to the channel where this meeting has been started
-        if (typeof channelId === 'string') {
-            switchToChannelById(serverUrl, channelId);
-        }
-
-        if (typeof conferenceId === 'string') {
-            // Notify the API that the user left the call
-            CallManager.leaveCall(serverUrl, conferenceId);
-
-            if (leaveInitiator === 'internal') {
-                // Notify OS about the end of the call
-                nativeReporters.callEnded(conferenceId);
+        if (hasUpdatedRef(leavingRef, true)) {
+            // Restore previous status
+            if (autoUpdateStatus) {
+                restoreStatus();
             }
-        }
 
-        if (jitsiMeetingRef.current) {
-            jitsiMeetingRef.current.close();
+            // Return back to the channel where this meeting has been started
+            if (typeof channelId === 'string') {
+                switchToChannelById(serverUrl, channelId);
+            }
+
+            if (typeof conferenceId === 'string') {
+                // Notify the API that the user left the call
+                CallManager.leaveCall(serverUrl, conferenceId);
+
+                if (leaveInitiator === 'internal') {
+                    // Notify OS about the end of the call
+                    nativeReporters.callEnded(conferenceId);
+                }
+            }
+
+            if (jitsiMeetingRef.current) {
+                jitsiMeetingRef.current.close();
+            }
         }
     });
     const leaveCall = (...args: Parameters<CallScreenHandle['leaveCall']>) => {
