@@ -31,8 +31,8 @@ public class CallManager: NSObject {
   @objc public private(set) var token: String?
 
   @objc var callAnsweredCallback: ((String, String, String) -> Void)?
-  @objc var callEndedCallback: ((String, String) -> Void)?
-  @objc var callMutedCallback: ((String, Bool) -> Void)?
+  @objc var callEndedCallback: (() -> Void)?
+  @objc var callMutedCallback: ((Bool) -> Void)?
 
   override private init() {
     let configuration: CXProviderConfiguration
@@ -138,13 +138,13 @@ extension CallManager: CXProviderDelegate {
 
   public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
     guard let existingCall = currentCalls[action.callUUID] else { return }
-    callEndedCallback?(existingCall.serverId, existingCall.conferenceId)
+    callEndedCallback?()
     action.fulfill()
   }
 
   public func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
     guard let existingCall = currentCalls[action.callUUID] else { return }
-    callMutedCallback?(existingCall.serverId, action.isMuted)
+    callMutedCallback?(action.isMuted)
     action.fulfill()
   }
 
