@@ -184,6 +184,7 @@ const CallScreen = ({
     serverUrl: kMeetServerUrl,
     userInfo,
 }: Props) => {
+    const isDM = isDMorGM(channel);
     const serverId = useServerId();
     const {formatMessage} = useIntl();
     const jitsiMeetingRef = useRef<JitsiRefProps | null>(null);
@@ -320,7 +321,7 @@ const CallScreen = ({
                     let callName = `~${channel.name}`; // GM
 
                     // Find the target user's username for DM calls
-                    if (isDMorGM(channel)) {
+                    if (isDM) {
                         const {users} = await fetchChannelMemberships(serverUrl, channelId, {per_page: 2});
                         const targetUser = users.find((user) => user.id !== currentUser.id);
                         if (targetUser) {
@@ -409,8 +410,12 @@ const CallScreen = ({
                 // Do not display meeting name
                 'meeting-name.enabled': false,
 
-                // Auto-join without having to type display name
-                'prejoinpage.enabled': false,
+                /**
+                 * For DM channels : Join immediatly like you would when answering a call
+                 * For other channels : Ask if the user wants to enable his audio/video
+                 */
+                'prejoinpage.enabled': !isDM,
+                'prejoinpage.hideDisplayName': true,
 
                 // Disable breakout-rooms
                 'breakout-rooms.enabled': false,
