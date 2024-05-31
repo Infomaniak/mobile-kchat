@@ -23,6 +23,7 @@ import CallManager from '@store/CallManager';
 import {isDMorGM} from '@utils/channel';
 
 import type ChannelModel from '@typings/database/models/servers/channel';
+import type ConferenceModel from '@typings/database/models/servers/conference';
 import type UserModel from '@typings/database/models/servers/user';
 
 export type PassedProps = {
@@ -36,6 +37,7 @@ export type PassedProps = {
 
 export type InjectedProps = {
     channel: ChannelModel;
+    conference: ConferenceModel | undefined;
     currentUser: UserModel;
 }
 
@@ -182,6 +184,7 @@ const CallScreen = ({
     autoUpdateStatus = false,
     channel,
     channelId,
+    conference,
     conferenceId,
     conferenceJWT,
     currentUser,
@@ -198,6 +201,11 @@ const CallScreen = ({
     const videoMutedRef = useRef(false);
     const conferenceJoinedRef = useRef(false);
     const leavingRef = useRef(false);
+
+    /**
+     * Is the current user the one that initiated the conference
+     */
+    const isCurrentUserInitiator = currentUser.id === conference?.userId;
 
     /**
      * Compare current status and new (arg) status
@@ -425,9 +433,9 @@ const CallScreen = ({
 
                 /**
                  * For DM channels : Join immediatly like you would when answering a call
-                 * For other channels : Ask if the user wants to enable his audio/video
+                 * For other channels : Ask if the user wants to enable his audio/video, but only if it's not the one that created the conference
                  */
-                'prejoinpage.enabled': !isDM,
+                'prejoinpage.enabled': !isDM && !isCurrentUserInitiator,
                 'prejoinpage.hideDisplayName': true,
 
                 // Disable breakout-rooms
