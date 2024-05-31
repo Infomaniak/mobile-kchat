@@ -101,11 +101,8 @@ class GlobalEventHandler {
         }
     };
 
-    onCallEnded = async (event: CallEndedEvent) => {
-        const serverUrl = await DatabaseManager.getServerUrlFromIdentifier(event.serverId);
-        if (typeof serverUrl === 'string') {
-            CallManager.declineCall(serverUrl, event.conferenceId);
-        }
+    onCallEnded = async () => {
+        CallManager.leaveCallScreen('native');
     };
 
     onCallMuted = async (event: CallMutedEvent) => {

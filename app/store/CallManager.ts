@@ -71,11 +71,10 @@ class CallManager {
         return null;
     };
 
-    declineCall = async (serverUrl: string, conferenceId: string): Promise<void> => {
-        try {
-            await NetworkManager.getClient(serverUrl).declineCall(conferenceId);
-        } catch (error) {
-            logError(error);
+    leaveCallScreen = (...args: Parameters<CallScreenHandle['leaveCall']>): void => {
+        const leaveCall = this.callScreenRef.current?.leaveCall;
+        if (typeof leaveCall === 'function') {
+            leaveCall(...args);
         }
     };
 

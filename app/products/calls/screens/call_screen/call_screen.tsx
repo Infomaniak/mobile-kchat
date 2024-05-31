@@ -40,8 +40,9 @@ export type InjectedProps = {
 }
 
 export type CallScreenHandle = {
-  muteCall: (isMuted: boolean) => void;
-  muteVideo: (isMuted: boolean) => void;
+    leaveCall: (initiator?: 'native' | 'internal') => void;
+    muteCall: (isMuted: boolean) => void;
+    muteVideo: (isMuted: boolean) => void;
 };
 
 type Props = PassedProps & InjectedProps & { autoUpdateStatus: boolean }
@@ -278,7 +279,7 @@ const CallScreen = ({
      * Close the current JitsiMeeting
      * Also trigger the "leaveCall" API
      */
-    const leaveCallRef = useTransientRef(() => {
+    const leaveCallRef = useTransientRef((leaveInitiator: 'internal' | 'native' = 'internal') => {
         // Restore previous status
         if (autoUpdateStatus) {
             restoreStatus();
@@ -293,14 +294,19 @@ const CallScreen = ({
             // Notify the API that the user left the call
             CallManager.leaveCall(serverUrl, conferenceId);
 
-            // Notify CallKit about the end of the call
-            nativeReporters.callEnded(conferenceId);
+            if (leaveInitiator === 'internal') {
+                // Notify OS about the end of the call
+                nativeReporters.callEnded(conferenceId);
+            }
         }
 
         if (jitsiMeetingRef.current) {
             jitsiMeetingRef.current.close();
         }
     });
+    const leaveCall = (...args: Parameters<CallScreenHandle['leaveCall']>) => {
+        leaveCallRef.current!(...args);
+    };
 
     /**
      * Setup the JitsiMeeting event listeners
@@ -383,7 +389,7 @@ const CallScreen = ({
     // EFFECTS
     // Register to allow functions from being called by the CallManager
     useEffect(() => {
-        CallManager.registerCallScreen({muteCall, muteVideo});
+        CallManager.registerCallScreen({leaveCall, muteCall, muteVideo});
     }, []);
 
     return (
