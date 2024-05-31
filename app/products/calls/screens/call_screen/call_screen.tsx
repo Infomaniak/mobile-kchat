@@ -137,8 +137,9 @@ const hasUpdatedRef = <T extends unknown>(ref: MutableRefObject<T>, newValue: T)
 const nativeReporters = {
     callStarted: (serverId: string, channelId: string, conferenceId: string, callName: string) => {
         try {
-            if (Platform.OS === 'ios') { // Only for CallKit
-                NativeModules.CallManagerModule.reportCallStarted(serverId, channelId, conferenceId, callName);
+            const {reportCallStarted} = NativeModules.CallManagerModule;
+            if (typeof reportCallStarted === 'function') {
+                reportCallStarted(serverId, channelId, conferenceId, callName);
             }
         } catch (error) {
             logError(error);
@@ -146,8 +147,9 @@ const nativeReporters = {
     },
     callEnded: (conferenceId: string) => {
         try {
-            if (Platform.OS === 'ios') { // Only for CallKit
-                NativeModules.CallManagerModule.reportCallEnded(conferenceId);
+            const {reportCallEnded} = NativeModules.CallManagerModule;
+            if (typeof reportCallEnded === 'function') {
+                reportCallEnded(conferenceId);
             }
         } catch (error) {
             logError(error);
@@ -155,8 +157,9 @@ const nativeReporters = {
     },
     callMuted: (conferenceId: string, isMuted: boolean) => {
         try {
-            if (Platform.OS === 'ios') { // Only for CallKit
-                NativeModules.CallManagerModule.reportCallMuted(conferenceId, isMuted);
+            const {reportCallMuted} = NativeModules.CallManagerModule;
+            if (typeof reportCallMuted === 'function') {
+                reportCallMuted(conferenceId, isMuted);
             }
         } catch (error) {
             logError(error);
@@ -164,8 +167,9 @@ const nativeReporters = {
     },
     callVideoMuted: (conferenceId: string, isMuted: boolean) => {
         try {
-            if (Platform.OS === 'ios') { // Only for CallKit
-                NativeModules.CallManagerModule.reportCallVideoMuted(conferenceId, isMuted);
+            const {reportCallVideoMuted} = NativeModules.CallManagerModule;
+            if (typeof reportCallVideoMuted === 'function') {
+                reportCallVideoMuted(conferenceId, isMuted);
             }
         } catch (error) {
             logError(error);
