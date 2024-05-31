@@ -71,10 +71,15 @@ class CallManager {
         return null;
     };
 
-    leaveCallScreen = (...args: Parameters<CallScreenHandle['leaveCall']>): void => {
+    leaveCallScreen = (
+        {serverUrl, conferenceId}: CallEndedEvent,
+        ...args: Parameters<CallScreenHandle['leaveCall']>
+    ): void => {
         const leaveCall = this.callScreenRef.current?.leaveCall;
         if (typeof leaveCall === 'function') {
             leaveCall(...args);
+        } else {
+            this.leaveCall(serverUrl, conferenceId);
         }
     };
 
