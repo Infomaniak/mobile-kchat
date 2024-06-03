@@ -1,9 +1,7 @@
 package com.mattermost.rnbeta;
 
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -47,10 +45,6 @@ public class MainActivity extends NavigationActivity {
 
         setHWKeyboardConnected();
         foldableObserver.onCreate();
-
-        //TODO Create a dialog to ask the user to authorize the "Draw over the app" permission
-        // needed for calls
-        //checkForOverlayPermission();
     }
 
     @Override
@@ -104,13 +98,6 @@ public class MainActivity extends NavigationActivity {
             }
         }
         return super.dispatchKeyEvent(event);
-    }
-
-    private void checkForOverlayPermission() {
-        if (!Settings.canDrawOverlays(this)) {
-            Intent myIntent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-            startActivity(myIntent);
-        }
     }
 
     private void setHWKeyboardConnected() {
