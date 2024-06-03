@@ -159,26 +159,6 @@ extension CallManager: CXProviderDelegate {
   public func providerDidReset(_ provider: CXProvider) {
     print("providerDidReset")
   }
-
-  public func handleCallIncomingNotification(notificationPayload: [AnyHashable: Any], completion: @escaping () -> Void) {
-    guard let serverId = notificationPayload["server_id"] as? String,
-          let channelId = notificationPayload["channel_id"] as? String,
-          let conferenceId = notificationPayload["conference_id"] as? String,
-          let channelName = notificationPayload["channel_name"] as? String,
-          let conferenceJWT = notificationPayload["conference_jwt"] as? String else {
-      return
-    }
-
-    let meetCall = MeetCall(
-      serverId: serverId,
-      channelId: channelId,
-      conferenceId: conferenceId,
-      conferenceJWT: conferenceJWT
-    )
-    reportIncomingCall(call: meetCall, callName: channelName) {
-      completion()
-    }
-  }
 }
 
 extension CallManager: PKPushRegistryDelegate {
@@ -200,7 +180,46 @@ extension CallManager: PKPushRegistryDelegate {
     guard type == .voIP else { return }
 
     print("Received voip notification \(payload.dictionaryPayload)")
-    handleCallIncomingNotification(notificationPayload: payload.dictionaryPayload, completion: completion)
+
+    let notificationPayload = payload.dictionaryPayload
+    if let type = notificationPayload["type"] as? String,
+       type == "cancel_call" {
+      handleCallCancelled(notificationPayload: notificationPayload, completion: completion)
+    } else {
+      handleCallIncomingNotification(notificationPayload: notificationPayload, completion: completion)
+    }
+  }
+
+  public func handleCallCancelled(notificationPayload: [AnyHashable: Any], completion: @escaping () -> Void) {
+    guard let conferenceId = notificationPayload["conference_id"] as? String,
+          let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else {
+      completion()
+      return
+    }
+
+    callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .remoteEnded)
+    completion()
+  }
+
+  public func handleCallIncomingNotification(notificationPayload: [AnyHashable: Any], completion: @escaping () -> Void) {
+    guard let serverId = notificationPayload["server_id"] as? String,
+          let channelId = notificationPayload["channel_id"] as? String,
+          let conferenceId = notificationPayload["conference_id"] as? String,
+          let channelName = notificationPayload["channel_name"] as? String,
+          let conferenceJWT = notificationPayload["conference_jwt"] as? String else {
+      completion()
+      return
+    }
+
+    let meetCall = MeetCall(
+      serverId: serverId,
+      channelId: channelId,
+      conferenceId: conferenceId,
+      conferenceJWT: conferenceJWT
+    )
+    reportIncomingCall(call: meetCall, callName: channelName) {
+      completion()
+    }
   }
 
   public func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {
