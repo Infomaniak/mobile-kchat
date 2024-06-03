@@ -259,7 +259,7 @@ const CallScreen = ({
             ) {
                 doUpdateStatusRef.current(statusBeforeCallRef.current);
             }
-        }, 2000, true /* Immediate */),
+        }, 2000, {leading: true, trailing: false}),
         [],
     );
 
