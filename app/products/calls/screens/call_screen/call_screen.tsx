@@ -50,6 +50,12 @@ export type CallScreenHandle = {
 type Props = PassedProps & InjectedProps & { autoUpdateStatus: boolean }
 type UserStatus = ReturnType<typeof getUserCustomStatus>
 
+/**
+ * Prevent the conference from being closed by 'leaveCall'
+ * handle if the duration is lower than this value
+ */
+const MINIMUM_CONFERENCE_DURATION = 2000; // ms
+
 const kMeetStatus = {
     emoji: 'kmeet',
     duration: CustomStatusDurationEnum.DONT_CLEAR,
@@ -199,8 +205,8 @@ const CallScreen = ({
     const serverUrl = useServerUrl();
     const audioMutedRef = useRef(false);
     const videoMutedRef = useRef(false);
-    const conferenceJoinedRef = useRef(false);
     const leavingRef = useRef(false);
+    const conferenceJoinedAtRef = useRef<number | undefined>();
 
     /**
      * Is the current user the one that initiated the conference
@@ -289,7 +295,11 @@ const CallScreen = ({
      * Also trigger the "leaveCall" API
      */
     const leaveCallRef = useTransientRef((leaveInitiator: 'internal' | 'native' = 'internal') => {
-        if (hasUpdatedRef(leavingRef, true)) {
+        if (
+            typeof conferenceJoinedAtRef.current === 'number' &&
+            (conferenceJoinedAtRef.current + MINIMUM_CONFERENCE_DURATION) <= Date.now() &&
+            hasUpdatedRef(leavingRef, true)
+        ) {
             // Restore previous status
             if (autoUpdateStatus) {
                 restoreStatus();
@@ -325,7 +335,8 @@ const CallScreen = ({
      */
     const eventListeners = useMemo(() => ({
         onConferenceJoined: () => {
-            conferenceJoinedRef.current = true;
+            // Update the conferenceJoinedAtRef date
+            conferenceJoinedAtRef.current = Date.now();
 
             if (autoUpdateStatus) {
                 updateStatus();
@@ -378,16 +389,18 @@ const CallScreen = ({
         },
         onAudioMutedChanged: (isMuted: boolean) => {
             if (
-                hasUpdatedRef(audioMutedRef, isMuted) &&
-                conferenceJoinedRef.current && typeof conferenceId === 'string'
+                typeof conferenceId === 'string' &&
+                typeof conferenceJoinedAtRef.current === 'number' &&
+                hasUpdatedRef(audioMutedRef, isMuted)
             ) {
                 nativeReporters.callMuted(conferenceId, isMuted);
             }
         },
         onVideoMutedChanged: (isMuted: boolean) => {
             if (
-                hasUpdatedRef(videoMutedRef, isMuted) &&
-                conferenceJoinedRef.current && typeof conferenceId === 'string'
+                typeof conferenceId === 'string' &&
+                typeof conferenceJoinedAtRef.current === 'number' &&
+                hasUpdatedRef(videoMutedRef, isMuted)
             ) {
                 nativeReporters.callVideoMuted(conferenceId, isMuted);
             }
@@ -421,6 +434,8 @@ const CallScreen = ({
              * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#eventlisteners
              */
             eventListeners={eventListeners}
+
+            // Ref. https://github.com/jitsi/jitsi-meet/blob/master/react/features/base/flags/constants.ts
             flags={{
 
                 // Prevent inviting new peoples
@@ -444,7 +459,7 @@ const CallScreen = ({
                 // 'lobby-mode.enabled': false,
                 // 'server-url-change.enabled': false,
 
-                // Disable CallKit. Maybe only disable on Android ?
+                // Disable CallKit
                 'call-integration.enabled': Platform.OS === 'android',
             }}
             style={{flex: 1}}
