@@ -99,6 +99,7 @@ public class CallManager: NSObject {
         print("An error occured ending call \(error)")
       } else {
         self.currentCalls[existingCall.localUUID]?.joined = false
+        self.currentCalls[existingCall.localUUID] = nil
       }
     }
   }
@@ -154,6 +155,7 @@ extension CallManager: CXProviderDelegate {
     guard let existingCall = currentCalls[action.callUUID] else { return }
     callEndedCallback?(existingCall.serverId, existingCall.conferenceId)
     currentCalls[action.callUUID]?.joined = false
+    currentCalls[existingCall.localUUID] = nil
     action.fulfill()
   }
 
@@ -209,6 +211,7 @@ extension CallManager: PKPushRegistryDelegate {
     }
 
     callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .remoteEnded)
+    currentCalls[existingCall.localUUID] = nil
     completion()
   }
 
