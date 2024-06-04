@@ -15,6 +15,7 @@ struct MeetCall {
   let channelId: String
   let conferenceId: String
   let conferenceJWT: String
+  var joined = false
 
   init(serverId: String, channelId: String, conferenceId: String, conferenceJWT: String) {
     guard let conferenceUUID = UUID(uuidString: conferenceId) else {
@@ -96,6 +97,8 @@ public class CallManager: NSObject {
     callController.requestTransaction(with: [endCallAction]) { error in
       if let error {
         print("An error occured ending call \(error)")
+      } else {
+        self.currentCalls[existingCall.localUUID]?.joined = false
       }
     }
   }
@@ -116,6 +119,8 @@ public class CallManager: NSObject {
     callController.requestTransaction(with: [startCallAction]) { error in
       if let error {
         print("An error occured starting call \(error)")
+      } else {
+        self.currentCalls[call.localUUID]?.joined = true
       }
     }
   }
@@ -141,12 +146,14 @@ extension CallManager: CXProviderDelegate {
   public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
     guard let existingCall = currentCalls[action.callUUID] else { return }
     callAnsweredCallback?(existingCall.serverId, existingCall.channelId, existingCall.conferenceJWT)
+    currentCalls[action.callUUID]?.joined = true
     action.fulfill()
   }
 
   public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
     guard let existingCall = currentCalls[action.callUUID] else { return }
     callEndedCallback?(existingCall.serverId, existingCall.conferenceId)
+    currentCalls[action.callUUID]?.joined = false
     action.fulfill()
   }
 
@@ -182,10 +189,14 @@ extension CallManager: PKPushRegistryDelegate {
     print("Received voip notification \(payload.dictionaryPayload)")
 
     let notificationPayload = payload.dictionaryPayload
-    if let type = notificationPayload["type"] as? String,
-       type == "cancel_call" {
+
+    let notificationType = notificationPayload["type"] as? String
+    switch notificationType {
+    case "cancel_call":
       handleCallCancelled(notificationPayload: notificationPayload, completion: completion)
-    } else {
+    case "joined_call":
+      handleJoinedCall(notificationPayload: notificationPayload, completion: completion)
+    default:
       handleCallIncomingNotification(notificationPayload: notificationPayload, completion: completion)
     }
   }
@@ -198,6 +209,19 @@ extension CallManager: PKPushRegistryDelegate {
     }
 
     callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .remoteEnded)
+    completion()
+  }
+
+  public func handleJoinedCall(notificationPayload: [AnyHashable: Any], completion: @escaping () -> Void) {
+    guard let conferenceId = notificationPayload["conference_id"] as? String,
+          let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value,
+          // Only hide call UI if the user joined the call on an other device than this one
+          !existingCall.joined else {
+      completion()
+      return
+    }
+
+    callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .answeredElsewhere)
     completion()
   }
 
