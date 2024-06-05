@@ -1,37 +1,51 @@
 package com.mattermost.rnbeta;
 
+import static com.mattermost.helpers.database_extension.GeneralKt.getServerUrlForIdentifier;
+import static com.mattermost.rnbeta.CallActivity.BROADCAST_RECEIVER_CALL_CANCELED_TAG;
+import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME;
+
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import java.util.Objects;
-
-import com.facebook.react.bridge.ReadableMap;
 import com.mattermost.helpers.CustomPushNotificationHelper;
 import com.mattermost.helpers.DatabaseHelper;
 import com.mattermost.helpers.Network;
 import com.mattermost.helpers.NotificationHelper;
 import com.mattermost.helpers.PushNotificationDataHelper;
-import com.mattermost.helpers.ReadableMapUtils;
 import com.mattermost.share.ShareModule;
-import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
-import com.wix.reactnativenotifications.core.notification.PushNotification;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
 import com.wix.reactnativenotifications.core.AppLifecycleFacade;
 import com.wix.reactnativenotifications.core.JsIOHelper;
+import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
+import com.wix.reactnativenotifications.core.notification.PushNotification;
 
-import static com.mattermost.helpers.database_extension.GeneralKt.*;
-import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME;
+import java.util.Objects;
 
 
 public class CustomPushNotification extends PushNotification {
+
+    static final String CHANNEL_ID_CALL = "KCHAT_CHANNEL_ID_CALL";
+    static final int NOTIFICATION_ID_CALL = -1;
+
     private final PushNotificationDataHelper dataHelper;
+
+    private String type;
+    private String ackId;
+    private String postId;
+    private String channelId;
+    private String serverId;
+    private String conferenceId;
+    private String channelName;
+    private String conferenceJWT;
 
     public CustomPushNotification(Context context, Bundle bundle, AppLifecycleFacade appLifecycleFacade, AppLaunchHelper appLaunchHelper, JsIOHelper jsIoHelper) {
         super(context, bundle, appLifecycleFacade, appLaunchHelper, jsIoHelper);
@@ -49,11 +63,17 @@ public class CustomPushNotification extends PushNotification {
     @Override
     public void onReceived() {
         final Bundle initialData = mNotificationProps.asBundle();
-        final String type = initialData.getString("type");
-        final String ackId = initialData.getString("ack_id");
-        final String postId = initialData.getString("post_id");
-        final String channelId = initialData.getString("channel_id");
+        type = initialData.getString("type");
+        ackId = initialData.getString("ack_id");
+        postId = initialData.getString("post_id");
+        channelId = initialData.getString("channel_id");
+        serverId = initialData.getString("server_id");
+        conferenceId = initialData.getString("conference_id");
+        channelName = initialData.getString("channel_name");
+        conferenceJWT = initialData.getString("conference_jwt");
+
         final boolean isIdLoaded = initialData.getString("id_loaded") != null && initialData.getString("id_loaded").equals("true");
+
         int notificationId = NotificationHelper.getNotificationId(initialData);
 
         String serverUrl = addServerUrlToBundle(initialData);
@@ -70,7 +90,19 @@ public class CustomPushNotification extends PushNotification {
             }
         }
 
-        finishProcessingNotification(serverUrl, type, channelId, notificationId);
+        if (Objects.equals(type, "cancel_call")) {
+            broadcastCallEnded();
+        } else if (conferenceId != null) {
+            //startIncomingCallActivity(channelId, serverId, conferenceId, channelName, conferenceJWT);
+            Notification callNotification = createNotification();
+            super.postNotification(callNotification, NOTIFICATION_ID_CALL);
+        } else {
+            finishProcessingNotification(
+                    serverUrl,
+                    type,
+                    notificationId
+            );
+        }
     }
 
     @Override
@@ -83,7 +115,67 @@ public class CustomPushNotification extends PushNotification {
         }
     }
 
-    private void finishProcessingNotification(final String serverUrl, @NonNull final String type, final String channelId, final int notificationId) {
+    private void broadcastCallEnded() {
+        Intent callCanceledIntent = new Intent();
+        callCanceledIntent.setAction(BROADCAST_RECEIVER_CALL_CANCELED_TAG);
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(callCanceledIntent);
+    }
+
+    private Notification createNotification() {
+        Intent contentIntent = new Intent(mContext, MainActivity.class);
+        PendingIntent contentPendingIntent = PendingIntent.getActivity(mContext, 0, contentIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        Intent fullScreenIntent = new Intent(mContext, CallActivity.class);
+        addExtrasToIntent(fullScreenIntent);
+        PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(mContext, 0, fullScreenIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        return new NotificationCompat.Builder(mContext, CHANNEL_ID_CALL)
+                .setSmallIcon(R.drawable.ic_kchat_notification)
+                .setContentTitle(mContext.getString(R.string.notificationCallFrom, channelName))
+                .setAutoCancel(false)
+                .setContentIntent(contentPendingIntent)
+                .setFullScreenIntent(fullScreenPendingIntent, true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_CALL)
+                .addAction(R.drawable.ic_decline, mContext.getString(R.string.declineCall), getCallPendingIntent(false))
+                .addAction(R.drawable.ic_accept, mContext.getString(R.string.acceptCall), getCallPendingIntent(true))
+                .build();
+    }
+
+    private void addExtrasToIntent(Intent intent) {
+        intent.putExtra("channelId", channelId);
+        intent.putExtra("serverId", serverId);
+        intent.putExtra("conferenceId", conferenceId);
+        intent.putExtra("channelName", channelName);
+        intent.putExtra("conferenceJWT", conferenceJWT);
+    }
+
+    private PendingIntent getCallPendingIntent(boolean isAccepted) {
+        Intent cancelCallIntent = new Intent(mContext, ActiveCallServiceReceiver.class);
+        String action = isAccepted ? ActiveCallServiceReceiver.ACTION_ACCEPT : ActiveCallServiceReceiver.ACTION_DECLINE;
+        cancelCallIntent.setAction(action);
+        addExtrasToIntent(cancelCallIntent);
+        return PendingIntent.getBroadcast(mContext, 0, cancelCallIntent, PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    private void startIncomingCallActivity() {
+        Intent intent = new Intent(mContext, CallActivity.class);
+        intent.putExtra("channelId", channelId);
+        intent.putExtra("serverId", serverId);
+        intent.putExtra("conferenceId", conferenceId);
+        intent.putExtra("channelName", channelName);
+        intent.putExtra("conferenceJWT", conferenceJWT);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        mContext.startActivity(intent);
+    }
+
+    private void finishProcessingNotification(
+            final String serverUrl,
+            @NonNull final String type,
+            final int notificationId
+    ) {
         final boolean isReactInit = mAppLifecycleFacade.isReactInitialized();
 
         switch (type) {
