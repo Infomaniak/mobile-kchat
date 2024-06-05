@@ -17,13 +17,11 @@ import type {CallScreenHandle, PassedProps} from '@calls/screens/call_screen/cal
 import type {MutableRefObject} from 'react';
 import type {Options} from 'react-native-navigation';
 
-export type Call = ApiCall & {server_url: string}
-
 /**
  * Extract the kMeet server_url from the ApiCall response
  * add it to the returned object
  */
-const withServerUrl = (call: ApiCall): Call => ({
+const withServerUrl = (call: ApiCall): ApiCall & { server_url: string } => ({
     ...call,
     server_url: call.url.replace(`/${call.channel_id}`, ''),
 });
@@ -34,7 +32,7 @@ class CallManager {
         this.callScreenRef.current = callScreen;
     };
 
-    startCall = async (serverUrl: string, channelId: string, allowAnswer = true): Promise<Call | null> => {
+    startCall = async (serverUrl: string, channelId: string, allowAnswer = true): Promise<ReturnType<typeof withServerUrl> | null> => {
         try {
             return withServerUrl(await NetworkManager.getClient(serverUrl).startCall(channelId));
         } catch (error) {
@@ -54,7 +52,7 @@ class CallManager {
         return null;
     };
 
-    answerCall = async (serverUrl: string, conferenceId: string, channelId?: string): Promise<Call | null> => {
+    answerCall = async (serverUrl: string, conferenceId: string, channelId?: string) => {
         try {
             return withServerUrl(await NetworkManager.getClient(serverUrl).answerCall(conferenceId));
         } catch (error) {
@@ -91,7 +89,7 @@ class CallManager {
         }
     };
 
-    leaveCall = async (serverUrl: string, conferenceId: string): Promise<Call | null> => {
+    leaveCall = async (serverUrl: string, conferenceId: string): Promise<ReturnType<typeof withServerUrl> | null> => {
         try {
             return withServerUrl(await NetworkManager.getClient(serverUrl).leaveCall(conferenceId));
         } catch (error) {
@@ -121,7 +119,7 @@ class CallManager {
      */
     onCall = async (
         serverUrl: string, channelId: string,
-        {conferenceId, conferenceJWT, initiator}:
+        {conferenceId, /*conferenceJWT, */initiator}:
         { conferenceId?: string; conferenceJWT?: string; initiator?: 'native' | 'internal' } = {},
     ) => {
         /* eslint-disable multiline-ternary */
@@ -149,7 +147,7 @@ class CallManager {
                     serverUrl: call.server_url,
                     channelId: call.channel_id,
                     conferenceId: call.id,
-                    conferenceJWT,
+                    conferenceJWT: call.jwt,
                     initiator,
 
                     /**

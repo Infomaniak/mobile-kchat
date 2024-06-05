@@ -8,6 +8,7 @@ export type ApiCall = {
     create_at: number;
     participants: string[];
     url: string;
+    jwt?: string;
 }
 
 export interface IKClientCallsMix {
