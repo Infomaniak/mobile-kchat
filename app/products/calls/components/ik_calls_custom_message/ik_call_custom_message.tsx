@@ -226,7 +226,8 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
                         {...titleProps}
                     />
                     {
-                        !isDM &&
+
+                        // !isDM &&
                         typeof channelId === 'string' &&
                         typeof conferenceId === 'string' &&
                         <IkCallsParticipantStack
