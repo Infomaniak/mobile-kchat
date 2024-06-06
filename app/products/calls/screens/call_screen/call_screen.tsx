@@ -427,6 +427,11 @@ const CallScreen = ({
             config={{
                 subject: 'kMeet',
                 disableModeratorIndicator: true,
+
+                // Start calls with video muted
+                // https://github.com/jitsi/jitsi-meet/blob/0913554af97e91f14b5a63ce8c8579755f1405a7/config.js#L290
+                startVideoMuted: 0,
+                startWithVideoMuted: false,
             }}
 
             token={conferenceJWT}
