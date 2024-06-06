@@ -1,7 +1,7 @@
 package com.mattermost.rnbeta;
 
 import static com.mattermost.helpers.database_extension.GeneralKt.getServerUrlForIdentifier;
-import static com.mattermost.rnbeta.CallActivity.BROADCAST_RECEIVER_CALL_CANCELED_TAG;
+import static com.mattermost.call.CallActivity.BROADCAST_RECEIVER_CALL_CANCELED_TAG;
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME;
 
 import android.app.Notification;
@@ -16,6 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.mattermost.call.ActiveCallServiceReceiver;
+import com.mattermost.call.CallActivity;
 import com.mattermost.helpers.CustomPushNotificationHelper;
 import com.mattermost.helpers.DatabaseHelper;
 import com.mattermost.helpers.Network;
@@ -30,11 +32,8 @@ import com.wix.reactnativenotifications.core.notification.PushNotification;
 
 import java.util.Objects;
 
-
 public class CustomPushNotification extends PushNotification {
-
     static final String CHANNEL_ID_CALL = "KCHAT_CHANNEL_ID_CALL";
-    static final int NOTIFICATION_ID_CALL = -1;
 
     private final PushNotificationDataHelper dataHelper;
 
@@ -95,7 +94,8 @@ public class CustomPushNotification extends PushNotification {
         } else if (conferenceId != null) {
             //startIncomingCallActivity(channelId, serverId, conferenceId, channelName, conferenceJWT);
             Notification callNotification = createNotification();
-            super.postNotification(callNotification, NOTIFICATION_ID_CALL);
+            //TODO to change
+            super.postNotification(callNotification, -1);
         } else {
             finishProcessingNotification(
                     serverUrl,

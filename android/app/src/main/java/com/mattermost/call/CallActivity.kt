@@ -1,8 +1,7 @@
-package com.mattermost.rnbeta
+package com.mattermost.call
 
 import android.app.KeyguardManager
 import android.app.KeyguardManager.KeyguardDismissCallback
-import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -10,15 +9,15 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.mattermost.rnbeta.CustomPushNotification.NOTIFICATION_ID_CALL
-import com.mattermost.rnbeta.databinding.ActivityCallBinding
+import com.airbnb.lottie.LottieAnimationView
+import com.google.android.material.button.MaterialButton
+import com.mattermost.rnbeta.R
 
 class CallActivity : AppCompatActivity() {
-
-    private val binding: ActivityCallBinding by lazy { ActivityCallBinding.inflate(layoutInflater) }
 
     private val callManagerModule by lazy { CallManagerModule.getInstance() }
     private val channelId by lazy { intent.getStringExtra("channelId") }
@@ -26,6 +25,10 @@ class CallActivity : AppCompatActivity() {
     private val conferenceId by lazy { intent.getStringExtra("conferenceId") }
     private val channelName by lazy { intent.getStringExtra("channelName") }
     private val conferenceJWT by lazy { intent.getStringExtra("conferenceJWT") }
+
+    private val idCallerTextView: TextView by lazy { findViewById(R.id.idCaller) }
+    private val declineButton: MaterialButton by lazy { findViewById(R.id.decline_button) }
+    private val answerButton: LottieAnimationView by lazy { findViewById(R.id.answerButton) }
 
     private val localBroadcastManager by lazy { LocalBroadcastManager.getInstance(this) }
 
@@ -35,13 +38,12 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(root)
-
+        setContentView(R.layout.activity_call)
         configureActivityOverLockScreen()
 
-        idCaller.text = channelName
+        idCallerTextView.text = channelName
         answerButton.setOnClickListener {
             callManagerModule?.callAnswered(
                 serverId = serverId!!,
@@ -62,7 +64,7 @@ class CallActivity : AppCompatActivity() {
     }
 
     private fun leaveActivityGracefully() {
-        NotificationManagerCompat.from(this@CallActivity).cancel(NOTIFICATION_ID_CALL)
+        NotificationManagerCompat.from(this@CallActivity).cancel(-1)
         finish()
     }
 
@@ -118,7 +120,7 @@ class ActiveCallServiceReceiver : BroadcastReceiver() {
                 )
             }
         }
-        NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID_CALL)
+        NotificationManagerCompat.from(context).cancel(-1)
     }
 
     companion object {

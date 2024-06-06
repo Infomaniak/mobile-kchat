@@ -102,7 +102,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".CallActivity"
+            android:name="com.mattermost.call.CallActivity"
             android:exported="true"
             android:showOnLockScreen="true"
             android:turnScreenOn="true"
@@ -135,7 +135,7 @@
 
         </activity>
 
-        <receiver android:name=".ActiveCallServiceReceiver" android:exported="false">
+        <receiver android:name="com.mattermost.call.ActiveCallServiceReceiver" android:exported="false">
             <intent-filter>
                 <action android:name=".ActiveCallServiceReceiver.DECLINE"/>
             </intent-filter>

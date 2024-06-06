@@ -26,6 +26,7 @@ import com.facebook.react.module.model.ReactModuleInfo;
 import com.facebook.react.module.model.ReactModuleInfoProvider;
 import com.facebook.react.modules.network.OkHttpClientProvider;
 import com.facebook.soloader.SoLoader;
+import com.mattermost.call.CallManagerModule;
 import com.mattermost.flipper.ReactNativeFlipper;
 import com.mattermost.helpers.RealPathUtil;
 import com.mattermost.networkclient.RCTOkHttpClientFactory;
@@ -94,7 +95,7 @@ public class MainApplication extends NavigationApplication implements INotificat
                                         map.put("MattermostShare", new ReactModuleInfo("MattermostShare", "com.mattermost.share.ShareModule", false, false, true, false, false));
                                         map.put("Notifications", new ReactModuleInfo("Notifications", "com.mattermost.rnbeta.NotificationsModule", false, false, false, false, false));
                                         map.put("SplitView", new ReactModuleInfo("SplitView", "com.mattermost.rnbeta.SplitViewModule", false, false, false, false, false));
-                                        map.put("CallManagerModule", new ReactModuleInfo("CallManagerModule", "com.mattermost.rnbeta.CallManagerModule", false, false, false, false, false));
+                                        map.put("CallManagerModule", new ReactModuleInfo("CallManagerModule", "com.mattermost.call.CallManagerModule", false, false, false, false, false));
                                         return map;
                                     };
                                 }
