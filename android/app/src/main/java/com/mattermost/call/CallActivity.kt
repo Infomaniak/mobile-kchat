@@ -50,11 +50,11 @@ class CallActivity : AppCompatActivity() {
                 channelId = channelId!!,
                 conferenceJWT = conferenceJWT!!
             )
-            leaveActivityGracefully()
+            leaveActivity()
         }
         declineButton.setOnClickListener {
             callManagerModule?.callEnded(serverId = serverId!!, conferenceId = conferenceId!!)
-            leaveActivityGracefully()
+            leaveActivity()
         }
 
         localBroadcastManager.registerReceiver(
@@ -63,7 +63,7 @@ class CallActivity : AppCompatActivity() {
         )
     }
 
-    private fun leaveActivityGracefully() {
+    private fun leaveActivity() {
         NotificationManagerCompat.from(this@CallActivity).cancel(-1)
         finish()
     }
@@ -76,7 +76,10 @@ class CallActivity : AppCompatActivity() {
             keyguardManager.requestDismissKeyguard(this, object : KeyguardDismissCallback() {
                 override fun onDismissSucceeded() {
                     super.onDismissSucceeded()
-                    callManagerModule?.callEnded(serverId = serverId!!, conferenceId = conferenceId!!)
+                    callManagerModule?.callEnded(
+                        serverId = serverId!!,
+                        conferenceId = conferenceId!!
+                    )
                 }
             })
         } else {
@@ -95,36 +98,5 @@ class CallActivity : AppCompatActivity() {
 
     companion object {
         const val BROADCAST_RECEIVER_CALL_CANCELED_TAG = "CallCanceledReceiver"
-    }
-}
-
-class ActiveCallServiceReceiver : BroadcastReceiver() {
-
-    private val callManagerModule by lazy { CallManagerModule.getInstance() }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        val channelId  = intent.getStringExtra("channelId")
-        val serverId = intent.getStringExtra("serverId")
-        val conferenceId = intent.getStringExtra("conferenceId")
-        val conferenceJWT = intent.getStringExtra("conferenceJWT")
-
-        when (intent.action) {
-            ACTION_DECLINE -> {
-                callManagerModule?.callEnded(serverId = serverId!!, conferenceId = conferenceId!!)
-            }
-            ACTION_ACCEPT -> {
-                callManagerModule?.callAnswered(
-                    serverId = serverId!!,
-                    channelId = channelId!!,
-                    conferenceJWT = conferenceJWT!!
-                )
-            }
-        }
-        NotificationManagerCompat.from(context).cancel(-1)
-    }
-
-    companion object {
-        const val ACTION_DECLINE = "DECLINE"
-        const val ACTION_ACCEPT = "ACCEPT"
     }
 }

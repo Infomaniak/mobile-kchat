@@ -16,7 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.mattermost.call.ActiveCallServiceReceiver;
+import com.mattermost.call.DeclineCallBroadcastReceiver;
 import com.mattermost.call.CallActivity;
 import com.mattermost.helpers.CustomPushNotificationHelper;
 import com.mattermost.helpers.DatabaseHelper;
@@ -89,13 +89,13 @@ public class CustomPushNotification extends PushNotification {
             }
         }
 
-        if (Objects.equals(type, "cancel_call")) {
+        if (Objects.equals(type, "joined_call")) {
+            //TODO to implement
+        } else if (Objects.equals(type, "cancel_call")) {
             broadcastCallEnded();
         } else if (conferenceId != null) {
-            //startIncomingCallActivity(channelId, serverId, conferenceId, channelName, conferenceJWT);
-            Notification callNotification = createNotification();
-            //TODO to change
-            super.postNotification(callNotification, -1);
+            //TODO Change notification id to handle multiple call notifications
+            super.postNotification(createCallNotification(), -1);
         } else {
             finishProcessingNotification(
                     serverUrl,
@@ -121,7 +121,7 @@ public class CustomPushNotification extends PushNotification {
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(callCanceledIntent);
     }
 
-    private Notification createNotification() {
+    private Notification createCallNotification() {
         Intent contentIntent = new Intent(mContext, MainActivity.class);
         PendingIntent contentPendingIntent = PendingIntent.getActivity(mContext, 0, contentIntent, PendingIntent.FLAG_IMMUTABLE);
 
@@ -137,8 +137,8 @@ public class CustomPushNotification extends PushNotification {
                 .setFullScreenIntent(fullScreenPendingIntent, true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_CALL)
-                .addAction(R.drawable.ic_decline, mContext.getString(R.string.declineCall), getCallPendingIntent(false))
-                .addAction(R.drawable.ic_accept, mContext.getString(R.string.acceptCall), getCallPendingIntent(true))
+                .addAction(R.drawable.ic_decline, mContext.getString(R.string.declineCall), getDeclineCallPendingIntent())
+                .addAction(R.drawable.ic_accept, mContext.getString(R.string.acceptCall), getMainActivityPendingIntent())
                 .build();
     }
 
@@ -150,25 +150,21 @@ public class CustomPushNotification extends PushNotification {
         intent.putExtra("conferenceJWT", conferenceJWT);
     }
 
-    private PendingIntent getCallPendingIntent(boolean isAccepted) {
-        Intent cancelCallIntent = new Intent(mContext, ActiveCallServiceReceiver.class);
-        String action = isAccepted ? ActiveCallServiceReceiver.ACTION_ACCEPT : ActiveCallServiceReceiver.ACTION_DECLINE;
-        cancelCallIntent.setAction(action);
-        addExtrasToIntent(cancelCallIntent);
-        return PendingIntent.getBroadcast(mContext, 0, cancelCallIntent, PendingIntent.FLAG_IMMUTABLE);
+    private PendingIntent getDeclineCallPendingIntent() {
+        Intent callEventIntent = new Intent(mContext, DeclineCallBroadcastReceiver.class);
+        addExtrasToIntent(callEventIntent);
+        return PendingIntent.getBroadcast(mContext, 0, callEventIntent, PendingIntent.FLAG_IMMUTABLE);
     }
 
-    private void startIncomingCallActivity() {
-        Intent intent = new Intent(mContext, CallActivity.class);
+    private PendingIntent getMainActivityPendingIntent() {
+        Intent intent = new Intent(mContext, MainActivity.class);
         intent.putExtra("channelId", channelId);
         intent.putExtra("serverId", serverId);
         intent.putExtra("conferenceId", conferenceId);
         intent.putExtra("channelName", channelName);
         intent.putExtra("conferenceJWT", conferenceJWT);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        mContext.startActivity(intent);
+
+        return PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE );
     }
 
     private void finishProcessingNotification(

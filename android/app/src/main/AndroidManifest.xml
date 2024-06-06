@@ -105,8 +105,8 @@
             android:name="com.mattermost.call.CallActivity"
             android:exported="true"
             android:showOnLockScreen="true"
-            android:turnScreenOn="true"
-            android:theme="@style/CallTheme" />
+            android:theme="@style/CallTheme"
+            android:turnScreenOn="true" />
 
         <activity
             android:name="com.reactnativenavigation.controllers.NavigationActivity"
@@ -135,14 +135,8 @@
 
         </activity>
 
-        <receiver android:name="com.mattermost.call.ActiveCallServiceReceiver" android:exported="false">
-            <intent-filter>
-                <action android:name=".ActiveCallServiceReceiver.DECLINE"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name=".ActiveCallServiceReceiver.ACCEPT"/>
-            </intent-filter>
-        </receiver>
-
+        <receiver
+            android:name="com.mattermost.call.DeclineCallBroadcastReceiver"
+            android:exported="false" />
     </application>
 </manifest>
