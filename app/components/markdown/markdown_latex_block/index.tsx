@@ -9,8 +9,8 @@ import {Keyboard, View, Text, StyleSheet, Platform} from 'react-native';
 import MathView from 'react-native-math-view';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
+import ErrorBoundary from '@components/error_boundary';
 import FormattedText from '@components/formatted_text';
-import ErrorBoundary from '@components/markdown/error_boundary';
 import SlideUpPanelItem, {ITEM_HEIGHT} from '@components/slide_up_panel_item';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {Screens} from '@constants';

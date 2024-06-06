@@ -14,7 +14,7 @@ import {fetchChannelMemberships, switchToChannelById} from '@actions/remote/chan
 import {unsetCustomStatus, updateCustomStatus} from '@actions/remote/user';
 import {CustomStatusDurationEnum, SET_CUSTOM_STATUS_FAILURE} from '@app/constants/custom_status';
 import {useServerId, useServerUrl} from '@app/context/server';
-import {useTransientRef} from '@app/hooks/utils';
+import {useMountedRef, useTransientRef} from '@app/hooks/utils';
 import {calculateExpiryTime} from '@app/screens/custom_status/custom_status';
 import {logError} from '@app/utils/log';
 import {getUserCustomStatus, getUserTimezone} from '@app/utils/user';
@@ -207,6 +207,7 @@ const CallScreen = ({
     const videoMutedRef = useRef(false);
     const leavingRef = useRef(false);
     const conferenceJoinedAtRef = useRef<number | undefined>();
+    const mountedRef = useMountedRef();
 
     /**
      * Is the current user the one that initiated the conference
@@ -296,6 +297,7 @@ const CallScreen = ({
      */
     const leaveCallRef = useTransientRef((leaveInitiator: 'internal' | 'native' = 'internal') => {
         if (
+            mountedRef.current &&
             typeof conferenceJoinedAtRef.current === 'number' &&
             (conferenceJoinedAtRef.current + MINIMUM_CONFERENCE_DURATION) <= Date.now() &&
             hasUpdatedRef(leavingRef, true)
@@ -425,6 +427,11 @@ const CallScreen = ({
             config={{
                 subject: 'kMeet',
                 disableModeratorIndicator: true,
+
+                // Start calls with video muted
+                // https://github.com/jitsi/jitsi-meet/blob/0913554af97e91f14b5a63ce8c8579755f1405a7/config.js#L290
+                startVideoMuted: 0,
+                startWithVideoMuted: false,
             }}
 
             token={conferenceJWT}
