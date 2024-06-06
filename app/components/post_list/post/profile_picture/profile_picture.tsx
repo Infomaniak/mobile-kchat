@@ -26,7 +26,13 @@ export const ProfilePictureMessage = ({author, source}: ProfilePictureProps) => 
         // handle below that the client is not set
     }
     if (author && client) {
-        const pictureUrl = client.getProfilePictureUrl(author.user_id, 0);
+        let pictureUrl = null;
+
+        if (author.props && author.props.override_icon_url?.startsWith('/')) {
+            pictureUrl = author.props.override_icon_url;
+        } else {
+            pictureUrl = client.getProfilePictureUrl(author.user_id, 0);
+        }
 
         const imgSource = source ?? {
             uri: `${serverUrl}${pictureUrl}`,
