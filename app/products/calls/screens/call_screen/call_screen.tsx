@@ -20,7 +20,7 @@ import {logError} from '@app/utils/log';
 import {getUserCustomStatus, getUserTimezone} from '@app/utils/user';
 import {debounce} from '@helpers/api/general';
 import CallManager from '@store/CallManager';
-import {isDMorGM} from '@utils/channel';
+import {isDMorGM as _isDMorGM} from '@utils/channel';
 
 import type ChannelModel from '@typings/database/models/servers/channel';
 import type ConferenceModel from '@typings/database/models/servers/conference';
@@ -39,6 +39,7 @@ export type InjectedProps = {
     channel: ChannelModel;
     conference: ConferenceModel | undefined;
     currentUser: UserModel;
+    participantCount: number;
 }
 
 export type CallScreenHandle = {
@@ -55,6 +56,13 @@ type UserStatus = ReturnType<typeof getUserCustomStatus>
  * handle if the duration is lower than this value
  */
 const MINIMUM_CONFERENCE_DURATION = 2000; // ms
+
+/**
+ * Number of maximum participant usernames to be displayed in Callkit
+ * when the users receive a GM call
+ *   example for 2 in a GM of 5 users -> "@jean.michel @foo.bar +3"
+ */
+const MAX_CALLNAME_PARTICIPANT_USERNAMES = 2;
 
 const kMeetStatus = {
     emoji: 'kmeet',
@@ -194,11 +202,12 @@ const CallScreen = ({
     conferenceId,
     conferenceJWT,
     currentUser,
+    participantCount,
     initiator,
     serverUrl: kMeetServerUrl,
     userInfo,
 }: Props) => {
-    const isDM = isDMorGM(channel);
+    const isDMorGM = _isDMorGM(channel);
     const serverId = useServerId();
     const {formatMessage} = useIntl();
     const jitsiMeetingRef = useRef<JitsiRefProps | null>(null);
@@ -335,6 +344,7 @@ const CallScreen = ({
      * Setup the JitsiMeeting event listeners
      * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#eventlisteners
      */
+    const participantCountRef = useTransientRef(participantCount);
     const eventListeners = useMemo(() => ({
         onConferenceJoined: () => {
             // Update the conferenceJoinedAtRef date
@@ -352,17 +362,29 @@ const CallScreen = ({
                 typeof conferenceId === 'string'
             ) {
                 (async function getCallName() {
-                    let callName = `~${channel.name}`; // GM
+                    let callName = `~${channel.name}`; // Public / Private channel
 
                     // Find the target user's username for DM calls
-                    if (isDM) {
-                        const {users} = await fetchChannelMemberships(serverUrl, channelId, {per_page: 2});
-                        const targetUser = users.find((user) => user.id !== currentUser.id);
-                        if (targetUser) {
-                            callName = `@${targetUser.username}`; // DM
+                    if (isDMorGM) {
+                        // Current user is not displayed
+                        const participantCountOverflow = Math.max(
+                            Math.max(0, participantCountRef.current! - 1) - // Current user is not displayed (-1)
+                            MAX_CALLNAME_PARTICIPANT_USERNAMES,
+                        );
+
+                        // Remove current user from list
+                        const users = (await fetchChannelMemberships(serverUrl, channelId, {per_page: MAX_CALLNAME_PARTICIPANT_USERNAMES + 1})).users.
+                            filter((user) => user.id !== currentUser.id).
+                            slice(0, MAX_CALLNAME_PARTICIPANT_USERNAMES);
+
+                        // Construct callName useing usernames
+                        callName = users.map((user) => `@${user.username}`).join(' ');
+                        if (participantCountOverflow > 0) {
+                            callName = `${callName} +${participantCountOverflow}`;
                         }
                     }
 
+                    // Trigger native reporter
                     nativeReporters.callStarted(serverId, channelId, conferenceId, callName);
 
                     // Also report about the audio/video mute status if toggled
@@ -457,7 +479,7 @@ const CallScreen = ({
                  * For DM channels : Join immediatly like you would when answering a call
                  * For other channels : Ask if the user wants to enable his audio/video, but only if it's not the one that created the conference
                  */
-                'prejoinpage.enabled': !isDM && !isCurrentUserInitiator,
+                'prejoinpage.enabled': !isDMorGM && !isCurrentUserInitiator,
                 'prejoinpage.hideDisplayName': true,
 
                 // Disable breakout-rooms

@@ -6,7 +6,7 @@ import {of as of$} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
 
 import {observeChannel} from '@app/queries/servers/channel';
-import {observeConference} from '@app/queries/servers/conference';
+import {observeConference, observeConferenceParticipantCount} from '@app/queries/servers/conference';
 import CallScreen from '@calls/screens/call_screen/call_screen';
 import {observeCurrentUserId} from '@queries/servers/system';
 import {observeUser} from '@queries/servers/user';
@@ -21,8 +21,9 @@ const enhance = withObservables(['channelId', 'conferenceId'], (
     const currentUserId = observeCurrentUserId(db);
     const currentUser = currentUserId.pipe(mergeMap((userId) => observeUser(db, userId)));
     const conference = typeof conferenceId === 'string' ? observeConference(db, conferenceId) : of$(undefined);
+    const participantCount = typeof conferenceId === 'string' ? observeConferenceParticipantCount(db, conferenceId!) : of$(0);
 
-    return {channel, conference, currentUser};
+    return {channel, conference, currentUser, participantCount};
 });
 
 export default withDatabase(enhance(CallScreen));
