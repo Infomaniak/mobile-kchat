@@ -153,29 +153,6 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
     );
 
     /**
-     * Compute bold message
-     */
-    const titleProps = (() => {
-        if (status === 'declined') {
-            return ({id: 'mobile.calls_call_declined', defaultMessage: 'Call rejected'});
-        }
-        if (status === 'missed') {
-            return ({id: 'mobile.calls_call_missed', defaultMessage: 'Call missed'});
-        }
-        if (isDM ? (status === 'calling' || status === 'joined') : status !== 'ended') {
-            return ({id: 'mobile.calls_call_started', defaultMessage: 'Call started'});
-        }
-        return ({id: 'mobile.calls_call_ended', defaultMessage: 'Call ended'});
-    })();
-
-    /**
-     * Compute button message
-     */
-    const buttonLabelProps = isDM && status === 'missed' ? (
-        {id: 'mobile.calls_call_back', defaultMessage: 'Call back'}
-    ) : ({id: 'mobile.calls_join_call_short', defaultMessage: 'Join'});
-
-    /**
      * Darken button background
      */
     const backgroundColor = (() => {
@@ -199,10 +176,21 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
                         }}
                         style={styles.joinCallButton}
                     >
-                        <FormattedText
-                            style={styles.joinCallButtonText}
-                            {...buttonLabelProps}
-                        />
+                        {
+                            isDM && status === 'missed' ? (
+                                <FormattedText
+                                    id='mobile.calls_call_back'
+                                    style={styles.joinCallButtonText}
+                                    defaultMessage='Call back'
+                                />
+                            ) : (
+                                <FormattedText
+                                    id='mobile.calls_join_call_short'
+                                    style={styles.joinCallButtonText}
+                                    defaultMessage='Join'
+                                />
+                            )
+                        }
                         <CompassIcon
                             name={'phone-in-talk'}
                             size={24}
@@ -221,10 +209,44 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
                     <KMeetIcon/>
                 </View>
                 <View>
-                    <FormattedText
-                        style={styles.systemMessageTitle}
-                        {...titleProps}
-                    />
+                    {
+                        (() => {
+                            if (status === 'declined') {
+                                return (
+                                    <FormattedText
+                                        id='mobile.calls_call_declined'
+                                        style={styles.systemMessageTitle}
+                                        defaultMessage='Call rejected'
+                                    />
+                                );
+                            }
+                            if (status === 'missed') {
+                                return (
+                                    <FormattedText
+                                        id='mobile.calls_call_missed'
+                                        style={styles.systemMessageTitle}
+                                        defaultMessage='Call missed'
+                                    />
+                                );
+                            }
+                            if (isDM ? (status === 'calling' || status === 'joined') : status !== 'ended') {
+                                return (
+                                    <FormattedText
+                                        id='mobile.calls_call_started'
+                                        style={styles.systemMessageTitle}
+                                        defaultMessage='Call started'
+                                    />
+                                );
+                            }
+                            return (
+                                <FormattedText
+                                    id='mobile.calls_call_ended'
+                                    style={styles.systemMessageTitle}
+                                    defaultMessage='Call ended'
+                                />
+                            );
+                        })()
+                    }
                     {
 
                         // !isDM &&

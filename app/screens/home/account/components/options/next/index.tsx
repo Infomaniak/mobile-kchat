@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React from 'react';
+import React, {useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {StyleSheet} from 'react-native';
 
@@ -18,6 +18,14 @@ const Next = () => {
     const {formatMessage} = useIntl();
     const [isNext, onNextToggle] = useNextState();
 
+    const label = useMemo(() => (isNext ? formatMessage({
+        id: 'account.server_prod',
+        defaultMessage: 'Switch to STABLE',
+    }) : formatMessage({
+        id: 'account.server_preprod',
+        defaultMessage: 'Switch to NEXT',
+    })), [isNext]);
+
     return typeof isNext === 'boolean' ? (
         <OptionItem
             action={onNextToggle}
@@ -25,10 +33,7 @@ const Next = () => {
             icon='flag'
             type='default'
 
-            label={formatMessage({
-                id: `account.server_${isNext ? '' : 'pre'}prod`,
-                defaultMessage: `Switch to ${isNext ? 'STABLE' : 'NEXT'}`,
-            })}
+            label={label}
 
             iconColor={COLOR}
             optionLabelTextStyle={styles.labelText}
