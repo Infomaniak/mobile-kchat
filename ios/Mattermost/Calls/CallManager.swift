@@ -30,7 +30,7 @@ struct MeetCall {
 }
 
 public class CallManager: NSObject {
-  static let videoEnabledByDefault = true
+  static let videoEnabledByDefault = false
 
   @objc public static let shared = CallManager()
 
