@@ -14,6 +14,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactActivityDelegate;
 import com.github.emilioicai.hwkeyboardevent.HWKeyboardEventModule;
 import com.mattermost.call.CallManagerModule;
+import com.mattermost.notification.NotificationUtils;
 import com.reactnativenavigation.NavigationActivity;
 
 import java.util.Objects;
@@ -113,9 +114,9 @@ public class MainActivity extends NavigationActivity {
 
     private void handleIntentExtras(Intent intent) {
         if (intent.getExtras() != null) {
-            String channelId = intent.getStringExtra("channelId");
-            String serverId = intent.getStringExtra("serverId");
-            String conferenceJWT = intent.getStringExtra("conferenceJWT");
+            String channelId = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CHANNEL_ID_KEY);
+            String serverId = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_SERVER_ID_KEY);
+            String conferenceJWT = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_JWT_KEY);
             CallManagerModule callManagerModule = CallManagerModule.getInstance();
 
             if (callManagerModule != null && channelId != null && serverId != null && conferenceJWT != null) {

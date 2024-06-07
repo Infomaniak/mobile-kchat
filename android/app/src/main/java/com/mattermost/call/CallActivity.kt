@@ -15,16 +15,27 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.button.MaterialButton
+import com.mattermost.notification.NotificationUtils
 import com.mattermost.rnbeta.R
 
 class CallActivity : AppCompatActivity() {
 
     private val callManagerModule by lazy { CallManagerModule.getInstance() }
-    private val channelId by lazy { intent.getStringExtra("channelId") }
-    private val serverId by lazy { intent.getStringExtra("serverId") }
-    private val conferenceId by lazy { intent.getStringExtra("conferenceId") }
-    private val channelName by lazy { intent.getStringExtra("channelName") }
-    private val conferenceJWT by lazy { intent.getStringExtra("conferenceJWT") }
+    private val channelId by lazy {
+        intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CHANNEL_ID_KEY)
+    }
+    private val serverId by lazy {
+        intent.getStringExtra(NotificationUtils.INTENT_EXTRA_SERVER_ID_KEY)
+    }
+    private val conferenceId by lazy {
+        intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_ID_KEY)
+    }
+    private val channelName by lazy {
+        intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CHANNEL_NAME_KEY)
+    }
+    private val conferenceJWT by lazy {
+        intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_JWT_KEY)
+    }
 
     private val idCallerTextView: TextView by lazy { findViewById(R.id.idCaller) }
     private val declineButton: MaterialButton by lazy { findViewById(R.id.decline_button) }

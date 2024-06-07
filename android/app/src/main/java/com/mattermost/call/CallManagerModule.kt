@@ -6,6 +6,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter
+import com.mattermost.notification.NotificationUtils
 
 class CallManagerModule(private var reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     private var listenerCount = 0
@@ -41,9 +42,9 @@ class CallManagerModule(private var reactContext: ReactApplicationContext) : Rea
     fun callAnswered(serverId: String, channelId: String, conferenceJWT: String) {
         val result = if (currentActivity != null) {
             val map = Arguments.createMap()
-            map.putString("serverId", serverId)
-            map.putString("channelId", channelId)
-            map.putString("conferenceJWT", conferenceJWT)
+            map.putString(NotificationUtils.INTENT_EXTRA_SERVER_ID_KEY, serverId)
+            map.putString(NotificationUtils.INTENT_EXTRA_CHANNEL_ID_KEY, channelId)
+            map.putString(NotificationUtils.INTENT_EXTRA_CONFERENCE_JWT_KEY, conferenceJWT)
             map
         } else {
             null
@@ -55,8 +56,8 @@ class CallManagerModule(private var reactContext: ReactApplicationContext) : Rea
     fun callEnded(serverId: String, conferenceId: String) {
         val result = if (currentActivity != null) {
             val map = Arguments.createMap()
-            map.putString("serverId", serverId)
-            map.putString("conferenceId", conferenceId)
+            map.putString(NotificationUtils.INTENT_EXTRA_SERVER_ID_KEY, serverId)
+            map.putString(NotificationUtils.INTENT_EXTRA_CONFERENCE_ID_KEY, conferenceId)
             map
         } else {
             null

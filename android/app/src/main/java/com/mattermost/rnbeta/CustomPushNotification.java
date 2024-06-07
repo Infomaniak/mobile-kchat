@@ -1,7 +1,7 @@
 package com.mattermost.rnbeta;
 
-import static com.mattermost.helpers.database_extension.GeneralKt.getServerUrlForIdentifier;
 import static com.mattermost.call.CallActivity.BROADCAST_RECEIVER_CALL_CANCELED_TAG;
+import static com.mattermost.helpers.database_extension.GeneralKt.getServerUrlForIdentifier;
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME;
 
 import android.app.Notification;
@@ -16,13 +16,12 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.mattermost.call.DeclineCallBroadcastReceiver;
-import com.mattermost.call.CallActivity;
 import com.mattermost.helpers.CustomPushNotificationHelper;
 import com.mattermost.helpers.DatabaseHelper;
 import com.mattermost.helpers.Network;
 import com.mattermost.helpers.NotificationHelper;
 import com.mattermost.helpers.PushNotificationDataHelper;
+import com.mattermost.notification.NotificationUtils;
 import com.mattermost.share.ShareModule;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
 import com.wix.reactnativenotifications.core.AppLifecycleFacade;
@@ -33,18 +32,8 @@ import com.wix.reactnativenotifications.core.notification.PushNotification;
 import java.util.Objects;
 
 public class CustomPushNotification extends PushNotification {
-    static final String CHANNEL_ID_CALL = "KCHAT_CHANNEL_ID_CALL";
 
     private final PushNotificationDataHelper dataHelper;
-
-    private String type;
-    private String ackId;
-    private String postId;
-    private String channelId;
-    private String serverId;
-    private String conferenceId;
-    private String channelName;
-    private String conferenceJWT;
 
     public CustomPushNotification(Context context, Bundle bundle, AppLifecycleFacade appLifecycleFacade, AppLaunchHelper appLaunchHelper, JsIOHelper jsIoHelper) {
         super(context, bundle, appLifecycleFacade, appLaunchHelper, jsIoHelper);
@@ -62,16 +51,17 @@ public class CustomPushNotification extends PushNotification {
     @Override
     public void onReceived() {
         final Bundle initialData = mNotificationProps.asBundle();
-        type = initialData.getString("type");
-        ackId = initialData.getString("ack_id");
-        postId = initialData.getString("post_id");
-        channelId = initialData.getString("channel_id");
-        serverId = initialData.getString("server_id");
-        conferenceId = initialData.getString("conference_id");
-        channelName = initialData.getString("channel_name");
-        conferenceJWT = initialData.getString("conference_jwt");
+        String type = initialData.getString(NotificationUtils.NOTIFICATION_TYPE_KEY);
+        String ackId = initialData.getString(NotificationUtils.NOTIFICATION_ACK_ID_KEY);
+        String postId = initialData.getString(NotificationUtils.NOTIFICATION_POST_ID_KEY);
+        String channelId = initialData.getString(NotificationUtils.NOTIFICATION_CHANNEL_ID_KEY);
+        String serverId = initialData.getString(NotificationUtils.NOTIFICATION_SERVER_ID_KEY);
+        String conferenceId = initialData.getString(NotificationUtils.NOTIFICATION_CONFERENCE_ID_KEY);
+        String channelName = initialData.getString(NotificationUtils.NOTIFICATION_CHANNEL_NAME_KEY);
+        String conferenceJWT = initialData.getString(NotificationUtils.NOTIFICATION_CONFERENCE_JWT_KEY);
 
-        final boolean isIdLoaded = initialData.getString("id_loaded") != null && initialData.getString("id_loaded").equals("true");
+        String idLoaded = initialData.getString(NotificationUtils.NOTIFICATION_ID_LOADED_KEY);
+        final boolean isIdLoaded = idLoaded != null && idLoaded.equals("true");
 
         int notificationId = NotificationHelper.getNotificationId(initialData);
 
@@ -81,26 +71,38 @@ public class CustomPushNotification extends PushNotification {
             Bundle response = ReceiptDelivery.send(ackId, serverUrl, postId, type, isIdLoaded);
             if (isIdLoaded && response != null) {
                 Bundle current = mNotificationProps.asBundle();
-                if (!current.containsKey("server_url")) {
-                    response.putString("server_url", serverUrl);
+                if (!current.containsKey(NotificationUtils.NOTIFICATION_SERVER_URL_KEY)) {
+                    response.putString(NotificationUtils.NOTIFICATION_SERVER_URL_KEY, serverUrl);
                 }
                 current.putAll(response);
                 mNotificationProps = createProps(current);
             }
         }
 
-        if (Objects.equals(type, "joined_call")) {
+        if (Objects.equals(type, NotificationUtils.NOTIFICATION_TYPE_JOINED_CALL_VALUE)) {
             //TODO to implement
-        } else if (Objects.equals(type, "cancel_call")) {
+        } else if (Objects.equals(type, NotificationUtils.NOTIFICATION_TYPE_CANCEL_CALL_VALUE)) {
             broadcastCallEnded();
         } else if (conferenceId != null) {
             //TODO Change notification id to handle multiple call notifications
-            super.postNotification(createCallNotification(), -1);
+            NotificationUtils.NotificationExtras notificationExtras = new NotificationUtils.NotificationExtras(
+                    channelId,
+                    serverId,
+                    conferenceId,
+                    channelName,
+                    conferenceJWT
+            );
+            Notification callNotification = NotificationUtils.createCallNotification(
+                    mContext,
+                    notificationExtras
+            );
+            super.postNotification(callNotification, -1);
         } else {
             finishProcessingNotification(
                     serverUrl,
                     type,
-                    notificationId
+                    notificationId,
+                    channelId
             );
         }
     }
@@ -121,56 +123,11 @@ public class CustomPushNotification extends PushNotification {
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(callCanceledIntent);
     }
 
-    private Notification createCallNotification() {
-        Intent contentIntent = new Intent(mContext, MainActivity.class);
-        PendingIntent contentPendingIntent = PendingIntent.getActivity(mContext, 0, contentIntent, PendingIntent.FLAG_IMMUTABLE);
-
-        Intent fullScreenIntent = new Intent(mContext, CallActivity.class);
-        addExtrasToIntent(fullScreenIntent);
-        PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(mContext, 0, fullScreenIntent, PendingIntent.FLAG_IMMUTABLE);
-
-        return new NotificationCompat.Builder(mContext, CHANNEL_ID_CALL)
-                .setSmallIcon(R.drawable.ic_kchat_notification)
-                .setContentTitle(mContext.getString(R.string.notificationCallFrom, channelName))
-                .setAutoCancel(false)
-                .setContentIntent(contentPendingIntent)
-                .setFullScreenIntent(fullScreenPendingIntent, true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setCategory(NotificationCompat.CATEGORY_CALL)
-                .addAction(R.drawable.ic_decline, mContext.getString(R.string.declineCall), getDeclineCallPendingIntent())
-                .addAction(R.drawable.ic_accept, mContext.getString(R.string.acceptCall), getMainActivityPendingIntent())
-                .build();
-    }
-
-    private void addExtrasToIntent(Intent intent) {
-        intent.putExtra("channelId", channelId);
-        intent.putExtra("serverId", serverId);
-        intent.putExtra("conferenceId", conferenceId);
-        intent.putExtra("channelName", channelName);
-        intent.putExtra("conferenceJWT", conferenceJWT);
-    }
-
-    private PendingIntent getDeclineCallPendingIntent() {
-        Intent callEventIntent = new Intent(mContext, DeclineCallBroadcastReceiver.class);
-        addExtrasToIntent(callEventIntent);
-        return PendingIntent.getBroadcast(mContext, 0, callEventIntent, PendingIntent.FLAG_IMMUTABLE);
-    }
-
-    private PendingIntent getMainActivityPendingIntent() {
-        Intent intent = new Intent(mContext, MainActivity.class);
-        intent.putExtra("channelId", channelId);
-        intent.putExtra("serverId", serverId);
-        intent.putExtra("conferenceId", conferenceId);
-        intent.putExtra("channelName", channelName);
-        intent.putExtra("conferenceJWT", conferenceJWT);
-
-        return PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE );
-    }
-
     private void finishProcessingNotification(
             final String serverUrl,
             @NonNull final String type,
-            final int notificationId
+            final int notificationId,
+            final String channelId
     ) {
         final boolean isReactInit = mAppLifecycleFacade.isReactInitialized();
 
