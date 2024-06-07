@@ -183,6 +183,10 @@ android {
             }
         }
     }
+
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 repositories {

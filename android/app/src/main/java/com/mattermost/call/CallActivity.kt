@@ -9,16 +9,15 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.airbnb.lottie.LottieAnimationView
-import com.google.android.material.button.MaterialButton
 import com.mattermost.notification.NotificationUtils
-import com.mattermost.rnbeta.R
+import com.mattermost.rnbeta.databinding.ActivityCallBinding
 
 class CallActivity : AppCompatActivity() {
+
+    private val binding by lazy { ActivityCallBinding.inflate(layoutInflater) }
 
     private val callManagerModule by lazy { CallManagerModule.getInstance() }
     private val channelId by lazy {
@@ -37,10 +36,6 @@ class CallActivity : AppCompatActivity() {
         intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_JWT_KEY)
     }
 
-    private val idCallerTextView: TextView by lazy { findViewById(R.id.idCaller) }
-    private val declineButton: MaterialButton by lazy { findViewById(R.id.decline_button) }
-    private val answerButton: LottieAnimationView by lazy { findViewById(R.id.answerButton) }
-
     private val localBroadcastManager by lazy { LocalBroadcastManager.getInstance(this) }
 
     private val callCanceledReceiver = object : BroadcastReceiver() {
@@ -49,12 +44,12 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_call)
+        setContentView(binding.root)
         configureActivityOverLockScreen()
 
-        idCallerTextView.text = channelName
+        idCaller.text = channelName
         answerButton.setOnClickListener {
             callManagerModule?.callAnswered(
                 serverId = serverId!!,
@@ -79,6 +74,7 @@ class CallActivity : AppCompatActivity() {
         finish()
     }
 
+    @Suppress("DEPRECATION")
     private fun configureActivityOverLockScreen() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
