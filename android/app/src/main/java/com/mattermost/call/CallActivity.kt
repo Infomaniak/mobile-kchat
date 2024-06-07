@@ -26,9 +26,6 @@ class CallActivity : AppCompatActivity() {
     private val serverId by lazy {
         intent.getStringExtra(NotificationUtils.INTENT_EXTRA_SERVER_ID_KEY)
     }
-    private val conferenceId by lazy {
-        intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_ID_KEY)
-    }
     private val channelName by lazy {
         intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CHANNEL_NAME_KEY)
     }
@@ -36,11 +33,19 @@ class CallActivity : AppCompatActivity() {
         intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_JWT_KEY)
     }
 
+    private var conferenceId: String? = null
+
     private val localBroadcastManager by lazy { LocalBroadcastManager.getInstance(this) }
 
-    private val callCanceledReceiver = object : BroadcastReceiver() {
+    private val dismissCallReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
-            finish()
+            val eventConferenceId = intent.getStringExtra(
+                NotificationUtils.INTENT_EXTRA_CONFERENCE_ID_KEY
+            ) ?: ""
+
+            if (eventConferenceId == conferenceId) {
+                finish()
+            }
         }
     }
 
@@ -48,6 +53,9 @@ class CallActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         configureActivityOverLockScreen()
+
+        // Getting this here because if we're using a lazy, the value will not be the right one
+        conferenceId = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_ID_KEY)
 
         idCaller.text = channelName
         answerButton.setOnClickListener {
@@ -64,8 +72,8 @@ class CallActivity : AppCompatActivity() {
         }
 
         localBroadcastManager.registerReceiver(
-            callCanceledReceiver,
-            IntentFilter(BROADCAST_RECEIVER_CALL_CANCELED_TAG)
+            dismissCallReceiver,
+            IntentFilter(BROADCAST_RECEIVER_DISMISS_CALL_TAG)
         )
     }
 
@@ -100,10 +108,10 @@ class CallActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        localBroadcastManager.unregisterReceiver(callCanceledReceiver)
+        localBroadcastManager.unregisterReceiver(dismissCallReceiver)
     }
 
     companion object {
-        const val BROADCAST_RECEIVER_CALL_CANCELED_TAG = "CallCanceledReceiver"
+        const val BROADCAST_RECEIVER_DISMISS_CALL_TAG = "DismissCall"
     }
 }

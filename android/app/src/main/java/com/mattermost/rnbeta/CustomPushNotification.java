@@ -1,6 +1,6 @@
 package com.mattermost.rnbeta;
 
-import static com.mattermost.call.CallActivity.BROADCAST_RECEIVER_CALL_CANCELED_TAG;
+import static com.mattermost.call.CallActivity.BROADCAST_RECEIVER_DISMISS_CALL_TAG;
 import static com.mattermost.helpers.database_extension.GeneralKt.getServerUrlForIdentifier;
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME;
 
@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.mattermost.call.CallManagerModule;
 import com.mattermost.helpers.CustomPushNotificationHelper;
 import com.mattermost.helpers.DatabaseHelper;
 import com.mattermost.helpers.Network;
@@ -34,6 +35,7 @@ import java.util.Objects;
 public class CustomPushNotification extends PushNotification {
 
     private final PushNotificationDataHelper dataHelper;
+    private final CallManagerModule callManagerModule = CallManagerModule.getInstance();
 
     public CustomPushNotification(Context context, Bundle bundle, AppLifecycleFacade appLifecycleFacade, AppLaunchHelper appLaunchHelper, JsIOHelper jsIoHelper) {
         super(context, bundle, appLifecycleFacade, appLaunchHelper, jsIoHelper);
@@ -79,12 +81,13 @@ public class CustomPushNotification extends PushNotification {
             }
         }
 
-        if (Objects.equals(type, NotificationUtils.NOTIFICATION_TYPE_JOINED_CALL_VALUE)) {
-            //TODO to implement
-        } else if (Objects.equals(type, NotificationUtils.NOTIFICATION_TYPE_CANCEL_CALL_VALUE)) {
-            broadcastCallEnded();
+        if (Objects.equals(type, NotificationUtils.NOTIFICATION_TYPE_JOINED_CALL_VALUE) && conferenceId != null) {
+            NotificationUtils.dismissCallNotification(mContext, conferenceId);
+            broadcastCallEvent(conferenceId);
+        } else if (Objects.equals(type, NotificationUtils.NOTIFICATION_TYPE_CANCEL_CALL_VALUE) && conferenceId != null) {
+            NotificationUtils.dismissCallNotification(mContext, conferenceId);
+            broadcastCallEvent(conferenceId);
         } else if (conferenceId != null) {
-            //TODO Change notification id to handle multiple call notifications
             NotificationUtils.NotificationExtras notificationExtras = new NotificationUtils.NotificationExtras(
                     channelId,
                     serverId,
@@ -96,7 +99,7 @@ public class CustomPushNotification extends PushNotification {
                     mContext,
                     notificationExtras
             );
-            super.postNotification(callNotification, -1);
+            super.postNotification(callNotification, notificationId);
         } else {
             finishProcessingNotification(
                     serverUrl,
@@ -117,10 +120,14 @@ public class CustomPushNotification extends PushNotification {
         }
     }
 
-    private void broadcastCallEnded() {
-        Intent callCanceledIntent = new Intent();
-        callCanceledIntent.setAction(BROADCAST_RECEIVER_CALL_CANCELED_TAG);
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(callCanceledIntent);
+    private void broadcastCallEvent(String conferenceId) {
+        Intent callEventIntent = new Intent();
+        callEventIntent.putExtra(
+                NotificationUtils.INTENT_EXTRA_CONFERENCE_ID_KEY,
+                conferenceId
+        );
+        callEventIntent.setAction(BROADCAST_RECEIVER_DISMISS_CALL_TAG);
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(callEventIntent);
     }
 
     private void finishProcessingNotification(

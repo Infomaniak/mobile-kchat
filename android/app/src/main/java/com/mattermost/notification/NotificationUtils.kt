@@ -10,11 +10,10 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.os.bundleOf
 import com.mattermost.call.CallActivity
-import com.mattermost.call.DeclineCallBroadcastReceiver
-import com.mattermost.notification.NotificationUtils.createCallNotification
-import com.mattermost.notification.NotificationUtils.getDeclineCallPendingIntent
-import com.mattermost.notification.NotificationUtils.getMainActivityPendingIntent
+import com.mattermost.call.CancelCallBroadcastReceiver
 import com.mattermost.rnbeta.MainActivity
 import com.mattermost.rnbeta.R
 
@@ -89,31 +88,45 @@ object NotificationUtils {
     fun Context.createCallNotification(
         notificationExtras: NotificationExtras
     ): Notification {
-            val contentIntent = Intent(this, MainActivity::class.java)
-            val contentPendingIntent =
-                PendingIntent.getActivity(
-                    this,
-                    0,
-                    contentIntent,
-                    PendingIntent.FLAG_IMMUTABLE
-                )
-
-            val fullScreenIntent = Intent(this, CallActivity::class.java)
-            addExtrasToIntent(fullScreenIntent, notificationExtras)
-            val fullScreenPendingIntent =
-                PendingIntent.getActivity(
-                    this,
-                    0,
-                    fullScreenIntent,
-                    PendingIntent.FLAG_IMMUTABLE
-                )
-
-            return buildCallNotification(
-                contentPendingIntent,
-                fullScreenPendingIntent,
-                notificationExtras
+        val contentIntent = Intent(this, MainActivity::class.java)
+        val contentPendingIntent =
+            PendingIntent.getActivity(
+                this,
+                0,
+                contentIntent,
+                PendingIntent.FLAG_IMMUTABLE
             )
+
+        val fullScreenIntent = Intent(this, CallActivity::class.java)
+        addExtrasToIntent(fullScreenIntent, notificationExtras)
+        val fullScreenPendingIntent =
+            PendingIntent.getActivity(
+                this,
+                0,
+                fullScreenIntent,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+
+        return buildCallNotification(
+            contentPendingIntent,
+            fullScreenPendingIntent,
+            notificationExtras
+        )
+    }
+
+    @JvmStatic
+    fun Context.dismissCallNotification(canceledConferenceIdCall: String) {
+        val notificationManagerCompat = NotificationManagerCompat.from(this)
+        notificationManagerCompat.activeNotifications.forEach { statusBarNotification ->
+            val notificationExtras = statusBarNotification.notification.extras
+            notificationExtras.getString(NOTIFICATION_CONFERENCE_ID_KEY)?.let { conferenceId ->
+                if (conferenceId == canceledConferenceIdCall) {
+                    notificationManagerCompat.cancel(statusBarNotification.id)
+                    return
+                }
+            }
         }
+    }
 
     private fun Context.buildCallNotification(
         contentPendingIntent: PendingIntent,
@@ -143,6 +156,7 @@ object NotificationUtils {
                 this@buildCallNotification.getString(R.string.acceptCall),
                 getMainActivityPendingIntent(notificationExtras)
             )
+            .setExtras(bundleOf(NOTIFICATION_CONFERENCE_ID_KEY to conferenceId))
             .build()
     }
 
@@ -160,14 +174,14 @@ object NotificationUtils {
     private fun Context.getDeclineCallPendingIntent(
         notificationExtras: NotificationExtras
     ): PendingIntent {
-        val callEventIntent = Intent(this, DeclineCallBroadcastReceiver::class.java)
+        val callEventIntent = Intent(this, CancelCallBroadcastReceiver::class.java)
         addExtrasToIntent(callEventIntent, notificationExtras)
 
         return PendingIntent.getBroadcast(
             this,
             0,
             callEventIntent,
-            PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         )
     }
 

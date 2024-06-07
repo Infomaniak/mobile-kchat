@@ -136,7 +136,7 @@
         </activity>
 
         <receiver
-            android:name="com.mattermost.call.DeclineCallBroadcastReceiver"
+            android:name="com.mattermost.call.CancelCallBroadcastReceiver"
             android:exported="false" />
     </application>
 </manifest>
