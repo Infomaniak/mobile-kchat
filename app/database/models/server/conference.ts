@@ -47,7 +47,7 @@ export default class ConferenceModel extends Model implements ConferenceModelInt
     /** url : The kMeet URL of this conference */
     @field('url') url!: string;
 
-    /* channel_id : The foreign key to the related Channel */
+    /** channel_id : The foreign key to the related Channel */
     @field('channel_id') channelId!: string;
 
     /** team_id : The foreign key to the related Team model */
