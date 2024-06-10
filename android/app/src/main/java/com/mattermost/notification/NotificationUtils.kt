@@ -14,8 +14,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
 import com.mattermost.call.CallActivity
 import com.mattermost.call.CancelCallBroadcastReceiver
-import com.mattermost.rnbeta.MainActivity
-import com.mattermost.rnbeta.R
+import com.mattermost.rnbeta.*
 
 object NotificationUtils {
 
