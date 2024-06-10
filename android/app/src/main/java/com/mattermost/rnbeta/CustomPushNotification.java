@@ -87,7 +87,7 @@ public class CustomPushNotification extends PushNotification {
         } else if (Objects.equals(type, NotificationUtils.NOTIFICATION_TYPE_CANCEL_CALL_VALUE) && conferenceId != null) {
             NotificationUtils.dismissCallNotification(mContext, conferenceId);
             broadcastCallEvent(conferenceId);
-        } else if (conferenceId != null) {
+        } else if (conferenceJWT != null) {
             NotificationUtils.NotificationExtras notificationExtras = new NotificationUtils.NotificationExtras(
                     channelId,
                     serverId,
