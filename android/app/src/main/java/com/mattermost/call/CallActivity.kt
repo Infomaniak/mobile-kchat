@@ -1,8 +1,7 @@
-package com.mattermost.rnbeta
+package com.mattermost.call
 
 import android.app.KeyguardManager
 import android.app.KeyguardManager.KeyguardDismissCallback
-import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -13,33 +12,50 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.mattermost.rnbeta.CustomPushNotification.NOTIFICATION_ID_CALL
+import com.mattermost.notification.NotificationUtils
 import com.mattermost.rnbeta.databinding.ActivityCallBinding
 
 class CallActivity : AppCompatActivity() {
 
-    private val binding: ActivityCallBinding by lazy { ActivityCallBinding.inflate(layoutInflater) }
+    private val binding by lazy { ActivityCallBinding.inflate(layoutInflater) }
 
     private val callManagerModule by lazy { CallManagerModule.getInstance() }
-    private val channelId by lazy { intent.getStringExtra("channelId") }
-    private val serverId by lazy { intent.getStringExtra("serverId") }
-    private val conferenceId by lazy { intent.getStringExtra("conferenceId") }
-    private val channelName by lazy { intent.getStringExtra("channelName") }
-    private val conferenceJWT by lazy { intent.getStringExtra("conferenceJWT") }
+    private val channelId by lazy {
+        intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CHANNEL_ID_KEY)
+    }
+    private val serverId by lazy {
+        intent.getStringExtra(NotificationUtils.INTENT_EXTRA_SERVER_ID_KEY)
+    }
+    private val channelName by lazy {
+        intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CHANNEL_NAME_KEY)
+    }
+    private val conferenceJWT by lazy {
+        intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_JWT_KEY)
+    }
+
+    private var conferenceId: String? = null
 
     private val localBroadcastManager by lazy { LocalBroadcastManager.getInstance(this) }
 
-    private val callCanceledReceiver = object : BroadcastReceiver() {
+    private val dismissCallReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
-            finish()
+            val eventConferenceId = intent.getStringExtra(
+                NotificationUtils.INTENT_EXTRA_CONFERENCE_ID_KEY
+            ) ?: ""
+
+            if (eventConferenceId == conferenceId) {
+                finish()
+            }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
-        setContentView(root)
-
+        setContentView(binding.root)
         configureActivityOverLockScreen()
+
+        // Getting this here because if we're using a lazy, the value will not be the right one
+        conferenceId = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_ID_KEY)
 
         idCaller.text = channelName
         answerButton.setOnClickListener {
@@ -48,24 +64,25 @@ class CallActivity : AppCompatActivity() {
                 channelId = channelId!!,
                 conferenceJWT = conferenceJWT!!
             )
-            leaveActivityGracefully()
+            leaveActivity()
         }
         declineButton.setOnClickListener {
             callManagerModule?.callEnded(serverId = serverId!!, conferenceId = conferenceId!!)
-            leaveActivityGracefully()
+            leaveActivity()
         }
 
         localBroadcastManager.registerReceiver(
-            callCanceledReceiver,
-            IntentFilter(BROADCAST_RECEIVER_CALL_CANCELED_TAG)
+            dismissCallReceiver,
+            IntentFilter(BROADCAST_RECEIVER_DISMISS_CALL_TAG)
         )
     }
 
-    private fun leaveActivityGracefully() {
-        NotificationManagerCompat.from(this@CallActivity).cancel(NOTIFICATION_ID_CALL)
+    private fun leaveActivity() {
+        NotificationManagerCompat.from(this@CallActivity).cancel(-1)
         finish()
     }
 
+    @Suppress("DEPRECATION")
     private fun configureActivityOverLockScreen() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
@@ -74,7 +91,10 @@ class CallActivity : AppCompatActivity() {
             keyguardManager.requestDismissKeyguard(this, object : KeyguardDismissCallback() {
                 override fun onDismissSucceeded() {
                     super.onDismissSucceeded()
-                    callManagerModule?.callEnded(serverId = serverId!!, conferenceId = conferenceId!!)
+                    callManagerModule?.callEnded(
+                        serverId = serverId!!,
+                        conferenceId = conferenceId!!
+                    )
                 }
             })
         } else {
@@ -88,41 +108,10 @@ class CallActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        localBroadcastManager.unregisterReceiver(callCanceledReceiver)
+        localBroadcastManager.unregisterReceiver(dismissCallReceiver)
     }
 
     companion object {
-        const val BROADCAST_RECEIVER_CALL_CANCELED_TAG = "CallCanceledReceiver"
-    }
-}
-
-class ActiveCallServiceReceiver : BroadcastReceiver() {
-
-    private val callManagerModule by lazy { CallManagerModule.getInstance() }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        val channelId  = intent.getStringExtra("channelId")
-        val serverId = intent.getStringExtra("serverId")
-        val conferenceId = intent.getStringExtra("conferenceId")
-        val conferenceJWT = intent.getStringExtra("conferenceJWT")
-
-        when (intent.action) {
-            ACTION_DECLINE -> {
-                callManagerModule?.callEnded(serverId = serverId!!, conferenceId = conferenceId!!)
-            }
-            ACTION_ACCEPT -> {
-                callManagerModule?.callAnswered(
-                    serverId = serverId!!,
-                    channelId = channelId!!,
-                    conferenceJWT = conferenceJWT!!
-                )
-            }
-        }
-        NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID_CALL)
-    }
-
-    companion object {
-        const val ACTION_DECLINE = "DECLINE"
-        const val ACTION_ACCEPT = "ACCEPT"
+        const val BROADCAST_RECEIVER_DISMISS_CALL_TAG = "DismissCall"
     }
 }

@@ -3,7 +3,7 @@
 
 import CookieManager from '@react-native-cookies/cookies';
 import {useCallback, useEffect, useState} from 'react';
-import {DevSettings} from 'react-native';
+import RNRestart from 'react-native-restart';
 
 import {useTransientRef} from '@app/hooks/utils';
 import {BASE_SERVER_URL} from '@client/rest/constants';
@@ -43,8 +43,8 @@ export const useNextState = (): [boolean | undefined, () => void] => {
         }, COOKIE_NEXT_USE_WEBKIT);
 
         // Reload the application
-        // Ref. https://reactnative.dev/docs/devsettings#reload
-        DevSettings.reload();
+        // Ref. https://www.npmjs.com/package/react-native-restart#usage
+        RNRestart.restart();
     }), []);
 
     /**
