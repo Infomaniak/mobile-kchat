@@ -1,16 +1,9 @@
 package com.mattermost.rnbeta;
 
-import static com.mattermost.rnbeta.CustomPushNotification.CHANNEL_ID_CALL;
-
-import android.app.Application;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-
-import androidx.annotation.RequiresApi;
 
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactNativeHost;
@@ -26,9 +19,11 @@ import com.facebook.react.module.model.ReactModuleInfo;
 import com.facebook.react.module.model.ReactModuleInfoProvider;
 import com.facebook.react.modules.network.OkHttpClientProvider;
 import com.facebook.soloader.SoLoader;
+import com.mattermost.call.CallManagerModule;
 import com.mattermost.flipper.ReactNativeFlipper;
 import com.mattermost.helpers.RealPathUtil;
 import com.mattermost.networkclient.RCTOkHttpClientFactory;
+import com.mattermost.notification.NotificationUtils;
 import com.mattermost.share.ShareModule;
 import com.nozbe.watermelondb.jsi.WatermelonDBJSIPackage;
 import com.oney.WebRTCModule.WebRTCModuleOptions;
@@ -41,7 +36,6 @@ import com.wix.reactnativenotifications.core.notification.INotificationsApplicat
 import com.wix.reactnativenotifications.core.notification.IPushNotification;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +88,7 @@ public class MainApplication extends NavigationApplication implements INotificat
                                         map.put("MattermostShare", new ReactModuleInfo("MattermostShare", "com.mattermost.share.ShareModule", false, false, true, false, false));
                                         map.put("Notifications", new ReactModuleInfo("Notifications", "com.mattermost.rnbeta.NotificationsModule", false, false, false, false, false));
                                         map.put("SplitView", new ReactModuleInfo("SplitView", "com.mattermost.rnbeta.SplitViewModule", false, false, false, false, false));
-                                        map.put("CallManagerModule", new ReactModuleInfo("CallManagerModule", "com.mattermost.rnbeta.CallManagerModule", false, false, false, false, false));
+                                        map.put("CallManagerModule", new ReactModuleInfo("CallManagerModule", "com.mattermost.call.CallManagerModule", false, false, false, false, false));
                                         return map;
                                     };
                                 }
@@ -164,7 +158,7 @@ public class MainApplication extends NavigationApplication implements INotificat
         options.enableMediaProjectionService = true;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createCallNotificationChannel();
+            NotificationUtils.createCallNotificationChannel(context);
         }
     }
 
@@ -177,47 +171,5 @@ public class MainApplication extends NavigationApplication implements INotificat
                 defaultAppLaunchHelper,
                 new JsIOHelper()
         );
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private void createCallNotificationChannel() {
-        NotificationChannel callChannel = buildNotificationChannel(
-                CHANNEL_ID_CALL,
-                getString(R.string.notificationChannelName),
-                NotificationManager.IMPORTANCE_HIGH,
-                getString(R.string.notificationChannelDescription)
-        );
-        List<NotificationChannel> channels = new ArrayList<>();
-        channels.add(callChannel);
-
-        createNotificationChannels(channels);
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private NotificationChannel buildNotificationChannel(
-            String channelId,
-            String name,
-            int importance,
-            String description
-    ) {
-        NotificationChannel notificationChannel = new NotificationChannel(channelId, name, importance);
-
-        notificationChannel.setDescription(description);
-
-        boolean isImportant = importance == NotificationManager.IMPORTANCE_HIGH;
-        notificationChannel.enableLights(isImportant);
-        notificationChannel.setShowBadge(isImportant);
-        notificationChannel.enableVibration(isImportant);
-        return notificationChannel;
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private void createNotificationChannels(
-            List<NotificationChannel> channelList
-    ) {
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Application.NOTIFICATION_SERVICE);
-        if (notificationManager != null) {
-            notificationManager.createNotificationChannels(channelList);
-        }
     }
 }

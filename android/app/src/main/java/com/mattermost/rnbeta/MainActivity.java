@@ -1,16 +1,20 @@
 package com.mattermost.rnbeta;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactActivityDelegate;
 import com.github.emilioicai.hwkeyboardevent.HWKeyboardEventModule;
+import com.mattermost.call.CallManagerModule;
+import com.mattermost.notification.NotificationUtils;
 import com.reactnativenavigation.NavigationActivity;
 
 import java.util.Objects;
@@ -45,6 +49,8 @@ public class MainActivity extends NavigationActivity {
 
         setHWKeyboardConnected();
         foldableObserver.onCreate();
+
+        handleIntentExtras(getIntent());
     }
 
     @Override
@@ -98,6 +104,28 @@ public class MainActivity extends NavigationActivity {
             }
         }
         return super.dispatchKeyEvent(event);
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntentExtras(intent);
+    }
+
+    private void handleIntentExtras(Intent intent) {
+        if (intent.getExtras() != null) {
+            String channelId = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CHANNEL_ID_KEY);
+            String serverId = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_SERVER_ID_KEY);
+            String conferenceJWT = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_JWT_KEY);
+            CallManagerModule callManagerModule = CallManagerModule.getInstance();
+
+            if (callManagerModule != null && channelId != null && serverId != null && conferenceJWT != null) {
+                callManagerModule.callAnswered(serverId, channelId, conferenceJWT);
+            }
+
+            //TODO Change notification id to handle multiple call notifications
+            NotificationManagerCompat.from(this).cancel(-1);
+        }
     }
 
     private void setHWKeyboardConnected() {
