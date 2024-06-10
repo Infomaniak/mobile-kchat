@@ -4,6 +4,7 @@
 import {Q} from '@nozbe/watermelondb';
 import {z} from 'zod';
 
+import {queryConference} from '@app/queries/servers/conference';
 import {logError} from '@app/utils/log';
 import {MM_TABLES} from '@constants/database';
 import DatabaseManager from '@database/manager';
@@ -40,7 +41,7 @@ export const ConferenceGenericEvent = z.object({
     team_id: z.string().uuid(),
 });
 
-export async function handleConferenceAdded(serverUrl: string, msg: WebSocketMessage) {
+export const handleConferenceAdded = async (serverUrl: string, msg: WebSocketMessage) => {
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
         return {error: `${serverUrl} operator not found`};
@@ -57,29 +58,22 @@ export async function handleConferenceAdded(serverUrl: string, msg: WebSocketMes
     }
 
     return {};
-}
+};
 
-export async function handleConferenceDeleted(serverUrl: string, msg: WebSocketMessage) {
+export const handleConferenceUpdated = async (serverUrl: string, conferences: ConferenceModel[], changes: Partial<ConferenceModel>) => {
+    const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
+    if (!operator) {
+        return {error: `${serverUrl} operator not found`};
+    }
+
     try {
-        const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        if (!database) {
-            return {error: `${serverUrl} database not found`};
-        }
-
-        const event = ConferenceGenericEvent.parse(msg.data);
-        const conferences = await database.get<ConferenceModel>(CONFERENCE).query(
-            Q.and(
-                Q.where('user_id', event.user_id),
-                Q.where('channel_id', event.channel_id),
-                Q.where('delete_at', Q.eq(null)),
-            ),
-        ).fetch();
-
-        // Update each "delete_at"
         const batch = [] as ConferenceModel[];
         for (const conference of conferences) {
             batch.push(conference.prepareUpdate((c) => {
-                c.deleteAt = Date.now();
+                for (const [key, value] of Object.entries(changes)) {
+                    // @ts-expect-error ts does not know how to process key as enums
+                    c[key] = value;
+                }
             }));
         }
 
@@ -90,41 +84,110 @@ export async function handleConferenceDeleted(serverUrl: string, msg: WebSocketM
     }
 
     return {};
-}
+};
 
-export async function handleConferenceUserPresence(serverUrl: string, msg: WebSocketMessage, present: boolean) {
+export const handleConferenceUpdatedById = async (serverUrl: string, conferenceId: string, changes: Partial<ConferenceModel>) => {
+    const database = DatabaseManager.serverDatabases[serverUrl]?.database;
+    if (!database) {
+        return {error: `${serverUrl} database not found`};
+    }
+
     try {
-        const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        if (!database) {
-            return {error: `${serverUrl} database not found`};
-        }
+        const conferences = await queryConference(database, conferenceId).fetch();
+        return await handleConferenceUpdated(serverUrl, conferences, changes);
+    } catch (e) {
+        logError(e);
+        return {error: (e as Error).toString()};
+    }
+};
 
-        // Parse the event and construct the fetch the participants
+const deleteConferences = (serverUrl: string, conferences: ConferenceModel[]) =>
+    handleConferenceUpdated(serverUrl, conferences, {deleteAt: Date.now()});
+
+export const handleConferenceDeleted = async (serverUrl: string, msg: WebSocketMessage) => {
+    const database = DatabaseManager.serverDatabases[serverUrl]?.database;
+    if (!database) {
+        return {error: `${serverUrl} database not found`};
+    }
+
+    try {
+        // ConferenceGenericEvent does not contain the conferenceId
         const event = ConferenceGenericEvent.parse(msg.data);
-        const conferenceParticipants = await database.get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).query(
+        const conferences = await database.get<ConferenceModel>(CONFERENCE).query(
             Q.and(
                 Q.where('user_id', event.user_id),
                 Q.where('channel_id', event.channel_id),
+                Q.where('delete_at', Q.eq(null)),
             ),
         ).fetch();
 
-        // Update each status
-        const batch = [] as ConferenceParticipantModel[];
-        for (const participant of conferenceParticipants) {
-            batch.push(participant.prepareUpdate((p) => {
-                p.status = present ? 'approved' : 'denied';
-                p.present = present;
-            }));
-        }
+        return await deleteConferences(serverUrl, conferences);
+    } catch (e) {
+        logError(e);
+        return {error: (e as Error).toString()};
+    }
+};
 
-        await operator.batchRecords(batch, 'updateConferenceParticipants');
+export const handleConferenceDeletedById = async (serverUrl: string, conferenceId: string) => {
+    const database = DatabaseManager.serverDatabases[serverUrl]?.database;
+    if (!database) {
+        return {error: `${serverUrl} database not found`};
+    }
+
+    try {
+        const conferences = await queryConference(database, conferenceId).fetch();
+        return await deleteConferences(serverUrl, conferences);
+    } catch (e) {
+        logError(e);
+        return {error: (e as Error).toString()};
+    }
+};
+
+export const handleConferenceUserPresence = async (serverUrl: string, msg: WebSocketMessage, present: boolean) => {
+    const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+    if (!database) {
+        return {error: `${serverUrl} database not found`};
+    }
+
+    try {
+        // Parse the event
+        const event = ConferenceGenericEvent.parse(msg.data);
+
+        // Fetch the latest conference that matches this channel_id
+        const [conference] = await database.get<ConferenceModel>(CONFERENCE).query(
+            Q.where('channel_id', event.channel_id),
+            Q.sortBy('create_at', Q.desc),
+            Q.take(1),
+        ).fetch();
+
+        // Get the conference participant that matches the conference's id and user id
+        const conferenceId = conference?.id;
+        if (typeof conferenceId === 'string') {
+            const conferenceParticipants = await database.get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).query(
+                Q.and(
+                    Q.where('user_id', event.user_id),
+                    Q.where('conference_id', conference.id),
+                ),
+            ).fetch();
+
+            // Update each status
+            const batch = [] as ConferenceParticipantModel[];
+            for (const participant of conferenceParticipants) {
+                batch.push(participant.prepareUpdate((p) => {
+                    p.status = present ? 'approved' : 'denied';
+                    p.present = present;
+                }));
+            }
+
+            await operator.batchRecords(batch, 'updateConferenceParticipants');
+        }
     } catch (e) {
         logError(e);
         return {error: (e as Error).toString()};
     }
 
     return {};
-}
+};
 
 export async function handleConferenceUserConnected(serverUrl: string, msg: WebSocketMessage) {
     return handleConferenceUserPresence(serverUrl, msg, true);
