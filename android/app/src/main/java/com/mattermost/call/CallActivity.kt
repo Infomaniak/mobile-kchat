@@ -9,21 +9,17 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.airbnb.lottie.LottieAnimationView
-import com.google.android.material.button.MaterialButton
 import com.mattermost.notification.NotificationUtils
 import com.mattermost.notification.NotificationUtils.dismissCallNotification
 import com.mattermost.rnbeta.*
+import com.mattermost.rnbeta.databinding.ActivityCallBinding
 
 class CallActivity : AppCompatActivity() {
 
-    private val idCaller: TextView by lazy { findViewById(R.id.idCaller) }
-    private val answerButton: LottieAnimationView by lazy { findViewById(R.id.answerButton) }
-    private val declineButton: MaterialButton by lazy { findViewById(R.id.declineButton) }
+    private val binding by lazy { ActivityCallBinding.inflate(layoutInflater) }
 
     private val callManagerModule by lazy { CallManagerModule.getInstance() }
     private val channelId by lazy {
@@ -55,9 +51,9 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_call)
+        setContentView(binding.root)
         configureActivityOverLockScreen()
 
         // Getting this here because if we're using a lazy, the value will not be the right one
