@@ -9,16 +9,21 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.airbnb.lottie.LottieAnimationView
+import com.google.android.material.button.MaterialButton
 import com.mattermost.notification.NotificationUtils
+import com.mattermost.notification.NotificationUtils.dismissCallNotification
 import com.mattermost.rnbeta.*
-import com.mattermost.rnbeta.databinding.ActivityCallBinding
 
 class CallActivity : AppCompatActivity() {
 
-    private val binding by lazy { ActivityCallBinding.inflate(layoutInflater) }
+    private val idCaller: TextView by lazy { findViewById(R.id.idCaller) }
+    private val answerButton: LottieAnimationView by lazy { findViewById(R.id.answerButton) }
+    private val declineButton: MaterialButton by lazy { findViewById(R.id.declineButton) }
 
     private val callManagerModule by lazy { CallManagerModule.getInstance() }
     private val channelId by lazy {
@@ -50,9 +55,9 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_call)
         configureActivityOverLockScreen()
 
         // Getting this here because if we're using a lazy, the value will not be the right one
@@ -60,6 +65,7 @@ class CallActivity : AppCompatActivity() {
 
         idCaller.text = channelName
         answerButton.setOnClickListener {
+            conferenceId?.let { dismissCallNotification(it) }
             callManagerModule?.callAnswered(
                 serverId = serverId!!,
                 channelId = channelId!!,
@@ -68,6 +74,7 @@ class CallActivity : AppCompatActivity() {
             leaveActivity()
         }
         declineButton.setOnClickListener {
+            conferenceId?.let { dismissCallNotification(it) }
             callManagerModule?.callEnded(serverId = serverId!!, conferenceId = conferenceId!!)
             leaveActivity()
         }
