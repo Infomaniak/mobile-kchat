@@ -821,6 +821,8 @@
     "rate.title": "¿Le gusta kChat?",
     "saved_messages.empty.paragraph": "Para guardar algo para después, mantén presionado sobre un mensjae y elige Guardar del menú. Los mensajes guardados sólo son visibles por ti.",
     "saved_messages.empty.title": "Aún no hay mensajes guardados",
+    "screen.call.calling": "Llamada en curso",
+    "screen.call.member_count": "{count} {count, plural, one {miembro} other {miembros}}",
     "screen.mentions.subtitle": "Mensajes en los que te han mencionado",
     "screen.mentions.title": "Menciones recientes",
     "screen.saved_messages.subtitle": "Todos los mensajes que has guardado para seguimiento",

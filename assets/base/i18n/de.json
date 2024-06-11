@@ -919,6 +919,8 @@
     "requested_ack.title": "Empfangsbestätigung anfordern",
     "saved_messages.empty.paragraph": "Um etwas für später zu speichern, drücke lange auf eine Nachricht und wähle im Menü Speichern. Gespeicherte Nachrichten sind nur für dich sichtbar.",
     "saved_messages.empty.title": "Keine gespeicherten Nachrichten",
+    "screen.call.calling": "Aktuelle Berufung",
+    "screen.call.member_count": "{count} {count, plural, one {mitglied} other {mitglieder}}",
     "screen.channel_files.header.recent_files": "Aktuellste Dateien",
     "screen.channel_files.results.filter.title": "Nach Dateityp filtern",
     "screen.mentions.subtitle": "Nachrichten, in denen du erwähnt wurdest",

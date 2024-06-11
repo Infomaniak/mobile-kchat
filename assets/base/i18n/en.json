@@ -926,6 +926,8 @@
   "requested_ack.title": "Request Acknowledgements",
   "saved_messages.empty.paragraph": "To save something for later, long-press on a message and choose Save from the menu. Saved messages are only visible to you.",
   "saved_messages.empty.title": "No saved messages yet",
+  "screen.call.calling": "Call in progress",
+  "screen.call.member_count": "{count} {count, plural, one {member} other {members}}",
   "screen.channel_files.header.recent_files": "Recent Files",
   "screen.channel_files.results.filter.title": "Filter by file type",
   "screen.mentions.subtitle": "Messages you've been mentioned in",

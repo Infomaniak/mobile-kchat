@@ -842,6 +842,8 @@
     "requested_ack.title": "Richiedi riconoscimenti",
     "saved_messages.empty.paragraph": "Per salvare un messaggio per un secondo momento, premere a lungo su un messaggio e scegliere Salva dal menu. I messaggi salvati sono visibili solo all'utente.",
     "saved_messages.empty.title": "Non ci sono ancora messaggi salvati",
+    "screen.call.calling": "Chiamata in corso",
+    "screen.call.member_count": "{count} {count, plural, one {membro} other {membri}}",
     "screen.channel_files.header.recent_files": "File recenti",
     "screen.channel_files.results.filter.title": "Filtra per tipo di file",
     "screen.mentions.subtitle": "I messaggi in cui siete stati citati",
