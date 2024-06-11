@@ -85,36 +85,27 @@ class CallManager {
         } else {
             const serverUrl = await DatabaseManager.getServerUrlFromIdentifier(serverId);
             if (typeof serverUrl === 'string') {
-                this.leaveCall(serverUrl, conferenceId);
+                this.declineCall(serverUrl, conferenceId);
             }
         }
     };
 
-    leaveCall = async (serverUrl: string, conferenceId: string): Promise<ApiCall | null> => {
+    handleCallTermination = (method: 'cancelCall' | 'declineCall' | 'leaveCall') => async (serverUrl: string, conferenceId: string): Promise<ApiCall | null> => {
         try {
             // Delete the conference localy by updating it's 'delete_at' column
             handleConferenceDeletedById(serverUrl, conferenceId);
 
             // Notify backend about left call
-            return await NetworkManager.getClient(serverUrl).leaveCall(conferenceId);
+            return await NetworkManager.getClient(serverUrl)[method](conferenceId);
         } catch (error) {
             // logError(error);
             return null;
         }
     };
 
-    cancelCall = async (serverUrl: string, conferenceId: string): Promise<ApiCall | null> => {
-        try {
-            // Delete the conference localy by updating it's 'delete_at' column
-            handleConferenceDeletedById(serverUrl, conferenceId);
-
-            // Notify backend about left call
-            return await NetworkManager.getClient(serverUrl).cancelCall(conferenceId);
-        } catch (error) {
-            // logError(error);
-            return null;
-        }
-    };
+    cancelCall = this.handleCallTermination('cancelCall');
+    declineCall = this.handleCallTermination('declineCall');
+    leaveCall = this.handleCallTermination('leaveCall');
 
     /**
      * Propagate state change via imperative handle
