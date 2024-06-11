@@ -47,8 +47,8 @@ type CallPropsSchema = z.infer<typeof CallPropsSchema>
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
         container: {
-            borderWidth: 0.25,
-            borderColor: changeOpacity(theme.centerChannelColor, 0.6),
+            borderWidth: 0.5,
+            borderColor: changeOpacity(theme.centerChannelColor, 0.15),
             borderRadius: 4,
             marginTop: 8,
             marginBottom: 8,
@@ -159,7 +159,7 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
         if (status === 'calling' || status === 'joined') {
             return theme.centerChannelBg;
         }
-        return isDark ? '#262A30' : '#F0F0F0';
+        return isDark ? '#262A30' : '#FAFAFA';
     })();
     const containerStyles = [styles.container, {backgroundColor}];
 
