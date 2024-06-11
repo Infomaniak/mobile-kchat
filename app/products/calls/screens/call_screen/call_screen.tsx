@@ -29,7 +29,7 @@ import {getUserCustomStatus, getUserTimezone} from '@app/utils/user';
 import {usePermissionsChecker} from '@calls/hooks';
 import NavigationHeader from '@components/navigation_header';
 import Image from '@components/profile_picture/image';
-import {Screens} from '@constants';
+import {General, Screens} from '@constants';
 import DatabaseManager from '@database/manager';
 import {debounce} from '@helpers/api/general';
 import CallManager from '@store/CallManager';
@@ -363,7 +363,8 @@ const CallScreen = ({
      * Is the current channel a DM or GM, will be false
      * for public and private channels
      */
-    const isDMorGM = useMemo(() => (channel ? isChannelDMorGM(channel) : false), [channelId]);
+    const isDM = channel?.type === General.DM_CHANNEL;
+    const isDMorGM = channel ? isChannelDMorGM(channel) : false;
 
     /**
      * Is the current user the one that initiated the conference
@@ -809,8 +810,7 @@ const CallScreen = ({
                  * For DM channels : Join immediatly like you would when answering a call
                  * For other channels : Ask if the user wants to enable his audio/video, but only if it's not the one that created the conference
                  */
-                // 'prejoinpage.enabled': !isDMorGM && !isCurrentUserInitiator,
-                'prejoinpage.enabled': true,
+                'prejoinpage.enabled': !isDM && !isCurrentUserInitiator,
                 'prejoinpage.hideDisplayName': true,
 
                 // Disable breakout-rooms
