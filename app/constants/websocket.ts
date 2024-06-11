@@ -101,6 +101,7 @@ const WebsocketEvents = {
     CONFERENCE_ADDED: 'conference_added',
     CONFERENCE_DELETED: 'conference_deleted',
     CONFERENCE_USER_CONNECTED: 'conference_user_connected',
+    CONFERENCE_USER_DENIED: 'conference_user_denied',
     CONFERENCE_USER_DISCONNECTED: 'conference_user_disconnected',
 };
 export default WebsocketEvents;

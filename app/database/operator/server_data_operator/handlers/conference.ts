@@ -47,13 +47,6 @@ const ConferenceHandler = <TBase extends Constructor<ServerDataOperatorBase>>(su
                             conference_id: conference.id, // Add the conference id
                             channel_id: conference.channel_id, // Add the channel_id
                             id: `${conference.id}-${user_id}`, // Create a unique id by using conference and user id
-
-                            // If this user is the one that initiated the conference
-                            // We always consider him present (he may disconnect later)
-                            ...(user_id === conference.user_id ? {
-                                present: true,
-                                status: 'approved',
-                            } : {}),
                         });
                         return acc;
                     },

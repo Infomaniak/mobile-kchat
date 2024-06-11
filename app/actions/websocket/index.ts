@@ -81,6 +81,7 @@ import {
     handleConferenceAdded,
     handleConferenceDeleted,
     handleConferenceUserConnected,
+    handleConferenceUserDenied,
     handleConferenceUserDisconnected,
 } from './conference';
 import {
@@ -494,6 +495,9 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
             break;
         case WebsocketEvents.CONFERENCE_USER_CONNECTED:
             handleConferenceUserConnected(serverUrl, msg);
+            break;
+        case WebsocketEvents.CONFERENCE_USER_DENIED:
+            handleConferenceUserDenied(serverUrl, msg);
             break;
         case WebsocketEvents.CONFERENCE_USER_DISCONNECTED:
             handleConferenceUserDisconnected(serverUrl, msg);

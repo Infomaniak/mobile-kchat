@@ -143,7 +143,7 @@ export const handleConferenceDeletedById = async (serverUrl: string, conferenceI
     }
 };
 
-export const handleConferenceUserPresence = async (serverUrl: string, msg: WebSocketMessage, present: boolean) => {
+export const handleConferenceUserUpdated = async (serverUrl: string, msg: WebSocketMessage, changes: Partial<Pick<ConferenceParticipantModel, 'present' | 'status'>>) => {
     const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
     if (!database) {
         return {error: `${serverUrl} database not found`};
@@ -174,8 +174,10 @@ export const handleConferenceUserPresence = async (serverUrl: string, msg: WebSo
             const batch = [] as ConferenceParticipantModel[];
             for (const participant of conferenceParticipants) {
                 batch.push(participant.prepareUpdate((p) => {
-                    p.status = present ? 'approved' : 'denied';
-                    p.present = present;
+                    for (const [key, value] of Object.entries(changes)) {
+                        // @ts-expect-error ts does not know how to process key as enums
+                        p[key] = value;
+                    }
                 }));
             }
 
@@ -190,9 +192,13 @@ export const handleConferenceUserPresence = async (serverUrl: string, msg: WebSo
 };
 
 export async function handleConferenceUserConnected(serverUrl: string, msg: WebSocketMessage) {
-    return handleConferenceUserPresence(serverUrl, msg, true);
+    return handleConferenceUserUpdated(serverUrl, msg, {present: true, status: 'approved'});
+}
+
+export async function handleConferenceUserDenied(serverUrl: string, msg: WebSocketMessage) {
+    return handleConferenceUserUpdated(serverUrl, msg, {status: 'denied'});
 }
 
 export async function handleConferenceUserDisconnected(serverUrl: string, msg: WebSocketMessage) {
-    return handleConferenceUserPresence(serverUrl, msg, false);
+    return handleConferenceUserUpdated(serverUrl, msg, {present: false});
 }
