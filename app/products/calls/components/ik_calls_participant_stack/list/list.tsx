@@ -3,7 +3,7 @@
 
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
 import {withObservables} from '@nozbe/watermelondb/react';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState, type ComponentProps} from 'react';
 import {StyleSheet, type ListRenderItemInfo} from 'react-native';
 import {of as of$} from 'rxjs';
 
@@ -26,7 +26,13 @@ const enhance = withObservables(['participant'], ({participant}: {
     participant,
     user: participant.user || of$(undefined),
 }));
-const UserItem = enhance(BaseUserItem);
+const UserItem = enhance(({participant, user, ...props}: { participant: ConferenceParticipantModel} & ComponentProps<typeof BaseUserItem>) => (
+    <BaseUserItem
+        user={user}
+        grayscale={!participant.present}
+        {...props}
+    />
+));
 
 /**
  * Get a list of users corresponding to a list of participants

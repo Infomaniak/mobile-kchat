@@ -96,6 +96,7 @@ const IkCallsParticipantStackIcon = ({
                 iconSize={iconSize}
                 size={size - 3}
                 url={serverUrl}
+                grayscale={!participant.present}
             />
 
             <View style={iconContainerStyle}>

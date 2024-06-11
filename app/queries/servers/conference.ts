@@ -29,7 +29,7 @@ export const observeConferenceParticipants = (database: Database, conferenceId: 
     return database.
         get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).
         query(...clauses).
-        observeWithColumns(['status']);
+        observeWithColumns(['status', 'presence']);
 };
 
 export const observeConferenceParticipantCount = (database: Database, conferenceId: string) =>
