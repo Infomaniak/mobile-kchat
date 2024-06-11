@@ -5,22 +5,37 @@
 
 import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
 import moment from 'moment';
-import React, {useCallback, useEffect, useMemo, useRef, type ComponentProps, type MutableRefObject} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState, type ComponentProps, type MutableRefObject} from 'react';
 import {useIntl} from 'react-intl';
-import {DeviceEventEmitter, NativeModules, Platform} from 'react-native';
+import {ActivityIndicator, DeviceEventEmitter, FlatList, NativeModules, Platform, View} from 'react-native';
+import {Navigation} from 'react-native-navigation';
+import {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
+import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 
 import {updateLocalCustomStatus} from '@actions/local/user';
 import {fetchChannelMemberships, switchToChannelById} from '@actions/remote/channel';
 import {unsetCustomStatus, updateCustomStatus} from '@actions/remote/user';
 import {CustomStatusDurationEnum, SET_CUSTOM_STATUS_FAILURE} from '@app/constants/custom_status';
 import {useServerId, useServerUrl} from '@app/context/server';
-import {useMountedRef, useTransientRef} from '@app/hooks/utils';
+import {useTheme} from '@app/context/theme';
+import {useCollapsibleHeader} from '@app/hooks/header';
+import {useMountedRef, useRerender, useTransientRef} from '@app/hooks/utils';
+import {getCommonSystemValues} from '@app/queries/servers/system';
 import {calculateExpiryTime} from '@app/screens/custom_status/custom_status';
 import {logError} from '@app/utils/log';
+import {changeOpacity, makeStyleSheetFromTheme} from '@app/utils/theme';
+import {typography} from '@app/utils/typography';
 import {getUserCustomStatus, getUserTimezone} from '@app/utils/user';
+import {usePermissionsChecker} from '@calls/hooks';
+import NavigationHeader from '@components/navigation_header';
+import Image from '@components/profile_picture/image';
+import {Screens} from '@constants';
+import DatabaseManager from '@database/manager';
 import {debounce} from '@helpers/api/general';
 import CallManager from '@store/CallManager';
-import {isDMorGM as _isDMorGM} from '@utils/channel';
+import {isDMorGM as isChannelDMorGM} from '@utils/channel';
+
+import {AudioMuteButton, ContentContainer, ToolboxContainer, VideoMuteButton} from './jitsi_components';
 
 import type ChannelModel from '@typings/database/models/servers/channel';
 import type ConferenceModel from '@typings/database/models/servers/conference';
@@ -28,24 +43,27 @@ import type UserModel from '@typings/database/models/servers/user';
 
 export type PassedProps = {
     serverUrl: string;
-    channelId: string;
+    channelId?: string;
     conferenceId?: string;
     conferenceJWT?: string;
-    initiator?: 'native' | 'internal';
+    initiator?: 'internal' | 'native';
     userInfo: ComponentProps<typeof JitsiMeeting>['userInfo'];
 };
 
 export type InjectedProps = {
-    channel: ChannelModel;
+    channel?: ChannelModel;
     conference: ConferenceModel | undefined;
     currentUser: UserModel;
+    currentUserId: string;
+    micPermissionsGranted: boolean;
     participantCount: number;
+    participantApprovedCount: number;
 }
 
 export type CallScreenHandle = {
-    leaveCall: (initiator?: 'native' | 'internal') => void;
-    muteCall: (isMuted: boolean) => void;
-    muteVideo: (isMuted: boolean) => void;
+    leaveCall: (leaveInitiator?: 'api' | 'internal' | 'native') => void;
+    toggleAudioMuted: (isMuted?: boolean) => void;
+    toggleVideoMuted: (isMuted?: boolean) => void;
 };
 
 type Props = PassedProps & InjectedProps & { autoUpdateStatus: boolean }
@@ -64,10 +82,61 @@ const MINIMUM_CONFERENCE_DURATION = 2000; // ms
  */
 const MAX_CALLNAME_PARTICIPANT_USERNAMES = 2;
 
+const EDGES: Edge[] = ['bottom', 'left', 'right'];
+
 const kMeetStatus = {
     emoji: 'kmeet',
     duration: CustomStatusDurationEnum.DONT_CLEAR,
 } as Pick<UserCustomStatus, 'emoji' | 'duration'>;
+
+/**
+ * Global styles
+ */
+const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
+    flex: {flex: 1},
+    wrapper: {flex: 1},
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 40,
+    },
+
+    /** Recipient avatar */
+    icon: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    /** Button text */
+    buttonText: {
+        color: changeOpacity(theme.buttonColor, 0.72),
+        ...typography('Body', 75, 'SemiBold'),
+    },
+    unavailableText: {
+        color: changeOpacity(theme.buttonColor, 0.32),
+    },
+
+    /** Mute audio/video buttons */
+    mute: {
+        alignSelf: 'stretch',
+        alignItems: 'center',
+        gap: 4,
+        padding: 24,
+        backgroundColor: theme.onlineIndicator,
+        borderRadius: 20,
+        marginLeft: 16,
+        marginRight: 16,
+        marginTop: 20,
+        marginBottom: 20,
+    },
+    muteMuted: {
+        backgroundColor: changeOpacity(theme.buttonColor, 0.12),
+    },
+    muteIcon: {
+        color: theme.buttonColor,
+    },
+}));
 
 /**
  * Convert possible "duration" status to a specific "date_and_time"
@@ -202,26 +271,194 @@ const CallScreen = ({
     conferenceId,
     conferenceJWT,
     currentUser,
+    currentUserId,
+    micPermissionsGranted,
     participantCount,
+    participantApprovedCount,
     initiator,
     serverUrl: kMeetServerUrl,
     userInfo,
 }: Props) => {
-    const isDMorGM = _isDMorGM(channel);
-    const serverId = useServerId();
     const {formatMessage} = useIntl();
-    const jitsiMeetingRef = useRef<JitsiRefProps | null>(null);
-    const serverUrl = useServerUrl();
-    const audioMutedRef = useRef(false);
-    const videoMutedRef = useRef(false);
-    const leavingRef = useRef(false);
-    const conferenceJoinedAtRef = useRef<number | undefined>();
     const mountedRef = useMountedRef();
+    const rerender = useRerender();
+    const serverId = useServerId();
+    const serverUrl = useServerUrl();
+    const theme = useTheme();
+
+    /**
+     * Ask for microphone permissions
+     */
+    usePermissionsChecker(micPermissionsGranted);
+
+    /**
+     * Keep reference of whenever we have mounted the <JitsiMeeting />
+     * component and it's imperative handle
+     */
+    const jitsiMeetingRef = useRef<JitsiRefProps | null>(null);
+    const jitsiMeetingMountedRef = useRef(false);
+    const jitsiMeetingMountedAtRef = useRef<number | undefined>();
+
+    /**
+     * Audio/Video muted state can be altered before entering the <JitsiMeeting />
+     * call component, we need to be able to both report it's state change and update the
+     * "Calling..." screen interface
+     */
+    const [audioMuted, setAudioMuted] = useState(false);
+    const [videoMuted, setVideoMuted] = useState(true); // Start with video muted
+    const audioMutedRef = useTransientRef(audioMuted);
+    const videoMutedRef = useTransientRef(videoMuted);
+
+    /**
+     * Mute/Unmute audio
+     * Can be called with no args to toggle/untoggle current state
+     */
+    const toggleAudioMuted = useCallback((isMuted?: unknown) => {
+        const nextState = typeof isMuted === 'boolean' ? isMuted : !audioMutedRef.current;
+
+        // If the <JitsiMeeting /> component has already been mounted,
+        // we can use the imperative handle instead of calling a "setState"
+        if (jitsiMeetingMountedRef.current) {
+            if (
+                // Prevent triggering a callback if the current state already matches the next state
+                // removing the next time would cause an infinite loop between the native interface
+                // that would report the audio muted and the <JitsiMeeting /> component that
+                // would report an internal state change
+                hasUpdatedRef(audioMutedRef, nextState) &&
+                typeof jitsiMeetingRef.current?.setAudioMuted === 'function'
+            ) {
+                jitsiMeetingRef.current.setAudioMuted(nextState);
+            }
+        } else if (audioMutedRef.current !== nextState) {
+            setAudioMuted(nextState);
+        }
+    }, []);
+
+    /**
+     * Mute/Unmute video
+     * Can be called with no args to toggle/untoggle current state
+     */
+    const toggleVideoMuted = useCallback((isMuted?: unknown) => {
+        const nextState = typeof isMuted === 'boolean' ? isMuted : !videoMutedRef.current;
+
+        // If the <JitsiMeeting /> component has already been mounted,
+        // we can use the imperative handle instead of calling a "setState"
+        if (jitsiMeetingMountedRef.current) {
+            if (
+                // Prevent triggering a callback if the current state already matches the next state
+                // removing the next time would cause an infinite loop between the native interface
+                // that would report the video muted and the <JitsiMeeting /> component that
+                // would report an internal state change
+                hasUpdatedRef(videoMutedRef, nextState) &&
+                typeof jitsiMeetingRef.current?.setVideoMuted === 'function'
+            ) {
+                jitsiMeetingRef.current.setVideoMuted(nextState);
+            }
+        } else if (videoMutedRef.current !== nextState) {
+            setVideoMuted(nextState);
+        }
+    }, []);
+
+    /**
+     * Is the current channel a DM or GM, will be false
+     * for public and private channels
+     */
+    const isDMorGM = useMemo(() => (channel ? isChannelDMorGM(channel) : false), [channelId]);
 
     /**
      * Is the current user the one that initiated the conference
      */
-    const isCurrentUserInitiator = currentUser.id === conference?.userId;
+    const isCurrentUserInitiator = currentUserId === conference?.userId;
+
+    /**
+     * The "Calling..." screen should only be displayed if :
+     *  - the current user is the call initiator (the caller)
+     *  - the meeting as exactly two participants (it's a direct call and not a meeting)
+     *  - there are no participants in the meeting other than possibly the current user him/herself
+     *  - the meeting screen has never been displayed (you cannot go back to the calling screen)
+     */
+    const shouldDisplayCallingScreen = (
+        isCurrentUserInitiator &&
+        participantCount === 2 &&
+        participantApprovedCount === 0 &&
+        jitsiMeetingMountedRef.current === false
+    );
+
+    /**
+     * Lazily query the called users
+     */
+    const callUsersRef = useRef<UserProfile[]>();
+    const getCallUsers = useCallback(async () => {
+        if (
+            typeof channelId === 'string' &&
+            typeof callUsersRef.current === 'undefined'
+        ) {
+            // Find the recipients for DM or GM calls
+            if (isDMorGM) {
+                // Remove current user from list
+                callUsersRef.current = (await fetchChannelMemberships(serverUrl, channelId, {per_page: MAX_CALLNAME_PARTICIPANT_USERNAMES + 1})).users.
+                    filter((user) => user.id !== currentUserId).
+                    slice(0, MAX_CALLNAME_PARTICIPANT_USERNAMES);
+            } else {
+                callUsersRef.current = [];
+            }
+        }
+
+        return callUsersRef.current!;
+    }, [channelId]);
+
+    /**
+     * Lazily query the callName
+     */
+    const callNameRef = useRef<string | undefined>(undefined);
+    const hasCallName = typeof callNameRef.current === 'string';
+    const getCallName = useCallback(async (forceRerender = false) => {
+        if (typeof channel === 'undefined') {
+            return '...';
+        }
+
+        if (typeof callNameRef.current !== 'string') {
+            let callName = `~${channel.name}`; // Public / Private channel
+
+            // Find the target user's username for DM calls
+            if (isDMorGM) {
+                // Current user is not displayed
+                const participantCountOverflow = Math.max(
+                    Math.max(0, participantCountRef.current! - 1) - // Current user is not displayed (-1)
+                    MAX_CALLNAME_PARTICIPANT_USERNAMES,
+                );
+
+                // Remove current user from list
+                const users = await getCallUsers();
+
+                // Construct callName useing usernames
+                callName = users.map((user) => `@${user.username}`).join(' ');
+                if (participantCountOverflow > 0) {
+                    callName = `${callName} +${participantCountOverflow}`;
+                }
+            }
+
+            callNameRef.current = callName;
+        }
+
+        // Forced update
+        if (forceRerender) {
+            rerender();
+        }
+
+        return callNameRef.current;
+    }, [channel]);
+
+    /**
+     * Unpack the recipient from the lazily queried call users
+     */
+    const recipient = typeof callUsersRef.current === 'object' ? callUsersRef.current[0] : undefined;
+
+    // Compute the participant count localized string
+    const participantCountString = formatMessage(
+        {id: 'screen.call.member_count', defaultMessage: '{count} {count, plural, one {member} other {members}}'},
+        {count: participantCount},
+    );
 
     /**
      * Compare current status and new (arg) status
@@ -280,35 +517,28 @@ const CallScreen = ({
     );
 
     /**
-     * Mute audio/video prevent triggering a callback if
-     * the state already matches the newState
-     */
-    const muteCall = useCallback((isMuted: boolean) => {
-        if (
-            hasUpdatedRef(audioMutedRef, isMuted) &&
-            typeof jitsiMeetingRef.current?.setAudioMuted === 'function'
-        ) {
-            jitsiMeetingRef.current.setAudioMuted(isMuted);
-        }
-    }, []);
-    const muteVideo = useCallback((isMuted: boolean) => {
-        if (
-            hasUpdatedRef(videoMutedRef, isMuted) &&
-            typeof jitsiMeetingRef.current?.setVideoMuted === 'function'
-        ) {
-            jitsiMeetingRef.current.setVideoMuted(isMuted);
-        }
-    }, []);
-
-    /**
      * Close the current JitsiMeeting
      * Also trigger the "leaveCall" API
      */
-    const leaveCallRef = useTransientRef((leaveInitiator: 'internal' | 'native' = 'internal') => {
+    const leavingRef = useRef(false);
+    const leaveCallRef = useTransientRef((leaveInitiator: 'api' | 'internal' | 'native' = 'internal') => {
+        const isUserInsideCall = jitsiMeetingMountedRef.current;
+
         if (
             mountedRef.current &&
-            typeof conferenceJoinedAtRef.current === 'number' &&
-            (conferenceJoinedAtRef.current + MINIMUM_CONFERENCE_DURATION) <= Date.now() &&
+            leavingRef.current === false &&
+            (
+
+                // Call was not answered OR
+                !isUserInsideCall ||
+
+                // Call has not been started for long-enought
+                // (this also prevents the simulator from immediatly closing because native handlers do not exists)
+                (
+                    typeof jitsiMeetingMountedAtRef.current === 'number' &&
+                    (jitsiMeetingMountedAtRef.current + MINIMUM_CONFERENCE_DURATION) <= Date.now()
+                )
+            ) &&
             hasUpdatedRef(leavingRef, true)
         ) {
             // Restore previous status
@@ -316,23 +546,45 @@ const CallScreen = ({
                 restoreStatus();
             }
 
+            // Remove the call screen, and in some situations it needs to be removed twice before actually being removed
+            Navigation.pop(Screens.CALL).catch(() => null);
+            Navigation.pop(Screens.CALL).catch(() => null);
+
             // Return back to the channel where this meeting has been started
-            if (typeof channelId === 'string') {
-                switchToChannelById(serverUrl, channelId);
+            const database = DatabaseManager.serverDatabases[serverUrl]?.database;
+            if (typeof channelId === 'string' && typeof database !== 'undefined') {
+                getCommonSystemValues(database).then((system) => {
+                    if (system.currentChannelId !== channelId) {
+                        switchToChannelById(serverUrl, channelId);
+                    }
+                });
             }
 
             if (typeof conferenceId === 'string') {
-                // Notify the API that the user left the call
-                CallManager.leaveCall(serverUrl, conferenceId);
-
-                if (leaveInitiator === 'internal') {
+                if (leaveInitiator !== 'native') {
                     // Notify OS about the end of the call
                     nativeReporters.callEnded(conferenceId);
                 }
-            }
 
-            if (jitsiMeetingRef.current) {
-                jitsiMeetingRef.current.close();
+                if (typeof jitsiMeetingRef.current?.close === 'function') {
+                    // Terminate the <JitsiMeeting />
+                    try {
+                        jitsiMeetingRef.current.close();
+                    } catch (e) {
+                        logError('JitsiMeeting could not be closed', e);
+                    }
+                }
+
+                // Only notify the backend, if it's not the backend that notified us!
+                if (leaveInitiator !== 'api') {
+                    if (isUserInsideCall) {
+                        // Call has been left by user
+                        CallManager.leaveCall(serverUrl, conferenceId);
+                    } else {
+                        // User canceled the call before it even started!
+                        CallManager.cancelCall(serverUrl, conferenceId);
+                    }
+                }
             }
         }
     });
@@ -346,9 +598,10 @@ const CallScreen = ({
      */
     const participantCountRef = useTransientRef(participantCount);
     const eventListeners = useMemo(() => ({
-        onConferenceJoined: () => {
-            // Update the conferenceJoinedAtRef date
-            conferenceJoinedAtRef.current = Date.now();
+        onConferenceJoined: async () => {
+            // Update the jitsiMeetingMountedAtRef date
+            jitsiMeetingMountedRef.current = true;
+            jitsiMeetingMountedAtRef.current = Date.now();
 
             if (autoUpdateStatus) {
                 updateStatus();
@@ -361,60 +614,36 @@ const CallScreen = ({
                 typeof channelId === 'string' &&
                 typeof conferenceId === 'string'
             ) {
-                (async function getCallName() {
-                    let callName = `~${channel.name}`; // Public / Private channel
+                // Trigger native reporter
+                nativeReporters.callStarted(serverId, channelId, conferenceId, await getCallName());
 
-                    // Find the target user's username for DM calls
-                    if (isDMorGM) {
-                        // Current user is not displayed
-                        const participantCountOverflow = Math.max(
-                            Math.max(0, participantCountRef.current! - 1) - // Current user is not displayed (-1)
-                            MAX_CALLNAME_PARTICIPANT_USERNAMES,
-                        );
+                // Also report about the audio/video mute status if toggled
+                const callbacks = [] as Array<() => void>;
+                if (audioMutedRef.current) {
+                    callbacks.push(() => {
+                        nativeReporters.callMuted(conferenceId, true);
+                    });
+                }
+                if (videoMutedRef.current) {
+                    callbacks.push(() => {
+                        nativeReporters.callVideoMuted(conferenceId, true);
+                    });
+                }
 
-                        // Remove current user from list
-                        const users = (await fetchChannelMemberships(serverUrl, channelId, {per_page: MAX_CALLNAME_PARTICIPANT_USERNAMES + 1})).users.
-                            filter((user) => user.id !== currentUser.id).
-                            slice(0, MAX_CALLNAME_PARTICIPANT_USERNAMES);
-
-                        // Construct callName useing usernames
-                        callName = users.map((user) => `@${user.username}`).join(' ');
-                        if (participantCountOverflow > 0) {
-                            callName = `${callName} +${participantCountOverflow}`;
+                // Trigger the update after a delay
+                if (callbacks.length) {
+                    setTimeout(() => {
+                        for (const callback of callbacks) {
+                            callback();
                         }
-                    }
-
-                    // Trigger native reporter
-                    nativeReporters.callStarted(serverId, channelId, conferenceId, callName);
-
-                    // Also report about the audio/video mute status if toggled
-                    const callbacks = [] as Array<() => void>;
-                    if (audioMutedRef.current) {
-                        callbacks.push(() => {
-                            nativeReporters.callMuted(conferenceId, true);
-                        });
-                    }
-                    if (videoMutedRef.current) {
-                        callbacks.push(() => {
-                            nativeReporters.callVideoMuted(conferenceId, true);
-                        });
-                    }
-
-                    // Trigger the update after a delay
-                    if (callbacks.length) {
-                        setTimeout(() => {
-                            for (const callback of callbacks) {
-                                callback();
-                            }
-                        }, 100);
-                    }
-                }());
+                    }, 100);
+                }
             }
         },
         onAudioMutedChanged: (isMuted: boolean) => {
             if (
                 typeof conferenceId === 'string' &&
-                typeof conferenceJoinedAtRef.current === 'number' &&
+                typeof jitsiMeetingMountedAtRef.current === 'number' &&
                 hasUpdatedRef(audioMutedRef, isMuted)
             ) {
                 nativeReporters.callMuted(conferenceId, isMuted);
@@ -423,24 +652,120 @@ const CallScreen = ({
         onVideoMutedChanged: (isMuted: boolean) => {
             if (
                 typeof conferenceId === 'string' &&
-                typeof conferenceJoinedAtRef.current === 'number' &&
+                typeof jitsiMeetingMountedAtRef.current === 'number' &&
                 hasUpdatedRef(videoMutedRef, isMuted)
             ) {
                 nativeReporters.callVideoMuted(conferenceId, isMuted);
             }
         },
         onReadyToClose: () => {
-            leaveCallRef.current!();
+            leaveCallRef.current!('internal');
         },
     }), []);
 
+    // STYLES
+    // const defaultHeight = useDefaultHeaderHeight();
+    // const contextStyle = useMemo(() => ({
+    //     top: defaultHeight,
+    // }), [defaultHeight]);
+    const styles = getStyleSheet(theme);
+    const {scrollPaddingTop, scrollRef, scrollValue, onScroll, headerHeight} = useCollapsibleHeader<FlatList<string>>(true);
+    const paddingTop = useMemo(() => ({paddingTop: scrollPaddingTop, flexGrow: 1}), [scrollPaddingTop]);
+    const opacity = useSharedValue(hasCallName ? 1 : 0);
+    const scale = useSharedValue(hasCallName ? 1 : 0.7);
+    const animated = useAnimatedStyle(() => ({
+        opacity: withTiming(opacity.value, {duration: 150}),
+        transform: [{scale: withTiming(scale.value, {duration: 150})}],
+    }), []);
+    const top = useAnimatedStyle(() => ({
+        top: headerHeight.value,
+    }));
+
     // EFFECTS
-    // Register to allow functions from being called by the CallManager
     useEffect(() => {
-        CallManager.registerCallScreen({leaveCall, muteCall, muteVideo});
+        // Register to allow functions from being called by the CallManager
+        CallManager.registerCallScreen({leaveCall, toggleAudioMuted, toggleVideoMuted});
+
+        // If the "Calling..." screen is displayed at first render
+        // we also need to fetch the current call name
+        if (shouldDisplayCallingScreen) {
+            getCallName(true); // Async forced re-render
+        }
+
+        return () => {
+            // Leave/cancel the call on unmount
+            leaveCallRef.current!();
+        };
     }, []);
 
-    return (
+    /**
+     * If the user called but the recipient did not answer
+     * the 'conference_deleted' event is fired by the API
+     * we still need to leave the call in the UI
+     */
+    const isConferenceDeleted = typeof conference?.deleteAt === 'number';
+    useEffect(() => {
+        if (isConferenceDeleted) {
+            // Conference deleted via websocket
+            leaveCallRef.current!('api');
+        }
+    }, [isConferenceDeleted]);
+
+    return shouldDisplayCallingScreen ? (
+        <>
+            <NavigationHeader
+                isLargeTitle={true}
+                showBackButton={true}
+                onBackPress={eventListeners.onReadyToClose}
+                hasSearch={false}
+                title={formatMessage({id: 'screen.call.calling', defaultMessage: 'Call in progress'})}
+                subtitle={hasCallName ? `${callNameRef.current}${isDMorGM ? '' : ` (${participantCountString})`}` : '...'}
+                scrollValue={scrollValue}
+            />
+            <SafeAreaView
+                style={[styles.flex, top]}
+                edges={EDGES}
+            >
+                <View style={paddingTop}>
+                    {/* Recipient avatar */}
+                    <View style={styles.container}>
+                        {
+                            typeof recipient === 'undefined' ? (
+                                <ActivityIndicator
+                                    color='white'
+                                    size='large'
+                                />
+                            ) : (
+                                <Image
+                                    author={recipient}
+                                    iconSize={48}
+                                    size={256}
+                                    url={serverUrl}
+                                />
+                            )
+                        }
+                    </View>
+
+                    {/* TODO */}
+                    {/* <ContentContainer aspectRatio={isWide ? 'wide' : 'narrow'}> */}
+                    <ContentContainer>
+                        <ToolboxContainer>
+                            <AudioMuteButton
+                                audioMuted={audioMuted}
+                                disabled={!micPermissionsGranted}
+                                onPress={toggleAudioMuted}
+                            />
+                            <VideoMuteButton
+                                videoMuted={videoMuted}
+                                disabled={false} // TODO
+                                onPress={toggleVideoMuted}
+                            />
+                        </ToolboxContainer>
+                    </ContentContainer>
+                </View>
+            </SafeAreaView>
+        </>
+    ) : (
         <JitsiMeeting
 
             ref={jitsiMeetingRef}
@@ -450,10 +775,15 @@ const CallScreen = ({
                 subject: 'kMeet',
                 disableModeratorIndicator: true,
 
+                // Start calls with audio muted
+                // https://github.com/jitsi/jitsi-meet/blob/0913554af97e91f14b5a63ce8c8579755f1405a7/config.js#L187
+                startAudioMuted: 0,
+                startWithAudioMuted: audioMuted,
+
                 // Start calls with video muted
                 // https://github.com/jitsi/jitsi-meet/blob/0913554af97e91f14b5a63ce8c8579755f1405a7/config.js#L290
                 startVideoMuted: 0,
-                startWithVideoMuted: false,
+                startWithVideoMuted: videoMuted,
             }}
 
             token={conferenceJWT}
@@ -479,7 +809,8 @@ const CallScreen = ({
                  * For DM channels : Join immediatly like you would when answering a call
                  * For other channels : Ask if the user wants to enable his audio/video, but only if it's not the one that created the conference
                  */
-                'prejoinpage.enabled': !isDMorGM && !isCurrentUserInitiator,
+                // 'prejoinpage.enabled': !isDMorGM && !isCurrentUserInitiator,
+                'prejoinpage.enabled': true,
                 'prejoinpage.hideDisplayName': true,
 
                 // Disable breakout-rooms
@@ -492,7 +823,7 @@ const CallScreen = ({
                 'call-integration.enabled': Platform.OS === 'android',
             }}
             style={{flex: 1}}
-            room={channelId}
+            room={channelId ?? ''}
             serverURL={kMeetServerUrl}
             userInfo={userInfo}
         />
