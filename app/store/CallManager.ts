@@ -3,6 +3,7 @@
 
 import {Platform} from 'react-native';
 
+import {handleConferenceDeletedById, handleConferenceUpdatedById} from '@actions/websocket/conference';
 import {Screens} from '@app/constants';
 import {getFullName} from '@app/utils/user';
 import ClientError from '@client/rest/error';
@@ -76,7 +77,7 @@ class CallManager {
      */
     leaveCallScreen = async (
         {serverId, conferenceId}: CallEndedEvent,
-        initiator: 'native' | 'internal' = 'native',
+        initiator: 'api' | 'internal' | 'native' = 'native',
     ): Promise<void> => {
         const leaveCall = this.callScreenRef.current?.leaveCall;
         if (typeof leaveCall === 'function') {
@@ -89,23 +90,45 @@ class CallManager {
         }
     };
 
-    leaveCall = async (serverUrl: string, conferenceId: string): Promise<ReturnType<typeof withServerUrl> | null> => {
+    leaveCall = async (serverUrl: string, conferenceId: string): Promise<ApiCall | null> => {
         try {
-            return withServerUrl(await NetworkManager.getClient(serverUrl).leaveCall(conferenceId));
+            // Delete the conference localy by updating it's 'delete_at' column
+            handleConferenceDeletedById(serverUrl, conferenceId);
+
+            // Notify backend about left call
+            return await NetworkManager.getClient(serverUrl).leaveCall(conferenceId);
         } catch (error) {
             // logError(error);
             return null;
         }
     };
 
-    muteCall = (isMuted: boolean) => {
-        if (this.callScreenRef.current !== null) {
-            this.callScreenRef.current.muteCall(isMuted);
+    cancelCall = async (serverUrl: string, conferenceId: string): Promise<ApiCall | null> => {
+        try {
+            // Delete the conference localy by updating it's 'delete_at' column
+            handleConferenceDeletedById(serverUrl, conferenceId);
+
+            // Notify backend about left call
+            return await NetworkManager.getClient(serverUrl).cancelCall(conferenceId);
+        } catch (error) {
+            // logError(error);
+            return null;
         }
     };
-    muteVideo = (isMuted: boolean) => {
-        if (this.callScreenRef.current !== null) {
-            this.callScreenRef.current.muteVideo(isMuted);
+
+    /**
+     * Propagate state change via imperative handle
+     */
+    toggleAudioMuted = (isMuted?: boolean) => {
+        const toggleAudioMuted = this.callScreenRef.current?.toggleAudioMuted;
+        if (typeof toggleAudioMuted === 'function') {
+            toggleAudioMuted(isMuted);
+        }
+    };
+    toggleVideoMuted = (isMuted?: boolean) => {
+        const toggleVideoMuted = this.callScreenRef.current?.toggleVideoMuted;
+        if (typeof toggleVideoMuted === 'function') {
+            toggleVideoMuted(isMuted);
         }
     };
 
@@ -137,6 +160,11 @@ class CallManager {
             ]);
 
             if (call !== null) {
+                // Ensure that the conference is not deleted
+                // this might happen since startCall might actually answer an old call
+                // that has been deleted locally, but has not remotely
+                await handleConferenceUpdatedById(serverUrl, call.id, {deleteAt: undefined});
+
                 // Setup CALL screen props
                 // - title
                 const translations = getTranslations(userProfile.locale);

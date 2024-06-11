@@ -109,11 +109,11 @@ class GlobalEventHandler {
     };
 
     onCallMuted = async (event: CallMutedEvent) => {
-        CallManager.muteCall(event.isMuted === 'true');
+        CallManager.toggleAudioMuted(event.isMuted === 'true');
     };
 
     onCallVideoMuted = async (event: CallMutedEvent) => {
-        CallManager.muteVideo(event.isMuted === 'true');
+        CallManager.toggleVideoMuted(event.isMuted === 'true');
     };
 
     onSplitViewChanged = async (result: SplitViewResult) => {
