@@ -119,7 +119,7 @@ class CallManager {
      */
     onCall = async (
         serverUrl: string, channelId: string,
-        {conferenceId, /*conferenceJWT, */initiator}:
+        {conferenceId, conferenceJWT, initiator}:
         { conferenceId?: string; conferenceJWT?: string; initiator?: 'native' | 'internal' } = {},
     ) => {
         /* eslint-disable multiline-ternary */
@@ -147,7 +147,7 @@ class CallManager {
                     serverUrl: call.server_url,
                     channelId: call.channel_id,
                     conferenceId: call.id,
-                    conferenceJWT: call.jwt,
+                    conferenceJWT: conferenceJWT ?? call.jwt,
                     initiator,
 
                     /**
