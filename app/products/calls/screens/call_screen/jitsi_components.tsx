@@ -15,6 +15,8 @@ const BUTTON_SIZE = 48;
 
 // STYLES
 const styles = {
+
+    /* Outter container */
     contentContainer: {
         alignItems: 'center',
         backgroundColor: BaseTheme.palette.uiBackground,
@@ -37,6 +39,7 @@ const styles = {
         width: '50%',
     } as ViewStyle,
 
+    /* Inner container */
     toolboxContainer: {
         alignItems: 'center',
         backgroundColor: BaseTheme.palette.ui01,
@@ -47,9 +50,10 @@ const styles = {
         justifyContent: 'space-between',
         marginBottom: BaseTheme.spacing[3],
         paddingHorizontal: BaseTheme.spacing[2],
-        width: 148,
+        width: 180,
     } as ViewStyle,
 
+    /* Borderless buttons */
     buttonStylesBorderless: {
         iconStyle: {
             color: BaseTheme.palette.icon01,
@@ -65,6 +69,7 @@ const styles = {
         underlayColor: 'transparent',
     },
 
+    /* Disabled buttons */
     disabledButtonStyles: {
         iconStyle: {opacity: 0.5},
         labelStyle: {opacity: 0.5},
@@ -72,6 +77,7 @@ const styles = {
         underlayColor: undefined,
     },
 
+    /* Toggled buttons */
     toggledButtonStyles: {
         iconStyle: {
             alignSelf: 'center',
@@ -86,11 +92,35 @@ const styles = {
             flexDirection: 'row',
             height: BUTTON_SIZE,
             justifyContent: 'center',
-            marginHorizontal: 6,
-            marginVertical: 6,
+            marginHorizontal: 4,
+            marginVertical: 4,
             width: BUTTON_SIZE,
         },
         underlayColor: 'transparent',
+    },
+
+    /* Hangup button */
+    hangupButtonStyles: {
+        iconStyle: {
+            alignSelf: 'center',
+            fontSize: 24,
+            color: BaseTheme.palette.icon01,
+        },
+        style: {
+            borderRadius: BaseTheme.shape.borderRadius,
+            borderWidth: 0,
+            flex: 0,
+            flexDirection: 'row',
+            height: BUTTON_SIZE,
+            justifyContent: 'center',
+            marginHorizontal: 6,
+            marginVertical: 6,
+            width: BUTTON_SIZE,
+
+            // backgroundColor: schemeColor('hangup'),
+            backgroundColor: 'rgb(227,79,86)',
+        },
+        underlayColor: BaseTheme.palette.ui04,
     },
 };
 
@@ -178,3 +208,23 @@ export const VideoMuteButton = translate((
         />
     );
 });
+
+export const HangupButton = translate((
+    {onPress, ...props}:
+    {onPress: ToolboxItem['props']['onClick']} & WithTranslation,
+) => (
+    <ToolboxItem
+        onClick={onPress}
+
+        label={'toolbar.hangup'}
+        labelProps={undefined}
+        accessibilityLabel={'toolbar.accessibilityLabel.hangup'}
+        tooltip={'toolbar.hangup'}
+
+        elementAfter={null}
+        icon={JitsiIcon.IconHangup}
+        styles={styles.hangupButtonStyles}
+
+        {...props}
+    />
+));

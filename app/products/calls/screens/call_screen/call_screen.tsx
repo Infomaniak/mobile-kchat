@@ -9,7 +9,7 @@ import React, {useCallback, useEffect, useMemo, useRef, useState, type Component
 import {useIntl} from 'react-intl';
 import {ActivityIndicator, DeviceEventEmitter, FlatList, NativeModules, Platform, View} from 'react-native';
 import {Navigation} from 'react-native-navigation';
-import {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
+import {useAnimatedStyle} from 'react-native-reanimated';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 
 import {updateLocalCustomStatus} from '@actions/local/user';
@@ -27,6 +27,8 @@ import {changeOpacity, makeStyleSheetFromTheme} from '@app/utils/theme';
 import {typography} from '@app/utils/typography';
 import {getUserCustomStatus, getUserTimezone} from '@app/utils/user';
 import {usePermissionsChecker} from '@calls/hooks';
+import {AudioMuteButton, ContentContainer, HangupButton, ToolboxContainer, VideoMuteButton} from '@calls/screens/call_screen/jitsi_components';
+import RippleIcon from '@calls/screens/call_screen/ripple_icon';
 import NavigationHeader from '@components/navigation_header';
 import Image from '@components/profile_picture/image';
 import {General, Screens} from '@constants';
@@ -34,8 +36,6 @@ import DatabaseManager from '@database/manager';
 import {debounce} from '@helpers/api/general';
 import CallManager from '@store/CallManager';
 import {isDMorGM as isChannelDMorGM} from '@utils/channel';
-
-import {AudioMuteButton, ContentContainer, ToolboxContainer, VideoMuteButton} from './jitsi_components';
 
 import type ChannelModel from '@typings/database/models/servers/channel';
 import type ConferenceModel from '@typings/database/models/servers/conference';
@@ -373,14 +373,14 @@ const CallScreen = ({
 
     /**
      * The "Calling..." screen should only be displayed if :
+     *  - the current channel is a DM
      *  - the current user is the call initiator (the caller)
-     *  - the meeting as exactly two participants (it's a direct call and not a meeting)
      *  - there are no participants in the meeting other than possibly the current user him/herself
      *  - the meeting screen has never been displayed (you cannot go back to the calling screen)
      */
     const shouldDisplayCallingScreen = (
+        isDM &&
         isCurrentUserInitiator &&
-        participantCount === 2 &&
         participantApprovedCount === 0 &&
         jitsiMeetingMountedRef.current === false
     );
@@ -670,17 +670,9 @@ const CallScreen = ({
     //     top: defaultHeight,
     // }), [defaultHeight]);
     const styles = getStyleSheet(theme);
-    const {scrollPaddingTop, scrollRef, scrollValue, onScroll, headerHeight} = useCollapsibleHeader<FlatList<string>>(true);
-    const paddingTop = useMemo(() => ({paddingTop: scrollPaddingTop, flexGrow: 1}), [scrollPaddingTop]);
-    const opacity = useSharedValue(hasCallName ? 1 : 0);
-    const scale = useSharedValue(hasCallName ? 1 : 0.7);
-    const animated = useAnimatedStyle(() => ({
-        opacity: withTiming(opacity.value, {duration: 150}),
-        transform: [{scale: withTiming(scale.value, {duration: 150})}],
-    }), []);
-    const top = useAnimatedStyle(() => ({
-        top: headerHeight.value,
-    }));
+    const {scrollPaddingTop, scrollValue, headerHeight} = useCollapsibleHeader<FlatList<string>>(true);
+    const paddingTop = useMemo(() => ({flexGrow: 1/*, paddingTop: scrollPaddingTop*/}), [scrollPaddingTop]);
+    const top = useAnimatedStyle(() => ({top: headerHeight.value}));
 
     // EFFECTS
     useEffect(() => {
@@ -737,17 +729,19 @@ const CallScreen = ({
                                     size='large'
                                 />
                             ) : (
-                                <Image
-                                    author={recipient}
-                                    iconSize={48}
-                                    size={256}
-                                    url={serverUrl}
-                                />
+                                <>
+                                    <RippleIcon/>
+                                    <Image
+                                        author={recipient}
+                                        iconSize={48}
+                                        size={178}
+                                        url={serverUrl}
+                                    />
+                                </>
                             )
                         }
                     </View>
 
-                    {/* TODO */}
                     {/* <ContentContainer aspectRatio={isWide ? 'wide' : 'narrow'}> */}
                     <ContentContainer>
                         <ToolboxContainer>
@@ -758,8 +752,13 @@ const CallScreen = ({
                             />
                             <VideoMuteButton
                                 videoMuted={videoMuted}
-                                disabled={false} // TODO
+                                disabled={false}
                                 onPress={toggleVideoMuted}
+                            />
+                            <HangupButton
+                                onPress={() => {
+                                    leaveCall('internal');
+                                }}
                             />
                         </ToolboxContainer>
                     </ContentContainer>
