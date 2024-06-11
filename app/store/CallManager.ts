@@ -1,8 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Platform} from 'react-native';
-
 import {handleConferenceDeletedById, handleConferenceUpdatedById} from '@actions/websocket/conference';
 import {Screens} from '@app/constants';
 import {getFullName} from '@app/utils/user';
@@ -203,7 +201,9 @@ class CallManager {
                     },
                     topBar: {
                         background: {color: '#000'},
-                        visible: Platform.OS === 'android',
+
+                        // visible: Platform.OS === 'android',
+                        visible: false,
                     },
                 };
 
