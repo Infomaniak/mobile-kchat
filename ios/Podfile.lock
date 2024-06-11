@@ -437,6 +437,8 @@ PODS:
     - React-Core
   - react-native-cameraroll (7.0.0):
     - React-Core
+  - react-native-color-matrix-image-filters (6.0.9):
+    - React-Core
   - react-native-cookies (6.2.1):
     - React-Core
   - react-native-create-thumbnail (1.6.4):
@@ -785,6 +787,7 @@ DEPENDENCIES:
   - react-native-app-auth (from `../node_modules/react-native-app-auth`)
   - react-native-background-timer (from `../node_modules/react-native-background-timer`)
   - "react-native-cameraroll (from `../node_modules/@react-native-camera-roll/camera-roll`)"
+  - react-native-color-matrix-image-filters (from `../node_modules/react-native-color-matrix-image-filters`)
   - "react-native-cookies (from `../node_modules/@react-native-cookies/cookies`)"
   - react-native-create-thumbnail (from `../node_modules/react-native-create-thumbnail`)
   - react-native-document-picker (from `../node_modules/react-native-document-picker`)
@@ -955,6 +958,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-background-timer"
   react-native-cameraroll:
     :path: "../node_modules/@react-native-camera-roll/camera-roll"
+  react-native-color-matrix-image-filters:
+    :path: "../node_modules/react-native-color-matrix-image-filters"
   react-native-cookies:
     :path: "../node_modules/@react-native-cookies/cookies"
   react-native-create-thumbnail:
@@ -1162,6 +1167,7 @@ SPEC CHECKSUMS:
   react-native-app-auth: 05c3b875b27bb65fe321bd5dc38cc1c04c5158be
   react-native-background-timer: 17ea5e06803401a379ebf1f20505b793ac44d0fe
   react-native-cameraroll: b474e88bc3d27a85315115d26c796cef4586c5ab
+  react-native-color-matrix-image-filters: e2df0971b44f1aba49f4740463fdda857d467adf
   react-native-cookies: f54fcded06bb0cda05c11d86788020b43528a26c
   react-native-create-thumbnail: e022bcdcba8a0b4529a50d3fa1a832ec921be39d
   react-native-document-picker: 2b8f18667caee73a96708a82b284a4f40b30a156
