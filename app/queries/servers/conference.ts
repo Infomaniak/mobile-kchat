@@ -36,7 +36,7 @@ export const observeConferenceParticipantCount = (database: Database, conference
     database.
         get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).
         query(Q.where('conference_id', conferenceId)).
-        observeCount();
+        observeCount(false);
 
 /**
  * Observe the number of conference participants that are in an "approved" status
@@ -55,5 +55,5 @@ export const observeConferenceParticipantApprovedCount = (database: Database, co
     return database.
         get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).
         query(Q.and(...clauses)).
-        observeCount();
+        observeCount(false);
 };
