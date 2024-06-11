@@ -27,7 +27,7 @@ import {changeOpacity, makeStyleSheetFromTheme} from '@app/utils/theme';
 import {typography} from '@app/utils/typography';
 import {getUserCustomStatus, getUserTimezone} from '@app/utils/user';
 import {usePermissionsChecker} from '@calls/hooks';
-import {AudioMuteButton, ContentContainer, HangupButton, ToolboxContainer, VideoMuteButton} from '@calls/screens/call_screen/jitsi_components';
+import {AudioMuteButton, ContentContainer, HangupButton, OutgoingRinging, ToolboxContainer, VideoMuteButton} from '@calls/screens/call_screen/jitsi_components';
 import RippleIcon from '@calls/screens/call_screen/ripple_icon';
 import NavigationHeader from '@components/navigation_header';
 import Image from '@components/profile_picture/image';
@@ -764,6 +764,9 @@ const CallScreen = ({
                     </ContentContainer>
                 </View>
             </SafeAreaView>
+
+            {/* Trigger ringtone */}
+            <OutgoingRinging/>
         </>
     ) : (
         <JitsiMeeting

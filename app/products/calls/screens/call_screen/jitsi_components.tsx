@@ -1,15 +1,19 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {getSdkBundlePath} from '@jitsi/react-native-sdk/react/features/app/functions.native';
 import {translate} from '@jitsi/react-native-sdk/react/features/base/i18n/functions';
 import {DEFAULT_ICON as JitsiIcon} from '@jitsi/react-native-sdk/react/features/base/icons/svg/constants';
+import {Audio} from '@jitsi/react-native-sdk/react/features/base/media/components/index.native';
 import {combineStyles} from '@jitsi/react-native-sdk/react/features/base/styles/functions.any';
 import {type Styles as AbstractToolboxItemStyles} from '@jitsi/react-native-sdk/react/features/base/toolbox/components/AbstractToolboxItem';
 import ToolboxItem from '@jitsi/react-native-sdk/react/features/base/toolbox/components/ToolboxItem.native';
 import BaseTheme from '@jitsi/react-native-sdk/react/features/base/ui/components/BaseTheme.native';
-import React, {useMemo} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef} from 'react';
 import {type WithTranslation} from 'react-i18next';
-import {View, type ViewStyle} from 'react-native';
+import {Platform, View, type ViewStyle} from 'react-native';
+
+import type {AudioElement} from '@jitsi/react-native-sdk/react/features/base/media/components/AbstractAudio';
 
 const BUTTON_SIZE = 48;
 
@@ -228,3 +232,28 @@ export const HangupButton = translate((
         {...props}
     />
 ));
+
+export const OutgoingRinging = ({soundName = 'outgoingRinging.mp3'}: { soundName?: string }) => {
+    const audioElementRef = useRef<AudioElement>();
+    const setRef = useCallback((audioElement: AudioElement) => {
+        audioElementRef.current = audioElement;
+    }, []);
+
+    const soundsPath = Platform.OS === 'ios' ? getSdkBundlePath() : 'asset:/sounds';
+
+    useEffect(() => {
+        audioElementRef.current?.play();
+        return () => {
+            audioElementRef.current?.stop();
+        };
+    });
+
+    /* Load the audio file */
+    return (
+        <Audio
+            setRef={setRef}
+            src={`${soundsPath}/${soundName}`}
+            loop={true}
+        />
+    );
+};
