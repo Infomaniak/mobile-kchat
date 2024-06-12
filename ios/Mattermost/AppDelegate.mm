@@ -19,6 +19,9 @@ NSString* const NOTIFICATION_CLEAR_ACTION = @"clear";
 NSString* const NOTIFICATION_UPDATE_BADGE_ACTION = @"update_badge";
 NSString* const NOTIFICATION_TEST_ACTION = @"test";
 
+NSString* const NOTIFICATION_CANCEL_CALL = @"cancel_call";
+NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
+
 -(void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)(void))completionHandler {
   os_log(OS_LOG_DEFAULT, "Mattermost will attach session from handleEventsForBackgroundURLSession!! identifier=%{public}@", identifier);
   [[GekidouWrapper default] attachSession:identifier completionHandler:completionHandler];
@@ -84,7 +87,23 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
   NSString* action = [userInfo objectForKey:@"type"];
   BOOL isClearAction = (action && [action isEqualToString: NOTIFICATION_CLEAR_ACTION]);
   BOOL isTestAction = (action && [action isEqualToString: NOTIFICATION_TEST_ACTION]);
-
+  BOOL isJoinedAction = (action && [action isEqualToString: NOTIFICATION_JOINED_CALL]);
+  BOOL isCancelAction = (action && [action isEqualToString: NOTIFICATION_CANCEL_CALL]);
+  
+  if (isJoinedAction) {
+    [[CallManager shared] handleJoinedCallWithNotificationPayload:userInfo completion:^{
+      completionHandler(UIBackgroundFetchResultNewData);
+    }];
+    return;
+  }
+  
+  if (isCancelAction) {
+    [[CallManager shared] handleCallCancelledWithNotificationPayload:userInfo completion:^{
+      completionHandler(UIBackgroundFetchResultNewData);
+    }];
+    return;
+  }
+  
   if (isTestAction) {
     completionHandler(UIBackgroundFetchResultNoData);
     return;

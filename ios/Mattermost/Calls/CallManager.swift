@@ -192,18 +192,10 @@ extension CallManager: PKPushRegistryDelegate {
 
     let notificationPayload = payload.dictionaryPayload
 
-    let notificationType = notificationPayload["type"] as? String
-    switch notificationType {
-    case "cancel_call":
-      handleCallCancelled(notificationPayload: notificationPayload, completion: completion)
-    case "joined_call":
-      handleJoinedCall(notificationPayload: notificationPayload, completion: completion)
-    default:
-      handleCallIncomingNotification(notificationPayload: notificationPayload, completion: completion)
-    }
+    handleCallIncomingNotification(notificationPayload: notificationPayload, completion: completion)
   }
 
-  public func handleCallCancelled(notificationPayload: [AnyHashable: Any], completion: @escaping () -> Void) {
+  @objc public func handleCallCancelled(notificationPayload: [AnyHashable: Any], completion: @escaping () -> Void) {
     guard let conferenceId = notificationPayload["conference_id"] as? String,
           let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else {
       completion()
@@ -215,7 +207,7 @@ extension CallManager: PKPushRegistryDelegate {
     completion()
   }
 
-  public func handleJoinedCall(notificationPayload: [AnyHashable: Any], completion: @escaping () -> Void) {
+  @objc public func handleJoinedCall(notificationPayload: [AnyHashable: Any], completion: @escaping () -> Void) {
     guard let conferenceId = notificationPayload["conference_id"] as? String,
           let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value,
           // Only hide call UI if the user joined the call on an other device than this one
@@ -234,6 +226,7 @@ extension CallManager: PKPushRegistryDelegate {
           let conferenceId = notificationPayload["conference_id"] as? String,
           let channelName = notificationPayload["channel_name"] as? String,
           let conferenceJWT = notificationPayload["conference_jwt"] as? String else {
+      print("We are not reporting a call ! This can lead to crash and errors.")
       completion()
       return
     }
