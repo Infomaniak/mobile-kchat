@@ -13,8 +13,11 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
 import com.mattermost.call.CallActivity
-import com.mattermost.call.CancelCallBroadcastReceiver
-import com.mattermost.rnbeta.*
+import com.mattermost.call.IntentUtils.addExtrasToIntent
+import com.mattermost.call.IntentUtils.getDeclineCallPendingIntent
+import com.mattermost.call.IntentUtils.getMainActivityPendingIntent
+import com.mattermost.rnbeta.MainActivity
+import com.mattermost.rnbeta.R
 
 object NotificationUtils {
 
@@ -85,7 +88,7 @@ object NotificationUtils {
 
     @JvmStatic
     fun Context.createCallNotification(
-        notificationExtras: NotificationExtras
+        callExtras: CallExtras
     ): Notification {
         val contentIntent = Intent(this, MainActivity::class.java)
         val contentPendingIntent =
@@ -97,7 +100,7 @@ object NotificationUtils {
             )
 
         val fullScreenIntent = Intent(this, CallActivity::class.java)
-        addExtrasToIntent(fullScreenIntent, notificationExtras)
+        fullScreenIntent.addExtrasToIntent(callExtras)
         val fullScreenPendingIntent =
             PendingIntent.getActivity(
                 this,
@@ -109,17 +112,17 @@ object NotificationUtils {
         return buildCallNotification(
             contentPendingIntent,
             fullScreenPendingIntent,
-            notificationExtras
+            callExtras
         )
     }
 
     @JvmStatic
-    fun Context.dismissCallNotification(canceledConferenceIdCall: String) {
+    fun Context.dismissCallNotification(conferenceIdCall: String) {
         val notificationManagerCompat = NotificationManagerCompat.from(this)
         notificationManagerCompat.activeNotifications.forEach { statusBarNotification ->
             val notificationExtras = statusBarNotification.notification.extras
             notificationExtras.getString(NOTIFICATION_CONFERENCE_ID_KEY)?.let { conferenceId ->
-                if (conferenceId == canceledConferenceIdCall) {
+                if (conferenceId == conferenceIdCall) {
                     notificationManagerCompat.cancel(statusBarNotification.id)
                     return
                 }
@@ -130,8 +133,8 @@ object NotificationUtils {
     private fun Context.buildCallNotification(
         contentPendingIntent: PendingIntent,
         fullScreenPendingIntent: PendingIntent,
-        notificationExtras: NotificationExtras
-    ): Notification = with(notificationExtras) {
+        callExtras: CallExtras
+    ): Notification = with(callExtras) {
         return NotificationCompat.Builder(this@buildCallNotification, CHANNEL_ID_CALL)
             .setSmallIcon(R.drawable.ic_kchat_notification)
             .setContentTitle(
@@ -141,64 +144,25 @@ object NotificationUtils {
                 )
             )
             .setAutoCancel(false)
-            .setContentIntent(contentPendingIntent)
+            //.setContentIntent(contentPendingIntent)
             .setFullScreenIntent(fullScreenPendingIntent, true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_CALL)
             .addAction(
                 R.drawable.ic_decline,
                 this@buildCallNotification.getString(R.string.declineCall),
-                getDeclineCallPendingIntent(notificationExtras)
+                this@buildCallNotification.getDeclineCallPendingIntent(callExtras)
             )
             .addAction(
                 R.drawable.ic_accept,
                 this@buildCallNotification.getString(R.string.acceptCall),
-                getMainActivityPendingIntent(notificationExtras)
+                this@buildCallNotification.getMainActivityPendingIntent(callExtras)
             )
             .setExtras(bundleOf(NOTIFICATION_CONFERENCE_ID_KEY to conferenceId))
             .build()
     }
 
-    private fun addExtrasToIntent(
-        intent: Intent,
-        notificationExtras: NotificationExtras
-    ) = with(notificationExtras) {
-        intent.putExtra(INTENT_EXTRA_CHANNEL_ID_KEY, channelId)
-        intent.putExtra(INTENT_EXTRA_SERVER_ID_KEY, serverId)
-        intent.putExtra(INTENT_EXTRA_CONFERENCE_ID_KEY, conferenceId)
-        intent.putExtra(INTENT_EXTRA_CHANNEL_NAME_KEY, channelName)
-        intent.putExtra(INTENT_EXTRA_CONFERENCE_JWT_KEY, conferenceJWT)
-    }
-
-    private fun Context.getDeclineCallPendingIntent(
-        notificationExtras: NotificationExtras
-    ): PendingIntent {
-        val callEventIntent = Intent(this, CancelCallBroadcastReceiver::class.java)
-        addExtrasToIntent(callEventIntent, notificationExtras)
-
-        return PendingIntent.getBroadcast(
-            this,
-            0,
-            callEventIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-        )
-    }
-
-    private fun Context.getMainActivityPendingIntent(
-        notificationExtras: NotificationExtras
-    ): PendingIntent {
-        val intent = Intent(this@getMainActivityPendingIntent, MainActivity::class.java)
-        addExtrasToIntent(intent, notificationExtras)
-
-        return PendingIntent.getActivity(
-            this@getMainActivityPendingIntent,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-        )
-    }
-
-    data class NotificationExtras(
+    data class CallExtras(
         val channelId: String? = null,
         val serverId: String? = null,
         val conferenceId: String? = null,

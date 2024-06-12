@@ -15,6 +15,9 @@ class CallManagerModule(private var reactContext: ReactApplicationContext) : Rea
         private var instance: CallManagerModule? = null
 
         @JvmStatic
+        var onModuleInitializedListener: (() -> Unit)? = null
+
+        @JvmStatic
         fun getInstance(reactContext: ReactApplicationContext): CallManagerModule {
             if (instance == null) {
                 instance = CallManagerModule(reactContext)
@@ -32,6 +35,11 @@ class CallManagerModule(private var reactContext: ReactApplicationContext) : Rea
     }
 
     override fun getName() = "CallManagerModule"
+
+    override fun initialize() {
+        super.initialize()
+        onModuleInitializedListener?.invoke()
+    }
 
     private fun sendEvent(eventName: String, params: WritableMap?) {
         reactContext

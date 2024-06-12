@@ -10,8 +10,9 @@ import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.mattermost.call.IntentUtils.getMainActivityIntent
+import com.mattermost.call.IntentUtils.getMainActivityPendingIntent
 import com.mattermost.notification.NotificationUtils
 import com.mattermost.notification.NotificationUtils.dismissCallNotification
 import com.mattermost.rnbeta.*
@@ -39,6 +40,7 @@ class CallActivity : AppCompatActivity() {
     }
 
     private val localBroadcastManager by lazy { LocalBroadcastManager.getInstance(this) }
+    private val keyguardManager by lazy { getSystemService(KEYGUARD_SERVICE) as KeyguardManager }
 
     private val dismissCallReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -61,12 +63,12 @@ class CallActivity : AppCompatActivity() {
         idCaller.text = channelName
         answerButton.setOnClickListener {
             conferenceId?.let { dismissCallNotification(it) }
-            askToUnlockPhone()
+            if (keyguardManager.isKeyguardLocked) askToUnlockPhone() else acceptCall()
         }
         declineButton.setOnClickListener {
             conferenceId?.let { dismissCallNotification(it) }
             callManagerModule?.callEnded(serverId = serverId!!, conferenceId = conferenceId!!)
-            leaveActivity()
+            finish()
         }
 
         localBroadcastManager.registerReceiver(
@@ -75,18 +77,13 @@ class CallActivity : AppCompatActivity() {
         )
     }
 
-    private fun leaveActivity() {
-        NotificationManagerCompat.from(this@CallActivity).cancel(-1)
-        finish()
-    }
-
     @Suppress("DEPRECATION")
     private fun configureActivityOverLockScreen() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
         } else {
-            this.window.addFlags(
+            window.addFlags(
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
                         WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
                         WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
@@ -96,19 +93,30 @@ class CallActivity : AppCompatActivity() {
 
     private fun askToUnlockPhone() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            val keyguardManager = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
             keyguardManager.requestDismissKeyguard(this, object : KeyguardDismissCallback() {
                 override fun onDismissSucceeded() {
                     super.onDismissSucceeded()
-                    callManagerModule?.callAnswered(
-                        serverId = serverId!!,
-                        channelId = channelId!!,
-                        conferenceJWT = conferenceJWT!!
-                    )
-                    leaveActivity()
+                    acceptCall()
                 }
             })
         }
+    }
+
+    private fun acceptCall() {
+        val callExtras = NotificationUtils.CallExtras(
+            channelId,
+            serverId,
+            conferenceId,
+            channelName,
+            conferenceJWT
+        )
+        startActivity(getMainActivityIntent(callExtras))
+        /*callManagerModule?.callAnswered(
+            serverId = serverId!!,
+            channelId = channelId!!,
+            conferenceJWT = conferenceJWT!!
+        )*/
+        finish()
     }
 
     override fun onDestroy() {
