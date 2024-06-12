@@ -26,7 +26,6 @@ const styles = {
         backgroundColor: BaseTheme.palette.uiBackground,
         bottom: 0,
         display: 'flex',
-        height: 280,
         justifyContent: 'center',
         position: 'absolute',
         width: '100%',
