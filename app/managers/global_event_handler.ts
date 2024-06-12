@@ -41,6 +41,8 @@ class GlobalEventHandler {
         // callManagerEmitter.addListener('CallVideoMuted', this.onCallMuted);
         splitViewEmitter.addListener('SplitViewChanged', this.onSplitViewChanged);
         Linking.addEventListener('url', this.onDeepLink);
+
+        this.initialized();
     }
 
     init = () => {
@@ -51,7 +53,7 @@ class GlobalEventHandler {
     initialized = () => {
         const {initialized} = NativeModules.CallManagerModule;
         if (typeof initialized === 'function') {
-            setTimeout(initialized, 2000);
+            initialized();
         }
     };
 
