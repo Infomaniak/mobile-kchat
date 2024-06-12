@@ -93,7 +93,7 @@ object NotificationUtils {
                 this,
                 0,
                 contentIntent,
-                PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
             )
 
         val fullScreenIntent = Intent(this, CallActivity::class.java)
@@ -103,7 +103,7 @@ object NotificationUtils {
                 this,
                 0,
                 fullScreenIntent,
-                PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
             )
 
         return buildCallNotification(
