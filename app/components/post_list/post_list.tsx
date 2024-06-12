@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {FlatList} from '@stream-io/flat-list-mvcp';
-import React, {type ReactElement, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {type ReactElement, useCallback, useEffect, useMemo, useRef, useState, useImperativeHandle} from 'react';
 import {DeviceEventEmitter, type ListRenderItemInfo, Platform, type StyleProp, StyleSheet, type ViewStyle, type NativeSyntheticEvent, type NativeScrollEvent} from 'react-native';
 import Animated, {type AnimatedStyle} from 'react-native-reanimated';
 
@@ -63,6 +63,12 @@ type ScrollIndexFailed = {
     highestMeasuredFrameIndex: number;
     averageItemLength: number;
 };
+
+export type PostListHandle = {
+  scrollToEnd: () => void;
+};
+
+export const postListRef = React.createRef<PostListHandle>();
 
 const CONTENT_OFFSET_THRESHOLD = 160;
 
@@ -329,6 +335,8 @@ const PostList = ({
     const onScrollToEnd = useCallback(() => {
         listRef.current?.scrollToOffset({offset: 0, animated: true});
     }, []);
+
+    useImperativeHandle(postListRef, () => ({scrollToEnd: onScrollToEnd}));
 
     useEffect(() => {
         const t = setTimeout(() => {

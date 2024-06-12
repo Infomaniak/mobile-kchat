@@ -15,6 +15,7 @@ import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 import {updateLocalCustomStatus} from '@actions/local/user';
 import {fetchChannelMemberships, switchToChannelById} from '@actions/remote/channel';
 import {unsetCustomStatus, updateCustomStatus} from '@actions/remote/user';
+import {postListRef} from '@app/components/post_list/post_list';
 import {CustomStatusDurationEnum, SET_CUSTOM_STATUS_FAILURE} from '@app/constants/custom_status';
 import {useServerId} from '@app/context/server';
 import {useTheme} from '@app/context/theme';
@@ -560,7 +561,14 @@ const CallScreen = ({
             const database = DatabaseManager.serverDatabases[serverUrl]?.database;
             if (typeof database !== 'undefined') {
                 getCommonSystemValues(database).then((system) => {
-                    if (system.currentChannelId !== channelId) {
+                    if (system.currentChannelId === channelId) {
+                        // Scroll to end of post list
+                        const scrollToEnd = postListRef.current?.scrollToEnd;
+                        if (typeof scrollToEnd === 'function') {
+                            scrollToEnd();
+                        }
+                    } else {
+                        // Go to this kMeet's related channel
                         switchToChannelById(serverUrl, channelId);
                     }
                 });
