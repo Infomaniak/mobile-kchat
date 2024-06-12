@@ -43,10 +43,10 @@ export const observeConferenceParticipantCount = (database: Database, conference
  * (ie. they are currently in the call)
  * Possibly ignore a user ids (the caller)
  */
-export const observeConferenceParticipantApprovedCount = (database: Database, conferenceId: string, ignoredUserId?: string) => {
+export const observeConferenceParticipantPresentCount = (database: Database, conferenceId: string, ignoredUserId?: string) => {
     const clauses: Q.Where[] = [
         Q.where('conference_id', conferenceId),
-        Q.where('status', 'approved'),
+        Q.where('present', true),
     ];
     if (typeof ignoredUserId === 'string') {
         clauses.push(Q.where('user_id', Q.notEq(ignoredUserId)));

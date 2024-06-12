@@ -3,7 +3,7 @@
 
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
 import {withObservables} from '@nozbe/watermelondb/react';
-import React, {useCallback, useEffect, useRef, useState, type ComponentProps} from 'react';
+import React, {useCallback, useEffect, useState, type ComponentProps} from 'react';
 import {StyleSheet, type ListRenderItemInfo} from 'react-native';
 import {of as of$} from 'rxjs';
 
@@ -11,6 +11,7 @@ import {fetchUsersByIds} from '@actions/remote/user';
 import {useOpenUserProfile} from '@app/components/user_avatars_stack/users_list';
 import GestureResponsiveFlatList from '@app/components/user_avatars_stack/users_list/gesture_responsive_flat_list';
 import {useServerUrl} from '@app/context/server';
+import {useMountedRef} from '@app/hooks/utils';
 import IkCallsParticipantStackStatusIcon from '@calls/components/ik_calls_participant_stack/status_icon';
 import Loading from '@components/loading';
 import BaseUserItem from '@components/user_item';
@@ -40,12 +41,7 @@ const UserItem = enhance(({participant, user, ...props}: { participant: Conferen
  */
 export const useFetchParticipantUsers = (participants: ConferenceParticipantModel[]) => {
     const serverUrl = useServerUrl();
-
-    // Save the mounted status
-    const mountedRef = useRef(true);
-    useEffect(() => () => {
-        mountedRef.current = false;
-    }, []);
+    const mountedRef = useMountedRef();
 
     // Asynchronous call should not set state on an unmounted component
     const [participantUsersVersion, setParticipantUsersVersion] = useState(0);
@@ -100,6 +96,7 @@ export const IkCallsParticipantStackList = ({
 
     // EFFECTS
     const loading = useFetchParticipantUsers(participants);
+
     if (loading) {
         return (
             <Loading

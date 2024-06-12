@@ -13,6 +13,8 @@ import React, {useCallback, useEffect, useMemo, useRef} from 'react';
 import {type WithTranslation} from 'react-i18next';
 import {Platform, View, type ViewStyle} from 'react-native';
 
+import {noop} from '@app/helpers/api/general';
+
 import type {AudioElement} from '@jitsi/react-native-sdk/react/features/base/media/components/AbstractAudio';
 
 const BUTTON_SIZE = 48;
@@ -232,7 +234,10 @@ export const HangupButton = translate((
     />
 ));
 
-export const OutgoingRinging = ({soundName = 'outgoingRinging.mp3'}: { soundName?: string }) => {
+export const OutgoingRinging = (
+    {play = true, soundName = 'outgoingRinging.mp3'}:
+    { play: boolean; soundName?: string },
+) => {
     const audioElementRef = useRef<AudioElement>();
     const setRef = useCallback((audioElement: AudioElement) => {
         audioElementRef.current = audioElement;
@@ -241,11 +246,14 @@ export const OutgoingRinging = ({soundName = 'outgoingRinging.mp3'}: { soundName
     const soundsPath = Platform.OS === 'ios' ? getSdkBundlePath() : 'asset:/sounds';
 
     useEffect(() => {
-        audioElementRef.current?.play();
-        return () => {
-            audioElementRef.current?.stop();
-        };
-    });
+        if (play) {
+            audioElementRef.current?.play();
+            return () => {
+                audioElementRef.current?.stop();
+            };
+        }
+        return noop;
+    }, [play]);
 
     /* Load the audio file */
     return (

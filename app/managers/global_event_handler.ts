@@ -48,6 +48,13 @@ class GlobalEventHandler {
         this.JavascriptAndNativeErrorHandler?.initializeErrorHandling();
     };
 
+    initialized = () => {
+        const {initialized} = NativeModules.CallManagerModule;
+        if (typeof initialized === 'function') {
+            setTimeout(initialized, 2000);
+        }
+    };
+
     configureAnalytics = async (serverUrl: string, config?: ClientConfig) => {
         if (serverUrl && config?.DiagnosticsEnabled === 'true' && config?.DiagnosticId && LocalConfig.RudderApiKey) {
             let client = analytics.get(serverUrl);

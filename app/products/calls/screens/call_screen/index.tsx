@@ -6,8 +6,8 @@ import {of as of$} from 'rxjs';
 import {distinctUntilChanged, mergeMap, switchMap} from 'rxjs/operators';
 
 import {observeChannel} from '@app/queries/servers/channel';
-import {observeConference, observeConferenceParticipantCount, observeConferenceParticipantApprovedCount} from '@app/queries/servers/conference';
-import CallScreen from '@calls/screens/call_screen/call_screen';
+import {observeConference, observeConferenceParticipantCount, observeConferenceParticipantPresentCount} from '@app/queries/servers/conference';
+import CallScreen, {type PassedProps} from '@calls/screens/call_screen/call_screen';
 import {observeGlobalCallsState} from '@calls/state';
 import {observeCurrentUserId} from '@queries/servers/system';
 import {observeUser} from '@queries/servers/user';
@@ -16,35 +16,23 @@ import type {WithDatabaseArgs} from '@typings/database/database';
 
 const enhance = withObservables(['channelId', 'conferenceId'], (
     {channelId, conferenceId, database: db}:
-    WithDatabaseArgs & { channelId?: string; conferenceId?: string },
+    WithDatabaseArgs & Pick<PassedProps, 'channelId' | 'conferenceId'>,
 ) => {
-    const channel = typeof channelId === 'string' ? observeChannel(db, channelId) : of$(undefined);
     const currentUserId = observeCurrentUserId(db);
-    const currentUser = currentUserId.pipe(mergeMap((userId) => observeUser(db, userId)));
-
-    const micPermissionsGranted = observeGlobalCallsState().pipe(
-        switchMap((gs) => of$(gs.micPermissionsGranted)),
-        distinctUntilChanged(),
-    );
-
-    const {conference, participantCount, participantApprovedCount} = typeof conferenceId === 'string' ? {
-        conference: observeConference(db, conferenceId),
-        participantCount: observeConferenceParticipantCount(db, conferenceId),
-        participantApprovedCount: currentUserId.pipe(mergeMap((userId) => observeConferenceParticipantApprovedCount(db, conferenceId, userId))),
-    } : {
-        conference: of$(undefined),
-        participantCount: of$(0),
-        participantApprovedCount: of$(0),
-    };
 
     return {
-        channel,
-        conference,
-        currentUser,
-        currentUserId,
-        micPermissionsGranted,
-        participantCount,
-        participantApprovedCount,
+        channel: observeChannel(db, channelId),
+        currentUserId: observeCurrentUserId(db),
+        currentUser: currentUserId.pipe(mergeMap((userId) => observeUser(db, userId))),
+
+        micPermissionsGranted: observeGlobalCallsState().pipe(
+            switchMap((gs) => of$(gs.micPermissionsGranted)),
+            distinctUntilChanged(),
+        ),
+
+        conference: observeConference(db, conferenceId),
+        participantCount: observeConferenceParticipantCount(db, conferenceId),
+        participantApprovedCount: currentUserId.pipe(mergeMap((userId) => observeConferenceParticipantPresentCount(db, conferenceId, userId))),
     };
 });
 

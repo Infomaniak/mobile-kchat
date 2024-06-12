@@ -16,24 +16,21 @@ import type {CallScreenHandle, PassedProps} from '@calls/screens/call_screen/cal
 import type {MutableRefObject} from 'react';
 import type {Options} from 'react-native-navigation';
 
-/**
- * Extract the kMeet server_url from the ApiCall response
- * add it to the returned object
- */
-const withServerUrl = (call: ApiCall): ApiCall & { server_url: string } => ({
-    ...call,
-    server_url: call.url.replace(`/${call.channel_id}`, ''),
-});
-
 class CallManager {
     callScreenRef: MutableRefObject<CallScreenHandle | null> = {current: null};
     registerCallScreen = (callScreen: CallScreenHandle | null) => {
         this.callScreenRef.current = callScreen;
     };
 
-    startCall = async (serverUrl: string, channelId: string, allowAnswer = true): Promise<ReturnType<typeof withServerUrl> | null> => {
+    startCall = async (serverUrl: string, channelId: string, allowAnswer = true): Promise<ApiCall & { answered: boolean; server_url: string } | null> => {
         try {
-            return withServerUrl(await NetworkManager.getClient(serverUrl).startCall(channelId));
+            const call = await NetworkManager.getClient(serverUrl).startCall(channelId);
+
+            return {
+                ...call,
+                answered: false,
+                server_url: call.url.replace(`/${call.channel_id}`, ''),
+            };
         } catch (error) {
             // If this call already exists start a new one
             if (
@@ -53,7 +50,13 @@ class CallManager {
 
     answerCall = async (serverUrl: string, conferenceId: string, channelId?: string) => {
         try {
-            return withServerUrl(await NetworkManager.getClient(serverUrl).answerCall(conferenceId));
+            const call = await NetworkManager.getClient(serverUrl).answerCall(conferenceId);
+
+            return {
+                ...call,
+                answered: true,
+                server_url: call.url.replace(`/${call.channel_id}`, ''),
+            };
         } catch (error) {
             // Start a new call if this one no longer exists
             if (
@@ -161,10 +164,12 @@ class CallManager {
 
                 // - passedProps
                 const passedProps: PassedProps = {
-                    serverUrl: call.server_url,
+                    serverUrl,
+                    kMeetServerUrl: call.server_url,
                     channelId: call.channel_id,
                     conferenceId: call.id,
-                    conferenceJWT: conferenceJWT ?? call.jwt,
+                    conferenceJWT: conferenceJWT ?? call.jwt ?? '',
+                    answered: call.answered,
                     initiator,
 
                     /**

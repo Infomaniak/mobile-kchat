@@ -16,7 +16,7 @@ import {updateLocalCustomStatus} from '@actions/local/user';
 import {fetchChannelMemberships, switchToChannelById} from '@actions/remote/channel';
 import {unsetCustomStatus, updateCustomStatus} from '@actions/remote/user';
 import {CustomStatusDurationEnum, SET_CUSTOM_STATUS_FAILURE} from '@app/constants/custom_status';
-import {useServerId, useServerUrl} from '@app/context/server';
+import {useServerId} from '@app/context/server';
 import {useTheme} from '@app/context/theme';
 import {useCollapsibleHeader} from '@app/hooks/header';
 import {useMountedRef, useRerender, useTransientRef} from '@app/hooks/utils';
@@ -43,9 +43,11 @@ import type UserModel from '@typings/database/models/servers/user';
 
 export type PassedProps = {
     serverUrl: string;
-    channelId?: string;
-    conferenceId?: string;
-    conferenceJWT?: string;
+    kMeetServerUrl: string;
+    channelId: string;
+    conferenceId: string;
+    conferenceJWT: string;
+    answered: boolean;
     initiator?: 'internal' | 'native';
     userInfo: ComponentProps<typeof JitsiMeeting>['userInfo'];
 };
@@ -275,15 +277,16 @@ const CallScreen = ({
     micPermissionsGranted,
     participantCount,
     participantApprovedCount,
+    answered,
     initiator,
-    serverUrl: kMeetServerUrl,
+    serverUrl,
+    kMeetServerUrl,
     userInfo,
 }: Props) => {
     const {formatMessage} = useIntl();
     const mountedRef = useMountedRef();
     const rerender = useRerender();
     const serverId = useServerId();
-    const serverUrl = useServerUrl();
     const theme = useTheme();
 
     /**
@@ -369,7 +372,12 @@ const CallScreen = ({
     /**
      * Is the current user the one that initiated the conference
      */
-    const isCurrentUserInitiator = currentUserId === conference?.userId;
+    const isCurrentUserInitiator = !answered;
+
+    /**
+     * Display the loading screen if the conference has not been loaded yet
+     */
+    const shouldDisplayLoadingScreen = !conference;
 
     /**
      * The "Calling..." screen should only be displayed if :
@@ -390,10 +398,7 @@ const CallScreen = ({
      */
     const callUsersRef = useRef<UserProfile[]>();
     const getCallUsers = useCallback(async () => {
-        if (
-            typeof channelId === 'string' &&
-            typeof callUsersRef.current === 'undefined'
-        ) {
+        if (typeof callUsersRef.current === 'undefined') {
             // Find the recipients for DM or GM calls
             if (isDMorGM) {
                 // Remove current user from list
@@ -553,7 +558,7 @@ const CallScreen = ({
 
             // Return back to the channel where this meeting has been started
             const database = DatabaseManager.serverDatabases[serverUrl]?.database;
-            if (typeof channelId === 'string' && typeof database !== 'undefined') {
+            if (typeof database !== 'undefined') {
                 getCommonSystemValues(database).then((system) => {
                     if (system.currentChannelId !== channelId) {
                         switchToChannelById(serverUrl, channelId);
@@ -561,30 +566,28 @@ const CallScreen = ({
                 });
             }
 
-            if (typeof conferenceId === 'string') {
-                if (leaveInitiator !== 'native') {
-                    // Notify OS about the end of the call
-                    nativeReporters.callEnded(conferenceId);
-                }
+            if (leaveInitiator !== 'native') {
+                // Notify OS about the end of the call
+                nativeReporters.callEnded(conferenceId);
+            }
 
-                if (typeof jitsiMeetingRef.current?.close === 'function') {
-                    // Terminate the <JitsiMeeting />
-                    try {
-                        jitsiMeetingRef.current.close();
-                    } catch (e) {
-                        logError('JitsiMeeting could not be closed', e);
-                    }
+            if (typeof jitsiMeetingRef.current?.close === 'function') {
+                // Terminate the <JitsiMeeting />
+                try {
+                    jitsiMeetingRef.current.close();
+                } catch (e) {
+                    logError('JitsiMeeting could not be closed', e);
                 }
+            }
 
-                // Only notify the backend, if it's not the backend that notified us!
-                if (leaveInitiator !== 'api') {
-                    if (isUserInsideCall) {
-                        // Call has been left by user
-                        CallManager.leaveCall(serverUrl, conferenceId);
-                    } else {
-                        // User canceled the call before it even started!
-                        CallManager.cancelCall(serverUrl, conferenceId);
-                    }
+            // Only notify the backend, if it's not the backend that notified us!
+            if (leaveInitiator !== 'api') {
+                if (isUserInsideCall) {
+                    // Call has been left by user
+                    CallManager.leaveCall(serverUrl, conferenceId);
+                } else {
+                    // User canceled the call before it even started!
+                    CallManager.cancelCall(serverUrl, conferenceId);
                 }
             }
         }
@@ -610,11 +613,7 @@ const CallScreen = ({
 
             // Report that the call started only if the initiator is not native
             //  -> 'internal' initiator means react-native
-            if (
-                initiator !== 'native' &&
-                typeof channelId === 'string' &&
-                typeof conferenceId === 'string'
-            ) {
+            if (initiator !== 'native') {
                 // Trigger native reporter
                 nativeReporters.callStarted(serverId, channelId, conferenceId, await getCallName());
 
@@ -643,7 +642,6 @@ const CallScreen = ({
         },
         onAudioMutedChanged: (isMuted: boolean) => {
             if (
-                typeof conferenceId === 'string' &&
                 typeof jitsiMeetingMountedAtRef.current === 'number' &&
                 hasUpdatedRef(audioMutedRef, isMuted)
             ) {
@@ -652,7 +650,6 @@ const CallScreen = ({
         },
         onVideoMutedChanged: (isMuted: boolean) => {
             if (
-                typeof conferenceId === 'string' &&
                 typeof jitsiMeetingMountedAtRef.current === 'number' &&
                 hasUpdatedRef(videoMutedRef, isMuted)
             ) {
@@ -679,11 +676,8 @@ const CallScreen = ({
         // Register to allow functions from being called by the CallManager
         CallManager.registerCallScreen({leaveCall, toggleAudioMuted, toggleVideoMuted});
 
-        // If the "Calling..." screen is displayed at first render
-        // we also need to fetch the current call name
-        if (shouldDisplayCallingScreen) {
-            getCallName(true); // Async forced re-render
-        }
+        // Fetch the current call name
+        getCallName(true); // Async forced re-render
 
         return () => {
             // Leave/cancel the call on unmount
@@ -704,73 +698,81 @@ const CallScreen = ({
         }
     }, [isConferenceDeleted]);
 
-    return shouldDisplayCallingScreen ? (
-        <>
-            <NavigationHeader
-                isLargeTitle={true}
-                showBackButton={true}
-                onBackPress={eventListeners.onReadyToClose}
-                hasSearch={false}
-                title={formatMessage({id: 'screen.call.calling', defaultMessage: 'Call in progress'})}
-                subtitle={hasCallName ? `${callNameRef.current}${isDMorGM ? '' : ` (${participantCountString})`}` : '...'}
-                scrollValue={scrollValue}
-            />
-            <SafeAreaView
-                style={[styles.flex, top]}
-                edges={EDGES}
-            >
-                <View style={paddingTop}>
-                    {/* Recipient avatar */}
-                    <View style={styles.container}>
-                        {
-                            typeof recipient === 'undefined' ? (
-                                <ActivityIndicator
-                                    color='white'
-                                    size='large'
-                                />
-                            ) : (
-                                <>
-                                    <RippleIcon/>
-                                    <Image
-                                        author={recipient}
-                                        iconSize={48}
-                                        size={178}
-                                        url={serverUrl}
+    if (shouldDisplayLoadingScreen || shouldDisplayCallingScreen) {
+        return (
+            <>
+                <NavigationHeader
+                    isLargeTitle={true}
+                    showBackButton={true}
+                    onBackPress={eventListeners.onReadyToClose}
+                    hasSearch={false}
+                    title={formatMessage({id: 'screen.call.calling', defaultMessage: 'Call in progress'})}
+                    subtitle={hasCallName ? `${callNameRef.current}${isDMorGM ? '' : ` (${participantCountString})`}` : '...'}
+                    scrollValue={scrollValue}
+                />
+                <SafeAreaView
+                    style={[styles.flex, top]}
+                    edges={EDGES}
+                >
+                    <View style={paddingTop}>
+                        {/* Recipient avatar */}
+                        <View style={styles.container}>
+                            {
+                                (shouldDisplayLoadingScreen || typeof recipient === 'undefined') ? (
+                                    <ActivityIndicator
+                                        color='white'
+                                        size='large'
                                     />
-                                </>
-                            )
+                                ) : (
+                                    <>
+                                        <RippleIcon/>
+                                        <Image
+                                            author={recipient}
+                                            iconSize={48}
+                                            size={178}
+                                            url={serverUrl}
+                                        />
+                                    </>
+                                )
+                            }
+                        </View>
+
+                        {/* Toolbox buttons */}
+                        {
+                            !shouldDisplayLoadingScreen &&
+
+                            // <ContentContainer aspectRatio={isWide ? 'wide' : 'narrow'}>
+                            <ContentContainer>
+                                <ToolboxContainer>
+                                    <AudioMuteButton
+                                        audioMuted={audioMuted}
+                                        disabled={!micPermissionsGranted}
+                                        onPress={toggleAudioMuted}
+                                    />
+                                    <VideoMuteButton
+                                        videoMuted={videoMuted}
+                                        disabled={false}
+                                        onPress={toggleVideoMuted}
+                                    />
+                                    <HangupButton
+                                        onPress={() => {
+                                            leaveCall('internal');
+                                        }}
+                                    />
+                                </ToolboxContainer>
+                            </ContentContainer>
                         }
                     </View>
+                </SafeAreaView>
 
-                    {/* <ContentContainer aspectRatio={isWide ? 'wide' : 'narrow'}> */}
-                    <ContentContainer>
-                        <ToolboxContainer>
-                            <AudioMuteButton
-                                audioMuted={audioMuted}
-                                disabled={!micPermissionsGranted}
-                                onPress={toggleAudioMuted}
-                            />
-                            <VideoMuteButton
-                                videoMuted={videoMuted}
-                                disabled={false}
-                                onPress={toggleVideoMuted}
-                            />
-                            <HangupButton
-                                onPress={() => {
-                                    leaveCall('internal');
-                                }}
-                            />
-                        </ToolboxContainer>
-                    </ContentContainer>
-                </View>
-            </SafeAreaView>
+                {/* Trigger ringtone */}
+                <OutgoingRinging play={!shouldDisplayLoadingScreen}/>
+            </>
+        );
+    }
 
-            {/* Trigger ringtone */}
-            <OutgoingRinging/>
-        </>
-    ) : (
+    return (
         <JitsiMeeting
-
             ref={jitsiMeetingRef}
 
             // Ref. https://github.com/jitsi/jitsi-meet/blob/master/config.js
@@ -825,7 +827,7 @@ const CallScreen = ({
                 'call-integration.enabled': Platform.OS === 'android',
             }}
             style={{flex: 1}}
-            room={channelId ?? ''}
+            room={channelId}
             serverURL={kMeetServerUrl}
             userInfo={userInfo}
         />
