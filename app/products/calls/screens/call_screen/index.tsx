@@ -3,10 +3,10 @@
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$} from 'rxjs';
-import {distinctUntilChanged, mergeMap, switchMap} from 'rxjs/operators';
+import {distinctUntilChanged, switchMap} from 'rxjs/operators';
 
 import {observeChannel} from '@app/queries/servers/channel';
-import {observeConference, observeConferenceParticipantCount, observeConferenceParticipantPresentCount} from '@app/queries/servers/conference';
+import {observeConference, observeConferenceParticipantCount, observeConferenceHasAtLeastOneParticipantPresent} from '@app/queries/servers/conference';
 import CallScreen, {type PassedProps} from '@calls/screens/call_screen/call_screen';
 import {observeGlobalCallsState} from '@calls/state';
 import {observeCurrentUserId} from '@queries/servers/system';
@@ -23,7 +23,9 @@ const enhance = withObservables(['channelId', 'conferenceId'], (
     return {
         channel: observeChannel(db, channelId),
         currentUserId: observeCurrentUserId(db),
-        currentUser: currentUserId.pipe(mergeMap((userId) => observeUser(db, userId))),
+        currentUser: currentUserId.pipe(
+            switchMap((userId) => observeUser(db, userId)),
+        ),
 
         micPermissionsGranted: observeGlobalCallsState().pipe(
             switchMap((gs) => of$(gs.micPermissionsGranted)),
@@ -32,7 +34,10 @@ const enhance = withObservables(['channelId', 'conferenceId'], (
 
         conference: observeConference(db, conferenceId),
         participantCount: observeConferenceParticipantCount(db, conferenceId),
-        participantApprovedCount: currentUserId.pipe(mergeMap((userId) => observeConferenceParticipantPresentCount(db, conferenceId, userId))),
+        hasAtLeastOneParticipantPresent: currentUserId.pipe(
+            switchMap((userId) => observeConferenceHasAtLeastOneParticipantPresent(db, conferenceId, userId)),
+            distinctUntilChanged(),
+        ),
     };
 });
 

@@ -39,11 +39,10 @@ export const observeConferenceParticipantCount = (database: Database, conference
         observeCount(false);
 
 /**
- * Observe the number of conference participants that are in an "approved" status
- * (ie. they are currently in the call)
- * Possibly ignore a user ids (the caller)
+ * Observe if there is at least one participant present in the conference
+ * Optionnaly, a userId can be ignored from the list of participants
  */
-export const observeConferenceParticipantPresentCount = (database: Database, conferenceId: string, ignoredUserId?: string) => {
+export const observeConferenceHasAtLeastOneParticipantPresent = (database: Database, conferenceId: string, ignoredUserId?: string) => {
     const clauses: Q.Where[] = [
         Q.where('conference_id', conferenceId),
         Q.where('present', true),
@@ -54,6 +53,7 @@ export const observeConferenceParticipantPresentCount = (database: Database, con
 
     return database.
         get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).
-        query(Q.and(...clauses)).
-        observeCount(false);
+        query(Q.and(...clauses), Q.take(1)).
+        observe().
+        pipe(switchMap((cps) => of$(cps.length > 0)));
 };

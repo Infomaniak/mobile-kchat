@@ -60,7 +60,7 @@ export type InjectedProps = {
     currentUserId: string;
     micPermissionsGranted: boolean;
     participantCount: number;
-    participantApprovedCount: number;
+    hasAtLeastOneParticipantPresent: boolean;
 }
 
 export type CallScreenHandle = {
@@ -277,7 +277,7 @@ const CallScreen = ({
     currentUserId,
     micPermissionsGranted,
     participantCount,
-    participantApprovedCount,
+    hasAtLeastOneParticipantPresent,
     answered,
     initiator,
     serverUrl,
@@ -390,7 +390,7 @@ const CallScreen = ({
     const shouldDisplayCallingScreen = (
         isDM &&
         isCurrentUserInitiator &&
-        participantApprovedCount === 0 &&
+        !hasAtLeastOneParticipantPresent &&
         jitsiMeetingMountedRef.current === false
     );
 
