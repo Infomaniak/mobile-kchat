@@ -5,8 +5,10 @@ import {fetchMyChannel, switchToChannelById} from '@actions/remote/channel';
 import {fetchPostById} from '@actions/remote/post';
 import {fetchMyTeam} from '@actions/remote/team';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
+import CallManager from '@app/store/CallManager';
 import {getDefaultThemeByAppearance} from '@context/theme';
 import DatabaseManager from '@database/manager';
+import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {getMyChannel} from '@queries/servers/channel';
 import {getPostById} from '@queries/servers/post';
@@ -26,6 +28,7 @@ import type PostModel from '@typings/database/models/servers/post';
 export async function pushNotificationEntry(serverUrl: string, notification: NotificationData) {
     // We only reach this point if we have a channel Id in the notification payload
     const channelId = notification.channel_id!;
+    const conferenceId = notification.conference_id;
     const rootId = notification.root_id!;
 
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
@@ -91,26 +94,42 @@ export async function pushNotificationEntry(serverUrl: string, notification: Not
 
     const isCRTEnabled = await getIsCRTEnabled(database);
     const isThreadNotification = isCRTEnabled && Boolean(rootId);
+    const isConferenceNotification = typeof conferenceId === 'string';
 
     if (myChannel && myTeam) {
-        if (isThreadNotification) {
-            let post: PostModel | Post | undefined = await getPostById(database, rootId);
-            if (!post) {
-                const resp = await fetchPostById(serverUrl, rootId);
-                post = resp.post;
+        let redirected = false;
+        if (isConferenceNotification) {
+            try {
+                const client = NetworkManager.getClient(serverUrl);
+                const conference = await client.getCall(conferenceId);
+                CallManager.onCall(serverUrl, conference.channel_id, {initiator: 'native'});
+                redirected = true;
+            } catch (e) {
+                // Conference not found!
+                // redirect to channel instead
             }
+        }
 
-            const actualRootId = post && ('root_id' in post ? post.root_id : post.rootId);
+        if (!redirected) {
+            if (isThreadNotification) {
+                let post: PostModel | Post | undefined = await getPostById(database, rootId);
+                if (!post) {
+                    const resp = await fetchPostById(serverUrl, rootId);
+                    post = resp.post;
+                }
 
-            if (actualRootId) {
-                await fetchAndSwitchToThread(serverUrl, actualRootId, true);
-            } else if (post) {
-                await fetchAndSwitchToThread(serverUrl, rootId, true);
+                const actualRootId = post && ('root_id' in post ? post.root_id : post.rootId);
+
+                if (actualRootId) {
+                    await fetchAndSwitchToThread(serverUrl, actualRootId, true);
+                } else if (post) {
+                    await fetchAndSwitchToThread(serverUrl, rootId, true);
+                } else {
+                    emitNotificationError('Post');
+                }
             } else {
-                emitNotificationError('Post');
+                await switchToChannelById(serverUrl, channelId, teamId);
             }
-        } else {
-            await switchToChannelById(serverUrl, channelId, teamId);
         }
     }
 

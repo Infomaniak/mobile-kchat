@@ -1,6 +1,10 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {handleConferenceReceived} from '@actions/websocket/conference';
+
+import type ClientBase from './base';
+
 export interface IKClientCallsMix {
     startCall: (channelId: string) => Promise<Conference>;
     getCall: (conferenceId: string) => Promise<Conference>;
@@ -10,7 +14,7 @@ export interface IKClientCallsMix {
     leaveCall: (conferenceId: string) => Promise<Conference>;
 }
 
-const IKClientCalls = (superclass: any) => class extends superclass {
+const IKClientCalls = <TBase extends Constructor<ClientBase>>(superclass: TBase) => class extends superclass {
     // Routes
     getCallsRoute = (suffix?: string): string =>
         `${this.urlVersion}/conferences${suffix || ''}`;
@@ -24,10 +28,18 @@ const IKClientCalls = (superclass: any) => class extends superclass {
     getLeaveCallRoute = this.getCallRouteCurry('/leave');
 
     // Queries
+    getCall = async (conferenceId: string, update = true) => {
+        const conference = await this.doFetch(`${this.getCallRoute(conferenceId)}`, {method: 'get'});
+        if (update) {
+            // Update the local DB
+            handleConferenceReceived(this.apiClient.baseUrl, conference);
+        }
+
+        return conference;
+    };
+
     startCall = (channelId: string) =>
         this.doFetch(`${this.getCallsRoute()}`, {method: 'post', body: {channel_id: channelId}});
-    getCall = async (conferenceId: string) =>
-        this.doFetch(`${this.getCallRoute(conferenceId)}`, {method: 'get'});
     answerCall = (conferenceId: string) =>
         this.doFetch(`${this.getAnswerCallRoute(conferenceId)}`, {method: 'post'});
     cancelCall = (conferenceId: string) =>

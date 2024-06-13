@@ -15,7 +15,6 @@ import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 import {updateLocalCustomStatus} from '@actions/local/user';
 import {fetchChannelMemberships, switchToChannelById} from '@actions/remote/channel';
 import {unsetCustomStatus, updateCustomStatus} from '@actions/remote/user';
-import {handleConferenceReceived} from '@actions/websocket/conference';
 import {postListRef} from '@app/components/post_list/post_list';
 import {CustomStatusDurationEnum, SET_CUSTOM_STATUS_FAILURE} from '@app/constants/custom_status';
 import {useServerId} from '@app/context/server';
@@ -735,10 +734,9 @@ const CallScreen = ({
 
     // EFFECTS
     useEffect(() => {
-        // Fetch the current conference if it was not received via WS
+        // Fetch and update the current conference if it was not received via WS
         if (!conference) {
-            NetworkManager.getClient(serverUrl).getCall(conferenceId).
-                then((c) => handleConferenceReceived(serverUrl, c));
+            NetworkManager.getClient(serverUrl).getCall(conferenceId);
         }
 
         // Fetch the current call name

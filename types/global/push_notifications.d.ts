@@ -22,6 +22,7 @@ interface NotificationData {
     ack_id?: string;
     body?: string;
     channel_id: string;
+    conference_id?: string;
     channel_name?: string;
     identifier?: string;
     from_webhook?: string;
