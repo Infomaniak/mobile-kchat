@@ -3,6 +3,12 @@ package com.mattermost.call
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.facebook.react.bridge.Arguments
+import com.mattermost.call.NetworkUtils.cancelCall
+import com.mattermost.helpers.DatabaseHelper
+import com.mattermost.helpers.Network
+import com.mattermost.helpers.ResolvePromise
+import com.mattermost.helpers.database_extension.getServerUrlForIdentifier
 import com.mattermost.notification.NotificationUtils
 import com.mattermost.notification.NotificationUtils.dismissCallNotification
 
@@ -17,6 +23,7 @@ class CancelCallBroadcastReceiver : BroadcastReceiver() {
         val conferenceId =
             intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_ID_KEY) ?: ""
         context.dismissCallNotification(conferenceId)
+        cancelCall(serverId, conferenceId)
         callManagerModule?.callEnded(serverId = serverId, conferenceId = conferenceId)
     }
 }

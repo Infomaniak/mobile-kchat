@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.mattermost.call.IntentUtils.getMainActivityIntent
 import com.mattermost.call.IntentUtils.getMainActivityPendingIntent
+import com.mattermost.call.NetworkUtils.cancelCall
 import com.mattermost.notification.NotificationUtils
 import com.mattermost.notification.NotificationUtils.dismissCallNotification
 import com.mattermost.rnbeta.*
@@ -65,12 +66,7 @@ class CallActivity : AppCompatActivity() {
             conferenceId?.let { dismissCallNotification(it) }
             if (keyguardManager.isKeyguardLocked) askToUnlockPhone() else acceptCall()
         }
-        declineButton.setOnClickListener {
-            conferenceId?.let { dismissCallNotification(it) }
-            callManagerModule?.callEnded(serverId = serverId!!, conferenceId = conferenceId!!)
-            finish()
-        }
-
+        declineButton.setOnClickListener { declineCall() }
         localBroadcastManager.registerReceiver(
             dismissCallReceiver,
             IntentFilter(BROADCAST_RECEIVER_DISMISS_CALL_TAG)
@@ -111,11 +107,13 @@ class CallActivity : AppCompatActivity() {
             conferenceJWT
         )
         startActivity(getMainActivityIntent(callExtras))
-        /*callManagerModule?.callAnswered(
-            serverId = serverId!!,
-            channelId = channelId!!,
-            conferenceJWT = conferenceJWT!!
-        )*/
+        finish()
+    }
+
+    private fun declineCall() {
+        conferenceId?.let { dismissCallNotification(it) }
+        cancelCall(serverId!!, conferenceId!!)
+        callManagerModule?.callEnded(serverId = serverId!!, conferenceId = conferenceId!!)
         finish()
     }
 

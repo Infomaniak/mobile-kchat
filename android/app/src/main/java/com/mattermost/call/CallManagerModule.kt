@@ -36,11 +36,6 @@ class CallManagerModule(private var reactContext: ReactApplicationContext) : Rea
 
     override fun getName() = "CallManagerModule"
 
-    override fun initialize() {
-        super.initialize()
-        onModuleInitializedListener?.invoke()
-    }
-
     private fun sendEvent(eventName: String, params: WritableMap?) {
         reactContext
             .getJSModule(RCTDeviceEventEmitter::class.java)
@@ -72,6 +67,11 @@ class CallManagerModule(private var reactContext: ReactApplicationContext) : Rea
         }
 
         sendEvent("CallEnded", result)
+    }
+
+    @ReactMethod
+    fun initialized() {
+        onModuleInitializedListener?.invoke()
     }
 
     @ReactMethod
