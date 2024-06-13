@@ -188,7 +188,7 @@ extension CallManager: PKPushRegistryDelegate {
   ) {
     guard type == .voIP else { return }
 
-    print("Received voip notification \(payload.dictionaryPayload)")
+    print("Received voip notification")
 
     let notificationPayload = payload.dictionaryPayload
 
