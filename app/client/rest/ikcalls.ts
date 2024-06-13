@@ -1,8 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {handleConferenceReceived} from '@actions/websocket/conference';
-
 import type ClientBase from './base';
 
 export interface IKClientCallsMix {
@@ -28,16 +26,8 @@ const IKClientCalls = <TBase extends Constructor<ClientBase>>(superclass: TBase)
     getLeaveCallRoute = this.getCallRouteCurry('/leave');
 
     // Queries
-    getCall = async (conferenceId: string, update = true) => {
-        const conference = await this.doFetch(`${this.getCallRoute(conferenceId)}`, {method: 'get'});
-        if (update) {
-            // Update the local DB
-            handleConferenceReceived(this.apiClient.baseUrl, conference);
-        }
-
-        return conference;
-    };
-
+    getCall = (conferenceId: string) =>
+        this.doFetch(`${this.getCallRoute(conferenceId)}`, {method: 'get'});
     startCall = (channelId: string) =>
         this.doFetch(`${this.getCallsRoute()}`, {method: 'post', body: {channel_id: channelId}});
     answerCall = (conferenceId: string) =>

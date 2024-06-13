@@ -2,13 +2,13 @@
 // See LICENSE.txt for license information.
 
 import {fetchMyChannel, switchToChannelById} from '@actions/remote/channel';
+import {fetchConference} from '@actions/remote/conference';
 import {fetchPostById} from '@actions/remote/post';
 import {fetchMyTeam} from '@actions/remote/team';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
 import CallManager from '@app/store/CallManager';
 import {getDefaultThemeByAppearance} from '@context/theme';
 import DatabaseManager from '@database/manager';
-import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {getMyChannel} from '@queries/servers/channel';
 import {getPostById} from '@queries/servers/post';
@@ -99,12 +99,11 @@ export async function pushNotificationEntry(serverUrl: string, notification: Not
     if (myChannel && myTeam) {
         let redirected = false;
         if (isConferenceNotification) {
-            try {
-                const client = NetworkManager.getClient(serverUrl);
-                const conference = await client.getCall(conferenceId);
+            const {conference} = await fetchConference(serverUrl, conferenceId);
+            if (conference) {
                 CallManager.onCall(serverUrl, conference.channel_id, {initiator: 'native'});
                 redirected = true;
-            } catch (e) {
+            } else {
                 // Conference not found, maybe it was terminated?
                 // redirect to channel instead
             }
