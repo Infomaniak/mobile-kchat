@@ -107,6 +107,7 @@ class CallActivity : AppCompatActivity() {
             conferenceJWT
         )
         val extra = Bundle().apply {
+            putString("type", "message")
             putString("channel_id", channelId)
             putString("server_id", serverId)
             putString("conference_id", conferenceId)
