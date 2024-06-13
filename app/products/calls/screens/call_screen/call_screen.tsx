@@ -21,6 +21,7 @@ import {useServerId} from '@app/context/server';
 import {useTheme} from '@app/context/theme';
 import {useCollapsibleHeader} from '@app/hooks/header';
 import {useMountedRef, useRerender, useTransientRef} from '@app/hooks/utils';
+import {fetchConferenceHasAtLeastOneParticipantPresent} from '@app/queries/servers/conference';
 import {getCommonSystemValues} from '@app/queries/servers/system';
 import {calculateExpiryTime} from '@app/screens/custom_status/custom_status';
 import {logError} from '@app/utils/log';
@@ -34,7 +35,7 @@ import NavigationHeader from '@components/navigation_header';
 import Image from '@components/profile_picture/image';
 import {General, Screens} from '@constants';
 import DatabaseManager from '@database/manager';
-import {debounce} from '@helpers/api/general';
+import {debounce, noop} from '@helpers/api/general';
 import CallManager from '@store/CallManager';
 import {isDMorGM as isChannelDMorGM} from '@utils/channel';
 
@@ -60,7 +61,8 @@ export type InjectedProps = {
     currentUserId: string;
     micPermissionsGranted: boolean;
     participantCount: number;
-    hasAtLeastOneParticipantPresent: boolean;
+
+    // hasAtLeastOneParticipantPresent: boolean;
 }
 
 export type CallScreenHandle = {
@@ -223,6 +225,48 @@ const hasUpdatedRef = <T extends unknown>(ref: MutableRefObject<T>, newValue: T)
 };
 
 /**
+ * Test if there is at least one participant present in the conference
+ * only necessary for DMs
+ * HACK ugly hack to prevent android from crashing
+ */
+const useHasAtLeastOneParticipantPresent = (() => {
+    const INTERVAL = 1000; // ms
+    const TIMER = 1000; // ms
+
+    return (isDM: boolean, serverUrl: string, conferenceId: string, currentUserId: string) => {
+        const [hasAtLeastOneParticipantPresent, setHasAtLeastOneParticipantPresent] = useState<boolean | undefined>(isDM ? false : undefined);
+        useEffect(() => {
+            if (isDM) {
+                let interval: NodeJS.Timeout | null = null;
+                const database = DatabaseManager.serverDatabases[serverUrl]?.database;
+
+                const clean = () => {
+                    if (typeof interval === 'number') {
+                        clearInterval(interval);
+                        interval = null;
+                    }
+                };
+
+                // Poll database until we get the response that we want
+                interval = setInterval(async () => {
+                    if (await fetchConferenceHasAtLeastOneParticipantPresent(database!, conferenceId, currentUserId)) {
+                        setTimeout(() => {
+                            setHasAtLeastOneParticipantPresent(true);
+                        }, TIMER);
+                        clean();
+                    }
+                }, INTERVAL);
+                return clean;
+            }
+
+            return noop;
+        }, []);
+
+        return hasAtLeastOneParticipantPresent;
+    };
+})();
+
+/**
  * Native reporters, notify native/OS about a state change
  */
 const nativeReporters = {
@@ -279,7 +323,8 @@ const CallScreen = ({
     currentUserId,
     micPermissionsGranted,
     participantCount,
-    hasAtLeastOneParticipantPresent,
+
+    // hasAtLeastOneParticipantPresent,
     answered,
     initiator,
     serverUrl,
@@ -376,6 +421,12 @@ const CallScreen = ({
      * Is the current user the one that initiated the conference
      */
     const isCurrentUserInitiator = !answered;
+
+    /**
+     * We should be using the observable hasAtLeastOneParticipantPresent instead
+     * HACK ugly hack to prevent android from crashing
+     */
+    const hasAtLeastOneParticipantPresent = useHasAtLeastOneParticipantPresent(isDM, serverUrl, conferenceId, currentUserId);
 
     /**
      * Display the loading screen if the conference has not been loaded yet
@@ -672,7 +723,7 @@ const CallScreen = ({
     }), []);
 
     // STYLES
-        const styles = getStyleSheet(theme);
+    const styles = getStyleSheet(theme);
     const {scrollPaddingTop, scrollValue, headerHeight} = useCollapsibleHeader<FlatList<string>>(true);
     const paddingTop = useMemo(() => ({flexGrow: 1/*, paddingTop: scrollPaddingTop*/}), [scrollPaddingTop]);
     const top = useAnimatedStyle(() => ({top: headerHeight.value}));
@@ -682,7 +733,7 @@ const CallScreen = ({
 
     // EFFECTS
     useEffect(() => {
-                // Fetch the current call name
+        // Fetch the current call name
         getCallName(true); // Async forced re-render
 
         return () => {

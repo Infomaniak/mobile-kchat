@@ -57,3 +57,20 @@ export const observeConferenceHasAtLeastOneParticipantPresent = (database: Datab
         observe().
         pipe(switchMap((cps) => of$(cps.length > 0)));
 };
+
+export const fetchConferenceHasAtLeastOneParticipantPresent = async (database: Database, conferenceId: string, ignoredUserId?: string) => {
+    const clauses: Q.Where[] = [
+        Q.where('conference_id', conferenceId),
+        Q.where('present', true),
+    ];
+    if (typeof ignoredUserId === 'string') {
+        clauses.push(Q.where('user_id', Q.notEq(ignoredUserId)));
+    }
+
+    const participants = await database.
+        get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).
+        query(Q.and(...clauses), Q.take(1)).
+        fetch();
+
+    return participants.length > 0;
+};
