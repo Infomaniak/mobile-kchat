@@ -5,6 +5,7 @@ import {Image as RNImage} from 'react-native';
 import FastImage, {type Source} from 'react-native-fast-image';
 import Animated from 'react-native-reanimated';
 
+import CompassIcon from '@app/components/compass_icon';
 import {useServerUrl} from '@context/server';
 import NetworkManager from '@managers/network_manager';
 
@@ -30,6 +31,13 @@ export const ProfilePictureMessage = ({author, source}: ProfilePictureProps) => 
 
         if (author.props && author.props.override_icon_url?.startsWith('/')) {
             pictureUrl = author.props.override_icon_url;
+        } else if (author.props && author.props.from_webhook && author.props.override_icon_url == null) {
+            return (
+                <CompassIcon
+                    name='webhook'
+                    size={32}
+                />
+            );
         } else {
             pictureUrl = client.getProfilePictureUrl(author.user_id, 0);
         }

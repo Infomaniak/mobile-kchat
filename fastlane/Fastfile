@@ -842,6 +842,27 @@ platform :android do
             new_string: "import #{package_id}.*"
         )
       end
+
+      Dir.glob('../android/app/src/main/java/com/mattermost/call/*.kt') do |item|
+        find_replace_string(
+            path_to_file: item[1..-1],
+            old_string: 'import com.mattermost.rnbeta.*',
+            new_string: "import #{package_id}.*"
+        )
+        find_replace_string(
+            path_to_file: item[1..-1],
+            old_string: 'import com.mattermost.rnbeta.databinding.ActivityCallBinding',
+            new_string: "import #{package_id}.databinding.ActivityCallBinding"
+        )
+      end
+
+      Dir.glob('../android/app/src/main/java/com/mattermost/notification/*.kt') do |item|
+        find_replace_string(
+            path_to_file: item[1..-1],
+            old_string: 'import com.mattermost.rnbeta.*',
+            new_string: "import #{package_id}.*"
+        )
+      end
     end
   end
 
