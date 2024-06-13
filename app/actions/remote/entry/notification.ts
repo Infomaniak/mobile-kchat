@@ -105,7 +105,7 @@ export async function pushNotificationEntry(serverUrl: string, notification: Not
                 CallManager.onCall(serverUrl, conference.channel_id, {initiator: 'native'});
                 redirected = true;
             } catch (e) {
-                // Conference not found!
+                // Conference not found, maybe it was terminated?
                 // redirect to channel instead
             }
         }
