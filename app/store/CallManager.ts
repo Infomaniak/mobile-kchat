@@ -4,6 +4,7 @@
 import {handleConferenceDeletedById, handleConferenceUpdatedById} from '@actions/websocket/conference';
 import {Screens} from '@app/constants';
 import {getFullName} from '@app/utils/user';
+import {callScreenRef, type PassedProps} from '@calls/screens/call_screen/call_screen';
 import ClientError from '@client/rest/error';
 import DatabaseManager from '@database/manager';
 import {getTranslations, t} from '@i18n';
@@ -12,16 +13,9 @@ import {allOrientations, dismissAllModalsAndPopToScreen} from '@screens/navigati
 import {logError} from '@utils/log';
 
 import type {ApiCall} from '@app/client/rest/ikcalls';
-import type {CallScreenHandle, PassedProps} from '@calls/screens/call_screen/call_screen';
-import type {MutableRefObject} from 'react';
 import type {Options} from 'react-native-navigation';
 
 class CallManager {
-    callScreenRef: MutableRefObject<CallScreenHandle | null> = {current: null};
-    registerCallScreen = (callScreen: CallScreenHandle | null) => {
-        this.callScreenRef.current = callScreen;
-    };
-
     startCall = async (serverUrl: string, channelId: string, allowAnswer = true): Promise<ApiCall & { answered: boolean; server_url: string } | null> => {
         try {
             const call = await NetworkManager.getClient(serverUrl).startCall(channelId);
@@ -80,7 +74,7 @@ class CallManager {
         {serverId, conferenceId}: CallEndedEvent,
         initiator: 'api' | 'internal' | 'native' = 'native',
     ): Promise<void> => {
-        const leaveCall = this.callScreenRef.current?.leaveCall;
+        const leaveCall = callScreenRef.current?.leaveCall;
         if (typeof leaveCall === 'function') {
             leaveCall(initiator);
         } else {
@@ -112,13 +106,13 @@ class CallManager {
      * Propagate state change via imperative handle
      */
     toggleAudioMuted = (isMuted?: boolean) => {
-        const toggleAudioMuted = this.callScreenRef.current?.toggleAudioMuted;
+        const toggleAudioMuted = callScreenRef.current?.toggleAudioMuted;
         if (typeof toggleAudioMuted === 'function') {
             toggleAudioMuted(isMuted);
         }
     };
     toggleVideoMuted = (isMuted?: boolean) => {
-        const toggleVideoMuted = this.callScreenRef.current?.toggleVideoMuted;
+        const toggleVideoMuted = callScreenRef.current?.toggleVideoMuted;
         if (typeof toggleVideoMuted === 'function') {
             toggleVideoMuted(isMuted);
         }

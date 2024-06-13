@@ -5,7 +5,7 @@
 
 import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
 import moment from 'moment';
-import React, {useCallback, useEffect, useMemo, useRef, useState, type ComponentProps, type MutableRefObject} from 'react';
+import React, {useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type ComponentProps, type MutableRefObject} from 'react';
 import {useIntl} from 'react-intl';
 import {ActivityIndicator, DeviceEventEmitter, FlatList, NativeModules, Platform, View} from 'react-native';
 import {Navigation} from 'react-native-navigation';
@@ -68,6 +68,8 @@ export type CallScreenHandle = {
     toggleAudioMuted: (isMuted?: boolean) => void;
     toggleVideoMuted: (isMuted?: boolean) => void;
 };
+
+export const callScreenRef = React.createRef<CallScreenHandle>();
 
 type Props = PassedProps & InjectedProps & { autoUpdateStatus: boolean }
 type UserStatus = ReturnType<typeof getUserCustomStatus>
@@ -670,21 +672,17 @@ const CallScreen = ({
     }), []);
 
     // STYLES
-    // const defaultHeight = useDefaultHeaderHeight();
-    // const contextStyle = useMemo(() => ({
-    //     top: defaultHeight,
-    // }), [defaultHeight]);
-    const styles = getStyleSheet(theme);
+        const styles = getStyleSheet(theme);
     const {scrollPaddingTop, scrollValue, headerHeight} = useCollapsibleHeader<FlatList<string>>(true);
     const paddingTop = useMemo(() => ({flexGrow: 1/*, paddingTop: scrollPaddingTop*/}), [scrollPaddingTop]);
     const top = useAnimatedStyle(() => ({top: headerHeight.value}));
 
+    // IMPERATIVE HANDLE
+    useImperativeHandle(callScreenRef, () => ({leaveCall, toggleAudioMuted, toggleVideoMuted}));
+
     // EFFECTS
     useEffect(() => {
-        // Register to allow functions from being called by the CallManager
-        CallManager.registerCallScreen({leaveCall, toggleAudioMuted, toggleVideoMuted});
-
-        // Fetch the current call name
+                // Fetch the current call name
         getCallName(true); // Async forced re-render
 
         return () => {
