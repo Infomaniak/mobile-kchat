@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.ReactActivityDelegate;
-import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactActivityDelegate;
 import com.github.emilioicai.hwkeyboardevent.HWKeyboardEventModule;

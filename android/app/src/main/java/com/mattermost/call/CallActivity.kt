@@ -6,18 +6,18 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.mattermost.call.IntentUtils.getMainActivityIntent
-import com.mattermost.call.IntentUtils.getMainActivityPendingIntent
 import com.mattermost.call.NetworkUtils.cancelCall
 import com.mattermost.notification.NotificationUtils
 import com.mattermost.notification.NotificationUtils.dismissCallNotification
-import com.mattermost.rnbeta.*
 import com.mattermost.rnbeta.databinding.ActivityCallBinding
+import com.wix.reactnativenotifications.core.notification.NotificationChannelProps
 
 class CallActivity : AppCompatActivity() {
 
@@ -106,7 +106,16 @@ class CallActivity : AppCompatActivity() {
             channelName,
             conferenceJWT
         )
-        startActivity(getMainActivityIntent(callExtras))
+        val extra = Bundle().apply {
+            putString("channel_id", channelId)
+            putString("server_id", serverId)
+            putString("conference_id", conferenceId)
+            putString("channel_name", channelName)
+            putString("conference_jwt", conferenceJWT)
+        }
+        val intent = getMainActivityIntent(callExtras)
+        intent.putExtra("pushNotification", extra)
+        startActivity(intent)
         finish()
     }
 

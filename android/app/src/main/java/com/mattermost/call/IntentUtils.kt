@@ -46,7 +46,7 @@ object IntentUtils {
 
     fun Context.getMainActivityIntent(callExtras: CallExtras): Intent {
         return Intent(this, MainActivity::class.java).apply {
-            addExtrasToIntent(callExtras)
+            //addExtrasToIntent(callExtras)
         }
     }
 }
