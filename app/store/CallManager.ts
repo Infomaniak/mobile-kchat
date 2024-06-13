@@ -12,11 +12,10 @@ import NetworkManager from '@managers/network_manager';
 import {allOrientations, dismissAllModalsAndPopToScreen} from '@screens/navigation';
 import {logError} from '@utils/log';
 
-import type {ApiCall} from '@app/client/rest/ikcalls';
 import type {Options} from 'react-native-navigation';
 
 class CallManager {
-    startCall = async (serverUrl: string, channelId: string, allowAnswer = true): Promise<ApiCall & { answered: boolean; server_url: string } | null> => {
+    startCall = async (serverUrl: string, channelId: string, allowAnswer = true): Promise<Conference & { answered: boolean; server_url: string } | null> => {
         try {
             const call = await NetworkManager.getClient(serverUrl).startCall(channelId);
 
@@ -85,7 +84,7 @@ class CallManager {
         }
     };
 
-    handleCallTermination = (method: 'cancelCall' | 'declineCall' | 'leaveCall') => async (serverUrl: string, conferenceId: string): Promise<ApiCall | null> => {
+    handleCallTermination = (method: 'cancelCall' | 'declineCall' | 'leaveCall') => async (serverUrl: string, conferenceId: string): Promise<Conference | null> => {
         try {
             // Delete the conference localy by updating it's 'delete_at' column
             handleConferenceDeletedById(serverUrl, conferenceId);

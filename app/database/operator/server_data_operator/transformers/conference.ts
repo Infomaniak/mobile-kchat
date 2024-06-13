@@ -28,7 +28,6 @@ export const transformConferenceRecord = ({action, database, value}: Transformer
         conference.createAt = raw.create_at;
 
         conference.channelId = raw.channel_id;
-        conference.teamId = raw.team_id;
         conference.userId = raw.user_id;
     };
 

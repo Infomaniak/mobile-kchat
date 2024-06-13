@@ -3,7 +3,6 @@
 
 import type ChannelModel from './channel';
 import type ConferenceParticipantModel from './conference_participant';
-import type TeamModel from './team';
 import type UserModel from './user';
 import type {Model, Query, Relation} from '@nozbe/watermelondb';
 import type {Associations} from '@nozbe/watermelondb/Model';
@@ -30,17 +29,11 @@ declare class ConferenceModel extends Model {
     /* channel_id : The foreign key to the related Channel */
     channelId: string;
 
-    /** team_id : The foreign key to the related Team model */
-    teamId: string;
-
     /** user_id : The related User's foreign key that created this conference */
     userId: string;
 
     /** channel : The related channel */
     channel: Relation<ChannelModel>;
-
-    /** team : The related team */
-    team: Relation<TeamModel>;
 
     /** user : The user that initiated this conference */
     user: Relation<UserModel>;

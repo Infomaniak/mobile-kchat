@@ -6,6 +6,7 @@ import semver from 'semver';
 
 import {switchToChannelById} from '@actions/remote/channel';
 import CallManager from '@app/store/CallManager';
+import {logError} from '@app/utils/log';
 import LocalConfig from '@assets/config.json';
 import {Device, Events, Sso} from '@constants';
 import {MIN_REQUIRED_VERSION} from '@constants/supported_server';
@@ -51,9 +52,13 @@ class GlobalEventHandler {
     };
 
     initialized = () => {
-        const {initialized} = NativeModules.CallManagerModule;
-        if (typeof initialized === 'function') {
-            initialized();
+        try {
+            const {initialized} = NativeModules.CallManagerModule;
+            if (typeof initialized === 'function') {
+                initialized();
+            }
+        } catch (error) {
+            logError(error);
         }
     };
 
