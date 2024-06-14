@@ -3,6 +3,7 @@ package com.mattermost.rnbeta;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -112,7 +113,9 @@ public class MainActivity extends NavigationActivity {
     }
 
     private void handleIntentExtras(Intent intent) {
+        Log.i("handleIntentExtras", "handleIntentExtras");
         if (intent != null && intent.getExtras() != null) {
+            Log.i("handleIntentExtras", "intent.getExtras() != null");
             Bundle bundle = intent.getExtras();
             String channelId = bundle.getString(NotificationUtils.CHANNEL_ID_KEY);
             String serverId = bundle.getString(NotificationUtils.SERVER_ID_KEY);
@@ -124,12 +127,20 @@ public class MainActivity extends NavigationActivity {
                     && channelId != null
                     && serverId != null
                     && conferenceJWT != null) {
-                callManagerModule.callAnswered(serverId, channelId, conferenceJWT);
+                Log.i("handleIntentExtras", "callmanager != null");
+                Log.i("handleIntentExtras", "serverId = " + serverId);
+                Log.i("handleIntentExtras", "channelId = " + channelId);
+                Log.i("handleIntentExtras", "conferenceJWT = " + conferenceJWT);
+                //callManagerModule.callAnswered(serverId, channelId, conferenceJWT);
             }
 
             if (conferenceId != null) {
+                Log.i("handleIntentExtras", "conferenceId == " + conferenceId);
+                Log.i("handleIntentExtras", "dismissCallNotification");
                 NotificationUtils.dismissCallNotification(this, conferenceId);
             }
+        } else {
+            Log.i("handleIntentExtras", "intent extras null");
         }
    }
 
