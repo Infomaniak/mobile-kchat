@@ -115,15 +115,14 @@ class GlobalEventHandler {
     onCallAnswered = async (event: unknown) => {
         const parsed = CallAnsweredEvent.safeParse(event);
         if (parsed.success) {
-            const { data } = parsed;
+            const {data} = parsed;
             const serverUrl = await DatabaseManager.getServerUrlFromIdentifier(data.serverId);
             if (typeof serverUrl === 'string') {
                 switchToConferenceByChannelId(serverUrl, data.channelId, {initiator: 'native'});
             }
         } else {
-            logError('UNABLE TO PARSE CallAnsweredEvent', parsed.error)
+            logError('UNABLE TO PARSE CallAnsweredEvent', parsed.error);
         }
-        
     };
 
     onCallEnded = async (event: unknown) => {
@@ -131,7 +130,7 @@ class GlobalEventHandler {
         if (parsed.success) {
             CallManager.leaveCallScreen(parsed.data);
         } else {
-            logError('UNABLE TO PARSE CallEndedEvent', parsed.error)
+            logError('UNABLE TO PARSE CallEndedEvent', parsed.error);
         }
     };
 
@@ -140,7 +139,7 @@ class GlobalEventHandler {
         if (parsed.success) {
             CallManager.toggleAudioMuted(parsed.data.isMuted === 'true');
         } else {
-            logError('UNABLE TO PARSE CallEndedEvent', parsed.error)
+            logError('UNABLE TO PARSE CallEndedEvent', parsed.error);
         }
     };
 
@@ -149,7 +148,7 @@ class GlobalEventHandler {
         if (parsed.success) {
             CallManager.toggleAudioMuted(parsed.data.isMuted === 'true');
         } else {
-            logError('UNABLE TO PARSE CallEndedEvent', parsed.error)
+            logError('UNABLE TO PARSE CallEndedEvent', parsed.error);
         }
     };
 
