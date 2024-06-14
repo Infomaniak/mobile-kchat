@@ -56,11 +56,11 @@ public class CustomPushNotification extends PushNotification {
         String type = initialData.getString(NotificationUtils.NOTIFICATION_TYPE_KEY);
         String ackId = initialData.getString(NotificationUtils.NOTIFICATION_ACK_ID_KEY);
         String postId = initialData.getString(NotificationUtils.NOTIFICATION_POST_ID_KEY);
-        String channelId = initialData.getString(NotificationUtils.NOTIFICATION_CHANNEL_ID_KEY);
-        String serverId = initialData.getString(NotificationUtils.NOTIFICATION_SERVER_ID_KEY);
-        String conferenceId = initialData.getString(NotificationUtils.NOTIFICATION_CONFERENCE_ID_KEY);
-        String channelName = initialData.getString(NotificationUtils.NOTIFICATION_CHANNEL_NAME_KEY);
-        String conferenceJWT = initialData.getString(NotificationUtils.NOTIFICATION_CONFERENCE_JWT_KEY);
+        String channelId = initialData.getString(NotificationUtils.CHANNEL_ID_KEY);
+        String serverId = initialData.getString(NotificationUtils.SERVER_ID_KEY);
+        String conferenceId = initialData.getString(NotificationUtils.CONFERENCE_ID_KEY);
+        String channelName = initialData.getString(NotificationUtils.CHANNEL_NAME_KEY);
+        String conferenceJWT = initialData.getString(NotificationUtils.CONFERENCE_JWT_KEY);
 
         String idLoaded = initialData.getString(NotificationUtils.NOTIFICATION_ID_LOADED_KEY);
         final boolean isIdLoaded = idLoaded != null && idLoaded.equals("true");
@@ -73,8 +73,8 @@ public class CustomPushNotification extends PushNotification {
             Bundle response = ReceiptDelivery.send(ackId, serverUrl, postId, type, isIdLoaded);
             if (isIdLoaded && response != null) {
                 Bundle current = mNotificationProps.asBundle();
-                if (!current.containsKey(NotificationUtils.NOTIFICATION_SERVER_URL_KEY)) {
-                    response.putString(NotificationUtils.NOTIFICATION_SERVER_URL_KEY, serverUrl);
+                if (!current.containsKey(NotificationUtils.SERVER_URL_KEY)) {
+                    response.putString(NotificationUtils.SERVER_URL_KEY, serverUrl);
                 }
                 current.putAll(response);
                 mNotificationProps = createProps(current);
@@ -122,10 +122,7 @@ public class CustomPushNotification extends PushNotification {
 
     private void broadcastCallEvent(String conferenceId) {
         Intent callEventIntent = new Intent();
-        callEventIntent.putExtra(
-                NotificationUtils.INTENT_EXTRA_CONFERENCE_ID_KEY,
-                conferenceId
-        );
+        callEventIntent.putExtra(NotificationUtils.CONFERENCE_ID_KEY, conferenceId);
         callEventIntent.setAction(BROADCAST_RECEIVER_DISMISS_CALL_TAG);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(callEventIntent);
     }

@@ -13,13 +13,18 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
 import com.mattermost.call.CallActivity
-import com.mattermost.call.IntentUtils.addExtrasToIntent
+import com.mattermost.call.IntentUtils.addExtraToIntent
+import com.mattermost.call.IntentUtils.getCallDeclinedBundle
 import com.mattermost.call.IntentUtils.getDeclineCallPendingIntent
 import com.mattermost.call.IntentUtils.getMainActivityPendingIntent
-import com.mattermost.rnbeta.MainActivity
 import com.mattermost.rnbeta.R
 
 object NotificationUtils {
+
+    // Yes, call type = message, call bundle key = pushNotification ... But this is because
+    // we don't want to change a lot of thing on the React side. Sorry about that.
+    const val CALL_TYPE_VALUE = "message"
+    const val CALL_BUNDLE_KEY = "pushNotification"
 
     const val NOTIFICATION_TYPE_KEY = "type"
     const val NOTIFICATION_TYPE_JOINED_CALL_VALUE = "joined_call"
@@ -28,18 +33,12 @@ object NotificationUtils {
     const val NOTIFICATION_ACK_ID_KEY = "ack_id"
     const val NOTIFICATION_POST_ID_KEY = "post_id"
 
-    const val NOTIFICATION_CHANNEL_ID_KEY = "channel_id"
-    const val NOTIFICATION_SERVER_ID_KEY = "server_id"
-    const val NOTIFICATION_SERVER_URL_KEY = "server_url"
-    const val NOTIFICATION_CONFERENCE_ID_KEY = "conference_id"
-    const val NOTIFICATION_CHANNEL_NAME_KEY = "channel_name"
-    const val NOTIFICATION_CONFERENCE_JWT_KEY = "conference_jwt"
-
-    const val INTENT_EXTRA_CHANNEL_ID_KEY = "channelId"
-    const val INTENT_EXTRA_SERVER_ID_KEY = "serverId"
-    const val INTENT_EXTRA_CONFERENCE_ID_KEY = "conferenceId"
-    const val INTENT_EXTRA_CHANNEL_NAME_KEY = "channelName"
-    const val INTENT_EXTRA_CONFERENCE_JWT_KEY = "conferenceJWT"
+    const val CHANNEL_ID_KEY = "channel_id"
+    const val SERVER_ID_KEY = "server_id"
+    const val SERVER_URL_KEY = "server_url"
+    const val CONFERENCE_ID_KEY = "conference_id"
+    const val CHANNEL_NAME_KEY = "channel_name"
+    const val CONFERENCE_JWT_KEY = "conference_jwt"
 
     const val NOTIFICATION_ID_LOADED_KEY = "id_loaded"
 
@@ -90,17 +89,8 @@ object NotificationUtils {
     fun Context.createCallNotification(
         callExtras: CallExtras
     ): Notification {
-        val contentIntent = Intent(this, MainActivity::class.java)
-        val contentPendingIntent =
-            PendingIntent.getActivity(
-                this,
-                0,
-                contentIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-            )
-
         val fullScreenIntent = Intent(this, CallActivity::class.java)
-        fullScreenIntent.addExtrasToIntent(callExtras)
+        fullScreenIntent.addExtraToIntent(callExtras)
         val fullScreenPendingIntent =
             PendingIntent.getActivity(
                 this,
@@ -109,19 +99,15 @@ object NotificationUtils {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
             )
 
-        return buildCallNotification(
-            contentPendingIntent,
-            fullScreenPendingIntent,
-            callExtras
-        )
+        return buildCallNotification(fullScreenPendingIntent, callExtras)
     }
 
     @JvmStatic
     fun Context.dismissCallNotification(conferenceIdCall: String) {
         val notificationManagerCompat = NotificationManagerCompat.from(this)
         notificationManagerCompat.activeNotifications.forEach { statusBarNotification ->
-            val notificationExtras = statusBarNotification.notification.extras
-            notificationExtras.getString(NOTIFICATION_CONFERENCE_ID_KEY)?.let { conferenceId ->
+            val callBundle = statusBarNotification.notification.extras.getBundle(CALL_BUNDLE_KEY)
+            callBundle?.getString(CONFERENCE_ID_KEY).let { conferenceId ->
                 if (conferenceId == conferenceIdCall) {
                     notificationManagerCompat.cancel(statusBarNotification.id)
                     return
@@ -131,7 +117,6 @@ object NotificationUtils {
     }
 
     private fun Context.buildCallNotification(
-        contentPendingIntent: PendingIntent,
         fullScreenPendingIntent: PendingIntent,
         callExtras: CallExtras
     ): Notification = with(callExtras) {
@@ -144,7 +129,6 @@ object NotificationUtils {
                 )
             )
             .setAutoCancel(false)
-            //.setContentIntent(contentPendingIntent)
             .setFullScreenIntent(fullScreenPendingIntent, true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_CALL)
@@ -158,7 +142,7 @@ object NotificationUtils {
                 this@buildCallNotification.getString(R.string.acceptCall),
                 this@buildCallNotification.getMainActivityPendingIntent(callExtras)
             )
-            .setExtras(bundleOf(NOTIFICATION_CONFERENCE_ID_KEY to conferenceId))
+            .setExtras(bundleOf(CALL_BUNDLE_KEY to getCallDeclinedBundle(callExtras)))
             .build()
     }
 

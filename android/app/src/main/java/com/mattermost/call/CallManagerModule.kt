@@ -15,9 +15,6 @@ class CallManagerModule(private var reactContext: ReactApplicationContext) : Rea
         private var instance: CallManagerModule? = null
 
         @JvmStatic
-        var onModuleInitializedListener: (() -> Unit)? = null
-
-        @JvmStatic
         fun getInstance(reactContext: ReactApplicationContext): CallManagerModule {
             if (instance == null) {
                 instance = CallManagerModule(reactContext)
@@ -45,9 +42,9 @@ class CallManagerModule(private var reactContext: ReactApplicationContext) : Rea
     fun callAnswered(serverId: String, channelId: String, conferenceJWT: String) {
         val result = if (currentActivity != null) {
             val map = Arguments.createMap()
-            map.putString(NotificationUtils.INTENT_EXTRA_SERVER_ID_KEY, serverId)
-            map.putString(NotificationUtils.INTENT_EXTRA_CHANNEL_ID_KEY, channelId)
-            map.putString(NotificationUtils.INTENT_EXTRA_CONFERENCE_JWT_KEY, conferenceJWT)
+            map.putString(NotificationUtils.SERVER_ID_KEY, serverId)
+            map.putString(NotificationUtils.CHANNEL_ID_KEY, channelId)
+            map.putString(NotificationUtils.CONFERENCE_JWT_KEY, conferenceJWT)
             map
         } else {
             null
@@ -59,19 +56,14 @@ class CallManagerModule(private var reactContext: ReactApplicationContext) : Rea
     fun callEnded(serverId: String, conferenceId: String) {
         val result = if (currentActivity != null) {
             val map = Arguments.createMap()
-            map.putString(NotificationUtils.INTENT_EXTRA_SERVER_ID_KEY, serverId)
-            map.putString(NotificationUtils.INTENT_EXTRA_CONFERENCE_ID_KEY, conferenceId)
+            map.putString(NotificationUtils.SERVER_ID_KEY, serverId)
+            map.putString(NotificationUtils.CONFERENCE_ID_KEY, conferenceId)
             map
         } else {
             null
         }
 
         sendEvent("CallEnded", result)
-    }
-
-    @ReactMethod
-    fun initialized() {
-        onModuleInitializedListener?.invoke()
     }
 
     @ReactMethod

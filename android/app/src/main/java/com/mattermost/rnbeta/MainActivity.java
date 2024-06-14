@@ -18,10 +18,7 @@ import com.reactnativenavigation.NavigationActivity;
 
 import java.util.Objects;
 
-import kotlin.Unit;
-
 public class MainActivity extends NavigationActivity {
-    private Intent callIntent = null;
     private boolean HWKeyboardConnected = false;
     private final FoldableObserver foldableObserver = FoldableObserver.Companion.getInstance(this);
 
@@ -49,15 +46,7 @@ public class MainActivity extends NavigationActivity {
         super.onCreate(null);
         setContentView(R.layout.launch_screen);
 
-        //TODO verifier avec une action dans l'intent avant de setter intent
-        callIntent = getIntent();
-
-        CallManagerModule.setOnModuleInitializedListener(() -> {
-                    handleIntentExtras(callIntent);
-                    callIntent = null;
-                    return Unit.INSTANCE;
-                }
-        );
+        handleIntentExtras(getIntent());
 
         setHWKeyboardConnected();
         foldableObserver.onCreate();
@@ -119,29 +108,30 @@ public class MainActivity extends NavigationActivity {
     @Override
     public void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        callIntent = intent;
+        handleIntentExtras(intent);
     }
 
     private void handleIntentExtras(Intent intent) {
         if (intent != null && intent.getExtras() != null) {
-            String channelId = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CHANNEL_ID_KEY);
-            String serverId = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_SERVER_ID_KEY);
-            String conferenceId = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_ID_KEY);
-            String conferenceJWT = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_JWT_KEY);
+            Bundle bundle = intent.getExtras();
+            String channelId = bundle.getString(NotificationUtils.CHANNEL_ID_KEY);
+            String serverId = bundle.getString(NotificationUtils.SERVER_ID_KEY);
+            String conferenceId = bundle.getString(NotificationUtils.CONFERENCE_ID_KEY);
+            String conferenceJWT = bundle.getString(NotificationUtils.CONFERENCE_JWT_KEY);
             CallManagerModule callManagerModule = CallManagerModule.getInstance();
 
-            if (
-                    callManagerModule != null
-                            && channelId != null
-                            && serverId != null
-                            && conferenceJWT != null
-                            && conferenceId != null
-            ) {
+            if (callManagerModule != null
+                    && channelId != null
+                    && serverId != null
+                    && conferenceJWT != null) {
                 callManagerModule.callAnswered(serverId, channelId, conferenceJWT);
+            }
+
+            if (conferenceId != null) {
                 NotificationUtils.dismissCallNotification(this, conferenceId);
             }
         }
-    }
+   }
 
     private void setHWKeyboardConnected() {
         HWKeyboardConnected = getResources().getConfiguration().keyboard == Configuration.KEYBOARD_QWERTY;
