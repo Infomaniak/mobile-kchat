@@ -25,7 +25,6 @@ import {typography} from '@utils/typography';
 import type ConferenceParticipantModel from '@app/database/models/server/conference_participant';
 
 const ROW_HEIGHT = 40;
-export const RENDERED_CONFERENCE_PARTICIPANT_COUNT = 3;
 
 const styles = StyleSheet.create({
     container: {
@@ -53,6 +52,7 @@ export const IkCallsParticipantStack = ({
     conferenceId,
     participants,
     participantCount,
+    maxDisplayedCount = 3,
     style: baseContainerStyle,
 }: {
     backgroundColor: string;
@@ -60,6 +60,7 @@ export const IkCallsParticipantStack = ({
     conferenceId: string;
     participants: ConferenceParticipantModel[];
     participantCount: number;
+    maxDisplayedCount?: number;
     style?: StyleProp<ViewStyle>;
 }) => {
     const {bottom} = useSafeAreaInsets();
@@ -127,12 +128,12 @@ export const IkCallsParticipantStack = ({
                                 />
                             ))}
                             {
-                                participantCount > RENDERED_CONFERENCE_PARTICIPANT_COUNT &&
+                                participantCount > maxDisplayedCount &&
                                 <IkCallsParticipantStackIconOverflow
                                     key='overflow'
                                     isFirst={false}
                                     backgroundColor={backgroundColor}
-                                    count={participantCount - RENDERED_CONFERENCE_PARTICIPANT_COUNT}
+                                    count={participantCount - maxDisplayedCount}
                                 />
                             }
                         </>
