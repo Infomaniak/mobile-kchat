@@ -2,13 +2,14 @@
 // See LICENSE.txt for license information.
 
 import moment from 'moment-timezone';
-import React, {useEffect, useMemo} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 import {z} from 'zod';
 
 import {fetchConference, switchToConferenceByChannelId} from '@actions/remote/conference';
 import FormattedRelativeTime from '@app/components/formatted_relative_time';
 import {useServerUrl} from '@app/context/server';
+import {useMountedRef} from '@app/hooks/utils';
 import {isDarkTheme} from '@app/utils/theme';
 import IkCallsParticipantStack from '@calls/components/ik_calls_participant_stack';
 import FormattedText from '@components/formatted_text';
@@ -86,7 +87,8 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
     timeText: {
         color: changeOpacity(theme.centerChannelColor, 0.64),
-        ...typography('Body', 100),
+        ...typography('Body', 75),
+        marginBottom: 4,
     },
     button: {
         backgroundColor: theme.buttonBg,
@@ -153,6 +155,29 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
     const iconContainerStyles = [styles.iconContainer, {backgroundColor: iconBackgroundColor}];
 
     /**
+     * We cannot display the regular participant count if the
+     * conference ended less than 60s ago, since moment will write a very long string
+     */
+    const [maxInlineParticipantCount, setMaxInlineParticipantCount] = useState(3);
+    const isActiveRef = useRef(isActive);
+    const isMountedRef = useMountedRef();
+    useEffect(
+        () => {
+            if (!isActive && isActiveRef.current) {
+                isActiveRef.current = true;
+                setMaxInlineParticipantCount(2);
+                setTimeout(() => {
+                    if (isMountedRef.current) {
+                        setMaxInlineParticipantCount(3);
+                    }
+                }, 1000 * 60);
+            } else {
+                isActiveRef.current = isActive;
+            }
+        }, [isActive],
+    );
+
+    /**
      * If the conference is active, make sure we have
      * the list of participants by fetching it from API
      */
@@ -201,7 +226,7 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
                 channelId={channelId}
                 conferenceId={conferenceId}
                 backgroundColor={backgroundColor}
-                maxDisplayedCount={(callButton || isTabletDevice) ? 5 : 3}
+                maxDisplayedCount={(callButton || isTabletDevice) ? 5 : maxInlineParticipantCount}
             />
         );
     }
