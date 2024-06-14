@@ -16,6 +16,7 @@ import com.mattermost.call.IntentUtils.getMainActivityIntent
 import com.mattermost.call.NetworkUtils.cancelCall
 import com.mattermost.notification.NotificationUtils
 import com.mattermost.notification.NotificationUtils.dismissCallNotification
+import com.mattermost.rnbeta.*
 import com.mattermost.rnbeta.databinding.ActivityCallBinding
 import com.wix.reactnativenotifications.core.notification.NotificationChannelProps
 
