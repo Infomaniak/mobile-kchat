@@ -4,7 +4,7 @@
 import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
 
-import CallManager from '@app/store/CallManager';
+import {switchToConferenceByChannelId} from '@actions/remote/conference';
 import {leaveCall} from '@calls/actions';
 import {leaveAndJoinWithAlert, showLimitRestrictedAlert} from '@calls/alerts';
 import {useTryCallsFunction} from '@calls/hooks';
@@ -54,7 +54,7 @@ const ChannelInfoStartButton = ({
     return (
         <OptionBox
             onPress={() => {
-                CallManager.onCall(serverUrl, channelId, {initiator: 'internal'});
+                switchToConferenceByChannelId(serverUrl, channelId, {initiator: 'internal'});
             }}
             text={startText}
             iconName='phone'

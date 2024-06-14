@@ -88,7 +88,7 @@ public class CustomPushNotification extends PushNotification {
             NotificationUtils.dismissCallNotification(mContext, conferenceId);
             broadcastCallEvent(conferenceId);
         } else if (conferenceJWT != null) {
-            NotificationUtils.NotificationExtras notificationExtras = new NotificationUtils.NotificationExtras(
+            NotificationUtils.CallExtras callExtras = new NotificationUtils.CallExtras(
                     channelId,
                     serverId,
                     conferenceId,
@@ -97,7 +97,7 @@ public class CustomPushNotification extends PushNotification {
             );
             Notification callNotification = NotificationUtils.createCallNotification(
                     mContext,
-                    notificationExtras
+                    callExtras
             );
             super.postNotification(callNotification, notificationId);
         } else {

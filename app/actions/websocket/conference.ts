@@ -14,10 +14,9 @@ import type ConferenceParticipantModel from '@app/database/models/server/confere
 
 const {CONFERENCE, CONFERENCE_PARTICIPANT} = MM_TABLES.SERVER;
 
-export const ConferenceAddedEvent = z.object({
+const ConferenceEvent = z.object({
     id: z.string().uuid(),
     url: z.string().url(),
-    team_id: z.string().uuid(),
     channel_id: z.string().uuid(),
     user_id: z.string().uuid(),
     participants: z.array(z.string().uuid()).optional(),
@@ -31,34 +30,44 @@ export const ConferenceAddedEvent = z.object({
     ).optional(),
     create_at: z.number(),
     delete_at: z.number().optional(),
-    update_at: z.number().optional(),
 });
 
-export const ConferenceGenericEvent = z.object({
+const ConferenceGenericEvent = z.object({
     url: z.string().url(),
     channel_id: z.string().uuid(),
     user_id: z.string().uuid(),
     team_id: z.string().uuid(),
 });
 
-export const handleConferenceAdded = async (serverUrl: string, msg: WebSocketMessage) => {
+/**
+ * Handle conference upsert
+ */
+export const handleConferenceReceived = async (serverUrl: string, data: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
-        return {error: `${serverUrl} operator not found`};
+        logError(`${serverUrl} operator not found`);
+        return undefined;
     }
 
     try {
-        operator.handleConferences({
-            conferences: [ConferenceAddedEvent.parse(msg.data)],
+        const [conference] = await operator.handleConferences({
+            conferences: [ConferenceEvent.parse(data)],
             prepareRecordsOnly: false,
         });
+        return conference;
     } catch (e) {
         logError(e);
-        return {error: (e as Error).toString()};
-    }
+        return undefined;
 
-    return {};
+        // return {error: (e as Error).toString()};
+    }
 };
+
+/**
+ * Handle the insertion of a conference via WS
+ */
+export const handleConferenceAdded = async (serverUrl: string, msg: WebSocketMessage) =>
+    handleConferenceReceived(serverUrl, msg.data);
 
 export const handleConferenceUpdated = async (serverUrl: string, conferences: ConferenceModel[], changes: Partial<ConferenceModel>) => {
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;

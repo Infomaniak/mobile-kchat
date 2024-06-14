@@ -2,21 +2,21 @@
 // See LICENSE.txt for license information.
 
 import moment from 'moment-timezone';
-import React, {useMemo} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
-import {Divider} from 'react-native-elements';
 import {z} from 'zod';
 
+import {fetchConference, switchToConferenceByChannelId} from '@actions/remote/conference';
 import FormattedRelativeTime from '@app/components/formatted_relative_time';
 import {useServerUrl} from '@app/context/server';
-import CallManager from '@app/store/CallManager';
+import {useMountedRef} from '@app/hooks/utils';
 import {isDarkTheme} from '@app/utils/theme';
 import IkCallsParticipantStack from '@calls/components/ik_calls_participant_stack';
-import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
 import FormattedTime from '@components/formatted_time';
 import {useTheme} from '@context/theme';
 import UserModel from '@typings/database/models/servers/user';
+import {isTablet} from '@utils/helpers';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {getUserTimezone} from '@utils/user';
@@ -44,80 +44,67 @@ const CallPropsSchema = (() => {
 })();
 type CallPropsSchema = z.infer<typeof CallPropsSchema>
 
-const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
-    return {
-        container: {
-            borderWidth: 0.5,
-            borderColor: changeOpacity(theme.centerChannelColor, 0.15),
-            borderRadius: 4,
-            marginTop: 8,
-            marginBottom: 8,
-        },
-        participantContainer: {
-            flexDirection: 'row',
-            marginTop: 4,
-            marginBottom: 8,
-        },
-        systemMessageTitle: {
-            color: theme.centerChannelColor,
-            ...typography('Heading', 200, 'SemiBold'),
-        },
-        systemMessageDescription: {
-            color: theme.centerChannelColor,
-            ...typography('Body', 200, 'Regular'),
-        },
-        iconContainer: {
-            flexDirection: 'column',
-            justifyContent: 'center',
-            marginTop: 8,
-            marginRight: 8,
-        },
-        iconMessageContainer: {
-            flexDirection: 'row',
-            padding: 16,
-            paddingTop: 10,
-        },
-        joinCallContainer: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-        },
-        joinCallButton: {
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 10,
-            backgroundColor: '#0098FF',
-            margin: 8,
-            borderRadius: 4,
-        },
-        joinCallButtonText: {
-            color: 'white',
-            marginLeft: 15,
-            ...typography('Body', 200, 'SemiBold'),
-        },
-        joinIcon: {
-            display: 'flex',
-            color: 'white',
-            width: 42,
-            height: 42,
-            textAlign: 'center',
-            textAlignVertical: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#0098FF',
-            borderRadius: 4,
-            margin: 4,
-            padding: 9,
-        },
-        timeText: {
-            ...typography('Body', 75),
-            color: changeOpacity(theme.centerChannelColor, 0.64),
-        },
-        callParticipants: {
-            marginTop: 4,
-            marginBottom: 8,
-        },
-    };
-});
+const HORIZONTAL_SPACING = 14;
+const VERTICAL_SPACING = 9;
+
+const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
+    container: {
+        borderWidth: 0.5,
+        borderColor: changeOpacity(theme.centerChannelColor, 0.15),
+        borderRadius: 12,
+        marginTop: 8,
+        marginBottom: 8,
+        padding: 16,
+    },
+    top: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+    },
+    bottom: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        marginTop: VERTICAL_SPACING,
+    },
+    left: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: HORIZONTAL_SPACING,
+    },
+    right: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    iconContainer: {
+        borderRadius: 8,
+        padding: 10,
+        marginRight: HORIZONTAL_SPACING,
+    },
+    title: {
+        color: theme.centerChannelColor,
+        ...typography('Heading', 200, 'SemiBold'),
+    },
+    timeText: {
+        color: changeOpacity(theme.centerChannelColor, 0.64),
+        ...typography('Body', 75),
+        marginBottom: 4,
+    },
+    button: {
+        backgroundColor: theme.buttonBg,
+        borderRadius: 6,
+        paddingHorizontal: 15,
+        paddingVertical: 12,
+        marginLeft: HORIZONTAL_SPACING,
+    },
+    buttonText: {
+        color: 'white',
+        ...typography('Body', 200, 'SemiBold'),
+    },
+    participants: {
+        marginTop: 2,
+    },
+}));
 
 export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: {
     currentUser?: UserModel;
@@ -130,6 +117,7 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
     const timezone = getUserTimezone(currentUser);
     const serverUrl = useServerUrl();
     const styles = getStyleSheet(theme);
+    const isTabletDevice = isTablet();
 
     const channelId = post.channelId;
     const callProps = CallPropsSchema.parse(post.props);
@@ -139,6 +127,7 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
         start_at: startedAt,
         end_at: endedAt,
     } = callProps;
+    const isActive = (status === 'calling' || status === 'joined');
 
     /**
      * Compute if the time difference is bellow 1 hour
@@ -153,134 +142,218 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
     );
 
     /**
-     * Darken button background
+     * Styles
      */
+    const iconBackgroundColor = isDark ? '#262A30' : '#FAFAFA';
     const backgroundColor = (() => {
-        if (status === 'calling' || status === 'joined') {
+        if (isActive) {
             return theme.centerChannelBg;
         }
-        return isDark ? '#262A30' : '#FAFAFA';
+        return isDark ? '#2A2E35' : '#F5F5F5';
     })();
     const containerStyles = [styles.container, {backgroundColor}];
+    const iconContainerStyles = [styles.iconContainer, {backgroundColor: iconBackgroundColor}];
+
+    /**
+     * We cannot display the regular participant count if the
+     * conference ended less than 60s ago, since moment will write a very long string
+     */
+    const [maxInlineParticipantCount, setMaxInlineParticipantCount] = useState(3);
+    const isActiveRef = useRef(isActive);
+    const isMountedRef = useMountedRef();
+    useEffect(
+        () => {
+            if (!isActive && isActiveRef.current) {
+                isActiveRef.current = true;
+                setMaxInlineParticipantCount(2);
+                setTimeout(() => {
+                    if (isMountedRef.current) {
+                        setMaxInlineParticipantCount(3);
+                    }
+                }, 1000 * 60);
+            } else {
+                isActiveRef.current = isActive;
+            }
+        }, [isActive],
+    );
+
+    /**
+     * If the conference is active, make sure we have
+     * the list of participants by fetching it from API
+     */
+    useEffect(() => {
+        if (isActive) {
+            fetchConference(serverUrl, conferenceId);
+        }
+    }, []);
 
     let callButton = null;
     if (startedAt && !endedAt) {
         callButton = (
-            <View>
-                <Divider/>
-                <View style={styles.joinCallContainer}>
-                    <View/>
-                    <TouchableOpacity
-                        onPress={() => {
-                            CallManager.onCall(serverUrl, channelId, {conferenceId, initiator: 'internal'});
-                        }}
-                        style={styles.joinCallButton}
-                    >
-                        {
-                            isDM && status === 'missed' ? (
-                                <FormattedText
-                                    id='mobile.calls_call_back'
-                                    style={styles.joinCallButtonText}
-                                    defaultMessage='Call back'
-                                />
-                            ) : (
-                                <FormattedText
-                                    id='mobile.calls_join_call_short'
-                                    style={styles.joinCallButtonText}
-                                    defaultMessage='Join'
-                                />
-                            )
-                        }
-                        <CompassIcon
-                            name={'phone-in-talk'}
-                            size={24}
-                            style={styles.joinIcon}
+            <TouchableOpacity
+                onPress={() => {
+                    switchToConferenceByChannelId(serverUrl, channelId, {conferenceId, initiator: 'internal'});
+                }}
+                style={styles.button}
+            >
+                {
+                    isDM && status === 'missed' ? (
+                        <FormattedText
+                            id='mobile.calls_call_back'
+                            style={styles.buttonText}
+                            defaultMessage='Call back'
                         />
-                    </TouchableOpacity>
-                </View>
-            </View>
+                    ) : (
+                        <FormattedText
+                            id='mobile.calls_join_call_short'
+                            style={styles.buttonText}
+                            defaultMessage='Join'
+                        />
+                    )
+                }
+            </TouchableOpacity>
+        );
+    }
+
+    let participantStack = null;
+    if (
+        typeof channelId === 'string' &&
+        typeof conferenceId === 'string'
+    ) {
+        participantStack = (
+            <IkCallsParticipantStack
+                style={styles.participants}
+                channelId={channelId}
+                conferenceId={conferenceId}
+                backgroundColor={backgroundColor}
+                maxDisplayedCount={(callButton || isTabletDevice) ? 5 : maxInlineParticipantCount}
+            />
         );
     }
 
     return (
         <View style={containerStyles}>
-            <View style={styles.iconMessageContainer}>
-                <View style={styles.iconContainer}>
-                    <KMeetIcon/>
-                </View>
-                <View>
-                    {
-                        (() => {
-                            if (status === 'declined') {
-                                return (
-                                    <FormattedText
-                                        id='mobile.calls_call_declined'
-                                        style={styles.systemMessageTitle}
-                                        defaultMessage='Call rejected'
-                                    />
-                                );
-                            }
-                            if (status === 'missed') {
-                                return (
-                                    <FormattedText
-                                        id='mobile.calls_call_missed'
-                                        style={styles.systemMessageTitle}
-                                        defaultMessage='Call missed'
-                                    />
-                                );
-                            }
-                            if (isDM ? (status === 'calling' || status === 'joined') : status !== 'ended') {
-                                return (
-                                    <FormattedText
-                                        id='mobile.calls_call_started'
-                                        style={styles.systemMessageTitle}
-                                        defaultMessage='Call started'
-                                    />
-                                );
-                            }
-                            return (
-                                <FormattedText
-                                    id='mobile.calls_call_ended'
-                                    style={styles.systemMessageTitle}
-                                    defaultMessage='Call ended'
-                                />
-                            );
-                        })()
-                    }
-                    {
 
-                        // !isDM &&
-                        typeof channelId === 'string' &&
-                        typeof conferenceId === 'string' &&
-                        <IkCallsParticipantStack
-                            style={styles.callParticipants}
-                            channelId={channelId}
-                            conferenceId={conferenceId}
-                            backgroundColor={backgroundColor}
-                        />
-                    }
-                    <Text style={styles.systemMessageDescription}>
+            <View style={styles.top}>
+                <View style={styles.left}>
+                    <View style={iconContainerStyles}>
+                        <KMeetIcon/>
+                    </View>
+                    <View>
                         {
-                            isEventOlderThanAnHour ? (
-                                <FormattedTime
-                                    style={styles.timeText}
-                                    value={eventDate}
-                                    isMilitaryTime={isMilitaryTime}
-                                    timezone={timezone}
-                                />
-                            ) : (
-                                <FormattedRelativeTime
-                                    style={styles.timeText}
-                                    value={endedAt || startedAt}
-                                    updateIntervalInSeconds={1}
-                                    timezone={timezone}
-                                />
-                            )
+                            (() => {
+                                if (status === 'declined') {
+                                    return (
+                                        <FormattedText
+                                            id='mobile.calls_call_declined'
+                                            style={styles.title}
+                                            defaultMessage='Call rejected'
+                                        />
+                                    );
+                                }
+                                if (status === 'missed') {
+                                    return (
+                                        <FormattedText
+                                            id='mobile.calls_call_missed'
+                                            style={styles.title}
+                                            defaultMessage='Call missed'
+                                        />
+                                    );
+                                }
+                                if (isDM ? (status === 'calling' || status === 'joined') : status !== 'ended') {
+                                    return (
+                                        <FormattedText
+                                            id='mobile.calls_call_started'
+                                            style={styles.title}
+                                            defaultMessage='Call started'
+                                        />
+                                    );
+                                }
+                                return (
+                                    <FormattedText
+                                        id='mobile.calls_call_ended'
+                                        style={styles.title}
+                                        defaultMessage='Call ended'
+                                    />
+                                );
+                            })()
                         }
-                    </Text>
+                        <Text style={styles.timeText}>
+                            {
+                                isEventOlderThanAnHour ? (
+                                    <>
+                                        {
+                                            (() => {
+                                                if (status === 'declined') {
+                                                    return (
+                                                        <FormattedText
+                                                            id='mobile.calls_declined_at'
+                                                            style={styles.timeText}
+                                                            defaultMessage='Rejected at'
+                                                        />
+                                                    );
+                                                }
+                                                if (status === 'missed') {
+                                                    return (
+                                                        <FormattedText
+                                                            id='mobile.calls_missed_at'
+                                                            style={styles.timeText}
+                                                            defaultMessage='Missed at'
+                                                        />
+                                                    );
+                                                }
+                                                if (isDM ? (status === 'calling' || status === 'joined') : status !== 'ended') {
+                                                    return (
+                                                        <FormattedText
+                                                            id='mobile.calls_started_at'
+                                                            style={styles.timeText}
+                                                            defaultMessage='Started at'
+                                                        />
+                                                    );
+                                                }
+                                                return (
+                                                    <FormattedText
+                                                        id='mobile.calls_ended_at'
+                                                        style={styles.timeText}
+                                                        defaultMessage='Ended at'
+                                                    />
+                                                );
+                                            })()
+                                        }
+                                        {' '}
+                                        <FormattedTime
+                                            style={styles.timeText}
+                                            value={eventDate}
+                                            isMilitaryTime={isMilitaryTime}
+                                            timezone={timezone}
+                                        />
+                                    </>
+                                ) : (
+                                    <FormattedRelativeTime
+                                        style={styles.timeText}
+                                        value={endedAt || startedAt}
+                                        updateIntervalInSeconds={1}
+                                        timezone={timezone}
+                                    />
+                                )
+                            }
+                        </Text>
+                    </View>
+                </View>
+                <View style={styles.right}>
+                    {(!callButton || isTabletDevice) && participantStack}
+                    {isTabletDevice && callButton}
                 </View>
             </View>
-            {callButton}
+
+            {
+                callButton && !isTabletDevice &&
+                <View style={styles.bottom}>
+                    {participantStack}
+                    {callButton}
+                </View>
+            }
+
         </View>
     );
 };

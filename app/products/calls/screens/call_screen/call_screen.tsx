@@ -14,6 +14,7 @@ import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 
 import {updateLocalCustomStatus} from '@actions/local/user';
 import {fetchChannelMemberships, switchToChannelById} from '@actions/remote/channel';
+import {fetchConference} from '@actions/remote/conference';
 import {unsetCustomStatus, updateCustomStatus} from '@actions/remote/user';
 import {postListRef} from '@app/components/post_list/post_list';
 import {CustomStatusDurationEnum, SET_CUSTOM_STATUS_FAILURE} from '@app/constants/custom_status';
@@ -733,6 +734,11 @@ const CallScreen = ({
 
     // EFFECTS
     useEffect(() => {
+        // Fetch and update the current conference if it was not received via WS
+        if (!conference) {
+            fetchConference(serverUrl, conferenceId);
+        }
+
         // Fetch the current call name
         getCallName(true); // Async forced re-render
 

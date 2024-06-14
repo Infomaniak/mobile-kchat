@@ -7,7 +7,6 @@ import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.NotificationManagerCompat;
 
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
@@ -19,7 +18,10 @@ import com.reactnativenavigation.NavigationActivity;
 
 import java.util.Objects;
 
+import kotlin.Unit;
+
 public class MainActivity extends NavigationActivity {
+    private Intent callIntent = null;
     private boolean HWKeyboardConnected = false;
     private final FoldableObserver foldableObserver = FoldableObserver.Companion.getInstance(this);
 
@@ -47,10 +49,18 @@ public class MainActivity extends NavigationActivity {
         super.onCreate(null);
         setContentView(R.layout.launch_screen);
 
+        //TODO verifier avec une action dans l'intent avant de setter intent
+        callIntent = getIntent();
+
+        CallManagerModule.setOnModuleInitializedListener(() -> {
+                    handleIntentExtras(callIntent);
+                    callIntent = null;
+                    return Unit.INSTANCE;
+                }
+        );
+
         setHWKeyboardConnected();
         foldableObserver.onCreate();
-
-        handleIntentExtras(getIntent());
     }
 
     @Override
@@ -109,22 +119,27 @@ public class MainActivity extends NavigationActivity {
     @Override
     public void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        handleIntentExtras(intent);
+        callIntent = intent;
     }
 
     private void handleIntentExtras(Intent intent) {
-        if (intent.getExtras() != null) {
+        if (intent != null && intent.getExtras() != null) {
             String channelId = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CHANNEL_ID_KEY);
             String serverId = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_SERVER_ID_KEY);
+            String conferenceId = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_ID_KEY);
             String conferenceJWT = intent.getStringExtra(NotificationUtils.INTENT_EXTRA_CONFERENCE_JWT_KEY);
             CallManagerModule callManagerModule = CallManagerModule.getInstance();
 
-            if (callManagerModule != null && channelId != null && serverId != null && conferenceJWT != null) {
+            if (
+                    callManagerModule != null
+                            && channelId != null
+                            && serverId != null
+                            && conferenceJWT != null
+                            && conferenceId != null
+            ) {
                 callManagerModule.callAnswered(serverId, channelId, conferenceJWT);
+                NotificationUtils.dismissCallNotification(this, conferenceId);
             }
-
-            //TODO Change notification id to handle multiple call notifications
-            NotificationManagerCompat.from(this).cancel(-1);
         }
     }
 

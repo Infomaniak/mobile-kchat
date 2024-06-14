@@ -15,6 +15,9 @@ class CallManagerModule(private var reactContext: ReactApplicationContext) : Rea
         private var instance: CallManagerModule? = null
 
         @JvmStatic
+        var onModuleInitializedListener: (() -> Unit)? = null
+
+        @JvmStatic
         fun getInstance(reactContext: ReactApplicationContext): CallManagerModule {
             if (instance == null) {
                 instance = CallManagerModule(reactContext)
@@ -64,6 +67,11 @@ class CallManagerModule(private var reactContext: ReactApplicationContext) : Rea
         }
 
         sendEvent("CallEnded", result)
+    }
+
+    @ReactMethod
+    fun initialized() {
+        onModuleInitializedListener?.invoke()
     }
 
     @ReactMethod

@@ -4,15 +4,15 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 
 import {observeConferenceParticipantCount, observeConferenceParticipants} from '@app/queries/servers/conference';
-import {IkCallsParticipantStack, RENDERED_CONFERENCE_PARTICIPANT_COUNT} from '@calls/components/ik_calls_participant_stack/stack';
+import {IkCallsParticipantStack} from '@calls/components/ik_calls_participant_stack/stack';
 
 import type {WithDatabaseArgs} from '@typings/database/database';
 
-const enhance = withObservables(['conferenceId'], (
-    {database: db, conferenceId}:
-    WithDatabaseArgs & { conferenceId: string },
+const enhance = withObservables(['conferenceId', 'maxDisplayedCount'], (
+    {database: db, conferenceId, maxDisplayedCount = 3}:
+    WithDatabaseArgs & { conferenceId: string; maxDisplayedCount?: number },
 ) => {
-    const participants = observeConferenceParticipants(db, conferenceId!, RENDERED_CONFERENCE_PARTICIPANT_COUNT);
+    const participants = observeConferenceParticipants(db, conferenceId!, maxDisplayedCount);
     const participantCount = observeConferenceParticipantCount(db, conferenceId!);
 
     return {participants, participantCount};
