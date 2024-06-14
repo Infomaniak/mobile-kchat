@@ -5,6 +5,7 @@ import {Alert, DeviceEventEmitter, Linking, NativeEventEmitter, NativeModules, P
 import semver from 'semver';
 
 import {switchToChannelById} from '@actions/remote/channel';
+import {switchToConferenceByChannelId} from '@actions/remote/conference';
 import CallManager from '@app/store/CallManager';
 import {logError} from '@app/utils/log';
 import LocalConfig from '@assets/config.json';
@@ -114,7 +115,7 @@ class GlobalEventHandler {
     onCallAnswered = async (event: CallAnsweredEvent) => {
         const serverUrl = await DatabaseManager.getServerUrlFromIdentifier(event.serverId);
         if (typeof serverUrl === 'string') {
-            CallManager.onCall(serverUrl, event.channelId, {initiator: 'native'});
+            switchToConferenceByChannelId(serverUrl, event.channelId, {initiator: 'native'});
         }
     };
 

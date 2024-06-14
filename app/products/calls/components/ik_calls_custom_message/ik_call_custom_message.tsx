@@ -7,9 +7,9 @@ import {Text, TouchableOpacity, View} from 'react-native';
 import {Divider} from 'react-native-elements';
 import {z} from 'zod';
 
+import {switchToConferenceByChannelId} from '@actions/remote/conference';
 import FormattedRelativeTime from '@app/components/formatted_relative_time';
 import {useServerUrl} from '@app/context/server';
-import CallManager from '@app/store/CallManager';
 import {isDarkTheme} from '@app/utils/theme';
 import IkCallsParticipantStack from '@calls/components/ik_calls_participant_stack';
 import CompassIcon from '@components/compass_icon';
@@ -172,7 +172,7 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
                     <View/>
                     <TouchableOpacity
                         onPress={() => {
-                            CallManager.onCall(serverUrl, channelId, {conferenceId, initiator: 'internal'});
+                            switchToConferenceByChannelId(serverUrl, channelId, {conferenceId, initiator: 'internal'});
                         }}
                         style={styles.joinCallButton}
                     >

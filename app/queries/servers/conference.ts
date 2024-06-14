@@ -15,6 +15,14 @@ const {CONFERENCE, CONFERENCE_PARTICIPANT} = DatabaseConstants.MM_TABLES.SERVER;
 export const queryConference = (database: Database, conferenceId: string) =>
     database.get<ConferenceModel>(CONFERENCE).query(Q.where('id', conferenceId));
 
+export const getConferenceById = async (database: Database, conferenceId: string) => {
+    try {
+        return await database.get<ConferenceModel>(CONFERENCE).find(conferenceId);
+    } catch {
+        return undefined;
+    }
+};
+
 export const observeConference = (database: Database, conferenceId: string) =>
     queryConference(database, conferenceId).
         observeWithColumns(['delete_at']).

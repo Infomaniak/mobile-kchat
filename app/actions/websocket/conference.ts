@@ -45,20 +45,22 @@ const ConferenceGenericEvent = z.object({
 export const handleConferenceReceived = async (serverUrl: string, data: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
-        return {error: `${serverUrl} operator not found`};
+        logError(`${serverUrl} operator not found`);
+        return undefined;
     }
 
     try {
-        operator.handleConferences({
+        const [conference] = await operator.handleConferences({
             conferences: [ConferenceEvent.parse(data)],
             prepareRecordsOnly: false,
         });
+        return conference;
     } catch (e) {
         logError(e);
-        return {error: (e as Error).toString()};
-    }
+        return undefined;
 
-    return {};
+        // return {error: (e as Error).toString()};
+    }
 };
 
 /**
