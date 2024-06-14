@@ -6,7 +6,7 @@ import semver from 'semver';
 
 import {switchToChannelById} from '@actions/remote/channel';
 import {switchToConferenceByChannelId} from '@actions/remote/conference';
-import CallManager from '@app/store/CallManager';
+import CallManager, {CallAnsweredEvent, CallEndedEvent, CallMutedEvent, CallVideoMutedEvent} from '@app/store/CallManager';
 import {logError} from '@app/utils/log';
 import LocalConfig from '@assets/config.json';
 import {Device, Events, Sso} from '@constants';
@@ -112,23 +112,45 @@ class GlobalEventHandler {
         }
     };
 
-    onCallAnswered = async (event: CallAnsweredEvent) => {
-        const serverUrl = await DatabaseManager.getServerUrlFromIdentifier(event.serverId);
-        if (typeof serverUrl === 'string') {
-            switchToConferenceByChannelId(serverUrl, event.channelId, {initiator: 'native'});
+    onCallAnswered = async (event: unknown) => {
+        const parsed = CallAnsweredEvent.safeParse(event);
+        if (parsed.success) {
+            const { data } = parsed;
+            const serverUrl = await DatabaseManager.getServerUrlFromIdentifier(data.serverId);
+            if (typeof serverUrl === 'string') {
+                switchToConferenceByChannelId(serverUrl, data.channelId, {initiator: 'native'});
+            }
+        } else {
+            logError('UNABLE TO PARSE CallAnsweredEvent', parsed.error)
+        }
+        
+    };
+
+    onCallEnded = async (event: unknown) => {
+        const parsed = CallEndedEvent.safeParse(event);
+        if (parsed.success) {
+            CallManager.leaveCallScreen(parsed.data);
+        } else {
+            logError('UNABLE TO PARSE CallEndedEvent', parsed.error)
         }
     };
 
-    onCallEnded = async (event: CallEndedEvent) => {
-        CallManager.leaveCallScreen(event);
+    onCallMuted = async (event: unknown) => {
+        const parsed = CallMutedEvent.safeParse(event);
+        if (parsed.success) {
+            CallManager.toggleAudioMuted(parsed.data.isMuted === 'true');
+        } else {
+            logError('UNABLE TO PARSE CallEndedEvent', parsed.error)
+        }
     };
 
-    onCallMuted = async (event: CallMutedEvent) => {
-        CallManager.toggleAudioMuted(event.isMuted === 'true');
-    };
-
-    onCallVideoMuted = async (event: CallMutedEvent) => {
-        CallManager.toggleVideoMuted(event.isMuted === 'true');
+    onCallVideoMuted = async (event: unknown) => {
+        const parsed = CallVideoMutedEvent.safeParse(event);
+        if (parsed.success) {
+            CallManager.toggleAudioMuted(parsed.data.isMuted === 'true');
+        } else {
+            logError('UNABLE TO PARSE CallEndedEvent', parsed.error)
+        }
     };
 
     onSplitViewChanged = async (result: SplitViewResult) => {

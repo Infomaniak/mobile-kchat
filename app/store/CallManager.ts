@@ -1,18 +1,34 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {handleConferenceDeletedById, handleConferenceUpdatedById} from '@actions/websocket/conference';
-import {Screens} from '@app/constants';
-import {getFullName} from '@app/utils/user';
-import {callScreenRef, type PassedProps} from '@calls/screens/call_screen/call_screen';
+import {z} from 'zod';
+
+import {handleConferenceDeletedById} from '@actions/websocket/conference';
+import {callScreenRef} from '@calls/screens/call_screen/call_screen';
 import ClientError from '@client/rest/error';
 import DatabaseManager from '@database/manager';
-import {getTranslations, t} from '@i18n';
 import NetworkManager from '@managers/network_manager';
-import {allOrientations, dismissAllModalsAndPopToScreen} from '@screens/navigation';
 import {logError} from '@utils/log';
 
-import type {Options} from 'react-native-navigation';
+// OS events
+export const CallAnsweredEvent = z.object({
+    serverId: z.string().uuid(),
+    channelId: z.string().uuid(),
+    conferenceJWT: z.string().min(1),
+});
+export type CallAnsweredEvent = z.infer<typeof CallAnsweredEvent>;
+
+export const CallEndedEvent = z.object({
+    serverId: z.string().uuid(),
+    conferenceId: z.string().uuid(),
+});
+export type CallEndedEvent = z.infer<typeof CallEndedEvent>;
+
+export const CallMutedEvent = z.object({isMuted: z.enum(['true', 'false'])});
+export type CallMutedEvent = z.infer<typeof CallMutedEvent>;
+
+export const CallVideoMutedEvent = CallMutedEvent;
+export type CallVideoMutedEvent = z.infer<typeof CallVideoMutedEvent>;
 
 class CallManager {
     startCall = async (serverUrl: string, channelId: string, allowAnswer = true): Promise<Conference & { answered: boolean; server_url: string } | null> => {
@@ -115,103 +131,6 @@ class CallManager {
         if (typeof toggleVideoMuted === 'function') {
             toggleVideoMuted(isMuted);
         }
-    };
-
-    /**
-     * Triggers a "Join/Start call" on a kMeet
-     *  -> Answer/Start the kMeet
-     *  -> Pop the CALL screen
-     *
-     * If the conferenceId is know it should
-     * be passed as an arg to trigger a "Join call" instead of a "Start call"
-     */
-    onCall = async (
-        serverUrl: string, channelId: string,
-        {conferenceId, conferenceJWT, initiator}:
-        { conferenceId?: string; conferenceJWT?: string; initiator?: 'native' | 'internal' } = {},
-    ) => {
-        /* eslint-disable multiline-ternary */
-        try {
-            const client = NetworkManager.getClient(serverUrl);
-            const [userProfile, call] = await Promise.all([
-
-                // Get current user profile
-                await client.getMe(),
-
-                // Start/Answer the call via API
-                typeof conferenceId === 'string' ?
-                    await this.answerCall(serverUrl, conferenceId, channelId) :
-                    await this.startCall(serverUrl, channelId),
-            ]);
-
-            if (call !== null) {
-                // Ensure that the conference is not deleted
-                // this might happen since startCall might actually answer an old call
-                // that has been deleted locally, but has not remotely
-                await handleConferenceUpdatedById(serverUrl, call.id, {deleteAt: undefined});
-
-                // Setup CALL screen props
-                // - title
-                const translations = getTranslations(userProfile.locale);
-                const title = translations[t('mobile.calls_call_screen')] || 'Call';
-
-                // - passedProps
-                const passedProps: PassedProps = {
-                    serverUrl,
-                    kMeetServerUrl: call.server_url,
-                    channelId: call.channel_id,
-                    conferenceId: call.id,
-                    conferenceJWT: conferenceJWT ?? call.jwt ?? '',
-                    answered: call.answered,
-                    initiator,
-
-                    /**
-                     * Compute the JitsiMeeting `userInfo`
-                     * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#userinfo
-                     */
-                    userInfo: {
-                        avatarURL: typeof userProfile.public_picture_url === 'string' ?
-                            userProfile.public_picture_url : // Public picture if available
-                            /**
-                             * API proxied image if not
-                             * Ref. app/components/profile_picture/image.tsx
-                             */
-                            (() => {
-                                const lastPictureUpdate = ('lastPictureUpdate' in userProfile) ?
-                                    (userProfile.lastPictureUpdate as number) :
-                                    userProfile.last_picture_update || 0;
-
-                                const pictureUrl = client.getProfilePictureUrl(userProfile.id, lastPictureUpdate);
-
-                                return `${serverUrl}${pictureUrl}`;
-                            })(),
-                        displayName: getFullName(userProfile),
-                        email: userProfile.email,
-                    },
-                };
-
-                // - options
-                const options: Options = {
-                    layout: {
-                        backgroundColor: '#000',
-                        componentBackgroundColor: '#000',
-                        orientation: allOrientations,
-                    },
-                    topBar: {
-                        background: {color: '#000'},
-
-                        // visible: Platform.OS === 'android',
-                        visible: false,
-                    },
-                };
-
-                // Pop the CALL screen
-                await dismissAllModalsAndPopToScreen(Screens.CALL, title, passedProps, options);
-            }
-        } catch (err) {
-            logError(err);
-        }
-        /* eslint-enable multiline-ternary */
     };
 }
 
