@@ -33,6 +33,11 @@ object NotificationUtils {
     const val NOTIFICATION_ACK_ID_KEY = "ack_id"
     const val NOTIFICATION_POST_ID_KEY = "post_id"
 
+    const val EVENT_CHANNEL_ID_KEY = "channelId"
+    const val EVENT_SERVER_ID_KEY = "serverId"
+    const val EVENT_CONFERENCE_ID_KEY = "conferenceId"
+    const val EVENT_CONFERENCE_JWT_KEY = "conferenceJWT"
+
     const val CHANNEL_ID_KEY = "channel_id"
     const val SERVER_ID_KEY = "server_id"
     const val SERVER_URL_KEY = "server_url"

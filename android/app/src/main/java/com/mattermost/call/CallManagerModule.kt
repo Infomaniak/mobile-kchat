@@ -42,9 +42,9 @@ class CallManagerModule(private var reactContext: ReactApplicationContext) : Rea
     fun callAnswered(serverId: String, channelId: String, conferenceJWT: String) {
         val result = if (currentActivity != null) {
             val map = Arguments.createMap()
-            map.putString(NotificationUtils.SERVER_ID_KEY, serverId)
-            map.putString(NotificationUtils.CHANNEL_ID_KEY, channelId)
-            map.putString(NotificationUtils.CONFERENCE_JWT_KEY, conferenceJWT)
+            map.putString(NotificationUtils.EVENT_SERVER_ID_KEY, serverId)
+            map.putString(NotificationUtils.EVENT_CHANNEL_ID_KEY, channelId)
+            map.putString(NotificationUtils.EVENT_CONFERENCE_JWT_KEY, conferenceJWT)
             map
         } else {
             null
@@ -56,8 +56,8 @@ class CallManagerModule(private var reactContext: ReactApplicationContext) : Rea
     fun callEnded(serverId: String, conferenceId: String) {
         val result = if (currentActivity != null) {
             val map = Arguments.createMap()
-            map.putString(NotificationUtils.SERVER_ID_KEY, serverId)
-            map.putString(NotificationUtils.CONFERENCE_ID_KEY, conferenceId)
+            map.putString(NotificationUtils.EVENT_SERVER_ID_KEY, serverId)
+            map.putString(NotificationUtils.EVENT_CONFERENCE_ID_KEY, conferenceId)
             map
         } else {
             null
