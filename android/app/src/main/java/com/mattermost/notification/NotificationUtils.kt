@@ -17,7 +17,7 @@ import com.mattermost.call.IntentUtils.addExtraToIntent
 import com.mattermost.call.IntentUtils.getCallDeclinedBundle
 import com.mattermost.call.IntentUtils.getDeclineCallPendingIntent
 import com.mattermost.call.IntentUtils.getMainActivityPendingIntent
-import com.mattermost.rnbeta.R
+import com.mattermost.rnbeta.*
 
 //Keep that import for RN...
 import com.mattermost.rnbeta.*
