@@ -7,7 +7,7 @@ import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
 import moment from 'moment';
 import React, {useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type ComponentProps, type MutableRefObject} from 'react';
 import {useIntl} from 'react-intl';
-import {ActivityIndicator, DeviceEventEmitter, FlatList, NativeModules, Platform, View} from 'react-native';
+import {ActivityIndicator, DeviceEventEmitter, FlatList, NativeModules, View} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {useAnimatedStyle} from 'react-native-reanimated';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
@@ -887,7 +887,7 @@ const CallScreen = ({
                 // 'server-url-change.enabled': false,
 
                 // Disable CallKit
-                'call-integration.enabled': Platform.OS === 'android',
+                'call-integration.enabled': false,
             }}
             style={{flex: 1}}
             room={channelId}
