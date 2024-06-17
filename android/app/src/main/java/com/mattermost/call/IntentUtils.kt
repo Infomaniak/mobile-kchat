@@ -15,6 +15,9 @@ import com.mattermost.notification.NotificationUtils.NOTIFICATION_TYPE_KEY
 import com.mattermost.notification.NotificationUtils.SERVER_ID_KEY
 import com.mattermost.rnbeta.MainActivity
 
+//Keep that import for RN...
+import com.mattermost.rnbeta.*
+
 object IntentUtils {
 
     fun getCallDeclinedBundle(notificationExtras: CallExtras): Bundle = with(notificationExtras) {

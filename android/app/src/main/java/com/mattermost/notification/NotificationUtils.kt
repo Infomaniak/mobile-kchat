@@ -19,6 +19,9 @@ import com.mattermost.call.IntentUtils.getDeclineCallPendingIntent
 import com.mattermost.call.IntentUtils.getMainActivityPendingIntent
 import com.mattermost.rnbeta.R
 
+//Keep that import for RN...
+import com.mattermost.rnbeta.*
+
 object NotificationUtils {
 
     // Yes, call type = message, call bundle key = pushNotification ... But this is because
