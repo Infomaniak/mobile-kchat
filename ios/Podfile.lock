@@ -443,7 +443,7 @@ PODS:
     - React-Core
   - react-native-create-thumbnail (1.6.4):
     - React-Core
-  - react-native-document-picker (9.0.1):
+  - react-native-document-picker (9.3.0):
     - React-Core
   - react-native-emm (1.4.0):
     - React-Core
@@ -1170,7 +1170,7 @@ SPEC CHECKSUMS:
   react-native-color-matrix-image-filters: e2df0971b44f1aba49f4740463fdda857d467adf
   react-native-cookies: f54fcded06bb0cda05c11d86788020b43528a26c
   react-native-create-thumbnail: e022bcdcba8a0b4529a50d3fa1a832ec921be39d
-  react-native-document-picker: 2b8f18667caee73a96708a82b284a4f40b30a156
+  react-native-document-picker: 5b97e24a7f1a1e4a50a72c540a043f32d29a70a2
   react-native-emm: 17ba66e81c93429b2bb288848d706e2e485b02e8
   react-native-get-random-values: dee677497c6a740b71e5612e8dbd83e7539ed5bb
   react-native-hw-keyboard-event: b517cefb8d5c659a38049c582de85ff43337dc53
