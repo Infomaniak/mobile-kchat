@@ -24,6 +24,7 @@ export const convertToNotificationData = (notification: Notification, tapped = t
             channel_id: payload.channel_id,
             channel_name: payload.channel_name,
             conference_id: payload.conference_id,
+            conference_jwt: payload.conference_jwt,
             identifier: payload.identifier || notification.identifier,
             from_webhook: payload.from_webhook,
             message: ((payload.type === NOTIFICATION_TYPE.MESSAGE) ? payload.message || notification.body : payload.body),

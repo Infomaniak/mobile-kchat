@@ -191,7 +191,8 @@ export const openNotification = async (serverUrl: string, notification: Notifica
     EphemeralStore.setNotificationTapped(true);
 
     const channelId = notification.payload!.channel_id!;
-    const conferenceId = notification.payload!.conference_id!;
+    const conferenceId = notification.payload!.conference_id;
+    const conferenceJWT = notification.payload!.conference_jwt;
     const rootId = notification.payload!.root_id!;
     try {
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
@@ -220,7 +221,7 @@ export const openNotification = async (serverUrl: string, notification: Notifica
         if (isConferenceNotification) {
             const {conference} = await fetchConference(serverUrl, conferenceId);
             if (conference) {
-                return switchToConferenceByChannelId(serverUrl, conference.channelId, {initiator: 'native'});
+                return switchToConferenceByChannelId(serverUrl, conference.channelId, {initiator: 'native', conferenceJWT});
             }
         }
 

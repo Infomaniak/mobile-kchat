@@ -28,6 +28,7 @@ export async function pushNotificationEntry(serverUrl: string, notification: Not
     // We only reach this point if we have a channel Id in the notification payload
     const channelId = notification.channel_id!;
     const conferenceId = notification.conference_id;
+    const conferenceJWT = notification.conference_jwt;
     const rootId = notification.root_id!;
 
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
@@ -100,7 +101,7 @@ export async function pushNotificationEntry(serverUrl: string, notification: Not
         if (isConferenceNotification) {
             const {conference} = await fetchConference(serverUrl, conferenceId);
             if (conference) {
-                switchToConferenceByChannelId(serverUrl, conference.channelId, {initiator: 'native'});
+                switchToConferenceByChannelId(serverUrl, conference.channelId, {initiator: 'native', conferenceJWT});
                 redirected = true;
             } else {
                 // Conference not found, maybe it was terminated?

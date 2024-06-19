@@ -23,6 +23,7 @@ interface NotificationData {
     body?: string;
     channel_id: string;
     conference_id?: string;
+    conference_jwt?: string;
     channel_name?: string;
     identifier?: string;
     from_webhook?: string;
