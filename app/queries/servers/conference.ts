@@ -12,73 +12,102 @@ import type ConferenceParticipantModel from '@typings/database/models/servers/co
 
 const {CONFERENCE, CONFERENCE_PARTICIPANT} = DatabaseConstants.MM_TABLES.SERVER;
 
+//
+// QUERIES
+//
+/**
+ * Create a query to get one conference by id in the database
+ */
 export const queryConference = (database: Database, conferenceId: string) =>
     database.get<ConferenceModel>(CONFERENCE).query(Q.where('id', conferenceId));
 
-export const getConferenceById = async (database: Database, conferenceId: string) => {
-    try {
-        return await database.get<ConferenceModel>(CONFERENCE).find(conferenceId);
-    } catch {
-        return undefined;
-    }
+/**
+ * Create a query to get the list of conference participants related to one conference
+ */
+export const queryConferenceParticipants = (database: Database, conferenceId: string, limit?: number) =>
+    database.
+        get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).
+        query(...[
+            Q.where('conference_id', conferenceId),
+            Q.sortBy('id', Q.asc),
+            ...(typeof limit === 'number' ? [Q.take(limit)] : []),
+        ]);
+
+/**
+ * Create a query to get one participant of a conference that is present
+ * Optionnaly, a specific userId can be ignored from the list of participants
+ */
+export const queryPresentConferenceParticipant = (database: Database, conferenceId: string, ignoredUserId?: string) =>
+    database.
+        get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).
+        query(
+            Q.and([
+                Q.where('conference_id', conferenceId),
+                Q.where('present', true),
+                ...(typeof ignoredUserId === 'string' ? [Q.where('user_id', Q.notEq(ignoredUserId))] : []),
+            ]),
+        );
+
+//
+// GETTERS
+//
+/**
+ * Find one conference by id in the database
+ */
+export const getConferenceById = async (...args: Parameters<typeof queryConference>) => {
+    const conferences = await queryConference(...args).fetch();
+    return conferences.length ? conferences[0] : undefined;
 };
 
-export const observeConference = (database: Database, conferenceId: string) =>
-    queryConference(database, conferenceId).
+/**
+ * Get the list of conference participants related to one conference
+ */
+export const getConferenceParticipants = (...args: Parameters<typeof queryConferenceParticipants>) =>
+    queryConferenceParticipants(...args).fetch();
+
+/**
+ * Get the number of conference participants related to one conference
+ */
+export const getConferenceParticipantCount = (...args: Parameters<typeof queryConferenceParticipants>) =>
+    queryConferenceParticipants(...args).fetchCount();
+
+/**
+ * Test if there is at least one participant present in the conference
+ * Optionnaly, a userId can be ignored from the list of participants
+ */
+export const getConferenceHasAtLeastOneParticipantPresent = async (...args: Parameters<typeof queryPresentConferenceParticipant>) =>
+    (await queryPresentConferenceParticipant(...args).fetchCount()) > 0;
+
+//
+// OBSERVERS
+//
+/**
+ * Observe one conference by id in the database
+ */
+export const observeConference = (...args: Parameters<typeof queryConference>) =>
+    queryConference(...args).
         observeWithColumns(['delete_at']).
         pipe(switchMap((cs) => of$(cs.length === 1 ? cs[0] : undefined)));
 
-export const observeConferenceParticipants = (database: Database, conferenceId: string, limit?: number) => {
-    const clauses: Q.Clause[] = [Q.where('conference_id', conferenceId), Q.sortBy('id', Q.asc)];
-    if (typeof limit === 'number') {
-        clauses.push(Q.take(limit));
-    }
-
-    return database.
-        get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).
-        query(...clauses).
+/**
+ * Observe a list of conference participants related to one conference
+ */
+export const observeConferenceParticipants = (...args: Parameters<typeof queryConferenceParticipants>) =>
+    queryConferenceParticipants(...args).
         observeWithColumns(['status', 'presence']);
-};
 
-export const observeConferenceParticipantCount = (database: Database, conferenceId: string) =>
-    database.
-        get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).
-        query(Q.where('conference_id', conferenceId)).
+/**
+ * Observe the number of conference participants related to one conference
+ */
+export const observeConferenceParticipantCount = (...args: Parameters<typeof queryConferenceParticipants>) =>
+    queryConferenceParticipants(...args).
         observeCount(false);
 
 /**
  * Observe if there is at least one participant present in the conference
  * Optionnaly, a userId can be ignored from the list of participants
  */
-export const observeConferenceHasAtLeastOneParticipantPresent = (database: Database, conferenceId: string, ignoredUserId?: string) => {
-    const clauses: Q.Where[] = [
-        Q.where('conference_id', conferenceId),
-        Q.where('present', true),
-    ];
-    if (typeof ignoredUserId === 'string') {
-        clauses.push(Q.where('user_id', Q.notEq(ignoredUserId)));
-    }
-
-    return database.
-        get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).
-        query(Q.and(...clauses), Q.take(1)).
-        observe().
-        pipe(switchMap((cps) => of$(cps.length > 0)));
-};
-
-export const fetchConferenceHasAtLeastOneParticipantPresent = async (database: Database, conferenceId: string, ignoredUserId?: string) => {
-    const clauses: Q.Where[] = [
-        Q.where('conference_id', conferenceId),
-        Q.where('present', true),
-    ];
-    if (typeof ignoredUserId === 'string') {
-        clauses.push(Q.where('user_id', Q.notEq(ignoredUserId)));
-    }
-
-    const participants = await database.
-        get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).
-        query(Q.and(...clauses), Q.take(1)).
-        fetch();
-
-    return participants.length > 0;
-};
+export const observeConferenceHasAtLeastOneParticipantPresent = (...args: Parameters<typeof queryPresentConferenceParticipant>) =>
+    queryPresentConferenceParticipant(...args).
+        observeCount(false).
+        pipe(switchMap((count) => of$(count > 0)));

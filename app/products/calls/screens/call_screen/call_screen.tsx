@@ -1,10 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-/* eslint max-lines: off */
+/* eslint-disable max-lines */
 /* eslint-disable max-nested-callbacks */
+/* eslint-disable react/display-name */
+/* eslint-disable react/jsx-max-props-per-line */
 
 import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
-import React, {useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type ComponentProps, type MutableRefObject} from 'react';
+import React, {forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type ComponentProps, type MutableRefObject} from 'react';
 import {useIntl} from 'react-intl';
 import {ActivityIndicator, FlatList, NativeModules, View} from 'react-native';
 import {Navigation} from 'react-native-navigation';
@@ -18,7 +20,6 @@ import {useServerId} from '@app/context/server';
 import {useTheme} from '@app/context/theme';
 import {useCollapsibleHeader} from '@app/hooks/header';
 import {useMountedRef, useRerender, useTransientRef} from '@app/hooks/utils';
-import {fetchConferenceHasAtLeastOneParticipantPresent} from '@app/queries/servers/conference';
 import {getCommonSystemValues} from '@app/queries/servers/system';
 import {logError} from '@app/utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@app/utils/theme';
@@ -30,12 +31,17 @@ import NavigationHeader from '@components/navigation_header';
 import Image from '@components/profile_picture/image';
 import {General, Screens} from '@constants';
 import DatabaseManager from '@database/manager';
-import {noop} from '@helpers/api/general';
 import CallManager from '@store/CallManager';
 import {isDMorGM as isChannelDMorGM} from '@utils/channel';
 
-import type ChannelModel from '@typings/database/models/servers/channel';
-import type ConferenceModel from '@typings/database/models/servers/conference';
+import {
+    _useChannel,
+    _useConference,
+    _useCurrentUserId,
+    _useHasAtLeastOneParticipantPresent,
+    _useMicPermissionsGranted,
+    _useParticipantCount,
+} from './hooks';
 
 export type PassedProps = {
     serverUrl: string;
@@ -49,12 +55,12 @@ export type PassedProps = {
 };
 
 export type InjectedProps = {
-    channel?: ChannelModel;
-    conference: ConferenceModel | undefined;
-    currentUserId: string;
-    micPermissionsGranted: boolean;
-    participantCount: number;
 
+    // channel?: ChannelModel;
+    // currentUserId: string;
+    // micPermissionsGranted: boolean;
+    // conference: ConferenceModel | undefined;
+    // participantCount: number;
     // hasAtLeastOneParticipantPresent: boolean;
 }
 
@@ -146,48 +152,6 @@ const hasUpdatedRef = <T extends unknown>(ref: MutableRefObject<T>, newValue: T)
 };
 
 /**
- * Test if there is at least one participant present in the conference
- * only necessary for DMs
- * HACK ugly hack to prevent android from crashing
- */
-const useHasAtLeastOneParticipantPresent = (() => {
-    const INTERVAL = 1000; // ms
-    const TIMER = 1000; // ms
-
-    return (isDM: boolean, serverUrl: string, conferenceId: string, currentUserId: string) => {
-        const [hasAtLeastOneParticipantPresent, setHasAtLeastOneParticipantPresent] = useState<boolean | undefined>(isDM ? false : undefined);
-        useEffect(() => {
-            if (isDM) {
-                let interval: NodeJS.Timeout | null = null;
-                const database = DatabaseManager.serverDatabases[serverUrl]?.database;
-
-                const clean = () => {
-                    if (typeof interval === 'number') {
-                        clearInterval(interval);
-                        interval = null;
-                    }
-                };
-
-                // Poll database until we get the response that we want
-                interval = setInterval(async () => {
-                    if (await fetchConferenceHasAtLeastOneParticipantPresent(database!, conferenceId, currentUserId)) {
-                        setTimeout(() => {
-                            setHasAtLeastOneParticipantPresent(true);
-                        }, TIMER);
-                        clean();
-                    }
-                }, INTERVAL);
-                return clean;
-            }
-
-            return noop;
-        }, []);
-
-        return hasAtLeastOneParticipantPresent;
-    };
-})();
-
-/**
  * Native reporters, notify native/OS about a state change
  */
 const nativeReporters = {
@@ -233,33 +197,31 @@ const nativeReporters = {
     },
 };
 
+const FrozenJitsiMeeting = forwardRef<JitsiRefProps, ComponentProps<typeof JitsiMeeting>>((props, ref) =>
+    useMemo(() => (<JitsiMeeting ref={ref} {...props}/>), []));
+
 const CallScreen = ({
-    channel,
     channelId,
-    conference,
     conferenceId,
     conferenceJWT,
-    currentUserId,
-    micPermissionsGranted,
-    participantCount,
-
-    // hasAtLeastOneParticipantPresent,
     answered,
     initiator,
     serverUrl,
     kMeetServerUrl,
     userInfo,
+
+    // channel,
+    // currentUserId,
+    // micPermissionsGranted,
+    // conference,
+    // participantCount,
+    // hasAtLeastOneParticipantPresent,
 }: Props) => {
     const {formatMessage} = useIntl();
     const mountedRef = useMountedRef();
     const rerender = useRerender();
     const serverId = useServerId();
     const theme = useTheme();
-
-    /**
-     * Ask for microphone permissions
-     */
-    usePermissionsChecker(micPermissionsGranted);
 
     /**
      * Keep reference of whenever we have mounted the <JitsiMeeting />
@@ -333,6 +295,7 @@ const CallScreen = ({
      * Is the current channel a DM or GM, will be false
      * for public and private channels
      */
+    const channel = _useChannel(serverUrl, channelId); // HACK - see NOTE #1
     const isDM = channel?.type === General.DM_CHANNEL;
     const isDMorGM = channel ? isChannelDMorGM(channel) : false;
 
@@ -342,15 +305,27 @@ const CallScreen = ({
     const isCurrentUserInitiator = !answered;
 
     /**
+     * NOTE #1
      * We should be using the observable hasAtLeastOneParticipantPresent instead
-     * HACK ugly hack to prevent android from crashing
+     * HACK ugly hack to prevent <JitsiMeeting /> from crashing
      */
-    const hasAtLeastOneParticipantPresent = useHasAtLeastOneParticipantPresent(isDM, serverUrl, conferenceId, currentUserId);
+    const currentUserId = _useCurrentUserId(isDM, serverUrl); // HACK
+    const micPermissionsGranted = _useMicPermissionsGranted(); // HACK
+    const conference = _useConference(serverUrl, conferenceId); // HACK
+    const participantCount = _useParticipantCount(serverUrl, conferenceId); // HACK
+    const hasAtLeastOneParticipantPresent = _useHasAtLeastOneParticipantPresent(serverUrl, conferenceId, currentUserId); // HACK
 
     /**
-     * Display the loading screen if the conference has not been loaded yet
+     * Ask for microphone permissions
      */
-    const shouldDisplayLoadingScreen = !conference;
+    usePermissionsChecker(micPermissionsGranted);
+
+    /**
+     * Display the loading screen if data has not been fully loaded yet
+     */
+    const shouldDisplayLoadingScreen =
+        typeof channel === 'undefined' ||
+        typeof conference === 'undefined';
 
     /**
      * The "Calling..." screen should only be displayed if :
@@ -374,9 +349,10 @@ const CallScreen = ({
         if (typeof callUsersRef.current === 'undefined') {
             // Find the recipients for DM or GM calls
             if (isDMorGM) {
+                const recipients = (await fetchChannelMemberships(serverUrl, channelId, {per_page: MAX_CALLNAME_PARTICIPANT_USERNAMES + 1})).users;
+
                 // Remove current user from list
-                callUsersRef.current = (await fetchChannelMemberships(serverUrl, channelId, {per_page: MAX_CALLNAME_PARTICIPANT_USERNAMES + 1})).users.
-                    filter((user) => user.id !== currentUserId).
+                callUsersRef.current = (recipients.length > 1 ? recipients.filter((user) => user.id !== currentUserId) : recipients).
                     slice(0, MAX_CALLNAME_PARTICIPANT_USERNAMES);
             } else {
                 callUsersRef.current = [];
@@ -384,7 +360,7 @@ const CallScreen = ({
         }
 
         return callUsersRef.current!;
-    }, [channelId]);
+    }, [currentUserId, isDMorGM]);
 
     /**
      * Lazily query the callName
@@ -403,7 +379,7 @@ const CallScreen = ({
             if (isDMorGM) {
                 // Current user is not displayed
                 const participantCountOverflow = Math.max(
-                    Math.max(0, participantCountRef.current! - 1) - // Current user is not displayed (-1)
+                    Math.max(0, (participantCountRef.current ?? 0) - 1) - // Current user is not displayed (-1)
                     MAX_CALLNAME_PARTICIPANT_USERNAMES,
                 );
 
@@ -436,7 +412,7 @@ const CallScreen = ({
     // Compute the participant count localized string
     const participantCountString = formatMessage(
         {id: 'screen.call.member_count', defaultMessage: '{count} {count, plural, one {member} other {members}}'},
-        {count: participantCount},
+        {count: participantCount || 0},
     );
 
     /**
@@ -586,20 +562,24 @@ const CallScreen = ({
     useImperativeHandle(callScreenRef, () => ({leaveCall, toggleAudioMuted, toggleVideoMuted}));
 
     // EFFECTS
+    // Leave/cancel the call on unmount
+    useEffect(() => () => {
+        leaveCallRef.current!();
+    }, []);
+
+    // Fetch and update the current callName
     useEffect(() => {
-        // Fetch and update the current conference if it was not received via WS
+        if (channel) {
+            getCallName(true); // Async forced re-render
+        }
+    }, [channel]);
+
+    // Fetch and update the current conference if it was not received via WS
+    useEffect(() => {
         if (!conference) {
             fetchConference(serverUrl, conferenceId);
         }
-
-        // Fetch the current call name
-        getCallName(true); // Async forced re-render
-
-        return () => {
-            // Leave/cancel the call on unmount
-            leaveCallRef.current!();
-        };
-    }, []);
+    }, [conference]);
 
     /**
      * If the user called but the recipient did not answer
@@ -688,7 +668,7 @@ const CallScreen = ({
     }
 
     return (
-        <JitsiMeeting
+        <FrozenJitsiMeeting
             ref={jitsiMeetingRef}
 
             // Ref. https://github.com/jitsi/jitsi-meet/blob/master/config.js
@@ -698,12 +678,12 @@ const CallScreen = ({
 
                 // Start calls with audio muted
                 // https://github.com/jitsi/jitsi-meet/blob/0913554af97e91f14b5a63ce8c8579755f1405a7/config.js#L187
-                startAudioMuted: 0,
+                startAudioMuted: 9999,
                 startWithAudioMuted: audioMuted,
 
                 // Start calls with video muted
                 // https://github.com/jitsi/jitsi-meet/blob/0913554af97e91f14b5a63ce8c8579755f1405a7/config.js#L290
-                startVideoMuted: 0,
+                startVideoMuted: 9999,
                 startWithVideoMuted: videoMuted,
             }}
 
@@ -731,7 +711,6 @@ const CallScreen = ({
                  * For other channels : Ask if the user wants to enable his audio/video, but only if it's not the one that created the conference
                  */
                 'prejoinpage.enabled': !isDM && !isCurrentUserInitiator,
-                'prejoinpage.hideDisplayName': true,
 
                 // Disable breakout-rooms
                 'breakout-rooms.enabled': false,
@@ -742,7 +721,7 @@ const CallScreen = ({
                 // Disable CallKit
                 'call-integration.enabled': false,
             }}
-            style={{flex: 1}}
+            style={styles.flex}
             room={channelId}
             serverURL={kMeetServerUrl}
             userInfo={userInfo}

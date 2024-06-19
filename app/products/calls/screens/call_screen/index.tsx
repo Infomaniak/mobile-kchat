@@ -1,37 +1,50 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
-import {of as of$} from 'rxjs';
-import {distinctUntilChanged, switchMap} from 'rxjs/operators';
+import CallScreen from '@calls/screens/call_screen/call_screen';
+export default CallScreen;
 
-import {observeChannel} from '@app/queries/servers/channel';
-import {observeConference, observeConferenceParticipantCount} from '@app/queries/servers/conference';
-import CallScreen, {type PassedProps} from '@calls/screens/call_screen/call_screen';
-import {observeGlobalCallsState} from '@calls/state';
-import {observeCurrentUserId} from '@queries/servers/system';
+/**
+ * HACK It seems <JitsiMeeting /> does not like rxjs
+ * using withObservable causes a infinite loop error
+ *   -> "Error: executing a cancelled action, js engine: hermes"
+ *   -> Replaced all observables with polled hooks ✅
+ */
 
-import type {WithDatabaseArgs} from '@typings/database/database';
+// import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
+// import {of as of$} from 'rxjs';
+// import {distinctUntilChanged, switchMap} from 'rxjs/operators';
 
-const enhance = withObservables(['channelId', 'conferenceId'], (
-    {channelId, conferenceId, database: db}:
-    WithDatabaseArgs & Pick<PassedProps, 'channelId' | 'conferenceId'>,
-) => ({
-    channel: observeChannel(db, channelId),
-    currentUserId: observeCurrentUserId(db),
+// import {observeChannel} from '@app/queries/servers/channel';
+// import {observeConference, observeConferenceParticipantCount, observeConferenceHasAtLeastOneParticipantPresent} from '@app/queries/servers/conference';
+// import CallScreen, {type PassedProps} from '@calls/screens/call_screen/call_screen';
+// import {observeGlobalCallsState} from '@calls/state';
+// import {observeCurrentUserId} from '@queries/servers/system';
 
-    micPermissionsGranted: observeGlobalCallsState().pipe(
-        switchMap((gs) => of$(gs.micPermissionsGranted)),
-        distinctUntilChanged(),
-    ),
+// import type {WithDatabaseArgs} from '@typings/database/database';
 
-    conference: observeConference(db, conferenceId),
-    participantCount: observeConferenceParticipantCount(db, conferenceId),
+// const enhance = withObservables(['channelId', 'conferenceId'], (
+//     {channelId, conferenceId, database: db}:
+//     WithDatabaseArgs & Pick<PassedProps, 'channelId' | 'conferenceId'>,
+// ) => {
+//     const currentUserId = observeCurrentUserId(db); // ✅
 
-    // hasAtLeastOneParticipantPresent: currentUserId.pipe(
-    //     switchMap((userId) => observeConferenceHasAtLeastOneParticipantPresent(db, conferenceId, userId)),
-    //     distinctUntilChanged(),
-    // ),
-}));
+//     return {
+//         channel: observeChannel(db, channelId), // ✅
+//         currentUserId,
 
-export default withDatabase(enhance(CallScreen));
+//         micPermissionsGranted: observeGlobalCallsState().pipe( // ✅
+//             switchMap((gs) => of$(gs.micPermissionsGranted)),
+//             distinctUntilChanged(),
+//         ),
+
+//         conference: observeConference(db, conferenceId), // ✅
+//         participantCount: observeConferenceParticipantCount(db, conferenceId), // ✅
+//         hasAtLeastOneParticipantPresent: currentUserId.pipe( // ✅
+//             switchMap((userId) => observeConferenceHasAtLeastOneParticipantPresent(db, conferenceId, userId)),
+//             distinctUntilChanged(),
+//         ),
+//     };
+// });
+
+// export default withDatabase(enhance(CallScreen));
