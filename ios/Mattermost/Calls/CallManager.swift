@@ -146,23 +146,33 @@ public class CallManager: NSObject {
 extension CallManager: CXProviderDelegate {
   public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
     guard let existingCall = currentCalls[action.callUUID] else { return }
-    callAnsweredCallback?(existingCall.serverId, existingCall.channelId, existingCall.conferenceJWT)
-    currentCalls[action.callUUID]?.joined = true
-    action.fulfill()
+    
+    DispatchQueue.main.async { [weak self] in
+      guard let self else { return }
+      callAnsweredCallback?(existingCall.serverId, existingCall.channelId, existingCall.conferenceJWT)
+      currentCalls[action.callUUID]?.joined = true
+      action.fulfill()
+    }
   }
 
   public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
     guard let existingCall = currentCalls[action.callUUID] else { return }
-    callEndedCallback?(existingCall.serverId, existingCall.conferenceId)
-    currentCalls[action.callUUID]?.joined = false
-    currentCalls[existingCall.localUUID] = nil
-    action.fulfill()
+    DispatchQueue.main.async { [weak self] in
+      guard let self else { return }
+      callEndedCallback?(existingCall.serverId, existingCall.conferenceId)
+      currentCalls[action.callUUID]?.joined = false
+      currentCalls[existingCall.localUUID] = nil
+      action.fulfill()
+    }
   }
 
   public func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
     guard let existingCall = currentCalls[action.callUUID] else { return }
-    callMutedCallback?(action.isMuted)
-    action.fulfill()
+    DispatchQueue.main.async { [weak self] in
+      guard let self else { return }
+      callMutedCallback?(action.isMuted)
+      action.fulfill()
+    }
   }
 
   public func providerDidReset(_ provider: CXProvider) {
