@@ -16,7 +16,6 @@ struct MeetCall {
   let conferenceId: String
   let conferenceJWT: String
   var joined = false
-  var audioMuted = false
 
   init(serverId: String, channelId: String, conferenceId: String, conferenceJWT: String) {
     guard let conferenceUUID = UUID(uuidString: conferenceId) else {
@@ -79,8 +78,6 @@ public class CallManager: NSObject {
     callController.requestTransaction(with: [muteCallAction]) { error in
       if let error {
         print("An error occured muting call \(error)")
-      } else {
-        self.currentCalls[existingCall.localUUID]?.audioMuted = isMuted
       }
     }
   }
@@ -165,7 +162,6 @@ extension CallManager: CXProviderDelegate {
   public func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
     guard let existingCall = currentCalls[action.callUUID] else { return }
     callMutedCallback?(action.isMuted)
-    currentCalls[existingCall.localUUID]?.audioMuted = action.isMuted
     action.fulfill()
   }
 
