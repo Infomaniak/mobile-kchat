@@ -13,7 +13,7 @@ import {Navigation} from 'react-native-navigation';
 import {useAnimatedStyle} from 'react-native-reanimated';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 
-import {fetchChannelMemberships, switchToChannelById} from '@actions/remote/channel';
+import {fetchChannelById, fetchChannelMemberships, switchToChannelById} from '@actions/remote/channel';
 import {fetchConference} from '@actions/remote/conference';
 import {postListRef} from '@app/components/post_list/post_list';
 import {useServerId} from '@app/context/server';
@@ -576,7 +576,14 @@ const CallScreen = ({
         }
     }, [Boolean(channel && currentUserId)]);
 
-    // Fetch and update the current conference if it was not received via WS
+    // Fetch the current channel if necessary
+    useEffect(() => {
+        if (!channel) {
+            fetchChannelById(serverUrl, channelId);
+        }
+    }, [channel]);
+
+    // Fetch the current conference if it was not received via WS
     useEffect(() => {
         if (!conference) {
             fetchConference(serverUrl, conferenceId);
