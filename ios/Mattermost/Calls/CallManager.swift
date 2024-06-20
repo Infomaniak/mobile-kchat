@@ -146,9 +146,12 @@ public class CallManager: NSObject {
 extension CallManager: CXProviderDelegate {
   public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
     guard let existingCall = currentCalls[action.callUUID] else { return }
-    
+
     DispatchQueue.main.async { [weak self] in
-      guard let self else { return }
+      guard let self else {
+        action.fulfill()
+        return
+      }
       callAnsweredCallback?(existingCall.serverId, existingCall.channelId, existingCall.conferenceJWT)
       currentCalls[action.callUUID]?.joined = true
       action.fulfill()
@@ -158,7 +161,10 @@ extension CallManager: CXProviderDelegate {
   public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
     guard let existingCall = currentCalls[action.callUUID] else { return }
     DispatchQueue.main.async { [weak self] in
-      guard let self else { return }
+      guard let self else {
+        action.fulfill()
+        return
+      }
       callEndedCallback?(existingCall.serverId, existingCall.conferenceId)
       currentCalls[action.callUUID]?.joined = false
       currentCalls[existingCall.localUUID] = nil
@@ -169,7 +175,11 @@ extension CallManager: CXProviderDelegate {
   public func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
     guard let existingCall = currentCalls[action.callUUID] else { return }
     DispatchQueue.main.async { [weak self] in
-      guard let self else { return }
+      guard let self else {
+        action.fulfill()
+        return
+      }
+
       callMutedCallback?(action.isMuted)
       action.fulfill()
     }
