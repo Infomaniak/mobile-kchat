@@ -89,6 +89,7 @@ public class CallManager: NSObject {
     } else {
       configuration = CXProviderConfiguration(localizedName: "kChat")
     }
+    configuration.iconTemplateImageData = UIImage(named: "monochrome_call_icon")?.pngData()
     configuration.supportsVideo = true
     configuration.supportedHandleTypes = [.generic]
     configuration.maximumCallsPerCallGroup = 1
