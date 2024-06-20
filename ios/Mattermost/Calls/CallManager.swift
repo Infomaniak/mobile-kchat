@@ -29,6 +29,17 @@ struct MeetCall {
   }
 }
 
+struct CallAnsweredEvent {
+  let serverId: String
+  let channelId: String
+  let conferenceJWT: String
+}
+
+struct CallEndedEvent {
+  let serverId: String
+  let conferenceId: String
+}
+
 public class CallManager: NSObject {
   static let videoEnabledByDefault = false
 
@@ -42,9 +53,34 @@ public class CallManager: NSObject {
 
   @objc public private(set) var token: String?
 
-  @objc var callAnsweredCallback: ((String, String, String) -> Void)?
-  @objc var callEndedCallback: ((String, String) -> Void)?
+  @objc var callAnsweredCallback: ((String, String, String) -> Void)? {
+    didSet {
+      guard let queuedCallAnsweredEvent, let callAnsweredCallback else { return }
+      DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+        callAnsweredCallback(
+          queuedCallAnsweredEvent.serverId,
+          queuedCallAnsweredEvent.channelId,
+          queuedCallAnsweredEvent.conferenceJWT
+        )
+        self?.queuedCallAnsweredEvent = nil
+      }
+    }
+  }
+
+  @objc var callEndedCallback: ((String, String) -> Void)? {
+    didSet {
+      guard let queuedCallEndedEvent, let callEndedCallback else { return }
+      DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+        callEndedCallback(queuedCallEndedEvent.serverId, queuedCallEndedEvent.conferenceId)
+        self?.queuedCallEndedEvent = nil
+      }
+    }
+  }
+
   @objc var callMutedCallback: ((Bool) -> Void)?
+
+  private var queuedCallAnsweredEvent: CallAnsweredEvent?
+  private var queuedCallEndedEvent: CallEndedEvent?
 
   override private init() {
     let configuration: CXProviderConfiguration
@@ -152,7 +188,18 @@ extension CallManager: CXProviderDelegate {
         action.fulfill()
         return
       }
-      callAnsweredCallback?(existingCall.serverId, existingCall.channelId, existingCall.conferenceJWT)
+
+      let callAnsweredEvent = CallAnsweredEvent(
+        serverId: existingCall.serverId,
+        channelId: existingCall.channelId,
+        conferenceJWT: existingCall.conferenceJWT
+      )
+
+      if let callAnsweredCallback {
+        callAnsweredCallback(existingCall.serverId, existingCall.channelId, existingCall.conferenceJWT)
+      } else {
+        queuedCallAnsweredEvent = callAnsweredEvent
+      }
       currentCalls[action.callUUID]?.joined = true
       action.fulfill()
     }
@@ -165,7 +212,14 @@ extension CallManager: CXProviderDelegate {
         action.fulfill()
         return
       }
-      callEndedCallback?(existingCall.serverId, existingCall.conferenceId)
+
+      let callEndedEvent = CallEndedEvent(serverId: existingCall.serverId, conferenceId: existingCall.conferenceId)
+
+      if let callEndedCallback {
+        callEndedCallback(existingCall.serverId, existingCall.conferenceId)
+      } else {
+        queuedCallEndedEvent = callEndedEvent
+      }
       currentCalls[action.callUUID]?.joined = false
       currentCalls[existingCall.localUUID] = nil
       action.fulfill()
