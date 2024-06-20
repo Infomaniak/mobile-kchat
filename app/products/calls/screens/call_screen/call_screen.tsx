@@ -344,6 +344,7 @@ const CallScreen = ({
     /**
      * Lazily query the called users
      */
+    const currentUserIdRef = useTransientRef(currentUserId);
     const callUsersRef = useRef<UserProfile[]>();
     const getCallUsers = useCallback(async () => {
         if (typeof callUsersRef.current === 'undefined') {
@@ -352,7 +353,7 @@ const CallScreen = ({
                 const recipients = (await fetchChannelMemberships(serverUrl, channelId, {per_page: MAX_CALLNAME_PARTICIPANT_USERNAMES + 1})).users;
 
                 // Remove current user from list
-                callUsersRef.current = (recipients.length > 1 ? recipients.filter((user) => user.id !== currentUserId) : recipients).
+                callUsersRef.current = (recipients.length > 1 ? recipients.filter((user) => user.id !== currentUserIdRef.current) : recipients).
                     slice(0, MAX_CALLNAME_PARTICIPANT_USERNAMES);
             } else {
                 callUsersRef.current = [];
@@ -360,7 +361,7 @@ const CallScreen = ({
         }
 
         return callUsersRef.current!;
-    }, [currentUserId, isDMorGM]);
+    }, [isDMorGM]);
 
     /**
      * Lazily query the callName
@@ -383,7 +384,7 @@ const CallScreen = ({
                     MAX_CALLNAME_PARTICIPANT_USERNAMES,
                 );
 
-                // Remove current user from list
+                // Query the called users (current user is filtered-out)
                 const users = await getCallUsers();
 
                 // Construct callName useing usernames
@@ -393,12 +394,13 @@ const CallScreen = ({
                 }
             }
 
+            // Update value
             callNameRef.current = callName;
-        }
 
-        // Forced update
-        if (forceRerender) {
-            rerender();
+            // Forced update
+            if (forceRerender) {
+                rerender();
+            }
         }
 
         return callNameRef.current;
@@ -569,10 +571,10 @@ const CallScreen = ({
 
     // Fetch and update the current callName
     useEffect(() => {
-        if (channel) {
+        if (channel && currentUserId) {
             getCallName(true); // Async forced re-render
         }
-    }, [channel]);
+    }, [Boolean(channel && currentUserId)]);
 
     // Fetch and update the current conference if it was not received via WS
     useEffect(() => {
