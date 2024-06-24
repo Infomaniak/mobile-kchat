@@ -13,6 +13,8 @@ import React, {useCallback, useEffect, useMemo, useRef} from 'react';
 import {type WithTranslation} from 'react-i18next';
 import {Platform, View, type ViewStyle} from 'react-native';
 
+import {noop} from '@app/helpers/api/general';
+
 import type {AudioElement} from '@jitsi/react-native-sdk/react/features/base/media/components/AbstractAudio';
 
 const BUTTON_SIZE = 48;
@@ -236,25 +238,16 @@ export const OutgoingRinging = (
     {play = true, soundName = 'outgoingRinging.mp3'}:
     { play: boolean; soundName?: string },
 ) => {
-    const playingRef = useRef(false);
     const audioElementRef = useRef<AudioElement>();
 
     const playSound = useCallback(() => {
-        if (
-            !playingRef.current &&
-            typeof audioElementRef.current !== 'undefined'
-        ) {
-            playingRef.current = true;
+        if (typeof audioElementRef.current !== 'undefined') {
             audioElementRef.current?.play();
         }
     }, []);
 
     const stopSound = useCallback(() => {
-        if (
-            playingRef.current &&
-            typeof audioElementRef.current !== 'undefined'
-        ) {
-            playingRef.current = false;
+        if (typeof audioElementRef.current !== 'undefined') {
             audioElementRef.current?.stop();
         }
     }, []);
@@ -266,7 +259,7 @@ export const OutgoingRinging = (
     const setRef = useCallback((audioElement: AudioElement) => {
         audioElementRef.current = audioElement;
         if (play) {
-            setTimeout(playSound, 1);
+            playSound();
         }
     }, []);
 
@@ -274,9 +267,13 @@ export const OutgoingRinging = (
 
     useEffect(() => {
         if (play) {
-            setTimeout(playSound, 1);
+            const interval = setInterval(playSound, 100);
+            return () => {
+                clearInterval(interval);
+                stopSound();
+            };
         }
-        return stopSound;
+        return noop;
     }, [play]);
 
     /* Load the audio file */
