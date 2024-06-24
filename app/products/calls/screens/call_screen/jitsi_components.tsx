@@ -13,8 +13,6 @@ import React, {useCallback, useEffect, useMemo, useRef} from 'react';
 import {type WithTranslation} from 'react-i18next';
 import {Platform, View, type ViewStyle} from 'react-native';
 
-import {noop} from '@app/helpers/api/general';
-
 import type {AudioElement} from '@jitsi/react-native-sdk/react/features/base/media/components/AbstractAudio';
 
 const BUTTON_SIZE = 48;
@@ -238,21 +236,47 @@ export const OutgoingRinging = (
     {play = true, soundName = 'outgoingRinging.mp3'}:
     { play: boolean; soundName?: string },
 ) => {
+    const playingRef = useRef(false);
     const audioElementRef = useRef<AudioElement>();
+
+    const playSound = useCallback(() => {
+        if (
+            !playingRef.current &&
+            typeof audioElementRef.current !== 'undefined'
+        ) {
+            playingRef.current = true;
+            audioElementRef.current?.play();
+        }
+    }, []);
+
+    const stopSound = useCallback(() => {
+        if (
+            playingRef.current &&
+            typeof audioElementRef.current !== 'undefined'
+        ) {
+            playingRef.current = false;
+            audioElementRef.current?.stop();
+        }
+    }, []);
+
+    /**
+     * setRef is triggered by {@link AbstractAudio}
+     * when the audio file has been loaded
+     */
     const setRef = useCallback((audioElement: AudioElement) => {
         audioElementRef.current = audioElement;
+        if (play) {
+            setTimeout(playSound, 1);
+        }
     }, []);
 
     const soundsPath = Platform.OS === 'ios' ? getSdkBundlePath() : 'asset:/sounds';
 
     useEffect(() => {
         if (play) {
-            audioElementRef.current?.play();
-            return () => {
-                audioElementRef.current?.stop();
-            };
+            setTimeout(playSound, 1);
         }
-        return noop;
+        return stopSound;
     }, [play]);
 
     /* Load the audio file */
