@@ -323,9 +323,7 @@ const CallScreen = ({
     /**
      * Display the loading screen if data has not been fully loaded yet
      */
-    const shouldDisplayLoadingScreen =
-        typeof channel === 'undefined' ||
-        typeof conference === 'undefined';
+    const shouldDisplayLoadingScreen = typeof channel === 'undefined';
 
     /**
      * The "Calling..." screen should only be displayed if :
