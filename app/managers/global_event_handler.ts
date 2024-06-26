@@ -118,7 +118,10 @@ class GlobalEventHandler {
             const {data} = parsed;
             const serverUrl = await DatabaseManager.getServerUrlFromIdentifier(data.serverId);
             if (typeof serverUrl === 'string') {
-                switchToConferenceByChannelId(serverUrl, data.channelId, {initiator: 'native'});
+                switchToConferenceByChannelId(serverUrl, data.channelId, {
+                    conferenceJWT: data.conferenceJWT,
+                    initiator: 'native',
+                });
             }
         } else {
             logError('UNABLE TO PARSE CallAnsweredEvent', parsed.error);
