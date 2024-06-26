@@ -148,7 +148,7 @@ type ConferencePathParams = {
     serverUrl: string;
     channelId: string;
 };
-const CONFERENCE_PATH = `:serverUrl(.*)/channels/:channelId(${IDENTIFIER_PATH_PATTERN})/conference`;
+const CONFERENCE_PATH = `:serverUrl(.*)/channels/:channelId(${IDENTIFIER_PATH_PATTERN})/conference(\\?conference_jwt=.+)?`;
 export const matchConferenceDeeplink = match<ConferencePathParams>(CONFERENCE_PATH);
 
 export function parseDeepLink(deepLinkUrl: string): DeepLinkWithData {
