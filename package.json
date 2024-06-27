@@ -175,6 +175,7 @@
     "nock": "13.3.8",
     "patch-package": "8.0.0",
     "react-devtools-core": "4.28.5",
+    "react-native-flipper": "0.182.0",
     "react-native-svg-transformer": "1.1.0",
     "react-test-renderer": "18.2.0",
     "tough-cookie": "4.1.3",
