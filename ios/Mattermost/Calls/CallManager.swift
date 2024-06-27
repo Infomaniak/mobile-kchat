@@ -8,6 +8,7 @@
 
 import CallKit
 import Foundation
+import Gekidou
 
 struct MeetCall {
   let localUUID: UUID
@@ -57,11 +58,14 @@ public class CallManager: NSObject {
     didSet {
       guard let queuedCallAnsweredEvent, let callAnsweredCallback else { return }
       DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-        callAnsweredCallback(
-          queuedCallAnsweredEvent.serverId,
-          queuedCallAnsweredEvent.channelId,
-          queuedCallAnsweredEvent.conferenceJWT
-        )
+        if let deepLinkURL = self?.callAnsweredAsDeepLink(
+          serverId: queuedCallAnsweredEvent.serverId,
+          channelId: queuedCallAnsweredEvent.channelId,
+          conferenceJWT: queuedCallAnsweredEvent.conferenceJWT
+        ) {
+          let application = UIApplication.shared
+          (application.delegate as? AppDelegate)?.application(application, open: deepLinkURL)
+        }
         self?.queuedCallAnsweredEvent = nil
       }
     }
@@ -178,6 +182,19 @@ public class CallManager: NSObject {
       completion()
     }
   }
+
+  func callAnsweredAsDeepLink(serverId: String, channelId: String, conferenceJWT: String) -> URL? {
+    guard let rawServerURL = try? Database.default.getServerUrlForServer(serverId),
+          let serverURL = URL(string: rawServerURL) else {
+      return nil
+    }
+    
+    var urlComponents = URLComponents(url: serverURL, resolvingAgainstBaseURL: false)
+    urlComponents?.path = "/channels/\(channelId)/conference"
+    urlComponents?.queryItems = [URLQueryItem(name: "conference_jwt", value: conferenceJWT)]
+
+    return urlComponents?.url
+  }
 }
 
 extension CallManager: CXProviderDelegate {
@@ -197,7 +214,14 @@ extension CallManager: CXProviderDelegate {
       )
 
       if let callAnsweredCallback {
-        callAnsweredCallback(existingCall.serverId, existingCall.channelId, existingCall.conferenceJWT)
+        if let deepLinkURL = callAnsweredAsDeepLink(
+          serverId: existingCall.serverId,
+          channelId: existingCall.channelId,
+          conferenceJWT: existingCall.conferenceJWT
+        ) {
+          let application = UIApplication.shared
+          (application.delegate as? AppDelegate)?.application(application, open: deepLinkURL)
+        }
       } else {
         queuedCallAnsweredEvent = callAnsweredEvent
       }
