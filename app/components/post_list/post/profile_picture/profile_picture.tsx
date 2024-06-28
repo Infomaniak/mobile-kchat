@@ -31,6 +31,13 @@ export const ProfilePictureMessage = ({author, source}: ProfilePictureProps) => 
 
         if (author.props && author.props.override_icon_url?.startsWith('/')) {
             pictureUrl = author.props.override_icon_url;
+        } else if (author.props.from_webhook && author.props.override_icon_url?.startsWith('http')) {
+            return (
+                <AnimatedImage
+                    source={{uri: author.props.override_icon_url}}
+                    style={{width: 30, height: 30, borderRadius: 50, marginRight: 8}}
+                />
+            );
         } else if (author.props && author.props.from_webhook && author.props.override_icon_url == null) {
             return (
                 <CompassIcon
