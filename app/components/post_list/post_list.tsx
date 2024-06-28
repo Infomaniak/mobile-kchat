@@ -180,7 +180,7 @@ const PostList = ({
                 options.fromPost = lastPost.id;
                 options.direction = 'down';
             }
-            await fetchPostThread(serverUrl, rootId, options, disablePullToRefresh);
+            await fetchPostThread(serverUrl, rootId, options);
         }
         setRefreshing(false);
         setLimit(EphemeralStore.serverHasLimit(serverUrl));
