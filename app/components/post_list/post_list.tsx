@@ -166,6 +166,9 @@ const PostList = ({
     }, []);
 
     const onRefresh = useCallback(async () => {
+        if (disablePullToRefresh) {
+            return;
+        }
         setRefreshing(true);
         if (location === Screens.CHANNEL && channelId) {
             await fetchPosts(serverUrl, channelId);
@@ -177,7 +180,7 @@ const PostList = ({
                 options.fromPost = lastPost.id;
                 options.direction = 'down';
             }
-            await fetchPostThread(serverUrl, rootId, options);
+            await fetchPostThread(serverUrl, rootId, options, disablePullToRefresh);
         }
         setRefreshing(false);
         setLimit(EphemeralStore.serverHasLimit(serverUrl));
@@ -386,7 +389,7 @@ const PostList = ({
                 testID={`${testID}.flat_list`}
                 inverted={true}
                 refreshing={refreshing}
-                onRefresh={disablePullToRefresh ? undefined : onRefresh}
+                onRefresh={onRefresh}
             />
             {location !== Screens.PERMALINK &&
             <ScrollToEndView
