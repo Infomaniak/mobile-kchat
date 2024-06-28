@@ -1,10 +1,10 @@
 PODS:
   - Alamofire (5.8.1)
-  - AppAuth (1.6.2):
-    - AppAuth/Core (= 1.6.2)
-    - AppAuth/ExternalUserAgent (= 1.6.2)
-  - AppAuth/Core (1.6.2)
-  - AppAuth/ExternalUserAgent (1.6.2):
+  - AppAuth (1.7.5):
+    - AppAuth/Core (= 1.7.5)
+    - AppAuth/ExternalUserAgent (= 1.7.5)
+  - AppAuth/Core (1.7.5)
+  - AppAuth/ExternalUserAgent (1.7.5):
     - AppAuth/Core
   - boost (1.76.0)
   - BVLinearGradient (2.8.3):
@@ -429,8 +429,6 @@ PODS:
     - React-Core
   - react-native-flipper (0.182.0):
     - React-Core
-  - react-native-get-random-values (1.9.0):
-    - React-Core
   - react-native-hw-keyboard-event (0.0.4):
     - React
   - react-native-image-picker (7.0.3):
@@ -675,7 +673,7 @@ PODS:
   - simdjson (3.1.0-wmelon1)
   - SocketRocket (0.6.1)
   - Starscream (4.0.4)
-  - SwiftyJSON (5.0.1)
+  - SwiftyJSON (5.0.2)
   - Swime (3.0.6)
   - WatermelonDB (0.27.1):
     - React
@@ -742,7 +740,6 @@ DEPENDENCIES:
   - react-native-document-picker (from `../node_modules/react-native-document-picker`)
   - "react-native-emm (from `../node_modules/@mattermost/react-native-emm`)"
   - react-native-flipper (from `../node_modules/react-native-flipper`)
-  - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-hw-keyboard-event (from `../node_modules/react-native-hw-keyboard-event`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-in-app-review (from `../node_modules/react-native-in-app-review`)
@@ -896,8 +893,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@mattermost/react-native-emm"
   react-native-flipper:
     :path: "../node_modules/react-native-flipper"
-  react-native-get-random-values:
-    :path: "../node_modules/react-native-get-random-values"
   react-native-hw-keyboard-event:
     :path: "../node_modules/react-native-hw-keyboard-event"
   react-native-image-picker:
@@ -1017,7 +1012,7 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   Alamofire: 3ca42e259043ee0dc5c0cdd76c4bc568b8e42af7
-  AppAuth: 3bb1d1cd9340bd09f5ed189fb00b1cc28e1e8570
+  AppAuth: 501c04eda8a8d11f179dbe8637b7a91bb7e5d2fa
   boost: 57d2868c099736d80fcd648bf211b4431e51a558
   BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
@@ -1067,7 +1062,6 @@ SPEC CHECKSUMS:
   react-native-document-picker: 2b8f18667caee73a96708a82b284a4f40b30a156
   react-native-emm: 17ba66e81c93429b2bb288848d706e2e485b02e8
   react-native-flipper: 6e4e344a0104a34a4e189a9ef2b3b5634b516dc8
-  react-native-get-random-values: dee677497c6a740b71e5612e8dbd83e7539ed5bb
   react-native-hw-keyboard-event: b517cefb8d5c659a38049c582de85ff43337dc53
   react-native-image-picker: 2381c008bbb09e72395a2d043c147b11bd1523d9
   react-native-in-app-review: db8bb167a5f238e7ceca5c242d6b36ce8c4404a4
@@ -1126,7 +1120,7 @@ SPEC CHECKSUMS:
   simdjson: e6bfae9ce4bcdc80452d388d593816f1ca2106f3
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Starscream: e7497aedb1c2e27d2a672d40286fd1b34f20f2e4
-  SwiftyJSON: 2f33a42c6fbc52764d96f13368585094bfd8aa5e
+  SwiftyJSON: f5b1bf1cd8dd53cd25887ac0eabcfd92301c6a5a
   Swime: d7b2c277503b6cea317774aedc2dce05613f8b0b
   WatermelonDB: 842d22ba555425aa9f3ce551239a001200c539bc
   Yoga: 4c3aa327e4a6a23eeacd71f61c81df1bcdf677d5
