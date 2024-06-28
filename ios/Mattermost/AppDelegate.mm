@@ -13,6 +13,7 @@
 #import <os/log.h>
 
 #if DEBUG
+#import "Atlantis-Swift.h"
 #ifdef FB_SONARKIT_ENABLED
 #import <FlipperKit/FlipperClient.h>
 #import <FlipperKitLayoutPlugin/FlipperKitLayoutPlugin.h>
@@ -71,6 +72,9 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
 
   os_log(OS_LOG_DEFAULT, "Mattermost started!!");
 
+  #if DEBUG
+  [Atlantis startWithHostName:nil shouldCaptureWebSocketTraffic:@YES];
+  #endif
   [self initializeFlipper:application];
   
   return YES;
