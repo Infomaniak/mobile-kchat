@@ -88,7 +88,7 @@ public class CallManager: NSObject {
     voipRegistry.desiredPushTypes = [.voIP]
   }
 
-  @objc public func reportCallMuted(conferenceId: String, isMuted: Bool) {
+  func reportCallAudioMuted(conferenceId: String, isMuted: Bool) {
     guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
 
     let muteCallAction = CXSetMutedCallAction(call: existingCall.localUUID, muted: isMuted)
@@ -99,7 +99,7 @@ public class CallManager: NSObject {
     }
   }
 
-  @objc public func reportCallVideoMuted(conferenceId: String, isMuted: Bool) {
+  func reportCallVideoMuted(conferenceId: String, isMuted: Bool) {
     guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
 
     let update = CXCallUpdate()
@@ -164,6 +164,14 @@ extension CallManager: CallViewControllerDelegate {
   func onConferenceTerminated() {
     callWindow = nil
   }
+
+  func onVideoMuted(conferenceId: String, isMuted: Bool) {
+    reportCallVideoMuted(conferenceId: conferenceId, isMuted: isMuted)
+  }
+
+  func onAudioMuted(conferenceId: String, isMuted: Bool) {
+    reportCallAudioMuted(conferenceId: conferenceId, isMuted: isMuted)
+  }
 }
 
 extension CallManager: CXProviderDelegate {
@@ -200,13 +208,7 @@ extension CallManager: CXProviderDelegate {
         return
       }
 
-      let callEndedEvent = CallEndedEvent(serverId: existingCall.serverId, conferenceId: existingCall.conferenceId)
-
-      if let callEndedCallback {
-        callEndedCallback(existingCall.serverId, existingCall.conferenceId)
-      } else {
-        queuedCallEndedEvent = callEndedEvent
-      }
+      callWindow?.leaveCurrentCall()
       currentCalls[action.callUUID]?.joined = false
       currentCalls[existingCall.localUUID] = nil
       action.fulfill()
@@ -221,7 +223,7 @@ extension CallManager: CXProviderDelegate {
         return
       }
 
-      callMutedCallback?(action.isMuted)
+      callWindow?.setCurrentCallMuted(action.isMuted)
       action.fulfill()
     }
   }

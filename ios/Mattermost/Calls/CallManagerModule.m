@@ -53,7 +53,6 @@ RCT_EXPORT_METHOD(reportCallMuted: (NSString*)conferenceId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-  [[CallManager shared] reportCallMutedWithConferenceId:conferenceId isMuted:isMuted];
   resolve(@[]);
 }
 
@@ -62,7 +61,6 @@ RCT_EXPORT_METHOD(reportCallVideoMuted: (NSString*)conferenceId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-  [[CallManager shared] reportCallVideoMutedWithConferenceId:conferenceId isMuted:isMuted];
   resolve(@[]);
 }
 

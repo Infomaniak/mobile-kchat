@@ -11,13 +11,15 @@ import UIKit
 
 protocol CallViewControllerDelegate: AnyObject {
   func onConferenceTerminated()
+  func onVideoMuted(conferenceId: String, isMuted: Bool)
+  func onAudioMuted(conferenceId: String, isMuted: Bool)
 }
 
 class CallWindow: UIWindow {
   private let callViewController: CallViewController
 
   init(meetCall: MeetCall, delegate: CallViewControllerDelegate, windowScene: UIWindowScene) {
-    callViewController = CallViewController(delegate: delegate)
+    callViewController = CallViewController(meetCall: meetCall, delegate: delegate)
     super.init(windowScene: windowScene)
     rootViewController = callViewController
     makeKeyAndVisible()
@@ -27,13 +29,27 @@ class CallWindow: UIWindow {
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
+  
+  func setCurrentCallMuted(_ isMuted: Bool) {
+    callViewController.jitsiView?.setAudioMuted(isMuted)
+  }
+  
+  func leaveCurrentCall() {
+    callViewController.jitsiView?.leave()
+    }
 }
 
 private class CallViewController: UIViewController {
   private weak var delegate: CallViewControllerDelegate?
+  private let meetCall: MeetCall
+  
+  var jitsiView: JitsiMeetView? {
+    return view as? JitsiMeetView
+  }
 
-  init(delegate: CallViewControllerDelegate) {
+  init(meetCall: MeetCall, delegate: CallViewControllerDelegate) {
     self.delegate = delegate
+    self.meetCall = meetCall
     super.init(nibName: nil, bundle: nil)
   }
 
@@ -76,5 +92,13 @@ extension CallViewController: JitsiMeetViewDelegate {
     } completion: { [weak self] _ in
       self?.delegate?.onConferenceTerminated()
     }
+  }
+
+  func audioMutedChanged(_ data: [AnyHashable: Any]!) {
+    delegate?.onAudioMuted(conferenceId: meetCall.conferenceId, isMuted: (data["muted"] as? Int ?? 0) == 1)
+  }
+
+  func videoMutedChanged(_ data: [AnyHashable: Any]!) {
+    delegate?.onVideoMuted(conferenceId: meetCall.conferenceId, isMuted: (data["muted"] as? Int ?? 0) == 4)
   }
 }
