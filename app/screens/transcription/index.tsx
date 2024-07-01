@@ -23,16 +23,7 @@ const Transcription: FC<Props> = ({closeButtonId, transcriptDatas}) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
 
-    const ITEM_HEIGHT = 50;
-    const bottom = 50;
-
-    const snapPoints = useMemo(() => {
-        const items: Array<string | number> = [1];
-        const segmentsCount = transcriptDatas.segments.length;
-
-        items.push(bottomSheetSnapPoint(segmentsCount, ITEM_HEIGHT, bottom) + 50);
-        return items;
-    }, [transcriptDatas]);
+    const snapPoints = [1, '50%', '90%'];
 
     const renderContent = () => {
         return (
