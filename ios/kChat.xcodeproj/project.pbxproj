@@ -15,6 +15,7 @@
 		27C667A529523F0A00E590D5 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 27C667A429523F0A00E590D5 /* Sentry */; };
 		27C667A9295241B600E590D5 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C667A8295241B600E590D5 /* Sentry.swift */; };
 		27C667AA295241B600E590D5 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C667A8295241B600E590D5 /* Sentry.swift */; };
+		37407E422C32BD87005FB5D3 /* CallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37407E412C32BD87005FB5D3 /* CallViewController.swift */; };
 		374A99042BFCDC23005517A1 /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A99032BFCDC23005517A1 /* CallManager.swift */; };
 		3750F86D296DACD2002DAC87 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3750F867296DACD2002DAC87 /* Localizable.strings */; };
 		3750F86E296DACE3002DAC87 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3750F867296DACD2002DAC87 /* Localizable.strings */; };
@@ -187,6 +188,7 @@
 		297AAFCCF0BD99FC109DA2BC /* Pods-MattermostTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MattermostTests.release.xcconfig"; path = "Target Support Files/Pods-MattermostTests/Pods-MattermostTests.release.xcconfig"; sourceTree = "<group>"; };
 		32AC3D4EA79E44738A6E9766 /* OpenSans-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-BoldItalic.ttf"; path = "../assets/fonts/OpenSans-BoldItalic.ttf"; sourceTree = "<group>"; };
 		3647DF63D6764CF093375861 /* OpenSans-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-ExtraBold.ttf"; path = "../assets/fonts/OpenSans-ExtraBold.ttf"; sourceTree = "<group>"; };
+		37407E412C32BD87005FB5D3 /* CallViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewController.swift; sourceTree = "<group>"; };
 		374A99032BFCDC23005517A1 /* CallManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
 		3750F868296DACD2002DAC87 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3750F869296DACD2002DAC87 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -436,6 +438,7 @@
 			isa = PBXGroup;
 			children = (
 				374A99032BFCDC23005517A1 /* CallManager.swift */,
+				37407E412C32BD87005FB5D3 /* CallViewController.swift */,
 				3751BAE12BFF55E200CE4D6D /* CallManagerModule.m */,
 				3751BAE02BFF549300CE4D6D /* CallManagerModule.h */,
 			);
@@ -1212,6 +1215,7 @@
 				3751BAE22BFF55E200CE4D6D /* CallManagerModule.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				7F59882B29827F2200C8C108 /* SplitViewModule.swift in Sources */,
+				37407E422C32BD87005FB5D3 /* CallViewController.swift in Sources */,
 				7FEB109D1F61019C0039A015 /* MattermostManaged.m in Sources */,
 				536CC6C323E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.m in Sources */,
 			);

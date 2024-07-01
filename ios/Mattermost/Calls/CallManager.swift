@@ -54,37 +54,13 @@ public class CallManager: NSObject {
 
   @objc public private(set) var token: String?
 
-  @objc var callAnsweredCallback: ((String, String, String) -> Void)? {
-    didSet {
-      guard let queuedCallAnsweredEvent, let callAnsweredCallback else { return }
-      DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-        if let deepLinkURL = self?.callAnsweredAsDeepLink(
-          serverId: queuedCallAnsweredEvent.serverId,
-          channelId: queuedCallAnsweredEvent.channelId,
-          conferenceJWT: queuedCallAnsweredEvent.conferenceJWT
-        ) {
-          let application = UIApplication.shared
-          (application.delegate as? AppDelegate)?.application(application, open: deepLinkURL)
-        }
-        self?.queuedCallAnsweredEvent = nil
-      }
-    }
-  }
-
-  @objc var callEndedCallback: ((String, String) -> Void)? {
-    didSet {
-      guard let queuedCallEndedEvent, let callEndedCallback else { return }
-      DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-        callEndedCallback(queuedCallEndedEvent.serverId, queuedCallEndedEvent.conferenceId)
-        self?.queuedCallEndedEvent = nil
-      }
-    }
-  }
-
+  @objc var callAnsweredCallback: ((String, String, String) -> Void)?
+  @objc var callEndedCallback: ((String, String) -> Void)?
   @objc var callMutedCallback: ((Bool) -> Void)?
 
   private var queuedCallAnsweredEvent: CallAnsweredEvent?
   private var queuedCallEndedEvent: CallEndedEvent?
+  private var callWindow: CallWindow?
 
   override private init() {
     let configuration: CXProviderConfiguration
@@ -182,18 +158,11 @@ public class CallManager: NSObject {
       completion()
     }
   }
+}
 
-  func callAnsweredAsDeepLink(serverId: String, channelId: String, conferenceJWT: String) -> URL? {
-    guard let rawServerURL = try? Database.default.getServerUrlForServer(serverId),
-          let serverURL = URL(string: rawServerURL) else {
-      return nil
-    }
-    
-    var urlComponents = URLComponents(url: serverURL, resolvingAgainstBaseURL: false)
-    urlComponents?.path = "/channels/\(channelId)/conference"
-    urlComponents?.queryItems = [URLQueryItem(name: "conference_jwt", value: conferenceJWT)]
-
-    return urlComponents?.url
+extension CallManager: CallViewControllerDelegate {
+  func onConferenceTerminated() {
+    callWindow = nil
   }
 }
 
@@ -213,18 +182,11 @@ extension CallManager: CXProviderDelegate {
         conferenceJWT: existingCall.conferenceJWT
       )
 
-      if let callAnsweredCallback {
-        if let deepLinkURL = callAnsweredAsDeepLink(
-          serverId: existingCall.serverId,
-          channelId: existingCall.channelId,
-          conferenceJWT: existingCall.conferenceJWT
-        ) {
-          let application = UIApplication.shared
-          (application.delegate as? AppDelegate)?.application(application, open: deepLinkURL)
-        }
-      } else {
-        queuedCallAnsweredEvent = callAnsweredEvent
+      if let rootWindowScene = (UIApplication.shared.delegate as? AppDelegate)?.window.windowScene {
+        let callWindow = CallWindow(meetCall: existingCall, delegate: self, windowScene: rootWindowScene)
+        self.callWindow = callWindow
       }
+
       currentCalls[action.callUUID]?.joined = true
       action.fulfill()
     }
