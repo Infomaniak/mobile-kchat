@@ -104,25 +104,6 @@ public class CallManager: NSObject {
     return call
   }
 
-  func reportCallAudioMuted(conferenceId: String, isMuted: Bool) {
-    guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
-
-    let muteCallAction = CXSetMutedCallAction(call: existingCall.localUUID, muted: isMuted)
-    callController.requestTransaction(with: [muteCallAction]) { error in
-      if let error {
-        LegacyLogger.calls.log(level: .error, message: "An error occurred muting call \(error)")
-      }
-    }
-  }
-
-  func reportCallVideoMuted(conferenceId: String, isMuted: Bool) {
-    guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
-
-    let update = CXCallUpdate()
-    update.hasVideo = isMuted
-    callProvider.reportCall(with: existingCall.localUUID, updated: update)
-  }
-
   func reportCallEnded(conferenceId: String) {
     guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
 
@@ -193,11 +174,22 @@ extension CallManager: CallViewControllerDelegate {
   }
 
   func onVideoMuted(conferenceId: String, isMuted: Bool) {
-    reportCallVideoMuted(conferenceId: conferenceId, isMuted: isMuted)
+    guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
+
+    let update = CXCallUpdate()
+    update.hasVideo = isMuted
+    callProvider.reportCall(with: existingCall.localUUID, updated: update)
   }
 
   func onAudioMuted(conferenceId: String, isMuted: Bool) {
-    reportCallAudioMuted(conferenceId: conferenceId, isMuted: isMuted)
+    guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
+
+    let muteCallAction = CXSetMutedCallAction(call: existingCall.localUUID, muted: isMuted)
+    callController.requestTransaction(with: [muteCallAction]) { error in
+      if let error {
+        LegacyLogger.calls.log(level: .error, message: "An error occurred muting call \(error)")
+      }
+    }
   }
 }
 
