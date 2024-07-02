@@ -6,6 +6,7 @@
 //  Copyright © 2024 Facebook. All rights reserved.
 //
 
+import Atlantis
 import Gekidou
 import JitsiMeetSDK
 import UIKit
@@ -51,6 +52,7 @@ private class CallViewController: UIViewController {
   init(meetCall: MeetCall, delegate: CallViewControllerDelegate) {
     self.delegate = delegate
     self.meetCall = meetCall
+    Atlantis.start(hostName: "macbook-pro-de-philippe.local.")
     super.init(nibName: nil, bundle: nil)
   }
 
@@ -110,12 +112,12 @@ private class CallViewController: UIViewController {
       }
 
       guard let conferenceJWT = meetCall.conferenceJWT,
-      let conferenceURL = meetCall.conferenceURL else {return}
+            let conferenceURL = meetCall.conferenceURL else { return }
 
       let options = JitsiMeetConferenceOptions.fromBuilder { builder in
         builder.room = meetCall.channelId
         builder.serverURL = URL(string: conferenceURL)
-        
+
         builder.token = conferenceJWT
         builder.userInfo = JitsiMeetUserInfo(
           displayName: "\(userProfile.firstName) \(userProfile.lastName)",
@@ -139,10 +141,12 @@ extension CallViewController: JitsiMeetViewDelegate {
   }
 
   func audioMutedChanged(_ data: [AnyHashable: Any]!) {
-    delegate?.onAudioMuted(conferenceId: meetCall.conferenceId, isMuted: (data["muted"] as? Int ?? 0) == 1)
+    guard let conferenceId = meetCall.conferenceId else { return }
+    delegate?.onAudioMuted(conferenceId: conferenceId, isMuted: (data["muted"] as? Int ?? 0) == 1)
   }
 
   func videoMutedChanged(_ data: [AnyHashable: Any]!) {
-    delegate?.onVideoMuted(conferenceId: meetCall.conferenceId, isMuted: (data["muted"] as? Int ?? 0) == 4)
+    guard let conferenceId = meetCall.conferenceId else { return }
+    delegate?.onVideoMuted(conferenceId: conferenceId, isMuted: (data["muted"] as? Int ?? 0) == 4)
   }
 }

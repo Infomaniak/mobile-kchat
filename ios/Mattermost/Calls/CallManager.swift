@@ -14,16 +14,13 @@ struct MeetCall {
   let localUUID: UUID
   let serverURL: String
   let channelId: String
-  let conferenceId: String
+  var conferenceId: String?
   var conferenceJWT: String?
   var conferenceURL: String?
   var joined = false
 
-  init(serverURL: String, channelId: String, conferenceId: String, conferenceJWT: String?) {
-    guard let conferenceUUID = UUID(uuidString: conferenceId) else {
-      fatalError("Couldn't convert conference UUID \(conferenceId)")
-    }
-    localUUID = conferenceUUID
+  init(serverURL: String, channelId: String, conferenceId: String?, conferenceJWT: String?) {
+    localUUID = UUID()
     self.serverURL = serverURL
     self.channelId = channelId
     self.conferenceId = conferenceId
@@ -73,7 +70,8 @@ public class CallManager: NSObject {
   }
 
   func declineCall(_ call: MeetCall) async throws {
-    _ = try await Network.default.declineCall(forServerUrl: call.serverURL, conferenceId: call.conferenceId)
+    guard let conferenceId = call.conferenceId else { return }
+    _ = try await Network.default.declineCall(forServerUrl: call.serverURL, conferenceId: conferenceId)
   }
 
   func startCall(_ partialCall: MeetCall) async throws -> MeetCall {
@@ -100,6 +98,7 @@ public class CallManager: NSObject {
     }
 
     call.conferenceURL = conference.url
+    call.conferenceId = conference.id
     call.conferenceJWT = call.conferenceJWT ?? conference.jwt
     return call
   }
@@ -118,7 +117,7 @@ public class CallManager: NSObject {
     }
   }
 
-  @objc public func reportCallStarted(serverId: String, channelId: String, conferenceId: String, callName: String) {
+  @objc public func reportCallStarted(serverId: String, channelId: String, callName: String) {
     guard let serverURL = try? Database.default.getServerUrlForServer(serverId) else {
       return
     }
@@ -127,7 +126,7 @@ public class CallManager: NSObject {
       let partialCall = MeetCall(
         serverURL: serverURL,
         channelId: channelId,
-        conferenceId: conferenceId,
+        conferenceId: nil,
         conferenceJWT: nil
       )
 
