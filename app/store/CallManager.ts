@@ -3,6 +3,7 @@
 
 import {z} from 'zod';
 
+import {fetchChannelMemberships} from '@actions/remote/channel';
 import {handleConferenceDeletedById} from '@actions/websocket/conference';
 import {callScreenRef} from '@calls/screens/call_screen/call_screen';
 import ClientError from '@client/rest/error';
@@ -31,6 +32,13 @@ export const CallVideoMutedEvent = CallMutedEvent;
 export type CallVideoMutedEvent = z.infer<typeof CallVideoMutedEvent>;
 
 class CallManager {
+    /**
+     * Number of maximum participant usernames to be displayed in Callkit
+     * when the users receive a GM call
+     *   example for 2 in a GM of 5 users -> "@jean.michel @foo.bar +3"
+     */
+    MAX_CALLNAME_PARTICIPANT_USERNAMES = 2;
+
     startCall = async (serverUrl: string, channelId: string, allowAnswer = true): Promise<Conference & { answered: boolean; server_url: string } | null> => {
         try {
             const call = await NetworkManager.getClient(serverUrl).startCall(channelId);
@@ -131,6 +139,18 @@ class CallManager {
         if (typeof toggleVideoMuted === 'function') {
             toggleVideoMuted(isMuted);
         }
+    };
+
+    /**
+     * Resolve list of called users
+     */
+    getCalledUsers = async (serverUrl: string, channelId: string, currentUserId: string, limit = 2) => {
+        // Add one since current user might be in list
+        const recipients = (await fetchChannelMemberships(serverUrl, channelId, {per_page: limit + 1})).users;
+
+        // Remove current user from list
+        return (recipients.length > 1 ? recipients.filter((user) => user.id !== currentUserId) : recipients).
+            slice(0, limit);
     };
 }
 

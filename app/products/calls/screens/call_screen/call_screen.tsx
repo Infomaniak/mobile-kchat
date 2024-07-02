@@ -13,7 +13,7 @@ import {Navigation} from 'react-native-navigation';
 import {useAnimatedStyle} from 'react-native-reanimated';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 
-import {fetchChannelById, fetchChannelMemberships, switchToChannelById} from '@actions/remote/channel';
+import {fetchChannelById, switchToChannelById} from '@actions/remote/channel';
 import {fetchConference} from '@actions/remote/conference';
 import {postListRef} from '@app/components/post_list/post_list';
 import {useServerId} from '@app/context/server';
@@ -79,13 +79,6 @@ type Props = PassedProps & InjectedProps
  * handle if the duration is lower than this value
  */
 const MINIMUM_CONFERENCE_DURATION = 2000; // ms
-
-/**
- * Number of maximum participant usernames to be displayed in Callkit
- * when the users receive a GM call
- *   example for 2 in a GM of 5 users -> "@jean.michel @foo.bar +3"
- */
-const MAX_CALLNAME_PARTICIPANT_USERNAMES = 2;
 
 const EDGES: Edge[] = ['bottom', 'left', 'right'];
 
@@ -345,17 +338,11 @@ const CallScreen = ({
     const currentUserIdRef = useTransientRef(currentUserId);
     const callUsersRef = useRef<UserProfile[]>();
     const getCallUsers = useCallback(async () => {
-        if (typeof callUsersRef.current === 'undefined') {
-            // Find the recipients for DM or GM calls
-            if (isDMorGM) {
-                const recipients = (await fetchChannelMemberships(serverUrl, channelId, {per_page: MAX_CALLNAME_PARTICIPANT_USERNAMES + 1})).users;
-
-                // Remove current user from list
-                callUsersRef.current = (recipients.length > 1 ? recipients.filter((user) => user.id !== currentUserIdRef.current) : recipients).
-                    slice(0, MAX_CALLNAME_PARTICIPANT_USERNAMES);
-            } else {
-                callUsersRef.current = [];
-            }
+        if (
+            typeof callUsersRef.current === 'undefined' &&
+            typeof currentUserIdRef.current === 'string'
+        ) {
+            callUsersRef.current = isDMorGM ? await CallManager.getCalledUsers(serverUrl, channelId, currentUserIdRef.current) : [];
         }
 
         return callUsersRef.current!;
@@ -379,7 +366,7 @@ const CallScreen = ({
                 // Current user is not displayed
                 const participantCountOverflow = Math.max(
                     Math.max(0, (participantCountRef.current ?? 0) - 1) - // Current user is not displayed (-1)
-                    MAX_CALLNAME_PARTICIPANT_USERNAMES,
+                    CallManager.MAX_CALLNAME_PARTICIPANT_USERNAMES,
                 );
 
                 // Query the called users (current user is filtered-out)
