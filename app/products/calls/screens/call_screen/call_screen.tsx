@@ -421,7 +421,7 @@ const CallScreen = ({
             //  -> 'internal' initiator means react-native
             if (initiator !== 'native') {
                 // Trigger native reporter
-                CallManager.nativeReporters.callStarted(serverId, channelId, conferenceId, await getCallName());
+                CallManager.nativeReporters.callStarted(serverId, channelId, await getCallName(), conferenceId);
 
                 // Also report about the audio/video mute status if toggled
                 const callbacks = [] as Array<() => void>;
