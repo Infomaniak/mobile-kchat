@@ -15,10 +15,11 @@ struct MeetCall {
   let serverURL: String
   let channelId: String
   let conferenceId: String
-  let conferenceJWT: String
+  var conferenceJWT: String?
+  var conferenceURL: String?
   var joined = false
 
-  init(serverURL: String, channelId: String, conferenceId: String, conferenceJWT: String) {
+  init(serverURL: String, channelId: String, conferenceId: String, conferenceJWT: String?) {
     guard let conferenceUUID = UUID(uuidString: conferenceId) else {
       fatalError("Couldn't convert conference UUID \(conferenceId)")
     }
@@ -71,10 +72,36 @@ public class CallManager: NSObject {
     voipRegistry.desiredPushTypes = [.voIP]
   }
 
-  func declineCall(_ call: MeetCall) {
-    Task {
-      try await Network.default.declineCall(forServerUrl: call.serverURL, conferenceId: call.conferenceId)
+  func declineCall(_ call: MeetCall) async throws {
+    _ = try await Network.default.declineCall(forServerUrl: call.serverURL, conferenceId: call.conferenceId)
+  }
+
+  func startCall(_ partialCall: MeetCall) async throws -> MeetCall {
+    var call = partialCall
+    let (startCallData, startCallResponse) = try await Network.default.startCall(
+      forServerUrl: call.serverURL,
+      channelId: call.channelId
+    )
+
+    let decoder = JSONDecoder()
+    decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+    let conference: Conference
+    if let startCallHttpResponse = startCallResponse as? HTTPURLResponse,
+       startCallHttpResponse.statusCode == 409 {
+      let partialConference = try decoder.decode(PartialConference.self, from: startCallData)
+      let (conferenceData, _) = try await Network.default.answerCall(
+        forServerUrl: call.serverURL,
+        conferenceId: partialConference.id
+      )
+      conference = try decoder.decode(Conference.self, from: conferenceData)
+    } else {
+      conference = try decoder.decode(Conference.self, from: startCallData)
     }
+
+    call.conferenceURL = conference.url
+    call.conferenceJWT = call.conferenceJWT ?? conference.jwt
+    return call
   }
 
   func reportCallAudioMuted(conferenceId: String, isMuted: Bool) {
@@ -114,26 +141,31 @@ public class CallManager: NSObject {
     guard let serverURL = try? Database.default.getServerUrlForServer(serverId) else {
       return
     }
-    
-    let call = MeetCall(
-      serverURL: serverURL,
-      channelId: channelId,
-      conferenceId: conferenceId,
-      conferenceJWT: ""
-    )
-    currentCalls[call.localUUID] = call
-    callProvider.reportOutgoingCall(with: call.localUUID, startedConnectingAt: Date(timeIntervalSinceNow: -3))
-    callProvider.reportOutgoingCall(with: call.localUUID, connectedAt: Date())
 
-    let startCallAction = CXStartCallAction(call: call.localUUID, handle: CXHandle(type: .generic, value: callName))
-    startCallAction.isVideo = CallManager.videoEnabledByDefault
-    callController.requestTransaction(with: [startCallAction]) { error in
-      if let error {
-        LegacyLogger.calls.log(level: .error, message: "An error occurred starting call \(error)")
-      } else if let rootWindowScene = (UIApplication.shared.delegate as? AppDelegate)?.window.windowScene {
-        let callWindow = CallWindow(meetCall: call, delegate: self, windowScene: rootWindowScene)
-        self.callWindow = callWindow
-        self.currentCalls[call.localUUID]?.joined = true
+    Task { @MainActor in
+      let partialCall = MeetCall(
+        serverURL: serverURL,
+        channelId: channelId,
+        conferenceId: conferenceId,
+        conferenceJWT: nil
+      )
+
+      let call = try await startCall(partialCall)
+
+      currentCalls[call.localUUID] = call
+      callProvider.reportOutgoingCall(with: call.localUUID, startedConnectingAt: Date(timeIntervalSinceNow: -3))
+      callProvider.reportOutgoingCall(with: call.localUUID, connectedAt: Date())
+
+      let startCallAction = CXStartCallAction(call: call.localUUID, handle: CXHandle(type: .generic, value: callName))
+      startCallAction.isVideo = CallManager.videoEnabledByDefault
+      callController.requestTransaction(with: [startCallAction]) { error in
+        if let error {
+          LegacyLogger.calls.log(level: .error, message: "An error occurred starting call \(error)")
+        } else if let rootWindowScene = (UIApplication.shared.delegate as? AppDelegate)?.window.windowScene {
+          let callWindow = CallWindow(meetCall: call, delegate: self, windowScene: rootWindowScene)
+          self.callWindow = callWindow
+          self.currentCalls[call.localUUID]?.joined = true
+        }
       }
     }
   }
@@ -173,36 +205,31 @@ extension CallManager: CXProviderDelegate {
   public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
     guard let existingCall = currentCalls[action.callUUID] else { return }
 
-    DispatchQueue.main.async { [weak self] in
-      guard let self else {
-        action.fulfill()
-        return
-      }
+    Task { @MainActor in
+      let call = try await startCall(existingCall)
 
       if let rootWindowScene = (UIApplication.shared.delegate as? AppDelegate)?.window.windowScene {
-        let callWindow = CallWindow(meetCall: existingCall, delegate: self, windowScene: rootWindowScene)
+        let callWindow = CallWindow(meetCall: call, delegate: self, windowScene: rootWindowScene)
         self.callWindow = callWindow
+        currentCalls[action.callUUID] = call
+        currentCalls[action.callUUID]?.joined = true
       }
 
-      currentCalls[action.callUUID]?.joined = true
       action.fulfill()
     }
   }
 
   public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
-    guard let existingCall = currentCalls[action.callUUID] else { return }
-    DispatchQueue.main.async { [weak self] in
-      guard let self else {
-        action.fulfill()
-        return
-      }
-
+    Task { @MainActor in
+      guard let existingCall = currentCalls[action.callUUID] else { return }
       // The user is in the current call
       if currentCalls[action.callUUID]?.joined == true {
         callWindow?.leaveCurrentCall()
       } else {
         // The user declined the call from native UI
-        declineCall(existingCall)
+        Task {
+          try await self.declineCall(existingCall)
+        }
       }
       currentCalls[action.callUUID]?.joined = false
       currentCalls[existingCall.localUUID] = nil
@@ -211,13 +238,7 @@ extension CallManager: CXProviderDelegate {
   }
 
   public func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
-    guard let existingCall = currentCalls[action.callUUID] else { return }
-    DispatchQueue.main.async { [weak self] in
-      guard let self else {
-        action.fulfill()
-        return
-      }
-
+    Task { @MainActor in
       callWindow?.setCurrentCallMuted(action.isMuted)
       action.fulfill()
     }

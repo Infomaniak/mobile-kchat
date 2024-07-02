@@ -109,31 +109,12 @@ private class CallViewController: UIViewController {
         avatarURL = URL(string: "\(meetCall.serverURL)/api/v4/users/{userProfile.id}/image?_={\(lastPictureUpdate)}")
       }
 
-      let (startCallData, startCallResponse) = try await Network.default.startCall(
-        forServerUrl: meetCall.serverURL,
-        channelId: meetCall.channelId
-      )
-
-      let conference: Conference
-      if let startCallHttpResponse = startCallResponse as? HTTPURLResponse,
-         startCallHttpResponse.statusCode == 409 {
-        let partialConference = try decoder.decode(PartialConference.self, from: startCallData)
-        let (conferenceData, _) = try await Network.default.answerCall(
-          forServerUrl: meetCall.serverURL,
-          conferenceId: partialConference.id
-        )
-        conference = try decoder.decode(Conference.self, from: conferenceData)
-      } else {
-        conference = try decoder.decode(Conference.self, from: startCallData)
-      }
-
-      guard let conferenceJWT = !meetCall.conferenceJWT.isEmpty ? meetCall.conferenceJWT : conference.jwt else {
-        return
-      }
+      guard let conferenceJWT = meetCall.conferenceJWT,
+      let conferenceURL = meetCall.conferenceURL else {return}
 
       let options = JitsiMeetConferenceOptions.fromBuilder { builder in
-        builder.room = conference.channelId
-        builder.serverURL = URL(string: conference.url)
+        builder.room = meetCall.channelId
+        builder.serverURL = URL(string: conferenceURL)
         
         builder.token = conferenceJWT
         builder.userInfo = JitsiMeetUserInfo(
