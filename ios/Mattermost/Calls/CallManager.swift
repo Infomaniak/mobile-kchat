@@ -104,7 +104,7 @@ public class CallManager: NSObject {
     let muteCallAction = CXSetMutedCallAction(call: existingCall.localUUID, muted: isMuted)
     callController.requestTransaction(with: [muteCallAction]) { error in
       if let error {
-        print("An error occured muting call \(error)")
+        LegacyLogger.calls.log(level: .error, message: "An error occurred muting call \(error)")
       }
     }
   }
@@ -123,7 +123,7 @@ public class CallManager: NSObject {
     let endCallAction = CXEndCallAction(call: existingCall.localUUID)
     callController.requestTransaction(with: [endCallAction]) { error in
       if let error {
-        print("An error occured ending call \(error)")
+        LegacyLogger.calls.log(level: .error, message: "An error occurred ending call \(error)")
       } else {
         self.currentCalls[existingCall.localUUID]?.joined = false
         self.currentCalls[existingCall.localUUID] = nil
@@ -146,7 +146,7 @@ public class CallManager: NSObject {
     startCallAction.isVideo = CallManager.videoEnabledByDefault
     callController.requestTransaction(with: [startCallAction]) { error in
       if let error {
-        print("An error occured starting call \(error)")
+        LegacyLogger.calls.log(level: .error, message: "An error occurred starting call \(error)")
       } else {
         self.currentCalls[call.localUUID]?.joined = true
       }
@@ -245,7 +245,7 @@ extension CallManager: CXProviderDelegate {
   }
 
   public func providerDidReset(_ provider: CXProvider) {
-    print("providerDidReset")
+    LegacyLogger.calls.log(level: .debug, message: "providerDidReset")
   }
 }
 
@@ -255,7 +255,7 @@ extension CallManager: PKPushRegistryDelegate {
 
     let tokenParts = pushCredentials.token.map { data in String(format: "%02.2hhx", data) }
     let token = tokenParts.joined()
-    print("PushKit Token \(token)")
+    LegacyLogger.calls.log(level: .debug, message: "PushKit Token \(token)")
     self.token = token
   }
 
@@ -267,7 +267,7 @@ extension CallManager: PKPushRegistryDelegate {
   ) {
     guard type == .voIP else { return }
 
-    print("Received voip notification")
+    LegacyLogger.calls.log(message: "Received voip notification")
 
     let notificationPayload = payload.dictionaryPayload
 
@@ -305,7 +305,7 @@ extension CallManager: PKPushRegistryDelegate {
           let conferenceId = notificationPayload["conference_id"] as? String,
           let channelName = notificationPayload["channel_name"] as? String,
           let conferenceJWT = notificationPayload["conference_jwt"] as? String else {
-      print("We are not reporting a call ! This can lead to crash and errors.")
+      LegacyLogger.calls.log(level: .error, message: "We are not reporting a call ! This can lead to crash and errors.")
       completion()
       return
     }
@@ -322,6 +322,6 @@ extension CallManager: PKPushRegistryDelegate {
   }
 
   public func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {
-    print("pushRegistry didInvalidatePushTokenFor")
+    LegacyLogger.calls.log(level: .debug, message: "pushRegistry didInvalidatePushTokenFor")
   }
 }
