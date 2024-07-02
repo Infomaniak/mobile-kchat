@@ -47,4 +47,33 @@ public extension Network {
       forServerUrl: serverUrl
     )
   }
+
+  func startCall(forServerUrl serverUrl: String, channelId: String) async throws -> (Data, URLResponse) {
+    let endpoint = "/conferences"
+    let url = buildApiUrl(serverUrl, endpoint)
+    
+    let headers = ["Content-Type": "application/json; charset=utf-8"]
+    let data = try? JSONSerialization.data(withJSONObject: ["channel_id": channelId], options: [])
+
+    return try await request(
+      url,
+      withMethod: "POST",
+      withBody: data,
+      andHeaders: headers,
+      forServerUrl: serverUrl
+    )
+  }
+
+  func answerCall(forServerUrl serverUrl: String, conferenceId: String) async throws -> (Data, URLResponse) {
+    let endpoint = "/conferences/\(conferenceId)"
+    let url = buildApiUrl(serverUrl, endpoint)
+
+    return try await request(
+      url,
+      withMethod: "GET",
+      withBody: nil,
+      andHeaders: nil,
+      forServerUrl: serverUrl
+    )
+  }
 }

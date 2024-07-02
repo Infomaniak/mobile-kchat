@@ -11,6 +11,7 @@ import Foundation
 struct MeUserProfile: Codable {
   let id: String
   let publicPictureUrl: String?
+  let lastPictureUpdate: Int?
   let firstName: String
   let lastName: String
   let email: String

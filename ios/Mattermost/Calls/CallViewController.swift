@@ -61,24 +61,26 @@ private class CallViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-
-    guard let jitsiView = view as? JitsiMeetView else { return }
-
-    jitsiView.delegate = self
-    let options = JitsiMeetConferenceOptions.fromBuilder { builder in
-      builder.room = "lxywemuqygmqvqtv"
-      builder.serverURL = URL(string: "https://kmeet.infomaniak.com")
-      builder.userInfo = JitsiMeetUserInfo(displayName: "Philou", andEmail: nil, andAvatar: nil)
+    let jitisiOptions = JitsiMeetConferenceOptions.fromBuilder { builder in
       builder.setFeatureFlag("prejoinpage.enabled", withBoolean: false)
       builder.setFeatureFlag("settings.enabled", withBoolean: false)
       builder.setFeatureFlag("unsaferoomwarning.enabled", withBoolean: false)
       builder.setFeatureFlag("welcomepage.enable", withBoolean: false)
       builder.setFeatureFlag("recording.enabled", withBoolean: false)
       builder.setFeatureFlag("video-share.enabled", withBoolean: false)
+      builder.setFeatureFlag("meeting-name.enabled", withBoolean: false)
+      builder.setFeatureFlag("add-people.enabled", withBoolean: false)
+      builder.setFeatureFlag("invite.enabled", withBoolean: false)
+      builder.setFeatureFlag("invite-dial-in.enabled", withBoolean: false)
+      builder.setFeatureFlag("breakout-rooms.enabled", withBoolean: false)
       builder.setFeatureFlag("live-streaming.enabled", withBoolean: false)
       builder.setFeatureFlag("call-integration.enabled", withBoolean: false)
     }
-    jitsiView.join(options)
+    JitsiMeet.sharedInstance().defaultConferenceOptions = jitisiOptions
+
+    guard let jitsiView = view as? JitsiMeetView else { return }
+
+    jitsiView.delegate = self
     initializeConference()
   }
 
@@ -88,20 +90,65 @@ private class CallViewController: UIViewController {
 
   func initializeConference() {
     Task {
-      let kMeetServerUrl = URL(string: "https://kchat.infomaniak.com")
-      
+      let meetCall = meetCall
+
       guard let serverURL = try? Database.default.getServerUrlForServer(meetCall.serverId) else {
         LegacyLogger.callViewController.log(message: "Couldn't find serverURL for \(meetCall.serverId)")
         return
       }
-      
+
       let decoder = JSONDecoder()
       decoder.keyDecodingStrategy = .convertFromSnakeCase
-      
+
       let (userProfileData, response) = try await Network.default.fetchUserProfile(forServerUrl: serverURL)
-      
-      let user = try decoder.decode(MeUserProfile.self, from: userProfileData)
-      print(user)
+
+      let userProfile = try decoder.decode(MeUserProfile.self, from: userProfileData)
+
+      let avatarURL: URL?
+      if let publicPictureUrl = userProfile.publicPictureUrl {
+        // Use the public_picture_url if available
+        avatarURL = URL(string: publicPictureUrl)
+      } else {
+        // Construct API URL if not
+        let lastPictureUpdate = userProfile.lastPictureUpdate ?? 0
+        avatarURL = URL(string: "\(serverURL)/api/v4/users/{userProfile.id}/image?_={\(lastPictureUpdate)}")
+      }
+
+      let (startCallData, startCallResponse) = try await Network.default.startCall(
+        forServerUrl: serverURL,
+        channelId: meetCall.channelId
+      )
+
+      let conference: Conference
+      if let startCallHttpResponse = startCallResponse as? HTTPURLResponse,
+         startCallHttpResponse.statusCode == 409 {
+        let partialConference = try decoder.decode(PartialConference.self, from: startCallData)
+        let (conferenceData, _) = try await Network.default.answerCall(
+          forServerUrl: serverURL,
+          conferenceId: partialConference.id
+        )
+        conference = try decoder.decode(Conference.self, from: conferenceData)
+      } else {
+        conference = try decoder.decode(Conference.self, from: startCallData)
+      }
+
+      guard let conferenceJWT = !meetCall.conferenceJWT.isEmpty ? meetCall.conferenceJWT : conference.jwt else {
+        return
+      }
+
+      let options = JitsiMeetConferenceOptions.fromBuilder { builder in
+        builder.room = conference.channelId
+        builder.serverURL = URL(string: conference.url)
+        
+        builder.token = conferenceJWT
+        builder.userInfo = JitsiMeetUserInfo(
+          displayName: "\(userProfile.firstName) \(userProfile.lastName)",
+          andEmail: userProfile.email,
+          andAvatar: avatarURL
+        )
+      }
+
+      jitsiView?.join(options)
     }
   }
 }
