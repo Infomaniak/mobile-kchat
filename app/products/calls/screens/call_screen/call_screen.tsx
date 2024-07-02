@@ -8,7 +8,7 @@
 import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
 import React, {forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type ComponentProps, type MutableRefObject} from 'react';
 import {useIntl} from 'react-intl';
-import {ActivityIndicator, FlatList, NativeModules, View} from 'react-native';
+import {ActivityIndicator, FlatList, View} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {useAnimatedStyle} from 'react-native-reanimated';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
@@ -142,52 +142,6 @@ const hasUpdatedRef = <T extends unknown>(ref: MutableRefObject<T>, newValue: T)
         return true;
     }
     return false;
-};
-
-/**
- * Native reporters, notify native/OS about a state change
- */
-const nativeReporters = {
-    callStarted: (serverId: string, channelId: string, conferenceId: string, callName: string) => {
-        try {
-            const {reportCallStarted} = NativeModules.CallManagerModule;
-            if (typeof reportCallStarted === 'function') {
-                reportCallStarted(serverId, channelId, conferenceId, callName);
-            }
-        } catch (error) {
-            logError(error);
-        }
-    },
-    callEnded: (conferenceId: string) => {
-        try {
-            const {reportCallEnded} = NativeModules.CallManagerModule;
-            if (typeof reportCallEnded === 'function') {
-                reportCallEnded(conferenceId);
-            }
-        } catch (error) {
-            logError(error);
-        }
-    },
-    callMuted: (conferenceId: string, isMuted: boolean) => {
-        try {
-            const {reportCallMuted} = NativeModules.CallManagerModule;
-            if (typeof reportCallMuted === 'function') {
-                reportCallMuted(conferenceId, isMuted);
-            }
-        } catch (error) {
-            logError(error);
-        }
-    },
-    callVideoMuted: (conferenceId: string, isMuted: boolean) => {
-        try {
-            const {reportCallVideoMuted} = NativeModules.CallManagerModule;
-            if (typeof reportCallVideoMuted === 'function') {
-                reportCallVideoMuted(conferenceId, isMuted);
-            }
-        } catch (error) {
-            logError(error);
-        }
-    },
 };
 
 const FrozenJitsiMeeting = forwardRef<JitsiRefProps, ComponentProps<typeof JitsiMeeting>>((props, ref) =>
@@ -425,7 +379,7 @@ const CallScreen = ({
 
             if (leaveInitiator !== 'native') {
                 // Notify OS about the end of the call
-                nativeReporters.callEnded(conferenceId);
+                CallManager.nativeReporters.callEnded(conferenceId);
             }
 
             if (typeof jitsiMeetingRef.current?.close === 'function') {
@@ -467,18 +421,18 @@ const CallScreen = ({
             //  -> 'internal' initiator means react-native
             if (initiator !== 'native') {
                 // Trigger native reporter
-                nativeReporters.callStarted(serverId, channelId, conferenceId, await getCallName());
+                CallManager.nativeReporters.callStarted(serverId, channelId, conferenceId, await getCallName());
 
                 // Also report about the audio/video mute status if toggled
                 const callbacks = [] as Array<() => void>;
                 if (audioMutedRef.current) {
                     callbacks.push(() => {
-                        nativeReporters.callMuted(conferenceId, true);
+                        CallManager.nativeReporters.callMuted(conferenceId, true);
                     });
                 }
                 if (videoMutedRef.current) {
                     callbacks.push(() => {
-                        nativeReporters.callVideoMuted(conferenceId, true);
+                        CallManager.nativeReporters.callVideoMuted(conferenceId, true);
                     });
                 }
 
@@ -497,7 +451,7 @@ const CallScreen = ({
                 typeof jitsiMeetingMountedAtRef.current === 'number' &&
                 hasUpdatedRef(audioMutedRef, isMuted)
             ) {
-                nativeReporters.callMuted(conferenceId, isMuted);
+                CallManager.nativeReporters.callMuted(conferenceId, isMuted);
             }
         },
         onVideoMutedChanged: (isMuted: boolean) => {
@@ -505,7 +459,7 @@ const CallScreen = ({
                 typeof jitsiMeetingMountedAtRef.current === 'number' &&
                 hasUpdatedRef(videoMutedRef, isMuted)
             ) {
-                nativeReporters.callVideoMuted(conferenceId, isMuted);
+                CallManager.nativeReporters.callVideoMuted(conferenceId, isMuted);
             }
         },
         onReadyToClose: () => {

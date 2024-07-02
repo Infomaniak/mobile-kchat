@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {NativeModules} from 'react-native';
 import {z} from 'zod';
 
 import {fetchChannelMemberships} from '@actions/remote/channel';
@@ -43,6 +44,55 @@ class CallManager {
      */
     MAX_CALLNAME_PARTICIPANT_USERNAMES = 5;
 
+    /**
+     * Native reporters, notify native/OS about a state change
+     */
+    nativeReporters = {
+        callStarted: (serverId: string, channelId: string, conferenceId: string, callName: string) => {
+            try {
+                const {reportCallStarted} = NativeModules.CallManagerModule;
+                if (typeof reportCallStarted === 'function') {
+                    reportCallStarted(serverId, channelId, conferenceId, callName);
+                }
+            } catch (error) {
+                logError(error);
+            }
+        },
+        callEnded: (conferenceId: string) => {
+            try {
+                const {reportCallEnded} = NativeModules.CallManagerModule;
+                if (typeof reportCallEnded === 'function') {
+                    reportCallEnded(conferenceId);
+                }
+            } catch (error) {
+                logError(error);
+            }
+        },
+        callMuted: (conferenceId: string, isMuted: boolean) => {
+            try {
+                const {reportCallMuted} = NativeModules.CallManagerModule;
+                if (typeof reportCallMuted === 'function') {
+                    reportCallMuted(conferenceId, isMuted);
+                }
+            } catch (error) {
+                logError(error);
+            }
+        },
+        callVideoMuted: (conferenceId: string, isMuted: boolean) => {
+            try {
+                const {reportCallVideoMuted} = NativeModules.CallManagerModule;
+                if (typeof reportCallVideoMuted === 'function') {
+                    reportCallVideoMuted(conferenceId, isMuted);
+                }
+            } catch (error) {
+                logError(error);
+            }
+        },
+    };
+
+    /**
+     * Start a new call, fallback to answering if it already exists on this channel
+     */
     startCall = async (serverUrl: string, channelId: string, allowAnswer = true): Promise<Conference & { answered: boolean; server_url: string } | null> => {
         try {
             const call = await NetworkManager.getClient(serverUrl).startCall(channelId);
@@ -69,6 +119,9 @@ class CallManager {
         return null;
     };
 
+    /**
+     * Answer an existing call by conferenceId
+     */
     answerCall = async (serverUrl: string, conferenceId: string, channelId?: string) => {
         try {
             const call = await NetworkManager.getClient(serverUrl).answerCall(conferenceId);
