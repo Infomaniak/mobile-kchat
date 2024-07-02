@@ -353,42 +353,17 @@ const CallScreen = ({
      */
     const callNameRef = useRef<string | undefined>(undefined);
     const hasCallName = typeof callNameRef.current === 'string';
-    const getCallName = useCallback(async (forceRerender = false) => {
-        if (typeof channel === 'undefined') {
-            return '...';
-        }
-
-        if (typeof callNameRef.current !== 'string') {
-            let callName = `~${channel.name}`; // Public / Private channel
-
-            // Find the target user's username for DM calls
-            if (isDMorGM) {
-                // Current user is not displayed
-                const participantCountOverflow = Math.max(
-                    Math.max(0, (participantCountRef.current ?? 0) - 1) - // Current user is not displayed (-1)
-                    CallManager.MAX_CALLNAME_PARTICIPANT_USERNAMES,
-                );
-
-                // Query the called users (current user is filtered-out)
-                const users = await getCallUsers();
-
-                // Construct callName useing usernames
-                callName = users.map((user) => `@${user.username}`).join(' ');
-                if (participantCountOverflow > 0) {
-                    callName = `${callName} +${participantCountOverflow}`;
-                }
-            }
-
+    const getCallName = useCallback(async () => {
+        if (
+            typeof channel !== 'undefined' &&
+            typeof callNameRef.current !== 'string' &&
+            typeof currentUserIdRef.current === 'string'
+        ) {
             // Update value
-            callNameRef.current = callName;
-
-            // Forced update
-            if (forceRerender) {
-                rerender();
-            }
+            callNameRef.current = await CallManager.getCallName(serverUrl, channel, currentUserIdRef.current);
         }
 
-        return callNameRef.current;
+        return callNameRef.current ?? '...';
     }, [channel]);
 
     /**
@@ -482,7 +457,6 @@ const CallScreen = ({
      * Setup the JitsiMeeting event listeners
      * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#eventlisteners
      */
-    const participantCountRef = useTransientRef(participantCount);
     const eventListeners = useMemo(() => ({
         onConferenceJoined: async () => {
             // Update the jitsiMeetingMountedAtRef date
@@ -557,7 +531,9 @@ const CallScreen = ({
     // Fetch and update the current callName
     useEffect(() => {
         if (channel && currentUserId) {
-            getCallName(true); // Async forced re-render
+            // Async forced re-render
+            // when both calledUsers and callName has been resolved
+            Promise.all([getCallUsers(), getCallName()]).then(rerender);
         }
     }, [Boolean(channel && currentUserId)]);
 

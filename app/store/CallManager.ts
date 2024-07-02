@@ -7,9 +7,13 @@ import {fetchChannelMemberships} from '@actions/remote/channel';
 import {handleConferenceDeletedById} from '@actions/websocket/conference';
 import {callScreenRef} from '@calls/screens/call_screen/call_screen';
 import ClientError from '@client/rest/error';
+import {General} from '@constants';
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
+import {isDMorGM as isChannelDMorGM} from '@utils/channel';
 import {logError} from '@utils/log';
+
+import type ChannelModel from '@typings/database/models/servers/channel';
 
 // OS events
 export const CallAnsweredEvent = z.object({
@@ -37,7 +41,7 @@ class CallManager {
      * when the users receive a GM call
      *   example for 2 in a GM of 5 users -> "@jean.michel @foo.bar +3"
      */
-    MAX_CALLNAME_PARTICIPANT_USERNAMES = 2;
+    MAX_CALLNAME_PARTICIPANT_USERNAMES = 5;
 
     startCall = async (serverUrl: string, channelId: string, allowAnswer = true): Promise<Conference & { answered: boolean; server_url: string } | null> => {
         try {
@@ -151,6 +155,30 @@ class CallManager {
         // Remove current user from list
         return (recipients.length > 1 ? recipients.filter((user) => user.id !== currentUserId) : recipients).
             slice(0, limit);
+    };
+
+    /**
+     * Construct the callName for CallKit
+     */
+    getCallName = async (serverUrl: string, channel: ChannelModel, currentUserId: string, calledUsernamesLimit = 2) => {
+        // Public / Private channel
+        const isDMorGM = channel ? isChannelDMorGM(channel) : false;
+        if (!isDMorGM) {
+            return `~${channel.name}`;
+        }
+
+        // Query the called users (current user is filtered-out)
+        const users = await this.getCalledUsers(serverUrl, channel.id, currentUserId, calledUsernamesLimit);
+
+        // If it's a DM the callName is the recipient with an "@"
+        const isDM = channel?.type === General.DM_CHANNEL;
+        if (isDM) {
+            const recipient = users[0]?.username ?? 'kMeet';
+            return `@${recipient}`;
+        }
+
+        // Construct callName by joining usernames
+        return `#${users.map((user) => `${user.username}`).join(', ')}`;
     };
 }
 
