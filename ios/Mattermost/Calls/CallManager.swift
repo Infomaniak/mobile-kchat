@@ -88,6 +88,16 @@ public class CallManager: NSObject {
     voipRegistry.desiredPushTypes = [.voIP]
   }
 
+  func declineCall(_ call: MeetCall) {
+    guard let serverURL = try? Database.default.getServerUrlForServer(call.serverId) else {
+      return
+    }
+
+    Task {
+      try await Network.default.declineCall(forServerUrl: serverURL, conferenceId: call.conferenceId)
+    }
+  }
+
   func reportCallAudioMuted(conferenceId: String, isMuted: Bool) {
     guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
 
@@ -208,7 +218,13 @@ extension CallManager: CXProviderDelegate {
         return
       }
 
-      callWindow?.leaveCurrentCall()
+      // The user is in the current call
+      if currentCalls[action.callUUID]?.joined == true {
+        callWindow?.leaveCurrentCall()
+      } else {
+        // The user declined the call from native UI
+        declineCall(existingCall)
+      }
       currentCalls[action.callUUID]?.joined = false
       currentCalls[existingCall.localUUID] = nil
       action.fulfill()

@@ -76,4 +76,17 @@ public extension Network {
       forServerUrl: serverUrl
     )
   }
+  
+  func declineCall(forServerUrl serverUrl: String, conferenceId: String) async throws -> (Data, URLResponse) {
+    let endpoint = "/conferences/\(conferenceId)/decline"
+    let url = buildApiUrl(serverUrl, endpoint)
+
+    return try await request(
+      url,
+      withMethod: "POST",
+      withBody: nil,
+      andHeaders: nil,
+      forServerUrl: serverUrl
+    )
+  }
 }
