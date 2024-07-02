@@ -30,17 +30,6 @@ struct MeetCall {
   }
 }
 
-struct CallAnsweredEvent {
-  let serverId: String
-  let channelId: String
-  let conferenceJWT: String
-}
-
-struct CallEndedEvent {
-  let serverId: String
-  let conferenceId: String
-}
-
 public class CallManager: NSObject {
   static let videoEnabledByDefault = false
 
@@ -54,12 +43,6 @@ public class CallManager: NSObject {
 
   @objc public private(set) var token: String?
 
-  @objc var callAnsweredCallback: ((String, String, String) -> Void)?
-  @objc var callEndedCallback: ((String, String) -> Void)?
-  @objc var callMutedCallback: ((Bool) -> Void)?
-
-  private var queuedCallAnsweredEvent: CallAnsweredEvent?
-  private var queuedCallEndedEvent: CallEndedEvent?
   private var callWindow: CallWindow?
 
   override private init() {
