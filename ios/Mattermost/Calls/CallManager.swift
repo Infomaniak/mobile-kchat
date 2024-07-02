@@ -12,18 +12,18 @@ import Gekidou
 
 struct MeetCall {
   let localUUID: UUID
-  let serverId: String
+  let serverURL: String
   let channelId: String
   let conferenceId: String
   let conferenceJWT: String
   var joined = false
 
-  init(serverId: String, channelId: String, conferenceId: String, conferenceJWT: String) {
+  init(serverURL: String, channelId: String, conferenceId: String, conferenceJWT: String) {
     guard let conferenceUUID = UUID(uuidString: conferenceId) else {
       fatalError("Couldn't convert conference UUID \(conferenceId)")
     }
     localUUID = conferenceUUID
-    self.serverId = serverId
+    self.serverURL = serverURL
     self.channelId = channelId
     self.conferenceId = conferenceId
     self.conferenceJWT = conferenceJWT
@@ -89,12 +89,8 @@ public class CallManager: NSObject {
   }
 
   func declineCall(_ call: MeetCall) {
-    guard let serverURL = try? Database.default.getServerUrlForServer(call.serverId) else {
-      return
-    }
-
     Task {
-      try await Network.default.declineCall(forServerUrl: serverURL, conferenceId: call.conferenceId)
+      try await Network.default.declineCall(forServerUrl: call.serverURL, conferenceId: call.conferenceId)
     }
   }
 
@@ -117,7 +113,7 @@ public class CallManager: NSObject {
     callProvider.reportCall(with: existingCall.localUUID, updated: update)
   }
 
-  @objc public func reportCallEnded(conferenceId: String) {
+  func reportCallEnded(conferenceId: String) {
     guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
 
     let endCallAction = CXEndCallAction(call: existingCall.localUUID)
@@ -132,8 +128,12 @@ public class CallManager: NSObject {
   }
 
   @objc public func reportCallStarted(serverId: String, channelId: String, conferenceId: String, callName: String) {
+    guard let serverURL = try? Database.default.getServerUrlForServer(serverId) else {
+      return
+    }
+    
     let call = MeetCall(
-      serverId: serverId,
+      serverURL: serverURL,
       channelId: channelId,
       conferenceId: conferenceId,
       conferenceJWT: ""
@@ -147,7 +147,9 @@ public class CallManager: NSObject {
     callController.requestTransaction(with: [startCallAction]) { error in
       if let error {
         LegacyLogger.calls.log(level: .error, message: "An error occurred starting call \(error)")
-      } else {
+      } else if let rootWindowScene = (UIApplication.shared.delegate as? AppDelegate)?.window.windowScene {
+        let callWindow = CallWindow(meetCall: call, delegate: self, windowScene: rootWindowScene)
+        self.callWindow = callWindow
         self.currentCalls[call.localUUID]?.joined = true
       }
     }
@@ -193,12 +195,6 @@ extension CallManager: CXProviderDelegate {
         action.fulfill()
         return
       }
-
-      let callAnsweredEvent = CallAnsweredEvent(
-        serverId: existingCall.serverId,
-        channelId: existingCall.channelId,
-        conferenceJWT: existingCall.conferenceJWT
-      )
 
       if let rootWindowScene = (UIApplication.shared.delegate as? AppDelegate)?.window.windowScene {
         let callWindow = CallWindow(meetCall: existingCall, delegate: self, windowScene: rootWindowScene)
@@ -310,8 +306,17 @@ extension CallManager: PKPushRegistryDelegate {
       return
     }
 
+    guard let serverURL = try? Database.default.getServerUrlForServer(serverId) else {
+      LegacyLogger.calls.log(
+        level: .error,
+        message: "We are not reporting a call because we couldn't find a server for id \(serverId) ! This can lead to crash and errors."
+      )
+      completion()
+      return
+    }
+
     let meetCall = MeetCall(
-      serverId: serverId,
+      serverURL: serverURL,
       channelId: channelId,
       conferenceId: conferenceId,
       conferenceJWT: conferenceJWT

@@ -92,15 +92,10 @@ private class CallViewController: UIViewController {
     Task {
       let meetCall = meetCall
 
-      guard let serverURL = try? Database.default.getServerUrlForServer(meetCall.serverId) else {
-        LegacyLogger.callViewController.log(message: "Couldn't find serverURL for \(meetCall.serverId)")
-        return
-      }
-
       let decoder = JSONDecoder()
       decoder.keyDecodingStrategy = .convertFromSnakeCase
 
-      let (userProfileData, response) = try await Network.default.fetchUserProfile(forServerUrl: serverURL)
+      let (userProfileData, _) = try await Network.default.fetchUserProfile(forServerUrl: meetCall.serverURL)
 
       let userProfile = try decoder.decode(MeUserProfile.self, from: userProfileData)
 
@@ -111,11 +106,11 @@ private class CallViewController: UIViewController {
       } else {
         // Construct API URL if not
         let lastPictureUpdate = userProfile.lastPictureUpdate ?? 0
-        avatarURL = URL(string: "\(serverURL)/api/v4/users/{userProfile.id}/image?_={\(lastPictureUpdate)}")
+        avatarURL = URL(string: "\(meetCall.serverURL)/api/v4/users/{userProfile.id}/image?_={\(lastPictureUpdate)}")
       }
 
       let (startCallData, startCallResponse) = try await Network.default.startCall(
-        forServerUrl: serverURL,
+        forServerUrl: meetCall.serverURL,
         channelId: meetCall.channelId
       )
 
@@ -124,7 +119,7 @@ private class CallViewController: UIViewController {
          startCallHttpResponse.statusCode == 409 {
         let partialConference = try decoder.decode(PartialConference.self, from: startCallData)
         let (conferenceData, _) = try await Network.default.answerCall(
-          forServerUrl: serverURL,
+          forServerUrl: meetCall.serverURL,
           conferenceId: partialConference.id
         )
         conference = try decoder.decode(Conference.self, from: conferenceData)
