@@ -6,6 +6,7 @@
 //  Copyright © 2024 Facebook. All rights reserved.
 //
 
+import Gekidou
 import JitsiMeetSDK
 import UIKit
 
@@ -29,20 +30,20 @@ class CallWindow: UIWindow {
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
-  
+
   func setCurrentCallMuted(_ isMuted: Bool) {
     callViewController.jitsiView?.setAudioMuted(isMuted)
   }
-  
+
   func leaveCurrentCall() {
     callViewController.jitsiView?.leave()
-    }
+  }
 }
 
 private class CallViewController: UIViewController {
   private weak var delegate: CallViewControllerDelegate?
   private let meetCall: MeetCall
-  
+
   var jitsiView: JitsiMeetView? {
     return view as? JitsiMeetView
   }
@@ -78,10 +79,30 @@ private class CallViewController: UIViewController {
       builder.setFeatureFlag("call-integration.enabled", withBoolean: false)
     }
     jitsiView.join(options)
+    initializeConference()
   }
 
   override func loadView() {
     view = JitsiMeetView()
+  }
+
+  func initializeConference() {
+    Task {
+      let kMeetServerUrl = URL(string: "https://kchat.infomaniak.com")
+      
+      guard let serverURL = try? Database.default.getServerUrlForServer(meetCall.serverId) else {
+        LegacyLogger.callViewController.log(message: "Couldn't find serverURL for \(meetCall.serverId)")
+        return
+      }
+      
+      let decoder = JSONDecoder()
+      decoder.keyDecodingStrategy = .convertFromSnakeCase
+      
+      let (userProfileData, response) = try await Network.default.fetchUserProfile(forServerUrl: serverURL)
+      
+      let user = try decoder.decode(MeUserProfile.self, from: userProfileData)
+      print(user)
+    }
   }
 }
 

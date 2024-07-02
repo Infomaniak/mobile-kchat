@@ -20,6 +20,9 @@
 		3750F86D296DACD2002DAC87 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3750F867296DACD2002DAC87 /* Localizable.strings */; };
 		3750F86E296DACE3002DAC87 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3750F867296DACD2002DAC87 /* Localizable.strings */; };
 		3751BAE22BFF55E200CE4D6D /* CallManagerModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 3751BAE12BFF55E200CE4D6D /* CallManagerModule.m */; };
+		37981AE12C33CB4D00205B36 /* Network+Calls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE02C33CB4D00205B36 /* Network+Calls.swift */; };
+		37981AE32C33D52900205B36 /* LegacyLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE22C33D52800205B36 /* LegacyLogger.swift */; };
+		37981AE52C33D86A00205B36 /* MeUserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE42C33D86A00205B36 /* MeUserProfile.swift */; };
 		37AD6C3029B5F239009576A8 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		37B0A413296DC0C50085944B /* Gekidou in Frameworks */ = {isa = PBXBuildFile; productRef = 37B0A412296DC0C50085944B /* Gekidou */; };
 		49AE370126D4455D00EF4E52 /* Gekidou in Frameworks */ = {isa = PBXBuildFile; productRef = 49AE370026D4455D00EF4E52 /* Gekidou */; };
@@ -197,6 +200,9 @@
 		3750F86C296DACD2002DAC87 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3751BAE02BFF549300CE4D6D /* CallManagerModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CallManagerModule.h; sourceTree = "<group>"; };
 		3751BAE12BFF55E200CE4D6D /* CallManagerModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CallManagerModule.m; sourceTree = "<group>"; };
+		37981AE02C33CB4D00205B36 /* Network+Calls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Network+Calls.swift"; sourceTree = "<group>"; };
+		37981AE22C33D52800205B36 /* LegacyLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyLogger.swift; sourceTree = "<group>"; };
+		37981AE42C33D86A00205B36 /* MeUserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeUserProfile.swift; sourceTree = "<group>"; };
 		41F3AFE83AAF4B74878AB78A /* OpenSans-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-Italic.ttf"; path = "../assets/fonts/OpenSans-Italic.ttf"; sourceTree = "<group>"; };
 		495BC95F23565ABF00C40C83 /* libXCDYouTubeKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libXCDYouTubeKit.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		495BC96123565ADD00C40C83 /* libYoutubePlayer-in-WKWebView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libYoutubePlayer-in-WKWebView.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -438,9 +444,12 @@
 			isa = PBXGroup;
 			children = (
 				374A99032BFCDC23005517A1 /* CallManager.swift */,
+				37981AE02C33CB4D00205B36 /* Network+Calls.swift */,
 				37407E412C32BD87005FB5D3 /* CallViewController.swift */,
+				37981AE22C33D52800205B36 /* LegacyLogger.swift */,
 				3751BAE12BFF55E200CE4D6D /* CallManagerModule.m */,
 				3751BAE02BFF549300CE4D6D /* CallManagerModule.h */,
+				37981AE42C33D86A00205B36 /* MeUserProfile.swift */,
 			);
 			name = Calls;
 			path = Mattermost/Calls;
@@ -1211,9 +1220,12 @@
 				7F1EB88527FDE361002E7EEC /* GekidouWrapper.swift in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				7F151D3E221B062700FAD8F3 /* RuntimeUtils.swift in Sources */,
+				37981AE12C33CB4D00205B36 /* Network+Calls.swift in Sources */,
 				7F537B2928A517580086D6B3 /* NotificationHelper.swift in Sources */,
+				37981AE52C33D86A00205B36 /* MeUserProfile.swift in Sources */,
 				3751BAE22BFF55E200CE4D6D /* CallManagerModule.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				37981AE32C33D52900205B36 /* LegacyLogger.swift in Sources */,
 				7F59882B29827F2200C8C108 /* SplitViewModule.swift in Sources */,
 				37407E422C32BD87005FB5D3 /* CallViewController.swift in Sources */,
 				7FEB109D1F61019C0039A015 /* MattermostManaged.m in Sources */,
