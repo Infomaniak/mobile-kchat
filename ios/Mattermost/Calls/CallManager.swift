@@ -117,11 +117,7 @@ public class CallManager: NSObject {
     }
   }
 
-  @objc public func reportCallStarted(serverId: String, channelId: String, callName: String) {
-    guard let serverURL = try? Database.default.getServerUrlForServer(serverId) else {
-      return
-    }
-
+  @objc public func reportCallStarted(serverURL: String, channelId: String, callName: String) {
     Task { @MainActor in
       let partialCall = MeetCall(
         serverURL: serverURL,
@@ -139,12 +135,14 @@ public class CallManager: NSObject {
       let startCallAction = CXStartCallAction(call: call.localUUID, handle: CXHandle(type: .generic, value: callName))
       startCallAction.isVideo = CallManager.videoEnabledByDefault
       callController.requestTransaction(with: [startCallAction]) { error in
-        if let error {
-          LegacyLogger.calls.log(level: .error, message: "An error occurred starting call \(error)")
-        } else if let rootWindowScene = (UIApplication.shared.delegate as? AppDelegate)?.window.windowScene {
-          let callWindow = CallWindow(meetCall: call, delegate: self, windowScene: rootWindowScene)
-          self.callWindow = callWindow
-          self.currentCalls[call.localUUID]?.joined = true
+        Task { @MainActor in
+          if let error {
+            LegacyLogger.calls.log(level: .error, message: "An error occurred starting call \(error)")
+          } else if let rootWindowScene = (UIApplication.shared.delegate as? AppDelegate)?.window.windowScene {
+            let callWindow = CallWindow(meetCall: call, delegate: self, windowScene: rootWindowScene)
+            self.callWindow = callWindow
+            self.currentCalls[call.localUUID]?.joined = true
+          }
         }
       }
     }

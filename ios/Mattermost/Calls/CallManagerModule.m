@@ -25,13 +25,13 @@ RCT_EXPORT_METHOD(getToken:(RCTPromiseResolveBlock)resolve
   resolve(token);
 }
 
-RCT_EXPORT_METHOD(reportCallStarted: (NSString*)serverId
+RCT_EXPORT_METHOD(reportCallStarted: (NSString*)serverURL
                   channelId: (NSString*)channelId
                   callName: (NSString*)callName
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-  [[CallManager shared] reportCallStartedWithServerId:serverId channelId:channelId callName:callName];
+  [[CallManager shared] reportCallStartedWithServerURL:serverURL channelId:channelId callName:callName];
   resolve(@[]);
 }
 
