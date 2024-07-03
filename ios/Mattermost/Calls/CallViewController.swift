@@ -116,6 +116,8 @@ private class CallViewController: UIViewController {
       let isDM = channel.type == "D"
 
       let isCurrentUserInitiator = meetCall.initiatorUserId == userProfile.id
+      
+      let isAppInBackground = UIApplication.shared.applicationState == .background
 
       let options = JitsiMeetConferenceOptions.fromBuilder { builder in
         builder.room = self.meetCall.channelId
@@ -128,7 +130,7 @@ private class CallViewController: UIViewController {
           andAvatar: avatarURL
         )
 
-        builder.setFeatureFlag("prejoinpage.enabled", withBoolean: !isDM && !isCurrentUserInitiator)
+        builder.setFeatureFlag("prejoinpage.enabled", withBoolean: !isDM && !isCurrentUserInitiator && !isAppInBackground)
       }
 
       jitsiView?.join(options)
