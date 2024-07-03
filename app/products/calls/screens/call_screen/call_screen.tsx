@@ -8,12 +8,12 @@
 import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
 import React, {forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type ComponentProps, type MutableRefObject} from 'react';
 import {useIntl} from 'react-intl';
-import {ActivityIndicator, FlatList, NativeModules, View} from 'react-native';
+import {ActivityIndicator, FlatList, View} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {useAnimatedStyle} from 'react-native-reanimated';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 
-import {fetchChannelById, fetchChannelMemberships, switchToChannelById} from '@actions/remote/channel';
+import {fetchChannelById, switchToChannelById} from '@actions/remote/channel';
 import {fetchConference} from '@actions/remote/conference';
 import {postListRef} from '@app/components/post_list/post_list';
 import {useServerId} from '@app/context/server';
@@ -80,13 +80,6 @@ type Props = PassedProps & InjectedProps
  */
 const MINIMUM_CONFERENCE_DURATION = 2000; // ms
 
-/**
- * Number of maximum participant usernames to be displayed in Callkit
- * when the users receive a GM call
- *   example for 2 in a GM of 5 users -> "@jean.michel @foo.bar +3"
- */
-const MAX_CALLNAME_PARTICIPANT_USERNAMES = 2;
-
 const EDGES: Edge[] = ['bottom', 'left', 'right'];
 
 /**
@@ -149,52 +142,6 @@ const hasUpdatedRef = <T extends unknown>(ref: MutableRefObject<T>, newValue: T)
         return true;
     }
     return false;
-};
-
-/**
- * Native reporters, notify native/OS about a state change
- */
-const nativeReporters = {
-    callStarted: (serverId: string, channelId: string, conferenceId: string, callName: string) => {
-        try {
-            const {reportCallStarted} = NativeModules.CallManagerModule;
-            if (typeof reportCallStarted === 'function') {
-                reportCallStarted(serverId, channelId, conferenceId, callName);
-            }
-        } catch (error) {
-            logError(error);
-        }
-    },
-    callEnded: (conferenceId: string) => {
-        try {
-            const {reportCallEnded} = NativeModules.CallManagerModule;
-            if (typeof reportCallEnded === 'function') {
-                reportCallEnded(conferenceId);
-            }
-        } catch (error) {
-            logError(error);
-        }
-    },
-    callMuted: (conferenceId: string, isMuted: boolean) => {
-        try {
-            const {reportCallMuted} = NativeModules.CallManagerModule;
-            if (typeof reportCallMuted === 'function') {
-                reportCallMuted(conferenceId, isMuted);
-            }
-        } catch (error) {
-            logError(error);
-        }
-    },
-    callVideoMuted: (conferenceId: string, isMuted: boolean) => {
-        try {
-            const {reportCallVideoMuted} = NativeModules.CallManagerModule;
-            if (typeof reportCallVideoMuted === 'function') {
-                reportCallVideoMuted(conferenceId, isMuted);
-            }
-        } catch (error) {
-            logError(error);
-        }
-    },
 };
 
 const FrozenJitsiMeeting = forwardRef<JitsiRefProps, ComponentProps<typeof JitsiMeeting>>((props, ref) =>
@@ -345,17 +292,11 @@ const CallScreen = ({
     const currentUserIdRef = useTransientRef(currentUserId);
     const callUsersRef = useRef<UserProfile[]>();
     const getCallUsers = useCallback(async () => {
-        if (typeof callUsersRef.current === 'undefined') {
-            // Find the recipients for DM or GM calls
-            if (isDMorGM) {
-                const recipients = (await fetchChannelMemberships(serverUrl, channelId, {per_page: MAX_CALLNAME_PARTICIPANT_USERNAMES + 1})).users;
-
-                // Remove current user from list
-                callUsersRef.current = (recipients.length > 1 ? recipients.filter((user) => user.id !== currentUserIdRef.current) : recipients).
-                    slice(0, MAX_CALLNAME_PARTICIPANT_USERNAMES);
-            } else {
-                callUsersRef.current = [];
-            }
+        if (
+            typeof callUsersRef.current === 'undefined' &&
+            typeof currentUserIdRef.current === 'string'
+        ) {
+            callUsersRef.current = isDMorGM ? await CallManager.getCalledUsers(serverUrl, channelId, currentUserIdRef.current) : [];
         }
 
         return callUsersRef.current!;
@@ -366,42 +307,17 @@ const CallScreen = ({
      */
     const callNameRef = useRef<string | undefined>(undefined);
     const hasCallName = typeof callNameRef.current === 'string';
-    const getCallName = useCallback(async (forceRerender = false) => {
-        if (typeof channel === 'undefined') {
-            return '...';
-        }
-
-        if (typeof callNameRef.current !== 'string') {
-            let callName = `~${channel.name}`; // Public / Private channel
-
-            // Find the target user's username for DM calls
-            if (isDMorGM) {
-                // Current user is not displayed
-                const participantCountOverflow = Math.max(
-                    Math.max(0, (participantCountRef.current ?? 0) - 1) - // Current user is not displayed (-1)
-                    MAX_CALLNAME_PARTICIPANT_USERNAMES,
-                );
-
-                // Query the called users (current user is filtered-out)
-                const users = await getCallUsers();
-
-                // Construct callName useing usernames
-                callName = users.map((user) => `@${user.username}`).join(' ');
-                if (participantCountOverflow > 0) {
-                    callName = `${callName} +${participantCountOverflow}`;
-                }
-            }
-
+    const getCallName = useCallback(async () => {
+        if (
+            typeof channel !== 'undefined' &&
+            typeof callNameRef.current !== 'string' &&
+            typeof currentUserIdRef.current === 'string'
+        ) {
             // Update value
-            callNameRef.current = callName;
-
-            // Forced update
-            if (forceRerender) {
-                rerender();
-            }
+            callNameRef.current = await CallManager.getCallName(serverUrl, channel, currentUserIdRef.current);
         }
 
-        return callNameRef.current;
+        return callNameRef.current ?? '...';
     }, [channel]);
 
     /**
@@ -463,7 +379,7 @@ const CallScreen = ({
 
             if (leaveInitiator !== 'native') {
                 // Notify OS about the end of the call
-                nativeReporters.callEnded(conferenceId);
+                CallManager.nativeReporters.callEnded(conferenceId);
             }
 
             if (typeof jitsiMeetingRef.current?.close === 'function') {
@@ -495,7 +411,6 @@ const CallScreen = ({
      * Setup the JitsiMeeting event listeners
      * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#eventlisteners
      */
-    const participantCountRef = useTransientRef(participantCount);
     const eventListeners = useMemo(() => ({
         onConferenceJoined: async () => {
             // Update the jitsiMeetingMountedAtRef date
@@ -506,18 +421,18 @@ const CallScreen = ({
             //  -> 'internal' initiator means react-native
             if (initiator !== 'native') {
                 // Trigger native reporter
-                nativeReporters.callStarted(serverId, channelId, conferenceId, await getCallName());
+                CallManager.nativeReporters.callStarted(serverId, channelId, await getCallName(), conferenceId);
 
                 // Also report about the audio/video mute status if toggled
                 const callbacks = [] as Array<() => void>;
                 if (audioMutedRef.current) {
                     callbacks.push(() => {
-                        nativeReporters.callMuted(conferenceId, true);
+                        CallManager.nativeReporters.callMuted(conferenceId, true);
                     });
                 }
                 if (videoMutedRef.current) {
                     callbacks.push(() => {
-                        nativeReporters.callVideoMuted(conferenceId, true);
+                        CallManager.nativeReporters.callVideoMuted(conferenceId, true);
                     });
                 }
 
@@ -536,7 +451,7 @@ const CallScreen = ({
                 typeof jitsiMeetingMountedAtRef.current === 'number' &&
                 hasUpdatedRef(audioMutedRef, isMuted)
             ) {
-                nativeReporters.callMuted(conferenceId, isMuted);
+                CallManager.nativeReporters.callMuted(conferenceId, isMuted);
             }
         },
         onVideoMutedChanged: (isMuted: boolean) => {
@@ -544,7 +459,7 @@ const CallScreen = ({
                 typeof jitsiMeetingMountedAtRef.current === 'number' &&
                 hasUpdatedRef(videoMutedRef, isMuted)
             ) {
-                nativeReporters.callVideoMuted(conferenceId, isMuted);
+                CallManager.nativeReporters.callVideoMuted(conferenceId, isMuted);
             }
         },
         onReadyToClose: () => {
@@ -570,7 +485,9 @@ const CallScreen = ({
     // Fetch and update the current callName
     useEffect(() => {
         if (channel && currentUserId) {
-            getCallName(true); // Async forced re-render
+            // Async forced re-render
+            // when both calledUsers and callName has been resolved
+            Promise.all([getCallUsers(), getCallName()]).then(rerender);
         }
     }, [Boolean(channel && currentUserId)]);
 

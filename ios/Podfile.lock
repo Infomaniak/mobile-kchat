@@ -94,7 +94,7 @@ PODS:
   - GTMAppAuth (4.1.1):
     - AppAuth/Core (~> 1.7)
     - GTMSessionFetcher/Core (< 4.0, >= 3.3)
-  - GTMSessionFetcher/Core (3.4.1)
+  - GTMSessionFetcher/Core (3.5.0)
   - hermes-engine (0.72.7):
     - hermes-engine/Pre-built (= 0.72.7)
   - hermes-engine/Pre-built (0.72.7)
@@ -105,6 +105,8 @@ PODS:
     - ObjectiveDropboxOfficial (= 6.2.3)
     - React-Core
     - react-native-webrtc
+  - JitsiMeetSDKLite (9.2.2-lite):
+    - JitsiWebRTC (~> 118.0)
   - JitsiWebRTC (118.0.0)
   - libevent (2.1.12)
   - libwebp (1.3.2):
@@ -763,6 +765,7 @@ DEPENDENCIES:
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - jail-monkey (from `../node_modules/jail-monkey`)
   - "jitsi-meet-rnsdk (from `../node_modules/@jitsi/react-native-sdk`)"
+  - JitsiMeetSDKLite (= 9.2.2-lite)
   - libevent (~> 2.1.12)
   - "mattermost-react-native-turbo-log (from `../node_modules/@mattermost/react-native-turbo-log`)"
   - OpenSSL-Universal (= 1.1.1100)
@@ -882,6 +885,7 @@ SPEC REPOS:
     - GTMAppAuth
     - GTMSessionFetcher
     - HMSegmentedControl
+    - JitsiMeetSDKLite
     - JitsiWebRTC
     - libevent
     - libwebp
@@ -1137,11 +1141,12 @@ SPEC CHECKSUMS:
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
-  GTMSessionFetcher: 8000756fc1c19d2e5697b90311f7832d2e33f6cd
+  GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   hermes-engine: 9180d43df05c1ed658a87cc733dc3044cf90c00a
   HMSegmentedControl: 34c1f54d822d8308e7b24f5d901ec674dfa31352
   jail-monkey: a71b35d482a70ecba844a90f002994012cf12a5d
   jitsi-meet-rnsdk: 76832ef9f54bd7ee79673fe541b7acd680dc3dc5
+  JitsiMeetSDKLite: 02886ad69a53f3370376ee7c2d26331c7b10fcf8
   JitsiWebRTC: 3a41671ef65a51d7204323814b055a2690b921c7
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
@@ -1250,6 +1255,6 @@ SPEC CHECKSUMS:
   Yoga: 4c3aa327e4a6a23eeacd71f61c81df1bcdf677d5
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 9fa68fcba497d49130324430f8f67c66ba248dea
+PODFILE CHECKSUM: c65ff41ab84069d06831d08046a3b372aac54242
 
 COCOAPODS: 1.14.3

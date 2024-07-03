@@ -239,17 +239,38 @@ export const OutgoingRinging = (
     { play: boolean; soundName?: string },
 ) => {
     const audioElementRef = useRef<AudioElement>();
+
+    const playSound = useCallback(() => {
+        if (typeof audioElementRef.current !== 'undefined') {
+            audioElementRef.current?.play();
+        }
+    }, []);
+
+    const stopSound = useCallback(() => {
+        if (typeof audioElementRef.current !== 'undefined') {
+            audioElementRef.current?.stop();
+        }
+    }, []);
+
+    /**
+     * setRef is triggered by {@link AbstractAudio}
+     * when the audio file has been loaded
+     */
     const setRef = useCallback((audioElement: AudioElement) => {
         audioElementRef.current = audioElement;
+        if (play) {
+            playSound();
+        }
     }, []);
 
     const soundsPath = Platform.OS === 'ios' ? getSdkBundlePath() : 'asset:/sounds';
 
     useEffect(() => {
         if (play) {
-            audioElementRef.current?.play();
+            const interval = setInterval(playSound, 100);
             return () => {
-                audioElementRef.current?.stop();
+                clearInterval(interval);
+                stopSound();
             };
         }
         return noop;

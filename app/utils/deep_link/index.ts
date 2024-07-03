@@ -6,6 +6,7 @@ import {createIntl, type IntlShape} from 'react-intl';
 import urlParse from 'url-parse';
 
 import {makeDirectChannel, switchToChannelByName} from '@actions/remote/channel';
+import {switchToConferenceByChannelId} from '@actions/remote/conference';
 import {showPermalink} from '@actions/remote/permalink';
 import {fetchUsersByUsernames} from '@actions/remote/user';
 import DeepLinkType from '@app/constants/deep_linking';
@@ -31,7 +32,7 @@ import {
 
 import {removeProtocol} from '../url';
 
-import type {DeepLinkChannel, DeepLinkDM, DeepLinkGM, DeepLinkPermalink, DeepLinkWithData, LaunchProps} from '@typings/launch';
+import type {DeepLinkChannel, DeepLinkConference, DeepLinkDM, DeepLinkGM, DeepLinkPermalink, DeepLinkWithData, LaunchProps} from '@typings/launch';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 const deepLinkScreens: AvailableScreens[] = [Screens.HOME, Screens.CHANNEL, Screens.GLOBAL_THREADS, Screens.THREAD];
@@ -108,6 +109,14 @@ export async function handleDeepLink(deepLinkUrl: string, intlShape?: IntlShape,
                 showPermalink(existingServerUrl, deepLinkData.teamName, deepLinkData.postId);
                 break;
             }
+            case DeepLink.Conference: {
+                const deepLinkData = parsed.data as DeepLinkConference;
+                switchToConferenceByChannelId(existingServerUrl, deepLinkData.channelId, {
+                    conferenceJWT: deepLinkData.conferenceJWT,
+                    initiator: 'native',
+                });
+                break;
+            }
         }
         return {error: false};
     } catch (error) {
@@ -135,6 +144,13 @@ type PermalinkPathParams = {
 const PERMALINK_PATH = `:serverUrl(.*)/:teamName(${TEAM_NAME_PATH_PATTERN})/pl/:postId(${ID_PATH_PATTERN})`;
 export const matchPermalinkDeeplink = match<PermalinkPathParams>(PERMALINK_PATH);
 
+type ConferencePathParams = {
+    serverUrl: string;
+    channelId: string;
+};
+const CONFERENCE_PATH = `:serverUrl(.*)/channels/:channelId(${IDENTIFIER_PATH_PATTERN})/conference(\\?conference_jwt=.+)?`;
+export const matchConferenceDeeplink = match<ConferencePathParams>(CONFERENCE_PATH);
+
 export function parseDeepLink(deepLinkUrl: string): DeepLinkWithData {
     try {
         const url = removeProtocol(deepLinkUrl);
@@ -160,6 +176,25 @@ export function parseDeepLink(deepLinkUrl: string): DeepLinkWithData {
         if (permalinkMatch) {
             const {params: {serverUrl, teamName, postId}} = permalinkMatch;
             return {type: DeepLink.Permalink, url: deepLinkUrl, data: {serverUrl, teamName, postId}};
+        }
+
+        const conferenceMatch = matchConferenceDeeplink(url);
+        if (conferenceMatch) {
+            const {params: {serverUrl, channelId}} = conferenceMatch;
+
+            // Parse the conferenceJWT from search params
+            const params = new URLSearchParams(deepLinkUrl);
+            const conferenceJWT = params.get('conference_jwt');
+
+            return {
+                type: DeepLink.Conference,
+                url: deepLinkUrl,
+                data: {
+                    serverUrl,
+                    channelId,
+                    conferenceJWT: typeof conferenceJWT === 'string' ? conferenceJWT : undefined,
+                },
+            };
         }
     } catch (err) {
         // do nothing just return invalid deeplink
