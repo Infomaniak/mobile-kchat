@@ -14,6 +14,7 @@ struct MeetCall {
   let localUUID: UUID
   let serverURL: String
   let channelId: String
+  var initiatorUserId: String?
   var conferenceId: String?
   var conferenceJWT: String?
   var conferenceURL: String?
@@ -100,6 +101,7 @@ public class CallManager: NSObject {
     call.conferenceURL = conference.url
     call.conferenceId = conference.id
     call.conferenceJWT = call.conferenceJWT ?? conference.jwt
+    call.initiatorUserId = conference.userId
     return call
   }
 

@@ -64,7 +64,6 @@ private class CallViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     let jitisiOptions = JitsiMeetConferenceOptions.fromBuilder { builder in
-      builder.setFeatureFlag("prejoinpage.enabled", withBoolean: false)
       builder.setFeatureFlag("settings.enabled", withBoolean: false)
       builder.setFeatureFlag("unsaferoomwarning.enabled", withBoolean: false)
       builder.setFeatureFlag("welcomepage.enable", withBoolean: false)
@@ -92,8 +91,6 @@ private class CallViewController: UIViewController {
 
   func initializeConference() {
     Task {
-      let meetCall = meetCall
-
       let decoder = JSONDecoder()
       decoder.keyDecodingStrategy = .convertFromSnakeCase
 
@@ -114,8 +111,14 @@ private class CallViewController: UIViewController {
       guard let conferenceJWT = meetCall.conferenceJWT,
             let conferenceURL = meetCall.conferenceURL else { return }
 
+      let channel = try await Network.default.fetchChannel(id: meetCall.channelId, serverUrl: meetCall.serverURL)
+
+      let isDM = channel.type == "D"
+
+      let isCurrentUserInitiator = meetCall.initiatorUserId == userProfile.id
+
       let options = JitsiMeetConferenceOptions.fromBuilder { builder in
-        builder.room = meetCall.channelId
+        builder.room = self.meetCall.channelId
         builder.serverURL = URL(string: conferenceURL)
 
         builder.token = conferenceJWT
@@ -124,6 +127,8 @@ private class CallViewController: UIViewController {
           andEmail: userProfile.email,
           andAvatar: avatarURL
         )
+
+        builder.setFeatureFlag("prejoinpage.enabled", withBoolean: !isDM && !isCurrentUserInitiator)
       }
 
       jitsiView?.join(options)

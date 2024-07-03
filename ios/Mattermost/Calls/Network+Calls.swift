@@ -48,10 +48,24 @@ public extension Network {
     )
   }
 
+  func fetchChannel(id channelId: String, serverUrl: String) async throws -> Channel {
+    let channelUrl = buildApiUrl(serverUrl, "/channels/\(channelId)")
+
+    let (channelData, _) = try await request(
+      channelUrl,
+      withMethod: "GET",
+      withBody: nil,
+      andHeaders: nil,
+      forServerUrl: serverUrl
+    )
+    
+    return try JSONDecoder().decode(Channel.self, from: channelData)
+  }
+
   func startCall(forServerUrl serverUrl: String, channelId: String) async throws -> (Data, URLResponse) {
     let endpoint = "/conferences"
     let url = buildApiUrl(serverUrl, endpoint)
-    
+
     let headers = ["Content-Type": "application/json; charset=utf-8"]
     let data = try? JSONSerialization.data(withJSONObject: ["channel_id": channelId], options: [])
 
@@ -76,7 +90,7 @@ public extension Network {
       forServerUrl: serverUrl
     )
   }
-  
+
   func declineCall(forServerUrl serverUrl: String, conferenceId: String) async throws -> (Data, URLResponse) {
     let endpoint = "/conferences/\(conferenceId)/decline"
     let url = buildApiUrl(serverUrl, endpoint)
