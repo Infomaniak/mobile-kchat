@@ -34,18 +34,23 @@ public extension Network {
   }
 }
 
-public extension Network {
-  func fetchUserProfile(forServerUrl serverUrl: String) async throws -> (Data, URLResponse) {
+extension Network {
+  func fetchUserProfile(forServerUrl serverUrl: String) async throws -> MeUserProfile {
     let endpoint = "/users/me"
     let url = buildApiUrl(serverUrl, endpoint)
 
-    return try await request(
+    let (userProfileData, _) = try await request(
       url,
       withMethod: "GET",
       withBody: nil,
       andHeaders: nil,
       forServerUrl: serverUrl
     )
+
+    let decoder = JSONDecoder()
+    decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+    return try decoder.decode(MeUserProfile.self, from: userProfileData)
   }
 
   func fetchChannel(id channelId: String, serverUrl: String) async throws -> Channel {
@@ -58,7 +63,7 @@ public extension Network {
       andHeaders: nil,
       forServerUrl: serverUrl
     )
-    
+
     return try JSONDecoder().decode(Channel.self, from: channelData)
   }
 

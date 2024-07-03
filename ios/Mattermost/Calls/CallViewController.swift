@@ -90,13 +90,8 @@ private class CallViewController: UIViewController {
   }
 
   func initializeConference() {
-    Task {
-      let decoder = JSONDecoder()
-      decoder.keyDecodingStrategy = .convertFromSnakeCase
-
-      let (userProfileData, _) = try await Network.default.fetchUserProfile(forServerUrl: meetCall.serverURL)
-
-      let userProfile = try decoder.decode(MeUserProfile.self, from: userProfileData)
+    Task { @MainActor in
+      let userProfile = try await Network.default.fetchUserProfile(forServerUrl: meetCall.serverURL)
 
       let avatarURL: URL?
       if let publicPictureUrl = userProfile.publicPictureUrl {
