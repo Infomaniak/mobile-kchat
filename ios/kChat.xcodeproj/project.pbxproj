@@ -23,6 +23,7 @@
 		37981AE12C33CB4D00205B36 /* Network+Calls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE02C33CB4D00205B36 /* Network+Calls.swift */; };
 		37981AE32C33D52900205B36 /* LegacyLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE22C33D52800205B36 /* LegacyLogger.swift */; };
 		37981AE52C33D86A00205B36 /* MeUserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE42C33D86A00205B36 /* MeUserProfile.swift */; };
+		37981AE72C33F0CA00205B36 /* Conference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE62C33F0CA00205B36 /* Conference.swift */; };
 		37AD6C3029B5F239009576A8 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		37B0A413296DC0C50085944B /* Gekidou in Frameworks */ = {isa = PBXBuildFile; productRef = 37B0A412296DC0C50085944B /* Gekidou */; };
 		49AE370126D4455D00EF4E52 /* Gekidou in Frameworks */ = {isa = PBXBuildFile; productRef = 49AE370026D4455D00EF4E52 /* Gekidou */; };
@@ -203,6 +204,7 @@
 		37981AE02C33CB4D00205B36 /* Network+Calls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Network+Calls.swift"; sourceTree = "<group>"; };
 		37981AE22C33D52800205B36 /* LegacyLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyLogger.swift; sourceTree = "<group>"; };
 		37981AE42C33D86A00205B36 /* MeUserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeUserProfile.swift; sourceTree = "<group>"; };
+		37981AE62C33F0CA00205B36 /* Conference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Conference.swift; sourceTree = "<group>"; };
 		41F3AFE83AAF4B74878AB78A /* OpenSans-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-Italic.ttf"; path = "../assets/fonts/OpenSans-Italic.ttf"; sourceTree = "<group>"; };
 		495BC95F23565ABF00C40C83 /* libXCDYouTubeKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libXCDYouTubeKit.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		495BC96123565ADD00C40C83 /* libYoutubePlayer-in-WKWebView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libYoutubePlayer-in-WKWebView.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -450,6 +452,7 @@
 				3751BAE12BFF55E200CE4D6D /* CallManagerModule.m */,
 				3751BAE02BFF549300CE4D6D /* CallManagerModule.h */,
 				37981AE42C33D86A00205B36 /* MeUserProfile.swift */,
+				37981AE62C33F0CA00205B36 /* Conference.swift */,
 			);
 			name = Calls;
 			path = Mattermost/Calls;
@@ -1230,6 +1233,7 @@
 				37407E422C32BD87005FB5D3 /* CallViewController.swift in Sources */,
 				7FEB109D1F61019C0039A015 /* MattermostManaged.m in Sources */,
 				536CC6C323E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.m in Sources */,
+				37981AE72C33F0CA00205B36 /* Conference.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
