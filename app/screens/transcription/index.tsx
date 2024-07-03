@@ -1,12 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useMemo, type FC} from 'react';
+import React, {type FC} from 'react';
 import {Animated, ScrollView, Text, View} from 'react-native';
 
 import FormattedText from '@app/components/formatted_text';
 import {Screens} from '@app/constants';
-import {bottomSheetSnapPoint} from '@app/utils/helpers';
 import {useTheme} from '@context/theme';
 import BottomSheet from '@screens/bottom_sheet';
 
