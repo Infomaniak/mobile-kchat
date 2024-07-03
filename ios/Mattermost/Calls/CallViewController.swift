@@ -91,7 +91,14 @@ private class CallViewController: UIViewController {
 
   func initializeConference() {
     Task { @MainActor in
-      let userProfile = try await Network.default.fetchUserProfile(forServerUrl: meetCall.serverURL)
+      guard let conferenceJWT = meetCall.conferenceJWT,
+            let conferenceURL = meetCall.conferenceURL else { return }
+
+      async let userProfileRequest = Network.default.fetchUserProfile(forServerUrl: meetCall.serverURL)
+      async let channelRequest = Network.default.fetchChannel(id: meetCall.channelId, serverUrl: meetCall.serverURL)
+
+      let userProfile = try await userProfileRequest
+      let channel = try await channelRequest
 
       let avatarURL: URL?
       if let publicPictureUrl = userProfile.publicPictureUrl {
@@ -103,15 +110,10 @@ private class CallViewController: UIViewController {
         avatarURL = URL(string: "\(meetCall.serverURL)/api/v4/users/{userProfile.id}/image?_={\(lastPictureUpdate)}")
       }
 
-      guard let conferenceJWT = meetCall.conferenceJWT,
-            let conferenceURL = meetCall.conferenceURL else { return }
-
-      let channel = try await Network.default.fetchChannel(id: meetCall.channelId, serverUrl: meetCall.serverURL)
-
       let isDM = channel.type == "D"
 
       let isCurrentUserInitiator = meetCall.initiatorUserId == userProfile.id
-      
+
       let isAppInBackground = UIApplication.shared.applicationState == .background
 
       let options = JitsiMeetConferenceOptions.fromBuilder { builder in
