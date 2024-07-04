@@ -11,16 +11,14 @@
 
 import {useEffect, useState} from 'react';
 
-import {SYSTEM_IDENTIFIERS} from '@app/constants/database';
 import {useMountedRef, useTransientRef} from '@app/hooks/utils';
 import {getChannelById} from '@app/queries/servers/channel';
 import {getConferenceById, getConferenceHasAtLeastOneParticipantPresent, getConferenceParticipantCount} from '@app/queries/servers/conference';
-import {querySystemValue} from '@app/queries/servers/system';
+import {getCurrentUserId} from '@app/queries/servers/system';
 import {getGlobalCallsState} from '@calls/state';
 import DatabaseManager from '@database/manager';
 import {noop} from '@helpers/api/general';
 
-import type {Database} from '@nozbe/watermelondb';
 import type ChannelModel from '@typings/database/models/servers/channel';
 import type ConferenceModel from '@typings/database/models/servers/conference';
 
@@ -41,12 +39,6 @@ export const _useChannel = (serverUrl: string, channelId: string) => {
 
     return channel;
 };
-
-/**
- * Get the current userId from database
- */
-const getCurrentUserId = async (database: Database) =>
-    ((await querySystemValue(database!, SYSTEM_IDENTIFIERS.CURRENT_USER_ID).fetch())[0] || {value: ''}).value;
 
 /**
  * Hook to get the current userId
