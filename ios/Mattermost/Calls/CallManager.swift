@@ -6,6 +6,7 @@
 //  Copyright © 2024 Facebook. All rights reserved.
 //
 
+import AVFAudio
 import CallKit
 import Foundation
 import Gekidou
@@ -197,16 +198,27 @@ extension CallManager: CXProviderDelegate {
     guard let existingCall = currentCalls[action.callUUID] else { return }
 
     Task { @MainActor in
-      let call = try await startCall(existingCall)
-
-      if let rootWindowScene = (UIApplication.shared.delegate as? AppDelegate)?.window.windowScene {
-        let callWindow = CallWindow(meetCall: call, delegate: self, windowScene: rootWindowScene)
-        self.callWindow = callWindow
-        currentCalls[action.callUUID] = call
-        currentCalls[action.callUUID]?.joined = true
+      do {
+        try AVAudioSession.sharedInstance().setCategory(.playback, mode: .voiceChat, options: [])
+      } catch {
+        LegacyLogger.calls.log(level: .error, message: "Failed to set audio session category \(error)")
       }
 
-      action.fulfill()
+      do {
+        let call = try await startCall(existingCall)
+
+        if let rootWindowScene = (UIApplication.shared.delegate as? AppDelegate)?.window.windowScene {
+          LegacyLogger.calls.log(message: "Presenting call window")
+          let callWindow = CallWindow(meetCall: call, delegate: self, windowScene: rootWindowScene)
+          self.callWindow = callWindow
+          currentCalls[action.callUUID] = call
+          currentCalls[action.callUUID]?.joined = true
+          action.fulfill()
+        }
+      } catch {
+        LegacyLogger.calls.log(level: .error, message: "Error while calling start call \(error)")
+        action.fail()
+      }
     }
   }
 
