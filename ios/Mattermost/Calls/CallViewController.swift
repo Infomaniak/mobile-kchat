@@ -6,7 +6,6 @@
 //  Copyright © 2024 Facebook. All rights reserved.
 //
 
-import Atlantis
 import Gekidou
 import JitsiMeetSDK
 import UIKit
@@ -52,7 +51,6 @@ private class CallViewController: UIViewController {
   init(meetCall: MeetCall, delegate: CallViewControllerDelegate) {
     self.delegate = delegate
     self.meetCall = meetCall
-    Atlantis.start(hostName: "macbook-pro-de-philippe.local.")
     super.init(nibName: nil, bundle: nil)
   }
 
