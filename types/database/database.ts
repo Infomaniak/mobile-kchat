@@ -6,7 +6,7 @@
 import type {DatabaseType} from '@constants/database';
 import type AppDataOperator from '@database/operator/app_data_operator';
 import type ServerDataOperator from '@database/operator/server_data_operator';
-import type {Database} from '@nozbe/watermelondb';
+import type {Database, Q} from '@nozbe/watermelondb';
 import type Model from '@nozbe/watermelondb/Model';
 import type {Clause} from '@nozbe/watermelondb/QueryDescription';
 import type {Class} from '@nozbe/watermelondb/types';
@@ -149,29 +149,31 @@ export type RetrieveRecordsArgs = {
   condition: Clause;
 };
 
-export type ProcessRecordsArgs = {
-  createOrUpdateRawValues: RawValue[];
-  deleteRawValues: RawValue[];
+export type ProcessRecordsArgs<T extends Model, R extends RawValue> = {
+  createOrUpdateRawValues: R[];
+  deleteRawValues?: R[];
   tableName: string;
-  fieldName: string;
-  buildKeyRecordBy?: (obj: Record<string, any>) => string;
-  shouldUpdate?: (existing: Record<string, any>, newRaw: Record<string, any>) => boolean;
-};
+  buildClauseFromRawValues?: (rawValues: R[]) => Q.Clause | null;
+  matchRecord?: (existingRecord: T, newRaw: R) => boolean;
+  shouldUpdate?: (existingRecord: T, newRaw: R) => boolean;
+} & ({
+  fieldName: keyof R;
+  buildKeyRecordBy: (obj: T | R) => string | number;
+} | {
 
-export type HandleRecordsArgs<T extends Model> = {
-  buildKeyRecordBy?: (obj: Record<string, any>) => string;
-  fieldName: string;
-  transformer: (args: TransformerArgs) => Promise<T>;
-  createOrUpdateRawValues: RawValue[];
-  deleteRawValues?: RawValue[];
-  tableName: string;
+  // If "fieldName" is common to Model and RawValue, "buildKeyRecordBy" becomes optionnal
+  fieldName: keyof R & keyof T;
+  buildKeyRecordBy?: (obj: T | R) => string | number;
+});
+
+export type HandleRecordsArgs<T extends Model, R extends RawValue> = ProcessRecordsArgs<T, R> & {
   prepareRecordsOnly: boolean;
-  shouldUpdate?: (existingRecord: T, newRaw: RawValue) => boolean;
+  transformer: (args: TransformerArgs) => Promise<T>;
 };
 
-export type RangeOfValueArgs = {
-  raws: RawValue[];
-  fieldName: string;
+export type RangeOfValueArgs<R extends RawValue> = {
+  raws: R[];
+  fieldName: keyof R;
 };
 
 export type RecordPair = {
