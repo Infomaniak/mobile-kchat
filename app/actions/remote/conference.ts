@@ -17,6 +17,7 @@ import DatabaseManager from '@database/manager';
 import {getTranslations, t} from '@i18n';
 import NetworkManager from '@managers/network_manager';
 import {allOrientations, dismissAllModalsAndPopToScreen} from '@screens/navigation';
+import {isDMorGM as isChannelDMorGM} from '@utils/channel';
 
 import {forceLogoutIfNecessary} from './session';
 
@@ -69,86 +70,96 @@ export const switchToConferenceByChannelId = async (
                 throw new Error(`Channel not found ${channelId}`);
             }
 
-            const callName = await CallManager.getCallName(serverUrl, channel, currentUserId);
-            CallManager.nativeReporters.callStarted(serverUrl, channelId, callName);
-        } else {
-            // For Android, answer/start the call and switch to the call_screen 🤖
-            const client = NetworkManager.getClient(serverUrl);
-            const [userProfile, call] = await Promise.all([
+            // Triggering a call from the UI (ie. initiator === internal) on
+            // DMs or GMs will display the "Calling..." screen, so we can't let iOS
+            // handle it for now
+            const isDMorGM = isChannelDMorGM(channel);
+            const shouldDisplayCallingScreen = isDMorGM && initiator === 'internal';
 
-                // Get current user profile
-                await client.getMe(),
+            if (!shouldDisplayCallingScreen) {
+                const callName = await CallManager.getCallName(serverUrl, channel, currentUserId);
+                CallManager.nativeReporters.callStarted(serverUrl, channelId, callName);
 
-                // Start/Answer the call via API
-                typeof conferenceId === 'string' ?
-                    await CallManager.answerCall(serverUrl, conferenceId, channelId) :
-                    await CallManager.startCall(serverUrl, channelId),
-            ]);
-
-            if (call !== null) {
-                // Ensure that the conference is not deleted
-                // this might happen since startCall might actually answer an old call
-                // that has been deleted locally, but has not remotely
-                await handleConferenceUpdatedById(serverUrl, call.id, {deleteAt: undefined});
-
-                // Setup CALL screen props
-                // - title
-                const translations = getTranslations(userProfile.locale);
-                const title = translations[t('mobile.calls_call_screen')] || 'Call';
-
-                // - passedProps
-                const passedProps: PassedProps = {
-                    serverUrl,
-                    kMeetServerUrl: call.server_url,
-                    channelId: call.channel_id,
-                    conferenceId: call.id,
-                    conferenceJWT: conferenceJWT ?? call.jwt ?? '',
-                    answered: call.answered,
-                    initiator,
-
-                    /**
-                     * Compute the JitsiMeeting `userInfo`
-                     * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#userinfo
-                     */
-                    userInfo: {
-                        avatarURL: typeof userProfile.public_picture_url === 'string' ?
-                            userProfile.public_picture_url : // Public picture if available
-                            /**
-                             * API proxied image if not
-                             * Ref. app/components/profile_picture/image.tsx
-                             */
-                            (() => {
-                                const lastPictureUpdate = ('lastPictureUpdate' in userProfile) ?
-                                    (userProfile.lastPictureUpdate as number) :
-                                    userProfile.last_picture_update || 0;
-
-                                const pictureUrl = client.getProfilePictureUrl(userProfile.id, lastPictureUpdate);
-
-                                return `${serverUrl}${pictureUrl}`;
-                            })(),
-                        displayName: getFullName(userProfile),
-                        email: userProfile.email,
-                    },
-                };
-
-                // - options
-                const options: Options = {
-                    layout: {
-                        backgroundColor: '#000',
-                        componentBackgroundColor: '#000',
-                        orientation: allOrientations,
-                    },
-                    topBar: {
-                        background: {color: '#000'},
-
-                        // visible: Platform.OS === 'android',
-                        visible: false,
-                    },
-                };
-
-                // Pop the CALL screen
-                await dismissAllModalsAndPopToScreen(Screens.CALL, title, passedProps, options);
+                return;
             }
+        }
+
+        // For Android, answer/start the call and switch to the call_screen 🤖
+        const client = NetworkManager.getClient(serverUrl);
+        const [userProfile, call] = await Promise.all([
+
+            // Get current user profile
+            await client.getMe(),
+
+            // Start/Answer the call via API
+            typeof conferenceId === 'string' ?
+                await CallManager.answerCall(serverUrl, conferenceId, channelId) :
+                await CallManager.startCall(serverUrl, channelId),
+        ]);
+
+        if (call !== null) {
+            // Ensure that the conference is not deleted
+            // this might happen since startCall might actually answer an old call
+            // that has been deleted locally, but has not remotely
+            await handleConferenceUpdatedById(serverUrl, call.id, {deleteAt: undefined});
+
+            // Setup CALL screen props
+            // - title
+            const translations = getTranslations(userProfile.locale);
+            const title = translations[t('mobile.calls_call_screen')] || 'Call';
+
+            // - passedProps
+            const passedProps: PassedProps = {
+                serverUrl,
+                kMeetServerUrl: call.server_url,
+                channelId: call.channel_id,
+                conferenceId: call.id,
+                conferenceJWT: conferenceJWT ?? call.jwt ?? '',
+                answered: call.answered,
+                initiator,
+
+                /**
+                 * Compute the JitsiMeeting `userInfo`
+                 * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#userinfo
+                 */
+                userInfo: {
+                    avatarURL: typeof userProfile.public_picture_url === 'string' ?
+                        userProfile.public_picture_url : // Public picture if available
+                        /**
+                         * API proxied image if not
+                         * Ref. app/components/profile_picture/image.tsx
+                         */
+                        (() => {
+                            const lastPictureUpdate = ('lastPictureUpdate' in userProfile) ?
+                                (userProfile.lastPictureUpdate as number) :
+                                userProfile.last_picture_update || 0;
+
+                            const pictureUrl = client.getProfilePictureUrl(userProfile.id, lastPictureUpdate);
+
+                            return `${serverUrl}${pictureUrl}`;
+                        })(),
+                    displayName: getFullName(userProfile),
+                    email: userProfile.email,
+                },
+            };
+
+            // - options
+            const options: Options = {
+                layout: {
+                    backgroundColor: '#000',
+                    componentBackgroundColor: '#000',
+                    orientation: allOrientations,
+                },
+                topBar: {
+                    background: {color: '#000'},
+
+                    // visible: Platform.OS === 'android',
+                    visible: false,
+                },
+            };
+
+            // Pop the CALL screen
+            await dismissAllModalsAndPopToScreen(Screens.CALL, title, passedProps, options);
         }
     } catch (err) {
         logError(err);

@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {Q} from '@nozbe/watermelondb';
+
 import {MM_TABLES} from '@constants/database';
 import {
     transformConferenceRecord,
@@ -95,6 +97,20 @@ const ConferenceHandler = <TBase extends Constructor<ServerDataOperatorBase>>(su
             prepareRecordsOnly,
             createOrUpdateRawValues: getUniqueRawsBy({raws: conferencesParticipants, key: 'id'}) as ConferenceParticipant[],
             tableName: CONFERENCE_PARTICIPANT,
+
+            // De-duplicate using "conference_id" and "user_id" as a primary tuple
+            buildClauseFromRawValues: (participants: ConferenceParticipant[]) =>
+                (participants.length === 0 ? null : Q.or(
+                    ...participants.map((participant) => Q.and(
+                        Q.where('conference_id', Q.eq(participant.conference_id)),
+                        Q.where('user_id', Q.eq(participant.user_id)),
+                    )),
+                )),
+
+            // Match existing record to rawValue
+            matchRecord: (record: ConferenceParticipantModel, newRaw: ConferenceParticipant) =>
+                record.conferenceId === newRaw.conference_id &&
+                record.userId === newRaw.user_id,
         }, 'handleConferenceParticipants');
     };
 };
