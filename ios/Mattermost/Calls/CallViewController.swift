@@ -6,7 +6,6 @@
 //  Copyright © 2024 Facebook. All rights reserved.
 //
 
-import Atlantis
 import Gekidou
 import JitsiMeetSDK
 import UIKit
@@ -96,8 +95,15 @@ private class CallViewController: UIViewController {
       async let userProfileRequest = Network.default.fetchUserProfile(forServerUrl: meetCall.serverURL)
       async let channelRequest = Network.default.fetchChannel(id: meetCall.channelId, serverUrl: meetCall.serverURL)
 
-      let userProfile = try await userProfileRequest
-      let channel = try await channelRequest
+      let userProfile:MeUserProfile
+      let channel: Channel
+      do {
+        userProfile = try await userProfileRequest
+        channel = try await channelRequest
+      } catch {
+        LegacyLogger.callViewController.log(level: .error, message: "An error occurred in initializeConference \(error)")
+        return
+      }
 
       let avatarURL: URL?
       if let publicPictureUrl = userProfile.publicPictureUrl {
