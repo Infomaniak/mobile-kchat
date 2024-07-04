@@ -267,9 +267,9 @@ export const OutgoingRinging = (
 
     useEffect(() => {
         if (play) {
-            const interval = setInterval(playSound, 100);
+            const interval = setTimeout(playSound, 100);
             return () => {
-                clearInterval(interval);
+                clearTimeout(interval);
                 stopSound();
             };
         }

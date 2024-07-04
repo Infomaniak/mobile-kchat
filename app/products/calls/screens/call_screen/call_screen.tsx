@@ -8,7 +8,7 @@
 import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
 import React, {forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type ComponentProps, type MutableRefObject} from 'react';
 import {useIntl} from 'react-intl';
-import {ActivityIndicator, FlatList, View} from 'react-native';
+import {ActivityIndicator, FlatList, Platform, View} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {useAnimatedStyle} from 'react-native-reanimated';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
@@ -29,7 +29,7 @@ import {AudioMuteButton, ContentContainer, HangupButton, OutgoingRinging, Toolbo
 import RippleIcon from '@calls/screens/call_screen/ripple_icon';
 import NavigationHeader from '@components/navigation_header';
 import Image from '@components/profile_picture/image';
-import {General, Screens} from '@constants';
+import {Screens} from '@constants';
 import DatabaseManager from '@database/manager';
 import CallManager from '@store/CallManager';
 import {isDMorGM as isChannelDMorGM} from '@utils/channel';
@@ -243,7 +243,6 @@ const CallScreen = ({
      * for public and private channels
      */
     const channel = _useChannel(serverUrl, channelId); // HACK - see NOTE #1
-    const isDM = channel?.type === General.DM_CHANNEL;
     const isDMorGM = channel ? isChannelDMorGM(channel) : false;
 
     /**
@@ -256,7 +255,7 @@ const CallScreen = ({
      * We should be using the observable hasAtLeastOneParticipantPresent instead
      * HACK ugly hack to prevent <JitsiMeeting /> from crashing
      */
-    const currentUserId = _useCurrentUserId(isDM, serverUrl); // HACK
+    const currentUserId = _useCurrentUserId(isDMorGM, serverUrl); // HACK
     const micPermissionsGranted = _useMicPermissionsGranted(); // HACK
     const conference = _useConference(serverUrl, conferenceId); // HACK
     const participantCount = _useParticipantCount(serverUrl, conferenceId); // HACK
@@ -280,7 +279,7 @@ const CallScreen = ({
      *  - the meeting screen has never been displayed (you cannot go back to the calling screen)
      */
     const shouldDisplayCallingScreen = (
-        isDM &&
+        isDMorGM &&
         isCurrentUserInitiator &&
         !hasAtLeastOneParticipantPresent &&
         jitsiMeetingMountedRef.current === false
@@ -518,7 +517,29 @@ const CallScreen = ({
         }
     }, [isConferenceDeleted]);
 
-    if (shouldDisplayLoadingScreen || shouldDisplayCallingScreen) {
+    /**
+     * Trigger the native iOS calling screen
+     */
+    const shouldTriggerNativeCall = (
+        Platform.OS === 'ios' &&
+        initiator === 'internal' &&
+        !shouldDisplayCallingScreen
+    );
+    useEffect(() => {
+        if (shouldTriggerNativeCall && typeof channel === 'string' && typeof currentUserId === 'string') {
+            (async () => {
+                const callName = await CallManager.getCallName(serverUrl, channel, currentUserId);
+                CallManager.nativeReporters.callStarted(serverUrl, channelId, callName);
+            })();
+        }
+    }, [shouldTriggerNativeCall]);
+
+    if (
+        // iOS must handle calling screen natively
+        Platform.OS === 'ios' ||
+        shouldDisplayLoadingScreen ||
+        shouldDisplayCallingScreen
+    ) {
         return (
             <>
                 <NavigationHeader
@@ -634,7 +655,7 @@ const CallScreen = ({
                  * For DM channels : Join immediatly like you would when answering a call
                  * For other channels : Ask if the user wants to enable his audio/video, but only if it's not the one that created the conference
                  */
-                'prejoinpage.enabled': !isDM && !isCurrentUserInitiator,
+                'prejoinpage.enabled': !isDMorGM && !isCurrentUserInitiator,
 
                 // Disable breakout-rooms
                 'breakout-rooms.enabled': false,

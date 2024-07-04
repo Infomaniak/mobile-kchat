@@ -42,16 +42,16 @@ export const _useChannel = (serverUrl: string, channelId: string) => {
 
 /**
  * Hook to get the current userId
- * only necessary for DMs
+ * only necessary for DMs or GMs
  */
-export const _useCurrentUserId = (isDM: boolean, serverUrl: string) => {
+export const _useCurrentUserId = (isDMorGM: boolean, serverUrl: string) => {
     const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
     useEffect(() => {
-        if (isDM) {
+        if (isDMorGM) {
             const database = DatabaseManager.serverDatabases[serverUrl]?.database;
             getCurrentUserId(database!).then(setCurrentUserId);
         }
-    }, [isDM]);
+    }, [isDMorGM]);
 
     return currentUserId;
 };
