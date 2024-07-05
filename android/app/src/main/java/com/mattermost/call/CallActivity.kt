@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.mattermost.call.IntentUtils.getMainActivityIntent
@@ -21,6 +22,8 @@ import com.mattermost.rnbeta.databinding.ActivityCallBinding
 class CallActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityCallBinding.inflate(layoutInflater) }
+
+    private val callViewModel: CallViewModel by viewModels()
 
     private val callManagerModule by lazy { CallManagerModule.getInstance() }
     private val conferenceId by lazy { intent.getStringExtra(NotificationUtils.CONFERENCE_ID_KEY) }
@@ -48,7 +51,7 @@ class CallActivity : AppCompatActivity() {
 
         configureActivityOverLockScreen()
 
-        idCaller.text = channelName
+        idCaller.text = callViewModel.getFormattedCallers(channelName)
         answerButton.setOnClickListener {
             conferenceId?.let { dismissCallNotification(it) }
             if (keyguardManager.isKeyguardLocked) askToUnlockPhone() else acceptCall()
@@ -111,5 +114,6 @@ class CallActivity : AppCompatActivity() {
 
     companion object {
         const val BROADCAST_RECEIVER_DISMISS_CALL_TAG = "DismissCall"
+        val MAX_CALLERS = 3
     }
 }

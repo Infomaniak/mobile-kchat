@@ -223,6 +223,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation "com.google.firebase:firebase-messaging:$firebaseVersion"
     implementation 'com.airbnb.android:lottie:6.4.0'
+    implementation 'androidx.activity:activity-ktx:1.7.0'
 
     androidTestImplementation('com.wix:detox:+')
     implementation project(':reactnativenotifications')
