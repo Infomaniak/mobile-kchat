@@ -17,8 +17,6 @@ import com.mattermost.call.IntentUtils.addExtraToIntent
 import com.mattermost.call.IntentUtils.getCallDeclinedBundle
 import com.mattermost.call.IntentUtils.getDeclineCallPendingIntent
 import com.mattermost.call.IntentUtils.getMainActivityPendingIntent
-import com.mattermost.rnbeta.*
-
 //Keep that import for RN...
 import com.mattermost.rnbeta.*
 
@@ -61,7 +59,6 @@ object NotificationUtils {
             NotificationManager.IMPORTANCE_HIGH,
             getString(R.string.notificationChannelDescription)
         )
-
         createNotificationChannels(listOf(callChannel))
     }
 
@@ -77,6 +74,7 @@ object NotificationUtils {
             this.description = description
 
             val isImportant = importance == NotificationManager.IMPORTANCE_HIGH
+            setSound(null, null)
             enableLights(isImportant)
             setShowBadge(isImportant)
             enableVibration(isImportant)
@@ -136,6 +134,7 @@ object NotificationUtils {
                     channelName
                 )
             )
+            .setSound(null)
             .setAutoCancel(false)
             .setFullScreenIntent(fullScreenPendingIntent, true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

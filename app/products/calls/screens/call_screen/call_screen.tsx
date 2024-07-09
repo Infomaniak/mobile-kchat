@@ -32,14 +32,8 @@ import DatabaseManager from '@database/manager';
 import CallManager from '@store/CallManager';
 import {isDMorGM as isChannelDMorGM} from '@utils/channel';
 
-import {
-    _useChannel,
-    _useConference,
-    _useCurrentUserId,
-    _useHasAtLeastOneParticipantPresent,
-    _useMicPermissionsGranted,
-    _useParticipantCount,
-} from './hooks';
+import type ChannelModel from '@typings/database/models/servers/channel';
+import type ConferenceModel from '@typings/database/models/servers/conference';
 
 export type PassedProps = {
     serverUrl: string;
@@ -54,13 +48,12 @@ export type PassedProps = {
 };
 
 export type InjectedProps = {
-
-    // channel?: ChannelModel;
-    // currentUserId: string;
-    // micPermissionsGranted: boolean;
-    // conference: ConferenceModel | undefined;
-    // participantCount: number;
-    // hasAtLeastOneParticipantPresent: boolean;
+    channel?: ChannelModel;
+    currentUserId: string;
+    micPermissionsGranted: boolean;
+    conference: ConferenceModel | undefined;
+    participantCount: number;
+    hasAtLeastOneParticipantPresent: boolean;
 }
 
 export type CallScreenHandle = {
@@ -147,6 +140,8 @@ const FrozenJitsiMeeting = forwardRef<JitsiRefProps, ComponentProps<typeof Jitsi
     useMemo(() => (<JitsiMeeting ref={ref} {...props}/>), []));
 
 const CallScreen = ({
+
+    // PassedProps
     channelId,
     conferenceId,
     conferenceJWT,
@@ -157,12 +152,13 @@ const CallScreen = ({
     kMeetServerUrl,
     userInfo,
 
-    // channel,
-    // currentUserId,
-    // micPermissionsGranted,
-    // conference,
-    // participantCount,
-    // hasAtLeastOneParticipantPresent,
+    // InjectedProps
+    channel,
+    currentUserId,
+    micPermissionsGranted,
+    conference,
+    participantCount,
+    hasAtLeastOneParticipantPresent,
 }: Props) => {
     const {formatMessage} = useIntl();
     const mountedRef = useMountedRef();
@@ -242,24 +238,12 @@ const CallScreen = ({
      * Is the current channel a DM or GM, will be false
      * for public and private channels
      */
-    const channel = _useChannel(serverUrl, channelId); // HACK - see NOTE #1
     const isDMorGM = channel ? isChannelDMorGM(channel) : false;
 
     /**
      * Is the current user the one that initiated the conference
      */
     const isCurrentUserInitiator = !answered;
-
-    /**
-     * NOTE #1
-     * We should be using the observable hasAtLeastOneParticipantPresent instead
-     * HACK ugly hack to prevent <JitsiMeeting /> from crashing
-     */
-    const currentUserId = _useCurrentUserId(isDMorGM, serverUrl); // HACK
-    const micPermissionsGranted = _useMicPermissionsGranted(); // HACK
-    const conference = _useConference(serverUrl, conferenceId); // HACK
-    const participantCount = _useParticipantCount(serverUrl, conferenceId); // HACK
-    const hasAtLeastOneParticipantPresent = _useHasAtLeastOneParticipantPresent(serverUrl, conferenceId, currentUserId); // HACK
 
     /**
      * Ask for microphone permissions

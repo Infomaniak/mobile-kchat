@@ -58,3 +58,10 @@ export default class ConferenceModel extends Model implements ConferenceModelInt
     /** participants : All the participants associated with this Conference */
     @children(CONFERENCE_PARTICIPANT) participants!: Query<ConferenceParticipantModel>;
 }
+
+export type ConferenceModelFields =
+    | 'createAt'
+    | 'deleteAt'
+    | 'url'
+    | 'channelId'
+    | 'userId';

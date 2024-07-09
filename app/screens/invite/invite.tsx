@@ -221,7 +221,7 @@ export default function Invite({
             if (typeof item === 'string') {
                 emails.push(item);
             } else {
-                userIds.push(id);
+                userIds.push(typeof id === 'number' ? id.toString() : id);
             }
         }
 
