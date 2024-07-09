@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.MediaPlayer
+import android.media.RingtoneManager
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -27,12 +29,14 @@ class CallActivity : AppCompatActivity() {
 
     private val callViewModel: CallViewModel by viewModels()
 
-    private val callManagerModule by lazy { CallManagerModule.getInstance() }
     private val conferenceId by lazy { intent.getStringExtra(NotificationUtils.CONFERENCE_ID_KEY) }
     private val channelName by lazy { intent.getStringExtra(NotificationUtils.CHANNEL_NAME_KEY) }
     private val channelId by lazy { intent.getStringExtra(NotificationUtils.CHANNEL_ID_KEY) }
     private val serverId by lazy { intent.getStringExtra(NotificationUtils.SERVER_ID_KEY) }
     private val conferenceJWT by lazy { intent.getStringExtra(NotificationUtils.CONFERENCE_JWT_KEY) }
+
+    private val ringtone by lazy { RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE) }
+    private val ringtonePlayer by lazy { MediaPlayer.create(applicationContext, ringtone) }
 
     private val localBroadcastManager by lazy { LocalBroadcastManager.getInstance(this) }
     private val keyguardManager by lazy { getSystemService(KEYGUARD_SERVICE) as KeyguardManager }
@@ -73,6 +77,17 @@ class CallActivity : AppCompatActivity() {
         }
 
         callViewModel.getUserImage(serverId, conferenceId)
+        ringtonePlayer.start()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        ringtonePlayer.stop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        localBroadcastManager.unregisterReceiver(dismissCallReceiver)
     }
 
     @Suppress("DEPRECATION")
@@ -114,18 +129,12 @@ class CallActivity : AppCompatActivity() {
 
     private fun declineCall() {
         conferenceId?.let { dismissCallNotification(it) }
-        cancelCall(serverId!!, conferenceId!!)
-        callManagerModule?.callEnded(serverId = serverId!!, conferenceId = conferenceId!!)
+        callViewModel.cancelCall(serverId!!, conferenceId!!)
         finish()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        localBroadcastManager.unregisterReceiver(dismissCallReceiver)
     }
 
     companion object {
         const val BROADCAST_RECEIVER_DISMISS_CALL_TAG = "DismissCall"
-        val MAX_CALLERS = 3
+        const val MAX_CALLERS = 3
     }
 }
