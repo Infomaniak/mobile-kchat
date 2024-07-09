@@ -61,13 +61,19 @@ export const switchToConferenceByChannelId = async (
         // and let CallKit do the job 🚀
         if (Platform.OS === 'ios') {
             const database = DatabaseManager.serverDatabases[serverUrl]?.database;
-            const [currentUserId, channel] = await Promise.all([
+            const [currentUserId, channel, call] = await Promise.all([
                 getCurrentUserId(database!),
                 getChannelById(database!, channelId),
+                typeof conferenceId === 'string' ?
+                    await CallManager.answerCall(serverUrl, conferenceId, channelId) :
+                    await CallManager.startCall(serverUrl, channelId),
             ]);
 
             if (typeof channel === 'undefined') {
                 throw new Error(`Channel not found ${channelId}`);
+            }
+            if (call === null) {
+                throw new Error('Call could not be started/answered');
             }
 
             // Triggering a call from the UI (ie. initiator === internal) on
@@ -78,7 +84,7 @@ export const switchToConferenceByChannelId = async (
 
             if (!shouldDisplayCallingScreen) {
                 const callName = await CallManager.getCallName(serverUrl, channel, currentUserId);
-                CallManager.nativeReporters.callStarted(serverUrl, channelId, callName);
+                CallManager.nativeReporters.ios.callStarted(serverUrl, channelId, callName, call.id, conferenceJWT ?? call.jwt ?? '');
 
                 return;
             }

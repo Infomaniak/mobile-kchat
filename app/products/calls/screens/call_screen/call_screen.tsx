@@ -1,7 +1,5 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-/* eslint-disable max-lines */
-/* eslint-disable max-nested-callbacks */
 /* eslint-disable react/display-name */
 /* eslint-disable react/jsx-max-props-per-line */
 
@@ -286,6 +284,15 @@ const CallScreen = ({
     );
 
     /**
+     * iOS must handle calling screen natively
+     */
+    const shouldDisplayNativeCall = (
+        !shouldDisplayLoadingScreen &&
+        !shouldDisplayCallingScreen &&
+        Platform.OS === 'ios'
+    );
+
+    /**
      * Lazily query the called users
      */
     const currentUserIdRef = useTransientRef(currentUserId);
@@ -420,7 +427,9 @@ const CallScreen = ({
             //  -> 'internal' initiator means react-native
             if (initiator !== 'native') {
                 // Trigger native reporter
-                CallManager.nativeReporters.callStarted(serverId, channelId, await getCallName(), conferenceId);
+                if (Platform.OS === 'android') {
+                    CallManager.nativeReporters.android.callStarted(serverId, channelId, await getCallName(), conferenceId);
+                }
 
                 // Also report about the audio/video mute status if toggled
                 const callbacks = [] as Array<() => void>;
@@ -520,25 +529,19 @@ const CallScreen = ({
     /**
      * Trigger the native iOS calling screen
      */
-    const shouldTriggerNativeCall = (
-        Platform.OS === 'ios' &&
-        initiator === 'internal' &&
-        !shouldDisplayCallingScreen
-    );
     useEffect(() => {
-        if (shouldTriggerNativeCall && typeof channel === 'string' && typeof currentUserId === 'string') {
+        if (shouldDisplayNativeCall) {
             (async () => {
-                const callName = await CallManager.getCallName(serverUrl, channel, currentUserId);
-                CallManager.nativeReporters.callStarted(serverUrl, channelId, callName);
+                const callName = await CallManager.getCallName(serverUrl, channel, currentUserId!);
+                CallManager.nativeReporters.ios.callStarted(serverUrl, channelId, callName, conferenceId, conferenceJWT);
             })();
         }
-    }, [shouldTriggerNativeCall]);
+    }, [shouldDisplayNativeCall]);
 
     if (
-        // iOS must handle calling screen natively
-        Platform.OS === 'ios' ||
         shouldDisplayLoadingScreen ||
-        shouldDisplayCallingScreen
+        shouldDisplayCallingScreen ||
+        shouldDisplayNativeCall
     ) {
         return (
             <>

@@ -120,16 +120,20 @@ public class CallManager: NSObject {
     }
   }
 
-  @objc public func reportCallStarted(serverURL: String, channelId: String, callName: String) {
+  @objc public func reportCallStarted(
+    serverURL: String,
+    channelId: String,
+    callName: String,
+    conferenceId: String,
+    conferenceJWT: String
+  ) {
     Task { @MainActor in
-      let partialCall = MeetCall(
+      let call = MeetCall(
         serverURL: serverURL,
         channelId: channelId,
-        conferenceId: nil,
-        conferenceJWT: nil
+        conferenceId: conferenceId,
+        conferenceJWT: conferenceJWT
       )
-
-      let call = try await startCall(partialCall)
 
       currentCalls[call.localUUID] = call
       callProvider.reportOutgoingCall(with: call.localUUID, startedConnectingAt: Date(timeIntervalSinceNow: -3))
