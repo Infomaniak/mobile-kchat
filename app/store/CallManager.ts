@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {NativeModules, Platform} from 'react-native';
+import {NativeModules} from 'react-native';
 import {z} from 'zod';
 
 import {fetchChannelMemberships} from '@actions/remote/channel';
@@ -48,22 +48,31 @@ class CallManager {
      * Native reporters, notify native/OS about a state change
      */
     nativeReporters = {
-        callStarted: (serverId: string, channelId: string, callName: string, conferenceId?: string) => {
-            try {
-                const {reportCallStarted} = NativeModules.CallManagerModule;
-                if (typeof reportCallStarted === 'function') {
-                    if (Platform.OS === 'ios') {
-                        // Does not include the conferenceId for iOS since it's started
-                        // by a native query
-                        reportCallStarted(serverId, channelId, callName);
-                    } else {
+        android: {
+            callStarted: (serverId: string, channelId: string, callName: string, conferenceId?: string) => {
+                try {
+                    const {reportCallStarted} = NativeModules.CallManagerModule;
+                    if (typeof reportCallStarted === 'function') {
                         reportCallStarted(serverId, channelId, conferenceId, callName);
                     }
+                } catch (error) {
+                    logError(error);
                 }
-            } catch (error) {
-                logError(error);
-            }
+            },
         },
+        ios: {
+            callStarted: (serverId: string, channelId: string, callName: string, conferenceId: string, conferenceJWT: string) => {
+                try {
+                    const {reportCallStarted} = NativeModules.CallManagerModule;
+                    if (typeof reportCallStarted === 'function') {
+                        reportCallStarted(serverId, channelId, callName, conferenceId, conferenceJWT);
+                    }
+                } catch (error) {
+                    logError(error);
+                }
+            },
+        },
+
         callEnded: (conferenceId: string) => {
             try {
                 const {reportCallEnded} = NativeModules.CallManagerModule;
