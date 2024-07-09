@@ -90,18 +90,22 @@ private class CallViewController: UIViewController {
   func initializeConference() {
     Task { @MainActor in
       guard let conferenceJWT = meetCall.conferenceJWT,
-            let conferenceURL = meetCall.conferenceURL else { return }
+            let conferenceURL = meetCall.conferenceURL else {
+        delegate?.onConferenceTerminated()
+        return
+      }
 
       async let userProfileRequest = Network.default.fetchUserProfile(forServerUrl: meetCall.serverURL)
       async let channelRequest = Network.default.fetchChannel(id: meetCall.channelId, serverUrl: meetCall.serverURL)
 
-      let userProfile:MeUserProfile
+      let userProfile: MeUserProfile
       let channel: Channel
       do {
         userProfile = try await userProfileRequest
         channel = try await channelRequest
       } catch {
         LegacyLogger.callViewController.log(level: .error, message: "An error occurred in initializeConference \(error)")
+        delegate?.onConferenceTerminated()
         return
       }
 
