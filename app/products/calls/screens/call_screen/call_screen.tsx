@@ -1,7 +1,5 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-/* eslint-disable max-lines */
-/* eslint-disable max-nested-callbacks */
 /* eslint-disable react/display-name */
 /* eslint-disable react/jsx-max-props-per-line */
 
@@ -286,6 +284,15 @@ const CallScreen = ({
     );
 
     /**
+     * iOS must handle calling screen natively
+     */
+    const shouldDisplayNativeCall = (
+        !shouldDisplayLoadingScreen &&
+        !shouldDisplayCallingScreen &&
+        Platform.OS === 'ios'
+    );
+
+    /**
      * Lazily query the called users
      */
     const currentUserIdRef = useTransientRef(currentUserId);
@@ -520,25 +527,19 @@ const CallScreen = ({
     /**
      * Trigger the native iOS calling screen
      */
-    const shouldTriggerNativeCall = (
-        Platform.OS === 'ios' &&
-        initiator === 'internal' &&
-        !shouldDisplayCallingScreen
-    );
     useEffect(() => {
-        if (shouldTriggerNativeCall && typeof channel === 'string' && typeof currentUserId === 'string') {
+        if (shouldDisplayNativeCall) {
             (async () => {
-                const callName = await CallManager.getCallName(serverUrl, channel, currentUserId);
+                const callName = await CallManager.getCallName(serverUrl, channel, currentUserId!);
                 CallManager.nativeReporters.callStarted(serverUrl, channelId, callName);
             })();
         }
-    }, [shouldTriggerNativeCall]);
+    }, [shouldDisplayNativeCall]);
 
     if (
-        // iOS must handle calling screen natively
-        Platform.OS === 'ios' ||
         shouldDisplayLoadingScreen ||
-        shouldDisplayCallingScreen
+        shouldDisplayCallingScreen ||
+        shouldDisplayNativeCall
     ) {
         return (
             <>
