@@ -9,8 +9,11 @@ import {logError} from '@app/utils/log';
 import {MM_TABLES} from '@constants/database';
 import DatabaseManager from '@database/manager';
 
-import type ConferenceModel from '@app/database/models/server/conference';
-import type ConferenceParticipantModel from '@app/database/models/server/conference_participant';
+import type {default as ConferenceModel, ConferenceModelFields} from '@app/database/models/server/conference';
+import type {default as ConferenceParticipantModel, ConferenceParticipantModelFields} from '@app/database/models/server/conference_participant';
+
+type ConferenceModelChanges = Partial<Pick<ConferenceModel, ConferenceModelFields>>;
+type ConferenceParticipantModelChanges = Partial<Pick<ConferenceParticipantModel, ConferenceParticipantModelFields>>;
 
 const {CONFERENCE, CONFERENCE_PARTICIPANT} = MM_TABLES.SERVER;
 
@@ -69,7 +72,7 @@ export const handleConferenceReceived = async (serverUrl: string, data: any) => 
 export const handleConferenceAdded = async (serverUrl: string, msg: WebSocketMessage) =>
     handleConferenceReceived(serverUrl, msg.data);
 
-export const handleConferenceUpdated = async (serverUrl: string, conferences: ConferenceModel[], changes: Partial<ConferenceModel>) => {
+export const handleConferenceUpdated = async (serverUrl: string, conferences: ConferenceModel[], changes: ConferenceModelChanges) => {
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
         return {error: `${serverUrl} operator not found`};
@@ -95,7 +98,7 @@ export const handleConferenceUpdated = async (serverUrl: string, conferences: Co
     return {};
 };
 
-export const handleConferenceUpdatedById = async (serverUrl: string, conferenceId: string, changes: Partial<ConferenceModel>) => {
+export const handleConferenceUpdatedById = async (serverUrl: string, conferenceId: string, changes: ConferenceModelChanges) => {
     const database = DatabaseManager.serverDatabases[serverUrl]?.database;
     if (!database) {
         return {error: `${serverUrl} database not found`};
@@ -152,7 +155,7 @@ export const handleConferenceDeletedById = async (serverUrl: string, conferenceI
     }
 };
 
-export const handleConferenceUserUpdated = async (serverUrl: string, msg: WebSocketMessage, changes: Partial<Pick<ConferenceParticipantModel, 'present' | 'status'>>) => {
+export const handleConferenceUserUpdated = async (serverUrl: string, msg: WebSocketMessage, changes: ConferenceParticipantModelChanges) => {
     const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
     if (!database) {
         return {error: `${serverUrl} database not found`};

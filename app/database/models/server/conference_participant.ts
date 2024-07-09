@@ -57,3 +57,10 @@ export default class ConferenceParticipantModel extends Model implements Confere
     /** user : The related record to the User model */
     @experimentalFailsafe(undefined) @immutableRelation(USER, 'user_id') user!: Relation<UserModel>;
 }
+
+export type ConferenceParticipantModelFields =
+    | 'present'
+    | 'status'
+    | 'channelId'
+    | 'conferenceId'
+    | 'userId';
