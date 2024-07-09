@@ -190,6 +190,7 @@ android {
 }
 
 repositories {
+    mavenCentral()
     maven {
         url 'https://maven.google.com'
     }
@@ -224,6 +225,8 @@ dependencies {
     implementation "com.google.firebase:firebase-messaging:$firebaseVersion"
     implementation 'com.airbnb.android:lottie:6.4.0'
     implementation 'androidx.activity:activity-ktx:1.7.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2'
+    implementation 'io.coil-kt:coil:2.4.0'
 
     androidTestImplementation('com.wix:detox:+')
     implementation project(':reactnativenotifications')

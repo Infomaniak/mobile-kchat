@@ -12,8 +12,10 @@ import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import coil.load
+import coil.transform.CircleCropTransformation
+import coil.transition.CrossfadeTransition
 import com.mattermost.call.IntentUtils.getMainActivityIntent
-import com.mattermost.call.NetworkUtils.cancelCall
 import com.mattermost.notification.NotificationUtils
 import com.mattermost.notification.NotificationUtils.dismissCallNotification
 import com.mattermost.rnbeta.*
@@ -61,6 +63,16 @@ class CallActivity : AppCompatActivity() {
             dismissCallReceiver,
             IntentFilter(BROADCAST_RECEIVER_DISMISS_CALL_TAG)
         )
+
+        callViewModel.conferenceImageLiveData.observe(this@CallActivity) {
+            binding.callerImage.load(it) {
+                fallback(R.drawable.kchat_icon_call)
+                transitionFactory { target, result -> CrossfadeTransition(target, result) }
+                transformations(CircleCropTransformation())
+            }
+        }
+
+        callViewModel.getUserImage(serverId, conferenceId)
     }
 
     @Suppress("DEPRECATION")
