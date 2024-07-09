@@ -3,6 +3,10 @@
     <string name="app_name">kChat</string>
     <string name="empty_notification_message">A importé quelque chose</string>
     <string name="callkChatDescription">Appel vocal kChat</string>
+    <plurals name="manyCallers">
+        <item quantity="one">, et %s autre</item>
+        <item quantity="other">, et %s autres</item>
+    </plurals>
     <string name="declineCall">Refuser</string>
     <string name="acceptCall">Accepter</string>
     <string name="notificationCallFrom">Appel de %1$s</string>

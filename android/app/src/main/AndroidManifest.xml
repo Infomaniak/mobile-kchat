@@ -106,6 +106,8 @@
             android:exported="true"
             android:showOnLockScreen="true"
             android:theme="@style/CallTheme"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
             android:turnScreenOn="true" />
 
         <activity
