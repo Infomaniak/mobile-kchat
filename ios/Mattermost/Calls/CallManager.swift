@@ -21,12 +21,13 @@ struct MeetCall {
   var conferenceURL: String?
   var joined = false
 
-  init(serverURL: String, channelId: String, conferenceId: String?, conferenceJWT: String?) {
+  init(serverURL: String, channelId: String, conferenceId: String?, conferenceJWT: String?, conferenceURL: String? = nil) {
     localUUID = UUID()
     self.serverURL = serverURL
     self.channelId = channelId
     self.conferenceId = conferenceId
     self.conferenceJWT = conferenceJWT
+    self.conferenceURL = conferenceURL
   }
 }
 
@@ -125,14 +126,16 @@ public class CallManager: NSObject {
     channelId: String,
     callName: String,
     conferenceId: String,
-    conferenceJWT: String
+    conferenceJWT: String,
+    conferenceURL: String
   ) {
     Task { @MainActor in
       let call = MeetCall(
         serverURL: serverURL,
         channelId: channelId,
         conferenceId: conferenceId,
-        conferenceJWT: conferenceJWT
+        conferenceJWT: conferenceJWT,
+        conferenceURL: conferenceURL
       )
 
       currentCalls[call.localUUID] = call

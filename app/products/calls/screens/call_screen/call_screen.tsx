@@ -47,6 +47,7 @@ export type PassedProps = {
     channelId: string;
     conferenceId: string;
     conferenceJWT: string;
+    conferenceURL: string;
     answered: boolean;
     initiator?: 'internal' | 'native';
     userInfo: ComponentProps<typeof JitsiMeeting>['userInfo'];
@@ -149,6 +150,7 @@ const CallScreen = ({
     channelId,
     conferenceId,
     conferenceJWT,
+    conferenceURL,
     answered,
     initiator,
     serverUrl,
@@ -533,7 +535,7 @@ const CallScreen = ({
         if (shouldDisplayNativeCall) {
             (async () => {
                 const callName = await CallManager.getCallName(serverUrl, channel, currentUserId!);
-                CallManager.nativeReporters.ios.callStarted(serverUrl, channelId, callName, conferenceId, conferenceJWT);
+                CallManager.nativeReporters.ios.callStarted(serverUrl, channelId, callName, conferenceId, conferenceJWT, conferenceURL);
             })();
         }
     }, [shouldDisplayNativeCall]);
