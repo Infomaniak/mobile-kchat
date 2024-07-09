@@ -39,6 +39,7 @@
         android:paddingTop="10dp"
         android:textColor="@color/call_id"
         android:textStyle="bold"
+        android:gravity="center_horizontal"
         android:paddingHorizontal="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
