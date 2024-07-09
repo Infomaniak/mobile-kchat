@@ -30,6 +30,7 @@ RCT_EXPORT_METHOD(reportCallStarted: (NSString*)serverURL
                   callName: (NSString*)callName
                   conferenceId: (NSString*)conferenceId
                   conferenceJWT: (NSString*)conferenceJWT
+                  conferenceURL: (NSString*)conferenceURL
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
@@ -37,7 +38,8 @@ RCT_EXPORT_METHOD(reportCallStarted: (NSString*)serverURL
                                         channelId:channelId
                                         callName:callName
                                         conferenceId:conferenceId
-                                        conferenceJWT:conferenceJWT];
+                                        conferenceJWT:conferenceJWT
+                                        conferenceURL:conferenceURL];
   resolve(@[]);
 }
 
