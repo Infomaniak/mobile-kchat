@@ -84,7 +84,7 @@ export const switchToConferenceByChannelId = async (
 
             if (!shouldDisplayCallingScreen) {
                 const callName = await CallManager.getCallName(serverUrl, channel, currentUserId);
-                CallManager.nativeReporters.ios.callStarted(serverUrl, channelId, callName, call.id, conferenceJWT ?? call.jwt ?? '');
+                CallManager.nativeReporters.ios.callStarted(serverUrl, channelId, callName, call.id, conferenceJWT ?? call.jwt ?? '', call.url);
 
                 return;
             }
@@ -121,6 +121,7 @@ export const switchToConferenceByChannelId = async (
                 channelId: call.channel_id,
                 conferenceId: call.id,
                 conferenceJWT: conferenceJWT ?? call.jwt ?? '',
+                conferenceURL: call.url,
                 answered: call.answered,
                 initiator,
 

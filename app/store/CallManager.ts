@@ -61,11 +61,11 @@ class CallManager {
             },
         },
         ios: {
-            callStarted: (serverId: string, channelId: string, callName: string, conferenceId: string, conferenceJWT: string) => {
+            callStarted: (serverId: string, channelId: string, callName: string, conferenceId: string, conferenceJWT: string, conferenceURL: string) => {
                 try {
                     const {reportCallStarted} = NativeModules.CallManagerModule;
                     if (typeof reportCallStarted === 'function') {
-                        reportCallStarted(serverId, channelId, callName, conferenceId, conferenceJWT);
+                        reportCallStarted(serverId, channelId, callName, conferenceId, conferenceJWT, conferenceURL);
                     }
                 } catch (error) {
                     logError(error);
