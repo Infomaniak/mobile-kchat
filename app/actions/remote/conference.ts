@@ -93,8 +93,7 @@ export const switchToConferenceByChannelId = async (
             const isDMorGM = isChannelDMorGM(channel);
             const shouldDisplayCallingScreen = (
                 isDMorGM &&
-                isCurrentUserInitiator &&
-                initiator === 'internal'
+                isCurrentUserInitiator
             );
 
             if (!shouldDisplayCallingScreen) {
