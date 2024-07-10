@@ -1,7 +1,7 @@
 #import "AppDelegate.h"
 
 #import <AVFoundation/AVFoundation.h>
-
+#import <Intents/Intents.h>
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
 #import <RNKeychain/RNKeychainManager.h>
@@ -150,6 +150,22 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
 - (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity
  restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> *restorableObjects))restorationHandler
 {
+  INInteraction *interaction = userActivity.interaction;
+  if ([interaction.intent isKindOfClass:[INStartAudioCallIntent class]]) {
+      INStartAudioCallIntent *startAudioCallIntent = (INStartAudioCallIntent *)interaction.intent;
+      INPerson *contact = startAudioCallIntent.contacts.firstObject;
+
+      INPersonHandle *contactHandle = contact.personHandle;
+
+      if (contactHandle.value) {
+        NSString *rawStartCall = contactHandle.value;
+        NSURL *startCallURL = [NSURL URLWithString:rawStartCall];
+        if (startCallURL) {
+          return [RCTLinkingManager application:application openURL:startCallURL options:@{}];
+        }
+      }
+  }
+
   return [RCTLinkingManager application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
 }
 
