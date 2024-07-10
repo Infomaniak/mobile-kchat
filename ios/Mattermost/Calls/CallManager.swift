@@ -140,7 +140,6 @@ public class CallManager: NSObject {
 
       currentCalls[call.localUUID] = call
       callProvider.reportOutgoingCall(with: call.localUUID, startedConnectingAt: Date(timeIntervalSinceNow: -3))
-      callProvider.reportOutgoingCall(with: call.localUUID, connectedAt: Date())
 
       let startCallAction = CXStartCallAction(call: call.localUUID, handle: CXHandle(type: .generic, value: callName))
       startCallAction.isVideo = CallManager.videoEnabledByDefault
@@ -201,8 +200,20 @@ extension CallManager: CallViewControllerDelegate {
 }
 
 extension CallManager: CXProviderDelegate {
+  public func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
+    guard let existingCall = currentCalls[action.callUUID] else {
+      action.fail()
+      return
+    }
+    callProvider.reportOutgoingCall(with: existingCall.localUUID, connectedAt: Date())
+    action.fulfill()
+  }
+
   public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
-    guard let existingCall = currentCalls[action.callUUID] else { return }
+    guard let existingCall = currentCalls[action.callUUID] else {
+      action.fail()
+      return
+    }
 
     Task { @MainActor in
       do {
@@ -231,7 +242,10 @@ extension CallManager: CXProviderDelegate {
 
   public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
     Task { @MainActor in
-      guard let existingCall = currentCalls[action.callUUID] else { return }
+      guard let existingCall = currentCalls[action.callUUID] else {
+        action.fail()
+        return
+      }
       // The user is in the current call
       if currentCalls[action.callUUID]?.joined == true {
         callWindow?.leaveCurrentCall()
