@@ -53,6 +53,7 @@ export type InjectedProps = {
     micPermissionsGranted: boolean;
     conference: ConferenceModel | undefined;
     participantCount: number;
+    isCurrentUserPresent: boolean;
     hasAtLeastOneParticipantPresent: boolean;
 }
 
@@ -158,6 +159,7 @@ const CallScreen = ({
     micPermissionsGranted,
     conference,
     participantCount,
+    isCurrentUserPresent,
     hasAtLeastOneParticipantPresent,
 }: Props) => {
     const {formatMessage} = useIntl();
@@ -503,14 +505,30 @@ const CallScreen = ({
      * If the user called but the recipient did not answer
      * the 'conference_deleted' event is fired by the API
      * we still need to leave the call in the UI
+     * Also if the current user is present in the meeting but the meeting
      */
     const isConferenceDeleted = typeof conference?.deleteAt === 'number';
+
+    /**
+     * Also if the current user is present in the meeting but the meeting is not mounted
+     * This means that the user joined the meeting from another device
+     */
+    const hasCurrentUserJoinedOnAnotherDevice = (
+        isCurrentUserPresent &&
+        jitsiMeetingMountedRef.current === false
+    );
+
+    /**
+     * If any of these conditions are true, we must leave the call
+     */
+    const shouldLeaveCall = isConferenceDeleted || hasCurrentUserJoinedOnAnotherDevice;
+
     useEffect(() => {
-        if (isConferenceDeleted) {
+        if (shouldLeaveCall) {
             // Conference deleted via websocket
             leaveCallRef.current!('api');
         }
-    }, [isConferenceDeleted]);
+    }, [shouldLeaveCall]);
 
     /**
      * Trigger the native iOS calling screen
