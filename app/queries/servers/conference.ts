@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Database, Q} from '@nozbe/watermelondb';
+import {Database, Q, Query} from '@nozbe/watermelondb';
 import {switchMap} from '@nozbe/watermelondb/utils/rx';
 import {of as of$} from 'rxjs';
 
@@ -9,6 +9,8 @@ import {Database as DatabaseConstants} from '@constants';
 
 import type ConferenceModel from '@typings/database/models/servers/conference';
 import type ConferenceParticipantModel from '@typings/database/models/servers/conference_participant';
+
+type QueryPresentConferenceParticipantArg<T> = [database: Database, conferenceId: string, extraArgument?: T];
 
 const {CONFERENCE, CONFERENCE_PARTICIPANT} = DatabaseConstants.MM_TABLES.SERVER;
 
@@ -35,18 +37,19 @@ export const queryConferenceParticipants = (database: Database, conferenceId: st
 
 /**
  * Create a query to get one participant of a conference that is present
- * Optionnaly, a specific userId can be ignored from the list of participants
+ * Optionnaly, specify a custom Q.Where clause to restrict results
  */
-export const queryPresentConferenceParticipant = (database: Database, conferenceId: string, ignoredUserId?: string) =>
-    database.
-        get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).
-        query(
-            Q.and([
-                Q.where('conference_id', conferenceId),
-                Q.where('present', true),
-                ...(typeof ignoredUserId === 'string' ? [Q.where('user_id', Q.notEq(ignoredUserId))] : []),
-            ]),
-        );
+export const queryPresentConferenceParticipant: (...args: QueryPresentConferenceParticipantArg<Q.Where>) => Query<ConferenceParticipantModel> =
+    (database, conferenceId, extraCondition) =>
+        database.
+            get<ConferenceParticipantModel>(CONFERENCE_PARTICIPANT).
+            query(
+                Q.and([
+                    Q.where('conference_id', conferenceId),
+                    Q.where('present', true),
+                    ...(typeof extraCondition === 'undefined' ? [] : [extraCondition]),
+                ]),
+            );
 
 //
 // GETTERS
@@ -104,10 +107,18 @@ export const observeConferenceParticipantCount = (...args: Parameters<typeof que
         observeCount(false);
 
 /**
+ * Observe if a specific user is currently inside a conference
+ */
+export const observeConferenceHasParticipantPresent = (...args: QueryPresentConferenceParticipantArg<string>) =>
+    queryPresentConferenceParticipant(args[0], args[1], typeof args[2] === 'string' ? Q.where('user_id', args[2]) : undefined).
+        observeCount(false).
+        pipe(switchMap((count) => of$(count > 0)));
+
+/**
  * Observe if there is at least one participant present in the conference
  * Optionnaly, a userId can be ignored from the list of participants
  */
-export const observeConferenceHasAtLeastOneParticipantPresent = (...args: Parameters<typeof queryPresentConferenceParticipant>) =>
-    queryPresentConferenceParticipant(...args).
+export const observeConferenceHasAtLeastOneParticipantPresent = (...args: QueryPresentConferenceParticipantArg<string>) =>
+    queryPresentConferenceParticipant(args[0], args[1], typeof args[2] === 'string' ? Q.where('user_id', Q.notEq(args[2])) : undefined).
         observeCount(false).
         pipe(switchMap((count) => of$(count > 0)));
