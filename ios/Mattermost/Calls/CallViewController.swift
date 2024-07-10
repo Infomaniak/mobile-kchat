@@ -11,7 +11,7 @@ import JitsiMeetSDK
 import UIKit
 
 protocol CallViewControllerDelegate: AnyObject {
-  func onConferenceTerminated()
+  func onConferenceTerminated(conferenceId: String?)
   func onVideoMuted(conferenceId: String, isMuted: Bool)
   func onAudioMuted(conferenceId: String, isMuted: Bool)
 }
@@ -91,7 +91,7 @@ private class CallViewController: UIViewController {
     Task { @MainActor in
       guard let conferenceJWT = meetCall.conferenceJWT,
             let conferenceURL = meetCall.conferenceURL else {
-        delegate?.onConferenceTerminated()
+        delegate?.onConferenceTerminated(conferenceId: meetCall.conferenceId)
         return
       }
 
@@ -105,7 +105,7 @@ private class CallViewController: UIViewController {
         channel = try await channelRequest
       } catch {
         LegacyLogger.callViewController.log(level: .error, message: "An error occurred in initializeConference \(error)")
-        delegate?.onConferenceTerminated()
+        delegate?.onConferenceTerminated(conferenceId: meetCall.conferenceId)
         return
       }
 
@@ -146,10 +146,11 @@ private class CallViewController: UIViewController {
 
 extension CallViewController: JitsiMeetViewDelegate {
   func conferenceTerminated(_ data: [AnyHashable: Any]!) {
+    let conferenceId = meetCall.conferenceId
     UIView.animate(withDuration: 0.25) { [weak self] in
       self?.view.alpha = 0
     } completion: { [weak self] _ in
-      self?.delegate?.onConferenceTerminated()
+      self?.delegate?.onConferenceTerminated(conferenceId: conferenceId)
     }
   }
 

@@ -15,19 +15,32 @@ struct MeetCall {
   let localUUID: UUID
   let serverURL: String
   let channelId: String
+  let name: String
   var initiatorUserId: String?
   var conferenceId: String?
   var conferenceJWT: String?
   var conferenceURL: String?
   var joined = false
 
-  init(serverURL: String, channelId: String, conferenceId: String?, conferenceJWT: String?, conferenceURL: String? = nil) {
+  var remoteHandle: CXHandle {
+    CXHandle(type: .generic, value: "\(serverURL)/channels/\(channelId)/conference")
+  }
+
+  init(
+    serverURL: String,
+    channelId: String,
+    conferenceId: String?,
+    conferenceJWT: String?,
+    conferenceURL: String? = nil,
+    name: String
+  ) {
     localUUID = UUID()
     self.serverURL = serverURL
     self.channelId = channelId
     self.conferenceId = conferenceId
     self.conferenceJWT = conferenceJWT
     self.conferenceURL = conferenceURL
+    self.name = name
   }
 }
 
@@ -135,33 +148,28 @@ public class CallManager: NSObject {
         channelId: channelId,
         conferenceId: conferenceId,
         conferenceJWT: conferenceJWT,
-        conferenceURL: conferenceURL
+        conferenceURL: conferenceURL,
+        name: callName
       )
 
       currentCalls[call.localUUID] = call
-      callProvider.reportOutgoingCall(with: call.localUUID, startedConnectingAt: Date(timeIntervalSinceNow: -3))
-      callProvider.reportOutgoingCall(with: call.localUUID, connectedAt: Date())
 
-      let startCallAction = CXStartCallAction(call: call.localUUID, handle: CXHandle(type: .generic, value: callName))
+      let startCallAction = CXStartCallAction(call: call.localUUID, handle: call.remoteHandle)
       startCallAction.isVideo = CallManager.videoEnabledByDefault
+
       callController.requestTransaction(with: [startCallAction]) { error in
-        Task { @MainActor in
-          if let error {
-            LegacyLogger.calls.log(level: .error, message: "An error occurred starting call \(error)")
-          } else if let rootWindowScene = (UIApplication.shared.delegate as? AppDelegate)?.window.windowScene {
-            let callWindow = CallWindow(meetCall: call, delegate: self, windowScene: rootWindowScene)
-            self.callWindow = callWindow
-            self.currentCalls[call.localUUID]?.joined = true
-          }
+        if let error {
+          LegacyLogger.calls.log(level: .error, message: "An error occurred starting call \(error)")
         }
       }
     }
   }
 
-  func reportIncomingCall(call: MeetCall, callName: String, completion: @escaping () -> Void) {
+  func reportIncomingCall(call: MeetCall, completion: @escaping () -> Void) {
     let update = CXCallUpdate()
+    update.localizedCallerName = call.name
     update.hasVideo = CallManager.videoEnabledByDefault
-    update.remoteHandle = CXHandle(type: .generic, value: callName)
+    update.remoteHandle = call.remoteHandle
 
     callProvider.reportNewIncomingCall(with: call.localUUID, update: update) { error in
       guard error == nil else {
@@ -176,8 +184,11 @@ public class CallManager: NSObject {
 }
 
 extension CallManager: CallViewControllerDelegate {
-  func onConferenceTerminated() {
+  func onConferenceTerminated(conferenceId: String?) {
     callWindow = nil
+
+    guard let conferenceId else { return }
+    reportCallEnded(conferenceId: conferenceId)
   }
 
   func onVideoMuted(conferenceId: String, isMuted: Bool) {
@@ -201,8 +212,34 @@ extension CallManager: CallViewControllerDelegate {
 }
 
 extension CallManager: CXProviderDelegate {
+  public func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
+    guard let existingCall = currentCalls[action.callUUID] else {
+      action.fail()
+      return
+    }
+
+    Task { @MainActor in
+      let callUpdate = CXCallUpdate()
+      callUpdate.remoteHandle = existingCall.remoteHandle
+      callUpdate.localizedCallerName = existingCall.name
+      callProvider.reportCall(with: action.callUUID, updated: callUpdate)
+
+      action.fulfill()
+
+      let answerCallAction = CXAnswerCallAction(call: existingCall.localUUID)
+      callController.requestTransaction(with: [answerCallAction]) { error in
+        if let error {
+          LegacyLogger.calls.log(level: .error, message: "An error occurred starting call \(error)")
+        }
+      }
+    }
+  }
+
   public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
-    guard let existingCall = currentCalls[action.callUUID] else { return }
+    guard let existingCall = currentCalls[action.callUUID] else {
+      action.fail()
+      return
+    }
 
     Task { @MainActor in
       do {
@@ -212,13 +249,18 @@ extension CallManager: CXProviderDelegate {
       }
 
       do {
-        let call = try await startCall(existingCall)
+        let completeCall: MeetCall
+        if existingCall.conferenceURL != nil {
+          completeCall = existingCall
+        } else {
+          completeCall = try await startCall(existingCall)
+        }
 
         if let rootWindowScene = (UIApplication.shared.delegate as? AppDelegate)?.window.windowScene {
           LegacyLogger.calls.log(message: "Presenting call window")
-          let callWindow = CallWindow(meetCall: call, delegate: self, windowScene: rootWindowScene)
+          let callWindow = CallWindow(meetCall: completeCall, delegate: self, windowScene: rootWindowScene)
           self.callWindow = callWindow
-          currentCalls[action.callUUID] = call
+          currentCalls[action.callUUID] = completeCall
           currentCalls[action.callUUID]?.joined = true
           action.fulfill()
         }
@@ -231,7 +273,10 @@ extension CallManager: CXProviderDelegate {
 
   public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
     Task { @MainActor in
-      guard let existingCall = currentCalls[action.callUUID] else { return }
+      guard let existingCall = currentCalls[action.callUUID] else {
+        action.fail()
+        return
+      }
       // The user is in the current call
       if currentCalls[action.callUUID]?.joined == true {
         callWindow?.leaveCurrentCall()
@@ -333,9 +378,10 @@ extension CallManager: PKPushRegistryDelegate {
       serverURL: serverURL,
       channelId: channelId,
       conferenceId: conferenceId,
-      conferenceJWT: conferenceJWT
+      conferenceJWT: conferenceJWT,
+      name: channelName
     )
-    reportIncomingCall(call: meetCall, callName: channelName) {
+    reportIncomingCall(call: meetCall) {
       completion()
     }
   }
