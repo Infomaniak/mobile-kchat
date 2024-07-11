@@ -691,6 +691,8 @@
     "more_messages.text": "{count} nuevos {count, plural, one {mensaje} other {mensajes}}",
     "msg_typing.areTyping": "{users} y {last} están escribiendo...",
     "msg_typing.isTyping": "{user} está escribiendo...",
+    "msg_recording.isRecording" : "{user} está grabando...", 
+    "msg_recording.areRecording": "{users} et {last} están grabando...",
     "notification.message_not_found": "Mensaje no encontrado",
     "notification.not_channel_member": "Este mensaje pertenece a un canal del cual no eres miembro.",
     "notification.not_team_member": "Este mensaje pertenece a un equipo del cual no eres miembro.",

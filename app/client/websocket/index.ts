@@ -52,6 +52,7 @@ export default class WebSocketClient {
     private lastConnect: number;
     private lastDisconnect: number;
     private url = '';
+    private recordingInterval: ReturnType<typeof setInterval> | null = null;
 
     private serverUrl: string;
     private hasReliablyReconnect = false;
@@ -352,6 +353,23 @@ export default class WebSocketClient {
             parent_id: parentId,
             user_id: userId,
         });
+    }
+
+    public sendUserRecordingEvent(userId: string, channelId: string, parentId?: string) {
+        const TIMER = 1000;
+        this.recordingInterval = setInterval(() => {
+            this.sendMessage('client-user_recording', {
+                channel_id: channelId,
+                parent_id: parentId,
+                user_id: userId,
+            });
+        }, TIMER);
+    }
+
+    public stopRecordingEvent() {
+        if (this.recordingInterval !== null) {
+            clearInterval(this.recordingInterval);
+        }
     }
 
     public isConnected(): boolean {

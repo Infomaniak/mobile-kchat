@@ -124,7 +124,7 @@ export async function handleUserTypingEvent(serverUrl: string, msg: WebSocketMes
     }
 }
 
-export const userTyping = async (serverUrl: string, channelId: string, rootId?: string) => {
+export const userTyping = async (actionType: 'typing' | 'recording' | 'stop', serverUrl: string, channelId: string, rootId?: string) => {
     const client = WebsocketManager.getClient(serverUrl);
     const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
     const currentUser = await getCurrentUser(database);
@@ -133,7 +133,19 @@ export const userTyping = async (serverUrl: string, channelId: string, rootId?: 
         return;
     }
 
-    client?.sendUserTypingEvent(currentUser.id, channelId, rootId);
+    switch (actionType) {
+        case 'typing':
+            client?.sendUserTypingEvent(currentUser.id, channelId, rootId);
+            break;
+        case 'recording':
+            client?.sendUserRecordingEvent(currentUser.id, channelId, rootId);
+            break;
+        case 'stop':
+            client?.stopRecordingEvent();
+            break;
+        default:
+            throw new Error('Invalid action type');
+    }
 };
 
 export async function handleStatusChangedEvent(serverUrl: string, msg: WebSocketMessage) {
