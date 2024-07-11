@@ -237,7 +237,7 @@ class CallManager {
     /**
      * Construct the callName for CallKit
      */
-    getCallName = async (serverUrl: string, channel: ChannelModel, currentUserId: string, calledUsernamesLimit = 2) => {
+    getCallName = async (serverUrl: string, channel: ChannelModel, currentUserId: string, limit = 2) => {
         // Public / Private channel
         const isDMorGM = channel ? isChannelDMorGM(channel) : false;
         if (!isDMorGM) {
@@ -255,7 +255,9 @@ class CallManager {
         }
 
         // Construct callName by joining usernames
-        return `#${users.map((user) => `${user.username}`).join(', ')}`;
+        const usernames = users.slice(0, limit).map((user) => `${user.username}`).join(', ');
+        const overflow = users.length > limit ? ` (+${users.length - limit})` : '';
+        return `#${usernames}${overflow}`;
     };
 }
 
