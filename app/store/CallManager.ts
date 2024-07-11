@@ -216,13 +216,22 @@ class CallManager {
     /**
      * Resolve list of called users
      */
-    getCalledUsers = async (serverUrl: string, channelId: string, currentUserId: string, limit = 2) => {
+    getCalledUsers = async (serverUrl: string, channelId: string, currentUserId: string) => {
         // Add one since current user might be in list
-        const recipients = (await fetchChannelMemberships(serverUrl, channelId, {per_page: limit + 1})).users;
+        const recipients = (await fetchChannelMemberships(serverUrl, channelId, {})).users;
+
+        // Move bots to end of list
+        recipients.sort(
+            (a, b) => {
+                if (a.is_bot) {
+                    return b.is_bot ? 0 : 1;
+                }
+                return b.is_bot ? -1 : 0;
+            },
+        );
 
         // Remove current user from list
-        return (recipients.length > 1 ? recipients.filter((user) => user.id !== currentUserId) : recipients).
-            slice(0, limit);
+        return (recipients.length > 1 ? recipients.filter((user) => user.id !== currentUserId) : recipients);
     };
 
     /**
@@ -236,7 +245,7 @@ class CallManager {
         }
 
         // Query the called users (current user is filtered-out)
-        const users = await this.getCalledUsers(serverUrl, channel.id, currentUserId, calledUsernamesLimit);
+        const users = await this.getCalledUsers(serverUrl, channel.id, currentUserId);
 
         // If it's a DM the callName is the recipient with an "@"
         const isDM = channel?.type === General.DM_CHANNEL;
