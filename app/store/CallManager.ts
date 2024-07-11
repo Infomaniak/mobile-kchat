@@ -216,19 +216,28 @@ class CallManager {
     /**
      * Resolve list of called users
      */
-    getCalledUsers = async (serverUrl: string, channelId: string, currentUserId: string, limit = 2) => {
+    getCalledUsers = async (serverUrl: string, channelId: string, currentUserId: string) => {
         // Add one since current user might be in list
-        const recipients = (await fetchChannelMemberships(serverUrl, channelId, {per_page: limit + 1})).users;
+        const recipients = (await fetchChannelMemberships(serverUrl, channelId, {})).users;
+
+        // Move bots to end of list
+        recipients.sort(
+            (a, b) => {
+                if (a.is_bot) {
+                    return b.is_bot ? 0 : 1;
+                }
+                return b.is_bot ? -1 : 0;
+            },
+        );
 
         // Remove current user from list
-        return (recipients.length > 1 ? recipients.filter((user) => user.id !== currentUserId) : recipients).
-            slice(0, limit);
+        return (recipients.length > 1 ? recipients.filter((user) => user.id !== currentUserId) : recipients);
     };
 
     /**
      * Construct the callName for CallKit
      */
-    getCallName = async (serverUrl: string, channel: ChannelModel, currentUserId: string, calledUsernamesLimit = 2) => {
+    getCallName = async (serverUrl: string, channel: ChannelModel, currentUserId: string, limit = 2) => {
         // Public / Private channel
         const isDMorGM = channel ? isChannelDMorGM(channel) : false;
         if (!isDMorGM) {
@@ -236,7 +245,7 @@ class CallManager {
         }
 
         // Query the called users (current user is filtered-out)
-        const users = await this.getCalledUsers(serverUrl, channel.id, currentUserId, calledUsernamesLimit);
+        const users = await this.getCalledUsers(serverUrl, channel.id, currentUserId);
 
         // If it's a DM the callName is the recipient with an "@"
         const isDM = channel?.type === General.DM_CHANNEL;
@@ -246,7 +255,9 @@ class CallManager {
         }
 
         // Construct callName by joining usernames
-        return `#${users.map((user) => `${user.username}`).join(', ')}`;
+        const usernames = users.slice(0, limit).map((user) => `${user.username}`).join(', ');
+        const overflow = users.length > limit ? ` (+${users.length - limit})` : '';
+        return `#${usernames}${overflow}`;
     };
 }
 
