@@ -55,10 +55,11 @@ export default class WebSocketClient {
     private errorCallback?: Function;
     private closeCallback?: (connectFailCount: number) => void;
     private connectingCallback?: () => void;
-
+    
     // Infomaniak
     // Current Pusher channel the user is connected to
     private presenceChannel?: Channel;
+    private recordingInterval: ReturnType<typeof setInterval> | null = null;
 
     constructor(serverUrl: string, token: string) {
         this.token = token;
@@ -384,6 +385,23 @@ export default class WebSocketClient {
             parent_id: parentId,
             user_id: userId,
         });
+    }
+
+    public sendUserRecordingEvent(userId: string, channelId: string, parentId?: string) {
+        const TIMER = 1000;
+        this.recordingInterval = setInterval(() => {
+            this.sendMessage('client-user_recording', {
+                channel_id: channelId,
+                parent_id: parentId,
+                user_id: userId,
+            });
+        }, TIMER);
+    }
+
+    public stopRecordingEvent() {
+        if (this.recordingInterval !== null) {
+            clearInterval(this.recordingInterval);
+        }
     }
 
     public isConnected(): boolean {
