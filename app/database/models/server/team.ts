@@ -19,6 +19,7 @@ import type ThreadModel from '@typings/database/models/servers/thread';
 const {
     CATEGORY,
     CHANNEL,
+    CONFERENCE,
     TEAM,
     MY_TEAM,
     TEAM_CHANNEL_HISTORY,
@@ -43,6 +44,9 @@ export default class TeamModel extends Model implements TeamModelInterface {
 
         /** A TEAM has a 1:N relationship with CHANNEL. A TEAM can possess multiple channels */
         [CHANNEL]: {type: 'has_many', foreignKey: 'team_id'},
+
+        /** A TEAM can be associated with multiple CONFERENCE (relationship is 1:N) */
+        [CONFERENCE]: {type: 'has_many', foreignKey: 'team_id'},
 
         /** A TEAM can be associated to one MY_TEAM (relationship is 1:1) */
         [MY_TEAM]: {type: 'has_many', foreignKey: 'id'},

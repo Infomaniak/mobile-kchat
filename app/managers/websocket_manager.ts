@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import NetInfo, {type NetInfoState} from '@react-native-community/netinfo';
-import {debounce, type DebouncedFunc} from 'lodash';
 import {AppState, type AppStateStatus} from 'react-native';
 import BackgroundTimer from 'react-native-background-timer';
 import {BehaviorSubject} from 'rxjs';
@@ -12,6 +11,7 @@ import {fetchStatusByIds} from '@actions/remote/user';
 import {handleClose, handleEvent, handleFirstConnect, handleReconnect} from '@actions/websocket';
 import WebSocketClient from '@client/websocket';
 import DatabaseManager from '@database/manager';
+import {debounce} from '@helpers/api/general';
 import {getCurrentUserId} from '@queries/servers/system';
 import {queryAllUsers} from '@queries/servers/user';
 import {toMilliseconds} from '@utils/datetime';
@@ -25,7 +25,7 @@ class WebsocketManager {
     private connectedSubjects: {[serverUrl: string]: BehaviorSubject<WebsocketConnectedState>} = {};
 
     private clients: Record<string, WebSocketClient> = {};
-    private connectionTimerIDs: Record<string, DebouncedFunc<() => void>> = {};
+    private connectionTimerIDs: Record<string, ReturnType<typeof debounce>> = {};
     private isBackgroundTimerRunning = false;
     private netConnected = false;
     private previousActiveState: boolean;

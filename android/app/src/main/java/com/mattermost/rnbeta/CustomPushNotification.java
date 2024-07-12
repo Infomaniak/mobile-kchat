@@ -1,37 +1,41 @@
 package com.mattermost.rnbeta;
 
+import static com.mattermost.call.CallActivity.BROADCAST_RECEIVER_DISMISS_CALL_TAG;
+import static com.mattermost.helpers.database_extension.GeneralKt.getServerUrlForIdentifier;
+import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME;
+
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import java.util.Objects;
-
-import com.facebook.react.bridge.ReadableMap;
+import com.mattermost.call.CallManagerModule;
 import com.mattermost.helpers.CustomPushNotificationHelper;
 import com.mattermost.helpers.DatabaseHelper;
 import com.mattermost.helpers.Network;
 import com.mattermost.helpers.NotificationHelper;
 import com.mattermost.helpers.PushNotificationDataHelper;
-import com.mattermost.helpers.ReadableMapUtils;
+import com.mattermost.notification.NotificationUtils;
 import com.mattermost.share.ShareModule;
-import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
-import com.wix.reactnativenotifications.core.notification.PushNotification;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
 import com.wix.reactnativenotifications.core.AppLifecycleFacade;
 import com.wix.reactnativenotifications.core.JsIOHelper;
+import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
+import com.wix.reactnativenotifications.core.notification.PushNotification;
 
-import static com.mattermost.helpers.database_extension.GeneralKt.*;
-import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME;
-
+import java.util.Objects;
 
 public class CustomPushNotification extends PushNotification {
+
     private final PushNotificationDataHelper dataHelper;
+    private final CallManagerModule callManagerModule = CallManagerModule.getInstance();
 
     public CustomPushNotification(Context context, Bundle bundle, AppLifecycleFacade appLifecycleFacade, AppLaunchHelper appLaunchHelper, JsIOHelper jsIoHelper) {
         super(context, bundle, appLifecycleFacade, appLaunchHelper, jsIoHelper);
@@ -49,11 +53,18 @@ public class CustomPushNotification extends PushNotification {
     @Override
     public void onReceived() {
         final Bundle initialData = mNotificationProps.asBundle();
-        final String type = initialData.getString("type");
-        final String ackId = initialData.getString("ack_id");
-        final String postId = initialData.getString("post_id");
-        final String channelId = initialData.getString("channel_id");
-        final boolean isIdLoaded = initialData.getString("id_loaded") != null && initialData.getString("id_loaded").equals("true");
+        String type = initialData.getString(NotificationUtils.NOTIFICATION_TYPE_KEY);
+        String ackId = initialData.getString(NotificationUtils.NOTIFICATION_ACK_ID_KEY);
+        String postId = initialData.getString(NotificationUtils.NOTIFICATION_POST_ID_KEY);
+        String channelId = initialData.getString(NotificationUtils.CHANNEL_ID_KEY);
+        String serverId = initialData.getString(NotificationUtils.SERVER_ID_KEY);
+        String conferenceId = initialData.getString(NotificationUtils.CONFERENCE_ID_KEY);
+        String channelName = initialData.getString(NotificationUtils.CHANNEL_NAME_KEY);
+        String conferenceJWT = initialData.getString(NotificationUtils.CONFERENCE_JWT_KEY);
+
+        String idLoaded = initialData.getString(NotificationUtils.NOTIFICATION_ID_LOADED_KEY);
+        final boolean isIdLoaded = idLoaded != null && idLoaded.equals("true");
+
         int notificationId = NotificationHelper.getNotificationId(initialData);
 
         String serverUrl = addServerUrlToBundle(initialData);
@@ -62,15 +73,41 @@ public class CustomPushNotification extends PushNotification {
             Bundle response = ReceiptDelivery.send(ackId, serverUrl, postId, type, isIdLoaded);
             if (isIdLoaded && response != null) {
                 Bundle current = mNotificationProps.asBundle();
-                if (!current.containsKey("server_url")) {
-                    response.putString("server_url", serverUrl);
+                if (!current.containsKey(NotificationUtils.SERVER_URL_KEY)) {
+                    response.putString(NotificationUtils.SERVER_URL_KEY, serverUrl);
                 }
                 current.putAll(response);
                 mNotificationProps = createProps(current);
             }
         }
 
-        finishProcessingNotification(serverUrl, type, channelId, notificationId);
+        if (Objects.equals(type, NotificationUtils.NOTIFICATION_TYPE_JOINED_CALL_VALUE) && conferenceId != null) {
+            NotificationUtils.dismissCallNotification(mContext, conferenceId);
+            broadcastCallEvent(conferenceId);
+        } else if (Objects.equals(type, NotificationUtils.NOTIFICATION_TYPE_CANCEL_CALL_VALUE) && conferenceId != null) {
+            NotificationUtils.dismissCallNotification(mContext, conferenceId);
+            broadcastCallEvent(conferenceId);
+        } else if (conferenceJWT != null) {
+            NotificationUtils.CallExtras callExtras = new NotificationUtils.CallExtras(
+                    channelId,
+                    serverId,
+                    conferenceId,
+                    channelName,
+                    conferenceJWT
+            );
+            Notification callNotification = NotificationUtils.createCallNotification(
+                    mContext,
+                    callExtras
+            );
+            super.postNotification(callNotification, notificationId);
+        } else {
+            finishProcessingNotification(
+                    serverUrl,
+                    type,
+                    notificationId,
+                    channelId
+            );
+        }
     }
 
     @Override
@@ -83,7 +120,19 @@ public class CustomPushNotification extends PushNotification {
         }
     }
 
-    private void finishProcessingNotification(final String serverUrl, @NonNull final String type, final String channelId, final int notificationId) {
+    private void broadcastCallEvent(String conferenceId) {
+        Intent callEventIntent = new Intent();
+        callEventIntent.putExtra(NotificationUtils.CONFERENCE_ID_KEY, conferenceId);
+        callEventIntent.setAction(BROADCAST_RECEIVER_DISMISS_CALL_TAG);
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(callEventIntent);
+    }
+
+    private void finishProcessingNotification(
+            final String serverUrl,
+            @NonNull final String type,
+            final int notificationId,
+            final String channelId
+    ) {
         final boolean isReactInit = mAppLifecycleFacade.isReactInitialized();
 
         switch (type) {

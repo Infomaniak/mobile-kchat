@@ -1,18 +1,21 @@
 package com.mattermost.rnbeta;
 
+import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import android.view.KeyEvent;
-import android.content.res.Configuration;
-
 import com.facebook.react.ReactActivityDelegate;
-import com.reactnativenavigation.NavigationActivity;
-import com.github.emilioicai.hwkeyboardevent.HWKeyboardEventModule;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactActivityDelegate;
+import com.github.emilioicai.hwkeyboardevent.HWKeyboardEventModule;
+import com.mattermost.call.CallManagerModule;
+import com.mattermost.notification.NotificationUtils;
+import com.reactnativenavigation.NavigationActivity;
 
 import java.util.Objects;
 
@@ -43,6 +46,9 @@ public class MainActivity extends NavigationActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(null);
         setContentView(R.layout.launch_screen);
+
+        handleIntentExtras(getIntent());
+
         setHWKeyboardConnected();
         foldableObserver.onCreate();
     }
@@ -99,6 +105,44 @@ public class MainActivity extends NavigationActivity {
         }
         return super.dispatchKeyEvent(event);
     }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntentExtras(intent);
+    }
+
+    private void handleIntentExtras(Intent intent) {
+        Log.i("handleIntentExtras", "handleIntentExtras");
+        if (intent != null && intent.getExtras() != null) {
+            Log.i("handleIntentExtras", "intent.getExtras() != null");
+            Bundle bundle = intent.getExtras();
+            String channelId = bundle.getString(NotificationUtils.CHANNEL_ID_KEY);
+            String serverId = bundle.getString(NotificationUtils.SERVER_ID_KEY);
+            String conferenceId = bundle.getString(NotificationUtils.CONFERENCE_ID_KEY);
+            String conferenceJWT = bundle.getString(NotificationUtils.CONFERENCE_JWT_KEY);
+            CallManagerModule callManagerModule = CallManagerModule.getInstance();
+
+            if (callManagerModule != null
+                    && channelId != null
+                    && serverId != null
+                    && conferenceJWT != null) {
+                Log.i("handleIntentExtras", "callmanager != null");
+                Log.i("handleIntentExtras", "serverId = " + serverId);
+                Log.i("handleIntentExtras", "channelId = " + channelId);
+                Log.i("handleIntentExtras", "conferenceJWT = " + conferenceJWT);
+                //callManagerModule.callAnswered(serverId, channelId, conferenceJWT);
+            }
+
+            if (conferenceId != null) {
+                Log.i("handleIntentExtras", "conferenceId == " + conferenceId);
+                Log.i("handleIntentExtras", "dismissCallNotification");
+                NotificationUtils.dismissCallNotification(this, conferenceId);
+            }
+        } else {
+            Log.i("handleIntentExtras", "intent extras null");
+        }
+   }
 
     private void setHWKeyboardConnected() {
         HWKeyboardConnected = getResources().getConfiguration().keyboard == Configuration.KEYBOARD_QWERTY;

@@ -7,7 +7,7 @@ apply plugin: 'kotlin-android'
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
 
- react {
+react {
     /* Folders */
     //   The root of your project, i.e. where "package.json" lives. Default is '..'
     // root = file("../")
@@ -53,8 +53,8 @@ apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
 if (System.getenv("SENTRY_ENABLED") == "true") {
     project.ext.sentryCli = [
-        logLevel: "error",
-        flavorAware: false
+            logLevel   : "error",
+            flavorAware: false
     ]
 
     apply from: "../../node_modules/@sentry/react-native/sentry.gradle"
@@ -111,8 +111,8 @@ android {
         applicationId "com.infomaniak.chat"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1_00_023_04
-        versionName "1.0.23"
+        versionCode 1_00_024_19
+        versionName "1.0.24"
         testBuildType System.getProperty('testBuildType', 'debug')
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         manifestPlaceholders = [
@@ -140,8 +140,9 @@ android {
         abi {
             reset()
             enable enableSeparateBuildPerCPUArchitecture
-            universalApk enableSeparateBuildPerCPUArchitecture  // If true, also generate a universal APK
-            include (*reactNativeArchitectures())
+            universalApk enableSeparateBuildPerCPUArchitecture
+            // If true, also generate a universal APK
+            include(*reactNativeArchitectures())
         }
     }
     buildTypes {
@@ -174,7 +175,7 @@ android {
         variant.outputs.each { output ->
             // For each separate APK per architecture, set a unique version code as described here:
             // http://tools.android.com/tech-docs/new-build-system/user-guide/apk-splits
-            def versionCodes = ["armeabi-v7a":1, "x86":2, "arm64-v8a": 3, "x86_64": 4]
+            def versionCodes = ["armeabi-v7a": 1, "x86": 2, "arm64-v8a": 3, "x86_64": 4]
             def abi = output.filters[0]
             if (abi != null) {  // null for the universal-debug, universal-release variants
                 output.versionCodeOverride =
@@ -182,9 +183,14 @@ android {
             }
         }
     }
+
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 repositories {
+    mavenCentral()
     maven {
         url 'https://maven.google.com'
     }
@@ -196,7 +202,7 @@ dependencies {
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
-        exclude group:'com.squareup.okhttp3', module:'okhttp'
+        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
 
     debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}")
@@ -206,6 +212,7 @@ dependencies {
         implementation jscFlavor
     }
 
+    implementation "androidx.core:core-ktx:1.11.0-beta02"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
     implementation 'io.reactivex.rxjava3:rxjava:3.1.6'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
@@ -216,6 +223,10 @@ dependencies {
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation "com.google.firebase:firebase-messaging:$firebaseVersion"
+    implementation 'com.airbnb.android:lottie:6.4.0'
+    implementation 'androidx.activity:activity-ktx:1.7.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2'
+    implementation 'io.coil-kt:coil:2.4.0'
 
     androidTestImplementation('com.wix:detox:+')
     implementation project(':reactnativenotifications')

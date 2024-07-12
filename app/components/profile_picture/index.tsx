@@ -27,6 +27,7 @@ type ProfilePictureProps = {
     testID?: string;
     source?: Source | string;
     url?: string;
+    grayscale?: boolean;
 };
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -67,6 +68,7 @@ const ProfilePicture = ({
     testID,
     source,
     url,
+    grayscale,
 }: ProfilePictureProps) => {
     const theme = useTheme();
     let serverUrl = useServerUrl();
@@ -98,6 +100,7 @@ const ProfilePicture = ({
                 size={size}
                 source={source}
                 url={serverUrl}
+                grayscale={grayscale}
             />
             {showStatus && !isBot &&
             <Status

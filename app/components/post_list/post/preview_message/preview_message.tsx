@@ -174,7 +174,7 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
                                     theme={theme}
                                     location={location}
                                     layoutWidth={layoutWidth}
-                                    imagesMetadata={post.metadata.embeds[0].data.post}
+                                    imagesMetadata={post as unknown as Record<string, PostImage | undefined>}
                                     textStyles={textStyles}
                                     isEdited={embed.data.post.edit_at}
                                 />

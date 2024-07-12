@@ -1,13 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {debounce} from 'lodash';
 import React, {useCallback, useMemo, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 
 import SearchBar from '@components/search';
 import TeamList from '@components/team_list';
 import {useTheme} from '@context/theme';
+import {debounce} from '@helpers/api/general';
 import {popTopScreen} from '@screens/navigation';
 import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity, getKeyboardAppearanceFromTheme} from '@utils/theme';

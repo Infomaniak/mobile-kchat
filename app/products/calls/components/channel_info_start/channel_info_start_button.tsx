@@ -4,12 +4,11 @@
 import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
 
+import {switchToConferenceByChannelId} from '@actions/remote/conference';
 import {leaveCall} from '@calls/actions';
 import {leaveAndJoinWithAlert, showLimitRestrictedAlert} from '@calls/alerts';
 import {useTryCallsFunction} from '@calls/hooks';
 import OptionBox from '@components/option_box';
-import CallManager from '@store/CallManager';
-import {preventDoubleTap} from '@utils/tap';
 
 import type {LimitRestrictedInfo} from '@calls/observers';
 
@@ -31,6 +30,7 @@ const ChannelInfoStartButton = ({
     limitRestrictedInfo,
 }: Props) => {
     const intl = useIntl();
+    const {formatMessage} = intl;
     const isLimitRestricted = limitRestrictedInfo.limitRestricted;
 
     const toggleJoinLeave = useCallback(() => {
@@ -47,15 +47,15 @@ const ChannelInfoStartButton = ({
 
     const [msgPostfix] = useTryCallsFunction(toggleJoinLeave);
 
-    const joinText = intl.formatMessage({id: 'mobile.calls_join_call', defaultMessage: 'Join call'});
-    const startText = intl.formatMessage({id: 'mobile.calls_start_call', defaultMessage: 'Start call'});
-    const leaveText = intl.formatMessage({id: 'mobile.calls_leave_call', defaultMessage: 'Leave call'});
+    const joinText = formatMessage({id: 'mobile.calls_join_call', defaultMessage: 'Join call'});
+    const startText = formatMessage({id: 'mobile.calls_start_call', defaultMessage: 'Start call'});
+    const leaveText = formatMessage({id: 'mobile.calls_leave_call', defaultMessage: 'Leave call'});
 
     return (
         <OptionBox
-            onPress={preventDoubleTap(() => {
-                CallManager.startCall(serverUrl, channelId);
-            })}
+            onPress={() => {
+                switchToConferenceByChannelId(serverUrl, channelId, {initiator: 'internal'});
+            }}
             text={startText}
             iconName='phone'
             activeText={joinText + msgPostfix}

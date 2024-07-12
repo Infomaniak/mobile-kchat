@@ -7,6 +7,7 @@ const DeepLinkType = {
     GroupMessage: 'gm',
     Invalid: 'invalid',
     Permalink: 'permalink',
+    Conference: 'conference',
     Redirect: '_redirect',
 } as const;
 

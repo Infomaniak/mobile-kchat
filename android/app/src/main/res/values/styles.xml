@@ -8,4 +8,15 @@
 
     </style>
 
+    <style name="Theme.Material3.DynamicColors.DayNight.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="CallTheme" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/call_background_color</item>
+        <item name="android:background">@color/call_background_color</item>
+        <item name="android:windowBackground">@color/call_background_color</item>
+    </style>
+
 </resources>

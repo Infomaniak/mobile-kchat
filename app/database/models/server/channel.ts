@@ -23,6 +23,8 @@ const {
     CHANNEL,
     CHANNEL_INFO,
     CHANNEL_MEMBERSHIP,
+    CONFERENCE,
+    CONFERENCE_PARTICIPANT,
     DRAFT,
     MY_CHANNEL,
     POSTS_IN_CHANNEL,
@@ -46,6 +48,12 @@ export default class ChannelModel extends Model implements ChannelModelInterface
 
         /** A CHANNEL can be associated with one CATEGORY_CHANNEL per team (relationship is 1:1)  */
         [CATEGORY_CHANNEL]: {type: 'has_many', foreignKey: 'channel_id'},
+
+        /** A CHANNEL can be associated with multiple CONFERENCE (relationship is 1:N) */
+        [CONFERENCE]: {type: 'has_many', foreignKey: 'channel_id'},
+
+        /** A CHANNEL can be associated with multiple CONFERENCE_PARTICIPANT (relationship is 1:N) */
+        [CONFERENCE_PARTICIPANT]: {type: 'has_many', foreignKey: 'channel_id'},
 
         /** A CHANNEL can be associated with multiple DRAFT (relationship is 1:N) */
         [DRAFT]: {type: 'has_many', foreignKey: 'channel_id'},
