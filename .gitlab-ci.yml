@@ -13,6 +13,8 @@ variables:
 # Install npm dependencies
 .script-npm-install: &script-npm-install
   - npm ci --ignore-scripts
+  - npx patch-package
+  - node scripts/generate-assets.js
 
 # Node-specific test config
 .tests-node: &tests-node
