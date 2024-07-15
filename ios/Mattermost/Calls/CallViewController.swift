@@ -118,7 +118,7 @@ private class CallViewController: UIViewController {
       } else {
         // Construct API URL if not
         let lastPictureUpdate = userProfile.lastPictureUpdate ?? 0
-        avatarURL = URL(string: "\(meetCall.serverURL)/api/v4/users/{userProfile.id}/image?_={\(lastPictureUpdate)}")
+        avatarURL = URL(string: "\(meetCall.serverURL)/api/v4/users/\(userProfile.id)/image?_=\(lastPictureUpdate)")
       }
 
       let isDM = channel.type == "D"
