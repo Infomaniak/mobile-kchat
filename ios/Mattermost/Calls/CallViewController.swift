@@ -74,6 +74,8 @@ private class CallViewController: UIViewController {
       builder.setFeatureFlag("breakout-rooms.enabled", withBoolean: false)
       builder.setFeatureFlag("live-streaming.enabled", withBoolean: false)
       builder.setFeatureFlag("call-integration.enabled", withBoolean: false)
+      
+      builder.setVideoMuted(true)
     }
     JitsiMeet.sharedInstance().defaultConferenceOptions = jitisiOptions
 
