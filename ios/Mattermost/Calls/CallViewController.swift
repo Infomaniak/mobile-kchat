@@ -74,6 +74,8 @@ private class CallViewController: UIViewController {
       builder.setFeatureFlag("breakout-rooms.enabled", withBoolean: false)
       builder.setFeatureFlag("live-streaming.enabled", withBoolean: false)
       builder.setFeatureFlag("call-integration.enabled", withBoolean: false)
+      
+      builder.setVideoMuted(true)
     }
     JitsiMeet.sharedInstance().defaultConferenceOptions = jitisiOptions
 
@@ -116,7 +118,7 @@ private class CallViewController: UIViewController {
       } else {
         // Construct API URL if not
         let lastPictureUpdate = userProfile.lastPictureUpdate ?? 0
-        avatarURL = URL(string: "\(meetCall.serverURL)/api/v4/users/{userProfile.id}/image?_={\(lastPictureUpdate)}")
+        avatarURL = URL(string: "\(meetCall.serverURL)/api/v4/users/\(userProfile.id)/image?_=\(lastPictureUpdate)")
       }
 
       let isDM = channel.type == "D"
