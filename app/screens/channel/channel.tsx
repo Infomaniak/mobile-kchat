@@ -86,6 +86,8 @@ const Channel = ({
 
     const marginTop = defaultHeight + (isTablet ? 0 : -insets.top);
     useEffect(() => {
+        const wsClient = WebsocketManager.getClient(serverUrl);
+
         // This is done so that the header renders
         // and the screen does not look totally blank
         const raf = requestAnimationFrame(() => {
@@ -98,10 +100,10 @@ const Channel = ({
         }, 500);
 
         storeLastViewedChannelIdAndServer(channelId);
-        WebsocketManager.getClient(serverUrl)?.subscribeAndBindPresenceChannel(channelId);
+        wsClient?.bindPresenceChannel(channelId);
 
         return () => {
-            WebsocketManager.getClient(serverUrl)?.unsubscribeFromPresenceChannel(channelId);
+            wsClient?.unbindPresenceChannel(channelId);
             cancelAnimationFrame(raf);
             clearTimeout(t);
             removeLastViewedChannelIdAndServer();
