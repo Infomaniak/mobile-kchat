@@ -3,9 +3,10 @@
 
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
+
+import {Image} from 'expo-image';
 import React, {useMemo} from 'react';
 import {StyleSheet, View} from 'react-native';
-import FastImage from 'react-native-fast-image';
 import Animated from 'react-native-reanimated';
 
 import CompassIcon from '@components/compass_icon';
@@ -15,7 +16,7 @@ import NetworkManager from '@managers/network_manager';
 
 import type UserModel from '@typings/database/models/servers/user';
 
-const AnimatedFastImage = Animated.createAnimatedComponent(FastImage);
+const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 type Props = {
     enablePostIconOverride: boolean;
@@ -47,9 +48,7 @@ const UserProfileAvatar = ({enablePostIconOverride, forwardRef, imageSize, user,
         const source = {uri: serverUrl + userIconOverride, headers: {Authorization: token}};
         return (
             <View style={styles.avatar}>
-                <AnimatedFastImage
-
-                    // @ts-expect-error TS expects old type ref
+                <AnimatedImage
                     ref={forwardRef}
                     style={styles.avatar}
                     source={source}

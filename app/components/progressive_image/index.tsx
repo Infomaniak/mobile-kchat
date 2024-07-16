@@ -1,34 +1,27 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {Image, ImageBackground, type ImageContentFit, type ImageStyle} from 'expo-image';
 import React, {type ReactNode, useEffect, useState} from 'react';
-import {ImageBackground, type StyleProp, StyleSheet, View, type ViewStyle, Image} from 'react-native';
-import FastImage, {type ResizeMode, type ImageStyle as FastImageStyle} from 'react-native-fast-image';
-import Animated, {interpolate, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming} from 'react-native-reanimated';
+import {type StyleProp, StyleSheet, View, type ViewStyle} from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
-import {emptyFunction} from '@utils/general';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
-import Thumbnail from './thumbnail';
-
-import type {ImageStyles} from '@typings/global/styles';
-
 const AnimatedImageBackground = Animated.createAnimatedComponent(ImageBackground);
-
-const AnimatedFastImage = Animated.createAnimatedComponent(FastImage);
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 type Props = ProgressiveImageProps & {
     children?: ReactNode | ReactNode[];
     forwardRef?: React.RefObject<any>;
     id: string;
-    imageStyle?: StyleProp<ImageStyles>;
+    imageStyle?: StyleProp<ImageStyle>;
     isBackgroundImage?: boolean;
     onError: () => void;
-    resizeMode?: ResizeMode;
+    contentFit?: ImageContentFit;
     style?: StyleProp<ViewStyle>;
     tintDefaultSource?: boolean;
 };
@@ -49,54 +42,32 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
 
 const ProgressiveImage = ({
     children, defaultSource, forwardRef, id, imageStyle, imageUri, inViewPort, isBackgroundImage,
-    onError, resizeMode = 'contain', style = {}, thumbnailUri, tintDefaultSource,
+    onError, contentFit = 'contain', style = {}, thumbnailUri, tintDefaultSource,
 }: Props) => {
     const [showHighResImage, setShowHighResImage] = useState(false);
     const theme = useTheme();
     const styles = getStyleSheet(theme);
-    const intensity = useSharedValue(0);
-    const serverUrl = useServerUrl();
-    const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
-
-    const defaultOpacity = useDerivedValue(() => (
-        interpolate(
-            intensity.value,
-            [0, 100],
-            [0.5, 0],
-        )
-    ), []);
-
-    const onLoadImageEnd = () => {
-        intensity.value = withTiming(100, {duration: 300});
-    };
-
-    const animatedOpacity = useAnimatedStyle(() => ({
-        opacity: interpolate(
-            intensity.value,
-            [200, 100],
-            [0.2, 1],
-        ),
-    }));
 
     useEffect(() => {
         if (inViewPort) {
-            setShowHighResImage(true);
+            setShowHighResImage(inViewPort);
         }
     }, [inViewPort]);
 
+    const serverUrl = useServerUrl();
+    const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
+    const headers = {Authorization: token};
+    const imgSource = {uri: imageUri, headers};
+    const thumbnailSource = {uri: thumbnailUri, headers};
+    const showImage = showHighResImage || !thumbnailUri;
+
     if (isBackgroundImage && imageUri) {
-        const imgSource = {
-            uri: imageUri,
-            headers: {
-                Authorization: token,
-            },
-        };
         return (
             <View style={[styles.defaultImageContainer, style]}>
                 <AnimatedImageBackground
                     key={id}
                     source={imgSource}
-                    resizeMode={'cover'}
+                    contentFit='cover'
                     style={[StyleSheet.absoluteFill, imageStyle]}
                 >
                     {children}
@@ -106,96 +77,39 @@ const ProgressiveImage = ({
     }
 
     if (defaultSource) {
-        defaultSource.headers = {Authorization: token};
         return (
             <View style={[styles.defaultImageContainer, style]}>
                 <AnimatedImage
                     ref={forwardRef}
-                    source={defaultSource}
+                    source={{...defaultSource, headers}}
                     style={[
                         StyleSheet.absoluteFill,
                         imageStyle,
                         tintDefaultSource ? styles.defaultImageTint : null,
                     ]}
-                    resizeMode={resizeMode}
+                    contentFit={contentFit}
                     onError={onError}
                     nativeID={`image-${id}`}
+                    recyclingKey={`image-${id}`}
                 />
             </View>
         );
     }
 
-    const containerStyle = {backgroundColor: changeOpacity(theme.centerChannelColor, Number(defaultOpacity.value))};
-    const imgSource = {
-        uri: imageUri,
-        headers: {
-            Authorization: token,
-        },
-    };
-
-    let image;
-    if (thumbnailUri) {
-        if (showHighResImage && imageUri) {
-            image = (
-                <AnimatedFastImage
-
-                    // @ts-expect-error ref not present in type
-                    ref={forwardRef}
-                    nativeID={`image-${id}`}
-                    resizeMode={resizeMode}
-                    onError={onError}
-                    source={imgSource}
-                    style={[
-                        StyleSheet.absoluteFill,
-                        imageStyle,
-                        animatedOpacity,
-                    ]}
-                    testID='progressive_image.highResImage'
-                    onLoadEnd={onLoadImageEnd}
-                />
-            );
-        }
-    } else if (imageUri) {
-        image = (
-            <AnimatedFastImage
-
-                // @ts-expect-error ref not present in type
-                ref={forwardRef}
-                nativeID={`image-${id}`}
-                resizeMode={resizeMode}
-                onError={onError}
-                source={imgSource}
-                style={[StyleSheet.absoluteFill, (imageStyle as StyleProp<FastImageStyle>), animatedOpacity]}
-                onLoadEnd={onLoadImageEnd}
-                testID='progressive_image.highResImage'
-            />
-        );
-    }
-
-    const thumbnailSource = {
-        uri: thumbnailUri,
-        headers: {
-            Authorization: token,
-        },
-    };
-
     return (
-        <Animated.View
-            style={[styles.defaultImageContainer, style, containerStyle]}
-        >
-            {Boolean(thumbnailUri) &&
-            <Thumbnail
-                onError={emptyFunction}
-                opacity={defaultOpacity}
-                source={thumbnailSource}
-                style={[
-                    thumbnailUri ? StyleSheet.absoluteFill : undefined,
-                    imageStyle,
-                ]}
-                tintColor={thumbnailUri ? undefined : theme.centerChannelColor}
+        <Animated.View style={[styles.defaultImageContainer, style]}>
+            <Image
+                ref={forwardRef}
+                placeholder={thumbnailSource}
+                placeholderContentFit='cover'
+                nativeID={`image-${id}`}
+                recyclingKey={`image-${id}`}
+                testID='progressive_image.highResImage'
+                transition={300}
+                style={[StyleSheet.absoluteFill, imageStyle]}
+                source={showImage ? imgSource : undefined}
+                autoplay={false}
             />
-            }
-            {image}
         </Animated.View>
     );
 };

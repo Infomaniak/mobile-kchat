@@ -2,6 +2,10 @@
 
 kChat is a fork of Mattermost mobile adapted for use within the Infomaniak ecosystem.
 
+- **Minimum Server versions:** Current ESR version (9.5.0+)
+- **Supported iOS versions:** 13.4+
+- **Supported Android versions:** 7.0+
+
 While the mobile app is a fork of Mattermost, the back-end is custom made and entierely developped by Infomaniak.
 
 The kChat app requires an Infomaniak account with kSuite. It enables you to communicate live with your teams and organise your projects within a unified communication platform.
@@ -54,6 +58,7 @@ git config --global user.email johndoe@example.com
 ```
 
 ### Binary 'watchman' not found
+
 ```
 brew install watchman
 ```
@@ -80,6 +85,7 @@ Before you begin, ensure you have:
 ### Steps:
 
 1. First, add two remote repositories to your local GitHub folder using the following commands:
+
    - `git remote add upstream https://github.com/mattermost/mattermost-mobile.git` (used to pull the latest changes from upstream)
    - `git remote add fork https://github.com/Infomaniak/mobile-kchat.git` (used to create the PR onto upstream)
 

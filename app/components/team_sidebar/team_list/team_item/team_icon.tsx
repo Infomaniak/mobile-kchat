@@ -1,10 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {Image} from 'expo-image';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {View, Text, type StyleProp, type TextStyle} from 'react-native';
-import FastImage from 'react-native-fast-image';
 
+import {buildAbsoluteUrl} from '@actions/remote/file';
+import {buildTeamIconUrl} from '@actions/remote/team';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
@@ -122,9 +124,9 @@ export default function TeamIcon({
         );
     } else {
         teamIconContent = (
-            <FastImage
+            <Image
                 style={styles.image}
-                source={{uri: `${serverUrl}${client!.getTeamIconUrl(id, lastIconUpdate)}`}}
+                source={{uri: buildAbsoluteUrl(serverUrl, buildTeamIconUrl(serverUrl, id, lastIconUpdate))}}
                 onError={handleImageError}
             />
         );

@@ -19,7 +19,7 @@ import {getCurrentUser, prepareUsers, queryAllUsers, queryUsersById, queryUsersB
 import {getFullErrorMessage} from '@utils/errors';
 import {logDebug} from '@utils/log';
 import {getDeviceTimezone} from '@utils/timezone';
-import {getUserTimezoneProps, removeUserFromList} from '@utils/user';
+import {getLastPictureUpdate, getUserTimezoneProps, removeUserFromList} from '@utils/user';
 
 import {fetchGroupsByNames} from './groups';
 import {forceLogoutIfNecessary} from './session';
@@ -793,6 +793,11 @@ export const buildProfileImageUrl = (serverUrl: string, userId: string, timestam
     } catch (error) {
         return '';
     }
+};
+
+export const buildProfileImageUrlFromUser = (serverUrl: string, user: UserModel | UserProfile) => {
+    const lastPictureUpdate = getLastPictureUpdate(user);
+    return buildProfileImageUrl(serverUrl, user.id, lastPictureUpdate);
 };
 
 export const autoUpdateTimezone = async (serverUrl: string) => {

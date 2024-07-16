@@ -38,12 +38,6 @@ export interface ClientPostsMix {
 
 const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) => class extends superclass {
     createPost = async (post: Post) => {
-        this.analytics?.trackAPI('api_posts_create', {channel_id: post.channel_id});
-
-        if (post.root_id != null && post.root_id !== '') {
-            this.analytics?.trackAPI('api_posts_replied', {channel_id: post.channel_id});
-        }
-
         return this.doFetch(
             `${this.getPostsRoute()}`,
             {method: 'post', body: post, noRetry: true},
@@ -51,8 +45,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     updatePost = async (post: Post) => {
-        this.analytics?.trackAPI('api_posts_update', {channel_id: post.channel_id});
-
         return this.doFetch(
             `${this.getPostRoute(post.id)}`,
             {method: 'put', body: post},
@@ -67,8 +59,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     patchPost = async (postPatch: Partial<Post> & {id: string}) => {
-        this.analytics?.trackAPI('api_posts_patch', {channel_id: postPatch.channel_id});
-
         return this.doFetch(
             `${this.getPostRoute(postPatch.id)}/patch`,
             {method: 'put', body: postPatch},
@@ -76,8 +66,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     deletePost = async (postId: string) => {
-        this.analytics?.trackAPI('api_posts_delete');
-
         return this.doFetch(
             `${this.getPostRoute(postId)}`,
             {method: 'delete'},
@@ -122,8 +110,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     getPostsBefore = async (channelId: string, postId = '', page = 0, perPage = PER_PAGE_DEFAULT, collapsedThreads = false, collapsedThreadsExtended = false) => {
-        this.analytics?.trackAPI('api_posts_get_before', {channel_id: channelId});
-
         return this.doFetch(
             `${this.getChannelRoute(channelId)}/posts${buildQueryString({before: postId, page, per_page: perPage, collapsedThreads, collapsedThreadsExtended})}`,
             {method: 'get'},
@@ -131,8 +117,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     getPostsAfter = async (channelId: string, postId: string, page = 0, perPage = PER_PAGE_DEFAULT, collapsedThreads = false, collapsedThreadsExtended = false) => {
-        this.analytics?.trackAPI('api_posts_get_after', {channel_id: channelId});
-
         return this.doFetch(
             `${this.getChannelRoute(channelId)}/posts${buildQueryString({after: postId, page, per_page: perPage, collapsedThreads, collapsedThreadsExtended})}`,
             {method: 'get'},
@@ -147,8 +131,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     getSavedPosts = async (userId: string, channelId = '', teamId = '', page = 0, perPage = PER_PAGE_DEFAULT) => {
-        this.analytics?.trackAPI('api_posts_get_flagged', {team_id: teamId});
-
         return this.doFetch(
             `${this.getUserRoute(userId)}/posts/flagged${buildQueryString({channel_id: channelId, team_id: teamId, page, per_page: perPage})}`,
             {method: 'get'},
@@ -156,7 +138,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     getPinnedPosts = async (channelId: string) => {
-        this.analytics?.trackAPI('api_posts_get_pinned', {channel_id: channelId});
         return this.doFetch(
             `${this.getChannelRoute(channelId)}/pinned`,
             {method: 'get'},
@@ -164,8 +145,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     markPostAsUnread = async (userId: string, postId: string) => {
-        this.analytics?.trackAPI('api_post_set_unread_post');
-
         // collapsed_threads_supported is not based on user preferences but to know if "CLIENT" supports CRT
         const body = JSON.stringify({collapsed_threads_supported: true});
 
@@ -176,8 +155,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     pinPost = async (postId: string) => {
-        this.analytics?.trackAPI('api_posts_pin');
-
         return this.doFetch(
             `${this.getPostRoute(postId)}/pin`,
             {method: 'post'},
@@ -185,8 +162,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     unpinPost = async (postId: string) => {
-        this.analytics?.trackAPI('api_posts_unpin');
-
         return this.doFetch(
             `${this.getPostRoute(postId)}/unpin`,
             {method: 'post'},
@@ -194,8 +169,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     addReaction = async (userId: string, postId: string, emojiName: string) => {
-        this.analytics?.trackAPI('api_reactions_save', {post_id: postId});
-
         return this.doFetch(
             `${this.getReactionsRoute()}`,
             {method: 'post', body: {user_id: userId, post_id: postId, emoji_name: emojiName}},
@@ -203,8 +176,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     removeReaction = async (userId: string, postId: string, emojiName: string) => {
-        this.analytics?.trackAPI('api_reactions_delete', {post_id: postId});
-
         return this.doFetch(
             `${this.getUserRoute(userId)}/posts/${postId}/reactions/${emojiName}`,
             {method: 'delete'},
@@ -219,7 +190,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     searchPostsWithParams = async (teamId: string, params: PostSearchParams) => {
-        this.analytics?.trackAPI('api_posts_search');
         const endpoint = teamId ? `${this.getTeamRoute(teamId)}/posts/search` : `${this.getPostsRoute()}/search`;
         return this.doFetch(endpoint, {method: 'post', body: params});
     };
@@ -233,12 +203,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     doPostActionWithCookie = async (postId: string, actionId: string, actionCookie: string, selectedOption = '') => {
-        if (selectedOption) {
-            this.analytics?.trackAPI('api_interactive_messages_menu_selected');
-        } else {
-            this.analytics?.trackAPI('api_interactive_messages_button_clicked');
-        }
-
         const msg: any = {
             selected_option: selectedOption,
         };

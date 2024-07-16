@@ -1,9 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {Image, type ImageProps} from 'expo-image';
 import React from 'react';
 import {View} from 'react-native';
-import FastImage from 'react-native-fast-image';
 
 import CompassIcon from '@components/compass_icon';
 import {ACCOUNT_OUTLINE_IMAGE} from '@constants/profile';
@@ -51,14 +51,12 @@ const Avatar = ({author, theme}: Props) => {
     if (author && serverUrl) {
         try {
             const client = NetworkManager.getClient(serverUrl);
-            let lastPictureUpdate = 0;
-            if (isBot) {
-                lastPictureUpdate = author?.props?.bot_last_icon_update || 0;
-            } else {
-                lastPictureUpdate = author?.lastPictureUpdate || 0;
+            const lastPictureUpdate = (isBot ? author?.props?.bot_last_icon_update as number : author?.lastPictureUpdate) || 0;
+            const absoluteUrl = client.getAbsoluteUrl(client.getProfilePictureUrl(author.id, lastPictureUpdate));
+            if (typeof absoluteUrl === 'string') {
+                pictureUrl = absoluteUrl;
             }
 
-            pictureUrl = client.getProfilePictureUrl(author.id, lastPictureUpdate);
             token = client.getCurrentBearerToken();
         } catch {
             // handle below that the client is not set
@@ -67,14 +65,12 @@ const Avatar = ({author, theme}: Props) => {
 
     let icon;
     if (pictureUrl && token) {
-        const imgSource = {
-            uri: `${serverUrl}${pictureUrl}`,
-            headers: {
-                Authorization: token,
-            },
+        const imgSource: ImageProps['source'] = {
+            uri: pictureUrl,
+            headers: {Authorization: token},
         };
         icon = (
-            <FastImage
+            <Image
                 key={pictureUrl}
                 style={style.image}
                 source={imgSource}

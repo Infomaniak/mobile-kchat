@@ -1,14 +1,17 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback} from 'react';
+import React, {useCallback, useState} from 'react';
 import {useIntl} from 'react-intl';
 
 import {switchToConferenceByChannelId} from '@actions/remote/conference';
-import {leaveCall} from '@calls/actions';
-import {leaveAndJoinWithAlert, showLimitRestrictedAlert} from '@calls/alerts';
-import {useTryCallsFunction} from '@calls/hooks';
-import OptionBox from '@components/option_box';
+import {showLimitRestrictedAlert} from '@calls/alerts';
+import Loading from '@components/loading';
+import OptionBox, {OPTIONS_HEIGHT} from '@components/option_box';
+import {useTheme} from '@context/theme';
+import {preventDoubleTap} from '@utils/tap';
+import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {typography} from '@utils/typography';
 
 import type {LimitRestrictedInfo} from '@calls/observers';
 
@@ -19,7 +22,29 @@ export interface Props {
     alreadyInCall: boolean;
     dismissChannelInfo: () => void;
     limitRestrictedInfo: LimitRestrictedInfo;
+    otherParticipants: boolean;
 }
+
+const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
+    container: {
+        alignItems: 'center',
+        backgroundColor: changeOpacity(theme.buttonBg, 0.08),
+        borderRadius: 4,
+        flex: 1,
+        maxHeight: OPTIONS_HEIGHT,
+        justifyContent: 'center',
+        minWidth: 60,
+        paddingTop: 12,
+        paddingBottom: 10,
+    },
+    text: {
+        color: theme.buttonBg,
+        paddingTop: 3,
+        width: '100%',
+        textAlign: 'center',
+        ...typography('Body', 50, 'SemiBold'),
+    },
+}));
 
 const ChannelInfoStartButton = ({
     serverUrl,
@@ -28,38 +53,58 @@ const ChannelInfoStartButton = ({
     alreadyInCall,
     dismissChannelInfo,
     limitRestrictedInfo,
+    otherParticipants,
 }: Props) => {
     const intl = useIntl();
-    const {formatMessage} = intl;
+    const theme = useTheme();
+    const styles = getStyleSheet(theme);
     const isLimitRestricted = limitRestrictedInfo.limitRestricted;
+    const [connecting, setConnecting] = useState(false);
 
-    const toggleJoinLeave = useCallback(() => {
+    const starting = intl.formatMessage({id: 'mobile.calls_starting', defaultMessage: 'Starting...'});
+    const joining = intl.formatMessage({id: 'mobile.calls_joining', defaultMessage: 'Joining...'});
+
+    const tryJoin = useCallback(async () => {
         if (alreadyInCall) {
-            leaveCall();
+            // TODO
+            // CallManager.leaveCallScreen();
         } else if (isLimitRestricted) {
             showLimitRestrictedAlert(limitRestrictedInfo, intl);
+            dismissChannelInfo();
         } else {
-            leaveAndJoinWithAlert(intl, serverUrl, channelId);
+            setConnecting(true);
+
+            await switchToConferenceByChannelId(serverUrl, channelId, {initiator: 'internal'});
+            setConnecting(false);
+            dismissChannelInfo();
         }
+    }, [isLimitRestricted, alreadyInCall, dismissChannelInfo, intl, serverUrl, channelId, isACallInCurrentChannel, otherParticipants]);
 
-        dismissChannelInfo();
-    }, [isLimitRestricted, alreadyInCall, dismissChannelInfo, intl, serverUrl, channelId, isACallInCurrentChannel]);
+    const joinText = intl.formatMessage({id: 'mobile.calls_join_call', defaultMessage: 'Join call'});
+    const startText = intl.formatMessage({id: 'mobile.calls_start_call', defaultMessage: 'Start call'});
+    const leaveText = intl.formatMessage({id: 'mobile.calls_leave_call', defaultMessage: 'Leave call'});
+    const text = isACallInCurrentChannel ? joinText : startText;
+    const icon = isACallInCurrentChannel ? 'phone-in-talk' : 'phone';
 
-    const [msgPostfix] = useTryCallsFunction(toggleJoinLeave);
-
-    const joinText = formatMessage({id: 'mobile.calls_join_call', defaultMessage: 'Join call'});
-    const startText = formatMessage({id: 'mobile.calls_start_call', defaultMessage: 'Start call'});
-    const leaveText = formatMessage({id: 'mobile.calls_leave_call', defaultMessage: 'Leave call'});
+    if (connecting) {
+        return (
+            <Loading
+                color={theme.buttonBg}
+                size={'small'}
+                footerText={isACallInCurrentChannel ? joining : starting}
+                containerStyle={styles.container}
+                footerTextStyles={styles.text}
+            />
+        );
+    }
 
     return (
         <OptionBox
-            onPress={() => {
-                switchToConferenceByChannelId(serverUrl, channelId, {initiator: 'internal'});
-            }}
-            text={startText}
-            iconName='phone'
-            activeText={joinText + msgPostfix}
-            activeIconName='phone-in-talk'
+            onPress={preventDoubleTap(tryJoin)}
+            text={text}
+            iconName={icon}
+            activeText={text}
+            activeIconName={icon}
             isActive={isACallInCurrentChannel}
             destructiveText={leaveText}
             destructiveIconName={'phone-hangup'}

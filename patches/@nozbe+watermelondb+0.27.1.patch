@@ -371,14 +371,15 @@ index 027c366..5807e79 100644
  
 diff --git a/node_modules/@nozbe/watermelondb/decorators/experimentalFailsafe/index.d.ts b/node_modules/@nozbe/watermelondb/decorators/experimentalFailsafe/index.d.ts
 new file mode 100644
-index 0000000..b2e2fd2
+index 0000000..6da29e6
 --- /dev/null
 +++ b/node_modules/@nozbe/watermelondb/decorators/experimentalFailsafe/index.d.ts
 @@ -0,0 +1,2 @@
 +declare function failsafe(fallback?: any): PropertyDecorator
 +export default failsafe
+\ No newline at end of file
 diff --git a/node_modules/@nozbe/watermelondb/decorators/index.d.ts b/node_modules/@nozbe/watermelondb/decorators/index.d.ts
-index 7f1fc8e..9fb334a 100644
+index 7f1fc8e..1978fd3 100644
 --- a/node_modules/@nozbe/watermelondb/decorators/index.d.ts
 +++ b/node_modules/@nozbe/watermelondb/decorators/index.d.ts
 @@ -9,3 +9,4 @@ export { default as readonly } from './readonly'
@@ -386,8 +387,24 @@ index 7f1fc8e..9fb334a 100644
  export { default as relation } from './relation'
  export { default as immutableRelation } from './immutableRelation'
 +export { default as experimentalFailsafe } from './experimentalFailsafe'
+\ No newline at end of file
+diff --git a/node_modules/@nozbe/watermelondb/native/android-jsi/src/main/java/com/nozbe/watermelondb/jsi/JSIInstaller.java b/node_modules/@nozbe/watermelondb/native/android-jsi/src/main/java/com/nozbe/watermelondb/jsi/JSIInstaller.java
+index 055cede..fb7ca33 100755
+--- a/node_modules/@nozbe/watermelondb/native/android-jsi/src/main/java/com/nozbe/watermelondb/jsi/JSIInstaller.java
++++ b/node_modules/@nozbe/watermelondb/native/android-jsi/src/main/java/com/nozbe/watermelondb/jsi/JSIInstaller.java
+@@ -1,8 +1,8 @@
+ package com.nozbe.watermelondb.jsi;
+ 
+ import android.content.Context;
+-class JSIInstaller {
+-    static void install(Context context, long javaScriptContextHolder) {
++public class JSIInstaller {
++    public static void install(Context context, long javaScriptContextHolder) {
+         JSIInstaller.context = context;
+         new JSIInstaller().installBinding(javaScriptContextHolder);
+ 
 diff --git a/node_modules/@nozbe/watermelondb/native/android/src/main/java/com/nozbe/watermelondb/WMDatabase.java b/node_modules/@nozbe/watermelondb/native/android/src/main/java/com/nozbe/watermelondb/WMDatabase.java
-index 2f170e0..bac0352 100644
+index 2f170e0..bd87f92 100644
 --- a/node_modules/@nozbe/watermelondb/native/android/src/main/java/com/nozbe/watermelondb/WMDatabase.java
 +++ b/node_modules/@nozbe/watermelondb/native/android/src/main/java/com/nozbe/watermelondb/WMDatabase.java
 @@ -11,6 +11,8 @@ import java.util.Arrays;
@@ -431,17 +448,19 @@ index 2f170e0..bac0352 100644
          } else {
              // On some systems there is some kind of lock on `/databases` folder ¯\_(ツ)_/¯
              path = context.getDatabasePath("" + name + ".db").getPath().replace("/databases", "");
-@@ -172,6 +190,10 @@ public class WMDatabase {
+@@ -172,7 +190,11 @@ public class WMDatabase {
          });
      }
  
+-    interface TransactionFunction {
 +    public void unsafeVacuum() {
 +        execute("vacuum");
 +    }
 +
-     interface TransactionFunction {
++    public interface TransactionFunction {
          void applyTransactionFunction();
      }
+ 
 diff --git a/node_modules/@nozbe/watermelondb/native/android/src/main/java/com/nozbe/watermelondb/WMDatabaseBridge.java b/node_modules/@nozbe/watermelondb/native/android/src/main/java/com/nozbe/watermelondb/WMDatabaseBridge.java
 index 117b2bc..57e4abb 100644
 --- a/node_modules/@nozbe/watermelondb/native/android/src/main/java/com/nozbe/watermelondb/WMDatabaseBridge.java
