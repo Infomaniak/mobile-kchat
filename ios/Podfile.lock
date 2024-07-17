@@ -1,5 +1,5 @@
 PODS:
-  - Alamofire (5.8.1)
+  - Alamofire (5.9.1)
   - AppAuth (1.7.5):
     - AppAuth/Core (= 1.7.5)
     - AppAuth/ExternalUserAgent (= 1.7.5)
@@ -461,10 +461,11 @@ PODS:
     - React
   - react-native-netinfo (11.1.0):
     - React-Core
-  - react-native-network-client (1.5.0):
-    - Alamofire (~> 5.8.1)
+  - react-native-network-client (1.6.0):
+    - Alamofire (~> 5.9.1)
+    - RCT-Folly (= 2021.07.22.00)
     - React-Core
-    - Starscream (~> 4.0.4)
+    - Starscream (~> 4.0.8)
     - SwiftyJSON (~> 5.0)
   - react-native-notifications (5.1.0):
     - React-Core
@@ -611,14 +612,14 @@ PODS:
     - React-Core
   - ReactNativeKeyboardTrackingView (5.7.0):
     - React
-  - ReactNativeNavigation (7.37.1-hotfix.1):
+  - ReactNativeNavigation (7.40.0):
     - HMSegmentedControl
     - React-Core
     - React-CoreModules
     - React-RCTImage
     - React-RCTText
-    - ReactNativeNavigation/Core (= 7.37.1-hotfix.1)
-  - ReactNativeNavigation/Core (7.37.1-hotfix.1):
+    - ReactNativeNavigation/Core (= 7.40.0)
+  - ReactNativeNavigation/Core (7.40.0):
     - HMSegmentedControl
     - React-Core
     - React-CoreModules
@@ -724,7 +725,7 @@ PODS:
   - SentryPrivate (8.21.0)
   - simdjson (3.1.0-wmelon1)
   - SocketRocket (0.6.1)
-  - Starscream (4.0.4)
+  - Starscream (4.0.8)
   - SwiftyJSON (5.0.2)
   - Swime (3.0.6)
   - WatermelonDB (0.27.1):
@@ -861,7 +862,6 @@ DEPENDENCIES:
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - RNWatch (from `../node_modules/react-native-watch-connectivity`)
   - "simdjson (from `../node_modules/@nozbe/simdjson`)"
-  - Starscream (from `https://github.com/mattermost/Starscream.git`, commit `7494780a021e44873e6e5fde5026ef96696c1865`)
   - "WatermelonDB (from `../node_modules/@nozbe/watermelondb`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -896,6 +896,7 @@ SPEC REPOS:
     - Sentry
     - SentryPrivate
     - SocketRocket
+    - Starscream
     - SwiftyJSON
     - Swime
     - YogaKit
@@ -1104,21 +1105,13 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-watch-connectivity"
   simdjson:
     :path: "../node_modules/@nozbe/simdjson"
-  Starscream:
-    :commit: 7494780a021e44873e6e5fde5026ef96696c1865
-    :git: https://github.com/mattermost/Starscream.git
   WatermelonDB:
     :path: "../node_modules/@nozbe/watermelondb"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
-CHECKOUT OPTIONS:
-  Starscream:
-    :commit: 7494780a021e44873e6e5fde5026ef96696c1865
-    :git: https://github.com/mattermost/Starscream.git
-
 SPEC CHECKSUMS:
-  Alamofire: 3ca42e259043ee0dc5c0cdd76c4bc568b8e42af7
+  Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
   AppAuth: 501c04eda8a8d11f179dbe8637b7a91bb7e5d2fa
   boost: 57d2868c099736d80fcd648bf211b4431e51a558
   BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
@@ -1183,7 +1176,7 @@ SPEC CHECKSUMS:
   react-native-in-app-review: db8bb167a5f238e7ceca5c242d6b36ce8c4404a4
   react-native-keep-awake: afad8a51dfef9fe9655a6344771be32c8596d774
   react-native-netinfo: 3aa5637c18834966e0c932de8ae1ae56fea20a97
-  react-native-network-client: 7ca5125fe613d2085c8ee12723a4ba9bca04f948
+  react-native-network-client: 4e8d6cbc715a9e522779a1fe82b32c5526c46417
   react-native-notifications: 4601a5a8db4ced6ae7cfc43b44d35fe437ac50c4
   react-native-orientation-locker: 4409c5b12b65f942e75449872b4f078b6f27af81
   react-native-pager-view: 0ccb8bf60e2ebd38b1f3669fa3650ecce81db2df
@@ -1216,7 +1209,7 @@ SPEC CHECKSUMS:
   ReactNativeExceptionHandler: b11ff67c78802b2f62eed0e10e75cb1ef7947c60
   ReactNativeIncallManager: 2385505fa5dfdbbc78925e3b8d23b30ce0cde40e
   ReactNativeKeyboardTrackingView: 02137fac3b2ebd330d74fa54ead48b14750a2306
-  ReactNativeNavigation: e748d4b1bfb8dbe9c23081a37babc14a9ac2f990
+  ReactNativeNavigation: e62ba14d9cd44774dca6068b6559ec872e0e61a6
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNAudioRecorderPlayer: f790fc1afb118552ae6285d60adde52ee6b5d9ef
   RNCalendarEvents: 7e65eb4a94f53c1744d1e275f7fafcfaa619f7a3
@@ -1248,13 +1241,13 @@ SPEC CHECKSUMS:
   SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
   simdjson: e6bfae9ce4bcdc80452d388d593816f1ca2106f3
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
-  Starscream: e7497aedb1c2e27d2a672d40286fd1b34f20f2e4
+  Starscream: 19b5533ddb925208db698f0ac508a100b884a1b9
   SwiftyJSON: f5b1bf1cd8dd53cd25887ac0eabcfd92301c6a5a
   Swime: d7b2c277503b6cea317774aedc2dce05613f8b0b
   WatermelonDB: 842d22ba555425aa9f3ce551239a001200c539bc
   Yoga: 4c3aa327e4a6a23eeacd71f61c81df1bcdf677d5
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: c65ff41ab84069d06831d08046a3b372aac54242
+PODFILE CHECKSUM: 483198bbbf3e2e8320cf2746cb8f9c26dc31d6fe
 
 COCOAPODS: 1.14.3

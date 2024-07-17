@@ -61,9 +61,6 @@ target 'kChat' do
   pod 'React-jsc', :path => '../node_modules/react-native/ReactCommon/jsc', :modular_headers => true
   pod 'simdjson', path: '../node_modules/@nozbe/simdjson', :modular_headers => true
 
-  # TODO: Remove this once upstream PR https://github.com/daltoniam/Starscream/pull/871 is merged
-  pod 'Starscream', :git => 'https://github.com/mattermost/Starscream.git', :commit => '7494780a021e44873e6e5fde5026ef96696c1865'
-
   pod 'JitsiMeetSDKLite', '9.2.2-lite'
 
   post_install do |installer|
