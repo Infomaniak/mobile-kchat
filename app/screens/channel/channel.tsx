@@ -103,7 +103,7 @@ const Channel = ({
         wsClient?.bindPresenceChannel(channelId);
 
         return () => {
-            wsClient?.unbindPresenceChannel(channelId);
+            wsClient?.unbindPresenceChannel();
             cancelAnimationFrame(raf);
             clearTimeout(t);
             removeLastViewedChannelIdAndServer();

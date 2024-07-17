@@ -1,3 +1,31 @@
+diff --git a/node_modules/@mattermost/react-native-network-client/android/src/main/java/com/mattermost/networkclient/NetworkClientPackage.kt b/node_modules/@mattermost/react-native-network-client/android/src/main/java/com/mattermost/networkclient/NetworkClientPackage.kt
+index d58511e..d9c96aa 100644
+--- a/node_modules/@mattermost/react-native-network-client/android/src/main/java/com/mattermost/networkclient/NetworkClientPackage.kt
++++ b/node_modules/@mattermost/react-native-network-client/android/src/main/java/com/mattermost/networkclient/NetworkClientPackage.kt
+@@ -31,6 +31,7 @@ class NetworkClientPackage : TurboReactPackage() {
+                         false,
+                         false,
+                         false,
++                        false,
+                         BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
+                 ),
+                 ApiClientModuleImpl.NAME to ReactModuleInfo(
+@@ -39,6 +40,7 @@ class NetworkClientPackage : TurboReactPackage() {
+                         false,
+                         false,
+                         false,
++                        false,
+                         BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
+                 ),
+                 WebSocketClientModuleImpl.NAME to ReactModuleInfo(
+@@ -47,6 +49,7 @@ class NetworkClientPackage : TurboReactPackage() {
+                         false,
+                         false,
+                         false,
++                        false,
+                         BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
+                 )
+         )
 diff --git a/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/NativeWebSocketClient.d.ts b/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/NativeWebSocketClient.d.ts
 index 1c27c00..536569e 100644
 --- a/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/NativeWebSocketClient.d.ts
@@ -18,7 +46,7 @@ index 1c27c00..536569e 100644
  export interface Spec extends TurboModule {
      addListener: (eventType: string) => void;
 diff --git a/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts b/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts
-index 1cfd45e..236bed5 100644
+index 1cfd45e..81b8586 100644
 --- a/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts
 +++ b/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts
 @@ -1,5 +1,6 @@
@@ -34,7 +62,7 @@ index 1cfd45e..236bed5 100644
  }
 -declare function getOrCreateWebSocketClient(url: string, config?: WebSocketClientConfiguration, clientErrorEventHandler?: WebSocketClientErrorEventHandler): Promise<{
 -    client: WebSocketClient;
-+declare function getOrCreateWebSocketClient(url: string, config?: WebSocketClientConfiguration): Promise<{
++declare function getOrCreateWebSocketClient(url: string, serverUrl: string, config?: WebSocketClientConfiguration): Promise<{
 +    client: Pusher;
      created: boolean;
  }>;
@@ -59,7 +87,7 @@ index e8f60de..7925a7b 100644
  
  export interface Spec extends TurboModule {
 diff --git a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
-index c4389f2..746a5d9 100644
+index c4389f2..83bf4cc 100644
 --- a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
 +++ b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
 @@ -3,6 +3,7 @@
@@ -79,9 +107,11 @@ index c4389f2..746a5d9 100644
  const CREATING_CLIENT: { [key: string]: boolean } = {};
  
  /**
-@@ -147,8 +148,7 @@ class WebSocketClient implements WebSocketClientInterface {
+@@ -146,9 +147,9 @@ class WebSocketClient implements WebSocketClientInterface {
+ 
  async function getOrCreateWebSocketClient(
      url: string,
++    serverUrl: string,
      config: WebSocketClientConfiguration = {},
 -    clientErrorEventHandler?: WebSocketClientErrorEventHandler,
 -): Promise<{ client: WebSocketClient; created: boolean }> {
@@ -89,7 +119,7 @@ index c4389f2..746a5d9 100644
      if (!isValidWebSocketURL(url)) {
          throw new Error(`"${url}" is not a valid WebSocket URL`);
      }
-@@ -161,10 +161,18 @@ async function getOrCreateWebSocketClient(
+@@ -161,10 +162,18 @@ async function getOrCreateWebSocketClient(
          }
          CREATING_CLIENT[url] = true;
          created = true;
@@ -100,7 +130,7 @@ index c4389f2..746a5d9 100644
 +        client = new Pusher('kchat-key', {
 +            wsHost: url,
 +            httpHost: url,
-+            authEndpoint: `${this.serverUrl}/broadcasting/auth`,
++            authEndpoint: `${serverUrl}/broadcasting/auth`,
 +            auth: { headers: config.headers },
 +            enabledTransports: ['ws', 'wss'],
 +            disabledTransports: ['xhr_streaming', 'xhr_polling', 'sockjs'],
