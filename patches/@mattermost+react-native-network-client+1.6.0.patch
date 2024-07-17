@@ -1,0 +1,114 @@
+diff --git a/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/NativeWebSocketClient.d.ts b/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/NativeWebSocketClient.d.ts
+index 1c27c00..536569e 100644
+--- a/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/NativeWebSocketClient.d.ts
++++ b/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/NativeWebSocketClient.d.ts
+@@ -19,10 +19,10 @@ export declare enum WebSocketEvents {
+     READY_STATE_EVENT = "WebSocketClient-ReadyState"
+ }
+ export declare enum WebSocketReadyState {
+-    CONNECTING = 0,
+-    OPEN = 1,
+-    CLOSING = 2,
+-    CLOSED = 3
++    CONNECTING = 'connecting',
++    OPEN = 'connected',
++    CLOSING = 'disconnected', // No equivalent for pusher state https://pusher.com/docs/channels/using_channels/connection/#available-states
++    CLOSED = 'disconnected',
+ }
+ export interface Spec extends TurboModule {
+     addListener: (eventType: string) => void;
+diff --git a/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts b/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts
+index 1cfd45e..236bed5 100644
+--- a/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts
++++ b/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts
+@@ -1,5 +1,6 @@
+ import { type EmitterSubscription } from "react-native";
+ import type { WebSocketClientConfiguration, WebSocketClientErrorEventHandler, WebSocketClientInterface, WebSocketEventHandler } from "@mattermost/react-native-network-client";
++import type Pusher from 'pusher-js/react-native';
+ import { WebSocketReadyState } from "./NativeWebSocketClient";
+ /**
+  * Configurable WebSocket client
+@@ -24,8 +25,8 @@ declare class WebSocketClient implements WebSocketClientInterface {
+     onClientError: (callback: WebSocketClientErrorEventHandler) => void;
+     invalidate: () => Promise<void>;
+ }
+-declare function getOrCreateWebSocketClient(url: string, config?: WebSocketClientConfiguration, clientErrorEventHandler?: WebSocketClientErrorEventHandler): Promise<{
+-    client: WebSocketClient;
++declare function getOrCreateWebSocketClient(url: string, config?: WebSocketClientConfiguration): Promise<{
++    client: Pusher;
+     created: boolean;
+ }>;
+ export { getOrCreateWebSocketClient };
+diff --git a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/NativeWebSocketClient.ts b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/NativeWebSocketClient.ts
+index e8f60de..7925a7b 100644
+--- a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/NativeWebSocketClient.ts
++++ b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/NativeWebSocketClient.ts
+@@ -27,10 +27,10 @@ export enum WebSocketEvents {
+ }
+ 
+ export enum WebSocketReadyState {
+-    CONNECTING,
+-    OPEN,
+-    CLOSING,
+-    CLOSED,
++    CONNECTING = 'connecting',
++    OPEN = 'connected',
++    CLOSING = 'disconnected', // No equivalent for pusher state https://pusher.com/docs/channels/using_channels/connection/#available-states
++    CLOSED = 'disconnected',
+ }
+ 
+ export interface Spec extends TurboModule {
+diff --git a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
+index c4389f2..746a5d9 100644
+--- a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
++++ b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
+@@ -3,6 +3,7 @@
+ 
+ import { NativeEventEmitter, type EmitterSubscription } from "react-native";
+ import isURL from "validator/es/lib/isURL";
++import Pusher from 'pusher-js/react-native';
+ 
+ import type {
+     WebSocketClientConfiguration,
+@@ -19,7 +20,7 @@ import NativeWebSocketClient, {
+ 
+ const Emitter = new NativeEventEmitter(NativeWebSocketClient);
+ 
+-const CLIENTS: { [key: string]: WebSocketClient } = {};
++const CLIENTS: { [key: string]: Pusher } = {};
+ const CREATING_CLIENT: { [key: string]: boolean } = {};
+ 
+ /**
+@@ -147,8 +148,7 @@ class WebSocketClient implements WebSocketClientInterface {
+ async function getOrCreateWebSocketClient(
+     url: string,
+     config: WebSocketClientConfiguration = {},
+-    clientErrorEventHandler?: WebSocketClientErrorEventHandler,
+-): Promise<{ client: WebSocketClient; created: boolean }> {
++): Promise<{ client: Pusher; created: boolean }> {
+     if (!isValidWebSocketURL(url)) {
+         throw new Error(`"${url}" is not a valid WebSocket URL`);
+     }
+@@ -161,10 +161,18 @@ async function getOrCreateWebSocketClient(
+         }
+         CREATING_CLIENT[url] = true;
+         created = true;
+-        client = new WebSocketClient(url);
+-        if (clientErrorEventHandler) {
+-            client.onClientError(clientErrorEventHandler);
+-        }
++        client = new Pusher('kchat-key', {
++            wsHost: url,
++            httpHost: url,
++            authEndpoint: `${this.serverUrl}/broadcasting/auth`,
++            auth: { headers: config.headers },
++            enabledTransports: ['ws', 'wss'],
++            disabledTransports: ['xhr_streaming', 'xhr_polling', 'sockjs'],
++            activityTimeout: 10000,
++            pongTimeout: 5000,
++            unavailableTimeout: 3000,
++            cluster: 'eu',
++        });
+         await NativeWebSocketClient.ensureClientFor(url, config);
+         CLIENTS[url] = client;
+         delete CREATING_CLIENT[url];
