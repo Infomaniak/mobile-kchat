@@ -67,11 +67,30 @@ PODS:
     - ExpoModulesCore
   - FBLazyVector (0.74.2)
   - fmt (9.1.0)
-  - Giphy (2.2.6):
+  - Giphy (2.2.9):
     - libwebp
-  - giphy-react-native-sdk (2.4.2):
-    - Giphy (= 2.2.6)
+  - giphy-react-native-sdk (3.2.6):
+    - DoubleConversion
+    - Giphy (= 2.2.9)
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - glog (0.3.5)
   - GoogleSignIn (7.1.0):
     - AppAuth (< 2.0, >= 1.7.3)
@@ -2169,8 +2188,8 @@ SPEC CHECKSUMS:
   ExpoWebBrowser: 7595ccac6938eb65b076385fd23d035db9ecdc8e
   FBLazyVector: 4bc164e5b5e6cfc288d2b5ff28643ea15fa1a589
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
-  Giphy: f64bff5937fbc4987b6a26c8ef625501c68a1e97
-  giphy-react-native-sdk: 0df3924c050ca12d32dace063e8bcb92e40a4afa
+  Giphy: 28cef321358869cc871b98ea5e3d707fc1f36fc6
+  giphy-react-native-sdk: 25b1d546f0edb74f8d3b0fa8be2e3f534bf362b2
   glog: fdfdfe5479092de0c4bdbebedd9056951f092c4f
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
