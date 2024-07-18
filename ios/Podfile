@@ -43,7 +43,7 @@ target 'kChat' do
   pod 'React-jsc', :path => '../node_modules/react-native/ReactCommon/jsc', :modular_headers => true
   pod 'simdjson', path: '../node_modules/@nozbe/simdjson', :modular_headers => true
 
-  pod 'JitsiMeetSDKLite', '9.2.2-lite'
+  pod 'JitsiMeetSDKLite', :git => 'https://github.com/tdwio/jitsi-meet-ios-sdk-releases.git', :commit => 'e8132fc0dd241e8857573a89c607034ce72039fa'
   
   post_install do |installer|
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
