@@ -87,7 +87,7 @@ index e8f60de..7925a7b 100644
  
  export interface Spec extends TurboModule {
 diff --git a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
-index c4389f2..83bf4cc 100644
+index c4389f2..cfa3ff9 100644
 --- a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
 +++ b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
 @@ -3,6 +3,7 @@
@@ -107,7 +107,7 @@ index c4389f2..83bf4cc 100644
  const CREATING_CLIENT: { [key: string]: boolean } = {};
  
  /**
-@@ -146,9 +147,9 @@ class WebSocketClient implements WebSocketClientInterface {
+@@ -146,13 +147,9 @@ class WebSocketClient implements WebSocketClientInterface {
  
  async function getOrCreateWebSocketClient(
      url: string,
@@ -115,11 +115,15 @@ index c4389f2..83bf4cc 100644
      config: WebSocketClientConfiguration = {},
 -    clientErrorEventHandler?: WebSocketClientErrorEventHandler,
 -): Promise<{ client: WebSocketClient; created: boolean }> {
+-    if (!isValidWebSocketURL(url)) {
+-        throw new Error(`"${url}" is not a valid WebSocket URL`);
+-    }
+-
 +): Promise<{ client: Pusher; created: boolean }> {
-     if (!isValidWebSocketURL(url)) {
-         throw new Error(`"${url}" is not a valid WebSocket URL`);
-     }
-@@ -161,10 +162,18 @@ async function getOrCreateWebSocketClient(
+     let created = false;
+     let client = CLIENTS[url];
+     if (!client) {
+@@ -161,10 +158,18 @@ async function getOrCreateWebSocketClient(
          }
          CREATING_CLIENT[url] = true;
          created = true;
