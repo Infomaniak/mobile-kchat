@@ -8,7 +8,7 @@ import FileIcon from '@app/components/files/file_icon';
 import ProgressiveImage from '@app/components/progressive_image';
 import {useServerUrl} from '@app/context/server';
 import {FileTypes} from '@app/utils/file/constants';
-import {getFormat, getFormattedFileSize} from '@utils/file';
+import {getFileType, getFormattedFileSize} from '@utils/file';
 
 import {getStyleSheet} from './styles';
 
@@ -41,10 +41,9 @@ export const FileCard: React.FC<CardProps> = ({post, theme}) => {
 
     let file = null;
     if (files.length > 0) {
-        const extension = files[0].extension;
         const thumbnailUri = buildFileThumbnailUrl(serverUrl, files[0].id);
         const imageUri = buildFilePreviewUrl(serverUrl, files[0].id);
-        const fileType = getFormat(extension);
+        const fileType = getFileType(files[0]);
 
         switch (fileType) {
             case FileTypes.IMAGE:
