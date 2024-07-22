@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "7FC5698528563FDB000B0905"
-               BuildableName = "kChatShareExtension.appex"
-               BlueprintName = "kChatShareExtension"
+               BuildableName = "kChatShare.appex"
+               BlueprintName = "kChatShare"
                ReferencedContainer = "container:kChat.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
