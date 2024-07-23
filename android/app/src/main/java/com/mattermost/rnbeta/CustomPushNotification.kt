@@ -6,7 +6,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.mattermost.call.CallActivity.BROADCAST_RECEIVER_DISMISS_CALL_TAG
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.mattermost.call.CallActivity
 import com.mattermost.call.CallManagerModule
 import com.mattermost.helpers.CustomPushNotificationHelper
 import com.mattermost.helpers.DatabaseHelper
@@ -14,6 +15,10 @@ import com.mattermost.helpers.Network
 import com.mattermost.helpers.PushNotificationDataHelper
 import com.mattermost.helpers.database_extension.getServerUrlForIdentifier
 import com.mattermost.notification.NotificationUtils
+import com.mattermost.notification.NotificationUtils.NOTIFICATION_TYPE_CANCEL_CALL_VALUE
+import com.mattermost.notification.NotificationUtils.NOTIFICATION_TYPE_JOINED_CALL_VALUE
+import com.mattermost.notification.NotificationUtils.createCallNotification
+import com.mattermost.notification.NotificationUtils.dismissCallNotification
 import com.mattermost.rnutils.helpers.NotificationHelper
 import com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME
 import com.wix.reactnativenotifications.core.AppLaunchHelper
@@ -26,7 +31,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class CustomPushNotification(
-        context: Context,
+        val context: Context,
         bundle: Bundle,
         appLifecycleFacade: AppLifecycleFacade,
         appLaunchHelper: AppLaunchHelper,
@@ -87,18 +92,18 @@ class CustomPushNotification(
             }
         }
 
-        if (!CustomPushNotificationHelper.verifySignature(mContext, signature, serverUrl, ackId)) {
+        if (!CustomPushNotificationHelper.verifySignature(context, signature, serverUrl, ackId)) {
             Log.i("Mattermost Notifications Signature verification", "Notification skipped because we could not verify it.")
             return
         }
 
-        finishProcessingNotification(serverUrl, type, channelId, notificationId)
+        finishProcessingNotification(serverId, serverUrl, type, channelId, channelName, postId, notificationId, ackId, conferenceId, conferenceJWT, isIdLoaded, signature)
     }
 
     override fun onOpened() {
         mNotificationProps?.let {
             digestNotification()
-            NotificationHelper.clearChannelOrThreadNotifications(mContext, it.asBundle())
+            NotificationHelper.clearChannelOrThreadNotifications(context, it.asBundle())
         }
     }
 
@@ -109,17 +114,17 @@ class CustomPushNotification(
         val isReactInit = mAppLifecycleFacade.isReactInitialized()
 
         if ((
-            type === CustomPushNotificationHelper.NOTIFICATION_TYPE_CANCEL_CALL_VALUE ||
-            type === CustomPushNotificationHelper.NOTIFICATION_TYPE_JOINED_CALL_VALUE
+            type === NOTIFICATION_TYPE_CANCEL_CALL_VALUE ||
+            type === NOTIFICATION_TYPE_JOINED_CALL_VALUE
         ) && conferenceId != null) {
-            NotificationUtils.dismissCallNotification(mContext, conferenceId)
+            context.dismissCallNotification(conferenceId)
             broadcastCallEvent(conferenceId)
         } else if (conferenceJWT != null) {
             val callExtras = NotificationUtils.CallExtras(
                 channelId, serverId, conferenceId,
                 channelName, conferenceJWT
             )
-            val callNotification = NotificationUtils.createCallNotification(mContext, callExtras)
+            val callNotification = context.createCallNotification(callExtras)
             super.postNotification(callNotification, notificationId)
         } else {
             when (type) {
@@ -138,13 +143,13 @@ class CustomPushNotification(
                                         mNotificationProps = createProps(notificationBundle)
                                     }
                                 }
-                                createSummary = NotificationHelper.addNotificationToPreferences(mContext, notificationId, notificationBundle)
+                                createSummary = NotificationHelper.addNotificationToPreferences(context, notificationId, notificationBundle)
                             }
                         }
                         buildNotification(notificationId, createSummary)
                     }
                 }
-                CustomPushNotificationHelper.PUSH_TYPE_CLEAR -> NotificationHelper.clearChannelOrThreadNotifications(mContext, mNotificationProps.asBundle())
+                CustomPushNotificationHelper.PUSH_TYPE_CLEAR -> NotificationHelper.clearChannelOrThreadNotifications(context, mNotificationProps.asBundle())
             }
         }
 
@@ -154,14 +159,14 @@ class CustomPushNotification(
     }
 
     private fun broadcastCallEvent(conferenceId: String) {
-        Intent callEventIntent = new Intent()
+        val callEventIntent = Intent()
         callEventIntent.putExtra(NotificationUtils.CONFERENCE_ID_KEY, conferenceId)
-        callEventIntent.setAction(BROADCAST_RECEIVER_DISMISS_CALL_TAG)
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(callEventIntent)
+        callEventIntent.setAction(CallActivity.BROADCAST_RECEIVER_DISMISS_CALL_TAG)
+        LocalBroadcastManager.getInstance(context).sendBroadcast(callEventIntent)
     }
 
     private fun buildNotification(notificationId: Int, createSummary: Boolean) {
-        val pendingIntent = NotificationIntentAdapter.createPendingNotificationIntent(mContext, mNotificationProps)
+        val pendingIntent = NotificationIntentAdapter.createPendingNotificationIntent(context, mNotificationProps)
         val notification = buildNotification(pendingIntent)
         if (createSummary) {
             val summary = getNotificationSummaryBuilder(pendingIntent).build()
@@ -172,12 +177,12 @@ class CustomPushNotification(
 
     override fun getNotificationBuilder(intent: PendingIntent): NotificationCompat.Builder {
         val bundle = mNotificationProps.asBundle()
-        return CustomPushNotificationHelper.createNotificationBuilder(mContext, intent, bundle, false)
+        return CustomPushNotificationHelper.createNotificationBuilder(context, intent, bundle, false)
     }
 
     private fun getNotificationSummaryBuilder(intent: PendingIntent): NotificationCompat.Builder {
         val bundle = mNotificationProps.asBundle()
-        return CustomPushNotificationHelper.createNotificationBuilder(mContext, intent, bundle, true)
+        return CustomPushNotificationHelper.createNotificationBuilder(context, intent, bundle, true)
     }
 
     private fun notifyReceivedToJS() {

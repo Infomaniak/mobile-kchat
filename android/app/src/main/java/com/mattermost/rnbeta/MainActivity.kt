@@ -5,18 +5,16 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
-
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 import com.facebook.react.ReactActivityDelegate
-
 import com.mattermost.call.CallManagerModule
 import com.mattermost.hardware.keyboard.MattermostHardwareKeyboardImpl
 import com.mattermost.notification.NotificationUtils
+import com.mattermost.notification.NotificationUtils.dismissCallNotification
 import com.mattermost.rnutils.helpers.FoldableObserver
-
+import com.oney.WebRTCModule.WebRTCModuleOptions
 import com.reactnativenavigation.NavigationActivity
-
 import expo.modules.ReactActivityDelegateWrapper
 
 class MainActivity : NavigationActivity() {
@@ -94,12 +92,12 @@ class MainActivity : NavigationActivity() {
         if (intent != null && intent.getExtras() != null) {
             Log.i("handleIntentExtras", "intent.getExtras() != null")
             val options: WebRTCModuleOptions = WebRTCModuleOptions.getInstance()
-            val bundle: Bundle = intent.getExtras()
-            val channelId: String = bundle.getString(NotificationUtils.CHANNEL_ID_KEY)
-            val serverId: String = bundle.getString(NotificationUtils.SERVER_ID_KEY)
-            val conferenceId: String = bundle.getString(NotificationUtils.CONFERENCE_ID_KEY)
-            val conferenceJWT: String = bundle.getString(NotificationUtils.CONFERENCE_JWT_KEY)
-            val callManagerModule: CallManagerModule = CallManagerModule.getInstance()
+            val bundle = intent.getExtras()
+            val channelId = bundle?.getString(NotificationUtils.CHANNEL_ID_KEY)
+            val serverId = bundle?.getString(NotificationUtils.SERVER_ID_KEY)
+            val conferenceId = bundle?.getString(NotificationUtils.CONFERENCE_ID_KEY)
+            val conferenceJWT = bundle?.getString(NotificationUtils.CONFERENCE_JWT_KEY)
+            val callManagerModule = CallManagerModule.getInstance()
 
             if (callManagerModule != null
                     && channelId != null
@@ -115,7 +113,7 @@ class MainActivity : NavigationActivity() {
             if (conferenceId != null) {
                 Log.i("handleIntentExtras", "conferenceId == " + conferenceId)
                 Log.i("handleIntentExtras", "dismissCallNotification")
-                NotificationUtils.dismissCallNotification(this, conferenceId)
+                dismissCallNotification(conferenceId)
             }
         } else {
             Log.i("handleIntentExtras", "intent extras null")

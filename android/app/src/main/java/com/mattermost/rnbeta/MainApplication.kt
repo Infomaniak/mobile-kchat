@@ -21,6 +21,7 @@ import com.facebook.react.ReactPackage
 import com.facebook.soloader.SoLoader
 
 import com.mattermost.networkclient.RCTOkHttpClientFactory
+import com.mattermost.notification.NotificationUtils.createCallNotificationChannel
 import com.mattermost.rnshare.helpers.RealPathUtil
 
 import com.nozbe.watermelondb.jsi.JSIInstaller
@@ -95,7 +96,7 @@ class MainApplication : NavigationApplication(), INotificationsApplication {
         val options: WebRTCModuleOptions = WebRTCModuleOptions.getInstance()
         options.enableMediaProjectionService = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationUtils.createCallNotificationChannel(context)
+            createCallNotificationChannel()
         }
 
         ApplicationLifecycleDispatcher.onApplicationCreate(this)
