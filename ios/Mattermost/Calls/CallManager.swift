@@ -336,8 +336,8 @@ extension CallManager: PKPushRegistryDelegate {
       return
     }
 
+    reportCallEnded(conferenceId: conferenceId)
     callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .remoteEnded)
-    currentCalls[existingCall.localUUID] = nil
     completion()
   }
 
@@ -350,6 +350,7 @@ extension CallManager: PKPushRegistryDelegate {
       return
     }
 
+    reportCallEnded(conferenceId: conferenceId)
     callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .answeredElsewhere)
     completion()
   }
