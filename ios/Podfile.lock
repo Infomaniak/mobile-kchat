@@ -1147,8 +1147,8 @@ PODS:
   - React-Mapbuffer (0.74.2):
     - glog
     - React-debug
-  - react-native-app-auth (7.0.0-rc2):
-    - AppAuth (~> 1.6)
+  - react-native-app-auth (7.2.0):
+    - AppAuth (>= 1.7.3)
     - React-Core
   - react-native-background-timer (2.4.1):
     - React-Core
@@ -2187,7 +2187,7 @@ SPEC CHECKSUMS:
   React-jsitracing: 0fa7f78d8fdda794667cb2e6f19c874c1cf31d7e
   React-logger: 29fa3e048f5f67fe396bc08af7606426d9bd7b5d
   React-Mapbuffer: bf56147c9775491e53122a94c423ac201417e326
-  react-native-app-auth: 05c3b875b27bb65fe321bd5dc38cc1c04c5158be
+  react-native-app-auth: 63fa4e58c5bd29aeb974d3a06a23c5858322d533
   react-native-background-timer: 17ea5e06803401a379ebf1f20505b793ac44d0fe
   react-native-cameraroll: a9138c165c9975da773d26945591d313992c799b
   react-native-color-matrix-image-filters: e2df0971b44f1aba49f4740463fdda857d467adf

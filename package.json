@@ -74,7 +74,7 @@
     "react-i18next": "11.18.6",
     "react-intl": "6.6.8",
     "react-native": "0.74.2",
-    "react-native-app-auth": "7.0.0-rc2",
+    "react-native-app-auth": "7.2.0",
     "react-native-audio-recorder-player": "3.6.6",
     "react-native-background-timer": "2.4.1",
     "react-native-button": "3.1.0",

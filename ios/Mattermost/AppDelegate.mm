@@ -141,18 +141,39 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
 }
 
 // Required for deeplinking
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options{
+- (BOOL) application: (UIApplication *)application
+             openURL: (NSURL *)url
+             options: (NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
+{
+  // https://commerce.nearform.com/open-source/react-native-app-auth/docs#define-openurl-callback-in-appdelegate
+  if ([self.authorizationFlowManagerDelegate resumeExternalUserAgentFlowWithURL:url]) {
+    return YES;
+  }
   return [RCTLinkingManager application:application openURL:url options:options];
 }
 
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+- (BOOL) application: (UIApplication *)application
+             openURL: (NSURL *)url
+   sourceApplication: (NSString *)sourceApplication
+          annotation: (id)annotation
+{
   return [RCTLinkingManager application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
 }
 
 // Only if your app is using [Universal Links](https://developer.apple.com/library/prerelease/ios/documentation/General/Conceptual/AppSearch/UniversalLinks.html).
-- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity
- restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> *restorableObjects))restorationHandler
+- (BOOL) application: (UIApplication *)application
+continueUserActivity: (nonnull NSUserActivity *)userActivity
+  restorationHandler: (nonnull void (^)(NSArray<id<UIUserActivityRestoring>> *_Nullable))restorationHandler
 {
+  if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
+    if (self.authorizationFlowManagerDelegate) {
+      BOOL resumableAuth = [self.authorizationFlowManagerDelegate resumeExternalUserAgentFlowWithURL:userActivity.webpageURL];
+      if (resumableAuth) {
+        return YES;
+      }
+    }
+  }
+
   INInteraction *interaction = userActivity.interaction;
   if ([interaction.intent isKindOfClass:[INStartAudioCallIntent class]]) {
       INStartAudioCallIntent *startAudioCallIntent = (INStartAudioCallIntent *)interaction.intent;
