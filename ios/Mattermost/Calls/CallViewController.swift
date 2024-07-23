@@ -151,12 +151,7 @@ private class CallViewController: UIViewController {
 
 extension CallViewController: JitsiMeetViewDelegate {
   func conferenceTerminated(_ data: [AnyHashable: Any]!) {
-    let conferenceId = meetCall.conferenceId
-    UIView.animate(withDuration: 0.25) { [weak self] in
-      self?.view.alpha = 0
-    } completion: { [weak self] _ in
-      self?.delegate?.onConferenceTerminated(conferenceId: conferenceId)
-    }
+    closeCallScreen()
   }
 
   func audioMutedChanged(_ data: [AnyHashable: Any]!) {
@@ -167,5 +162,18 @@ extension CallViewController: JitsiMeetViewDelegate {
   func videoMutedChanged(_ data: [AnyHashable: Any]!) {
     guard let conferenceId = meetCall.conferenceId else { return }
     delegate?.onVideoMuted(conferenceId: conferenceId, isMuted: (data["muted"] as? Int ?? 0) == 4)
+  }
+  
+  func ready(toClose data: [AnyHashable : Any]!) {
+    closeCallScreen()
+  }
+  
+  func closeCallScreen() {
+    let conferenceId = meetCall.conferenceId
+    UIView.animate(withDuration: 0.25) { [weak self] in
+      self?.view.alpha = 0
+    } completion: { [weak self] _ in
+      self?.delegate?.onConferenceTerminated(conferenceId: conferenceId)
+    }
   }
 }
