@@ -28,9 +28,10 @@ const POST_OPTIONS_BUTTON = 'close-post-options';
 type Props = {
     post: PostModel;
     componentId: string;
+    postId: string;
 };
 
-const IKReminder = ({post, componentId}: Props) => {
+const IKReminder = ({post, postId, componentId}: Props) => {
     const serverUrl = useServerUrl();
     const {bottom} = useSafeAreaInsets();
     const isTablet = useIsTablet();
@@ -56,7 +57,10 @@ const IKReminder = ({post, componentId}: Props) => {
 
     useNavButtonPressed(POST_OPTIONS_BUTTON, componentId, close, []);
 
-    const isSystemPost = isSystemMessage(post);
+    let isSystemPost = true;
+    if (post) {
+        isSystemPost = isSystemMessage(post);
+    }
 
     const snapPoints = useMemo(() => {
         const items: Array<string | number> = [1];
@@ -94,7 +98,11 @@ const IKReminder = ({post, componentId}: Props) => {
     const addPostReminder = async (timestamp: number) => {
         try {
             const client = NetworkManager.getClient(serverUrl);
-            await client.addPostReminder(post.id, timestamp);
+            if (post) {
+                await client.addPostReminder(post.id, timestamp);
+            } else {
+                await client.addPostReminder(postId, timestamp);
+            }
         } catch (e) {
             // do nothing
         }
