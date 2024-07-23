@@ -321,16 +321,30 @@ const Post = ({
                     post={post}
                 />
                 {post.type === 'system_post_reminder' && (
-                    <TouchableOpacity
-                        style={[buttonBackgroundStyle(theme, 's', 'primary'), {width: '100%'}]}
-                        onPress={handlePostponePress}
-                    >
-                        <FormattedText
-                            id='infomaniak.post.reminder.postpone'
-                            defaultMessage='Postpone the reminder'
-                            style={buttonTextStyle(theme, 's', 'primary')}
-                        />
-                    </TouchableOpacity>
+                    <View>
+                        <TouchableOpacity
+                            style={[buttonBackgroundStyle(theme, 'm', 'primary'), {width: '100%'}]}
+                            onPress={handlePostponePress}
+                        >
+                            <FormattedText
+                                id='infomaniak.post.reminder.postpone'
+                                defaultMessage='Postpone the reminder'
+                                style={buttonTextStyle(theme, 's', 'primary')}
+                            />
+                        </TouchableOpacity>
+                        <View style={{marginTop: 10}}>
+                            <TouchableOpacity
+                                style={[buttonBackgroundStyle(theme, 'm', 'secondary'), {width: '100%'}]}
+                                onPress={handlePostponePress}
+                            >
+                                <FormattedText
+                                    id='infomaniak.post.reminder.markAsCompleted'
+                                    defaultMessage='Mark as completed'
+                                    style={buttonTextStyle(theme, 's', 'secondary')}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 )}
             </>
 

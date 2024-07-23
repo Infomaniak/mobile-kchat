@@ -1116,6 +1116,7 @@
     "infomaniak.post_info.post_reminder.sub_menu.monday": "Lundi",
     "infomaniak.post_info.post_reminder.sub_menu.custom": "Personnalisé",
     "infomaniak.post.reminder.postpone": "Différer le rappel",
+    "infomaniak.post.reminder.markAsCompleted" : "Marquer comme terminé",
     "infomaniak.post.reminder.systemBot": "Bonjour, voici votre rappel concernant ce message de {username} :\n{permaLink}",
     "infomaniak.post_info.post_translate.menu": "Traduire",
     "infomaniak.intro_messages.botGPT": "{limit} requêtes ChatGPT quotidiennes sont gratuitement incluses avec kChat jusqu'au {day} décembre 2024 afin de vous permettre de comparer et tester la puissance de {botName}, notre IA souveraine. Avec {botName}, les données sont exclusivement traitées en Suisse sur les serveurs d'Infomaniak. En utilisant ChatGPT, les données sont envoyées et analysées sur les serveurs d'OpenAI aux Etats-Unis. Nous vous conseillons de ne pas partager des informations sensibles à ChatGPT et nous vous rappelons que les IA peuvent générer des informations inexactes, incomplètes ou trompeuses.",
