@@ -1,13 +1,14 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {type ReactNode, useEffect, useMemo, useRef, useState} from 'react';
+import React, {type ReactNode, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {Keyboard, Platform, type StyleProp, View, type ViewStyle, TouchableHighlight} from 'react-native';
+import {Keyboard, Platform, type StyleProp, View, type ViewStyle, TouchableHighlight, TouchableOpacity} from 'react-native';
 
 import {removePost} from '@actions/local/post';
 import {showPermalink} from '@actions/remote/permalink';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
+import FormattedText from '@app/components/formatted_text';
 import {getMarkdownTextStyles} from '@app/utils/markdown';
 import IkCallsCustomMessage from '@calls/components/ik_calls_custom_message';
 import {isCallsCustomMessage} from '@calls/utils';
@@ -20,6 +21,7 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import {openAsBottomSheet} from '@screens/navigation';
+import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {hasJumboEmojiOnly} from '@utils/emoji/helpers';
 import {fromAutoResponder, isFromWebhook, isPostFailed, isPostPendingOrFailed, isSystemMessage} from '@utils/post';
 import {preventDoubleTap} from '@utils/tap';
@@ -179,6 +181,29 @@ const Post = ({
         }
     });
 
+    const handlePostponePress = useCallback(async () => {
+        let postId = post.props.previewed_post;
+
+        if (!post.props.previewed_post) {
+            postId = post.props.link;
+            if (postId.includes('/pl/')) {
+                const parts = postId.split('/pl/');
+                const partAfterPl = parts[1];
+                postId = partAfterPl;
+            }
+        }
+
+        openAsBottomSheet({
+            closeButtonId: 'close-quota-exceeded',
+            screen: Screens.INFOMANIAK_REMINDER,
+            theme,
+            title: '',
+            props: {
+                postId,
+            },
+        });
+    }, [post]);
+
     const showPostOptions = () => {
         if (!post) {
             return;
@@ -290,10 +315,25 @@ const Post = ({
     let body;
     if (isSystemPost && !isEphemeral && !isAutoResponder) {
         body = (
-            <SystemMessage
-                location={location}
-                post={post}
-            />
+            <>
+                <SystemMessage
+                    location={location}
+                    post={post}
+                />
+                {post.type === 'system_post_reminder' && (
+                    <TouchableOpacity
+                        style={[buttonBackgroundStyle(theme, 's', 'primary'), {width: '100%'}]}
+                        onPress={handlePostponePress}
+                    >
+                        <FormattedText
+                            id='infomaniak.post.reminder.postpone'
+                            defaultMessage='Postpone the reminder'
+                            style={buttonTextStyle(theme, 's', 'primary')}
+                        />
+                    </TouchableOpacity>
+                )}
+            </>
+
         );
     } else if (isCallsPost && !hasBeenDeleted) {
         body = <IkCallsCustomMessage post={post}/>;
