@@ -87,7 +87,7 @@ index e8f60de..7925a7b 100644
  
  export interface Spec extends TurboModule {
 diff --git a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
-index c4389f2..cfa3ff9 100644
+index c4389f2..5637053 100644
 --- a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
 +++ b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
 @@ -3,6 +3,7 @@
@@ -146,3 +146,17 @@ index c4389f2..cfa3ff9 100644
          await NativeWebSocketClient.ensureClientFor(url, config);
          CLIENTS[url] = client;
          delete CREATING_CLIENT[url];
+@@ -173,13 +178,4 @@ async function getOrCreateWebSocketClient(
+     return { client, created };
+ }
+ 
+-const isValidWebSocketURL = (url: string) => {
+-    return isURL(url, {
+-        protocols: ["ws", "wss"],
+-        require_protocol: true,
+-        require_valid_protocol: true,
+-        require_host: true,
+-    });
+-};
+-
+ export { getOrCreateWebSocketClient };
