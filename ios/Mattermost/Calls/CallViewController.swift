@@ -130,7 +130,9 @@ private class CallViewController: UIViewController {
 
       let options = JitsiMeetConferenceOptions.fromBuilder { builder in
         builder.room = self.meetCall.channelId
-        builder.serverURL = URL(string: conferenceURL)
+        if let host = URL(string: conferenceURL)?.host {
+          builder.serverURL = URL(string: "https://\(host)")
+        }
 
         builder.token = conferenceJWT
         builder.userInfo = JitsiMeetUserInfo(
