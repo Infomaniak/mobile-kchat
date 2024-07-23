@@ -4,7 +4,7 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 
 import {observeConfigBooleanValue} from '@queries/servers/system';
-import {observeUser} from '@queries/servers/user';
+import {observeCurrentUser, observeUser} from '@queries/servers/user';
 
 import SystemMessage from './system_message';
 
@@ -14,6 +14,7 @@ import type PostModel from '@typings/database/models/servers/post';
 const enhance = withObservables(['post'], ({post, database}: {post: PostModel} & WithDatabaseArgs) => ({
     author: observeUser(database, post.userId),
     hideGuestTags: observeConfigBooleanValue(database, 'HideGuestTags'),
+    currentUser: observeCurrentUser(database),
 }));
 
 export default withDatabase(enhance(SystemMessage));
