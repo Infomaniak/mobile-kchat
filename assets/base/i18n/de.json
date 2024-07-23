@@ -1162,5 +1162,6 @@
     "display_theme.tile.auto": "Automatisch",
     "display_theme.tile.dark": "Dunkel",
     "display_theme.tile.light": "Hell",
-    "guest_banner.text": "Es gibt {count} externe Benutzer in diesem Gespräch."
+    "guest_banner.text": "Es gibt {count} externe Benutzer in diesem Gespräch.",
+    "infomaniak.post.reminder.postpone": "Erinnerung verschieben"
 }
