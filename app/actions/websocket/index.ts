@@ -109,7 +109,7 @@ import {
     handleTeamRestored,
 } from './teams';
 import {handleThreadUpdatedEvent, handleThreadReadChangedEvent, handleThreadFollowChangedEvent} from './threads';
-import {handleUserUpdatedEvent, handleUserTypingEvent, handleStatusChangedEvent} from './users';
+import {handleUserUpdatedEvent, handleUserTypingEvent, handleStatusChangedEvent, handleUserRecordingEvent} from './users';
 
 export async function handleFirstConnect(serverUrl: string) {
     registerDeviceToken(serverUrl);
@@ -327,6 +327,9 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
             break;
         case WebsocketEvents.TYPING:
             handleUserTypingEvent(serverUrl, msg);
+            break;
+        case WebsocketEvents.RECORDING:
+            handleUserRecordingEvent(serverUrl, msg);
             break;
 
         case WebsocketEvents.REACTION_ADDED:
