@@ -1,6 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {Q} from '@nozbe/watermelondb';
+
+import {Preferences} from '@app/constants';
 import {MM_TABLES} from '@constants/database';
 import {buildPreferenceKey} from '@database/operator/server_data_operator/comparators';
 import {shouldUpdateUserRecord} from '@database/operator/server_data_operator/comparators/user';
@@ -49,7 +52,9 @@ const UserHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
         // WE NEED TO SYNC THE PREFS FROM WHAT WE GOT AND WHAT WE HAVE
         const deleteValues: PreferenceModel[] = [];
-        const stored = await this.database.get(PREFERENCE).query().fetch() as PreferenceModel[];
+
+        // Ik changes :  Retrieves all preferences except those in the “THEME” category, otherwise the theme will be reset to the default value.
+        const stored = await this.database.get(PREFERENCE).query(Q.where('category', Q.notEq(Preferences.CATEGORIES.THEME))).fetch() as PreferenceModel[];
         const storedPreferencesMap = new Map(stored.map((p) => {
             return [`${p.category}-${p.name}`, p];
         }));
