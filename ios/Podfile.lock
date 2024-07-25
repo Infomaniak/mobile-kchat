@@ -81,10 +81,11 @@ PODS:
     - FlipperKit/Core
     - FlipperKit/FlipperKitNetworkPlugin
   - fmt (6.2.1)
-  - Giphy (2.2.6):
+  - Giphy (2.2.9):
     - libwebp
-  - giphy-react-native-sdk (2.4.2):
-    - Giphy (= 2.2.6)
+  - giphy-react-native-sdk (3.2.6):
+    - Giphy (= 2.2.9)
+    - RCT-Folly (= 2021.07.22.00)
     - React-Core
   - glog (0.3.5)
   - GoogleSignIn (7.1.0):
@@ -1129,8 +1130,8 @@ SPEC CHECKSUMS:
   Flipper-PeerTalk: 116d8f857dc6ef55c7a5a75ea3ceaafe878aadc9
   FlipperKit: 2efad7007d6745a3f95e4034d547be637f89d3f6
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
-  Giphy: f64bff5937fbc4987b6a26c8ef625501c68a1e97
-  giphy-react-native-sdk: 0df3924c050ca12d32dace063e8bcb92e40a4afa
+  Giphy: 28cef321358869cc871b98ea5e3d707fc1f36fc6
+  giphy-react-native-sdk: 668dca06fc2998eb4d6d92125e7cd42d8cbd4159
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
