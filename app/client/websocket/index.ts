@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {type ClientHeaders, getOrCreateWebSocketClient, WebSocketReadyState} from '@mattermost/react-native-network-client';
-import Pusher, {type Channel} from 'pusher-js/react-native';
+import Pusher, {ConnectionManager, type Channel} from 'pusher-js/react-native';
 
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
@@ -117,7 +117,7 @@ export default class WebSocketClient {
             return;
         }
 
-        this.conn!.connection.bind('connected', () => {
+        this.bindConnection('connected', () => {
             clearTimeout(this.connectionTimeout);
 
             // No need to reset sequence number here.
@@ -142,7 +142,7 @@ export default class WebSocketClient {
             this.connectFailCount = 0;
         });
 
-        this.conn!.connection.bind('disconnected', () => {
+        this.bindConnection('disconnected', () => {
             clearTimeout(this.connectionTimeout);
             this.conn = undefined;
             this.responseSequence = 1;
@@ -190,7 +190,7 @@ export default class WebSocketClient {
             );
         });
 
-        this.conn!.connection.bind('error', (evt: PusherEvent) => {
+        this.bindConnection('error', (evt: PusherEvent) => {
             if (evt?.url === this.url) {
                 this.onError(evt);
             }
@@ -201,15 +201,21 @@ export default class WebSocketClient {
     }
 
     private async connOpen() {
-        const client = NetworkManager.getClient(this.serverUrl);
-        const user = await client.getMe();
-        if (!user) {
-            return;
-        }
+        if (typeof this.conn !== 'undefined') {
+            if (this.conn.connection.state === WebSocketReadyState.CLOSED) {
+                this.conn.connect();
+            }
 
-        this.bindChannel(`private-team.${user.team_id}`, false);
-        this.bindChannel(`presence-user.${user.user_id}`, false);
-        this.bindChannel(`presence-teamUser.${user.id}`);
+            const client = NetworkManager.getClient(this.serverUrl);
+            const user = await client.getMe();
+            if (!user) {
+                return;
+            }
+
+            this.bindChannel(`private-team.${user.team_id}`, false);
+            this.bindChannel(`presence-user.${user.user_id}`, false);
+            this.bindChannel(`presence-teamUser.${user.id}`);
+        }
     }
 
     private onError(evt: PusherEvent) {
@@ -239,15 +245,29 @@ export default class WebSocketClient {
         }
     }
 
+    private bindConnection(...args: Parameters<ConnectionManager['bind']>) {
+        if (typeof this.conn !== 'undefined') {
+            const [eventName] = args;
+            const callbacks = this.conn!.connection.callbacks.get(eventName);
+
+            // Prevent binding the same event listener multiple times
+            if (callbacks.length === 0) {
+                this.conn!.connection.bind(...args);
+            }
+        }
+    }
+
     public bindChannel(channelName: string, ignoreSubscriptionErrors = true) {
         let channel: Channel | undefined;
         if (typeof this.conn !== 'undefined') {
-            channel = this.conn.subscribe(channelName);
-            channel.bind_global((...args: Parameters<WebSocketClient['onMessage']>) => {
-                this.onMessage(...args);
-            });
-            if (!ignoreSubscriptionErrors) {
-                channel.bind('pusher:subscription_error', this.onError);
+            if (!this.conn.channel(channelName)) {
+                channel = this.conn.subscribe(channelName);
+                channel.bind_global((...args: Parameters<WebSocketClient['onMessage']>) => {
+                    this.onMessage(...args);
+                });
+                if (!ignoreSubscriptionErrors) {
+                    channel.bind('pusher:subscription_error', this.onError);
+                }
             }
         }
 
