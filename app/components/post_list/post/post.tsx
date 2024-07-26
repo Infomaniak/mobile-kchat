@@ -224,6 +224,20 @@ const Post = ({
     const itemTestID = `${testID}.${post.id}`;
     const rightColumnStyle: StyleProp<ViewStyle> = [styles.rightColumn, (Boolean(post.rootId) && isLastReply && styles.rightColumnPadding)];
     const pendingPostStyle: StyleProp<ViewStyle> | undefined = isPendingOrFailed ? styles.pendingPost : undefined;
+    const getEmbedFromMetadata = (metadata: PostMetadata) => {
+        if (!metadata || !metadata.embeds || metadata.embeds.length === 0) {
+            return null;
+        }
+        return metadata.embeds[0];
+    };
+    const getEmbed = () => {
+        const {metadata} = post;
+        if (metadata) {
+            return getEmbedFromMetadata(metadata);
+        }
+        return null;
+    };
+    const embed = getEmbed();
 
     let highlightedStyle: StyleProp<ViewStyle>;
     if (highlight) {
@@ -323,8 +337,8 @@ const Post = ({
                 />
 
                 <PreviewMessage
+                    metadata={embed}
                     post={post}
-                    channelDisplayName={post.metadata.embeds[0].data.channel_display_name}
                     theme={theme}
                     location={location}
                     postLink={postLink}

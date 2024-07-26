@@ -34,11 +34,12 @@ type PreviewMessageProps = {
     location: string;
     textStyles?: MarkdownTextStyles;
     siteURL: string;
+    metadata: PostPreviewMetadata;
 };
 
 const SHOW_MORE_HEIGHT = 54;
 
-export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, post, theme, user, postLink, location, siteURL, textStyles}) => {
+export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, post, metadata, theme, user, postLink, location, siteURL, textStyles}) => {
     const [open, setOpen] = useState(false);
     const [layoutWidth, setLayoutWidth] = useState(0);
     const [height, setHeight] = useState<number|undefined>();
@@ -63,36 +64,18 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
         }
     }, []);
 
-    const getEmbedFromMetadata = (metadata: PostMetadata) => {
-        if (!metadata || !metadata.embeds || metadata.embeds.length === 0) {
-            return null;
-        }
-        return metadata.embeds[0];
-    };
-
-    const getEmbed = () => {
-        const {metadata} = post;
-        if (metadata) {
-            return getEmbedFromMetadata(metadata);
-        }
-        return null;
-    };
-
-    const embed = getEmbed();
-
     const displayName = useMemo(() => {
         if (user) {
-            if (embed?.data.post.props.from_webhook === 'true') {
-                return embed.data.post.props.override_username;
+            if (metadata?.data?.post?.props.from_webhook === 'true') {
+                return metadata.data.post.props.override_username;
             }
             return displayUsername(user, undefined, 'full_name', true);
         }
         return '';
-    }, [user, embed?.data.post.props.from_webhook, embed?.data.post.props.override_username]);
+    }, [user, metadata?.data?.post?.props.from_webhook, metadata?.data?.post?.props.override_username]);
 
     const handlePress = async () => {
         const url = normalizeProtocol(postLink);
-
         if (!url) {
             return;
         }
@@ -121,8 +104,16 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
         }
     };
 
-    if (embed?.data && 'post_id' in embed.data && embed.data.post_id && post.metadata?.embeds) {
-        const message = embed.data.post.message;
+    if (metadata?.data && 'post_id' in metadata.data && metadata.data.post_id && metadata.data.post && post.metadata?.embeds) {
+        const message = metadata?.data?.post?.message;
+        let messageEdit;
+        if (metadata?.data?.post?.edit_at) {
+            messageEdit = true;
+        } else {
+            messageEdit = false;
+        }
+        const postFile = metadata.data.post as unknown as PostModel;
+
         return (
             <TouchableOpacity
                 onPress={handlePress}
@@ -134,7 +125,7 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
                         style={styles.previewHeader}
                     >
                         <ProfilePicture
-                            author={embed.data.post}
+                            author={metadata.data.post}
                         />
 
                         <Text
@@ -150,7 +141,7 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
                             />
                         </Text>
                         <FormattedRelativeTime
-                            value={embed.data.post.create_at}
+                            value={metadata?.data?.post?.create_at}
                             testID='post_header.date_time'
                             updateIntervalInSeconds={1}
                             style={styles.time}
@@ -176,12 +167,12 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
                                     layoutWidth={layoutWidth}
                                     imagesMetadata={post as unknown as Record<string, PostImage | undefined>}
                                     textStyles={textStyles}
-                                    isEdited={embed.data.post.edit_at}
+                                    isEdited={messageEdit}
                                 />
 
-                                {embed?.data?.post?.props?.attachments?.[0] && (
+                                {metadata?.data?.post?.props?.attachments?.[0] && (
                                     <MessageAttachment
-                                        attachment={embed?.data?.post?.props?.attachments?.[0]}
+                                        attachment={metadata?.data?.post?.props?.attachments?.[0]}
                                         channelId={post.channelId}
                                         layoutWidth={layoutWidth}
                                         location={location}
@@ -193,7 +184,7 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
                                 <Files
                                     layoutWidth={layoutWidth}
                                     location={location}
-                                    post={embed.data.post}
+                                    post={postFile}
                                     isReplyPost={false}
                                 />
                             </View>
