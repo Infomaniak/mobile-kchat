@@ -7,6 +7,7 @@ import {Keyboard, Platform, type StyleProp, View, type ViewStyle, TouchableHighl
 
 import {removePost} from '@actions/local/post';
 import {showPermalink} from '@actions/remote/permalink';
+import {markPostReminderAsDone} from '@actions/remote/post';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
 import FormattedText from '@app/components/formatted_text';
 import {getMarkdownTextStyles} from '@app/utils/markdown';
@@ -182,16 +183,7 @@ const Post = ({
     });
 
     const handlePostponePress = useCallback(async () => {
-        let postId = post.props.previewed_post;
-
-        if (!post.props.previewed_post) {
-            postId = post.props.link;
-            if (postId.includes('/pl/')) {
-                const parts = postId.split('/pl/');
-                const partAfterPl = parts[1];
-                postId = partAfterPl;
-            }
-        }
+        const postId = post.props.post_id;
 
         openAsBottomSheet({
             closeButtonId: 'close-quota-exceeded',
@@ -200,9 +192,15 @@ const Post = ({
             title: '',
             props: {
                 postId,
+                postpone: true,
             },
         });
     }, [post]);
+
+    const handleMarkRemindAsDone = async () => {
+        const postId = post.id;
+        markPostReminderAsDone(serverUrl, postId);
+    };
 
     const showPostOptions = () => {
         if (!post) {
@@ -335,7 +333,7 @@ const Post = ({
                         <View style={{marginTop: 10}}>
                             <TouchableOpacity
                                 style={[buttonBackgroundStyle(theme, 'm', 'secondary'), {width: '100%'}]}
-                                onPress={handlePostponePress}
+                                onPress={handleMarkRemindAsDone}
                             >
                                 <FormattedText
                                     id='infomaniak.post.reminder.markAsCompleted'

@@ -1122,3 +1122,13 @@ export async function deletePersistedPosts(serverUrl: string, channelId: string,
         // Do nothing
     }
 }
+
+export async function markPostReminderAsDone(serverUrl: string, postId: string) {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        await client.markPostReminderAsDone(postId);
+    } catch (e) {
+        // do nothing
+    }
+    return {};
+}
