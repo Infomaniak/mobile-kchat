@@ -66,13 +66,13 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
 
     const displayName = useMemo(() => {
         if (user) {
-            if (metadata?.data?.post?.props.from_webhook === 'true') {
-                return metadata.data.post.props.override_username;
+            if (metadata.post?.props.from_webhook === 'true') {
+                return metadata.post.props.override_username;
             }
             return displayUsername(user, undefined, 'full_name', true);
         }
         return '';
-    }, [user, metadata?.data?.post?.props.from_webhook, metadata?.data?.post?.props.override_username]);
+    }, [user, metadata?.post?.props.from_webhook, metadata?.post?.props.override_username]);
 
     const handlePress = async () => {
         const url = normalizeProtocol(postLink);
@@ -104,15 +104,15 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
         }
     };
 
-    if (metadata?.data && 'post_id' in metadata.data && metadata.data.post_id && metadata.data.post && post.metadata?.embeds) {
-        const message = metadata?.data?.post?.message;
+    if (metadata && 'post_id' in metadata && metadata.post_id && metadata.post && post.metadata?.embeds) {
+        const message = metadata?.post?.message;
         let messageEdit;
-        if (metadata?.data?.post?.edit_at) {
+        if (metadata?.post?.edit_at) {
             messageEdit = true;
         } else {
             messageEdit = false;
         }
-        const postFile = metadata.data.post as unknown as PostModel;
+        const postFile = metadata.post as unknown as PostModel;
 
         return (
             <TouchableOpacity
@@ -125,7 +125,7 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
                         style={styles.previewHeader}
                     >
                         <ProfilePicture
-                            author={metadata.data.post}
+                            author={metadata.post}
                         />
 
                         <Text
@@ -141,7 +141,7 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
                             />
                         </Text>
                         <FormattedRelativeTime
-                            value={metadata?.data?.post?.create_at}
+                            value={metadata?.post?.create_at}
                             testID='post_header.date_time'
                             updateIntervalInSeconds={1}
                             style={styles.time}
@@ -170,9 +170,9 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
                                     isEdited={messageEdit}
                                 />
 
-                                {metadata?.data?.post?.props?.attachments?.[0] && (
+                                {metadata?.post?.props?.attachments?.[0] && (
                                     <MessageAttachment
-                                        attachment={metadata?.data?.post?.props?.attachments?.[0]}
+                                        attachment={metadata?.post?.props?.attachments?.[0]}
                                         channelId={post.channelId}
                                         layoutWidth={layoutWidth}
                                         location={location}

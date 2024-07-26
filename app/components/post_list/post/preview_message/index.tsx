@@ -13,12 +13,17 @@ import PreviewMessage from './preview_message';
 import type {WithDatabaseArgs} from '@typings/database/database';
 import type PostModel from '@typings/database/models/servers/post';
 
-const enhance = withObservables(['previewUserId'], ({database, previewUserId, metadata}: WithDatabaseArgs & {post: PostModel; previewUserId: string; metadata: any}) => {
+const enhance = withObservables(['previewUserId', 'metadata'], ({database, previewUserId, metadata}: WithDatabaseArgs & {post: PostModel; previewUserId: string; metadata: PostPreviewMetadata}) => {
     const siteURL = observeConfigValue(database, 'SiteURL');
-    const channel = observeChannel(database, metadata.data.channel_id);
-    const channelDisplayName = channel.pipe(
-        switchMap((c) => of$(c?.displayName)),
-    );
+    let channel;
+    let channelDisplayName;
+    if (metadata.channel_id) {
+        channel = observeChannel(database, metadata.channel_id);
+        channelDisplayName = channel.pipe(
+            switchMap((c) => of$(c?.displayName)),
+        );
+    }
+
     return {
         siteURL,
         channelDisplayName,

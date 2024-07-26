@@ -89,6 +89,7 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
         }
         return metadata.embeds[0];
     };
+
     const getEmbed = () => {
         const {metadata} = post;
         if (metadata) {
@@ -96,6 +97,7 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
         }
         return null;
     };
+
     const embed = getEmbed();
 
     return (
@@ -109,10 +111,10 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
                 value={intl.formatMessage(localeHolder, values)}
                 theme={theme}
             />
-            {(post.type === Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL || Post.POST_TYPES.IK_SYSTEM_POST_REMINDER) && previewUserId && embed && (
+            {(post.type === Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL || Post.POST_TYPES.IK_SYSTEM_POST_REMINDER) && previewUserId && embed != null && (
                 <View>
                     <PreviewMessage
-                        metadata={embed}
+                        metadata={embed.data}
                         post={post}
                         previewUserId={previewUserId}
                         theme={theme}
