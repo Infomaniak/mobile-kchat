@@ -108,7 +108,7 @@ export default class WebSocketClient {
                 // the websocket will call onClose then onError then initialize again with readyState CLOSED, we need to open it again
                 if (this.conn.connection.state === WebSocketReadyState.CLOSED) {
                     clearTimeout(this.connectionTimeout);
-                    this.conn.connect();
+                    this.connOpen();
                 }
                 return;
             }
@@ -247,12 +247,16 @@ export default class WebSocketClient {
 
     private bindConnection(...args: Parameters<ConnectionManager['bind']>) {
         if (typeof this.conn !== 'undefined') {
-            const [eventName] = args;
-            const callbacks = this.conn!.connection.callbacks.get(eventName);
+            const [eventName, fn, ...rest] = args;
 
-            // Prevent binding the same event listener multiple times
-            if (callbacks.length === 0) {
-                this.conn!.connection.bind(...args);
+            // Assign the eventName to the function to differentiate from
+            // pusher's own callbacks
+            const callback = Object.assign(fn, {eventName});
+
+            // Verify that this callback is not already bound
+            const callbacks = this.conn!.connection.callbacks.get(eventName);
+            if (!callbacks.find((cb) => (cb.fn as typeof callback).eventName === eventName)) {
+                this.conn!.connection.bind(eventName, callback, ...rest);
             }
         }
     }
