@@ -118,7 +118,7 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
                         post={post}
                         previewUserId={previewUserId}
                         theme={theme}
-                        postLink={Post.POST_TYPES.IK_SYSTEM_POST_REMINDER ? post.props.link : post.props.post_link}
+                        postLink={post.type === Post.POST_TYPES.IK_SYSTEM_POST_REMINDER ? post.props.link : post.props.post_link}
                         location={location}
                         textStyles={textStyles}
                     />
