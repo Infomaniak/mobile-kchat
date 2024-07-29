@@ -27,6 +27,7 @@ import com.facebook.soloader.SoLoader
 import com.mattermost.call.CallManagerModule;
 import com.mattermost.helpers.RealPathUtil
 import com.mattermost.networkclient.RCTOkHttpClientFactory
+import com.mattermost.notification.NotificationUtils.createCallNotificationChannel
 import com.mattermost.share.ShareModule
 
 import com.nozbe.watermelondb.jsi.WatermelonDBJSIPackage
@@ -167,10 +168,6 @@ class MainApplication : NavigationApplication(), INotificationsApplication {
         // Tells React Native to use our RCTOkHttpClientFactory which builds an OKHttpClient
         // with a cookie jar defined in APIClientModule and an interceptor to intercept all
         // requests that originate from React Native's OKHttpClient
-
-        // Tells React Native to use our RCTOkHttpClientFactory which builds an OKHttpClient
-        // with a cookie jar defined in APIClientModule and an interceptor to intercept all
-        // requests that originate from React Native's OKHttpClient
         OkHttpClientProvider.setOkHttpClientFactory(RCTOkHttpClientFactory())
 
         SoLoader.init(this, false)
@@ -185,8 +182,9 @@ class MainApplication : NavigationApplication(), INotificationsApplication {
         val options: WebRTCModuleOptions = WebRTCModuleOptions.getInstance()
         options.enableMediaProjectionService = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationUtils.createCallNotificationChannel(context)
+            createCallNotificationChannel()
         }
+
     }
 
     override fun getPushNotification(
@@ -196,11 +194,12 @@ class MainApplication : NavigationApplication(), INotificationsApplication {
         defaultAppLaunchHelper: AppLaunchHelper?
     ): IPushNotification {
         return CustomPushNotification(
-            context,
-            bundle,
-            defaultFacade,
-            defaultAppLaunchHelper,
+            context!!,
+            bundle!!,
+            defaultFacade!!,
+            defaultAppLaunchHelper!!,
             JsIOHelper()
         )
     }
+
 }
