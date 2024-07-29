@@ -67,6 +67,7 @@ public class CallManager: NSObject {
       configuration = CXProviderConfiguration(localizedName: "kChat")
     }
     configuration.iconTemplateImageData = UIImage(named: "monochrome_call_icon")?.pngData()
+    configuration.ringtoneSound = "ringtone.wav"
     configuration.supportsVideo = true
     configuration.supportedHandleTypes = [.generic]
     configuration.maximumCallsPerCallGroup = 1
