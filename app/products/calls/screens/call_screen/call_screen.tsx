@@ -23,7 +23,7 @@ import {logError} from '@app/utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@app/utils/theme';
 import {typography} from '@app/utils/typography';
 import {usePermissionsChecker} from '@calls/hooks';
-import {AudioMuteButton, ContentContainer, HangupButton, OutgoingRinging, ToolboxContainer, VideoMuteButton} from '@calls/screens/call_screen/jitsi_components';
+import {AudioMuteButton, ContentContainer, HangupButton, Sound, ToolboxContainer, VideoMuteButton} from '@calls/screens/call_screen/jitsi_components';
 import RippleIcon from '@calls/screens/call_screen/ripple_icon';
 import NavigationHeader from '@components/navigation_header';
 import Image from '@components/profile_picture/image';
@@ -614,7 +614,10 @@ const CallScreen = ({
                 </SafeAreaView>
 
                 {/* Trigger ringtone */}
-                <OutgoingRinging play={!shouldDisplayLoadingScreen}/>
+                <Sound
+                    play={!shouldDisplayLoadingScreen}
+                    soundName={isCurrentUserInitiator ? 'outgoingRinging.mp3' : 'ring.mp3'}
+                />
             </>
         );
     }

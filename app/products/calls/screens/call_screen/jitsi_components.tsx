@@ -234,7 +234,7 @@ export const HangupButton = translate((
     />
 ));
 
-export const OutgoingRinging = (
+export const Sound = (
     {play = true, soundName = 'outgoingRinging.mp3'}:
     { play: boolean; soundName?: string },
 ) => {

@@ -138,10 +138,10 @@ class AppsManager {
     refreshAppBindings = async (serverUrl: string) => {
         try {
             const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-            const appsEnabled = (await getConfig(database))?.FeatureFlagAppsEnabled === 'true';
-            if (!appsEnabled) {
+            if (!await this.isAppsEnabled(serverUrl)) {
                 this.getEnabledSubject(serverUrl).next(false);
                 this.clearServer(serverUrl);
+                return;
             }
 
             const channelId = await getCurrentChannelId(database);
