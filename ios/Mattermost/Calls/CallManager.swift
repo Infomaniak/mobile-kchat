@@ -67,6 +67,7 @@ public class CallManager: NSObject {
       configuration = CXProviderConfiguration(localizedName: "kChat")
     }
     configuration.iconTemplateImageData = UIImage(named: "monochrome_call_icon")?.pngData()
+    configuration.ringtoneSound = "ringtone.wav"
     configuration.supportsVideo = true
     configuration.supportedHandleTypes = [.generic]
     configuration.maximumCallsPerCallGroup = 1
@@ -336,8 +337,8 @@ extension CallManager: PKPushRegistryDelegate {
       return
     }
 
+    reportCallEnded(conferenceId: conferenceId)
     callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .remoteEnded)
-    currentCalls[existingCall.localUUID] = nil
     completion()
   }
 
@@ -350,6 +351,7 @@ extension CallManager: PKPushRegistryDelegate {
       return
     }
 
+    reportCallEnded(conferenceId: conferenceId)
     callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .answeredElsewhere)
     completion()
   }

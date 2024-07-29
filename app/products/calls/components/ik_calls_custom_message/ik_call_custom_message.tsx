@@ -187,33 +187,44 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
         }
     }, []);
 
-    let callButton = null;
-    if (startedAt && !endedAt) {
-        callButton = (
-            <TouchableOpacity
-                onPress={() => {
-                    switchToConferenceByChannelId(serverUrl, channelId, {conferenceId, initiator: 'internal'});
-                }}
-                style={styles.button}
-            >
-                {
-                    isDM && status === 'missed' ? (
-                        <FormattedText
-                            id='mobile.calls_call_back'
-                            style={styles.buttonText}
-                            defaultMessage='Call back'
-                        />
-                    ) : (
-                        <FormattedText
-                            id='mobile.calls_join_call_short'
-                            style={styles.buttonText}
-                            defaultMessage='Join'
-                        />
-                    )
-                }
-            </TouchableOpacity>
+    /**
+     * Only allow answering call if it's a missed DM
+     * or if the call is still in progress
+     */
+    const isCallInProgress = startedAt && !endedAt;
+    const isMissedDMCall = isDM && status === 'missed';
+    let callText = null;
+    if (isCallInProgress) {
+        callText = (
+            <FormattedText
+                id='mobile.calls_join_call_short'
+                style={styles.buttonText}
+                defaultMessage='Join'
+            />
+        );
+    } else if (isMissedDMCall) {
+        callText = (
+            <FormattedText
+                id='mobile.calls_call_back'
+                style={styles.buttonText}
+                defaultMessage='Call back'
+            />
         );
     }
+
+    /**
+     * Wrap text with button
+     */
+    const callButton = callText === null ? null : (
+        <TouchableOpacity
+            onPress={() => {
+                switchToConferenceByChannelId(serverUrl, channelId, {conferenceId, initiator: 'internal'});
+            }}
+            style={styles.button}
+        >
+            {callText}
+        </TouchableOpacity>
+    );
 
     let participantStack = null;
     if (

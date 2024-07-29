@@ -79,10 +79,11 @@ PODS:
     - FlipperKit/Core
     - FlipperKit/FlipperKitNetworkPlugin
   - fmt (6.2.1)
-  - Giphy (2.2.6):
+  - Giphy (2.2.9):
     - libwebp
-  - giphy-react-native-sdk (2.4.2):
-    - Giphy (= 2.2.6)
+  - giphy-react-native-sdk (3.2.6):
+    - Giphy (= 2.2.9)
+    - RCT-Folly (= 2021.07.22.00)
     - React-Core
   - glog (0.3.5)
   - GoogleSignIn (7.1.0):
@@ -1035,10 +1036,11 @@ PODS:
     - React
   - react-native-netinfo (11.3.1):
     - React-Core
-  - react-native-network-client (1.5.1):
+  - react-native-network-client (1.6.0):
     - Alamofire (~> 5.9.1)
+    - RCT-Folly (= 2021.07.22.00)
     - React-Core
-    - Starscream (~> 4.0.4)
+    - Starscream (~> 4.0.8)
     - SwiftyJSON (~> 5.0)
   - react-native-notifications (5.1.0):
     - React-Core
@@ -1244,14 +1246,14 @@ PODS:
     - React-Core
   - ReactNativeKeyboardTrackingView (5.7.0):
     - React
-  - ReactNativeNavigation (7.39.1):
+  - ReactNativeNavigation (7.40.0):
     - HMSegmentedControl
     - React-Core
     - React-CoreModules
     - React-RCTImage
     - React-RCTText
-    - ReactNativeNavigation/Core (= 7.39.1)
-  - ReactNativeNavigation/Core (7.39.1):
+    - ReactNativeNavigation/Core (= 7.40.0)
+  - ReactNativeNavigation/Core (7.40.0):
     - HMSegmentedControl
     - React-Core
     - React-CoreModules
@@ -1336,7 +1338,7 @@ PODS:
   - SentryPrivate (8.21.0)
   - simdjson (3.1.0-wmelon1)
   - SocketRocket (0.6.1)
-  - Starscream (4.0.4)
+  - Starscream (4.0.8)
   - SwiftyJSON (5.0.2)
   - Swime (3.0.6)
   - WatermelonDB (0.27.1):
@@ -1481,7 +1483,6 @@ DEPENDENCIES:
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - RNWatch (from `../node_modules/react-native-watch-connectivity`)
   - "simdjson (from `../node_modules/@nozbe/simdjson`)"
-  - Starscream (from `https://github.com/mattermost/Starscream.git`, commit `7494780a021e44873e6e5fde5026ef96696c1865`)
   - "WatermelonDB (from `../node_modules/@nozbe/watermelondb`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1516,6 +1517,7 @@ SPEC REPOS:
     - Sentry
     - SentryPrivate
     - SocketRocket
+    - Starscream
     - SwiftyJSON
     - Swime
 
@@ -1741,18 +1743,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-watch-connectivity"
   simdjson:
     :path: "../node_modules/@nozbe/simdjson"
-  Starscream:
-    :commit: 7494780a021e44873e6e5fde5026ef96696c1865
-    :git: https://github.com/mattermost/Starscream.git
   WatermelonDB:
     :path: "../node_modules/@nozbe/watermelondb"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
-
-CHECKOUT OPTIONS:
-  Starscream:
-    :commit: 7494780a021e44873e6e5fde5026ef96696c1865
-    :git: https://github.com/mattermost/Starscream.git
 
 SPEC CHECKSUMS:
   Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
@@ -1773,9 +1767,9 @@ SPEC CHECKSUMS:
   Flipper-PeerTalk: 116d8f857dc6ef55c7a5a75ea3ceaafe878aadc9
   FlipperKit: 37525a5d056ef9b93d1578e04bc3ea1de940094f
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
-  Giphy: f64bff5937fbc4987b6a26c8ef625501c68a1e97
-  giphy-react-native-sdk: 0df3924c050ca12d32dace063e8bcb92e40a4afa
-  glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
+  Giphy: 28cef321358869cc871b98ea5e3d707fc1f36fc6
+  giphy-react-native-sdk: 668dca06fc2998eb4d6d92125e7cd42d8cbd4159
+  glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
@@ -1825,8 +1819,8 @@ SPEC CHECKSUMS:
   react-native-image-picker: d3db110a3ded6e48c93aef7e8e51afdde8b16ed0
   react-native-in-app-review: db8bb167a5f238e7ceca5c242d6b36ce8c4404a4
   react-native-keep-awake: afad8a51dfef9fe9655a6344771be32c8596d774
-  react-native-netinfo: bdb108d340cdb41875c9ced535977cac6d2ff321
-  react-native-network-client: a7e0e465f0de5ea75cef5c557df0d9dc0adbf6a9
+  react-native-netinfo: 3aa5637c18834966e0c932de8ae1ae56fea20a97
+  react-native-network-client: 4e8d6cbc715a9e522779a1fe82b32c5526c46417
   react-native-notifications: 4601a5a8db4ced6ae7cfc43b44d35fe437ac50c4
   react-native-orientation-locker: 4409c5b12b65f942e75449872b4f078b6f27af81
   react-native-pager-view: 0ccb8bf60e2ebd38b1f3669fa3650ecce81db2df
@@ -1862,7 +1856,7 @@ SPEC CHECKSUMS:
   ReactNativeExceptionHandler: b11ff67c78802b2f62eed0e10e75cb1ef7947c60
   ReactNativeIncallManager: bfc9c67358cd524882a7c4116dcb311ac2293d4b
   ReactNativeKeyboardTrackingView: 02137fac3b2ebd330d74fa54ead48b14750a2306
-  ReactNativeNavigation: 86a23855d2ccc74ad3e59bff1595c2d4b76ed8cc
+  ReactNativeNavigation: e62ba14d9cd44774dca6068b6559ec872e0e61a6
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNAudioRecorderPlayer: f790fc1afb118552ae6285d60adde52ee6b5d9ef
   RNCalendarEvents: 7e65eb4a94f53c1744d1e275f7fafcfaa619f7a3
@@ -1894,12 +1888,12 @@ SPEC CHECKSUMS:
   SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
   simdjson: e6bfae9ce4bcdc80452d388d593816f1ca2106f3
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
-  Starscream: e7497aedb1c2e27d2a672d40286fd1b34f20f2e4
+  Starscream: 19b5533ddb925208db698f0ac508a100b884a1b9
   SwiftyJSON: f5b1bf1cd8dd53cd25887ac0eabcfd92301c6a5a
   Swime: d7b2c277503b6cea317774aedc2dce05613f8b0b
   WatermelonDB: 842d22ba555425aa9f3ce551239a001200c539bc
   Yoga: 805bf71192903b20fc14babe48080582fee65a80
 
-PODFILE CHECKSUM: 0447e03dcb8781e86c99c422b9b980ee6087d148
+PODFILE CHECKSUM: 483198bbbf3e2e8320cf2746cb8f9c26dc31d6fe
 
 COCOAPODS: 1.14.3
