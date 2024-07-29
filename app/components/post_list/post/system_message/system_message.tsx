@@ -317,6 +317,7 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: R
 
     const username = renderUsername(post.props.username);
     const permaLink = `[${post.props.link}](${post.props.link})`;
+    const link = `[this message](${post.props.link})`;
 
     let localeHolder = {
         id: t('infomaniak.post.reminder.systemBot'),
@@ -326,18 +327,18 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: R
     if (post.props.reschedule) {
         localeHolder = {
             id: t('infomaniak.post.reminder.reschedule'),
-            defaultMessage: 'Alright, I will remind you of <a>this message</a> in',
+            defaultMessage: 'Alright, I will remind you of {link} in',
         };
     }
 
     if (post.props.completed) {
         localeHolder = {
             id: t('infomaniak.post.reminder.completed'),
-            defaultMessage: 'Alright, I have marked the reminder for <a>this message</a> as completed!',
+            defaultMessage: 'Alright, I have marked the reminder for {link} as completed!',
         };
     }
 
-    const values = {username, permaLink};
+    const values = {username, permaLink, link};
     return renderMessage({post, styles, intl, location, localeHolder, values, theme});
 };
 

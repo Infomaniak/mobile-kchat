@@ -191,6 +191,7 @@ const Post = ({
             theme,
             title: '',
             props: {
+                post,
                 postId,
                 postpone: true,
             },

@@ -103,11 +103,7 @@ const IKReminder = ({post, postId, postpone, componentId}: Props) => {
     const addPostReminder = async (timestamp: number) => {
         try {
             const client = NetworkManager.getClient(serverUrl);
-            if (post) {
-                await client.addPostReminder(post.id, timestamp);
-            } else {
-                await client.addPostReminder(postId, timestamp);
-            }
+            await client.addPostReminder(post.id, timestamp);
         } catch (e) {
             // do nothing
         }
