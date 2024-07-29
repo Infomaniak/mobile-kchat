@@ -332,7 +332,7 @@ const Post = ({
                     location={location}
                     post={post}
                 />
-                {post.type === 'system_post_reminder' && (
+                {post.type === 'system_post_reminder' && !(post.props.reschedule || post.props.completed) && (
                     <View>
                         <TouchableOpacity
                             style={[buttonBackgroundStyle(theme, 'm', 'primary'), {width: '100%'}]}
