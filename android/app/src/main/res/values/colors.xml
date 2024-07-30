@@ -3,4 +3,7 @@
     <color name="white">#FFFFFF</color>
     <color name="transparent">#00000000</color>
     <color name="splashscreen_bg">#f4f6fd</color>
+    <color name="call_background_color">#fff</color>
+    <color name="call_description_text_color">#292e3d</color>
+    <color name="call_id">#292e3d</color>
 </resources>

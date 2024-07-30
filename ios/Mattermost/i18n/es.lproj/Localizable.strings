@@ -645,6 +645,7 @@ El cambio es permanente y no puede deshacerse.
 "mobile.post_info.unsave" = "No guardar";
 "mobile.post_info.save" = "Guardar";
 "mobile.participants.header" = "Participantes del hilo";
+"mobile.call_participants.header" = "Convocatoria Participantes";
 "mobile.oauth.switch_to_browser.title" = "Redireccionando...";
 "mobile.oauth.switch_to_browser.error_title" = "Error de inicio de sesión";
 "mobile.oauth.switch_to_browser" = "Estás siendo redireccionado a tu proveedor de inicio de sesión";

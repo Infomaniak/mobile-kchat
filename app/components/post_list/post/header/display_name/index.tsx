@@ -55,7 +55,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             maxWidth: '70%',
         },
         customStatusEmoji: {
-            color: theme.centerChannelColor,
             marginRight: 4,
         },
     };

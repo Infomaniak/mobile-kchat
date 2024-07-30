@@ -2,11 +2,11 @@
 // See LICENSE.txt for license information.
 
 import {DatabaseProvider} from '@nozbe/watermelondb/react';
-import React, {type ComponentType, useEffect, useState} from 'react';
+import React, {type ComponentType, useEffect, useState, type ComponentProps} from 'react';
 
 import {AudioPlayerProvider} from '@app/context/audio_player';
 import DeviceInfoProvider from '@context/device';
-import ServerProvider from '@context/server';
+import ServerContext from '@context/server';
 import ThemeProvider from '@context/theme';
 import UserLocaleProvider from '@context/user_locale';
 import DatabaseManager from '@database/manager';
@@ -17,8 +17,7 @@ import type ServersModel from '@typings/database/models/app/servers';
 
 type State = {
     database: Database;
-    serverUrl: string;
-    serverDisplayName: string;
+    server: ComponentProps<typeof ServerContext.Provider>['value'];
 };
 
 export function withServerDatabase<T extends JSX.IntrinsicAttributes>(Component: ComponentType<T>): ComponentType<T> {
@@ -37,8 +36,11 @@ export function withServerDatabase<T extends JSX.IntrinsicAttributes>(Component:
                 if (database) {
                     setState({
                         database,
-                        serverUrl: server.url,
-                        serverDisplayName: server.displayName,
+                        server: {
+                            id: server.identifier,
+                            url: server.url,
+                            displayName: server.displayName,
+                        },
                     });
                 }
             } else {
@@ -61,17 +63,17 @@ export function withServerDatabase<T extends JSX.IntrinsicAttributes>(Component:
         return (
             <DatabaseProvider
                 database={state.database}
-                key={state.serverUrl}
+                key={state.server.url}
             >
                 <DeviceInfoProvider>
                     <UserLocaleProvider database={state.database}>
-                        <ServerProvider server={{displayName: state.serverDisplayName, url: state.serverUrl}}>
+                        <ServerContext.Provider value={state.server}>
                             <ThemeProvider database={state.database}>
                                 <AudioPlayerProvider>
                                     <Component {...props}/>
                                 </AudioPlayerProvider>
                             </ThemeProvider>
-                        </ServerProvider>
+                        </ServerContext.Provider>
                     </UserLocaleProvider>
                 </DeviceInfoProvider>
             </DatabaseProvider>

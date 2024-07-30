@@ -50,8 +50,8 @@ export const getValidRecordsForUpdate = ({tableName, newValue, existingRecord}: 
  * @param {RawValue[]} range.raws
  * @returns {string[]}
  */
-export const getRangeOfValues = ({fieldName, raws}: RangeOfValueArgs) => {
-    return raws.reduce((oneOfs, current: RawValue) => {
+export const getRangeOfValues = <R extends RawValue>({fieldName, raws}: RangeOfValueArgs<R>) => {
+    return raws.reduce((oneOfs, current: R) => {
         const key = fieldName as keyof typeof current;
         const value: string = current[key] as string;
         if (value) {
@@ -78,7 +78,7 @@ export const getRawRecordPairs = (raws: any[]): RecordPair[] => {
  * @param {RawValue[]} raws
  * @param {string} key
  */
-export const getUniqueRawsBy = ({raws, key}: { raws: RawValue[]; key: string}) => {
+export const getUniqueRawsBy = <R extends RawValue>({raws, key}: { raws: R[]; key: string}) => {
     return [...new Map(raws.map((item) => {
         const curItemKey = item[key as keyof typeof item];
         return [curItemKey, item];

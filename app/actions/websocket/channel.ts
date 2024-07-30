@@ -76,17 +76,12 @@ export async function handleChannelUnarchiveEvent(serverUrl: string, msg: any) {
 
 export async function handleChannelConvertedEvent(serverUrl: string, msg: any) {
     try {
-        const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-
         const channelId = msg.data.channel_id;
         if (EphemeralStore.isConvertingChannel(channelId)) {
             return;
         }
 
-        const {channel} = await fetchChannelById(serverUrl, channelId);
-        if (channel) {
-            operator.handleChannel({channels: [channel], prepareRecordsOnly: false});
-        }
+        await fetchChannelById(serverUrl, channelId);
     } catch {
         // do nothing
     }

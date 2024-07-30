@@ -80,7 +80,7 @@ const DEFAULT_DURATION: CustomStatusDuration = 'today';
 const BTN_UPDATE_STATUS = 'update-custom-status';
 const edges: Edge[] = ['bottom', 'left', 'right'];
 
-const calculateExpiryTime = (duration: CustomStatusDuration, currentUser: UserModel | undefined, expiresAt: moment.Moment): string => {
+export const calculateExpiryTime = (duration: CustomStatusDuration, currentUser: UserModel | undefined, expiresAt?: moment.Moment): string => {
     const userTimezone = getTimezone(currentUser?.timezone);
     const currentTime = getCurrentMomentForTimezone(userTimezone);
 
@@ -96,7 +96,7 @@ const calculateExpiryTime = (duration: CustomStatusDuration, currentUser: UserMo
         case 'this_week':
             return currentTime.endOf('isoWeek').toISOString();
         case 'date_and_time':
-            return expiresAt.toISOString();
+            return (expiresAt || moment().add(1, 'hours')).toISOString();
         case CustomStatusDurationEnum.DONT_CLEAR:
         default:
             return '';

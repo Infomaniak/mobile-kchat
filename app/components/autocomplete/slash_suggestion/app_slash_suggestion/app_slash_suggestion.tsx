@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {debounce} from 'lodash';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {FlatList, Platform, type StyleProp, type ViewStyle} from 'react-native';
@@ -10,6 +9,7 @@ import AtMentionItem from '@components/autocomplete/at_mention_item';
 import ChannelItem from '@components/channel_item';
 import {COMMAND_SUGGESTION_CHANNEL, COMMAND_SUGGESTION_USER} from '@constants/apps';
 import {useServerUrl} from '@context/server';
+import {debounce} from '@helpers/api/general';
 import analytics from '@managers/analytics';
 
 import {AppCommandParser, type ExtendedAutocompleteSuggestion} from '../app_command_parser/app_command_parser';

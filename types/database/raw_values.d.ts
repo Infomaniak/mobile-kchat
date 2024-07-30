@@ -109,6 +109,8 @@ type RawValue =
   | ChannelInfo
   | ChannelMember
   | ChannelMembership
+  | Conference
+  | ConferenceParticipant
   | CustomEmoji
   | Draft
   | FileInfo
