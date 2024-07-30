@@ -288,6 +288,7 @@ export default function SendHandler({
             postPriority={postPriority}
             updatePostPriority={handlePostPriority}
             setIsFocused={setIsFocused}
+            serverUrl={serverUrl}
         />
     );
 }
