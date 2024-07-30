@@ -1,0 +1,35 @@
+stages:
+  - test
+
+variables:
+  NODE_VERSION: 20.11.0 # Sould respect /.nvmrc
+
+# REFERENCES
+# Triggered on Merge Requests
+.rule-mr: &rule-mr
+  - if: &if-merge-request "$CI_MERGE_REQUEST_ID"
+    when: on_success
+
+# Install npm dependencies
+.script-npm-install: &script-npm-install
+  - npm ci --ignore-scripts
+  - npx patch-package
+  - node scripts/generate-assets.js
+
+# Node-specific test config
+.tests-node: &tests-node
+  image: node:${NODE_VERSION}
+  before_script:
+    - *script-npm-install
+
+# STAGES
+# Execute tsc & eslint
+test:check:
+  stage: test
+  extends:
+    - .tests-node
+  rules:
+    - *rule-mr
+    - when: never
+  script:
+    - npm run check
