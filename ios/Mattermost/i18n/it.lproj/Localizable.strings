@@ -525,6 +525,7 @@ Per utilizzare l'applicazione kChat è necessario un aggiornamento del server. C
 "mobile.post_info.unsave" = "Disattivare";
 "mobile.post_info.save" = "Risparmiare";
 "mobile.participants.header" = "Partecipanti al thread";
+"mobile.call_participants.header" = "Partecipanti al chiamati";
 "mobile.open_dm.error" = "Non è stato possibile aprire un messaggio diretto con {displayName}. Controllare la connessione e riprovare.";
 "mobile.onboarding.sign_in_to_get_started" = "Accedi per iniziare";
 "mobile.onboarding.sign_in" = "Accedi";

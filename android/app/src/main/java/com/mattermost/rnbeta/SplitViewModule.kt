@@ -1,15 +1,21 @@
 package com.mattermost.rnbeta
 
-import com.facebook.react.bridge.*
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.bridge.ReactContextBaseJavaModule
+import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.WritableMap
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter
 import com.learnium.RNDeviceInfo.resolver.DeviceTypeResolver
 
-class SplitViewModule(private var reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+class SplitViewModule(private var reactContext: ReactApplicationContext) :
+    ReactContextBaseJavaModule(reactContext) {
     private var listenerCount = 0
 
     companion object {
         private var instance: SplitViewModule? = null
 
+        @JvmStatic
         fun getInstance(reactContext: ReactApplicationContext): SplitViewModule {
             if (instance == null) {
                 instance = SplitViewModule(reactContext)
@@ -20,21 +26,21 @@ class SplitViewModule(private var reactContext: ReactApplicationContext) : React
             return instance!!
         }
 
+        @JvmStatic
         fun getInstance(): SplitViewModule? {
             return instance
         }
     }
 
-
     override fun getName() = "SplitView"
 
     private fun sendEvent(params: WritableMap?) {
         reactContext
-                .getJSModule(RCTDeviceEventEmitter::class.java)
-                .emit("SplitViewChanged", params)
+            .getJSModule(RCTDeviceEventEmitter::class.java)
+            .emit("SplitViewChanged", params)
     }
 
-    private fun getSplitViewResults(folded: Boolean) : WritableMap? {
+    private fun getSplitViewResults(folded: Boolean): WritableMap? {
         if (currentActivity != null) {
             val deviceResolver = DeviceTypeResolver(this.reactContext)
             val map = Arguments.createMap()

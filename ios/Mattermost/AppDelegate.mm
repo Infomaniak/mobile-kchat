@@ -1,7 +1,7 @@
 #import "AppDelegate.h"
 
 #import <AVFoundation/AVFoundation.h>
-
+#import <Intents/Intents.h>
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
 #import <RNKeychain/RNKeychainManager.h>
@@ -19,10 +19,19 @@ NSString* const NOTIFICATION_CLEAR_ACTION = @"clear";
 NSString* const NOTIFICATION_UPDATE_BADGE_ACTION = @"update_badge";
 NSString* const NOTIFICATION_TEST_ACTION = @"test";
 
+NSString* const NOTIFICATION_CANCEL_CALL = @"cancel_call";
+NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
+
 -(void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)(void))completionHandler {
   os_log(OS_LOG_DEFAULT, "Mattermost will attach session from handleEventsForBackgroundURLSession!! identifier=%{public}@", identifier);
   [[GekidouWrapper default] attachSession:identifier completionHandler:completionHandler];
   os_log(OS_LOG_DEFAULT, "Mattermost session ATTACHED from handleEventsForBackgroundURLSession!! identifier=%{public}@", identifier);
+}
+
+- (BOOL)application:(UIApplication *)application willFinishLaunchingWithOptions:(NSDictionary<UIApplicationLaunchOptionsKey,id> *)launchOptions
+{
+  [[CallManager shared] registerForVoIPPushes];
+  return YES;
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -78,7 +87,23 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
   NSString* action = [userInfo objectForKey:@"type"];
   BOOL isClearAction = (action && [action isEqualToString: NOTIFICATION_CLEAR_ACTION]);
   BOOL isTestAction = (action && [action isEqualToString: NOTIFICATION_TEST_ACTION]);
-
+  BOOL isJoinedAction = (action && [action isEqualToString: NOTIFICATION_JOINED_CALL]);
+  BOOL isCancelAction = (action && [action isEqualToString: NOTIFICATION_CANCEL_CALL]);
+  
+  if (isJoinedAction) {
+    [[CallManager shared] handleJoinedCallWithNotificationPayload:userInfo completion:^{
+      completionHandler(UIBackgroundFetchResultNewData);
+    }];
+    return;
+  }
+  
+  if (isCancelAction) {
+    [[CallManager shared] handleCallCancelledWithNotificationPayload:userInfo completion:^{
+      completionHandler(UIBackgroundFetchResultNewData);
+    }];
+    return;
+  }
+  
   if (isTestAction) {
     completionHandler(UIBackgroundFetchResultNoData);
     return;
@@ -125,6 +150,22 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
 - (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity
  restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> *restorableObjects))restorationHandler
 {
+  INInteraction *interaction = userActivity.interaction;
+  if ([interaction.intent isKindOfClass:[INStartAudioCallIntent class]]) {
+      INStartAudioCallIntent *startAudioCallIntent = (INStartAudioCallIntent *)interaction.intent;
+      INPerson *contact = startAudioCallIntent.contacts.firstObject;
+
+      INPersonHandle *contactHandle = contact.personHandle;
+
+      if (contactHandle.value) {
+        NSString *rawStartCall = contactHandle.value;
+        NSURL *startCallURL = [NSURL URLWithString:rawStartCall];
+        if (startCallURL) {
+          return [RCTLinkingManager application:application openURL:startCallURL options:@{}];
+        }
+      }
+  }
+
   return [RCTLinkingManager application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
 }
 
@@ -225,6 +266,11 @@ RNHWKeyboardEvent *hwKeyEvent = nil;
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
+{
+  return [self getBundleURL];
+}
+
+- (NSURL *)getBundleURL
 {
   #if DEBUG
     return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];

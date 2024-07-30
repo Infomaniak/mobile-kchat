@@ -34,7 +34,8 @@ const assetImages = new Map([
     ['mail.png', require('@assets/images/emojis/mail.png')],
     ['paste.png', require('@assets/images/emojis/paste.png')],
     ['swisstransfer.png', require('@assets/images/emojis/swisstransfer.png')],
-    ['tasks.png', require('@assets/images/emojis/tasks.png')]]);
+    ['tasks.png', require('@assets/images/emojis/tasks.png')],
+]);
 
 const Emoji = (props: EmojiProps) => {
     const {

@@ -600,6 +600,7 @@ Bist du sicher, dass du **{displayName}**** in einen privaten Kanal umwandeln m√
 "mobile.post_info.unsave" = "Nicht speichern";
 "mobile.post_info.save" = "Speichern";
 "mobile.participants.header" = "Teilnehmer der Unterhaltung";
+"mobile.call_participants.header" = "Teilnehmer Anrufen";
 "mobile.oauth.switch_to_browser.title" = "Weiterleitung...";
 "mobile.oauth.switch_to_browser.error_title" = "Fehler bei der Anmeldung";
 "mobile.oauth.switch_to_browser" = "Du wirst zu deinem Login-Anbieter weitergeleitet";

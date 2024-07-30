@@ -37,6 +37,7 @@ type Props = {
     viewRef?: React.LegacyRef<View>;
     padding?: number;
     hideGuestTags: boolean;
+    grayscale?: boolean;
 }
 
 const getThemedStyles = makeStyleSheetFromTheme((theme: Theme) => {
@@ -111,6 +112,7 @@ const UserItem = ({
     padding,
     includeMargin,
     hideGuestTags,
+    grayscale,
 }: Props) => {
     const theme = useTheme();
     const style = getThemedStyles(theme);
@@ -174,6 +176,7 @@ const UserItem = ({
                     showStatus={false}
                     testID={`${userItemTestId}.profile_picture`}
                     containerStyle={nonThemedStyles.profile}
+                    grayscale={grayscale}
                 />
                 <View style={nonThemedStyles.rowInfoBaseContainer}>
                     <View style={nonThemedStyles.rowInfoContainer}>
