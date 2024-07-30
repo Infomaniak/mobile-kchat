@@ -57,6 +57,8 @@
 	</dict>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>Enabling access to your media library means you can attach files from your media library to your messages in $(PRODUCT_NAME).</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>We need access to your calendar to schedule meetings</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Enabling access to Bluetooth means we can synchronize content across your devices and clients.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
@@ -104,8 +106,10 @@
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>audio</string>
 		<string>fetch</string>
 		<string>remote-notification</string>
+		<string>voip</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -130,5 +134,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Atlantis would use Bonjour Service to discover Proxyman app from your local network.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_Proxyman._tcp</string>
+	</array>
 </dict>
 </plist>

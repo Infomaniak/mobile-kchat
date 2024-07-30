@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {fetchMyChannel, switchToChannelById} from '@actions/remote/channel';
+import {fetchConference, switchToConferenceByChannelId} from '@actions/remote/conference';
 import {fetchPostById} from '@actions/remote/post';
 import {fetchMyTeam} from '@actions/remote/team';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
@@ -26,6 +27,8 @@ import type PostModel from '@typings/database/models/servers/post';
 export async function pushNotificationEntry(serverUrl: string, notification: NotificationData) {
     // We only reach this point if we have a channel Id in the notification payload
     const channelId = notification.channel_id!;
+    const conferenceId = notification.conference_id;
+    const conferenceJWT = notification.conference_jwt;
     const rootId = notification.root_id!;
 
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
@@ -91,26 +94,41 @@ export async function pushNotificationEntry(serverUrl: string, notification: Not
 
     const isCRTEnabled = await getIsCRTEnabled(database);
     const isThreadNotification = isCRTEnabled && Boolean(rootId);
+    const isConferenceNotification = typeof conferenceId === 'string';
 
     if (myChannel && myTeam) {
-        if (isThreadNotification) {
-            let post: PostModel | Post | undefined = await getPostById(database, rootId);
-            if (!post) {
-                const resp = await fetchPostById(serverUrl, rootId);
-                post = resp.post;
-            }
-
-            const actualRootId = post && ('root_id' in post ? post.root_id : post.rootId);
-
-            if (actualRootId) {
-                await fetchAndSwitchToThread(serverUrl, actualRootId, true);
-            } else if (post) {
-                await fetchAndSwitchToThread(serverUrl, rootId, true);
+        let redirected = false;
+        if (isConferenceNotification) {
+            const {conference} = await fetchConference(serverUrl, conferenceId);
+            if (conference) {
+                switchToConferenceByChannelId(serverUrl, conference.channelId, {initiator: 'native', conferenceJWT});
+                redirected = true;
             } else {
-                emitNotificationError('Post');
+                // Conference not found, maybe it was terminated?
+                // redirect to channel instead
             }
-        } else {
-            await switchToChannelById(serverUrl, channelId, teamId);
+        }
+
+        if (!redirected) {
+            if (isThreadNotification) {
+                let post: PostModel | Post | undefined = await getPostById(database, rootId);
+                if (!post) {
+                    const resp = await fetchPostById(serverUrl, rootId);
+                    post = resp.post;
+                }
+
+                const actualRootId = post && ('root_id' in post ? post.root_id : post.rootId);
+
+                if (actualRootId) {
+                    await fetchAndSwitchToThread(serverUrl, actualRootId, true);
+                } else if (post) {
+                    await fetchAndSwitchToThread(serverUrl, rootId, true);
+                } else {
+                    emitNotificationError('Post');
+                }
+            } else {
+                await switchToChannelById(serverUrl, channelId, teamId);
+            }
         }
     }
 

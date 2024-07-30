@@ -1110,10 +1110,17 @@ export async function searchChannels(serverUrl: string, term: string, teamId: st
     }
 }
 
-export async function fetchChannelById(serverUrl: string, id: string) {
+export async function fetchChannelById(serverUrl: string, channelId: string, fetchOnly = false) {
     try {
         const client = NetworkManager.getClient(serverUrl);
-        const channel = await client.getChannel(id);
+        const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+
+        const channel = await client.getChannel(channelId);
+
+        if (!fetchOnly) {
+            await operator.handleChannel({channels: [channel], prepareRecordsOnly: false});
+        }
+
         return {channel};
     } catch (error) {
         logDebug('error on fetchChannelById', getFullErrorMessage(error));

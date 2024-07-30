@@ -130,7 +130,7 @@ describe('*** DataOperator: Base Handlers tests ***', () => {
 
         await expect(
             operator?.handleRecords({
-                fieldName: 'invalidField',
+                fieldName: 'id',
                 tableName: 'INVALID_TABLE_NAME',
                 transformer: transformSystemRecord,
                 createOrUpdateRawValues: [{id: 'tos-1', value: '1'}],

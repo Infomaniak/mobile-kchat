@@ -24,7 +24,18 @@ import {isUnicodeEmoji} from '@utils/emoji/helpers';
 import type {EmojiProps} from '@typings/components/emoji';
 import type {WithDatabaseArgs} from '@typings/database/database';
 
-const assetImages = new Map([['kchat.png', require('@assets/images/emojis/kchat.png')]]);
+const assetImages = new Map([
+    ['kchat.png', require('@assets/images/emojis/kchat.png')],
+    ['kmeet.png', require('@assets/images/emojis/kmeet.png')],
+    ['calendar.png', require('@assets/images/emojis/calendar.png')],
+    ['chk.png', require('@assets/images/emojis/chk.png')],
+    ['contacts.png', require('@assets/images/emojis/contacts.png')],
+    ['drive.png', require('@assets/images/emojis/drive.png')],
+    ['mail.png', require('@assets/images/emojis/mail.png')],
+    ['paste.png', require('@assets/images/emojis/paste.png')],
+    ['swisstransfer.png', require('@assets/images/emojis/swisstransfer.png')],
+    ['tasks.png', require('@assets/images/emojis/tasks.png')],
+]);
 
 const Emoji = (props: EmojiProps) => {
     const {

@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import Fuse from 'fuse.js';
-import {debounce} from 'lodash';
 import React, {useCallback, useEffect, useMemo} from 'react';
 import {FlatList, Platform, type StyleProp, Text, View, type ViewStyle} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -13,6 +12,7 @@ import Emoji from '@components/emoji';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import {debounce} from '@helpers/api/general';
 import {getEmojiByName, getEmojis, searchEmojis} from '@utils/emoji/helpers';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 

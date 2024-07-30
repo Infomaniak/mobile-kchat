@@ -6,7 +6,7 @@ import {useIntl} from 'react-intl';
 import {Text, View} from 'react-native';
 import MathView from 'react-native-math-view';
 
-import ErrorBoundary from '@components/markdown/error_boundary';
+import ErrorBoundary from '@components/error_boundary';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 

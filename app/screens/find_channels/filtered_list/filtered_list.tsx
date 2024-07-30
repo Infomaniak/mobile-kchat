@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {debounce, type DebouncedFunc} from 'lodash';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Alert, FlatList, type ListRenderItemInfo, StyleSheet, View} from 'react-native';
@@ -17,6 +16,7 @@ import ThreadsButton from '@components/threads_button';
 import UserItem from '@components/user_item';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import {debounce} from '@helpers/api/general';
 import {sortChannelsByDisplayName} from '@utils/channel';
 import {displayUsername} from '@utils/user';
 
@@ -78,7 +78,7 @@ const FilteredList = ({
     isCRTEnabled, keyboardOverlap, loading, onLoading, restrictDirectMessage, showTeamName,
     teamIds, teammateDisplayNameSetting, term, usersMatch, usersMatchStart, testID,
 }: Props) => {
-    const bounce = useRef<DebouncedFunc<() => void>>();
+    const bounce = useRef<ReturnType<typeof debounce>>();
     const mounted = useRef(false);
     const serverUrl = useServerUrl();
     const theme = useTheme();

@@ -64,8 +64,7 @@ export const observeCurrentTeamId = (database: Database): Observable<string> => 
 
 export const getCurrentUserId = async (serverDatabase: Database): Promise<string> => {
     try {
-        const currentUserId = await serverDatabase.get<SystemModel>(SYSTEM).find(SYSTEM_IDENTIFIERS.CURRENT_USER_ID);
-        return currentUserId?.value || '';
+        return ((await querySystemValue(serverDatabase, SYSTEM_IDENTIFIERS.CURRENT_USER_ID).fetch())[0] || {value: ''}).value;
     } catch {
         return '';
     }

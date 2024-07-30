@@ -5,6 +5,7 @@ import {Image as RNImage} from 'react-native';
 import FastImage, {type Source} from 'react-native-fast-image';
 import Animated from 'react-native-reanimated';
 
+import CompassIcon from '@app/components/compass_icon';
 import {useServerUrl} from '@context/server';
 import NetworkManager from '@managers/network_manager';
 
@@ -26,7 +27,27 @@ export const ProfilePictureMessage = ({author, source}: ProfilePictureProps) => 
         // handle below that the client is not set
     }
     if (author && client) {
-        const pictureUrl = client.getProfilePictureUrl(author.user_id, 0);
+        let pictureUrl = null;
+
+        if (author.props && author.props.override_icon_url?.startsWith('/')) {
+            pictureUrl = author.props.override_icon_url;
+        } else if (author.props.from_webhook && author.props.override_icon_url?.startsWith('http')) {
+            return (
+                <AnimatedImage
+                    source={{uri: author.props.override_icon_url}}
+                    style={{width: 30, height: 30, borderRadius: 50, marginRight: 8}}
+                />
+            );
+        } else if (author.props && author.props.from_webhook && author.props.override_icon_url == null) {
+            return (
+                <CompassIcon
+                    name='webhook'
+                    size={32}
+                />
+            );
+        } else {
+            pictureUrl = client.getProfilePictureUrl(author.user_id, 0);
+        }
 
         const imgSource = source ?? {
             uri: `${serverUrl}${pictureUrl}`,
