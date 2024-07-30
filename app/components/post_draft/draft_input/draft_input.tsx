@@ -6,6 +6,7 @@ import {type LayoutChangeEvent, Platform, ScrollView, View} from 'react-native';
 import Permissions, {openSettings} from 'react-native-permissions';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
+import {userTyping} from '@actions/websocket/users';
 import GuestBanner from '@app/components/guest_banner';
 import {logInfo} from '@app/utils/log';
 import QuickActions from '@components/post_draft/quick_actions';
@@ -29,6 +30,7 @@ type Props = {
     currentUserId: string;
     voiceMessageEnabled: boolean;
     canShowPostPriority?: boolean;
+    serverUrl: string;
 
     // Post Props
     postPriority: PostPriority;
@@ -123,6 +125,7 @@ export default function DraftInput({
     postPriority,
     updatePostPriority,
     setIsFocused,
+    serverUrl,
 }: Props) {
     const [recording, setRecording] = useState(false);
     const theme = useTheme();
@@ -151,6 +154,7 @@ export default function DraftInput({
 
         if (check === 'granted') {
             setRecording(true);
+            userTyping('recording', serverUrl, channelId, rootId);
         }
 
         if (check === 'denied') {
@@ -159,6 +163,7 @@ export default function DraftInput({
             if (result === 'granted') {
                 await new Promise((resolve) => setTimeout(resolve, 500));
                 setRecording(true);
+                userTyping('recording', serverUrl, channelId, rootId);
             }
 
             if (Platform.OS === 'android' && result === 'blocked') {
@@ -169,6 +174,7 @@ export default function DraftInput({
 
     const onCloseRecording = useCallback(() => {
         setRecording(false);
+        userTyping('stop', serverUrl, channelId, rootId);
     }, []);
 
     const isHandlingVoice = recording;
