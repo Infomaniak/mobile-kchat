@@ -247,17 +247,17 @@ export default class WebSocketClient {
     }
 
     private bindConnection(...args: Parameters<ConnectionManager['bind']>) {
-        if (typeof this.conn !== 'undefined') {
-            const [eventName, fn, ...rest] = args;
+        const [eventName, fn, ...rest] = args;
 
+        if (typeof this.conn !== 'undefined') {
             // Assign the eventName to the function to differentiate from
             // pusher's own callbacks
-            const callback = Object.assign(fn, {eventName});
+            const callback = Object.assign(fn, {fnRef: this.serverUrl});
 
             // Verify that this callback is not already bound
             const callbacks = this.conn!.connection.callbacks.get(eventName);
-            if (!callbacks.find((cb) => (cb.fn as typeof callback).eventName === eventName)) {
-                this.conn!.connection.bind(eventName, callback, ...rest);
+            if (!callbacks.find((cb) => (cb.fn as typeof callback).fnRef === this.serverUrl)) {
+                this.conn.connection.bind(eventName, callback, ...rest);
             }
         }
     }
