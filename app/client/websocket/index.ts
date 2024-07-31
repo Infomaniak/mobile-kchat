@@ -202,7 +202,7 @@ export default class WebSocketClient {
 
     private async connOpen() {
         if (typeof this.conn !== 'undefined') {
-            if (this.conn.connection.state === WebSocketReadyState.CLOSED) {
+            if (this.conn.connection.state !== WebSocketReadyState.OPEN) {
                 this.conn.connect();
             }
 
