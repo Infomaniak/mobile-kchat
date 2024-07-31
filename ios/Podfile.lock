@@ -1687,6 +1687,11 @@ PODS:
     - Sentry/HybridSDK (= 8.29.1)
   - RNShare (10.2.1):
     - React-Core
+  - RNSound (0.11.2):
+    - React-Core
+    - RNSound/Core (= 0.11.2)
+  - RNSound/Core (0.11.2):
+    - React-Core
   - RNSVG (15.3.0):
     - React-Core
   - RNVectorIcons (10.1.0):
@@ -1847,6 +1852,7 @@ DEPENDENCIES:
   - RNScreens (from `../node_modules/react-native-screens`)
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNShare (from `../node_modules/react-native-share`)
+  - RNSound (from `../node_modules/react-native-sound`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - "simdjson (from `../node_modules/@nozbe/simdjson`)"
@@ -2106,6 +2112,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@sentry/react-native"
   RNShare:
     :path: "../node_modules/react-native-share"
+  RNSound:
+    :path: "../node_modules/react-native-sound"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   RNVectorIcons:
@@ -2249,6 +2257,7 @@ SPEC CHECKSUMS:
   RNScreens: 5aeecbb09aa7285379b6e9f3c8a3c859bb16401c
   RNSentry: e9aa15bb2f3e18c822c002eea13bbd3b222ab493
   RNShare: 0fad69ae2d71de9d1f7b9a43acf876886a6cb99c
+  RNSound: 6c156f925295bdc83e8e422e7d8b38d33bc71852
   RNSVG: a48668fd382115bc89761ce291a81c4ca5f2fd2e
   RNVectorIcons: 2a2f79274248390b80684ea3c4400bd374a15c90
   SDWebImage: 066c47b573f408f18caa467d71deace7c0f8280d
