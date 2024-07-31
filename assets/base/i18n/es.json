@@ -726,6 +726,8 @@
     "more_messages.text": "{count} nuevos {count, plural, one {mensaje} other {mensajes}}",
     "msg_typing.areTyping": "{users} y {last} están escribiendo...",
     "msg_typing.isTyping": "{user} está escribiendo...",
+    "msg_recording.isRecording" : "{user} está grabando...", 
+    "msg_recording.areRecording": "{users} et {last} están grabando...",
     "notification_settings.auto_responder.default_message": "Hola, estoy fuera de la oficina y no puedo responder a los mensajes.",
     "notification_settings.auto_responder.footer.message": "Asigna un mensaje personalizado para que sea enviado automáticamente en respuesta a los mensajes directos, tal como fuera de la oficina o de vacaciones. Habilitar esta configuración cambia tu estado de Fuera de la Oficina y deshabilita las notificaciones.",
     "notification_settings.auto_responder.message": "Mensaje",

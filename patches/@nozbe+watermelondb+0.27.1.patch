@@ -379,7 +379,7 @@ index 0000000..6da29e6
 +export default failsafe
 \ No newline at end of file
 diff --git a/node_modules/@nozbe/watermelondb/decorators/index.d.ts b/node_modules/@nozbe/watermelondb/decorators/index.d.ts
-index 7f1fc8e..1978fd3 100644
+index 7f1fc8e..9fb334a 100644
 --- a/node_modules/@nozbe/watermelondb/decorators/index.d.ts
 +++ b/node_modules/@nozbe/watermelondb/decorators/index.d.ts
 @@ -9,3 +9,4 @@ export { default as readonly } from './readonly'
@@ -387,7 +387,6 @@ index 7f1fc8e..1978fd3 100644
  export { default as relation } from './relation'
  export { default as immutableRelation } from './immutableRelation'
 +export { default as experimentalFailsafe } from './experimentalFailsafe'
-\ No newline at end of file
 diff --git a/node_modules/@nozbe/watermelondb/native/android-jsi/src/main/java/com/nozbe/watermelondb/jsi/JSIInstaller.java b/node_modules/@nozbe/watermelondb/native/android-jsi/src/main/java/com/nozbe/watermelondb/jsi/JSIInstaller.java
 index 055cede..fb7ca33 100755
 --- a/node_modules/@nozbe/watermelondb/native/android-jsi/src/main/java/com/nozbe/watermelondb/jsi/JSIInstaller.java

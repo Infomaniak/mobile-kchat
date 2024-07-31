@@ -1,6 +1,3 @@
-diff --git a/node_modules/@giphy/react-native-sdk/ios/.DS_Store b/node_modules/@giphy/react-native-sdk/ios/.DS_Store
-new file mode 100644
-index 0000000..e69de29
 diff --git a/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift b/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift
 index 3731b25..2f01a05 100644
 --- a/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift

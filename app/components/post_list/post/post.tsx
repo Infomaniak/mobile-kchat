@@ -268,6 +268,20 @@ const Post = ({
     const itemTestID = `${testID}.${post.id}`;
     const rightColumnStyle: StyleProp<ViewStyle> = [styles.rightColumn, (Boolean(post.rootId) && isLastReply && styles.rightColumnPadding)];
     const pendingPostStyle: StyleProp<ViewStyle> | undefined = isPendingOrFailed ? styles.pendingPost : undefined;
+    const getEmbedFromMetadata = (metadata: PostMetadata) => {
+        if (!metadata || !metadata.embeds || metadata.embeds.length === 0) {
+            return null;
+        }
+        return metadata.embeds[0];
+    };
+    const getEmbed = () => {
+        const {metadata} = post;
+        if (metadata) {
+            return getEmbedFromMetadata(metadata);
+        }
+        return null;
+    };
+    const embed = getEmbed();
 
     let highlightedStyle: StyleProp<ViewStyle>;
     if (highlight) {
@@ -341,7 +355,7 @@ const Post = ({
         );
     } else if (isCallsPost && !hasBeenDeleted) {
         body = <IkCallsCustomMessage post={post}/>;
-    } else if (post.metadata && post.metadata.embeds && post.metadata.embeds.length > 0 && post.metadata.embeds[0].type === 'permalink') {
+    } else if (post.metadata && post.metadata.embeds && post.metadata.embeds.length > 0 && post.metadata.embeds[0].type === 'permalink' && embed) {
         const postLink = `/${post.metadata.embeds[0].data.team_name}/pl/${post.metadata.embeds[0].data.post_id}`;
         body = (
             <>
@@ -367,8 +381,8 @@ const Post = ({
                 />
 
                 <PreviewMessage
+                    metadata={embed.data}
                     post={post}
-                    channelDisplayName={post.metadata.embeds[0].data.channel_display_name}
                     theme={theme}
                     location={location}
                     postLink={postLink}

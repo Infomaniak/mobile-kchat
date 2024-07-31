@@ -78,10 +78,6 @@ class MainApplication : NavigationApplication(), INotificationsApplication {
         // Tells React Native to use our RCTOkHttpClientFactory which builds an OKHttpClient
         // with a cookie jar defined in APIClientModule and an interceptor to intercept all
         // requests that originate from React Native's OKHttpClient
-
-        // Tells React Native to use our RCTOkHttpClientFactory which builds an OKHttpClient
-        // with a cookie jar defined in APIClientModule and an interceptor to intercept all
-        // requests that originate from React Native's OKHttpClient
         OkHttpClientProvider.setOkHttpClientFactory(RCTOkHttpClientFactory())
         ExpoImageOkHttpClientGlideModule.okHttpClient = RCTOkHttpClientFactory().createNewNetworkModuleClient()
 

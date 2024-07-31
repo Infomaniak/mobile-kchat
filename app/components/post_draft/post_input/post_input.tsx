@@ -200,7 +200,7 @@ export default function PostInput({
             membersInChannel < maxNotificationsPerChannel &&
             enableUserTypingMessage
         ) {
-            userTyping(serverUrl, channelId, rootId);
+            userTyping('typing', serverUrl, channelId, rootId);
             lastTypingEventSent.current = Date.now();
         }
     }, [

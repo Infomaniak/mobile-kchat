@@ -119,4 +119,5 @@ class MainActivity : NavigationActivity() {
             Log.i("handleIntentExtras", "intent extras null")
         }
    }
+
 }

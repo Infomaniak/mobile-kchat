@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {type ClientHeaders, getOrCreateWebSocketClient, WebSocketReadyState} from '@mattermost/react-native-network-client';
-import Pusher, {type Channel} from 'pusher-js/react-native';
+import Pusher, {ConnectionManager, type Channel} from 'pusher-js/react-native';
 
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
@@ -59,6 +59,7 @@ export default class WebSocketClient {
     // Infomaniak
     // Current Pusher channel the user is connected to
     private presenceChannel?: Channel;
+    private recordingInterval: ReturnType<typeof setInterval> | null = null;
 
     constructor(serverUrl: string, token: string) {
         this.token = token;
@@ -88,8 +89,7 @@ export default class WebSocketClient {
             this.connectingCallback();
         }
 
-        const regex = /^(?:https?|wss?):(?:\/\/)?[^/]*/;
-        const captured = (regex).exec(connectionUrl);
+        this.url = connectionUrl;
 
         if (this.connectFailCount === 0) {
             logInfo('websocket connecting to ' + this.url);
@@ -109,7 +109,7 @@ export default class WebSocketClient {
                 // the websocket will call onClose then onError then initialize again with readyState CLOSED, we need to open it again
                 if (this.conn.connection.state === WebSocketReadyState.CLOSED) {
                     clearTimeout(this.connectionTimeout);
-                    this.conn.connect();
+                    this.connOpen();
                 }
                 return;
             }
@@ -118,7 +118,7 @@ export default class WebSocketClient {
             return;
         }
 
-        this.conn!.connection.bind('connected', () => {
+        this.bindConnection('connected', () => {
             clearTimeout(this.connectionTimeout);
 
             // No need to reset sequence number here.
@@ -143,7 +143,7 @@ export default class WebSocketClient {
             this.connectFailCount = 0;
         });
 
-        this.conn!.connection.bind('disconnected', () => {
+        this.bindConnection('disconnected', () => {
             clearTimeout(this.connectionTimeout);
             this.conn = undefined;
             this.responseSequence = 1;
@@ -191,7 +191,7 @@ export default class WebSocketClient {
             );
         });
 
-        this.conn!.connection.bind('error', (evt: PusherEvent) => {
+        this.bindConnection('error', (evt: PusherEvent) => {
             if (evt?.url === this.url) {
                 this.onError(evt);
             }
@@ -202,15 +202,21 @@ export default class WebSocketClient {
     }
 
     private async connOpen() {
-        const client = NetworkManager.getClient(this.serverUrl);
-        const user = await client.getMe();
-        if (!user) {
-            return;
-        }
+        if (typeof this.conn !== 'undefined') {
+            if (this.conn.connection.state !== WebSocketReadyState.OPEN) {
+                this.conn.connect();
+            }
 
-        this.bindChannel(`private-team.${user.team_id}`, false);
-        this.bindChannel(`presence-user.${user.user_id}`, false);
-        this.bindChannel(`presence-teamUser.${user.id}`);
+            const client = NetworkManager.getClient(this.serverUrl);
+            const user = await client.getMe();
+            if (!user) {
+                return;
+            }
+
+            this.bindChannel(`private-team.${user.team_id}`, false);
+            this.bindChannel(`presence-user.${user.user_id}`, false);
+            this.bindChannel(`presence-teamUser.${user.id}`);
+        }
     }
 
     private onError(evt: PusherEvent) {
@@ -240,15 +246,44 @@ export default class WebSocketClient {
         }
     }
 
+    private bindConnection(...args: Parameters<ConnectionManager['bind']>) {
+        const [eventName, fn, ...rest] = args;
+
+        if (typeof this.conn !== 'undefined') {
+            // Assign the eventName to the function to differentiate from
+            // pusher's own callbacks
+            const callback = Object.assign(fn, {fnRef: this.serverUrl});
+
+            // Verify that this callback is not already bound
+            const callbacks = this.conn!.connection.callbacks.get(eventName);
+            if (!callbacks.find((cb) => (cb.fn as typeof callback).fnRef === this.serverUrl)) {
+                this.conn.connection.bind(eventName, callback, ...rest);
+            }
+
+            // If we try to bind a 'connected' event listener
+            // we need to fire it immediately if it listen for the expected current state
+            // This is used to ensure compatibility of Pusher.connection.bind
+            // with mattermost's .onOpen()
+            if (
+                (eventName === 'connected') &&
+                (this.conn.connection.state === WebSocketReadyState.OPEN)
+            ) {
+                fn();
+            }
+        }
+    }
+
     public bindChannel(channelName: string, ignoreSubscriptionErrors = true) {
         let channel: Channel | undefined;
         if (typeof this.conn !== 'undefined') {
-            channel = this.conn.subscribe(channelName);
-            channel.bind_global((...args: Parameters<WebSocketClient['onMessage']>) => {
-                this.onMessage(...args);
-            });
-            if (!ignoreSubscriptionErrors) {
-                channel.bind('pusher:subscription_error', this.onError);
+            if (!this.conn.channel(channelName)) {
+                channel = this.conn.subscribe(channelName);
+                channel.bind_global((...args: Parameters<WebSocketClient['onMessage']>) => {
+                    this.onMessage(...args);
+                });
+                if (!ignoreSubscriptionErrors) {
+                    channel.bind('pusher:subscription_error', this.onError);
+                }
             }
         }
 
@@ -276,27 +311,6 @@ export default class WebSocketClient {
             this.unbindChannel(this.presenceChannel);
             delete this.presenceChannel;
         }
-    }
-
-    public unbindChannel(channelName: string) {
-        if (typeof this.conn !== 'undefined') {
-            this.conn.unsubscribe(channelName);
-        }
-    }
-
-    /**
-     * Save on which channel the user is currently present on
-     */
-    private getPresenceChannel(channelId: string) {
-        return `presence-channel.${channelId}`;
-    }
-    public bindPresenceChannel(channelId: string) {
-        this.presenceChannelId = channelId;
-        this.bindChannel(this.getPresenceChannel(channelId));
-    }
-    public unbindPresenceChannel(channelId: string) {
-        delete this.presenceChannelId;
-        this.unbindChannel(this.getPresenceChannel(channelId));
     }
 
     public setConnectingCallback(callback: () => void) {
@@ -382,6 +396,23 @@ export default class WebSocketClient {
             parent_id: parentId,
             user_id: userId,
         });
+    }
+
+    public sendUserRecordingEvent(userId: string, channelId: string, parentId?: string) {
+        const TIMER = 1000;
+        this.recordingInterval = setInterval(() => {
+            this.sendMessage('client-user_recording', {
+                channel_id: channelId,
+                parent_id: parentId,
+                user_id: userId,
+            });
+        }, TIMER);
+    }
+
+    public stopRecordingEvent() {
+        if (this.recordingInterval !== null) {
+            clearInterval(this.recordingInterval);
+        }
     }
 
     public isConnected(): boolean {
