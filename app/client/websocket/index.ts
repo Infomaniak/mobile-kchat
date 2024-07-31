@@ -259,6 +259,17 @@ export default class WebSocketClient {
             if (!callbacks.find((cb) => (cb.fn as typeof callback).fnRef === this.serverUrl)) {
                 this.conn.connection.bind(eventName, callback, ...rest);
             }
+
+            // If we try to bind a 'connected' event listener
+            // we need to fire it immediately if it listen for the expected current state
+            // This is used to ensure compatibility of Pusher.connection.bind
+            // with mattermost's .onOpen()
+            if (
+                (eventName === 'connected') &&
+                (this.conn.connection.state === WebSocketReadyState.OPEN)
+            ) {
+                fn();
+            }
         }
     }
 
