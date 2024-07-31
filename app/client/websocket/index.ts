@@ -202,7 +202,7 @@ export default class WebSocketClient {
 
     private async connOpen() {
         if (typeof this.conn !== 'undefined') {
-            if (this.conn.connection.state === WebSocketReadyState.CLOSED) {
+            if (this.conn.connection.state !== WebSocketReadyState.OPEN) {
                 this.conn.connect();
             }
 
@@ -246,17 +246,28 @@ export default class WebSocketClient {
     }
 
     private bindConnection(...args: Parameters<ConnectionManager['bind']>) {
-        if (typeof this.conn !== 'undefined') {
-            const [eventName, fn, ...rest] = args;
+        const [eventName, fn, ...rest] = args;
 
+        if (typeof this.conn !== 'undefined') {
             // Assign the eventName to the function to differentiate from
             // pusher's own callbacks
-            const callback = Object.assign(fn, {eventName});
+            const callback = Object.assign(fn, {fnRef: this.serverUrl});
 
             // Verify that this callback is not already bound
             const callbacks = this.conn!.connection.callbacks.get(eventName);
-            if (!callbacks.find((cb) => (cb.fn as typeof callback).eventName === eventName)) {
-                this.conn!.connection.bind(eventName, callback, ...rest);
+            if (!callbacks.find((cb) => (cb.fn as typeof callback).fnRef === this.serverUrl)) {
+                this.conn.connection.bind(eventName, callback, ...rest);
+            }
+
+            // If we try to bind a 'connected' event listener
+            // we need to fire it immediately if it listen for the expected current state
+            // This is used to ensure compatibility of Pusher.connection.bind
+            // with mattermost's .onOpen()
+            if (
+                (eventName === 'connected') &&
+                (this.conn.connection.state === WebSocketReadyState.OPEN)
+            ) {
+                fn();
             }
         }
     }
