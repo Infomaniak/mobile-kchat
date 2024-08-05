@@ -55,7 +55,7 @@ export default class WebSocketClient {
     private errorCallback?: Function;
     private closeCallback?: (connectFailCount: number) => void;
     private connectingCallback?: () => void;
-    
+
     // Infomaniak
     // Current Pusher channel the user is connected to
     private presenceChannel?: Channel;
