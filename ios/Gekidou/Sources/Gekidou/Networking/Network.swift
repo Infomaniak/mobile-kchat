@@ -34,15 +34,15 @@ public class Network: NSObject {
         )
     }
     
-    internal func buildApiUrl(_ serverUrl: String, _ endpoint: String) -> URL {
+    public func buildApiUrl(_ serverUrl: String, _ endpoint: String) -> URL {
         return URL(string: "\(serverUrl)\(urlVersion)\(endpoint)")!
     }
     
-    internal func responseOK(_ response: URLResponse?) -> Bool {
+    public func responseOK(_ response: URLResponse?) -> Bool {
         return (response as? HTTPURLResponse)?.statusCode == 200
     }
     
-    internal func buildURLRequest(for url: URL, usingMethod method: String, withBody body: Data?, andHeaders headers: [String:String]?, forServerUrl serverUrl: String) -> URLRequest {
+    public func buildURLRequest(for url: URL, usingMethod method: String, withBody body: Data?, andHeaders headers: [String:String]?, forServerUrl serverUrl: String) -> URLRequest {
         let request = NSMutableURLRequest(url: url)
         request.httpMethod = method
         
@@ -63,11 +63,11 @@ public class Network: NSObject {
         return request as URLRequest
     }
     
-    internal func request(_ url: URL, usingMethod method: String, forServerUrl serverUrl: String, completionHandler: @escaping ResponseHandler) {
+    public func request(_ url: URL, usingMethod method: String, forServerUrl serverUrl: String, completionHandler: @escaping ResponseHandler) {
         return request(url, withMethod: method, withBody: nil, andHeaders: nil, forServerUrl: serverUrl, completionHandler: completionHandler)
     }
     
-    internal func request(_ url: URL, withMethod method: String, withBody body: Data?, andHeaders headers: [String:String]?, forServerUrl serverUrl: String, completionHandler: @escaping ResponseHandler) {
+    public func request(_ url: URL, withMethod method: String, withBody body: Data?, andHeaders headers: [String:String]?, forServerUrl serverUrl: String, completionHandler: @escaping ResponseHandler) {
         let urlRequest = buildURLRequest(for: url, usingMethod: method, withBody: body, andHeaders: headers, forServerUrl: serverUrl)
         
         let task = session!.dataTask(with: urlRequest) { data, response, error in

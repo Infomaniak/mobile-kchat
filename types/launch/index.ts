@@ -29,12 +29,18 @@ export interface DeepLinkPlugin extends DeepLink {
     route?: string;
 }
 
+export interface DeepLinkConference {
+    serverUrl: string;
+    channelId: string;
+    conferenceJWT?: string;
+}
+
 export type DeepLinkType = typeof DeepLink[keyof typeof DeepLink];
 
 export interface DeepLinkWithData {
     type: DeepLinkType;
     url: string;
-    data?: DeepLinkChannel | DeepLinkDM | DeepLinkGM | DeepLinkPermalink | DeepLinkPlugin;
+    data?: DeepLinkChannel | DeepLinkDM | DeepLinkGM | DeepLinkPermalink | DeepLinkPlugin | DeepLinkConference;
 }
 
 export type LaunchType = typeof Launch[keyof typeof Launch];

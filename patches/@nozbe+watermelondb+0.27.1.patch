@@ -369,6 +369,23 @@ index 027c366..5807e79 100644
    // Performs work on the underlying database - see concrete DatabaseAdapter implementation for more details
    unsafeExecute(work: UnsafeExecuteOperations, callback: ResultCallback<void>): void
  
+diff --git a/node_modules/@nozbe/watermelondb/decorators/experimentalFailsafe/index.d.ts b/node_modules/@nozbe/watermelondb/decorators/experimentalFailsafe/index.d.ts
+new file mode 100644
+index 0000000..b2e2fd2
+--- /dev/null
++++ b/node_modules/@nozbe/watermelondb/decorators/experimentalFailsafe/index.d.ts
+@@ -0,0 +1,2 @@
++declare function failsafe(fallback?: any): PropertyDecorator
++export default failsafe
+diff --git a/node_modules/@nozbe/watermelondb/decorators/index.d.ts b/node_modules/@nozbe/watermelondb/decorators/index.d.ts
+index 7f1fc8e..9fb334a 100644
+--- a/node_modules/@nozbe/watermelondb/decorators/index.d.ts
++++ b/node_modules/@nozbe/watermelondb/decorators/index.d.ts
+@@ -9,3 +9,4 @@ export { default as readonly } from './readonly'
+ export { default as lazy } from './lazy'
+ export { default as relation } from './relation'
+ export { default as immutableRelation } from './immutableRelation'
++export { default as experimentalFailsafe } from './experimentalFailsafe'
 diff --git a/node_modules/@nozbe/watermelondb/native/android/src/main/java/com/nozbe/watermelondb/WMDatabase.java b/node_modules/@nozbe/watermelondb/native/android/src/main/java/com/nozbe/watermelondb/WMDatabase.java
 index 2f170e0..bac0352 100644
 --- a/node_modules/@nozbe/watermelondb/native/android/src/main/java/com/nozbe/watermelondb/WMDatabase.java
@@ -492,7 +509,7 @@ diff --git a/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/objc/WMDat
 index 04fc2e5..f141aea 100644
 --- a/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/objc/WMDatabase.m
 +++ b/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/objc/WMDatabase.m
-@@ -125,6 +125,15 @@
+@@ -125,6 +125,15 @@ - (void) setUserVersion:(long)userVersion
      }
  }
  
@@ -512,7 +529,7 @@ diff --git a/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/objc/WMDat
 index 8a3ab35..9e0550f 100644
 --- a/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/objc/WMDatabaseBridge.m
 +++ b/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/objc/WMDatabaseBridge.m
-@@ -183,6 +183,16 @@ BRIDGE_METHOD(unsafeResetDatabase,
+@@ -183,6 +183,16 @@ + (BOOL) requiresMainQueueSetup
      })
  }
  

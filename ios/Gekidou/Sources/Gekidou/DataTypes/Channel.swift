@@ -20,7 +20,7 @@ public struct Channel: Codable {
     let teamId: String
     let totalMsgCount: Int
     let totalMsgCountRoot: Int
-    let type: String
+    public let type: String
     let updateAt: Double
     
     public enum ChannelKeys: String, CodingKey {

@@ -1,6 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+/* Polyfills */
+import 'react-native-url-polyfill/auto';
+
 import TurboLogger from '@mattermost/react-native-turbo-log';
 import {LogBox, Platform, UIManager} from 'react-native';
 import ViewReactNativeStyleAttributes from 'react-native/Libraries/Components/View/ReactNativeStyleAttributes';

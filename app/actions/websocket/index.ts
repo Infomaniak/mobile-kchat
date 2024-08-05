@@ -78,6 +78,13 @@ import {
     handleUserRemovedFromChannelEvent,
 } from './channel';
 import {
+    handleConferenceAdded,
+    handleConferenceDeleted,
+    handleConferenceUserConnected,
+    handleConferenceUserDenied,
+    handleConferenceUserDisconnected,
+} from './conference';
+import {
     handleGroupMemberAddEvent,
     handleGroupMemberDeleteEvent,
     handleGroupReceivedEvent,
@@ -109,7 +116,7 @@ import {
     handleTeamRestored,
 } from './teams';
 import {handleThreadUpdatedEvent, handleThreadReadChangedEvent, handleThreadFollowChangedEvent} from './threads';
-import {handleUserUpdatedEvent, handleUserTypingEvent, handleStatusChangedEvent} from './users';
+import {handleUserUpdatedEvent, handleUserTypingEvent, handleStatusChangedEvent, handleUserRecordingEvent} from './users';
 
 export async function handleFirstConnect(serverUrl: string) {
     registerDeviceToken(serverUrl);
@@ -328,6 +335,9 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
         case WebsocketEvents.TYPING:
             handleUserTypingEvent(serverUrl, msg);
             break;
+        case WebsocketEvents.RECORDING:
+            handleUserRecordingEvent(serverUrl, msg);
+            break;
 
         case WebsocketEvents.REACTION_ADDED:
             handleReactionAddedToPostEvent(serverUrl, msg);
@@ -477,6 +487,23 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
             break;
         case WebsocketEvents.KSUITE_DELETED:
             handleTeamSyncEvent(serverUrl);
+            break;
+
+        // kMeet
+        case WebsocketEvents.CONFERENCE_ADDED:
+            handleConferenceAdded(serverUrl, msg);
+            break;
+        case WebsocketEvents.CONFERENCE_DELETED:
+            handleConferenceDeleted(serverUrl, msg);
+            break;
+        case WebsocketEvents.CONFERENCE_USER_CONNECTED:
+            handleConferenceUserConnected(serverUrl, msg);
+            break;
+        case WebsocketEvents.CONFERENCE_USER_DENIED:
+            handleConferenceUserDenied(serverUrl, msg);
+            break;
+        case WebsocketEvents.CONFERENCE_USER_DISCONNECTED:
+            handleConferenceUserDisconnected(serverUrl, msg);
             break;
 
         // Plugins

@@ -269,9 +269,9 @@ export const updateMe = async (serverUrl: string, user: Partial<UserProfile>) =>
 let ids: string[] = [];
 const debouncedFetchStatusesByIds = debounce((serverUrl: string) => {
     fetchStatusByIds(serverUrl, [...new Set(ids)]);
-}, 200, false, () => {
+}, 200, {callback: () => {
     ids = [];
-});
+}});
 
 export const fetchStatusInBatch = (serverUrl: string, id: string) => {
     ids = [...ids, id];
@@ -288,10 +288,9 @@ const debouncedFetchUserOrGroupsByMentionNames = debounce(
         fetchUserOrGroupsByMentionNames(serverUrl, Array.from(mentionNames));
     },
     200,
-    false,
-    () => {
+    {callback: () => {
         mentionNames.clear();
-    },
+    }},
 );
 
 const notFoundMentions: {[serverUrl: string]: Set<string>} = {};

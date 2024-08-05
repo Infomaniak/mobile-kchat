@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {debounce} from 'lodash';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Platform, SectionList, type SectionListData, type SectionListRenderItemInfo, type StyleProp, type ViewStyle} from 'react-native';
 
@@ -12,6 +11,7 @@ import {General} from '@constants';
 import {CHANNEL_MENTION_REGEX, CHANNEL_MENTION_SEARCH_REGEX} from '@constants/autocomplete';
 import {useServerUrl} from '@context/server';
 import DatabaseManager from '@database/manager';
+import {debounce} from '@helpers/api/general';
 import useDidUpdate from '@hooks/did_update';
 import {t} from '@i18n';
 import {getUserById} from '@queries/servers/user';

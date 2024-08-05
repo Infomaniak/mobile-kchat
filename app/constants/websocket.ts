@@ -34,7 +34,9 @@ const WebsocketEvents = {
     USER_ROLE_UPDATED: 'user_role_updated',
     ROLE_UPDATED: 'role_updated',
     TYPING: 'client-user_typing',
+    RECORDING: 'client-user_recording',
     STOP_TYPING: 'stop_typing',
+    STOP_RECORDING: 'stop_recording',
     PREFERENCE_CHANGED: 'preference_changed',
     PREFERENCES_CHANGED: 'preferences_changed',
     PREFERENCES_DELETED: 'preferences_deleted',
@@ -98,5 +100,10 @@ const WebsocketEvents = {
     GROUP_DISSOCIATED_TO_CHANNEL: 'received_group_not_associated_to_channel',
     KSUITE_ADDED: 'ksuite_added',
     KSUITE_DELETED: 'ksuite_deleted',
+    CONFERENCE_ADDED: 'conference_added',
+    CONFERENCE_DELETED: 'conference_deleted',
+    CONFERENCE_USER_CONNECTED: 'conference_user_connected',
+    CONFERENCE_USER_DENIED: 'conference_user_denied',
+    CONFERENCE_USER_DISCONNECTED: 'conference_user_disconnected',
 };
 export default WebsocketEvents;
