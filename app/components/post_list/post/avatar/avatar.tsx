@@ -12,9 +12,11 @@ import ProfilePicture from '@components/profile_picture';
 import {Screens, View as ViewConstant} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import NetworkManager from '@managers/network_manager';
 import {openAsBottomSheet} from '@screens/navigation';
 import {preventDoubleTap} from '@utils/tap';
 
+import type {Client} from '@client/rest';
 import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
 
@@ -36,6 +38,12 @@ const Avatar = ({author, enablePostIconOverride, isAutoReponse, location, post}:
     const intl = useIntl();
     const theme = useTheme();
     const serverUrl = useServerUrl();
+    let client: Client | undefined;
+    try {
+        client = NetworkManager.getClient(serverUrl);
+    } catch {
+        // do nothing, client is not set
+    }
 
     const fromWebHook = post.props?.from_webhook === 'true';
     const iconOverride = enablePostIconOverride && post.props?.use_user_icon !== 'true';
