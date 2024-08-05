@@ -87,7 +87,7 @@ index e8f60de..7925a7b 100644
  
  export interface Spec extends TurboModule {
 diff --git a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
-index c4389f2..cfa3ff9 100644
+index c4389f2..bc84af8 100644
 --- a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
 +++ b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
 @@ -3,6 +3,7 @@
@@ -123,7 +123,7 @@ index c4389f2..cfa3ff9 100644
      let created = false;
      let client = CLIENTS[url];
      if (!client) {
-@@ -161,10 +158,18 @@ async function getOrCreateWebSocketClient(
+@@ -161,11 +158,19 @@ async function getOrCreateWebSocketClient(
          }
          CREATING_CLIENT[url] = true;
          created = true;
@@ -131,6 +131,7 @@ index c4389f2..cfa3ff9 100644
 -        if (clientErrorEventHandler) {
 -            client.onClientError(clientErrorEventHandler);
 -        }
+-        await NativeWebSocketClient.ensureClientFor(url, config);
 +        client = new Pusher('kchat-key', {
 +            wsHost: url,
 +            httpHost: url,
@@ -143,6 +144,7 @@ index c4389f2..cfa3ff9 100644
 +            unavailableTimeout: 3000,
 +            cluster: 'eu',
 +        });
-         await NativeWebSocketClient.ensureClientFor(url, config);
++        await NativeWebSocketClient.ensureClientFor(`wss://${url}`, config);
          CLIENTS[url] = client;
          delete CREATING_CLIENT[url];
+     }
