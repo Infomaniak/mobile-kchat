@@ -9,7 +9,7 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.ReadableMap;
 
-import com.mattermost.networkclient.APIClientModule;
+import com.mattermost.networkclient.ApiClientModuleImpl;
 import com.mattermost.networkclient.enums.RetryTypes;
 
 import java.util.Iterator;
@@ -20,14 +20,14 @@ import okhttp3.Response;
 
 
 public class Network {
-    private static APIClientModule clientModule;
+    private static ApiClientModuleImpl clientModule;
     private static final WritableMap clientOptions = Arguments.createMap();
     private static final Promise emptyPromise = new ResolvePromise();
     private static ReactApplicationContext reactContext;
 
     public static void init(Context context) {
-        final ReactApplicationContext reactContext = (APIClientModule.context == null) ? new ReactApplicationContext(context) : APIClientModule.context;
-        clientModule = new APIClientModule(reactContext);
+        final ReactApplicationContext reactContext = (ApiClientModuleImpl.context == null) ? new ReactApplicationContext(context) : ApiClientModuleImpl.context;
+        clientModule = new ApiClientModuleImpl(reactContext);
         Network.reactContext = reactContext;
         createClientOptions();
     }

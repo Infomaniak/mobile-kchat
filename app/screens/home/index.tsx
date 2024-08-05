@@ -2,7 +2,8 @@
 // See LICENSE.txt for license information.
 
 import {createBottomTabNavigator, type BottomTabBarProps} from '@react-navigation/bottom-tabs';
-import {NavigationContainer} from '@react-navigation/native';
+import {useFlipper} from '@react-navigation/devtools';
+import {NavigationContainer, useNavigationContainerRef} from '@react-navigation/native';
 import React, {useEffect} from 'react';
 import {useIntl} from 'react-intl';
 import {DeviceEventEmitter, Platform} from 'react-native';
@@ -60,6 +61,11 @@ export default function HomeScreen(props: HomeProps) {
     const theme = useTheme();
     const intl = useIntl();
     const appState = useAppState();
+
+    // Flipper react-navigation plugin
+    // Ref. https://reactnavigation.org/docs/devtools
+    const navigationRef = useNavigationContainerRef();
+    useFlipper(navigationRef);
 
     useEffect(() => {
         const listener = DeviceEventEmitter.addListener(Events.NOTIFICATION_ERROR, (value: 'Team' | 'Channel' | 'Post' | 'Connection') => {
@@ -139,6 +145,7 @@ export default function HomeScreen(props: HomeProps) {
     return (
         <>
             <NavigationContainer
+                ref={navigationRef}
                 theme={{
                     dark: false,
                     colors: {

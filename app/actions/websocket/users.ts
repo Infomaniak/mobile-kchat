@@ -91,7 +91,7 @@ export async function handleUserUpdatedEvent(serverUrl: string, msg: WebSocketMe
     }
 }
 
-export async function handleUserTypingEvent(serverUrl: string, msg: WebSocketMessage) {
+const handleUserActionEvent = (action: 'typing' | 'recording') => async (serverUrl: string, msg: WebSocketMessage) => {
     const currentServerUrl = await DatabaseManager.getActiveServerUrl();
     if (currentServerUrl === serverUrl) {
         const database = DatabaseManager.serverDatabases[serverUrl]?.database;
@@ -116,15 +116,17 @@ export async function handleUserTypingEvent(serverUrl: string, msg: WebSocketMes
             username,
             now: Date.now(),
         };
-        DeviceEventEmitter.emit(Events.USER_TYPING, data);
+        DeviceEventEmitter.emit(action === 'typing' ? Events.USER_TYPING : Events.USER_RECORDING, data);
 
         setTimeout(() => {
-            DeviceEventEmitter.emit(Events.USER_STOP_TYPING, data);
+            DeviceEventEmitter.emit(action === 'typing' ? Events.USER_STOP_TYPING : Events.USER_STOP_RECORDING, data);
         }, parseInt(config.TimeBetweenUserTypingUpdatesMilliseconds, 10));
     }
-}
+};
+export const handleUserTypingEvent = handleUserActionEvent('typing');
+export const handleUserRecordingEvent = handleUserActionEvent('recording');
 
-export const userTyping = async (serverUrl: string, channelId: string, rootId?: string) => {
+export const userTyping = async (actionType: 'typing' | 'recording' | 'stop', serverUrl: string, channelId: string, rootId?: string) => {
     const client = WebsocketManager.getClient(serverUrl);
     const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
     const currentUser = await getCurrentUser(database);
@@ -133,7 +135,19 @@ export const userTyping = async (serverUrl: string, channelId: string, rootId?: 
         return;
     }
 
-    client?.sendUserTypingEvent(currentUser.id, channelId, rootId);
+    switch (actionType) {
+        case 'typing':
+            client?.sendUserTypingEvent(currentUser.id, channelId, rootId);
+            break;
+        case 'recording':
+            client?.sendUserRecordingEvent(currentUser.id, channelId, rootId);
+            break;
+        case 'stop':
+            client?.stopRecordingEvent();
+            break;
+        default:
+            throw new Error('Invalid action type');
+    }
 };
 
 export async function handleStatusChangedEvent(serverUrl: string, msg: WebSocketMessage) {

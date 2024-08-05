@@ -15,7 +15,6 @@ import NetworkManager from '@managers/network_manager';
 
 import type UserModel from '@typings/database/models/servers/user';
 
-// @ts-expect-error FastImage does work with Animated.createAnimatedComponent
 const AnimatedFastImage = Animated.createAnimatedComponent(FastImage);
 
 type Props = {

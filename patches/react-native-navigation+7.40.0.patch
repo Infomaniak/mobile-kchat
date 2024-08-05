@@ -74,7 +74,11 @@ index 481aaf0..609e359 100644
          mPermissionListener = listener;
          requestPermissions(permissions, requestCode);
 diff --git a/node_modules/react-native-navigation/lib/android/app/src/main/java/com/reactnativenavigation/react/NavigationModule.java b/node_modules/react-native-navigation/lib/android/app/src/main/java/com/reactnativenavigation/react/NavigationModule.java
+<<<<<<<< HEAD:patches/react-native-navigation+7.39.1.patch
+index 4cc09eb..2c46d59 100644
+========
 index 4cc09eb..857bbd4 100644
+>>>>>>>> build-beta-495:patches/react-native-navigation+7.40.0.patch
 --- a/node_modules/react-native-navigation/lib/android/app/src/main/java/com/reactnativenavigation/react/NavigationModule.java
 +++ b/node_modules/react-native-navigation/lib/android/app/src/main/java/com/reactnativenavigation/react/NavigationModule.java
 @@ -31,6 +31,7 @@ import com.reactnativenavigation.viewcontrollers.viewcontroller.ViewController;

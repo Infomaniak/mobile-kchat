@@ -754,6 +754,8 @@
     "more_messages.text": "{count} {count, plural, one {nouveau message} other {nouveaux messages}}",
     "msg_typing.areTyping": "{users} et {last} sont en train d'écrire...",
     "msg_typing.isTyping": "{user} est en train d'écrire...",
+    "msg_recording.isRecording" : "{user} est en train d'enregistrer...", 
+    "msg_recording.areRecording": "{users} et {last} sont en train d'enregistrer...",
     "notification.message_not_found": "Message non trouvé",
     "notification.not_channel_member": "Ce message appartient à un canal dont vous n'êtes pas membre.",
     "notification.not_team_member": "Ce message appartient à une équipe dont vous n'êtes pas membre.",

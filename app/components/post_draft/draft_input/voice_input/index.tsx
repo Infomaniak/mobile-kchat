@@ -108,7 +108,6 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
     const disableRecord = async (shouldDelete = false) => {
         setRecording(false);
         setRecorder(undefined);
-
         await recorder?.stopRecorder();
         recorder?.removeRecordBackListener();
 
@@ -124,7 +123,7 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
 
     const endRecording = useCallback(async () => {
         disableRecord();
-
+        onClose();
         if (recorder && url) {
             storeLocalAudioURI?.(url);
             const fi = await extractFileInfo([{uri: url}]);

@@ -55,6 +55,15 @@ type PostMetadata = {
     priority?: PostPriority;
 };
 
+type PostPreviewMetadata = {
+    post_id?: string;
+    post?: Post;
+    channel_display_name?: string;
+    team_name?: string;
+    channel_type?: ChannelType;
+    channel_id?: string ;
+};
+
 type Post = {
     id: string;
     create_at: number;

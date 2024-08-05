@@ -83,6 +83,23 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
         previewUserId = post.metadata.embeds[0].data.post.user_id;
     }
 
+    const getEmbedFromMetadata = (metadata: PostMetadata) => {
+        if (!metadata || !metadata.embeds || metadata.embeds.length === 0) {
+            return null;
+        }
+        return metadata.embeds[0];
+    };
+
+    const getEmbed = () => {
+        const {metadata} = post;
+        if (metadata) {
+            return getEmbedFromMetadata(metadata);
+        }
+        return null;
+    };
+
+    const embed = getEmbed();
+
     return (
         <View style={containerStyle}>
             <Markdown
@@ -94,14 +111,19 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
                 value={intl.formatMessage(localeHolder, values)}
                 theme={theme}
             />
-            {post.type === Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL && previewUserId && (
+            {(
+                post.type === Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL ||
+                post.type === Post.POST_TYPES.IK_SYSTEM_POST_REMINDER
+            ) &&
+            previewUserId &&
+            embed != null && (
                 <View>
                     <PreviewMessage
-                        channelDisplayName={post.props.channel_name}
+                        metadata={embed.data}
                         post={post}
                         previewUserId={previewUserId}
                         theme={theme}
-                        postLink={post.props.post_link}
+                        postLink={post.type === Post.POST_TYPES.IK_SYSTEM_POST_REMINDER ? post.props.link : post.props.post_link}
                         location={location}
                         textStyles={textStyles}
                     />

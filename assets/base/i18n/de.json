@@ -774,6 +774,8 @@
     "more_messages.text": "{count} neue {count, plural, one {Nachricht} other {Nachrichten}}",
     "msg_typing.areTyping": "{users} und {last} tippen gerade...",
     "msg_typing.isTyping": "{user} tippt...",
+    "msg_recording.isRecording" : "{user} nimmt auf..", 
+    "msg_recording.areRecording": "{users} und {last} nehmen auf...",
     "notification.message_not_found": "Nachricht nicht gefunden",
     "notification.no_connection": "Der Server ist nicht erreichbar und es war nicht möglich, die spezifischen Nachrichteninformationen für die Benachrichtigung abzurufen.",
     "notification.no_post": "Die Nachricht wurde nicht gefunden.",
