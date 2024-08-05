@@ -1,3 +1,6 @@
+plugin 'cocoapods-user-defined-build-types'
+enable_user_defined_build_types!
+
 def node_require(script)
   # Resolve script with node to allow for hoisting
   require Pod::Executable.execute_command('node', ['-p',
@@ -44,7 +47,10 @@ target 'kChat' do
   pod 'simdjson', path: '../node_modules/@nozbe/simdjson', :modular_headers => true
 
   pod 'JitsiMeetSDKLite', :git => 'https://github.com/tdwio/jitsi-meet-ios-sdk-releases.git', :commit => 'e8132fc0dd241e8857573a89c607034ce72039fa'
-  
+
+  # TODO: keep only for debug
+  pod 'atlantis-proxyman', :build_type => :dynamic_framework
+
   post_install do |installer|
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(

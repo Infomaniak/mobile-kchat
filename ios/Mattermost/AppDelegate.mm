@@ -11,6 +11,10 @@
 #import "kChat-Swift.h"
 #import <os/log.h>
 
+#if DEBUG
+#import "Atlantis-Swift.h"
+#endif
+
 @implementation AppDelegate
 
 @synthesize orientationLock;
