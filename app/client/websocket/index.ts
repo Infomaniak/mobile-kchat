@@ -59,7 +59,6 @@ export default class WebSocketClient {
     // INFOMANIAK
     // Current Pusher channel the user is connected to
     private presenceChannel?: Channel;
-    private recordingInterval: ReturnType<typeof setInterval> | null = null;
 
     // Recording polling ws event
     private recordingInterval: ReturnType<typeof setInterval> | null = null;
