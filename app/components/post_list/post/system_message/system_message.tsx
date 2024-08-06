@@ -319,6 +319,34 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: R
     const permaLink = `[${post.props.link}](${post.props.link})`;
     const link = `[this message](${post.props.link})`;
 
+    let targetTime;
+    targetTime = post.props.target_time;
+    const targetTimeDate = new Date(post.props.target_time);
+    const now = new Date();
+    const diffInMs = targetTimeDate.getTime() - now.getTime();
+    const diffInDays = Math.round(Math.abs(diffInMs) / (1000 * 60 * 60 * 24));
+
+    switch (diffInDays) {
+        case 0:
+            targetTime = intl.formatMessage(
+                {id: 'post.reminder.systemBot.today', defaultMessage: 'at {time}'},
+                {time: intl.formatTime(targetTime)},
+            );
+            break;
+        case 1:
+            targetTime = intl.formatMessage(
+                {id: 'post.reminder.systemBot.tomorrow', defaultMessage: 'tomorrow at {time}'},
+                {time: intl.formatTime(targetTime)},
+            );
+            break;
+        default:
+            targetTime = intl.formatDate(targetTime, {
+                weekday: 'long',
+                day: '2-digit',
+                month: 'short',
+            });
+    }
+
     let localeHolder = {
         id: 'infomaniak.post.reminder.systemBot',
         defaultMessage: 'Hi there, here\'s your reminder about this message from {username}:\n{permaLink}',
@@ -327,7 +355,7 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: R
     if (post.props.reschedule) {
         localeHolder = {
             id: 'infomaniak.post.reminder.reschedule',
-            defaultMessage: 'Alright, I will remind you of {link} in',
+            defaultMessage: 'Alright, I will remind you of {link} {targetTime}.',
         };
     }
 
@@ -338,7 +366,7 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: R
         };
     }
 
-    const values = {username, permaLink, link};
+    const values = {username, permaLink, link, targetTime};
     return renderMessage({post, styles, intl, location, localeHolder, values, theme});
 };
 
