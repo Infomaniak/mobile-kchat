@@ -19,8 +19,6 @@ import WaveIllustration from './wave_illustration';
 import type {LaunchProps} from '@typings/launch';
 
 interface ServerProps extends LaunchProps {
-    closeButtonId?: string;
-    componentId: string;
     theme: Theme;
 }
 
