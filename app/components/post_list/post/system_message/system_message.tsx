@@ -319,32 +319,35 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: R
     const permaLink = `[${post.props.link}](${post.props.link})`;
     const link = `[this message](${post.props.link})`;
 
-    let targetTime;
-    targetTime = post.props.target_time;
-    const targetTimeDate = new Date(post.props.target_time);
+    const targetTime = new Date(post.props.target_time);
+    targetTime.setHours(targetTime.getHours() + 2);
+
     const now = new Date();
-    const diffInMs = targetTimeDate.getTime() - now.getTime();
-    const diffInDays = Math.round(Math.abs(diffInMs) / (1000 * 60 * 60 * 24));
+    const diffInMs = targetTime.getTime() - now.getTime();
+    const diffInDays = Math.round(diffInMs / (1000 * 60 * 60 * 24));
+
+    let formattedTargetTime;
 
     switch (diffInDays) {
         case 0:
-            targetTime = intl.formatMessage(
+            formattedTargetTime = intl.formatMessage(
                 {id: 'infomaniak.post.reminder.systemBot.today', defaultMessage: 'at {time}'},
                 {time: intl.formatTime(targetTime)},
             );
             break;
         case 1:
-            targetTime = intl.formatMessage(
+            formattedTargetTime = intl.formatMessage(
                 {id: 'infomaniak.post.reminder.systemBot.tomorrow', defaultMessage: 'tomorrow at {time}'},
                 {time: intl.formatTime(targetTime)},
             );
             break;
         default:
-            targetTime = intl.formatDate(targetTime, {
+            formattedTargetTime = intl.formatDate(targetTime, {
                 weekday: 'long',
                 day: '2-digit',
                 month: 'short',
             });
+            break;
     }
 
     let localeHolder = {
@@ -355,7 +358,7 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: R
     if (post.props.reschedule) {
         localeHolder = {
             id: 'infomaniak.post.reminder.reschedule',
-            defaultMessage: 'Alright, I will remind you of {link} {targetTime}.',
+            defaultMessage: 'Alright, I will remind you of {link} {formattedTargetTime}.',
         };
     }
 
@@ -366,7 +369,7 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: R
         };
     }
 
-    const values = {username, permaLink, link, targetTime};
+    const values = {username, permaLink, link, formattedTargetTime};
     return renderMessage({post, styles, intl, location, localeHolder, values, theme});
 };
 
