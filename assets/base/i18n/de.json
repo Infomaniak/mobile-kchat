@@ -353,6 +353,8 @@
     "global_threads.options.title": "Unterhaltungsaktionen",
     "global_threads.unreads": "Ungelesene",
     "home.header.plus_menu": "Optionen",
+    "infomaniak.post.reminder.systemBot.today": "um {time}",
+    "infomaniak.post.reminder.systemBot.tomorrow": "morgen um {time}",
     "integration_selector.multiselect.submit": "Erledigt",
     "interactive_dialog.submit": "Absenden",
     "intro.add_members": "Mitglieder hinzufügen",

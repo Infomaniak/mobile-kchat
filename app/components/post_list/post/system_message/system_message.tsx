@@ -329,13 +329,13 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: R
     switch (diffInDays) {
         case 0:
             targetTime = intl.formatMessage(
-                {id: 'post.reminder.systemBot.today', defaultMessage: 'at {time}'},
+                {id: 'infomaniak.post.reminder.systemBot.today', defaultMessage: 'at {time}'},
                 {time: intl.formatTime(targetTime)},
             );
             break;
         case 1:
             targetTime = intl.formatMessage(
-                {id: 'post.reminder.systemBot.tomorrow', defaultMessage: 'tomorrow at {time}'},
+                {id: 'infomaniak.post.reminder.systemBot.tomorrow', defaultMessage: 'tomorrow at {time}'},
                 {time: intl.formatTime(targetTime)},
             );
             break;
