@@ -370,6 +370,8 @@
   "infomaniak.post_info.post_reminder.menu": "Remind",
   "infomaniak.post_info.post_translate.menu": "Translate",
   "infomaniak.post.reminder.systemBot": "Hi there, here's your reminder about this message from {username}:\n{permaLink}",
+  "infomaniak.post.reminder.systemBot.today": "at {time}",
+  "infomaniak.post.reminder.systemBot.tomorrow": "tomorrow at {time}",
   "integration_selector.multiselect.submit": "Done",
   "interactive_dialog.submit": "Submit",
   "intro.add_members": "Add members",
