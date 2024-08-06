@@ -57,7 +57,7 @@ class GlobalEventHandler {
                 initialized();
             }
         } catch (error) {
-            logError(error);
+            // logError(error);
         }
     };
 
