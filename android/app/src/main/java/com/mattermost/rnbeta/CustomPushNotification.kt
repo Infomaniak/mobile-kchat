@@ -8,7 +8,6 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.mattermost.call.CallActivity
-import com.mattermost.call.CallManagerModule
 import com.mattermost.helpers.CustomPushNotificationHelper
 import com.mattermost.helpers.DatabaseHelper
 import com.mattermost.helpers.Network
@@ -31,14 +30,13 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class CustomPushNotification(
-        val context: Context,
-        bundle: Bundle,
-        appLifecycleFacade: AppLifecycleFacade,
-        appLaunchHelper: AppLaunchHelper,
-        jsIoHelper: JsIOHelper
+    val context: Context,
+    bundle: Bundle,
+    appLifecycleFacade: AppLifecycleFacade,
+    appLaunchHelper: AppLaunchHelper,
+    jsIoHelper: JsIOHelper
 ) : PushNotification(context, bundle, appLifecycleFacade, appLaunchHelper, jsIoHelper) {
     private val dataHelper = PushNotificationDataHelper(context)
-    private val callManagerModule by lazy { CallManagerModule.getInstance() }
 
     init {
         try {
@@ -62,14 +60,17 @@ class CustomPushNotification(
         val channelName = initialData.getString(NotificationUtils.CHANNEL_NAME_KEY)
         val conferenceJWT = initialData.getString(NotificationUtils.CONFERENCE_JWT_KEY)
         val signature = initialData.getString(NotificationUtils.SIGNATURE_KEY)
-        val isIdLoaded = initialData.getString(NotificationUtils.NOTIFICATION_ID_LOADED_KEY) == "true"
+        val isIdLoaded =
+            initialData.getString(NotificationUtils.NOTIFICATION_ID_LOADED_KEY) == "true"
         val notificationId = NotificationHelper.getNotificationId(initialData)
         val serverUrl = addServerUrlToBundle(initialData)
 
         GlobalScope.launch {
             try {
-                handlePushNotificationInCoroutine(serverId, serverUrl, type, channelId, channelName, postId,
-                    notificationId, ackId, conferenceId, conferenceJWT, isIdLoaded, signature)
+                handlePushNotificationInCoroutine(
+                    serverId, serverUrl, type, channelId, channelName, postId,
+                    notificationId, ackId, conferenceId, conferenceJWT, isIdLoaded, signature
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -77,8 +78,18 @@ class CustomPushNotification(
     }
 
     private suspend fun handlePushNotificationInCoroutine(
-        serverId: String?, serverUrl: String?, type: String?, channelId: String?, channelName: String?, postId: String?,
-        notificationId: Int, ackId: String?, conferenceId: String?, conferenceJWT: String?, isIdLoaded: Boolean, signature: String?
+        serverId: String?,
+        serverUrl: String?,
+        type: String?,
+        channelId: String?,
+        channelName: String?,
+        postId: String?,
+        notificationId: Int,
+        ackId: String?,
+        conferenceId: String?,
+        conferenceJWT: String?,
+        isIdLoaded: Boolean,
+        signature: String?
     ) {
         if (ackId != null && serverUrl != null) {
             val response = ReceiptDelivery.send(ackId, serverUrl, postId, type, isIdLoaded)
@@ -93,11 +104,23 @@ class CustomPushNotification(
         }
 
         if (!CustomPushNotificationHelper.verifySignature(context, signature, serverUrl, ackId)) {
-            Log.i("Mattermost Notifications Signature verification", "Notification skipped because we could not verify it.")
+            Log.i(
+                "Mattermost Notifications Signature verification",
+                "Notification skipped because we could not verify it."
+            )
             return
         }
 
-        finishProcessingNotification(serverId, serverUrl, type, channelId, channelName, postId, notificationId, ackId, conferenceId, conferenceJWT, isIdLoaded, signature)
+        finishProcessingNotification(
+            serverId,
+            serverUrl,
+            type,
+            channelId,
+            channelName,
+            notificationId,
+            conferenceId,
+            conferenceJWT,
+        )
     }
 
     override fun onOpened() {
@@ -108,15 +131,18 @@ class CustomPushNotification(
     }
 
     private suspend fun finishProcessingNotification(
-        serverId: String?, serverUrl: String?, type: String?, channelId: String?, channelName: String?, postId: String?,
-        notificationId: Int, ackId: String?, conferenceId: String?, conferenceJWT: String?, isIdLoaded: Boolean, signature: String?
+        serverId: String?,
+        serverUrl: String?,
+        type: String?,
+        channelId: String?,
+        channelName: String?,
+        notificationId: Int,
+        conferenceId: String?,
+        conferenceJWT: String?,
     ) {
         val isReactInit = mAppLifecycleFacade.isReactInitialized()
 
-        if ((
-            type === NOTIFICATION_TYPE_CANCEL_CALL_VALUE ||
-            type === NOTIFICATION_TYPE_JOINED_CALL_VALUE
-        ) && conferenceId != null) {
+        if ((type == NOTIFICATION_TYPE_CANCEL_CALL_VALUE || type == NOTIFICATION_TYPE_JOINED_CALL_VALUE) && conferenceId != null) {
             context.dismissCallNotification(conferenceId)
             broadcastCallEvent(conferenceId)
         } else if (conferenceJWT != null) {
@@ -129,7 +155,9 @@ class CustomPushNotification(
         } else {
             when (type) {
                 CustomPushNotificationHelper.PUSH_TYPE_MESSAGE, CustomPushNotificationHelper.PUSH_TYPE_SESSION -> {
-                    val currentActivityName = mAppLifecycleFacade.runningReactContext?.currentActivity?.componentName?.className ?: ""
+                    val currentActivityName =
+                        mAppLifecycleFacade.runningReactContext?.currentActivity?.componentName?.className
+                            ?: ""
                     Log.i("ReactNative", currentActivityName)
                     if (!mAppLifecycleFacade.isAppVisible() || currentActivityName != "MainActivity") {
                         var createSummary = type == CustomPushNotificationHelper.PUSH_TYPE_MESSAGE
@@ -137,19 +165,31 @@ class CustomPushNotification(
                             channelId?.let {
                                 val notificationBundle = mNotificationProps.asBundle()
                                 serverUrl?.let {
-                                    val notificationResult = dataHelper.fetchAndStoreDataForPushNotification(notificationBundle, isReactInit)
+                                    val notificationResult =
+                                        dataHelper.fetchAndStoreDataForPushNotification(
+                                            notificationBundle,
+                                            isReactInit
+                                        )
                                     notificationResult?.let { result ->
                                         notificationBundle.putBundle("data", result)
                                         mNotificationProps = createProps(notificationBundle)
                                     }
                                 }
-                                createSummary = NotificationHelper.addNotificationToPreferences(context, notificationId, notificationBundle)
+                                createSummary = NotificationHelper.addNotificationToPreferences(
+                                    context,
+                                    notificationId,
+                                    notificationBundle
+                                )
                             }
                         }
                         buildNotification(notificationId, createSummary)
                     }
                 }
-                CustomPushNotificationHelper.PUSH_TYPE_CLEAR -> NotificationHelper.clearChannelOrThreadNotifications(context, mNotificationProps.asBundle())
+
+                CustomPushNotificationHelper.PUSH_TYPE_CLEAR -> NotificationHelper.clearChannelOrThreadNotifications(
+                    context,
+                    mNotificationProps.asBundle()
+                )
             }
         }
 
@@ -166,7 +206,8 @@ class CustomPushNotification(
     }
 
     private fun buildNotification(notificationId: Int, createSummary: Boolean) {
-        val pendingIntent = NotificationIntentAdapter.createPendingNotificationIntent(context, mNotificationProps)
+        val pendingIntent =
+            NotificationIntentAdapter.createPendingNotificationIntent(context, mNotificationProps)
         val notification = buildNotification(pendingIntent)
         if (createSummary) {
             val summary = getNotificationSummaryBuilder(pendingIntent).build()
@@ -177,7 +218,12 @@ class CustomPushNotification(
 
     override fun getNotificationBuilder(intent: PendingIntent): NotificationCompat.Builder {
         val bundle = mNotificationProps.asBundle()
-        return CustomPushNotificationHelper.createNotificationBuilder(context, intent, bundle, false)
+        return CustomPushNotificationHelper.createNotificationBuilder(
+            context,
+            intent,
+            bundle,
+            false
+        )
     }
 
     private fun getNotificationSummaryBuilder(intent: PendingIntent): NotificationCompat.Builder {
@@ -186,7 +232,11 @@ class CustomPushNotification(
     }
 
     private fun notifyReceivedToJS() {
-        mJsIOHelper.sendEventToJS(NOTIFICATION_RECEIVED_EVENT_NAME, mNotificationProps.asBundle(), mAppLifecycleFacade.runningReactContext)
+        mJsIOHelper.sendEventToJS(
+            NOTIFICATION_RECEIVED_EVENT_NAME,
+            mNotificationProps.asBundle(),
+            mAppLifecycleFacade.runningReactContext
+        )
     }
 
     private fun addServerUrlToBundle(bundle: Bundle): String? {
