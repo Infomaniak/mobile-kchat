@@ -110,8 +110,8 @@ PODS:
     - React-Core
     - react-native-webrtc
   - JitsiMeetSDKLite (9.2.2-lite):
-    - JitsiWebRTC (~> 124.0.0)
-  - JitsiWebRTC (124.0.0)
+    - JitsiWebRTC (~> 118.0)
+  - JitsiWebRTC (118.0.0)
   - libavif/core (0.11.1)
   - libavif/libdav1d (0.11.1):
     - libavif/core
@@ -1322,8 +1322,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-webrtc (124.0.1):
-    - JitsiWebRTC (~> 124.0.0)
+  - react-native-webrtc (118.0.7):
+    - JitsiWebRTC (~> 118.0.0)
     - React-Core
   - react-native-webview (13.8.4):
     - DoubleConversion
@@ -1757,7 +1757,7 @@ DEPENDENCIES:
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - "jitsi-meet-rnsdk (from `../node_modules/@jitsi/react-native-sdk`)"
-  - JitsiMeetSDKLite (from `https://github.com/tdwio/jitsi-meet-ios-sdk-releases.git`, commit `e8132fc0dd241e8857573a89c607034ce72039fa`)
+  - JitsiMeetSDKLite (= 9.2.2-lite)
   - "mattermost-hardware-keyboard (from `../node_modules/@mattermost/hardware-keyboard`)"
   - "mattermost-keyboard-tracker (from `../node_modules/@mattermost/keyboard-tracker`)"
   - "mattermost-react-native-turbo-log (from `../node_modules/@mattermost/react-native-turbo-log`)"
@@ -1868,6 +1868,7 @@ SPEC REPOS:
     - GTMAppAuth
     - GTMSessionFetcher
     - HMSegmentedControl
+    - JitsiMeetSDKLite
     - JitsiWebRTC
     - libavif
     - libdav1d
@@ -1926,9 +1927,6 @@ EXTERNAL SOURCES:
     :tag: hermes-2024-06-03-RNv0.74.2-bb1e74fe1e95c2b5a2f4f9311152da052badc2bc
   jitsi-meet-rnsdk:
     :path: "../node_modules/@jitsi/react-native-sdk"
-  JitsiMeetSDKLite:
-    :commit: e8132fc0dd241e8857573a89c607034ce72039fa
-    :git: https://github.com/tdwio/jitsi-meet-ios-sdk-releases.git
   mattermost-hardware-keyboard:
     :path: "../node_modules/@mattermost/hardware-keyboard"
   mattermost-keyboard-tracker:
@@ -2122,11 +2120,6 @@ EXTERNAL SOURCES:
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
-CHECKOUT OPTIONS:
-  JitsiMeetSDKLite:
-    :commit: e8132fc0dd241e8857573a89c607034ce72039fa
-    :git: https://github.com/tdwio/jitsi-meet-ios-sdk-releases.git
-
 SPEC CHECKSUMS:
   Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
   AppAuth: 501c04eda8a8d11f179dbe8637b7a91bb7e5d2fa
@@ -2158,8 +2151,8 @@ SPEC CHECKSUMS:
   hermes-engine: 01d3e052018c2a13937aca1860fbedbccd4a41b7
   HMSegmentedControl: 34c1f54d822d8308e7b24f5d901ec674dfa31352
   jitsi-meet-rnsdk: 76832ef9f54bd7ee79673fe541b7acd680dc3dc5
-  JitsiMeetSDKLite: 429c112754eee0eeea37d77a000e11383db2309b
-  JitsiWebRTC: 37fb2fb70d42cac58c06948527a5f9e1b3f50812
+  JitsiMeetSDKLite: 02886ad69a53f3370376ee7c2d26331c7b10fcf8
+  JitsiWebRTC: 3a41671ef65a51d7204323814b055a2690b921c7
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
@@ -2210,7 +2203,7 @@ SPEC CHECKSUMS:
   react-native-safe-area-context: a240ad4b683349e48b1d51fed1611138d1bdad97
   react-native-slider: 1cdd6ba29675df21f30544253bf7351d3c2d68c4
   react-native-video: 8cd68fa00f56087184154c0e976d3756adaad144
-  react-native-webrtc: 8b9b90ab7ad5b77811a22a3c3ac1fe2a64737e29
+  react-native-webrtc: 8b024c7bb9a005d2b9efeba4c691172dbd00268d
   react-native-webview: 684364aaf96cbfff9a7128ade10766ebb7d25c6f
   React-nativeconfig: 9f223cd321823afdecf59ed00861ab2d69ee0fc1
   React-NativeModulesApple: ff7efaff7098639db5631236cfd91d60abff04c0
@@ -2269,6 +2262,6 @@ SPEC CHECKSUMS:
   WatermelonDB: 842d22ba555425aa9f3ce551239a001200c539bc
   Yoga: ae3c32c514802d30f687a04a6a35b348506d411f
 
-PODFILE CHECKSUM: 0f205f3676dad681731725d78f45a6b0cd94cec0
+PODFILE CHECKSUM: 0a5d41115b7db159d6e8a9be2b9bfcf42ee356cf
 
 COCOAPODS: 1.15.2
