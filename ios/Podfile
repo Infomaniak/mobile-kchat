@@ -48,9 +48,6 @@ target 'kChat' do
 
   pod 'JitsiMeetSDKLite', :git => 'https://github.com/tdwio/jitsi-meet-ios-sdk-releases.git', :commit => 'e8132fc0dd241e8857573a89c607034ce72039fa'
 
-  # TODO: keep only for debug
-  pod 'atlantis-proxyman', :build_type => :dynamic_framework
-
   post_install do |installer|
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
