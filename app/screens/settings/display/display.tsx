@@ -94,7 +94,6 @@ const Display = ({componentId, currentUser, hasMilitaryTimeFormat, isCRTEnabled,
     }, [componentId]);
 
     useAndroidHardwareBackHandler(componentId, close);
-
     return (
         <SettingContainer testID='display_settings'>
             {isThemeSwitchingEnabled && (

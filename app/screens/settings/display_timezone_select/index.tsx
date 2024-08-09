@@ -7,6 +7,7 @@ import {FlatList} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {getAllSupportedTimezones} from '@actions/remote/user';
+import {useServerUrl} from '@app/context/server';
 import Search from '@components/search';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
@@ -61,6 +62,7 @@ type SelectTimezonesProps = {
 }
 const SelectTimezones = ({componentId, onBack, currentTimezone}: SelectTimezonesProps) => {
     const intl = useIntl();
+    const serverUrl = useServerUrl();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
 
@@ -121,7 +123,7 @@ const SelectTimezones = ({componentId, onBack, currentTimezone}: SelectTimezones
     useEffect(() => {
         // let's get all supported timezones
         const getSupportedTimezones = async () => {
-            const allTzs = await getAllSupportedTimezones();
+            const allTzs = await getAllSupportedTimezones(serverUrl);
             if (allTzs.length > 0) {
                 setTimezones(allTzs);
                 const timezoneIndex = allTzs.findIndex((timezone) => timezone === currentTimezone);

@@ -859,6 +859,15 @@ export const fetchTeamAndChannelMembership = async (serverUrl: string, userId: s
     }
 };
 
-export const getAllSupportedTimezones = async () => {
-    return [];
+export const getAllSupportedTimezones = async (serverUrl: string) => {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        const allTzs = await client.getTimezones();
+        return allTzs;
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new Error(`error while getting all timezones : ${error}`);
+        }
+        return [];
+    }
 };
