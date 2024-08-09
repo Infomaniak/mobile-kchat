@@ -16,9 +16,9 @@
 		27C667A529523F0A00E590D5 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 27C667A429523F0A00E590D5 /* Sentry */; };
 		27C667A9295241B600E590D5 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C667A8295241B600E590D5 /* Sentry.swift */; };
 		27C667AA295241B600E590D5 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C667A8295241B600E590D5 /* Sentry.swift */; };
-		372419E32C57657400603DCF /* ringtone.wav in Resources */ = {isa = PBXBuildFile; fileRef = 372419E22C57657400603DCF /* ringtone.wav */; };
 		37407E422C32BD87005FB5D3 /* CallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37407E412C32BD87005FB5D3 /* CallViewController.swift */; };
 		374A99042BFCDC23005517A1 /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A99032BFCDC23005517A1 /* CallManager.swift */; };
+		374AA56B2C64B90C00FA6D63 /* kchat-ringtone.wav in Resources */ = {isa = PBXBuildFile; fileRef = 374AA56A2C64B90C00FA6D63 /* kchat-ringtone.wav */; };
 		3750F86D296DACD2002DAC87 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3750F867296DACD2002DAC87 /* Localizable.strings */; };
 		3750F86E296DACE3002DAC87 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3750F867296DACD2002DAC87 /* Localizable.strings */; };
 		3751BAE22BFF55E200CE4D6D /* CallManagerModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 3751BAE12BFF55E200CE4D6D /* CallManagerModule.m */; };
@@ -196,9 +196,9 @@
 		2E17B88EAD6181B9E9A24084 /* Pods-kChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChat.debug.xcconfig"; path = "Target Support Files/Pods-kChat/Pods-kChat.debug.xcconfig"; sourceTree = "<group>"; };
 		32AC3D4EA79E44738A6E9766 /* OpenSans-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-BoldItalic.ttf"; path = "../assets/fonts/OpenSans-BoldItalic.ttf"; sourceTree = "<group>"; };
 		3647DF63D6764CF093375861 /* OpenSans-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-ExtraBold.ttf"; path = "../assets/fonts/OpenSans-ExtraBold.ttf"; sourceTree = "<group>"; };
-		372419E22C57657400603DCF /* ringtone.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ringtone.wav; sourceTree = "<group>"; };
 		37407E412C32BD87005FB5D3 /* CallViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewController.swift; sourceTree = "<group>"; };
 		374A99032BFCDC23005517A1 /* CallManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
+		374AA56A2C64B90C00FA6D63 /* kchat-ringtone.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "kchat-ringtone.wav"; path = "Mattermost/kchat-ringtone.wav"; sourceTree = "<group>"; };
 		3750F868296DACD2002DAC87 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3750F869296DACD2002DAC87 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3750F86A296DACD2002DAC87 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -424,7 +424,7 @@
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
-				372419E22C57657400603DCF /* ringtone.wav */,
+				374AA56A2C64B90C00FA6D63 /* kchat-ringtone.wav */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB71A68108700A75B9A /* main.m */,
 				7F63D2C21E6DD98A001FAE12 /* Mattermost.entitlements */,
@@ -992,6 +992,7 @@
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				672D98A329F1927F004228D6 /* InfoPlist.strings in Resources */,
 				7F0F4B0A24BA173900E14C60 /* LaunchScreen.storyboard in Resources */,
+				374AA56B2C64B90C00FA6D63 /* kchat-ringtone.wav in Resources */,
 				7F292A711E8AB73400A450A3 /* SplashScreenResource in Resources */,
 				C9A107102BBD7C8700753CDC /* PrivacyInfo.xcprivacy in Resources */,
 				7FB31F812710995B0032E2E5 /* Metropolis-Light.ttf in Resources */,
@@ -1001,7 +1002,6 @@
 				7FB31F862710996D0032E2E5 /* OpenSans-ExtraBold.ttf in Resources */,
 				7FB31F872710996D0032E2E5 /* OpenSans-ExtraBoldItalic.ttf in Resources */,
 				7FB31F882710996D0032E2E5 /* OpenSans-Italic.ttf in Resources */,
-				372419E32C57657400603DCF /* ringtone.wav in Resources */,
 				7FB31F892710996D0032E2E5 /* OpenSans-Light.ttf in Resources */,
 				7FB31F8A2710996D0032E2E5 /* OpenSans-LightItalic.ttf in Resources */,
 				7FB31F8B2710996D0032E2E5 /* OpenSans-Regular.ttf in Resources */,
@@ -1485,7 +1485,7 @@
 				CODE_SIGN_ENTITLEMENTS = Mattermost/Mattermost.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 39;
 				DEVELOPMENT_TEAM = 864VDCS2QY;
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
@@ -1529,7 +1529,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 39;
 				DEVELOPMENT_TEAM = 864VDCS2QY;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 864VDCS2QY;
 				ENABLE_BITCODE = NO;
@@ -1580,7 +1580,7 @@
 				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 39;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 864VDCS2QY;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1631,7 +1631,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 39;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 864VDCS2QY;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1680,7 +1680,7 @@
 				CODE_SIGN_ENTITLEMENTS = MattermostShare/MattermostShare.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 39;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 864VDCS2QY;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1732,7 +1732,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 39;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 864VDCS2QY;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
