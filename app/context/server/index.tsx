@@ -3,6 +3,11 @@
 
 import React, {createContext, useContext} from 'react';
 
+type Props = {
+    server: ServerContext;
+    children: React.ReactNode;
+}
+
 type WithServerUrlProps = {
     serverUrl: string;
 }
@@ -11,23 +16,30 @@ type GetProps<C> = C extends React.ComponentType<infer P & WithServerUrlProps> ?
 
 type ServerContext = {
     id: string;
-    url: string;
     displayName: string;
+    url: string;
 }
 
-const ServerContext = createContext<ServerContext>({id: '', url: '', displayName: ''});
+const ServerContext = createContext<ServerContext>({id: '', displayName: '', url: ''});
+const {Provider, Consumer} = ServerContext;
+
+function ServerUrlProvider({server, children}: Props) {
+    return (
+        <Provider value={server}>{children}</Provider>
+    );
+}
 
 export function withServerUrl<C extends React.ComponentType<P>, P = GetProps<C>>(Component: C) {
     return function ServerUrlComponent(props: JSX.LibraryManagedAttributes<C, P>) {
         return (
-            <ServerContext.Consumer>
+            <Consumer>
                 {(server: ServerContext) => (
                     <Component
                         {...props}
                         serverUrl={server.url}
                     />
                 )}
-            </ServerContext.Consumer>
+            </Consumer>
         );
     };
 }
@@ -36,4 +48,4 @@ export const useServerId = () => useContext(ServerContext).id;
 export const useServerUrl = () => useContext(ServerContext).url;
 export const useServerDisplayName = () => useContext(ServerContext).displayName;
 
-export default ServerContext;
+export default ServerUrlProvider;

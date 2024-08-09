@@ -1,11 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {Image} from 'expo-image';
 import React, {type ReactNode} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, Platform, StyleSheet, TouchableOpacity, View} from 'react-native';
-import FastImage from 'react-native-fast-image';
 
+import {buildAbsoluteUrl} from '@actions/remote/file';
 import CompassIcon from '@components/compass_icon';
 import ProfilePicture from '@components/profile_picture';
 import {Screens, View as ViewConstant} from '@constants';
@@ -51,7 +52,7 @@ const Avatar = ({author, enablePostIconOverride, isAutoReponse, location, post}:
         const frameSize = ViewConstant.PROFILE_PICTURE_SIZE;
         const pictureSize = isEmoji ? ViewConstant.PROFILE_PICTURE_EMOJI_SIZE : ViewConstant.PROFILE_PICTURE_SIZE;
         const borderRadius = isEmoji ? 0 : ViewConstant.PROFILE_PICTURE_SIZE / 2;
-        const overrideIconUrl = client?.getAbsoluteUrl(post.props?.override_icon_url);
+        const overrideIconUrl = buildAbsoluteUrl(serverUrl, post.props?.override_icon_url);
 
         let iconComponent: ReactNode;
         if (overrideIconUrl) {
@@ -67,7 +68,7 @@ const Avatar = ({author, enablePostIconOverride, isAutoReponse, location, post}:
             }
 
             iconComponent = (
-                <FastImage
+                <Image
                     source={source}
                     style={{
                         height: pictureSize,

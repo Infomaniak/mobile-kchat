@@ -1,6 +1,7 @@
 package com.mattermost.helpers.database_extension
 
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import android.text.TextUtils
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReadableMap
@@ -8,8 +9,7 @@ import com.mattermost.helpers.DatabaseHelper
 import com.mattermost.helpers.QueryArgs
 import com.mattermost.helpers.mapCursor
 import com.nozbe.watermelondb.WMDatabase
-import java.util.*
-import kotlin.Exception
+import java.util.Arrays
 
 internal fun DatabaseHelper.saveToDatabase(db: WMDatabase, data: ReadableMap, teamId: String?, channelId: String?, receivingThreads: Boolean) {
     db.transaction {
@@ -56,14 +56,30 @@ fun DatabaseHelper.getDatabaseForServer(context: Context?, serverUrl: String): W
         defaultDatabase!!.rawQuery(query, arrayOf(serverUrl)).use { cursor ->
             if (cursor.count == 1) {
                 cursor.moveToFirst()
-                val databasePath = cursor.getString(0)
-                return WMDatabase.getInstance(databasePath, context!!)
+                val databasePath = String.format("file://%s", cursor.getString(0))
+                return WMDatabase.buildDatabase(databasePath, context!!, SQLiteDatabase.CREATE_IF_NECESSARY)
             }
         }
     } catch (e: Exception) {
         e.printStackTrace()
         // let it fall to return null
     }
+    return null
+}
+
+fun DatabaseHelper.getDeviceToken(): String? {
+    try {
+        val query = "SELECT value FROM Global WHERE id=?"
+        defaultDatabase!!.rawQuery(query, arrayOf("deviceToken")).use { cursor ->
+            if (cursor.count == 1) {
+                cursor.moveToFirst()
+                return cursor.getString(0)
+            }
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+
     return null
 }
 

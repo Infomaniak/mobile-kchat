@@ -5,20 +5,17 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
-
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 import com.facebook.react.ReactActivityDelegate
-
-import com.github.emilioicai.hwkeyboardevent.HWKeyboardEventModule
-
 import com.mattermost.call.CallManagerModule
+import com.mattermost.hardware.keyboard.MattermostHardwareKeyboardImpl
 import com.mattermost.notification.NotificationUtils
 import com.mattermost.notification.NotificationUtils.dismissCallNotification
-
+import com.mattermost.rnutils.helpers.FoldableObserver
 import com.oney.WebRTCModule.WebRTCModuleOptions
-
 import com.reactnativenavigation.NavigationActivity
+import expo.modules.ReactActivityDelegateWrapper
 
 class MainActivity : NavigationActivity() {
     private var HWKeyboardConnected = false
@@ -35,7 +32,8 @@ class MainActivity : NavigationActivity() {
      * which allows you to enable New Architecture with a single boolean flags [fabricEnabled]
      */
     override fun createReactActivityDelegate(): ReactActivityDelegate =
-        DefaultReactActivityDelegate(this, mainComponentName, DefaultNewArchitectureEntryPoint.fabricEnabled)
+        ReactActivityDelegateWrapper(this, BuildConfig.IS_NEW_ARCHITECTURE_ENABLED,
+            DefaultReactActivityDelegate(this, mainComponentName, DefaultNewArchitectureEntryPoint.fabricEnabled))
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,6 +54,11 @@ class MainActivity : NavigationActivity() {
         foldableObserver.onStop()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        foldableObserver.onDestroy()
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         if (newConfig.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO) {
@@ -70,24 +73,11 @@ class MainActivity : NavigationActivity() {
         reactGateway.onWindowFocusChanged(hasFocus)
     }
 
-    /*
-    https://mattermost.atlassian.net/browse/MM-10601
-    Required by react-native-hw-keyboard-event
-    (https://github.com/emilioicai/react-native-hw-keyboard-event)
-    */
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (HWKeyboardConnected) {
-            val keyCode = event.keyCode
-            val keyAction = event.action
-            if (keyAction == KeyEvent.ACTION_UP) {
-                if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    val keyPressed = if (event.isShiftPressed) "shift-enter" else "enter"
-                    HWKeyboardEventModule.getInstance().keyPressed(keyPressed)
-                    return true
-                } else if (keyCode == KeyEvent.KEYCODE_K && event.isCtrlPressed) {
-                    HWKeyboardEventModule.getInstance().keyPressed("find-channels")
-                    return true
-                }
+            val ok = MattermostHardwareKeyboardImpl.dispatchKeyEvent(event)
+            if (ok) {
+                return true
             }
         }
         return super.dispatchKeyEvent(event)

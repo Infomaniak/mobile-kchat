@@ -25,7 +25,10 @@ import {
     handleCallRecordingState,
     handleCallScreenOff,
     handleCallScreenOn,
-    handleCallStarted, handleCallUserConnected, handleCallUserDisconnected,
+    handleCallStarted,
+    handleCallState,
+    handleCallUserConnected,
+    handleCallUserDisconnected,
     handleCallUserJoined,
     handleCallUserLeft,
     handleCallUserMuted,
@@ -35,21 +38,24 @@ import {
     handleCallUserUnraiseHand,
     handleCallUserVoiceOff,
     handleCallUserVoiceOn,
+    handleHostLowerHand,
+    handleHostMute,
+    handleHostRemoved,
     handleUserDismissedNotification,
 } from '@calls/connection/websocket_event_handlers';
 import {isSupportedServerCalls} from '@calls/utils';
 import {Screens, WebsocketEvents} from '@constants';
-import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import AppsManager from '@managers/apps_manager';
+import {getActiveServerUrl} from '@queries/app/servers';
 import {getLastPostInThread} from '@queries/servers/post';
 import {
     getConfig,
     getCurrentChannelId,
     getCurrentTeamId,
     getLicense,
-    getWebSocketLastDisconnected,
-    resetWebSocketLastDisconnected,
+    getLastFullSync,
+    setLastFullSync,
 } from '@queries/servers/system';
 import {getIsCRTEnabled} from '@queries/servers/thread';
 import {getCurrentUser} from '@queries/servers/user';
@@ -128,22 +134,6 @@ export async function handleReconnect(serverUrl: string) {
     return doReconnect(serverUrl);
 }
 
-export async function handleClose(serverUrl: string, lastDisconnect: number) {
-    const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
-    if (!operator) {
-        return;
-    }
-    await operator.handleSystem({
-        systems: [
-            {
-                id: SYSTEM_IDENTIFIERS.WEBSOCKET,
-                value: lastDisconnect.toString(10),
-            },
-        ],
-        prepareRecordsOnly: false,
-    });
-}
-
 async function doReconnect(serverUrl: string) {
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
@@ -157,14 +147,14 @@ async function doReconnect(serverUrl: string) {
 
     const {database} = operator;
 
-    const lastDisconnectedAt = await getWebSocketLastDisconnected(database);
-    resetWebSocketLastDisconnected(operator);
+    const lastFullSync = await getLastFullSync(database);
+    const now = Date.now();
 
     const currentTeamId = await getCurrentTeamId(database);
     const currentChannelId = await getCurrentChannelId(database);
 
     setTeamLoading(serverUrl, true);
-    const entryData = await entry(serverUrl, currentTeamId, currentChannelId, lastDisconnectedAt);
+    const entryData = await entry(serverUrl, currentTeamId, currentChannelId, lastFullSync);
     if ('error' in entryData) {
         setTeamLoading(serverUrl, false);
         return entryData.error;
@@ -178,8 +168,11 @@ async function doReconnect(serverUrl: string) {
         await operator.batchRecords(models, 'doReconnect');
     }
 
+    await setLastFullSync(operator, now);
+
     const tabletDevice = isTablet();
-    if (tabletDevice && initialChannelId === currentChannelId) {
+    const isActiveServer = (await getActiveServerUrl()) === serverUrl;
+    if (isActiveServer && tabletDevice && initialChannelId === currentChannelId) {
         await markChannelAsRead(serverUrl, initialChannelId);
         markChannelAsViewed(serverUrl, initialChannelId);
     }
@@ -197,7 +190,7 @@ async function doReconnect(serverUrl: string) {
         loadConfigAndCalls(serverUrl, currentUserId);
     }
 
-    await deferredAppEntryActions(serverUrl, lastDisconnectedAt, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, initialTeamId);
+    await deferredAppEntryActions(serverUrl, lastFullSync, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, initialTeamId);
 
     openAllUnreadChannels(serverUrl);
 
@@ -462,6 +455,18 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
         case WebsocketEvents.CALLS_CAPTION:
             handleCallCaption(serverUrl, msg);
             break;
+        case WebsocketEvents.CALLS_HOST_MUTE:
+            handleHostMute(serverUrl, msg);
+            break;
+        case WebsocketEvents.CALLS_HOST_LOWER_HAND:
+            handleHostLowerHand(serverUrl, msg);
+            break;
+        case WebsocketEvents.CALLS_HOST_REMOVED:
+            handleHostRemoved(serverUrl, msg);
+            break;
+        case WebsocketEvents.CALLS_CALL_STATE:
+            handleCallState(serverUrl, msg);
+            break;
 
         case WebsocketEvents.GROUP_RECEIVED:
             handleGroupReceivedEvent(serverUrl, msg);
@@ -517,6 +522,11 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
 
 async function fetchPostDataIfNeeded(serverUrl: string) {
     try {
+        const isActiveServer = (await getActiveServerUrl()) === serverUrl;
+        if (!isActiveServer) {
+            return;
+        }
+
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const currentChannelId = await getCurrentChannelId(database);
         const isCRTEnabled = await getIsCRTEnabled(database);

@@ -15,11 +15,10 @@ const config = {
     redirectUrl: 'com.infomaniak.chat://oauth2redirect',
     additionalParameters: {hide_create_account: ''},
     iosPrefersEphemeralSession: true,
+    scopes: [],
 };
 
 export async function login(): Promise<string> {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     const result = await authorize(config);
     return result.accessToken;
 }

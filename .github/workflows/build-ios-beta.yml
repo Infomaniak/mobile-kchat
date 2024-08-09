@@ -9,26 +9,54 @@ on:
       - build-beta-sim-[0-9]+
 
 env:
-  NODE_VERSION: 20.11.0
+  NODE_VERSION: 20.13.1
   TERM: xterm
 
 jobs:
   test:
-    runs-on: [ self-hosted, macOS, iOS ]
+    runs-on: [self-hosted, macOS, iOS]
     steps:
       - name: ci/checkout-repo
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: ci/test
         uses: ./.github/actions/test
 
+  build-ios-simulator:
+    runs-on: macos-14-large
+    if: ${{ !contains(github.ref_name, 'beta-ios') }}
+    needs:
+      - test
+    steps:
+      - name: ci/checkout-repo
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: ci/prepare-ios-build
+        uses: ./.github/actions/prepare-ios-build
+
+      - name: ci/build-ios-simulator
+        env:
+          TAG: "${{ github.ref_name }}"
+          AWS_ACCESS_KEY_ID: "${{ secrets.MM_MOBILE_BETA_AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY: "${{ secrets.MM_MOBILE_BETA_AWS_SECRET_ACCESS_KEY }}"
+          MATTERMOST_WEBHOOK_URL: "${{ secrets.MM_MOBILE_BETA_MATTERMOST_WEBHOOK_URL }}"
+          GITHUB_TOKEN: "${{ secrets.MM_MOBILE_GITHUB_TOKEN }}"
+        run: bundle exec fastlane ios simulator --env ios.simulator
+        working-directory: ./fastlane
+
+      - name: ci/upload-ios-pr-simulator
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        with:
+          name: ios-build-simulator-${{ github.run_id }}
+          path: Mattermost-simulator-x86_64.app.zip
+
   build-and-deploy-ios-beta:
-    runs-on: [ self-hosted, macOS, iOS ]
+    runs-on: [self-hosted, macOS, iOS]
     if: ${{ !contains(github.ref_name, 'beta-sim') }}
     needs:
       - test
     steps:
       - name: ci/checkout-repo
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: ci/output-ssh-private-key
         shell: bash
@@ -67,7 +95,7 @@ jobs:
         working-directory: ./fastlane
 
       - name: ci/upload-ios-beta-build
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: ios-build-beta-${{ github.run_id }}
           path: "*.ipa"

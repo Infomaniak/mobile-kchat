@@ -11,10 +11,12 @@ import type UserModel from '@typings/database/models/servers/user';
 
 export type GlobalCallsState = {
     micPermissionsGranted: boolean;
+    joiningChannelId: string | null;
 }
 
 export const DefaultGlobalCallsState: GlobalCallsState = {
     micPermissionsGranted: false,
+    joiningChannelId: null,
 };
 
 export type CallsState = {
@@ -47,10 +49,13 @@ export type IncomingCallNotification = {
 
 export type IncomingCalls = {
     incomingCalls: IncomingCallNotification[];
+    currentRingingCallId?: string;
+    callIdHasRung: Dictionary<boolean>;
 }
 
 export const DefaultIncomingCalls: IncomingCalls = {
     incomingCalls: [],
+    callIdHasRung: {},
 };
 
 export type Call = {
@@ -167,6 +172,7 @@ export const DefaultCallsConfig: CallsConfigState = {
     EnableRinging: false,
     EnableTranscriptions: false,
     EnableLiveCaptions: false,
+    HostControlsAllowed: false,
 };
 
 export type ApiResp = {
@@ -203,18 +209,6 @@ export type CallsVersion = {
     build?: string;
 };
 
-export type SubtitleTrack = {
-    title?: string | undefined;
-    language?: string | undefined;
-    type: 'application/x-subrip' | 'application/ttml+xml' | 'text/vtt';
-    uri: string;
-};
-
-export type SelectedSubtitleTrack = {
-    type: 'system' | 'disabled' | 'title' | 'language' | 'index';
-    value?: string | number | undefined;
-};
-
 export type LiveCaptionMobile = {
     captionId: string;
     sessionId: string;
@@ -234,4 +228,21 @@ export type CallRecordingState = {
 export type CallRecordingStateData = {
     recState: CallRecordingState;
     callID: string;
+}
+
+// TODO: MM-57919, refactor wsmsg data to calls-common
+export type HostControlsMsgData = {
+    channel_id: string;
+    session_id: string;
+}
+
+export type HostControlsLowerHandMsgData = HostControlsMsgData & {
+    call_id: string;
+    host_id: string;
+}
+
+export enum EndCallReturn {
+    Cancel,
+    LeaveCall,
+    EndCall,
 }

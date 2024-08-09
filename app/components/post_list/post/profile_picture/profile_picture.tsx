@@ -1,8 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
+import {Image, type ImageProps} from 'expo-image';
 import React from 'react';
-import {Image as RNImage} from 'react-native';
-import FastImage, {type Source} from 'react-native-fast-image';
 import Animated from 'react-native-reanimated';
 
 import CompassIcon from '@app/components/compass_icon';
@@ -13,9 +12,9 @@ import type {Client} from '@client/rest';
 
 type ProfilePictureProps = {
     author: any;
-    source?: Source;
+    source?: ImageProps['source'];
 }
-const AnimatedImage = Animated.createAnimatedComponent(RNImage);
+const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 export const ProfilePictureMessage = ({author, source}: ProfilePictureProps) => {
     let client: Client | undefined;
@@ -55,7 +54,11 @@ export const ProfilePictureMessage = ({author, source}: ProfilePictureProps) => 
                 Authorization: client.getCurrentBearerToken(),
             },
         };
-        if (imgSource.uri?.startsWith('file://')) {
+        if (
+            typeof imgSource === 'object' &&
+            !Array.isArray(imgSource) &&
+            imgSource.uri?.startsWith('file://')
+        ) {
             return (
                 <AnimatedImage
                     key={pictureUrl}
@@ -65,7 +68,7 @@ export const ProfilePictureMessage = ({author, source}: ProfilePictureProps) => 
         }
 
         return (
-            <FastImage
+            <Image
                 key={pictureUrl}
                 source={imgSource}
                 style={{width: 30, height: 30, borderRadius: 50, marginRight: 8}}

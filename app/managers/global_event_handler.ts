@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import RNUtils, {type SplitViewResult} from '@mattermost/rnutils';
 import {Alert, DeviceEventEmitter, Linking, NativeEventEmitter, NativeModules, Platform} from 'react-native';
 import semver from 'semver';
 
@@ -8,13 +9,11 @@ import {switchToChannelById} from '@actions/remote/channel';
 import {switchToConferenceByChannelId} from '@actions/remote/conference';
 import CallManager, {CallAnsweredEvent, CallEndedEvent, CallMutedEvent, CallVideoMutedEvent} from '@app/store/CallManager';
 import {logError} from '@app/utils/log';
-import LocalConfig from '@assets/config.json';
 import {Device, Events, Sso} from '@constants';
 import {MIN_REQUIRED_VERSION} from '@constants/supported_server';
 import DatabaseManager from '@database/manager';
 import {DEFAULT_LOCALE, getTranslations, t} from '@i18n';
 import {getServerCredentials} from '@init/credentials';
-import * as analytics from '@managers/analytics';
 import {getActiveServerUrl} from '@queries/app/servers';
 import {queryTeamDefaultChannel} from '@queries/servers/channel';
 import {getCommonSystemValues} from '@queries/servers/system';
@@ -25,15 +24,14 @@ import {getIntlShape} from '@utils/general';
 
 type LinkingCallbackArg = {url: string};
 
-const splitViewEmitter = new NativeEventEmitter(NativeModules.SplitView);
 const callManagerEmitter = new NativeEventEmitter(NativeModules.CallManagerModule);
+const splitViewEmitter = new NativeEventEmitter(RNUtils);
 
 class GlobalEventHandler {
     JavascriptAndNativeErrorHandler: jsAndNativeErrorHandler | undefined;
 
     constructor() {
         DeviceEventEmitter.addListener(Events.SERVER_VERSION_CHANGED, this.onServerVersionChanged);
-        DeviceEventEmitter.addListener(Events.CONFIG_CHANGED, this.onServerConfigChanged);
         callManagerEmitter.addListener('CallAnswered', this.onCallAnswered);
         callManagerEmitter.addListener('CallEnded', this.onCallEnded);
         if (Platform.OS === 'ios') {
@@ -59,18 +57,7 @@ class GlobalEventHandler {
                 initialized();
             }
         } catch (error) {
-            logError(error);
-        }
-    };
-
-    configureAnalytics = async (serverUrl: string, config?: ClientConfig) => {
-        if (serverUrl && config?.DiagnosticsEnabled === 'true' && config?.DiagnosticId && LocalConfig.RudderApiKey) {
-            let client = analytics.get(serverUrl);
-            if (!client) {
-                client = analytics.create(serverUrl);
-            }
-
-            await client.init(config);
+            // logError(error);
         }
     };
 
@@ -85,10 +72,6 @@ class GlobalEventHandler {
                 alertInvalidDeepLink(getIntlShape(DEFAULT_LOCALE));
             }
         }
-    };
-
-    onServerConfigChanged = ({serverUrl, config}: {serverUrl: string; config: ClientConfig}) => {
-        this.configureAnalytics(serverUrl, config);
     };
 
     onServerVersionChanged = async ({serverUrl, serverVersion}: {serverUrl: string; serverVersion?: string}) => {

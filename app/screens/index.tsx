@@ -226,6 +226,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.SETTINGS_NOTIFICATION_PUSH:
             screen = withServerDatabase(require('@screens/settings/notification_push').default);
             break;
+        case Screens.SETTINGS_NOTIFICATION_CALL:
+            screen = withServerDatabase(require('@screens/settings/notification_call').default);
+            break;
         case Screens.SHARE_FEEDBACK:
             screen = withServerDatabase(require('@screens/share_feedback').default);
             break;
@@ -271,6 +274,13 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.CALL:
             screen = withServerDatabase(require('@calls/screens/call_screen').default);
             break;
+
+        // case Screens.CALL_PARTICIPANTS:
+        //     screen = withServerDatabase(require('@calls/screens/participants_list').default);
+        //     break;
+        // case Screens.CALL_HOST_CONTROLS:
+        //     screen = withServerDatabase(require('@calls/screens/host_controls').default);
+        //     break;
         case Screens.INFOMANIAK_QUOTA_EXCEEDED:
             screen = withServerDatabase(require('@screens/ik_quota_exceeded').default);
             break;

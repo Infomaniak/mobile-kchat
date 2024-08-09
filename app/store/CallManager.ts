@@ -175,7 +175,7 @@ class CallManager {
         } else {
             const serverUrl = await DatabaseManager.getServerUrlFromIdentifier(serverId);
             if (typeof serverUrl === 'string') {
-                this.declineCall(serverUrl, conferenceId);
+                this.leaveCall(serverUrl, conferenceId);
             }
         }
     };

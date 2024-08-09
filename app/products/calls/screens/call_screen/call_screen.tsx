@@ -8,7 +8,6 @@ import React, {forwardRef, useCallback, useEffect, useImperativeHandle, useMemo,
 import {useIntl} from 'react-intl';
 import {ActivityIndicator, FlatList, Platform, View} from 'react-native';
 import {Navigation} from 'react-native-navigation';
-import {useAnimatedStyle} from 'react-native-reanimated';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 
 import {fetchChannelById, switchToChannelById} from '@actions/remote/channel';
@@ -465,9 +464,9 @@ const CallScreen = ({
 
     // STYLES
     const styles = getStyleSheet(theme);
-    const {scrollPaddingTop, scrollValue, headerHeight} = useCollapsibleHeader<FlatList<string>>(true);
+    const {scrollPaddingTop, scrollValue/*, headerHeight*/} = useCollapsibleHeader<FlatList<string>>(true);
     const paddingTop = useMemo(() => ({flexGrow: 1/*, paddingTop: scrollPaddingTop*/}), [scrollPaddingTop]);
-    const top = useAnimatedStyle(() => ({top: headerHeight.value}));
+    // const top = useAnimatedStyle(() => ({top: headerHeight.value}));
 
     // IMPERATIVE HANDLE
     useImperativeHandle(callScreenRef, () => ({leaveCall, toggleAudioMuted, toggleVideoMuted}));
@@ -559,7 +558,7 @@ const CallScreen = ({
                     scrollValue={scrollValue}
                 />
                 <SafeAreaView
-                    style={[styles.flex, top]}
+                    style={styles.flex}
                     edges={EDGES}
                 >
                     <View style={paddingTop}>

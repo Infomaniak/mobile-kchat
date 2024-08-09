@@ -45,6 +45,7 @@ object NotificationUtils {
     const val CONFERENCE_ID_KEY = "conference_id"
     const val CHANNEL_NAME_KEY = "channel_name"
     const val CONFERENCE_JWT_KEY = "conference_jwt"
+    const val SIGNATURE_KEY = "signature"
 
     const val NOTIFICATION_ID_LOADED_KEY = "id_loaded"
 

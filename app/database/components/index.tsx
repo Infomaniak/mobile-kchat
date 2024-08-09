@@ -6,7 +6,7 @@ import React, {type ComponentType, useEffect, useState, type ComponentProps} fro
 
 import {AudioPlayerProvider} from '@app/context/audio_player';
 import DeviceInfoProvider from '@context/device';
-import ServerContext from '@context/server';
+import ServerUrlProvider from '@context/server';
 import ThemeProvider from '@context/theme';
 import UserLocaleProvider from '@context/user_locale';
 import DatabaseManager from '@database/manager';
@@ -17,7 +17,7 @@ import type ServersModel from '@typings/database/models/app/servers';
 
 type State = {
     database: Database;
-    server: ComponentProps<typeof ServerContext.Provider>['value'];
+    server: ComponentProps<typeof ServerUrlProvider>['server'];
 };
 
 export function withServerDatabase<T extends JSX.IntrinsicAttributes>(Component: ComponentType<T>): ComponentType<T> {
@@ -67,13 +67,13 @@ export function withServerDatabase<T extends JSX.IntrinsicAttributes>(Component:
             >
                 <DeviceInfoProvider>
                     <UserLocaleProvider database={state.database}>
-                        <ServerContext.Provider value={state.server}>
+                        <ServerUrlProvider server={state.server}>
                             <ThemeProvider database={state.database}>
                                 <AudioPlayerProvider>
                                     <Component {...props}/>
                                 </AudioPlayerProvider>
                             </ThemeProvider>
-                        </ServerContext.Provider>
+                        </ServerUrlProvider>
                     </UserLocaleProvider>
                 </DeviceInfoProvider>
             </DatabaseProvider>

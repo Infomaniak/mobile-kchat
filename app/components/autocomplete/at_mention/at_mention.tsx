@@ -2,9 +2,8 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {Platform, SectionList, type SectionListData, type SectionListRenderItemInfo, type StyleProp, type ViewStyle} from 'react-native';
+import {Platform, SectionList, type SectionListRenderItemInfo, type StyleProp, type ViewStyle} from 'react-native';
 
-import {searchGroupsByName, searchGroupsByNameInChannel, searchGroupsByNameInTeam} from '@actions/local/group';
 import {searchUsers} from '@actions/remote/user';
 import GroupMentionItem from '@components/autocomplete/at_mention_group/at_mention_group';
 import AtMentionItem from '@components/autocomplete/at_mention_item';
@@ -12,194 +11,14 @@ import AutocompleteSectionHeader from '@components/autocomplete/autocomplete_sec
 import SpecialMentionItem from '@components/autocomplete/special_mention_item';
 import {AT_MENTION_REGEX, AT_MENTION_SEARCH_REGEX} from '@constants/autocomplete';
 import {useServerUrl} from '@context/server';
-import DatabaseManager from '@database/manager';
 import {debounce} from '@helpers/api/general';
-import {t} from '@i18n';
-import {queryAllUsers} from '@queries/servers/user';
-import {hasTrailingSpaces} from '@utils/helpers';
 
+import {SECTION_KEY_GROUPS, SECTION_KEY_SPECIAL, emptyGroupList, emptySectionList, emptyUserlList} from './constants';
+import {checkSpecialMentions, filterResults, getAllUsers, getMatchTermForAtMention, keyExtractor, makeSections, searchGroups, sortReceivedUsers} from './utils';
+
+import type {SpecialMention, UserMentionSections} from './types';
 import type GroupModel from '@typings/database/models/servers/group';
 import type UserModel from '@typings/database/models/servers/user';
-
-const SECTION_KEY_TEAM_MEMBERS = 'teamMembers';
-const SECTION_KEY_IN_CHANNEL = 'inChannel';
-const SECTION_KEY_OUT_OF_CHANNEL = 'outChannel';
-const SECTION_KEY_SPECIAL = 'special';
-const SECTION_KEY_GROUPS = 'groups';
-
-type SpecialMention = {
-    completeHandle: string;
-    id: string;
-    defaultMessage: string;
-}
-
-type UserMentionSections = Array<SectionListData<UserProfile|UserModel|GroupModel|SpecialMention>>
-
-const getMatchTermForAtMention = (() => {
-    let lastMatchTerm: string | null = null;
-    let lastValue: string;
-    let lastIsSearch: boolean;
-    return (value: string, isSearch: boolean) => {
-        if (value !== lastValue || isSearch !== lastIsSearch) {
-            const regex = isSearch ? AT_MENTION_SEARCH_REGEX : AT_MENTION_REGEX;
-            let term = value.toLowerCase();
-            if (term.startsWith('from: @') || term.startsWith('from:@')) {
-                term = term.replace('@', '');
-            }
-
-            const match = term.match(regex);
-            lastValue = value;
-            lastIsSearch = isSearch;
-            if (match) {
-                lastMatchTerm = (isSearch ? match[1] : match[2]).toLowerCase();
-            } else {
-                lastMatchTerm = null;
-            }
-        }
-        return lastMatchTerm;
-    };
-})();
-
-const getSpecialMentions: () => SpecialMention[] = () => {
-    return [{
-        completeHandle: 'all',
-        id: t('suggestion.mention.all'),
-        defaultMessage: 'Notifies everyone in this channel',
-    }, {
-        completeHandle: 'channel',
-        id: t('suggestion.mention.channel'),
-        defaultMessage: 'Notifies everyone in this channel',
-    }, {
-        completeHandle: 'here',
-        id: t('suggestion.mention.here'),
-        defaultMessage: 'Notifies everyone online in this channel',
-    }];
-};
-
-const checkSpecialMentions = (term: string) => {
-    return getSpecialMentions().filter((m) => m.completeHandle.startsWith(term)).length > 0;
-};
-
-const keyExtractor = (item: UserProfile) => {
-    return item.id;
-};
-
-const filterResults = (users: Array<UserModel | UserProfile>, term: string) => {
-    return users.filter((u) => {
-        const firstName = ('firstName' in u ? u.firstName : u.first_name).toLowerCase();
-        const lastName = ('lastName' in u ? u.lastName : u.last_name).toLowerCase();
-        const fullName = `${firstName} ${lastName}`;
-        return u.username.toLowerCase().includes(term) ||
-            u.nickname.toLowerCase().includes(term) ||
-            fullName.includes(term) ||
-            u.email.toLowerCase().includes(term);
-    });
-};
-
-const makeSections = (teamMembers: Array<UserProfile | UserModel>, usersInChannel: Array<UserProfile | UserModel>, usersOutOfChannel: Array<UserProfile | UserModel>, groups: GroupModel[], showSpecialMentions: boolean, isLocal = false, isSearch = false) => {
-    const newSections: UserMentionSections = [];
-
-    if (isSearch) {
-        if (teamMembers.length) {
-            newSections.push({
-                id: t('mobile.suggestion.members'),
-                defaultMessage: 'Members',
-                data: teamMembers,
-                key: SECTION_KEY_TEAM_MEMBERS,
-            });
-        }
-    } else if (isLocal) {
-        if (teamMembers.length) {
-            newSections.push({
-                id: t('mobile.suggestion.members'),
-                defaultMessage: 'Members',
-                data: teamMembers,
-                key: SECTION_KEY_TEAM_MEMBERS,
-            });
-        }
-
-        if (groups.length) {
-            newSections.push({
-                id: t('suggestion.mention.groups'),
-                defaultMessage: 'Group Mentions',
-                data: groups,
-                key: SECTION_KEY_GROUPS,
-            });
-        }
-
-        if (showSpecialMentions) {
-            newSections.push({
-                id: t('suggestion.mention.special'),
-                defaultMessage: 'Special Mentions',
-                data: getSpecialMentions(),
-                key: SECTION_KEY_SPECIAL,
-            });
-        }
-    } else {
-        if (usersInChannel.length) {
-            newSections.push({
-                id: t('suggestion.mention.members'),
-                defaultMessage: 'Channel Members',
-                data: usersInChannel,
-                key: SECTION_KEY_IN_CHANNEL,
-            });
-        }
-
-        if (groups.length) {
-            newSections.push({
-                id: t('suggestion.mention.groups'),
-                defaultMessage: 'Group Mentions',
-                data: groups,
-                key: SECTION_KEY_GROUPS,
-            });
-        }
-
-        if (showSpecialMentions) {
-            newSections.push({
-                id: t('suggestion.mention.special'),
-                defaultMessage: 'Special Mentions',
-                data: getSpecialMentions(),
-                key: SECTION_KEY_SPECIAL,
-            });
-        }
-
-        if (usersOutOfChannel.length) {
-            newSections.push({
-                id: t('suggestion.mention.nonmembers'),
-                defaultMessage: 'Not in Channel',
-                data: usersOutOfChannel,
-                key: SECTION_KEY_OUT_OF_CHANNEL,
-            });
-        }
-    }
-    return newSections;
-};
-
-const searchGroups = async (serverUrl: string, matchTerm: string, useGroupMentions: boolean, isChannelConstrained: boolean, isTeamConstrained: boolean, channelId?: string, teamId?: string) => {
-    try {
-        if (useGroupMentions && matchTerm && matchTerm !== '') {
-            let g = emptyGroupList;
-
-            if (isChannelConstrained) {
-                // If the channel is constrained, we only show groups for that channel
-                if (channelId) {
-                    g = await searchGroupsByNameInChannel(serverUrl, matchTerm, channelId);
-                }
-            } else if (isTeamConstrained) {
-                // If there is no channel constraint, but a team constraint - only show groups for team
-                g = await searchGroupsByNameInTeam(serverUrl, matchTerm, teamId!);
-            } else {
-                // No constraints? Search all groups
-                g = await searchGroupsByName(serverUrl, matchTerm || '');
-            }
-
-            return g.length ? g : emptyGroupList;
-        }
-        return emptyGroupList;
-    } catch (error) {
-        return emptyGroupList;
-    }
-};
 
 type Props = {
     channelId?: string;
@@ -216,19 +35,6 @@ type Props = {
     isTeamConstrained: boolean;
     listStyle: StyleProp<ViewStyle>;
 }
-
-const emptyUserlList: Array<UserModel | UserProfile> = [];
-const emptySectionList: UserMentionSections = [];
-const emptyGroupList: GroupModel[] = [];
-
-const getAllUsers = async (serverUrl: string) => {
-    const database = DatabaseManager.serverDatabases[serverUrl]?.database;
-    if (!database) {
-        return [];
-    }
-
-    return queryAllUsers(database).fetch();
-};
 
 const AtMention = ({
     channelId,
@@ -289,16 +95,9 @@ const AtMention = ({
             const filteredUsers = filterResults(fallbackUsers, term);
             setFilteredLocalUsers(filteredUsers.length ? filteredUsers : emptyUserlList);
         } else if (receivedUsers) {
-            if (hasTrailingSpaces(term)) {
-                const filteredReceivedUsers = filterResults(receivedUsers.users, term);
-                const filteredReceivedOutOfChannelUsers = filterResults(receivedUsers.out_of_channel || [], term);
-
-                setUsersInChannel(filteredReceivedUsers.length ? filteredReceivedUsers : emptyUserlList);
-                setUsersOutOfChannel(filteredReceivedOutOfChannelUsers.length ? filteredReceivedOutOfChannelUsers : emptyUserlList);
-            } else {
-                setUsersInChannel(receivedUsers.users.length ? receivedUsers.users : emptyUserlList);
-                setUsersOutOfChannel(receivedUsers.out_of_channel?.length ? receivedUsers.out_of_channel : emptyUserlList);
-            }
+            const [sortedMembers, sortedOutOfChannel] = await sortReceivedUsers(sUrl, term, receivedUsers?.users, receivedUsers?.out_of_channel);
+            setUsersInChannel(sortedMembers.length ? sortedMembers : emptyUserlList);
+            setUsersOutOfChannel(sortedOutOfChannel.length ? sortedOutOfChannel : emptyUserlList);
         }
 
         setLoading(false);
@@ -448,7 +247,7 @@ const AtMention = ({
         }
         setSections(nSections ? newSections : emptySectionList);
         onShowingChange(Boolean(nSections));
-    }, [!useLocal && usersInChannel, !useLocal && usersOutOfChannel, teamMembers, groups, loading, channelId, useLocal && filteredLocalUsers]);
+    }, [!useLocal && usersInChannel, !useLocal && usersOutOfChannel, groups, loading, channelId, useLocal && filteredLocalUsers]);
 
     if (sections.length === 0 || noResultsTerm != null) {
         // If we are not in an active state or the mention has been completed return null so nothing is rendered

@@ -1,13 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {useHardwareKeyboardEvents} from '@mattermost/hardware-keyboard';
 import {createBottomTabNavigator, type BottomTabBarProps} from '@react-navigation/bottom-tabs';
-import {useFlipper} from '@react-navigation/devtools';
-import {NavigationContainer, useNavigationContainerRef} from '@react-navigation/native';
+import {NavigationContainer} from '@react-navigation/native';
 import React, {useEffect} from 'react';
 import {useIntl} from 'react-intl';
 import {DeviceEventEmitter, Platform} from 'react-native';
-import HWKeyboardEvent from 'react-native-hw-keyboard-event';
 import {enableFreeze, enableScreens} from 'react-native-screens';
 
 import {autoUpdateTimezone} from '@actions/remote/user';
@@ -62,10 +61,16 @@ export default function HomeScreen(props: HomeProps) {
     const intl = useIntl();
     const appState = useAppState();
 
-    // Flipper react-navigation plugin
-    // Ref. https://reactnavigation.org/docs/devtools
-    const navigationRef = useNavigationContainerRef();
-    useFlipper(navigationRef);
+    const handleFindChannels = () => {
+        if (!NavigationStore.getScreensInStack().includes(Screens.FIND_CHANNELS)) {
+            findChannels(
+                intl.formatMessage({id: 'find_channels.title', defaultMessage: 'Find Channels'}),
+                theme,
+            );
+        }
+    };
+
+    useHardwareKeyboardEvents({onFindChannels: handleFindChannels});
 
     useEffect(() => {
         const listener = DeviceEventEmitter.addListener(Events.NOTIFICATION_ERROR, (value: 'Team' | 'Channel' | 'Post' | 'Connection') => {
@@ -105,20 +110,6 @@ export default function HomeScreen(props: HomeProps) {
     }, [intl.locale]);
 
     useEffect(() => {
-        const listener = HWKeyboardEvent.onHWKeyPressed((keyEvent: {pressedKey: string}) => {
-            if (!NavigationStore.getScreensInStack().includes(Screens.FIND_CHANNELS) && keyEvent.pressedKey === 'find-channels') {
-                findChannels(
-                    intl.formatMessage({id: 'find_channels.title', defaultMessage: 'Find Channels'}),
-                    theme,
-                );
-            }
-        });
-        return () => {
-            listener.remove();
-        };
-    }, [intl.locale]);
-
-    useEffect(() => {
         if (appState === 'active') {
             updateTimezoneIfNeeded();
         }
@@ -145,7 +136,6 @@ export default function HomeScreen(props: HomeProps) {
     return (
         <>
             <NavigationContainer
-                ref={navigationRef}
                 theme={{
                     dark: false,
                     colors: {

@@ -2,16 +2,17 @@
 // See LICENSE.txt for license information.
 
 import {withObservables} from '@nozbe/watermelondb/react';
+import {Image, type ImageSource} from 'expo-image';
 import React from 'react';
-import {Image, StyleSheet, View} from 'react-native';
-import FastImage, {type Source} from 'react-native-fast-image';
+import {StyleSheet, View} from 'react-native';
 
+import {buildAbsoluteUrl} from '@actions/remote/file';
+import {buildProfileImageUrlFromUser} from '@actions/remote/user';
 import CompassIcon from '@components/compass_icon';
 import NetworkManager from '@managers/network_manager';
 import {observeConfigBooleanValue} from '@queries/servers/system';
 import {observeUser} from '@queries/servers/user';
 
-import type {Client} from '@client/rest';
 import type {WithDatabaseArgs} from '@typings/database/database';
 import type UserModel from '@typings/database/models/servers/user';
 
@@ -36,28 +37,18 @@ const styles = StyleSheet.create({
 });
 
 const NotificationIcon = ({author, enablePostIconOverride, fromWebhook, overrideIconUrl, serverUrl, useUserIcon}: NotificationIconProps) => {
-    let client: Client | undefined;
-    try {
-        client = NetworkManager.getClient(serverUrl);
-    } catch {
-        // do nothing, client is not set
-    }
+    const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
+    const authorizedHeaders: ImageSource['headers'] = {Authorization: token};
 
     let icon;
-    if (client && fromWebhook && !useUserIcon && enablePostIconOverride) {
+    if (fromWebhook && !useUserIcon && enablePostIconOverride) {
         if (overrideIconUrl) {
-            const source: Source = {
-                uri: client.getAbsoluteUrl(overrideIconUrl),
-                headers: {},
+            const source: ImageSource = {
+                uri: buildAbsoluteUrl(serverUrl, overrideIconUrl),
+                headers: overrideIconUrl.startsWith('/') ? authorizedHeaders : {},
             };
-
-            if (typeof overrideIconUrl === 'string' && overrideIconUrl.startsWith('/')) {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                source.headers.Authorization = client?.getCurrentBearerToken();
-            }
             icon = (
-                <FastImage
+                <Image
                     source={source}
                     style={styles.icon}
                 />
@@ -70,17 +61,15 @@ const NotificationIcon = ({author, enablePostIconOverride, fromWebhook, override
                 />
             );
         }
-    } else if (author && client) {
-        const pictureUrl = client.getProfilePictureUrl(author.id, author.lastPictureUpdate);
+    } else if (author) {
+        const pictureUrl = buildProfileImageUrlFromUser(serverUrl, author);
         icon = (
-            <FastImage
+            <Image
                 key={pictureUrl}
                 style={{width: IMAGE_SIZE, height: IMAGE_SIZE, borderRadius: (IMAGE_SIZE / 2)}}
                 source={{
-                    uri: `${serverUrl}${pictureUrl}`,
-                    headers: {
-                        Authorization: client?.getCurrentBearerToken(),
-                    },
+                    uri: buildAbsoluteUrl(serverUrl, pictureUrl),
+                    headers: authorizedHeaders,
                 }}
             />
         );

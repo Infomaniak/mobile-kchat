@@ -7,6 +7,8 @@ export const APPS_FORM = 'AppForm';
 export const BOTTOM_SHEET = 'BottomSheet';
 export const BROWSE_CHANNELS = 'BrowseChannels';
 export const CALL = 'Call';
+export const CALL_PARTICIPANTS = 'CallParticipants';
+export const CALL_HOST_CONTROLS = 'CallHostControls';
 export const CHANNEL = 'Channel';
 export const CHANNEL_ADD_MEMBERS = 'ChannelAddMembers';
 export const CHANNEL_FILES = 'ChannelFiles';
@@ -62,6 +64,7 @@ export const SETTINGS_NOTIFICATION_AUTO_RESPONDER = 'SettingsNotificationAutoRes
 export const SETTINGS_NOTIFICATION_EMAIL = 'SettingsNotificationEmail';
 export const SETTINGS_NOTIFICATION_MENTION = 'SettingsNotificationMention';
 export const SETTINGS_NOTIFICATION_PUSH = 'SettingsNotificationPush';
+export const SETTINGS_NOTIFICATION_CALL = 'SettingsNotificationCall';
 export const SHARE_FEEDBACK = 'ShareFeedback';
 export const SNACK_BAR = 'SnackBar';
 export const SSO = 'SSO';
@@ -86,6 +89,8 @@ export default {
     BOTTOM_SHEET,
     BROWSE_CHANNELS,
     CALL,
+    CALL_PARTICIPANTS,
+    CALL_HOST_CONTROLS,
     CHANNEL,
     CHANNEL_ADD_MEMBERS,
     CHANNEL_FILES,
@@ -141,6 +146,7 @@ export default {
     SETTINGS_NOTIFICATION_EMAIL,
     SETTINGS_NOTIFICATION_MENTION,
     SETTINGS_NOTIFICATION_PUSH,
+    SETTINGS_NOTIFICATION_CALL,
     SHARE_FEEDBACK,
     SNACK_BAR,
     SSO,
@@ -189,6 +195,8 @@ export const SCREENS_AS_BOTTOM_SHEET = new Set<string>([
     THREAD_OPTIONS,
     REACTIONS,
     USER_PROFILE,
+    CALL_PARTICIPANTS,
+    CALL_HOST_CONTROLS,
     INFOMANIAK_QUOTA_EXCEEDED,
     INFOMANIAK_REMINDER,
 ]);
