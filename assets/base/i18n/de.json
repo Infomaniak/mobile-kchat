@@ -355,7 +355,6 @@
     "global_threads.options.open_in_channel": "In Kanal öffnen",
     "global_threads.options.title": "Unterhaltungsaktionen",
     "global_threads.unreads": "Ungelesene",
-    "guest_banner.text": "Es gibt {count} externe Benutzer in diesem Gespräch.",
     "home.header.plus_menu": "Optionen",
     "infomaniak.channel_quota_exceeded.description": "Sie haben das Limit für öffentliche und private Kanäle in Ihrem kChat erreicht. Um weitere Kanäle zu erstellen, müssen Sie einen höheren Plan abonnieren.",
     "infomaniak.channel_quota_exceeded.title": "Schaffung neuer Kanäle zur Verbesserung der Kommunikation mit den Mitgliedern Ihrer Organisation",
@@ -380,6 +379,8 @@
     "infomaniak.size_quota_exceeded.description": "Ihr Speicherplatz ist voll. Abonnieren Sie ein höheres Angebot, um weiterhin Dateien zu versenden.",
     "infomaniak.size_quota_exceeded.title": "Erhöhen Sie den Speicherplatz in Ihrer kSuite",
     "infomanial.post.reminder.systemBot": "Hallo, hier ist Ihre Erinnerung an diese Nachricht von {username}:\n{permaLink}",
+    "infomaniak.post.reminder.systemBot.today": "um {time}",
+    "infomaniak.post.reminder.systemBot.tomorrow": "morgen um {time}",
     "integration_selector.multiselect.submit": "Erledigt",
     "interactive_dialog.submit": "Absenden",
     "intro.add_members": "Mitglieder hinzufügen",
@@ -1210,5 +1211,8 @@
     "video.download": "Video herunterladen",
     "video.failed_description": "Beim Abspielen des Videos ist ein Fehler aufgetreten.",
     "your.servers": "Deine Server",
-    "your.teams": "Deine Teams"
+    "your.teams": "Deine Teams",
+    "guest_banner.text": "Es gibt {count} externe Benutzer in diesem Gespräch.",
+    "infomaniak.post.reminder.postpone": "Erinnerung verschieben",
+    "infomaniak.post.reminder.markAsCompleted": "Als erledigt markieren"
 }
