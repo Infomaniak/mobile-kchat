@@ -320,7 +320,7 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: R
     const link = `[this message](${post.props.link})`;
 
     const targetTime = new Date(post.props.target_time);
-    targetTime.setHours(targetTime.getHours() + 2);
+    targetTime.setHours(targetTime.getHours() + 2); // Temp solution to fix the timezone issue
 
     const now = new Date();
     const diffInMs = targetTime.getTime() - now.getTime();
