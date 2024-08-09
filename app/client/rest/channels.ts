@@ -243,20 +243,22 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
             );
             return response;
         } catch (error) {
-            if (error instanceof ClientError) {
-                if (error.status_code === 404) {
-                    const membership: ChannelMembership = {
-                        user_id: userId,
-                        channel_id: channelId,
-                        roles: '',
-                        last_viewed_at: 0,
-                        msg_count: 0,
-                        mention_count: 0,
-                        notify_props: {},
-                        last_update_at: 0,
-                    };
-                    return membership;
-                }
+            if (
+                error instanceof ClientError &&
+                error.status_code === 404 &&
+                userId === 'me'
+            ) {
+                const membership: ChannelMembership = {
+                    user_id: userId,
+                    channel_id: channelId,
+                    roles: '',
+                    last_viewed_at: 0,
+                    msg_count: 0,
+                    mention_count: 0,
+                    notify_props: {},
+                    last_update_at: 0,
+                };
+                return membership;
             }
             throw error;
         }
