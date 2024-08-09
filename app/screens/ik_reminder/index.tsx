@@ -28,9 +28,11 @@ const POST_OPTIONS_BUTTON = 'close-post-options';
 type Props = {
     post: PostModel;
     componentId: string;
+    postId: string;
+    postpone: boolean;
 };
 
-const IKReminder = ({post, componentId}: Props) => {
+const IKReminder = ({post, postId, postpone, componentId}: Props) => {
     const serverUrl = useServerUrl();
     const {bottom} = useSafeAreaInsets();
     const isTablet = useIsTablet();
@@ -56,7 +58,10 @@ const IKReminder = ({post, componentId}: Props) => {
 
     useNavButtonPressed(POST_OPTIONS_BUTTON, componentId, close, []);
 
-    const isSystemPost = isSystemMessage(post);
+    let isSystemPost = true;
+    if (post) {
+        isSystemPost = isSystemMessage(post);
+    }
 
     const snapPoints = useMemo(() => {
         const items: Array<string | number> = [1];
@@ -86,8 +91,12 @@ const IKReminder = ({post, componentId}: Props) => {
                 endTime = currentDate.startOf('isoWeek').add(1, 'week').hours(9).minutes(0).seconds(0);
                 break;
         }
+        if (postpone) {
+            addPostponeReminder(endTime.unix());
+        } else {
+            addPostReminder(endTime.unix());
+        }
 
-        addPostReminder(endTime.unix());
         close();
     };
 
@@ -95,6 +104,19 @@ const IKReminder = ({post, componentId}: Props) => {
         try {
             const client = NetworkManager.getClient(serverUrl);
             await client.addPostReminder(post.id, timestamp);
+        } catch (e) {
+            // do nothing
+        }
+        return {};
+    };
+
+    const addPostponeReminder = async (timestamp: number) => {
+        try {
+            const client = NetworkManager.getClient(serverUrl);
+            const reschedule = true;
+            const reminderPostId = post.id;
+
+            await client.addPostReminder(postId, timestamp, reschedule, reminderPostId);
         } catch (e) {
             // do nothing
         }
