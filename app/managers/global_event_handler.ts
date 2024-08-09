@@ -1,10 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Alert, DeviceEventEmitter, Linking, NativeEventEmitter, NativeModules} from 'react-native';
+import {Alert, DeviceEventEmitter, Linking, NativeEventEmitter, NativeModules, Platform} from 'react-native';
 import semver from 'semver';
 
 import {switchToChannelById} from '@actions/remote/channel';
+import {switchToConferenceByChannelId} from '@actions/remote/conference';
+import CallManager, {CallAnsweredEvent, CallEndedEvent, CallMutedEvent, CallVideoMutedEvent} from '@app/store/CallManager';
+import {logError} from '@app/utils/log';
 import LocalConfig from '@assets/config.json';
 import {Device, Events, Sso} from '@constants';
 import {MIN_REQUIRED_VERSION} from '@constants/supported_server';
@@ -22,8 +25,8 @@ import {getIntlShape} from '@utils/general';
 
 type LinkingCallbackArg = {url: string};
 
-const {SplitView} = NativeModules;
-const splitViewEmitter = new NativeEventEmitter(SplitView);
+const splitViewEmitter = new NativeEventEmitter(NativeModules.SplitView);
+const callManagerEmitter = new NativeEventEmitter(NativeModules.CallManagerModule);
 
 class GlobalEventHandler {
     JavascriptAndNativeErrorHandler: jsAndNativeErrorHandler | undefined;
@@ -31,13 +34,33 @@ class GlobalEventHandler {
     constructor() {
         DeviceEventEmitter.addListener(Events.SERVER_VERSION_CHANGED, this.onServerVersionChanged);
         DeviceEventEmitter.addListener(Events.CONFIG_CHANGED, this.onServerConfigChanged);
+        callManagerEmitter.addListener('CallAnswered', this.onCallAnswered);
+        callManagerEmitter.addListener('CallEnded', this.onCallEnded);
+        if (Platform.OS === 'ios') {
+            callManagerEmitter.addListener('CallMuted', this.onCallMuted);
+        }
+
+        // callManagerEmitter.addListener('CallVideoMuted', this.onCallMuted);
         splitViewEmitter.addListener('SplitViewChanged', this.onSplitViewChanged);
         Linking.addEventListener('url', this.onDeepLink);
+
+        this.initialized();
     }
 
     init = () => {
         this.JavascriptAndNativeErrorHandler = require('@utils/error_handling').default;
         this.JavascriptAndNativeErrorHandler?.initializeErrorHandling();
+    };
+
+    initialized = () => {
+        try {
+            const {initialized} = NativeModules.CallManagerModule;
+            if (typeof initialized === 'function') {
+                initialized();
+            }
+        } catch (error) {
+            logError(error);
+        }
     };
 
     configureAnalytics = async (serverUrl: string, config?: ClientConfig) => {
@@ -86,6 +109,49 @@ class GlobalEventHandler {
                     {cancelable: false},
                 );
             }
+        }
+    };
+
+    onCallAnswered = async (event: unknown) => {
+        const parsed = CallAnsweredEvent.safeParse(event);
+        if (parsed.success) {
+            const {data} = parsed;
+            const serverUrl = await DatabaseManager.getServerUrlFromIdentifier(data.serverId);
+            if (typeof serverUrl === 'string') {
+                switchToConferenceByChannelId(serverUrl, data.channelId, {
+                    conferenceJWT: data.conferenceJWT,
+                    initiator: 'native',
+                });
+            }
+        } else {
+            logError('UNABLE TO PARSE CallAnsweredEvent', parsed.error);
+        }
+    };
+
+    onCallEnded = async (event: unknown) => {
+        const parsed = CallEndedEvent.safeParse(event);
+        if (parsed.success) {
+            CallManager.leaveCallScreen(parsed.data);
+        } else {
+            logError('UNABLE TO PARSE CallEndedEvent', parsed.error);
+        }
+    };
+
+    onCallMuted = async (event: unknown) => {
+        const parsed = CallMutedEvent.safeParse(event);
+        if (parsed.success) {
+            CallManager.toggleAudioMuted(parsed.data.isMuted === 'true');
+        } else {
+            logError('UNABLE TO PARSE CallEndedEvent', parsed.error);
+        }
+    };
+
+    onCallVideoMuted = async (event: unknown) => {
+        const parsed = CallVideoMutedEvent.safeParse(event);
+        if (parsed.success) {
+            CallManager.toggleAudioMuted(parsed.data.isMuted === 'true');
+        } else {
+            logError('UNABLE TO PARSE CallEndedEvent', parsed.error);
         }
     };
 

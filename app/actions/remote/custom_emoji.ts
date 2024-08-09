@@ -77,9 +77,9 @@ const debouncedFetchEmojiByNames = debounce(async (serverUrl: string) => {
         logDebug('error on debouncedFetchEmojiByNames', getFullErrorMessage(error));
         return {error};
     }
-}, 200, false, () => {
+}, 200, {callback: () => {
     names.clear();
-});
+}});
 
 export const fetchCustomEmojiInBatch = (serverUrl: string, emojiName: string) => {
     names.add(emojiName);

@@ -1,0 +1,31 @@
+diff --git a/node_modules/@giphy/react-native-sdk/android/build.gradle b/node_modules/@giphy/react-native-sdk/android/build.gradle
+index 21e647a..857dd3a 100644
+--- a/node_modules/@giphy/react-native-sdk/android/build.gradle
++++ b/node_modules/@giphy/react-native-sdk/android/build.gradle
+@@ -136,6 +136,9 @@ android {
+     sourceCompatibility JavaVersion.VERSION_1_8
+     targetCompatibility JavaVersion.VERSION_1_8
+   }
++  kotlinOptions {
++    jvmTarget = JavaVersion.VERSION_1_8
++  }
+ 
+   sourceSets {
+     main {
+diff --git a/node_modules/@giphy/react-native-sdk/ios/.DS_Store b/node_modules/@giphy/react-native-sdk/ios/.DS_Store
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift b/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift
+index 3731b25..2f01a05 100644
+--- a/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift
++++ b/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift
+@@ -20,7 +20,8 @@ extension GPHMedia {
+ 
+   private func toGPHJSON() -> GPHJSONObject {
+     guard let data = try? JSONEncoder().encode(self),
+-          let rep = try? JSONSerialization.jsonObject(with: data) as? GPHJSONObject else {
++          let optionalRep = try? JSONSerialization.jsonObject(with: data) as? GPHJSONObject,
++          let rep = optionalRep else {
+       return [:]
+     }
+     return rep

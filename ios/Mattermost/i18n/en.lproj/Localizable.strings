@@ -10,6 +10,8 @@
 "about.teamEditiont1" = "Enterprise Edition";
 "account.logout" = "Log out";
 "account.logout_from" = "Log out of {serverName}";
+"account.server_preprod" = "Switch to NEXT";
+"account.server_prod" = "Switch to STABLE";
 "account.settings" = "Settings";
 "account.your_profile" = "Your Profile";
 "alert.channel_deleted.description" = "The channel {displayName} has been archived.";
@@ -643,6 +645,7 @@ Go to Settings > Touch ID & Passcode.";
 "mobile.open_dm.error" = "We couldn't open a direct message with {displayName}. Please check your connection and try again.";
 "mobile.open_gm.error" = "We couldn't open a group message with those users. Please check your connection and try again.";
 "mobile.participants.header" = "Thread Participants";
+"mobile.call_participants.header" = "Call Participants";
 "mobile.permission_denied_dismiss" = "Don't Allow";
 "mobile.permission_denied_retry" = "Settings";
 "mobile.post_info.add_reaction" = "Add Reaction";

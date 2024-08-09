@@ -24,7 +24,10 @@ import {isUnicodeEmoji} from '@utils/emoji/helpers';
 import type {EmojiProps} from '@typings/components/emoji';
 import type {WithDatabaseArgs} from '@typings/database/database';
 
-const assetImages = new Map([['kchat.png', require('@assets/images/emojis/kchat.png')]]);
+const assetImages = new Map([
+    ['kchat.png', require('@assets/images/emojis/kchat.png')],
+    ['kmeet.png', require('@assets/images/emojis/kmeet.png')],
+]);
 
 const Emoji = (props: EmojiProps) => {
     const {

@@ -3,6 +3,7 @@
 
 import React, {useMemo} from 'react';
 import {Image as RNImage} from 'react-native';
+import {Grayscale} from 'react-native-color-matrix-image-filters';
 import FastImage, {type Source} from 'react-native-fast-image';
 import Animated from 'react-native-reanimated';
 
@@ -19,6 +20,7 @@ import type UserModel from '@typings/database/models/servers/user';
 type Props = {
     author?: UserModel | UserProfile;
     forwardRef?: React.RefObject<any>;
+    grayscale?: boolean;
     iconSize?: number;
     size: number;
     source?: Source | string;
@@ -37,7 +39,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const Image = ({author, forwardRef, iconSize, size, source, url}: Props) => {
+const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Props) => {
     const theme = useTheme();
     let serverUrl = useServerUrl();
     serverUrl = url || serverUrl;
@@ -68,50 +70,54 @@ const Image = ({author, forwardRef, iconSize, size, source, url}: Props) => {
         // handle below that the client is not set
     }
 
-    if (author && client) {
-        let lastPictureUpdate = 0;
-        const isBot = ('isBot' in author) ? author.isBot : author.is_bot;
-        if (isBot) {
-            lastPictureUpdate = ('isBot' in author) ? author.props?.bot_last_icon_update : author.bot_last_icon_update || 0;
-        } else {
-            lastPictureUpdate = ('lastPictureUpdate' in author) ? author.lastPictureUpdate : author.last_picture_update || 0;
-        }
+    const image = (() => {
+        if (author && client) {
+            let lastPictureUpdate = 0;
+            const isBot = ('isBot' in author) ? author.isBot : author.is_bot;
+            if (isBot) {
+                lastPictureUpdate = ('isBot' in author) ? author.props?.bot_last_icon_update : author.bot_last_icon_update || 0;
+            } else {
+                lastPictureUpdate = ('lastPictureUpdate' in author) ? author.lastPictureUpdate : author.last_picture_update || 0;
+            }
 
-        const pictureUrl = client.getProfilePictureUrl(author.id, lastPictureUpdate);
-        const imgSource = source ?? {
-            uri: `${serverUrl}${pictureUrl}`,
-            headers: {
-                Authorization: client.getCurrentBearerToken(),
-            },
-        };
-        if (imgSource.uri?.startsWith('file://')) {
+            const pictureUrl = client.getProfilePictureUrl(author.id, lastPictureUpdate);
+            const imgSource = source ?? {
+                uri: `${serverUrl}${pictureUrl}`,
+                headers: {
+                    Authorization: client.getCurrentBearerToken(),
+                },
+            };
+            if (imgSource.uri?.startsWith('file://')) {
+                return (
+                    <AnimatedImage
+                        key={pictureUrl}
+                        ref={forwardRef}
+                        style={fIStyle}
+                        source={{uri: imgSource.uri}}
+                    />
+                );
+            }
             return (
-                <AnimatedImage
+                <AnimatedFastImage
                     key={pictureUrl}
+
+                    // @ts-expect-error TS expects old type ref
                     ref={forwardRef}
                     style={fIStyle}
-                    source={{uri: imgSource.uri}}
+                    source={imgSource}
                 />
             );
         }
         return (
-            <AnimatedFastImage
-                key={pictureUrl}
-
-                // @ts-expect-error TS expects old type ref
-                ref={forwardRef}
-                style={fIStyle}
-                source={imgSource}
+            <CompassIcon
+                name={ACCOUNT_OUTLINE_IMAGE}
+                size={iconSize || size}
+                style={style.icon}
             />
         );
-    }
-    return (
-        <CompassIcon
-            name={ACCOUNT_OUTLINE_IMAGE}
-            size={iconSize || size}
-            style={style.icon}
-        />
-    );
+    })();
+
+    return grayscale ? <Grayscale>{image}</Grayscale> : image;
 };
 
 export default Image;

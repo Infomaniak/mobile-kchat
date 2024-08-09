@@ -296,12 +296,7 @@ const Post = ({
             />
         );
     } else if (isCallsPost && !hasBeenDeleted) {
-        body = (
-            <IkCallsCustomMessage
-                serverUrl={serverUrl}
-                post={post}
-            />
-        );
+        body = <IkCallsCustomMessage post={post}/>;
     } else if (post.metadata && post.metadata.embeds && post.metadata.embeds.length > 0 && post.metadata.embeds[0].type === 'permalink') {
         const postLink = `/${post.metadata.embeds[0].data.team_name}/pl/${post.metadata.embeds[0].data.post_id}`;
         body = (

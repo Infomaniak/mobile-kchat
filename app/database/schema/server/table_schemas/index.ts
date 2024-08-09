@@ -6,6 +6,8 @@ export {default as CategoryChannelSchema} from './category_channel';
 export {default as ChannelInfoSchema} from './channel_info';
 export {default as ChannelMembershipSchema} from './channel_membership';
 export {default as ChannelSchema} from './channel';
+export {default as ConferenceSchema} from './conference';
+export {default as ConferenceParticipantSchema} from './conference_participant';
 export {default as CustomEmojiSchema} from './custom_emoji';
 export {default as DraftSchema} from './draft';
 export {default as FileSchema} from './file';

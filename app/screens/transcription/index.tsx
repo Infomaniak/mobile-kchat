@@ -1,12 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useMemo, type FC} from 'react';
+import React, {type FC} from 'react';
 import {Animated, ScrollView, Text, View} from 'react-native';
 
 import FormattedText from '@app/components/formatted_text';
 import {Screens} from '@app/constants';
-import {bottomSheetSnapPoint} from '@app/utils/helpers';
 import {useTheme} from '@context/theme';
 import BottomSheet from '@screens/bottom_sheet';
 
@@ -23,16 +22,7 @@ const Transcription: FC<Props> = ({closeButtonId, transcriptDatas}) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
 
-    const ITEM_HEIGHT = 50;
-    const bottom = 50;
-
-    const snapPoints = useMemo(() => {
-        const items: Array<string | number> = [1];
-        const segmentsCount = transcriptDatas.segments.length;
-
-        items.push(bottomSheetSnapPoint(segmentsCount, ITEM_HEIGHT, bottom) + 50);
-        return items;
-    }, [transcriptDatas]);
+    const snapPoints = [1, '50%', '90%'];
 
     const renderContent = () => {
         return (

@@ -4,13 +4,39 @@
 // NOTE : To implement migration, please follow this document
 // https://nozbe.github.io/WatermelonDB/Advanced/Migrations.html
 
-import {addColumns, schemaMigrations} from '@nozbe/watermelondb/Schema/migrations';
+import {addColumns, createTable, schemaMigrations} from '@nozbe/watermelondb/Schema/migrations';
 
 import {MM_TABLES} from '@constants/database';
 
-const {CHANNEL_INFO, DRAFT, POST} = MM_TABLES.SERVER;
+const {CONFERENCE, CONFERENCE_PARTICIPANT, CHANNEL_INFO, DRAFT, POST} = MM_TABLES.SERVER;
 
 export default schemaMigrations({migrations: [
+    {
+        toVersion: 4,
+        steps: [
+            createTable({
+                name: CONFERENCE,
+                columns: [
+                    {name: 'url', type: 'string'},
+                    {name: 'channel_id', type: 'string', isIndexed: true},
+                    {name: 'team_id', type: 'string', isIndexed: true},
+                    {name: 'user_id', type: 'string', isIndexed: true},
+                    {name: 'create_at', type: 'number'},
+                    {name: 'delete_at', type: 'number', isOptional: true},
+                ],
+            }),
+            createTable({
+                name: CONFERENCE_PARTICIPANT,
+                columns: [
+                    {name: 'channel_id', type: 'string', isIndexed: true},
+                    {name: 'conference_id', type: 'string', isIndexed: true},
+                    {name: 'user_id', type: 'string', isIndexed: true},
+                    {name: 'present', type: 'boolean'},
+                    {name: 'status', type: 'string'},
+                ],
+            }),
+        ],
+    },
     {
         toVersion: 3,
         steps: [

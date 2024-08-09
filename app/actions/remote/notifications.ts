@@ -7,6 +7,7 @@ import {addChannelToDefaultCategory, storeCategories} from '@actions/local/categ
 import {storeMyChannelsForTeam} from '@actions/local/channel';
 import {storePostsForChannel} from '@actions/local/post';
 import {fetchDirectChannelsInfo, fetchMyChannel, switchToChannelById} from '@actions/remote/channel';
+import {fetchConference, switchToConferenceByChannelId} from '@actions/remote/conference';
 import {fetchPostsForChannel, fetchPostThread} from '@actions/remote/post';
 import {forceLogoutIfNecessary} from '@actions/remote/session';
 import {fetchMyTeam} from '@actions/remote/team';
@@ -190,12 +191,15 @@ export const openNotification = async (serverUrl: string, notification: Notifica
     EphemeralStore.setNotificationTapped(true);
 
     const channelId = notification.payload!.channel_id!;
+    const conferenceId = notification.payload!.conference_id;
+    const conferenceJWT = notification.payload!.conference_jwt;
     const rootId = notification.payload!.root_id!;
     try {
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
 
         const isCRTEnabled = await getIsCRTEnabled(database);
         const isThreadNotification = isCRTEnabled && Boolean(rootId);
+        const isConferenceNotification = typeof conferenceId === 'string';
 
         const currentTeamId = await getCurrentTeamId(database);
         const currentServerUrl = await DatabaseManager.getActiveServerUrl();
@@ -213,6 +217,13 @@ export const openNotification = async (serverUrl: string, notification: Notifica
         // To make the switch faster we determine if we already have the team & channel
         const myChannel = await getMyChannel(database, channelId);
         const myTeam = await getMyTeamById(database, teamId);
+
+        if (isConferenceNotification) {
+            const {conference} = await fetchConference(serverUrl, conferenceId);
+            if (conference) {
+                return switchToConferenceByChannelId(serverUrl, conference.channelId, {initiator: 'native', conferenceJWT});
+            }
+        }
 
         if (myChannel && myTeam) {
             if (isThreadNotification) {

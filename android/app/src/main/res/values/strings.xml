@@ -23,4 +23,14 @@
     <string name="inAppSessionAuth_title">In-App Session Auth</string>
     <string name="inAppSessionAuth_description">Instead of default flow from the mobile browser, enforce SSO with the WebView.</string>
     <string name="empty_notification_message">Imported something</string>
+    <plurals name="manyCallers">
+        <item quantity="one">, and another %s</item>
+        <item quantity="other">, and %s others</item>
+    </plurals>
+    <string name="callkChatDescription">kChat voice call</string>
+    <string name="declineCall">Decline</string>
+    <string name="acceptCall">Accept</string>
+    <string name="notificationCallFrom">Call from %1$s</string>
+    <string name="notificationChannelName">Call notification</string>
+    <string name="notificationChannelDescription">Display a notification if you’re receiving a call</string>
 </resources>

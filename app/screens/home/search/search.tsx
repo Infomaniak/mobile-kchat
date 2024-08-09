@@ -85,9 +85,9 @@ const SearchScreen = ({teamId, teams}: Props) => {
     const insets = useSafeAreaInsets();
     const keyboardHeight = useKeyboardHeight();
 
-    const stateIndex = nav.getState().index;
+    const stateIndex = nav.getState()!.index;
     const serverUrl = useServerUrl();
-    const searchTerm = (nav.getState().routes[stateIndex].params as any)?.searchTerm;
+    const searchTerm = (nav.getState()!.routes[stateIndex].params as any)?.searchTerm;
 
     const clearRef = useRef<boolean>(false);
     const cancelRef = useRef<boolean>(false);

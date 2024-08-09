@@ -1,10 +1,10 @@
 PODS:
-  - Alamofire (5.8.1)
-  - AppAuth (1.6.2):
-    - AppAuth/Core (= 1.6.2)
-    - AppAuth/ExternalUserAgent (= 1.6.2)
-  - AppAuth/Core (1.6.2)
-  - AppAuth/ExternalUserAgent (1.6.2):
+  - Alamofire (5.9.1)
+  - AppAuth (1.7.5):
+    - AppAuth/Core (= 1.7.5)
+    - AppAuth/ExternalUserAgent (= 1.7.5)
+  - AppAuth/Core (1.7.5)
+  - AppAuth/ExternalUserAgent (1.7.5):
     - AppAuth/Core
   - boost (1.76.0)
   - BVLinearGradient (2.8.3):
@@ -81,14 +81,34 @@ PODS:
     - FlipperKit/Core
     - FlipperKit/FlipperKitNetworkPlugin
   - fmt (6.2.1)
+  - Giphy (2.2.9):
+    - libwebp
+  - giphy-react-native-sdk (3.2.6):
+    - Giphy (= 2.2.9)
+    - RCT-Folly (= 2021.07.22.00)
+    - React-Core
   - glog (0.3.5)
+  - GoogleSignIn (7.1.0):
+    - AppAuth (< 2.0, >= 1.7.3)
+    - GTMAppAuth (< 5.0, >= 4.1.1)
+    - GTMSessionFetcher/Core (~> 3.3)
+  - GTMAppAuth (4.1.1):
+    - AppAuth/Core (~> 1.7)
+    - GTMSessionFetcher/Core (< 4.0, >= 3.3)
+  - GTMSessionFetcher/Core (3.5.0)
   - hermes-engine (0.72.7):
     - hermes-engine/Pre-built (= 0.72.7)
   - hermes-engine/Pre-built (0.72.7)
   - HMSegmentedControl (1.5.6)
   - jail-monkey (2.8.0):
     - React-Core
-  - JitsiWebRTC (111.0.2)
+  - jitsi-meet-rnsdk (2.2.1):
+    - ObjectiveDropboxOfficial (= 6.2.3)
+    - React-Core
+    - react-native-webrtc
+  - JitsiMeetSDKLite (9.2.2-lite):
+    - JitsiWebRTC (~> 118.0)
+  - JitsiWebRTC (118.0.0)
   - libevent (2.1.12)
   - libwebp (1.3.2):
     - libwebp/demux (= 1.3.2)
@@ -106,6 +126,7 @@ PODS:
     - CocoaLumberjack (~> 3.8.2)
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
+  - ObjectiveDropboxOfficial (6.2.3)
   - OpenSSL-Universal (1.1.1100)
   - RCT-Folly (2021.07.22.00):
     - boost
@@ -419,13 +440,17 @@ PODS:
     - React-Core
   - react-native-cameraroll (7.0.0):
     - React-Core
+  - react-native-color-matrix-image-filters (6.0.9):
+    - React-Core
   - react-native-cookies (6.2.1):
     - React-Core
   - react-native-create-thumbnail (1.6.4):
     - React-Core
-  - react-native-document-picker (9.0.1):
+  - react-native-document-picker (9.3.0):
     - React-Core
   - react-native-emm (1.4.0):
+    - React-Core
+  - react-native-get-random-values (1.9.0):
     - React-Core
   - react-native-hw-keyboard-event (0.0.4):
     - React
@@ -433,27 +458,42 @@ PODS:
     - React-Core
   - react-native-in-app-review (4.3.3):
     - React-Core
+  - react-native-keep-awake (4.0.0):
+    - React
   - react-native-netinfo (11.1.0):
     - React-Core
-  - react-native-network-client (1.5.0):
-    - Alamofire (~> 5.8.1)
+  - react-native-network-client (1.6.0):
+    - Alamofire (~> 5.9.1)
+    - RCT-Folly (= 2021.07.22.00)
     - React-Core
-    - Starscream (~> 4.0.4)
+    - Starscream (~> 4.0.8)
     - SwiftyJSON (~> 5.0)
   - react-native-notifications (5.1.0):
+    - React-Core
+  - react-native-orientation-locker (1.6.0):
+    - React-Core
+  - react-native-pager-view (6.2.0):
     - React-Core
   - react-native-paste-input (0.7.0):
     - React-Core
     - Swime (= 3.0.6)
+  - react-native-performance (5.0.0):
+    - React-Core
+  - react-native-restart (0.0.27):
+    - React-Core
   - react-native-safe-area-context (4.7.4):
+    - React-Core
+  - react-native-slider (4.4.3):
+    - React-Core
+  - react-native-splash-screen (3.3.0):
     - React-Core
   - react-native-video (5.2.1):
     - React-Core
     - react-native-video/Video (= 5.2.1)
   - react-native-video/Video (5.2.1):
     - React-Core
-  - react-native-webrtc (111.0.6):
-    - JitsiWebRTC (~> 111.0.0)
+  - react-native-webrtc (118.0.7):
+    - JitsiWebRTC (~> 118.0.0)
     - React-Core
   - react-native-webview (13.6.3):
     - React-Core
@@ -573,14 +613,14 @@ PODS:
     - React-Core
   - ReactNativeKeyboardTrackingView (5.7.0):
     - React
-  - ReactNativeNavigation (7.37.1-hotfix.1):
+  - ReactNativeNavigation (7.40.0):
     - HMSegmentedControl
     - React-Core
     - React-CoreModules
     - React-RCTImage
     - React-RCTText
-    - ReactNativeNavigation/Core (= 7.37.1-hotfix.1)
-  - ReactNativeNavigation/Core (7.37.1-hotfix.1):
+    - ReactNativeNavigation/Core (= 7.40.0)
+  - ReactNativeNavigation/Core (7.40.0):
     - HMSegmentedControl
     - React-Core
     - React-CoreModules
@@ -590,9 +630,15 @@ PODS:
     - React-Core
   - RNAudioRecorderPlayer (3.6.6):
     - React-Core
+  - RNCalendarEvents (2.2.0):
+    - React
+  - RNCAsyncStorage (1.19.4):
+    - React-Core
   - RNCClipboard (1.12.1):
     - React-Core
   - RNDateTimePicker (7.6.1):
+    - React-Core
+  - RNDefaultPreference (1.4.4):
     - React-Core
   - RNDeviceInfo (10.11.0):
     - React-Core
@@ -606,6 +652,9 @@ PODS:
     - React-Core
   - RNGestureHandler (2.13.4):
     - RCT-Folly (= 2021.07.22.00)
+    - React-Core
+  - RNGoogleSignin (10.1.0):
+    - GoogleSignIn (~> 7.0)
     - React-Core
   - RNKeychain (8.1.2):
     - React-Core
@@ -654,11 +703,18 @@ PODS:
     - Sentry/HybridSDK (= 8.21.0)
   - RNShare (10.0.1):
     - React-Core
+  - RNSound (0.11.2):
+    - React-Core
+    - RNSound/Core (= 0.11.2)
+  - RNSound/Core (0.11.2):
+    - React-Core
   - RNSVG (14.0.0):
     - React-Core
   - RNVectorIcons (10.0.2):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
+  - RNWatch (1.1.0):
+    - React
   - SDWebImage (5.18.12):
     - SDWebImage/Core (= 5.18.12)
   - SDWebImage/Core (5.18.12)
@@ -670,8 +726,8 @@ PODS:
   - SentryPrivate (8.21.0)
   - simdjson (3.1.0-wmelon1)
   - SocketRocket (0.6.1)
-  - Starscream (4.0.4)
-  - SwiftyJSON (5.0.1)
+  - Starscream (4.0.8)
+  - SwiftyJSON (5.0.2)
   - Swime (3.0.6)
   - WatermelonDB (0.27.1):
     - React
@@ -706,9 +762,12 @@ DEPENDENCIES:
   - FlipperKit/FlipperKitReactPlugin (= 0.182.0)
   - FlipperKit/FlipperKitUserDefaultsPlugin (= 0.182.0)
   - FlipperKit/SKIOSNetworkPlugin (= 0.182.0)
+  - "giphy-react-native-sdk (from `../node_modules/@giphy/react-native-sdk`)"
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - jail-monkey (from `../node_modules/jail-monkey`)
+  - "jitsi-meet-rnsdk (from `../node_modules/@jitsi/react-native-sdk`)"
+  - JitsiMeetSDKLite (= 9.2.2-lite)
   - libevent (~> 2.1.12)
   - "mattermost-react-native-turbo-log (from `../node_modules/@mattermost/react-native-turbo-log`)"
   - OpenSSL-Universal (= 1.1.1100)
@@ -733,18 +792,27 @@ DEPENDENCIES:
   - react-native-app-auth (from `../node_modules/react-native-app-auth`)
   - react-native-background-timer (from `../node_modules/react-native-background-timer`)
   - "react-native-cameraroll (from `../node_modules/@react-native-camera-roll/camera-roll`)"
+  - react-native-color-matrix-image-filters (from `../node_modules/react-native-color-matrix-image-filters`)
   - "react-native-cookies (from `../node_modules/@react-native-cookies/cookies`)"
   - react-native-create-thumbnail (from `../node_modules/react-native-create-thumbnail`)
   - react-native-document-picker (from `../node_modules/react-native-document-picker`)
   - "react-native-emm (from `../node_modules/@mattermost/react-native-emm`)"
+  - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-hw-keyboard-event (from `../node_modules/react-native-hw-keyboard-event`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-in-app-review (from `../node_modules/react-native-in-app-review`)
+  - react-native-keep-awake (from `../node_modules/react-native-keep-awake`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - "react-native-network-client (from `../node_modules/@mattermost/react-native-network-client`)"
   - react-native-notifications (from `../node_modules/react-native-notifications`)
+  - react-native-orientation-locker (from `../node_modules/react-native-orientation-locker`)
+  - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - "react-native-paste-input (from `../node_modules/@mattermost/react-native-paste-input`)"
+  - react-native-performance (from `../node_modules/react-native-performance`)
+  - react-native-restart (from `../node_modules/react-native-restart`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
+  - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
   - react-native-video (from `../node_modules/react-native-video`)
   - react-native-webrtc (from `../node_modules/react-native-webrtc`)
   - react-native-webview (from `../node_modules/react-native-webview`)
@@ -771,13 +839,17 @@ DEPENDENCIES:
   - ReactNativeNavigation (from `../node_modules/react-native-navigation`)
   - rn-fetch-blob (from `../node_modules/rn-fetch-blob`)
   - RNAudioRecorderPlayer (from `../node_modules/react-native-audio-recorder-player`)
+  - RNCalendarEvents (from `../node_modules/react-native-calendar-events`)
+  - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
+  - RNDefaultPreference (from `../node_modules/react-native-default-preference`)
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNFastImage (from `../node_modules/react-native-fast-image`)
   - RNFileViewer (from `../node_modules/react-native-file-viewer`)
   - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNKeychain (from `../node_modules/react-native-keychain`)
   - RNLocalize (from `../node_modules/react-native-localize`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
@@ -786,10 +858,11 @@ DEPENDENCIES:
   - RNScreens (from `../node_modules/react-native-screens`)
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNShare (from `../node_modules/react-native-share`)
+  - RNSound (from `../node_modules/react-native-sound`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
+  - RNWatch (from `../node_modules/react-native-watch-connectivity`)
   - "simdjson (from `../node_modules/@nozbe/simdjson`)"
-  - Starscream (from `https://github.com/mattermost/Starscream.git`, commit `7494780a021e44873e6e5fde5026ef96696c1865`)
   - "WatermelonDB (from `../node_modules/@nozbe/watermelondb`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -808,16 +881,23 @@ SPEC REPOS:
     - Flipper-PeerTalk
     - FlipperKit
     - fmt
+    - Giphy
+    - GoogleSignIn
+    - GTMAppAuth
+    - GTMSessionFetcher
     - HMSegmentedControl
+    - JitsiMeetSDKLite
     - JitsiWebRTC
     - libevent
     - libwebp
+    - ObjectiveDropboxOfficial
     - OpenSSL-Universal
     - SDWebImage
     - SDWebImageWebPCoder
     - Sentry
     - SentryPrivate
     - SocketRocket
+    - Starscream
     - SwiftyJSON
     - Swime
     - YogaKit
@@ -833,6 +913,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/Libraries/FBLazyVector"
   FBReactNativeSpec:
     :path: "../node_modules/react-native/React/FBReactNativeSpec"
+  giphy-react-native-sdk:
+    :path: "../node_modules/@giphy/react-native-sdk"
   glog:
     :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
   hermes-engine:
@@ -840,6 +922,8 @@ EXTERNAL SOURCES:
     :tag: hermes-2023-08-07-RNv0.72.4-813b2def12bc9df02654b3e3653ae4a68d0572e0
   jail-monkey:
     :path: "../node_modules/jail-monkey"
+  jitsi-meet-rnsdk:
+    :path: "../node_modules/@jitsi/react-native-sdk"
   mattermost-react-native-turbo-log:
     :path: "../node_modules/@mattermost/react-native-turbo-log"
   RCT-Folly:
@@ -880,6 +964,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-background-timer"
   react-native-cameraroll:
     :path: "../node_modules/@react-native-camera-roll/camera-roll"
+  react-native-color-matrix-image-filters:
+    :path: "../node_modules/react-native-color-matrix-image-filters"
   react-native-cookies:
     :path: "../node_modules/@react-native-cookies/cookies"
   react-native-create-thumbnail:
@@ -888,22 +974,38 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-document-picker"
   react-native-emm:
     :path: "../node_modules/@mattermost/react-native-emm"
+  react-native-get-random-values:
+    :path: "../node_modules/react-native-get-random-values"
   react-native-hw-keyboard-event:
     :path: "../node_modules/react-native-hw-keyboard-event"
   react-native-image-picker:
     :path: "../node_modules/react-native-image-picker"
   react-native-in-app-review:
     :path: "../node_modules/react-native-in-app-review"
+  react-native-keep-awake:
+    :path: "../node_modules/react-native-keep-awake"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
   react-native-network-client:
     :path: "../node_modules/@mattermost/react-native-network-client"
   react-native-notifications:
     :path: "../node_modules/react-native-notifications"
+  react-native-orientation-locker:
+    :path: "../node_modules/react-native-orientation-locker"
+  react-native-pager-view:
+    :path: "../node_modules/react-native-pager-view"
   react-native-paste-input:
     :path: "../node_modules/@mattermost/react-native-paste-input"
+  react-native-performance:
+    :path: "../node_modules/react-native-performance"
+  react-native-restart:
+    :path: "../node_modules/react-native-restart"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-slider:
+    :path: "../node_modules/@react-native-community/slider"
+  react-native-splash-screen:
+    :path: "../node_modules/react-native-splash-screen"
   react-native-video:
     :path: "../node_modules/react-native-video"
   react-native-webrtc:
@@ -956,10 +1058,16 @@ EXTERNAL SOURCES:
     :path: "../node_modules/rn-fetch-blob"
   RNAudioRecorderPlayer:
     :path: "../node_modules/react-native-audio-recorder-player"
+  RNCalendarEvents:
+    :path: "../node_modules/react-native-calendar-events"
+  RNCAsyncStorage:
+    :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCClipboard:
     :path: "../node_modules/@react-native-clipboard/clipboard"
   RNDateTimePicker:
     :path: "../node_modules/@react-native-community/datetimepicker"
+  RNDefaultPreference:
+    :path: "../node_modules/react-native-default-preference"
   RNDeviceInfo:
     :path: "../node_modules/react-native-device-info"
   RNFastImage:
@@ -970,6 +1078,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-fs"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNGoogleSignin:
+    :path: "../node_modules/@react-native-google-signin/google-signin"
   RNKeychain:
     :path: "../node_modules/react-native-keychain"
   RNLocalize:
@@ -986,28 +1096,24 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@sentry/react-native"
   RNShare:
     :path: "../node_modules/react-native-share"
+  RNSound:
+    :path: "../node_modules/react-native-sound"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
+  RNWatch:
+    :path: "../node_modules/react-native-watch-connectivity"
   simdjson:
     :path: "../node_modules/@nozbe/simdjson"
-  Starscream:
-    :commit: 7494780a021e44873e6e5fde5026ef96696c1865
-    :git: https://github.com/mattermost/Starscream.git
   WatermelonDB:
     :path: "../node_modules/@nozbe/watermelondb"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
-CHECKOUT OPTIONS:
-  Starscream:
-    :commit: 7494780a021e44873e6e5fde5026ef96696c1865
-    :git: https://github.com/mattermost/Starscream.git
-
 SPEC CHECKSUMS:
-  Alamofire: 3ca42e259043ee0dc5c0cdd76c4bc568b8e42af7
-  AppAuth: 3bb1d1cd9340bd09f5ed189fb00b1cc28e1e8570
+  Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
+  AppAuth: 501c04eda8a8d11f179dbe8637b7a91bb7e5d2fa
   boost: 57d2868c099736d80fcd648bf211b4431e51a558
   BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
@@ -1024,14 +1130,22 @@ SPEC CHECKSUMS:
   Flipper-PeerTalk: 116d8f857dc6ef55c7a5a75ea3ceaafe878aadc9
   FlipperKit: 2efad7007d6745a3f95e4034d547be637f89d3f6
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
+  Giphy: 28cef321358869cc871b98ea5e3d707fc1f36fc6
+  giphy-react-native-sdk: 668dca06fc2998eb4d6d92125e7cd42d8cbd4159
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
+  GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
+  GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
+  GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   hermes-engine: 9180d43df05c1ed658a87cc733dc3044cf90c00a
   HMSegmentedControl: 34c1f54d822d8308e7b24f5d901ec674dfa31352
   jail-monkey: a71b35d482a70ecba844a90f002994012cf12a5d
-  JitsiWebRTC: 80f62908fcf2a1160e0d14b584323fb6e6be630b
+  jitsi-meet-rnsdk: 76832ef9f54bd7ee79673fe541b7acd680dc3dc5
+  JitsiMeetSDKLite: 02886ad69a53f3370376ee7c2d26331c7b10fcf8
+  JitsiWebRTC: 3a41671ef65a51d7204323814b055a2690b921c7
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
   mattermost-react-native-turbo-log: bf99c70309c19f81719f044f068c1b9c0baf5e94
+  ObjectiveDropboxOfficial: fe206ce8c0bc49976c249d472db7fdbc53ebbd53
   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
   RCT-Folly: 424b8c9a7a0b9ab2886ffe9c3b041ef628fd4fb1
   RCTRequired: 83bca1c184feb4d2e51c72c8369b83d641443f95
@@ -1052,20 +1166,29 @@ SPEC CHECKSUMS:
   react-native-app-auth: 05c3b875b27bb65fe321bd5dc38cc1c04c5158be
   react-native-background-timer: 17ea5e06803401a379ebf1f20505b793ac44d0fe
   react-native-cameraroll: b474e88bc3d27a85315115d26c796cef4586c5ab
+  react-native-color-matrix-image-filters: e2df0971b44f1aba49f4740463fdda857d467adf
   react-native-cookies: f54fcded06bb0cda05c11d86788020b43528a26c
   react-native-create-thumbnail: e022bcdcba8a0b4529a50d3fa1a832ec921be39d
-  react-native-document-picker: 2b8f18667caee73a96708a82b284a4f40b30a156
+  react-native-document-picker: 5b97e24a7f1a1e4a50a72c540a043f32d29a70a2
   react-native-emm: 17ba66e81c93429b2bb288848d706e2e485b02e8
+  react-native-get-random-values: dee677497c6a740b71e5612e8dbd83e7539ed5bb
   react-native-hw-keyboard-event: b517cefb8d5c659a38049c582de85ff43337dc53
   react-native-image-picker: 2381c008bbb09e72395a2d043c147b11bd1523d9
   react-native-in-app-review: db8bb167a5f238e7ceca5c242d6b36ce8c4404a4
+  react-native-keep-awake: afad8a51dfef9fe9655a6344771be32c8596d774
   react-native-netinfo: 3aa5637c18834966e0c932de8ae1ae56fea20a97
-  react-native-network-client: 7ca5125fe613d2085c8ee12723a4ba9bca04f948
+  react-native-network-client: 4e8d6cbc715a9e522779a1fe82b32c5526c46417
   react-native-notifications: 4601a5a8db4ced6ae7cfc43b44d35fe437ac50c4
+  react-native-orientation-locker: 4409c5b12b65f942e75449872b4f078b6f27af81
+  react-native-pager-view: 0ccb8bf60e2ebd38b1f3669fa3650ecce81db2df
   react-native-paste-input: 325908063bb38c88d96b43c8304021b1978402b6
+  react-native-performance: 47ac22ebf2aa24f324a96a5825581f6ce18c09e8
+  react-native-restart: 7595693413fe3ca15893702f2c8306c62a708162
   react-native-safe-area-context: 2cd91d532de12acdb0a9cbc8d43ac72a8e4c897c
+  react-native-slider: 1cdd6ba29675df21f30544253bf7351d3c2d68c4
+  react-native-splash-screen: 4312f786b13a81b5169ef346d76d33bc0c6dc457
   react-native-video: c26780b224543c62d5e1b2a7244a5cd1b50e8253
-  react-native-webrtc: 255a1172fd31525b952b36aef7b8e9a41de325e5
+  react-native-webrtc: 8b024c7bb9a005d2b9efeba4c691172dbd00268d
   react-native-webview: 88293a0f23eca8465c0433c023ec632930e644d0
   React-NativeModulesApple: b6868ee904013a7923128892ee4a032498a1024a
   React-perflogger: 31ea61077185eb1428baf60c0db6e2886f141a5a
@@ -1087,16 +1210,20 @@ SPEC CHECKSUMS:
   ReactNativeExceptionHandler: b11ff67c78802b2f62eed0e10e75cb1ef7947c60
   ReactNativeIncallManager: 2385505fa5dfdbbc78925e3b8d23b30ce0cde40e
   ReactNativeKeyboardTrackingView: 02137fac3b2ebd330d74fa54ead48b14750a2306
-  ReactNativeNavigation: e748d4b1bfb8dbe9c23081a37babc14a9ac2f990
+  ReactNativeNavigation: e62ba14d9cd44774dca6068b6559ec872e0e61a6
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNAudioRecorderPlayer: f790fc1afb118552ae6285d60adde52ee6b5d9ef
+  RNCalendarEvents: 7e65eb4a94f53c1744d1e275f7fafcfaa619f7a3
+  RNCAsyncStorage: 3a8f7145d17cdd9f88e7b77666c94a09e4f759c8
   RNCClipboard: d77213bfa269013bf4b857b7a9ca37ee062d8ef1
   RNDateTimePicker: 8fb39263b721223e095248acaf6f406d5b7f6713
+  RNDefaultPreference: 08bdb06cfa9188d5da97d4642dac745218d7fb31
   RNDeviceInfo: bf8a32acbcb875f568217285d1793b0e8588c974
   RNFastImage: d2166bfb81ca27b8c9cd21d8105c4e9adaf0b252
   RNFileViewer: ce7ca3ac370e18554d35d6355cffd7c30437c592
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: 6e46dde1f87e5f018a54fe5d40cd0e0b942b49ee
+  RNGoogleSignin: a6a612cce56a45ab701c5c5c6e36f5390522d100
   RNKeychain: a65256b6ca6ba6976132cc4124b238a5b13b3d9c
   RNLocalize: 7ce27517894956a226aa6d614786802d253a0a0a
   RNPermissions: 4eadee4a93f798c1f087c37440f7b873f4765968
@@ -1105,21 +1232,23 @@ SPEC CHECKSUMS:
   RNScreens: 3c2d122f5e08c192e254c510b212306da97d2581
   RNSentry: 5381e9284aec59a546e4a7d40e33ad0839b99c1e
   RNShare: bed7c4fbe615f3d977f22feb0902af9a790c1660
+  RNSound: 6c156f925295bdc83e8e422e7d8b38d33bc71852
   RNSVG: 255767813dac22db1ec2062c8b7e7b856d4e5ae6
   RNVectorIcons: 23b6e11af4aaf104d169b1b0afa7e5cf96c676ce
+  RNWatch: fd30ca40a5b5ef58dcbc195638e68219bc455236
   SDWebImage: 2d6d229046fea284d62e36bfb8ebe8287dfc5b10
   SDWebImageWebPCoder: af09429398d99d524cae2fe00f6f0f6e491ed102
   Sentry: ebc12276bd17613a114ab359074096b6b3725203
   SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
   simdjson: e6bfae9ce4bcdc80452d388d593816f1ca2106f3
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
-  Starscream: e7497aedb1c2e27d2a672d40286fd1b34f20f2e4
-  SwiftyJSON: 2f33a42c6fbc52764d96f13368585094bfd8aa5e
+  Starscream: 19b5533ddb925208db698f0ac508a100b884a1b9
+  SwiftyJSON: f5b1bf1cd8dd53cd25887ac0eabcfd92301c6a5a
   Swime: d7b2c277503b6cea317774aedc2dce05613f8b0b
   WatermelonDB: 842d22ba555425aa9f3ce551239a001200c539bc
   Yoga: 4c3aa327e4a6a23eeacd71f61c81df1bcdf677d5
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 9fa68fcba497d49130324430f8f67c66ba248dea
+PODFILE CHECKSUM: 483198bbbf3e2e8320cf2746cb8f9c26dc31d6fe
 
 COCOAPODS: 1.14.3

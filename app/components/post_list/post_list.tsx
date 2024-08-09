@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {FlatList} from '@stream-io/flat-list-mvcp';
-import React, {type ReactElement, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {type ReactElement, useCallback, useEffect, useMemo, useRef, useState, useImperativeHandle} from 'react';
 import {DeviceEventEmitter, type ListRenderItemInfo, Platform, type StyleProp, StyleSheet, type ViewStyle, type NativeSyntheticEvent, type NativeScrollEvent} from 'react-native';
 import Animated, {type AnimatedStyle} from 'react-native-reanimated';
 
@@ -63,6 +63,12 @@ type ScrollIndexFailed = {
     highestMeasuredFrameIndex: number;
     averageItemLength: number;
 };
+
+export type PostListHandle = {
+  scrollToEnd: () => void;
+};
+
+export const postListRef = React.createRef<PostListHandle>();
 
 const CONTENT_OFFSET_THRESHOLD = 160;
 
@@ -160,6 +166,9 @@ const PostList = ({
     }, []);
 
     const onRefresh = useCallback(async () => {
+        if (disablePullToRefresh) {
+            return;
+        }
         setRefreshing(true);
         if (location === Screens.CHANNEL && channelId) {
             await fetchPosts(serverUrl, channelId);
@@ -270,7 +279,6 @@ const PostList = ({
             case 'user-activity': {
                 const postProps = {
                     currentUsername,
-                    key: item.value,
                     postId: item.value,
                     location,
                     style: styles.container,
@@ -279,7 +287,12 @@ const PostList = ({
                     theme,
                 };
 
-                return (<CombinedUserActivity {...postProps}/>);
+                return (
+                    <CombinedUserActivity
+                        key={item.value}
+                        {...postProps}
+                    />
+                );
             }
             default: {
                 const post = item.value.currentPost;
@@ -293,7 +306,6 @@ const PostList = ({
                     highlight: highlightedId === post.id,
                     highlightPinnedOrSaved,
                     isSaved,
-                    key: post.id,
                     location,
                     nextPost,
                     post,
@@ -304,7 +316,12 @@ const PostList = ({
                     testID: `${testID}.post`,
                 };
 
-                return (<Post {...postProps}/>);
+                return (
+                    <Post
+                        key={post.id}
+                        {...postProps}
+                    />
+                );
             }
         }
     }, [appsEnabled, currentTimezone, customEmojiNames, highlightPinnedOrSaved, isCRTEnabled, isPostAcknowledgementEnabled, shouldRenderReplyButton, theme]);
@@ -321,6 +338,8 @@ const PostList = ({
     const onScrollToEnd = useCallback(() => {
         listRef.current?.scrollToOffset({offset: 0, animated: true});
     }, []);
+
+    useImperativeHandle(postListRef, () => ({scrollToEnd: onScrollToEnd}));
 
     useEffect(() => {
         const t = setTimeout(() => {
@@ -370,7 +389,7 @@ const PostList = ({
                 testID={`${testID}.flat_list`}
                 inverted={true}
                 refreshing={refreshing}
-                onRefresh={disablePullToRefresh ? undefined : onRefresh}
+                onRefresh={onRefresh}
             />
             {location !== Screens.PERMALINK &&
             <ScrollToEndView

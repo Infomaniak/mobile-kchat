@@ -15,6 +15,8 @@ export const MM_TABLES = {
         CHANNEL: 'Channel',
         CHANNEL_INFO: 'ChannelInfo',
         CHANNEL_MEMBERSHIP: 'ChannelMembership',
+        CONFERENCE: 'Conference',
+        CONFERENCE_PARTICIPANT: 'ConferenceParticipant',
         CONFIG: 'Config',
         CUSTOM_EMOJI: 'CustomEmoji',
         DRAFT: 'Draft',

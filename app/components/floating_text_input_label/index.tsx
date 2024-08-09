@@ -3,12 +3,12 @@
 
 // Note: This file has been adapted from the library https://github.com/csath/react-native-reanimated-text-input
 
-import {debounce} from 'lodash';
 import React, {useState, useEffect, useRef, useImperativeHandle, forwardRef, useMemo, useCallback} from 'react';
 import {type GestureResponderEvent, type LayoutChangeEvent, type NativeSyntheticEvent, type StyleProp, type TargetedEvent, Text, TextInput, type TextInputFocusEventData, type TextInputProps, type TextStyle, TouchableWithoutFeedback, View, type ViewStyle} from 'react-native';
 import Animated, {useAnimatedStyle, withTiming, Easing} from 'react-native-reanimated';
 
 import CompassIcon from '@components/compass_icon';
+import {debounce} from '@helpers/api/general';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import {getLabelPositions, onExecution} from './utils';
