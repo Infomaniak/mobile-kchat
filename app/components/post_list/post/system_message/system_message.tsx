@@ -343,7 +343,7 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme, cu
             );
             break;
         default:
-            formattedTargetTime = targetMoment.format('LLL');
+            formattedTargetTime = targetMoment.format('MMMM D, h:mm A');
             break;
     }
 
