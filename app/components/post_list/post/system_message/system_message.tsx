@@ -1,10 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import moment from 'moment-timezone';
 import React from 'react';
 import {type IntlShape, useIntl} from 'react-intl';
 import {type StyleProp, Text, type TextStyle, View, type ViewStyle} from 'react-native';
 
+import {getUserTimezone} from '@app/utils/user';
 import Markdown from '@components/markdown';
 import {postTypeMessages} from '@components/post_list/combined_user_activity/messages';
 import PreviewMessage from '@components/post_list/post/preview_message';
@@ -23,6 +25,7 @@ type SystemMessageProps = {
     author?: UserModel;
     location: string;
     post: PostModel;
+    currentUser?: UserModel;
 }
 
 type RenderersProps = SystemMessageProps & {
@@ -37,7 +40,7 @@ type RenderersProps = SystemMessageProps & {
     theme: Theme;
 }
 
-type RenderMessageProps = RenderersProps & {
+type RenderMessageProps = Omit<RenderersProps, 'currentUser'> & {
     localeHolder: {
         id: string;
         defaultMessage: string;
@@ -310,7 +313,7 @@ const renderGuestJoinChannelMessage = ({post, styles, location, intl, theme}: Re
     return renderMessage({post, styles, intl, location, localeHolder, values, theme});
 };
 
-const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: RenderersProps) => {
+const renderReminderSystemBotMessage = ({post, styles, location, intl, theme, currentUser}: RenderersProps) => {
     if (!post.props.username) {
         return null;
     }
@@ -319,12 +322,10 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: R
     const permaLink = `[${post.props.link}](${post.props.link})`;
     const link = `[this message](${post.props.link})`;
 
-    const targetTime = new Date(post.props.target_time);
-    targetTime.setHours(targetTime.getHours() + 2); // Temp solution to fix the timezone issue
-
-    const now = new Date();
-    const diffInMs = targetTime.getTime() - now.getTime();
-    const diffInDays = Math.round(diffInMs / (1000 * 60 * 60 * 24));
+    const timezone = getUserTimezone(currentUser);
+    const targetMoment = moment.tz(post.props.target_time, timezone as string);
+    const startOfDay = moment().startOf('day');
+    const diffInDays = startOfDay.diff(targetMoment, 'days');
 
     let formattedTargetTime;
 
@@ -332,21 +333,17 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: R
         case 0:
             formattedTargetTime = intl.formatMessage(
                 {id: 'infomaniak.post.reminder.systemBot.today', defaultMessage: 'at {time}'},
-                {time: intl.formatTime(targetTime)},
+                {time: targetMoment.format('LT')},
             );
             break;
         case 1:
             formattedTargetTime = intl.formatMessage(
                 {id: 'infomaniak.post.reminder.systemBot.tomorrow', defaultMessage: 'tomorrow at {time}'},
-                {time: intl.formatTime(targetTime)},
+                {time: targetMoment.format('LT')},
             );
             break;
         default:
-            formattedTargetTime = intl.formatDate(targetTime, {
-                weekday: 'long',
-                day: '2-digit',
-                month: 'short',
-            });
+            formattedTargetTime = targetMoment.format('LLL');
             break;
     }
 
@@ -383,7 +380,7 @@ const systemMessageRenderers = {
     [Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL]: renderUserMentionedInChannelMessage,
 };
 
-export const SystemMessage = ({post, location, author, hideGuestTags}: SystemMessageProps & { hideGuestTags: boolean}) => {
+export const SystemMessage = ({post, location, author, hideGuestTags, currentUser}: SystemMessageProps & { hideGuestTags: boolean}) => {
     const intl = useIntl();
     const theme = useTheme();
     const style = getStyleSheet(theme);
@@ -415,7 +412,7 @@ export const SystemMessage = ({post, location, author, hideGuestTags}: SystemMes
         );
     }
 
-    return renderer({post, author, location, styles, intl, theme});
+    return renderer({post, author, location, styles, intl, theme, currentUser});
 };
 
 export default SystemMessage;
