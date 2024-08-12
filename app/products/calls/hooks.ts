@@ -57,7 +57,7 @@ export const useTryCallsFunction = (fn: () => void) => {
     const tryFn = useCallback(async () => {
         let enabled;
         try {
-            enabled = await client?.getEnabled();
+            enabled = false;
         } catch (error) {
             errorAlert(getFullErrorMessage(error), intl);
             return;

@@ -1,29 +1,22 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {RTCMonitor, RTCPeer} from '@mattermost/calls/lib';
-import {deflate} from 'pako';
-import {DeviceEventEmitter, type EmitterSubscription, NativeEventEmitter, NativeModules, Platform} from 'react-native';
+import {RTCPeer} from '@mattermost/calls/lib';
+import {DeviceEventEmitter, type EmitterSubscription} from 'react-native';
 import InCallManager from 'react-native-incall-manager';
-import {mediaDevices, MediaStream, MediaStreamTrack, RTCPeerConnection} from 'react-native-webrtc';
+import {mediaDevices, MediaStream, MediaStreamTrack} from 'react-native-webrtc';
 
-import {processMeanOpinionScore, setAudioDeviceInfo} from '@calls/state';
-import {AudioDevice, type AudioDeviceInfo, type AudioDeviceInfoRaw, type CallsConnection} from '@calls/types/calls';
-import {getICEServersConfigs} from '@calls/utils';
+import {type CallsConnection} from '@calls/types/calls';
 import {WebsocketEvents} from '@constants';
 import {getServerCredentials} from '@init/credentials';
 import NetworkManager from '@managers/network_manager';
-import {getFullErrorMessage} from '@utils/errors';
-import {logDebug, logError, logInfo, logWarning} from '@utils/log';
+import {logDebug, logError} from '@utils/log';
 
 import {WebSocketClient, wsReconnectionTimeoutErr} from './websocket_client';
 
 import type {EmojiData} from '@mattermost/calls/lib/types';
 
 const peerConnectTimeout = 5000;
-const rtcMonitorInterval = 4000;
-
-const InCallManagerEmitter = new NativeEventEmitter(NativeModules.InCallManager);
 
 export async function newConnection(
     serverUrl: string,
@@ -40,16 +33,7 @@ export async function newConnection(
     let voiceTrack: MediaStreamTrack | null = null;
     let isClosed = false;
     let onCallEnd: EmitterSubscription | null = null;
-    let audioDeviceChanged: EmitterSubscription | null = null;
-    let wiredHeadsetEvent: EmitterSubscription | null = null;
     const streams: MediaStream[] = [];
-    let rtcMonitor: RTCMonitor | null = null;
-    const logger = {
-        logDebug,
-        logErr: logError,
-        logWarn: logWarning,
-        logInfo,
-    };
 
     const initializeVoiceTrack = async () => {
         if (voiceTrack) {
@@ -90,7 +74,6 @@ export async function newConnection(
 
         ws.send('leave');
         ws.close();
-        rtcMonitor?.stop();
 
         if (onCallEnd) {
             onCallEnd.remove();
@@ -107,8 +90,6 @@ export async function newConnection(
         peer?.destroy();
         peer = null;
         InCallManager.stop();
-        audioDeviceChanged?.remove();
-        wiredHeadsetEvent?.remove();
 
         if (closeCb) {
             closeCb(err);
@@ -145,14 +126,6 @@ export async function newConnection(
         if (!peer || !voiceTrack) {
             return;
         }
-
-        // NOTE: we purposely clear the monitor's stats cache upon unmuting
-        // in order to skip some calculations since upon muting we actually
-        // stop sending packets which would result in stats to be skewed as
-        // soon as we resume sending.
-        // This is not perfect but it avoids having to constantly send
-        // silence frames when muted.
-        rtcMonitor?.clearCache();
 
         try {
             if (voiceTrackAdded) {
@@ -221,126 +194,6 @@ export async function newConnection(
         }
     });
 
-    ws.on('join', async () => {
-        logDebug('calls: join ack received, initializing connection');
-        let config;
-        try {
-            config = await client.getCallsConfig();
-        } catch (err) {
-            logError('calls: fetching calls config:', getFullErrorMessage(err));
-            return;
-        }
-
-        const iceConfigs = getICEServersConfigs(config);
-        if (config.NeedsTURNCredentials) {
-            try {
-                iceConfigs.push(...await client.genTURNCredentials());
-            } catch (err) {
-                logWarning('calls: failed to fetch TURN credentials:', getFullErrorMessage(err));
-            }
-        }
-
-        InCallManager.start();
-        InCallManager.stopProximitySensor();
-
-        let btInitialized = false;
-        let speakerInitialized = false;
-
-        if (Platform.OS === 'android') {
-            audioDeviceChanged = DeviceEventEmitter.addListener('onAudioDeviceChanged', (data: AudioDeviceInfoRaw) => {
-                const info: AudioDeviceInfo = {
-                    availableAudioDeviceList: JSON.parse(data.availableAudioDeviceList),
-                    selectedAudioDevice: data.selectedAudioDevice,
-                };
-                setAudioDeviceInfo(info);
-                logDebug('calls: AudioDeviceChanged, info:', info);
-
-                // Auto switch to bluetooth the first time we connect to bluetooth, but not after.
-                if (!btInitialized) {
-                    if (info.availableAudioDeviceList.includes(AudioDevice.Bluetooth)) {
-                        btInitialized = true;
-                    } else if (!speakerInitialized) {
-                        // If we don't have bluetooth available, default to speakerphone on.
-                        speakerInitialized = true;
-                    }
-                }
-            });
-        }
-
-        // We default to speakerphone, but not if the WiredHeadset is plugged in.
-        if (Platform.OS === 'ios') {
-            wiredHeadsetEvent = InCallManagerEmitter.addListener('WiredHeadset', (data) => {
-                // Log for customer debugging. For the moment we're not changing output labels because of incall-manager iOS
-                // limitations with how it reports Bluetooth -- namely that it doesn't, so we don't know when Bluetooth is
-                // overriding the earpiece and/or headset.
-                logDebug('calls: WiredHeadset plugged in, data:', data);
-            });
-        }
-
-        peer = new RTCPeer({
-            iceServers: iceConfigs || [],
-            logger,
-            webrtc: {
-                MediaStream,
-                RTCPeerConnection,
-            },
-        });
-
-        rtcMonitor = new RTCMonitor({
-            peer,
-            logger,
-            monitorInterval: rtcMonitorInterval,
-        });
-        rtcMonitor.on('mos', processMeanOpinionScore);
-
-        peer.on('offer', (sdp) => {
-            logDebug(`calls: local offer, sending: ${JSON.stringify(sdp)}`);
-            ws.send('sdp', {
-                data: deflate(JSON.stringify(sdp)),
-            }, true);
-        });
-
-        peer.on('answer', (sdp) => {
-            logDebug(`calls: local answer, sending: ${JSON.stringify(sdp)}`);
-            ws.send('sdp', {
-                data: deflate(JSON.stringify(sdp)),
-            }, true);
-        });
-
-        peer.on('candidate', (candidate) => {
-            logDebug(`calls: local candidate: ${JSON.stringify(candidate)}`);
-            ws.send('ice', {
-                data: JSON.stringify(candidate),
-            });
-        });
-
-        peer.on('error', (err: any) => {
-            logError('calls: peer error:', err);
-            if (!isClosed) {
-                disconnect();
-            }
-        });
-
-        peer.on('stream', (remoteStream: MediaStream) => {
-            logDebug('calls: new remote stream received', remoteStream.id);
-            for (const track of remoteStream.getTracks()) {
-                logDebug('calls: remote track', track.id);
-            }
-
-            streams.push(remoteStream);
-            if (remoteStream.getVideoTracks().length > 0) {
-                setScreenShareURL(remoteStream.toURL());
-            }
-        });
-
-        peer.on('close', () => {
-            logDebug('calls: peer closed');
-            if (!isClosed) {
-                disconnect();
-            }
-        });
-    });
-
     ws.on('message', ({data}: { data: string }) => {
         const msg = JSON.parse(data);
         if (!msg) {
@@ -362,7 +215,6 @@ export async function newConnection(
             }
             setTimeout(() => {
                 if (peer?.connected) {
-                    rtcMonitor?.start();
                     callback();
                 } else {
                     waitForReadyImpl(callback, fail, timeout - 200);
