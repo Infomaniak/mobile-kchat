@@ -27,7 +27,6 @@ function getBaseProps(): ComponentProps<typeof ChannelListScreen> {
         isCRTEnabled: true,
         isLicensed: true,
         launchType: 'normal',
-        showIncomingCalls: true,
         showToS: false,
         currentUserId: 'someId',
     };
