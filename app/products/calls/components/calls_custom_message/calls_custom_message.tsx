@@ -6,7 +6,6 @@ import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
 import {Text, TouchableOpacity, View} from 'react-native';
 
-import {leaveCallConfirmation} from '@calls/actions/calls';
 import {leaveAndJoinWithAlert, showLimitRestrictedAlert} from '@calls/alerts';
 import {setJoiningChannelId} from '@calls/state';
 import CompassIcon from '@components/compass_icon';
@@ -28,9 +27,6 @@ type Props = {
     post: PostModel;
     isMilitaryTime: boolean;
     joiningChannelId: string | null;
-    otherParticipants: boolean;
-    isAdmin: boolean;
-    isHost: boolean;
     currentUser?: UserModel;
     limitRestrictedInfo?: LimitRestrictedInfo;
     ccChannelId?: string;
@@ -134,9 +130,6 @@ export const CallsCustomMessage = ({
     ccChannelId,
     limitRestrictedInfo,
     joiningChannelId,
-    otherParticipants,
-    isAdmin,
-    isHost,
 }: Props) => {
     const intl = useIntl();
     const theme = useTheme();
@@ -159,10 +152,6 @@ export const CallsCustomMessage = ({
         await leaveAndJoinWithAlert(intl, serverUrl, post.channelId);
         setJoiningChannelId(null);
     }, [limitRestrictedInfo, intl, serverUrl, post.channelId]);
-
-    const leaveCallHandler = useCallback(() => {
-        leaveCallConfirmation(intl, otherParticipants, isAdmin, isHost, serverUrl, post.channelId);
-    }, [intl, otherParticipants, isAdmin, isHost, serverUrl, post.channelId]);
 
     const title = post.props.title ? (
         <Text style={style.title}>
@@ -214,21 +203,7 @@ export const CallsCustomMessage = ({
     }
 
     const button = alreadyInTheCall ? (
-        <TouchableOpacity
-            style={[style.callButton, style.leaveCallButton]}
-            onPress={leaveCallHandler}
-        >
-            <CompassIcon
-                name='phone-hangup'
-                size={18}
-                style={[style.buttonIcon]}
-            />
-            <FormattedText
-                id={'mobile.calls_leave'}
-                defaultMessage={'Leave'}
-                style={style.buttonText}
-            />
-        </TouchableOpacity>
+        null
     ) : (
         <TouchableOpacity
             style={[style.callButton, style.joinCallButton, isLimitRestricted && style.joinCallButtonRestricted]}

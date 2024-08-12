@@ -14,7 +14,6 @@ import {fetchPostsForChannel, fetchPostThread} from '@actions/remote/post';
 import {openAllUnreadChannels} from '@actions/remote/preference';
 import {autoUpdateTimezone} from '@actions/remote/user';
 import {handleTeamSyncEvent} from '@actions/websocket/ikTeams';
-import {loadConfigAndCalls} from '@calls/actions/calls';
 import {
     handleCallCaption,
     handleCallChannelDisabled,
@@ -26,7 +25,6 @@ import {
     handleCallScreenOff,
     handleCallScreenOn,
     handleCallStarted,
-    handleCallState,
     handleCallUserConnected,
     handleCallUserDisconnected,
     handleCallUserJoined,
@@ -38,12 +36,8 @@ import {
     handleCallUserUnraiseHand,
     handleCallUserVoiceOff,
     handleCallUserVoiceOn,
-    handleHostLowerHand,
-    handleHostMute,
-    handleHostRemoved,
     handleUserDismissedNotification,
 } from '@calls/connection/websocket_event_handlers';
-import {isSupportedServerCalls} from '@calls/utils';
 import {Screens, WebsocketEvents} from '@constants';
 import DatabaseManager from '@database/manager';
 import AppsManager from '@managers/apps_manager';
@@ -185,10 +179,6 @@ async function doReconnect(serverUrl: string) {
     const {id: currentUserId, locale: currentUserLocale} = (await getCurrentUser(database))!;
     const license = await getLicense(database);
     const config = await getConfig(database);
-
-    if (isSupportedServerCalls(config?.Version)) {
-        loadConfigAndCalls(serverUrl, currentUserId);
-    }
 
     await deferredAppEntryActions(serverUrl, lastFullSync, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, initialTeamId);
 
@@ -454,18 +444,6 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
             break;
         case WebsocketEvents.CALLS_CAPTION:
             handleCallCaption(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_HOST_MUTE:
-            handleHostMute(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_HOST_LOWER_HAND:
-            handleHostLowerHand(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_HOST_REMOVED:
-            handleHostRemoved(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_CALL_STATE:
-            handleCallState(serverUrl, msg);
             break;
 
         case WebsocketEvents.GROUP_RECEIVED:

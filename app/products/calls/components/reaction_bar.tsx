@@ -4,9 +4,6 @@
 import React, {useCallback, useMemo} from 'react';
 import {Pressable, StyleSheet, useWindowDimensions, View} from 'react-native';
 
-import {raiseHand, unraiseHand} from '@calls/actions';
-import {sendReaction} from '@calls/actions/calls';
-import EmojiButton from '@calls/components/emoji_button';
 import {makeCallsTheme} from '@calls/utils';
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
@@ -64,8 +61,6 @@ const getStyleSheet = ((theme: CallsTheme) => StyleSheet.create({
     },
 }));
 
-const predefinedReactions = [['+1', '1F44D'], ['clap', '1F44F'], ['joy', '1F602'], ['heart', '2764-FE0F']];
-
 interface Props {
     raisedHand: number;
 }
@@ -91,12 +86,7 @@ const ReactionBar = ({raisedHand}: Props) => {
         />);
 
     const toggleRaiseHand = useCallback(() => {
-        const whenRaisedHand = raisedHand || 0;
-        if (whenRaisedHand > 0) {
-            unraiseHand();
-        } else {
-            raiseHand();
-        }
+        // ...
     }, [raisedHand]);
 
     return (
@@ -113,16 +103,6 @@ const ReactionBar = ({raisedHand}: Props) => {
                     />
                     {raisedHand ? LowerHandText : RaiseHandText}
                 </Pressable>
-                {
-                    predefinedReactions.map(([name, unified]) => (
-                        <EmojiButton
-                            key={name}
-                            emojiName={name}
-                            style={[style.button, isLandscape && style.buttonLandscape]}
-                            onPress={() => sendReaction({name, unified})}
-                        />
-                    ))
-                }
             </View>
         </View>
     );

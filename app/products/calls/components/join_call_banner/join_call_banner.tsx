@@ -5,7 +5,6 @@ import React from 'react';
 import {useIntl} from 'react-intl';
 import {View, Pressable} from 'react-native';
 
-import {dismissIncomingCall} from '@calls/actions';
 import {leaveAndJoinWithAlert, showLimitRestrictedAlert} from '@calls/alerts';
 import {removeIncomingCall, setJoiningChannelId} from '@calls/state';
 import CompassIcon from '@components/compass_icon';
@@ -156,7 +155,6 @@ const JoinCallBanner = ({
 
     const onDismissPress = () => {
         removeIncomingCall(serverUrl, callId, channelId);
-        dismissIncomingCall(serverUrl, channelId);
     };
 
     return (

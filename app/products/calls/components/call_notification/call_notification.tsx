@@ -7,10 +7,8 @@ import {Pressable, Text, View} from 'react-native';
 
 import {switchToChannelById} from '@actions/remote/channel';
 import {fetchProfilesInChannel} from '@actions/remote/user';
-import {dismissIncomingCall} from '@calls/actions/calls';
-import {playIncomingCallsRinging, removeIncomingCall} from '@calls/state';
+import {playIncomingCallsRinging} from '@calls/state';
 import {ChannelType, type IncomingCallNotification} from '@calls/types/calls';
-import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
 import ProfilePicture from '@components/profile_picture';
 import {CALL_NOTIFICATION_BAR_HEIGHT} from '@constants/view';
@@ -162,11 +160,6 @@ export const CallNotification = ({
         switchToChannelById(incomingCall.serverUrl, incomingCall.channelID);
     }, [incomingCall, serverUrl]);
 
-    const onDismissPress = useCallback(() => {
-        removeIncomingCall(serverUrl, incomingCall.callID, incomingCall.channelID);
-        dismissIncomingCall(incomingCall.serverUrl, incomingCall.channelID);
-    }, [incomingCall]);
-
     let message: React.ReactElement;
     if (incomingCall.type === ChannelType.DM) {
         message = (
@@ -221,14 +214,6 @@ export const CallNotification = ({
                         </Text>
                     }
                 </View>
-                <Pressable onPress={onDismissPress}>
-                    <View style={style.dismissContainer}>
-                        <CompassIcon
-                            name='close'
-                            style={[style.icon, style.closeIcon]}
-                        />
-                    </View>
-                </Pressable>
             </Pressable>
         </View>
     );

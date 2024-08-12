@@ -6,7 +6,6 @@ import {useIntl} from 'react-intl';
 import {Platform, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-import {hostLowerHand, hostMake, hostMuteSession, hostStopScreenshare} from '@calls/actions/calls';
 import {removeFromCall} from '@calls/alerts';
 import {useHostMenus} from '@calls/hooks';
 import SlideUpPanelItem from '@components/slide_up_panel_item';
@@ -62,26 +61,6 @@ export const HostControls = ({
 
     const sharingScreen = currentCall.screenOn === session.sessionId;
 
-    const makeHostPress = useCallback(async () => {
-        hostMake(currentCall.serverUrl, currentCall.channelId, session.userId);
-        await dismissBottomSheet();
-    }, [currentCall.serverUrl, currentCall.channelId, session.userId]);
-
-    const mutePress = useCallback(async () => {
-        hostMuteSession(currentCall.serverUrl, currentCall.channelId, session.sessionId);
-        await dismissBottomSheet();
-    }, [currentCall.serverUrl, currentCall.channelId, session.sessionId]);
-
-    const lowerHandPress = useCallback(async () => {
-        hostLowerHand(currentCall.serverUrl, currentCall.channelId, session.sessionId);
-        await dismissBottomSheet();
-    }, [currentCall.serverUrl, currentCall.channelId, session.sessionId]);
-
-    const stopScreensharePress = useCallback(async () => {
-        hostStopScreenshare(currentCall.serverUrl, currentCall.channelId, session.sessionId);
-        await dismissBottomSheet();
-    }, [currentCall.serverUrl, currentCall.channelId, session.sessionId]);
-
     const profilePress = useCallback(async () => {
         await dismissBottomSheet();
         openUserProfile(session);
@@ -100,13 +79,6 @@ export const HostControls = ({
         ];
     }, [bottom, session.muted, sharingScreen, session.raisedHand]);
 
-    const makeHostText = intl.formatMessage({id: 'mobile.calls_make_host', defaultMessage: 'Make host'});
-    const muteText = intl.formatMessage({id: 'mobile.calls_mute_participant', defaultMessage: 'Mute participant'});
-    const lowerHandText = intl.formatMessage({id: 'mobile.calls_lower_hand', defaultMessage: 'Lower hand'});
-    const stopScreenshareText = intl.formatMessage({
-        id: 'mobile.calls_stop_screenshare',
-        defaultMessage: 'Stop screen share',
-    });
     const profileText = intl.formatMessage({id: 'mobile.calls_view_profile', defaultMessage: 'View profile'});
     const removeText = intl.formatMessage({id: 'mobile.calls_remove_participant', defaultMessage: 'Remove from call'});
 
@@ -126,36 +98,6 @@ export const HostControls = ({
                     teammateDisplayName={teammateNameDisplay}
                     user={session.userModel}
                     hideGuestTags={hideGuestTags}
-                />
-                {!session.muted &&
-                    <SlideUpPanelItem
-                        leftIcon={'microphone-off'}
-                        leftIconStyles={styles.iconStyle}
-                        onPress={mutePress}
-                        text={muteText}
-                    />
-                }
-                {Boolean(session.raisedHand) &&
-                    <SlideUpPanelItem
-                        leftIcon={'hand-right-outline-off'}
-                        leftIconStyles={styles.iconStyle}
-                        onPress={lowerHandPress}
-                        text={lowerHandText}
-                    />
-                }
-                {sharingScreen &&
-                    <SlideUpPanelItem
-                        leftIcon={'monitor-off'}
-                        leftIconStyles={styles.iconStyle}
-                        onPress={stopScreensharePress}
-                        text={stopScreenshareText}
-                    />
-                }
-                <SlideUpPanelItem
-                    leftIcon={'monitor-account'}
-                    leftIconStyles={styles.iconStyle}
-                    onPress={makeHostPress}
-                    text={makeHostText}
                 />
                 <SlideUpPanelItem
                     leftIcon={'account-outline'}

@@ -4,17 +4,12 @@
 import {DeviceEventEmitter} from 'react-native';
 
 import {fetchUsersByIds} from '@actions/remote/user';
-import {leaveCall, muteMyself, unraiseHand} from '@calls/actions';
-import {createCallAndAddToIds} from '@calls/actions/calls';
-import {hostRemovedErr} from '@calls/errors';
 import {
     callEnded,
     callStarted,
     getCallsConfig,
-    getCurrentCall,
     receivedCaption,
     removeIncomingCall,
-    setCallForChannel,
     setCallScreenOff,
     setCallScreenOn,
     setCaptioningState,
@@ -34,14 +29,12 @@ import Calls from '@constants/calls';
 import DatabaseManager from '@database/manager';
 import {getCurrentUserId} from '@queries/servers/system';
 
-import type {CallRecordingStateData, HostControlsLowerHandMsgData, HostControlsMsgData} from '@calls/types/calls';
+import type {CallRecordingStateData} from '@calls/types/calls';
 import type {
     CallHostChangedData,
     CallJobState,
     CallJobStateData,
     CallStartData,
-    CallState,
-    CallStateData,
     EmptyData,
     LiveCaptionData,
     UserConnectedData,
@@ -212,43 +205,15 @@ export const handleCallCaption = (serverUrl: string, msg: WebSocketMessage<LiveC
     receivedCaption(serverUrl, msg.data);
 };
 
-export const handleHostMute = async (serverUrl: string, msg: WebSocketMessage<HostControlsMsgData>) => {
-    const currentCall = getCurrentCall();
-    if (currentCall?.serverUrl !== serverUrl ||
-        currentCall?.channelId !== msg.data.channel_id ||
-        currentCall?.mySessionId !== msg.data.session_id) {
-        return;
-    }
-
-    muteMyself();
+export const handleHostMute = async () => {
+    // ...
 };
 
-export const handleHostLowerHand = async (serverUrl: string, msg: WebSocketMessage<HostControlsLowerHandMsgData>) => {
-    const currentCall = getCurrentCall();
-    if (currentCall?.serverUrl !== serverUrl ||
-        currentCall?.channelId !== msg.data.channel_id ||
-        currentCall?.mySessionId !== msg.data.session_id) {
-        return;
-    }
-
-    unraiseHand();
+export const handleHostLowerHand = async () => {
+    // ...
 };
 
-export const handleHostRemoved = async (serverUrl: string, msg: WebSocketMessage<HostControlsMsgData>) => {
-    const currentCall = getCurrentCall();
-    if (currentCall?.serverUrl !== serverUrl ||
-        currentCall?.channelId !== msg.data.channel_id ||
-        currentCall?.mySessionId !== msg.data.session_id) {
-        return;
-    }
-
-    leaveCall(hostRemovedErr);
-};
-
-export const handleCallState = (serverUrl: string, msg: WebSocketMessage<CallStateData>) => {
-    const callState: CallState = JSON.parse(msg.data.call);
-    const call = createCallAndAddToIds(msg.data.channel_id, callState);
-
-    setCallForChannel(serverUrl, msg.data.channel_id, call);
+export const handleHostRemoved = async () => {
+    // ...
 };
 

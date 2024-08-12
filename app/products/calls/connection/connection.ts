@@ -7,7 +7,6 @@ import {DeviceEventEmitter, type EmitterSubscription, NativeEventEmitter, Native
 import InCallManager from 'react-native-incall-manager';
 import {mediaDevices, MediaStream, MediaStreamTrack, RTCPeerConnection} from 'react-native-webrtc';
 
-import {setPreferredAudioRoute, setSpeakerphoneOn} from '@calls/actions/calls';
 import {processMeanOpinionScore, setAudioDeviceInfo} from '@calls/state';
 import {AudioDevice, type AudioDeviceInfo, type AudioDeviceInfoRaw, type CallsConnection} from '@calls/types/calls';
 import {getICEServersConfigs} from '@calls/utils';
@@ -259,11 +258,9 @@ export async function newConnection(
                 // Auto switch to bluetooth the first time we connect to bluetooth, but not after.
                 if (!btInitialized) {
                     if (info.availableAudioDeviceList.includes(AudioDevice.Bluetooth)) {
-                        setPreferredAudioRoute(AudioDevice.Bluetooth);
                         btInitialized = true;
                     } else if (!speakerInitialized) {
                         // If we don't have bluetooth available, default to speakerphone on.
-                        setPreferredAudioRoute(AudioDevice.Speakerphone);
                         speakerInitialized = true;
                     }
                 }
@@ -277,20 +274,7 @@ export async function newConnection(
                 // limitations with how it reports Bluetooth -- namely that it doesn't, so we don't know when Bluetooth is
                 // overriding the earpiece and/or headset.
                 logDebug('calls: WiredHeadset plugged in, data:', data);
-
-                // iOS switches to the headset when we connect it, so turn off speakerphone to keep UI in sync.
-                if (data.isPlugged) {
-                    setSpeakerphoneOn(false);
-                }
             });
-
-            // If headset is plugged in when the call starts, use it.
-            const report = await InCallManager.getIsWiredHeadsetPluggedIn();
-            if (report.isWiredHeadsetPluggedIn) {
-                setSpeakerphoneOn(false);
-            } else {
-                setSpeakerphoneOn(true);
-            }
         }
 
         peer = new RTCPeer({

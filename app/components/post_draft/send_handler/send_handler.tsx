@@ -12,7 +12,6 @@ import {createPost} from '@actions/remote/post';
 import {handleReactionToLatestPost} from '@actions/remote/reactions';
 import {setStatus} from '@actions/remote/user';
 import {deleteDeviceFile} from '@app/utils/file';
-import {handleCallsSlashCommand} from '@calls/actions/calls';
 import {Events, Screens} from '@constants';
 import {PostPriorityType, PostTypes} from '@constants/post';
 import {NOTIFY_ALL_MEMBERS} from '@constants/post_draft';
@@ -165,20 +164,6 @@ export default function SendHandler({
     }, [intl, channelTimezoneCount, doSubmitMessage]);
 
     const sendCommand = useCallback(async () => {
-        if (value.trim().startsWith('/call')) {
-            const {handled, error} = await handleCallsSlashCommand(value.trim(), serverUrl, channelId, rootId, currentUserId, intl);
-            if (handled) {
-                setSendingMessage(false);
-                clearDraft();
-                return;
-            }
-            if (error) {
-                setSendingMessage(false);
-                DraftUtils.alertSlashCommandFailed(intl, error);
-                return;
-            }
-        }
-
         const status = DraftUtils.getStatusFromSlashCommand(value);
         if (userIsOutOfOffice && status) {
             const updateStatus = (newStatus: string) => {

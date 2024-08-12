@@ -5,8 +5,6 @@ import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {View, Text, Pressable, Platform} from 'react-native';
 
-import {muteMyself, unmuteMyself} from '@calls/actions';
-import {leaveCallConfirmation} from '@calls/actions/calls';
 import {recordingAlert, recordingWillBePostedAlert, recordingErrorAlert} from '@calls/alerts';
 import CallAvatar from '@calls/components/call_avatar';
 import CallDuration from '@calls/components/call_duration';
@@ -15,7 +13,6 @@ import UnavailableIconWrapper from '@calls/components/unavailable_icon_wrapper';
 import {usePermissionsChecker} from '@calls/hooks';
 import {setCallQualityAlertDismissed, setMicPermissionsErrorDismissed, useCallsConfig} from '@calls/state';
 import {makeCallsTheme} from '@calls/utils';
-import CompassIcon from '@components/compass_icon';
 import {Calls, Screens} from '@constants';
 import {CURRENT_CALL_BAR_HEIGHT} from '@constants/view';
 import {useServerUrl} from '@context/server';
@@ -35,8 +32,6 @@ type Props = {
     teammateNameDisplay: string;
     micPermissionsGranted: boolean;
     threadScreen?: boolean;
-    otherParticipants: boolean;
-    isAdmin: boolean;
     isHost: boolean;
 }
 
@@ -143,8 +138,6 @@ const CurrentCallBar = ({
     teammateNameDisplay,
     micPermissionsGranted,
     threadScreen,
-    otherParticipants,
-    isAdmin,
     isHost,
 }: Props) => {
     const theme = useTheme();
@@ -174,10 +167,6 @@ const CurrentCallBar = ({
         await dismissAllModalsAndPopToScreen(Screens.CALL, title, {fromThreadScreen: threadScreen}, options);
     }, [formatMessage, threadScreen]);
 
-    const leaveCallHandler = useCallback(() => {
-        leaveCallConfirmation(intl, otherParticipants, isAdmin, isHost, serverUrl, currentCall?.channelId || '');
-    }, [intl, otherParticipants, isAdmin, isHost, serverUrl, currentCall?.channelId]);
-
     const mySession = currentCall?.sessions[currentCall.mySessionId];
 
     // Since we can only see one user talking, it doesn't really matter who we show here (e.g., we can't
@@ -206,11 +195,7 @@ const CurrentCallBar = ({
     }
 
     const muteUnmute = () => {
-        if (mySession?.muted) {
-            unmuteMyself();
-        } else {
-            muteMyself();
-        }
+        // ...
     };
 
     const micPermissionsError = !micPermissionsGranted && !currentCall?.micPermissionsErrorDismissed;
@@ -273,16 +258,6 @@ const CurrentCallBar = ({
                             />
                         </Pressable>
                         <View style={style.verticalLine}/>
-                        <Pressable
-                            onPress={leaveCallHandler}
-                            style={[style.pressable, style.hangupIconContainer]}
-                        >
-                            <CompassIcon
-                                name='phone-hangup'
-                                size={24}
-                                style={style.hangupIcon}
-                            />
-                        </Pressable>
                     </View>
                 </Pressable>
             </View>

@@ -4,7 +4,6 @@
 import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
 
-import {enableChannelCalls} from '@calls/actions';
 import {useTryCallsFunction} from '@calls/hooks';
 import OptionItem from '@components/option_item';
 import {useServerUrl} from '@context/server';
@@ -20,7 +19,7 @@ const ChannelInfoEnableCalls = ({channelId, enabled}: Props) => {
     const serverUrl = useServerUrl();
 
     const toggleCalls = useCallback(async () => {
-        enableChannelCalls(serverUrl, channelId, !enabled);
+        // ...
     }, [serverUrl, channelId, enabled]);
 
     const [tryOnPress, msgPostfix] = useTryCallsFunction(toggleCalls);

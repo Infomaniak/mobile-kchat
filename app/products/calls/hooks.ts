@@ -8,7 +8,6 @@ import {useIntl} from 'react-intl';
 import {Alert, Platform} from 'react-native';
 import Permissions from 'react-native-permissions';
 
-import {initializeVoiceTrack} from '@calls/actions/calls';
 import {
     getCallsConfig,
     getCurrentCall,
@@ -121,7 +120,6 @@ export const usePermissionsChecker = (micPermissionsGranted: boolean) => {
             if (appState === 'active') {
                 const hasPermission = (await Permissions.check(micPermission)) === Permissions.RESULTS.GRANTED;
                 if (hasPermission) {
-                    initializeVoiceTrack();
                     setMicPermissionsGranted(hasPermission);
                 }
             }

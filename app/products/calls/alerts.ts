@@ -3,9 +3,6 @@
 
 import {Alert, type AlertButton, Platform} from 'react-native';
 
-import {hasMicrophonePermission, joinCall, leaveCall, unmuteMyself} from '@calls/actions';
-import {dismissIncomingCall, hostRemove} from '@calls/actions/calls';
-import {hasBluetoothPermission} from '@calls/actions/permissions';
 import {hostRemovedErr, userLeftChannelErr, userRemovedFromChannelErr} from '@calls/errors';
 import {
     getCallsConfig,
@@ -77,8 +74,6 @@ export const leaveAndJoinWithAlert = async (
     intl: IntlShape,
     joinServerUrl: string,
     joinChannelId: string,
-    title?: string,
-    rootId?: string,
 ) => {
     let leaveChannelName = '';
     let joinChannelName = '';
@@ -141,7 +136,7 @@ export const leaveAndJoinWithAlert = async (
                             id: 'mobile.leave_and_join_confirmation',
                             defaultMessage: 'Leave & Join',
                         }),
-                        onPress: async () => resolve(await doJoinCall(joinServerUrl, joinChannelId, joinChannelIsDMorGM, newCall, intl, title, rootId)),
+                        onPress: async () => resolve(await doJoinCall(joinServerUrl, joinChannelId, joinChannelIsDMorGM, newCall, intl)),
                         isPreferred: true,
                     },
                 ],
@@ -151,7 +146,7 @@ export const leaveAndJoinWithAlert = async (
         return asyncAlert();
     }
 
-    return doJoinCall(joinServerUrl, joinChannelId, joinChannelIsDMorGM, newCall, intl, title, rootId);
+    return doJoinCall(joinServerUrl, joinChannelId, joinChannelIsDMorGM, newCall, intl);
 };
 
 const doJoinCall = async (
@@ -160,8 +155,6 @@ const doJoinCall = async (
     joinChannelIsDMorGM: boolean,
     newCall: boolean,
     intl: IntlShape,
-    title?: string,
-    rootId?: string,
 ) => {
     const {formatMessage} = intl;
 
@@ -206,26 +199,19 @@ const doJoinCall = async (
     recordingAlertLock = false;
     recordingWillBePostedLock = true; // only unlock if/when the user stops a recording.
 
-    await hasBluetoothPermission();
-    const hasPermission = await hasMicrophonePermission();
-    setMicPermissionsGranted(hasPermission);
+    setMicPermissionsGranted(false);
 
     if (!newCall && joinChannelIsDMorGM) {
         // we're joining an existing call, so dismiss any notifications (for all clients, too)
         const callId = getCallsState(serverUrl).calls[channelId].id;
-        dismissIncomingCall(serverUrl, channelId);
         removeIncomingCall(serverUrl, callId, channelId);
     }
 
-    const res = await joinCall(serverUrl, channelId, user.id, hasPermission, intl, title, rootId);
+    const res = {error: false};
     if (res.error) {
         const seeLogs = formatMessage({id: 'mobile.calls_see_logs', defaultMessage: 'See server logs'});
         errorAlert(res.error?.toString() || seeLogs, intl);
         return false;
-    }
-
-    if (joinChannelIsDMorGM) {
-        unmuteMyself();
     }
 
     return true;
@@ -310,7 +296,7 @@ export const recordingAlert = (isHost: boolean, transcriptionsEnabled: boolean, 
                 defaultMessage: 'Leave',
             }),
             onPress: async () => {
-                await leaveCall();
+                // ...
             },
             style: 'destructive',
         },
@@ -516,7 +502,6 @@ export const removeFromCall = (serverUrl: string, displayName: string, callId: s
             defaultMessage: 'Remove',
         }),
         onPress: () => {
-            hostRemove(serverUrl, callId, sessionId);
             dismissBottomSheet();
         },
         style: 'destructive',
