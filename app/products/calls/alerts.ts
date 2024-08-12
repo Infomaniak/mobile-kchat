@@ -23,7 +23,6 @@ import {getFullErrorMessage} from '@utils/errors';
 import {logError} from '@utils/log';
 import {isSystemAdmin} from '@utils/user';
 
-import type {LimitRestrictedInfo} from '@calls/observers';
 import type {IntlShape} from 'react-intl';
 
 // Only unlock when:
@@ -38,21 +37,15 @@ let recordingWillBePostedLock = true;
 // Only unlock when starting/stopping a recording.
 let recordingErrorLock = true;
 
-export const showLimitRestrictedAlert = (info: LimitRestrictedInfo, intl: IntlShape) => {
+export const showLimitRestrictedAlert = (intl: IntlShape) => {
     const title = intl.formatMessage({
         id: 'mobile.calls_participant_limit_title_GA',
         defaultMessage: 'This call is at capacity',
     });
-    let message = intl.formatMessage({
+    const message = intl.formatMessage({
         id: 'mobile.calls_limit_msg',
         defaultMessage: 'The maximum number of participants per call is {maxParticipants}. Contact your System Admin to increase the limit.',
-    }, {maxParticipants: info.maxParticipants});
-    if (info.isCloudStarter) {
-        message = intl.formatMessage({
-            id: 'mobile.calls_limit_msg_GA',
-            defaultMessage: 'Upgrade to Cloud Professional or Cloud Enterprise to enable group calls with more than {maxParticipants} participants.',
-        }, {maxParticipants: info.maxParticipants});
-    }
+    }, {maxParticipants: 1234});
     const ok = intl.formatMessage({
         id: 'mobile.calls_ok',
         defaultMessage: 'Okay',

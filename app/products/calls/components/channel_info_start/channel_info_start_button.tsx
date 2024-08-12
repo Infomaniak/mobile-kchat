@@ -5,7 +5,6 @@ import React, {useCallback, useState} from 'react';
 import {useIntl} from 'react-intl';
 
 import {switchToConferenceByChannelId} from '@actions/remote/conference';
-import {showLimitRestrictedAlert} from '@calls/alerts';
 import Loading from '@components/loading';
 import OptionBox, {OPTIONS_HEIGHT} from '@components/option_box';
 import {useTheme} from '@context/theme';
@@ -13,16 +12,9 @@ import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import type {LimitRestrictedInfo} from '@calls/observers';
-
 export interface Props {
     serverUrl: string;
     channelId: string;
-    isACallInCurrentChannel: boolean;
-    alreadyInCall: boolean;
-    dismissChannelInfo: () => void;
-    limitRestrictedInfo: LimitRestrictedInfo;
-    otherParticipants: boolean;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
@@ -49,49 +41,27 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 const ChannelInfoStartButton = ({
     serverUrl,
     channelId,
-    isACallInCurrentChannel,
-    alreadyInCall,
-    dismissChannelInfo,
-    limitRestrictedInfo,
-    otherParticipants,
 }: Props) => {
     const intl = useIntl();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
-    const isLimitRestricted = limitRestrictedInfo.limitRestricted;
     const [connecting, setConnecting] = useState(false);
 
-    const starting = intl.formatMessage({id: 'mobile.calls_starting', defaultMessage: 'Starting...'});
-    const joining = intl.formatMessage({id: 'mobile.calls_joining', defaultMessage: 'Joining...'});
-
     const tryJoin = useCallback(async () => {
-        if (alreadyInCall) {
-            // TODO
-            // CallManager.leaveCallScreen();
-        } else if (isLimitRestricted) {
-            showLimitRestrictedAlert(limitRestrictedInfo, intl);
-            dismissChannelInfo();
-        } else {
-            setConnecting(true);
+        setConnecting(true);
+        await switchToConferenceByChannelId(serverUrl, channelId, {initiator: 'internal'});
+        setConnecting(false);
+    }, [serverUrl, channelId]);
 
-            await switchToConferenceByChannelId(serverUrl, channelId, {initiator: 'internal'});
-            setConnecting(false);
-            dismissChannelInfo();
-        }
-    }, [isLimitRestricted, alreadyInCall, dismissChannelInfo, intl, serverUrl, channelId, isACallInCurrentChannel, otherParticipants]);
-
-    const joinText = intl.formatMessage({id: 'mobile.calls_join_call', defaultMessage: 'Join call'});
-    const startText = intl.formatMessage({id: 'mobile.calls_start_call', defaultMessage: 'Start call'});
-    const leaveText = intl.formatMessage({id: 'mobile.calls_leave_call', defaultMessage: 'Leave call'});
-    const text = isACallInCurrentChannel ? joinText : startText;
-    const icon = isACallInCurrentChannel ? 'phone-in-talk' : 'phone';
+    const text = intl.formatMessage({id: 'mobile.calls_start_call', defaultMessage: 'Start call'});
+    const starting = intl.formatMessage({id: 'mobile.calls_starting', defaultMessage: 'Starting...'});
 
     if (connecting) {
         return (
             <Loading
                 color={theme.buttonBg}
                 size={'small'}
-                footerText={isACallInCurrentChannel ? joining : starting}
+                footerText={starting}
                 containerStyle={styles.container}
                 footerTextStyles={styles.text}
             />
@@ -102,13 +72,7 @@ const ChannelInfoStartButton = ({
         <OptionBox
             onPress={preventDoubleTap(tryJoin)}
             text={text}
-            iconName={icon}
-            activeText={text}
-            activeIconName={icon}
-            isActive={isACallInCurrentChannel}
-            destructiveText={leaveText}
-            destructiveIconName={'phone-hangup'}
-            isDestructive={alreadyInCall}
+            iconName='phone'
             testID='channel_info.channel_actions.join_start_call.action'
         />
     );
