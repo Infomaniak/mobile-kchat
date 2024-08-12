@@ -9,7 +9,6 @@ import CopyChannelLinkOption from '@components/channel_actions/copy_channel_link
 import InfoBox from '@components/channel_actions/info_box';
 import LeaveChannelLabel from '@components/channel_actions/leave_channel_label';
 import {useTheme} from '@context/theme';
-import {dismissBottomSheet} from '@screens/navigation';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 type Props = {
@@ -47,7 +46,6 @@ const ChannelQuickAction = ({channelId, callsEnabled, isDMorGM}: Props) => {
             <View style={styles.wrapper}>
                 <ChannelActions
                     channelId={channelId}
-                    dismissChannelInfo={dismissBottomSheet}
                     callsEnabled={callsEnabled}
                     testID='channel.quick_actions'
                 />

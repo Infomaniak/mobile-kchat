@@ -102,7 +102,6 @@ const ChannelInfo = ({
                 <ChannelActions
                     channelId={channelId}
                     inModal={true}
-                    dismissChannelInfo={onPressed}
                     callsEnabled={callsAvailable}
                     testID='channel_info.channel_actions'
                 />
