@@ -5,7 +5,6 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$} from 'rxjs';
 import {distinctUntilChanged, switchMap} from 'rxjs/operators';
 
-import {observeIncomingCalls} from '@calls/state';
 import {queryAllMyChannelsForTeam} from '@queries/servers/channel';
 import {observeCurrentTeamId, observeCurrentUserId, observeLicense} from '@queries/servers/system';
 import {queryMyTeams} from '@queries/servers/team';
@@ -23,11 +22,6 @@ const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
     );
 
     const teamsCount = queryMyTeams(database).observeCount(false);
-
-    const showIncomingCalls = observeIncomingCalls().pipe(
-        switchMap((ics) => of$(ics.incomingCalls.length > 0)),
-        distinctUntilChanged(),
-    );
 
     return {
         isCRTEnabled: observeIsCRTEnabled(database),
@@ -51,7 +45,6 @@ const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
             switchMap((u) => of$(Boolean(u))),
             distinctUntilChanged(),
         ),
-        showIncomingCalls,
     };
 });
 

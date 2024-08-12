@@ -28,7 +28,6 @@ type Props = {
     closeButtonId: string;
     componentId: AvailableScreens;
     type?: ChannelType;
-    canEnableDisableCalls: boolean;
     isCallsEnabledInChannel: boolean;
     canManageMembers: boolean;
     isCRTEnabled: boolean;

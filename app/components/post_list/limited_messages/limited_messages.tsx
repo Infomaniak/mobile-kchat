@@ -6,16 +6,13 @@ import {Platform, View} from 'react-native';
 import Animated, {interpolate, useAnimatedStyle, useSharedValue, withSpring} from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-import {useCallsAdjustment} from '@calls/hooks';
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
-import {useServerUrl} from '@context/server';
 import {makeStyleSheetFromTheme, hexToHue} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 type Props = {
-    channelId: string;
     theme: Theme;
     testID: string;
     onClose: () => void;
@@ -88,19 +85,16 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 });
 
 const LimitedMessages = ({
-    channelId,
     testID,
     theme,
     onClose,
 }: Props) => {
-    const serverUrl = useServerUrl();
     const insets = useSafeAreaInsets();
     const underlayColor = useMemo(() => `hsl(${hexToHue(theme.buttonBg)}, 50%, 38%)`, [theme]);
     const top = useSharedValue(1);
-    const callsAdjustment = useCallsAdjustment(serverUrl, channelId);
 
     // The final top:
-    const adjustedTop = insets.top + callsAdjustment;
+    const adjustedTop = insets.top;
 
     const BARS_FACTOR = Math.abs((1) / (HIDDEN_TOP - SHOWN_TOP));
 

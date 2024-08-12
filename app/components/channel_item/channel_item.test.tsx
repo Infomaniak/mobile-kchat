@@ -41,7 +41,6 @@ describe('components/channel_list/categories/body/channel_item', () => {
                 onPress={() => undefined}
                 isUnread={myChannel.isUnread}
                 mentionsCount={myChannel.mentionsCount}
-                hasCall={false}
             />,
         );
 
@@ -61,7 +60,6 @@ describe('components/channel_list/categories/body/channel_item', () => {
                 onPress={() => undefined}
                 isUnread={myChannel.isUnread}
                 mentionsCount={myChannel.mentionsCount}
-                hasCall={false}
             />,
         );
 
@@ -81,7 +79,6 @@ describe('components/channel_list/categories/body/channel_item', () => {
                 onPress={() => undefined}
                 isUnread={myChannel.isUnread}
                 mentionsCount={myChannel.mentionsCount}
-                hasCall={true}
             />,
         );
 
