@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import ClientCalls, {type ClientCallsMix} from '@calls/client/rest';
 import IKClientCalls, {type IKClientCallsMix} from '@client/rest/ikcalls';
 import IKClientCustomActions, {type IKClientCustomActionsMix} from '@client/rest/ikcustomactions';
 import IKClientMultiTeam, {type IKClientMultiTeamMix} from '@client/rest/ikteams';
@@ -43,7 +42,6 @@ interface Client extends ClientBase,
     ClientThreadsMix,
     ClientTosMix,
     ClientUsersMix,
-    ClientCallsMix,
     ClientPluginsMix,
     ClientNPSMix,
     IKClientMultiTeamMix,
@@ -66,7 +64,6 @@ class Client extends mix(ClientBase).with(
     ClientThreads,
     ClientTos,
     ClientUsers,
-    ClientCalls,
     ClientPlugins,
     ClientNPS,
     IKClientMultiTeam,

@@ -18,7 +18,6 @@ import {storeDeviceToken} from '@actions/app/global';
 import {markChannelAsViewed} from '@actions/local/channel';
 import {updateThread} from '@actions/local/thread';
 import {backgroundNotification, openNotification} from '@actions/remote/notifications';
-import {isCallsStartedMessage} from '@calls/utils';
 import {Device, Events, Navigation, PushNotification, Screens} from '@constants';
 import DatabaseManager from '@database/manager';
 import {DEFAULT_LOCALE, getLocalizedMessage, t} from '@i18n';
@@ -111,11 +110,6 @@ class PushNotifications {
 
     handleInAppNotification = async (serverUrl: string, notification: NotificationWithData) => {
         const {payload} = notification;
-
-        // Do not show overlay if this is a call-started message (the call_notification will alert the user)
-        if (isCallsStartedMessage(payload)) {
-            return;
-        }
 
         const database = DatabaseManager.serverDatabases[serverUrl]?.database;
         if (database) {
@@ -247,6 +241,8 @@ class PushNotifications {
 
             this.processNotification(notification);
         }
+
+        // Always play a sound
         completion({alert: false, sound: true, badge: true});
     };
 

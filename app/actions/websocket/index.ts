@@ -14,30 +14,6 @@ import {fetchPostsForChannel, fetchPostThread} from '@actions/remote/post';
 import {openAllUnreadChannels} from '@actions/remote/preference';
 import {autoUpdateTimezone} from '@actions/remote/user';
 import {handleTeamSyncEvent} from '@actions/websocket/ikTeams';
-import {loadConfigAndCalls} from '@calls/actions/calls';
-import {
-    handleCallCaption,
-    handleCallChannelDisabled,
-    handleCallChannelEnabled,
-    handleCallEnded,
-    handleCallHostChanged,
-    handleCallJobState,
-    handleCallRecordingState,
-    handleCallScreenOff,
-    handleCallScreenOn,
-    handleCallStarted, handleCallUserConnected, handleCallUserDisconnected,
-    handleCallUserJoined,
-    handleCallUserLeft,
-    handleCallUserMuted,
-    handleCallUserRaiseHand,
-    handleCallUserReacted,
-    handleCallUserUnmuted,
-    handleCallUserUnraiseHand,
-    handleCallUserVoiceOff,
-    handleCallUserVoiceOn,
-    handleUserDismissedNotification,
-} from '@calls/connection/websocket_event_handlers';
-import {isSupportedServerCalls} from '@calls/utils';
 import {Screens, WebsocketEvents} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
@@ -192,10 +168,6 @@ async function doReconnect(serverUrl: string) {
     const {id: currentUserId, locale: currentUserLocale} = (await getCurrentUser(database))!;
     const license = await getLicense(database);
     const config = await getConfig(database);
-
-    if (isSupportedServerCalls(config?.Version)) {
-        loadConfigAndCalls(serverUrl, currentUserId);
-    }
 
     await deferredAppEntryActions(serverUrl, lastDisconnectedAt, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, initialTeamId);
 
@@ -387,81 +359,6 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
             break;
 
             // return dispatch(handleRefreshAppsBindings());
-
-        // Calls ws events:
-        case WebsocketEvents.CALLS_CHANNEL_ENABLED:
-            handleCallChannelEnabled(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_CHANNEL_DISABLED:
-            handleCallChannelDisabled(serverUrl, msg);
-            break;
-
-        // DEPRECATED in favour of user_joined (since v0.21.0)
-        case WebsocketEvents.CALLS_USER_CONNECTED:
-            handleCallUserConnected(serverUrl, msg);
-            break;
-
-        // DEPRECATED in favour of user_left (since v0.21.0)
-        case WebsocketEvents.CALLS_USER_DISCONNECTED:
-            handleCallUserDisconnected(serverUrl, msg);
-            break;
-
-        case WebsocketEvents.CALLS_USER_JOINED:
-            handleCallUserJoined(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_LEFT:
-            handleCallUserLeft(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_MUTED:
-            handleCallUserMuted(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_UNMUTED:
-            handleCallUserUnmuted(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_VOICE_ON:
-            handleCallUserVoiceOn(msg);
-            break;
-        case WebsocketEvents.CALLS_USER_VOICE_OFF:
-            handleCallUserVoiceOff(msg);
-            break;
-        case WebsocketEvents.CALLS_CALL_START:
-            handleCallStarted(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_SCREEN_ON:
-            handleCallScreenOn(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_SCREEN_OFF:
-            handleCallScreenOff(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_RAISE_HAND:
-            handleCallUserRaiseHand(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_UNRAISE_HAND:
-            handleCallUserUnraiseHand(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_CALL_END:
-            handleCallEnded(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_REACTED:
-            handleCallUserReacted(serverUrl, msg);
-            break;
-
-        // DEPRECATED in favour of CALLS_JOB_STATE (since v2.15.0)
-        case WebsocketEvents.CALLS_RECORDING_STATE:
-            handleCallRecordingState(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_JOB_STATE:
-            handleCallJobState(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_HOST_CHANGED:
-            handleCallHostChanged(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_DISMISSED_NOTIFICATION:
-            handleUserDismissedNotification(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_CAPTION:
-            handleCallCaption(serverUrl, msg);
-            break;
 
         case WebsocketEvents.GROUP_RECEIVED:
             handleGroupReceivedEvent(serverUrl, msg);

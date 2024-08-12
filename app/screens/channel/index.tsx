@@ -4,7 +4,7 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$, switchMap} from 'rxjs';
 
-import {observeCallStateInChannel, observeIsCallsEnabledInChannel} from '@calls/observers';
+import {observeIsCallsEnabledInChannel} from '@calls/observers';
 import {Preferences} from '@constants';
 import {withServerUrl} from '@context/server';
 import {observeCurrentChannel} from '@queries/servers/channel';
@@ -20,7 +20,7 @@ type EnhanceProps = WithDatabaseArgs & {
     serverUrl: string;
 }
 
-const enhanced = withObservables([], ({database, serverUrl}: EnhanceProps) => {
+const enhanced = withObservables([], ({database}: EnhanceProps) => {
     const channel = observeCurrentChannel(database);
     const channelId = observeCurrentChannelId(database);
     const dismissedGMasDMNotice = queryPreferencesByCategoryAndName(database, Preferences.CATEGORIES.SYSTEM_NOTICE, Preferences.NOTICES.GM_AS_DM).observe();
@@ -30,7 +30,6 @@ const enhanced = withObservables([], ({database, serverUrl}: EnhanceProps) => {
 
     return {
         channelId,
-        ...observeCallStateInChannel(serverUrl, database, channelId),
         isCallsEnabledInChannel: observeIsCallsEnabledInChannel(currentUserId, channel),
         dismissedGMasDMNotice,
         channelType,
