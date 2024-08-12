@@ -109,7 +109,7 @@
 		7FB50D222856E1AB0035ACB5 /* ShareUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB50D212856E1AB0035ACB5 /* ShareUIView.swift */; };
 		7FC5698928563FDB000B0905 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FC5698828563FDB000B0905 /* ShareViewController.swift */; };
 		7FC5698C28563FDB000B0905 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7FC5698A28563FDB000B0905 /* MainInterface.storyboard */; };
-		7FC5699028563FDB000B0905 /* kChatShare.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 7FC5698628563FDB000B0905 /* kChatShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7FC5699028563FDB000B0905 /* kChatShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 7FC5698628563FDB000B0905 /* kChatShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7FCEFB9326B7934F006DC1DE /* SDWebImageDownloaderOperation+Swizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FCEFB9226B7934F006DC1DE /* SDWebImageDownloaderOperation+Swizzle.m */; };
 		7FD482292864D69700A5B18B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7FD482282864D69700A5B18B /* Assets.xcassets */; };
 		7FD4822C2864D73300A5B18B /* OpenGraph in Frameworks */ = {isa = PBXBuildFile; productRef = 7FD4822B2864D73300A5B18B /* OpenGraph */; };
@@ -173,7 +173,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				7FC5699028563FDB000B0905 /* kChatShare.appex in Embed App Extensions */,
+				7FC5699028563FDB000B0905 /* kChatShareExtension.appex in Embed App Extensions */,
 				7F581D39221ED5C60099E66B /* kChatNotificationService.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
@@ -290,7 +290,7 @@
 		7FA9A98D28673EC200AB35A1 /* ShareViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewModel.swift; sourceTree = "<group>"; };
 		7FA9A98F2868BD8800AB35A1 /* LocalFileManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalFileManager.swift; sourceTree = "<group>"; };
 		7FB50D212856E1AB0035ACB5 /* ShareUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareUIView.swift; sourceTree = "<group>"; };
-		7FC5698628563FDB000B0905 /* kChatShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = kChatShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		7FC5698628563FDB000B0905 /* kChatShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = kChatShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FC5698828563FDB000B0905 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		7FC5698B28563FDB000B0905 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		7FC5698D28563FDB000B0905 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -804,7 +804,7 @@
 			children = (
 				13B07F961A680F5B00A75B9A /* kChat.app */,
 				7F581D32221ED5C60099E66B /* kChatNotificationService.appex */,
-				7FC5698628563FDB000B0905 /* kChatShare.appex */,
+				7FC5698628563FDB000B0905 /* kChatShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -872,9 +872,9 @@
 			productReference = 7F581D32221ED5C60099E66B /* kChatNotificationService.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		7FC5698528563FDB000B0905 /* kChatShare */ = {
+		7FC5698528563FDB000B0905 /* kChatShareExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7FC5699328563FDB000B0905 /* Build configuration list for PBXNativeTarget "kChatShare" */;
+			buildConfigurationList = 7FC5699328563FDB000B0905 /* Build configuration list for PBXNativeTarget "kChatShareExtension" */;
 			buildPhases = (
 				7FC5698228563FDB000B0905 /* Sources */,
 				7FC5698328563FDB000B0905 /* Frameworks */,
@@ -884,14 +884,14 @@
 			);
 			dependencies = (
 			);
-			name = kChatShare;
+			name = kChatShareExtension;
 			packageProductDependencies = (
 				7FD4822B2864D73300A5B18B /* OpenGraph */,
 				7F4288032865D340006B48E1 /* Gekidou */,
 				27C667A429523F0A00E590D5 /* Sentry */,
 			);
-			productName = kChatShare;
-			productReference = 7FC5698628563FDB000B0905 /* kChatShare.appex */;
+			productName = MattermostShare;
+			productReference = 7FC5698628563FDB000B0905 /* kChatShareExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -978,7 +978,7 @@
 			targets = (
 				13B07F861A680F5B00A75B9A /* kChat */,
 				7F581D31221ED5C60099E66B /* kChatNotificationService */,
-				7FC5698528563FDB000B0905 /* kChatShare */,
+				7FC5698528563FDB000B0905 /* kChatShareExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -1366,7 +1366,7 @@
 		};
 		7FC5698F28563FDB000B0905 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 7FC5698528563FDB000B0905 /* kChatShare */;
+			target = 7FC5698528563FDB000B0905 /* kChatShareExtension */;
 			targetProxy = 7FC5698E28563FDB000B0905 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -1698,7 +1698,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = com.infomaniak.chat.kChatShare;
+				PRODUCT_BUNDLE_IDENTIFIER = com.infomaniak.chat.ShareExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -1749,11 +1749,11 @@
 				MARKETING_VERSION = 1.0.25;
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = com.infomaniak.chat.kChatShare;
+				PRODUCT_BUNDLE_IDENTIFIER = com.infomaniak.chat.ShareExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "605f9321-1e14-42b9-8b23-320788fb835f";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.infomaniak.chat.kChatShare 1685967110";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore com.infomaniak.chat.kChatShare 1717665990";
+				PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.infomaniak.chat.ShareExtension 1685967110";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore com.infomaniak.chat.ShareExtension 1717665990";
 				SKIP_INSTALL = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1913,7 +1913,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7FC5699328563FDB000B0905 /* Build configuration list for PBXNativeTarget "kChatShare" */ = {
+		7FC5699328563FDB000B0905 /* Build configuration list for PBXNativeTarget "kChatShareExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7FC5699128563FDB000B0905 /* Debug */,
