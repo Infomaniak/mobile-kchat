@@ -4,11 +4,9 @@
 import React, {useCallback, useMemo} from 'react';
 import {defineMessages, useIntl} from 'react-intl';
 
-import {getCallsConfig} from '@calls/state';
 import SettingContainer from '@components/settings/container';
 import SettingItem from '@components/settings/item';
 import {General, Screens} from '@constants';
-import {useServerUrl} from '@context/server';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {t} from '@i18n';
 import {popTopScreen} from '@screens/navigation';
@@ -56,9 +54,7 @@ const Notifications = ({
     sendEmailNotifications,
 }: NotificationsProps) => {
     const intl = useIntl();
-    const serverUrl = useServerUrl();
     const notifyProps = useMemo(() => getNotificationProps(currentUser), [currentUser?.notifyProps]);
-    const callsRingingEnabled = useMemo(() => getCallsConfig(serverUrl).EnableRinging, [serverUrl]);
 
     const emailIntervalPref = useMemo(() =>
         getEmailInterval(
@@ -82,18 +78,6 @@ const Notifications = ({
         const title = intl.formatMessage({
             id: 'notification_settings.push_notification',
             defaultMessage: 'Push Notifications',
-        });
-
-        gotoSettingsScreen(screen, title);
-    }, []);
-
-    const callsNotificationsOn = useMemo(() => Boolean(notifyProps?.calls_mobile_sound ? notifyProps.calls_mobile_sound === 'true' : notifyProps?.calls_desktop_sound === 'true'),
-        [notifyProps]);
-    const goToNotificationSettingsCall = useCallback(() => {
-        const screen = Screens.SETTINGS_NOTIFICATION_CALL;
-        const title = intl.formatMessage({
-            id: 'notification_settings.call_notification',
-            defaultMessage: 'Call Notifications',
         });
 
         gotoSettingsScreen(screen, title);
@@ -136,17 +120,6 @@ const Notifications = ({
                 onPress={goToNotificationSettingsPush}
                 testID='notification_settings.push_notifications.option'
             />
-            {callsRingingEnabled &&
-                <SettingItem
-                    optionName='call_notification'
-                    onPress={goToNotificationSettingsCall}
-                    info={intl.formatMessage({
-                        id: callsNotificationsOn ? mentionTexts.callsOn.id : mentionTexts.callsOff.id,
-                        defaultMessage: callsNotificationsOn ? mentionTexts.callsOn.defaultMessage : mentionTexts.callsOff.defaultMessage,
-                    })}
-                    testID='notification_settings.call_notifications.option'
-                />
-            }
             <SettingItem
                 optionName='email'
                 onPress={goToEmailSettings}

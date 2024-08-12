@@ -18,7 +18,6 @@ type Props = {
     channelId: string;
     channelType?: ChannelType;
     inModal?: boolean;
-    dismissChannelInfo: () => void;
     callsEnabled: boolean;
     testID?: string;
     canManageMembers: boolean;
@@ -40,7 +39,6 @@ const ChannelActions = ({
     channelId,
     channelType,
     inModal = false,
-    dismissChannelInfo,
     callsEnabled,
     canManageMembers,
     testID,
@@ -101,7 +99,6 @@ const ChannelActions = ({
                     <ChannelInfoStartButton
                         serverUrl={serverUrl}
                         channelId={channelId}
-                        dismissChannelInfo={dismissChannelInfo}
                     />
                 </>
             }

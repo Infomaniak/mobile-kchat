@@ -55,6 +55,8 @@ const ChannelInfoStartButton = ({
 
     const text = intl.formatMessage({id: 'mobile.calls_start_call', defaultMessage: 'Start call'});
     const starting = intl.formatMessage({id: 'mobile.calls_starting', defaultMessage: 'Starting...'});
+    const leaveText = intl.formatMessage({id: 'mobile.calls_leave_call', defaultMessage: 'Leave call'});
+    const icon = 'phone';
 
     if (connecting) {
         return (
@@ -72,7 +74,13 @@ const ChannelInfoStartButton = ({
         <OptionBox
             onPress={preventDoubleTap(tryJoin)}
             text={text}
-            iconName='phone'
+            iconName={icon}
+            activeText={text}
+            activeIconName={icon}
+            isActive={false}
+            destructiveText={leaveText}
+            destructiveIconName={'phone-hangup'}
+            isDestructive={false}
             testID='channel_info.channel_actions.join_start_call.action'
         />
     );
