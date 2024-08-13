@@ -33,6 +33,10 @@ export CPPFLAGS="-I/opt/homebrew/opt/openjdk@11/include"
 2. Run the command `npm install` (This will install node_modules & pods)
 3. Run `npm run build:ios-sim` to launch your app
 
+## Project launch :
+
+1. To avoid errors related to the Infomaniak font, you can run the shell command `npm run font-download` 2. Run `npm start`
+
 ## Common errors
 
 ### Binary emulator not found
