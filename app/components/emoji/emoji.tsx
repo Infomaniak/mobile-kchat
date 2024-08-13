@@ -30,9 +30,9 @@ const assetImages = new Map([
     ['calendar.png', require('@assets/images/emojis/calendar.png')],
     ['chk.png', require('@assets/images/emojis/chk.png')],
     ['contacts.png', require('@assets/images/emojis/contacts.png')],
-    ['drive.png', require('@assets/images/emojis/drive.png')],
+    ['kdrive.png', require('@assets/images/emojis/kdrive.png')],
     ['mail.png', require('@assets/images/emojis/mail.png')],
-    ['paste.png', require('@assets/images/emojis/paste.png')],
+    ['kpaste.png', require('@assets/images/emojis/kpaste.png')],
     ['swisstransfer.png', require('@assets/images/emojis/swisstransfer.png')],
     ['tasks.png', require('@assets/images/emojis/tasks.png')],
 ]);
