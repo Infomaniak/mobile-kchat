@@ -81,7 +81,10 @@ function Typing({
     const onUserStartTyping = useCreateOnUserStartAction('typing');
     const onUserStartRecording = useCreateOnUserStartAction('recording');
 
-    const useCreateOnUserStopAction = (action: Action) => useCallback((msg: any) => {
+    const useCreateOnUserStopAction = (
+        action: Action,
+        ref: React.MutableRefObject<Array<{ id: string; now: number; username: string}>>,
+    ) => useCallback((msg: any) => {
         if (channelId !== msg.channelId) {
             return;
         }
@@ -91,14 +94,14 @@ function Typing({
             return;
         }
 
-        typing.current = typing.current.filter(({id, now}) => id !== msg.userId && now !== msg.now);
+        ref.current = ref.current.filter(({id, now}) => id !== msg.userId && now !== msg.now);
 
         if (timeoutToDisappear.current) {
             clearTimeout(timeoutToDisappear.current[action]);
             timeoutToDisappear.current[action] = undefined;
         }
 
-        if (typing.current.length === 0) {
+        if (ref.current.length === 0) {
             timeoutToDisappear.current[action] = setTimeout(() => {
                 if (mounted.current) {
                     setRefresh(Date.now());
@@ -109,8 +112,8 @@ function Typing({
             setRefresh(Date.now());
         }
     }, [channelId, rootId]);
-    const onUserStopTyping = useCreateOnUserStopAction('typing');
-    const onUserStopRecording = useCreateOnUserStopAction('recording');
+    const onUserStopTyping = useCreateOnUserStopAction('typing', typing);
+    const onUserStopRecording = useCreateOnUserStopAction('recording', recording);
 
     useEffect(() => {
         mounted.current = true;
