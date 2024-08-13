@@ -95,6 +95,9 @@
             android:name=".NotificationDismissService"
             android:enabled="true"
             android:exported="false" />
+            
+        <service android:name="org.jitsi.meet.sdk.JitsiMeetOngoingConferenceService"
+                android:foregroundServiceType="mediaProjection" />
 
         <receiver
             android:name=".NotificationReplyBroadcastReceiver"
