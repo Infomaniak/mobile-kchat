@@ -4,6 +4,7 @@
 import {type ClientHeaders, getOrCreateWebSocketClient, WebSocketReadyState} from '@mattermost/react-native-network-client';
 import Pusher, {ConnectionManager, type Channel} from 'pusher-js/react-native';
 
+import {WebsocketEvents} from '@app/constants';
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
 import {getConfigValue} from '@queries/servers/system';
@@ -393,7 +394,7 @@ export default class WebSocketClient {
     }
 
     public sendUserTypingEvent(userId: string, channelId: string, parentId?: string) {
-        this.sendPresenceMessage('client-user_typing', {
+        this.sendPresenceMessage(WebsocketEvents.TYPING, {
             channel_id: channelId,
             parent_id: parentId,
             user_id: userId,
@@ -403,7 +404,7 @@ export default class WebSocketClient {
     public sendUserRecordingEvent(userId: string, channelId: string, parentId?: string) {
         const TIMER = 1000;
         this.recordingInterval = setInterval(() => {
-            this.sendMessage('client-user_recording', {
+            this.sendPresenceMessage(WebsocketEvents.RECORDING, {
                 channel_id: channelId,
                 parent_id: parentId,
                 user_id: userId,
