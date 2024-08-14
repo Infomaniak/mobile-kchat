@@ -11,10 +11,6 @@
 #import "kChat-Swift.h"
 #import <os/log.h>
 
-#if DEBUG
-#import "Atlantis-Swift.h"
-#endif
-
 @implementation AppDelegate
 
 @synthesize orientationLock;
@@ -64,6 +60,7 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
 
   os_log(OS_LOG_DEFAULT, "Mattermost started!!");
   [ReactNativeNavigation bootstrapWithDelegate:self launchOptions:launchOptions];
+
   return YES;
 }
 

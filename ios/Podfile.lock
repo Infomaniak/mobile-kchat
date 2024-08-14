@@ -6,7 +6,6 @@ PODS:
   - AppAuth/Core (1.7.5)
   - AppAuth/ExternalUserAgent (1.7.5):
     - AppAuth/Core
-  - atlantis-proxyman (1.24.0)
   - boost (1.83.0)
   - CocoaLumberjack (3.8.5):
     - CocoaLumberjack/Core (= 3.8.5)
@@ -1735,7 +1734,6 @@ PODS:
   - Yoga (0.0.0)
 
 DEPENDENCIES:
-  - atlantis-proxyman
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - EXApplication (from `../node_modules/expo-application/ios`)
@@ -1861,7 +1859,6 @@ SPEC REPOS:
   trunk:
     - Alamofire
     - AppAuth
-    - atlantis-proxyman
     - CocoaLumberjack
     - Giphy
     - GoogleSignIn
@@ -2123,7 +2120,6 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
   AppAuth: 501c04eda8a8d11f179dbe8637b7a91bb7e5d2fa
-  atlantis-proxyman: 0aa5c86216f191e460ec0847d2c731ca4d7c1abf
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   CocoaLumberjack: 6a459bc897d6d80bd1b8c78482ec7ad05dffc3f0
   DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
@@ -2262,6 +2258,6 @@ SPEC CHECKSUMS:
   WatermelonDB: 842d22ba555425aa9f3ce551239a001200c539bc
   Yoga: ae3c32c514802d30f687a04a6a35b348506d411f
 
-PODFILE CHECKSUM: 0a5d41115b7db159d6e8a9be2b9bfcf42ee356cf
+PODFILE CHECKSUM: d202545a38c350d34e28ca3195d1ab3f2346e8d3
 
 COCOAPODS: 1.15.2
