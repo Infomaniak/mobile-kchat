@@ -1,6 +1,3 @@
-plugin 'cocoapods-user-defined-build-types'
-enable_user_defined_build_types!
-
 def node_require(script)
   # Resolve script with node to allow for hoisting
   require Pod::Executable.execute_command('node', ['-p',
@@ -31,7 +28,7 @@ setup_permissions([
 #   dependencies: {
 #     ...(process.env.NO_FLIPPER ? { 'react-native-flipper': { platforms: { ios: null } } } : {}),
 # ```
-flipper_config = ENV['NO_FLIPPER'] == "1" ? FlipperConfiguration.disabled : FlipperConfiguration.enabled(["Debug"], {'Flipper' => '0.182.0'})
+flipper_config = ENV['NO_FLIPPER'] == "1" ? FlipperConfiguration.disabled : FlipperConfiguration.enabled
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
@@ -58,7 +55,6 @@ target 'kChat' do
   pod 'React-jsc', :path => '../node_modules/react-native/ReactCommon/jsc', :modular_headers => true
   pod 'simdjson', path: '../node_modules/@nozbe/simdjson', :modular_headers => true
 
-  pod 'atlantis-proxyman', :build_type => :dynamic_framework
   pod 'JitsiMeetSDKLite', '9.2.2-lite'
 
   post_install do |installer|
@@ -85,8 +81,5 @@ target 'kChat' do
         config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
       end
     end
-
-    puts 'Patching YogaKit to fix YGMeasureView call signature'
-    %x(patch Pods/YogaKit/YogaKit/Source/YGLayout.m -N < patches/YGLayout.patch)
   end
 end
