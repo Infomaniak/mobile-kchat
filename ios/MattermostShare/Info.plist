@@ -31,9 +31,9 @@
 				<integer>10</integer>
 				<key>NSExtensionActivationSupportsText</key>
 				<true/>
-				<key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
-				<integer>1</integer>
 				<key>NSExtensionActivationSupportsWebPageWithMaxCount</key>
+				<integer>1</integer>
+				<key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
 				<integer>1</integer>
 			</dict>
 		</dict>
@@ -65,8 +65,8 @@
 		<string>Metropolis-Light.ttf</string>
 		<string>compass-icons.ttf</string>
 		<string>SuisseIntl-Regular.ttf</string>
-        <string>SuisseIntl-RegularItalic.ttf</string>
-        <string>SuisseIntl-SemiBold.ttf</string>
+		<string>SuisseIntl-RegularItalic.ttf</string>
+		<string>SuisseIntl-SemiBold.ttf</string>
 	</array>
 </dict>
 </plist>
