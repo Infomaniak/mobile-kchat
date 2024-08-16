@@ -59,8 +59,6 @@ GEM
       nap (>= 0.8, < 2.0)
       netrc (~> 0.11)
     cocoapods-try (1.2.0)
-    cocoapods-user-defined-build-types (0.0.7)
-      cocoapods (>= 1.5.0, < 2.0)
     colored2 (3.1.2)
     concurrent-ruby (1.2.2)
     connection_pool (2.4.1)
@@ -104,7 +102,6 @@ PLATFORMS
 
 DEPENDENCIES
   cocoapods (= 1.14.3)
-  cocoapods-user-defined-build-types (= 0.0.7)
 
 BUNDLED WITH
    2.3.26
