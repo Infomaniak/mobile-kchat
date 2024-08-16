@@ -1626,6 +1626,9 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNGoogleSignin (10.1.0):
+    - GoogleSignIn (~> 7.0)
+    - React-Core
   - RNKeychain (8.2.0):
     - React-Core
   - RNLocalize (3.2.0):
@@ -1840,6 +1843,7 @@ DEPENDENCIES:
   - RNFileViewer (from `../node_modules/react-native-file-viewer`)
   - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNKeychain (from `../node_modules/react-native-keychain`)
   - RNLocalize (from `../node_modules/react-native-localize`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
@@ -2088,6 +2092,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-fs"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNGoogleSignin:
+    :path: "../node_modules/@react-native-google-signin/google-signin"
   RNKeychain:
     :path: "../node_modules/react-native-keychain"
   RNLocalize:
@@ -2235,6 +2241,7 @@ SPEC CHECKSUMS:
   RNFileViewer: ce7ca3ac370e18554d35d6355cffd7c30437c592
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: 2282cfbcf86c360d29f44ace393203afd5c6cff7
+  RNGoogleSignin: a6a612cce56a45ab701c5c5c6e36f5390522d100
   RNKeychain: bfe3d12bf4620fe488771c414530bf16e88f3678
   RNLocalize: b77875884750cb6a58cd6865863fe2ba2729b72b
   RNPermissions: 3eefc58872a947ed61fef7922fe12864237f9998
@@ -2258,6 +2265,6 @@ SPEC CHECKSUMS:
   WatermelonDB: 842d22ba555425aa9f3ce551239a001200c539bc
   Yoga: ae3c32c514802d30f687a04a6a35b348506d411f
 
-PODFILE CHECKSUM: d202545a38c350d34e28ca3195d1ab3f2346e8d3
+PODFILE CHECKSUM: eb6fa8fb3f8440f50f0cdf0b6a4c3b4fa1dba2f9
 
 COCOAPODS: 1.15.2

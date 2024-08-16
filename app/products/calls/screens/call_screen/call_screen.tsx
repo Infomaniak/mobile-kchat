@@ -674,6 +674,9 @@ const CallScreen = ({
 
                 // Disable CallKit
                 'call-integration.enabled': false,
+
+                // Disable screensharing on android
+                'android.screensharing.enabled': false,
             }}
             style={styles.flex}
             room={channelId}
