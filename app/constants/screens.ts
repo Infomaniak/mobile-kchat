@@ -3,6 +3,7 @@
 
 export const ABOUT = 'About';
 export const ACCOUNT = 'Account';
+export const AI_OPTIONS = 'AiOptions';
 export const APPS_FORM = 'AppForm';
 export const BOTTOM_SHEET = 'BottomSheet';
 export const BROWSE_CHANNELS = 'BrowseChannels';
@@ -86,6 +87,7 @@ export const TRANSCRIPTION = 'Transcription';
 export default {
     ABOUT,
     ACCOUNT,
+    AI_OPTIONS,
     APPS_FORM,
     BOTTOM_SHEET,
     BROWSE_CHANNELS,

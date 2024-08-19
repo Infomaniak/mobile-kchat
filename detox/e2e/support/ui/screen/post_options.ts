@@ -22,6 +22,9 @@ class PostOptionsScreen {
         unpinPostOption: 'post_options.unpin_post.option',
         editPostOption: 'post_options.edit_post.option',
         deletePostOption: 'post_options.delete_post.option',
+        aiSummarizeThreadOption: 'post_options.ai_summarize_thread.option',
+        reactForMeThreadOption: 'post_options.react_for_me_thread.option',
+        askAiOption: 'post_options.ask_ai.option',
     };
 
     postOptionsScreen = element(by.id(this.testID.postOptionsScreen));

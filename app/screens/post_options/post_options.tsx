@@ -22,6 +22,7 @@ import {bottomSheetSnapPoint} from '@utils/helpers';
 import {isSystemMessage} from '@utils/post';
 
 import AppBindingsPostOptions from './options/app_bindings_post_option';
+import AskAi from './options/ask_ai';
 import CopyTextOption from './options/copy_text_option';
 import DeletePostOption from './options/delete_post_option';
 import EditOption from './options/edit_option';
@@ -120,6 +121,12 @@ const PostOptions = ({
                     <FollowThreadOption
                         bottomSheetId={Screens.POST_OPTIONS}
                         thread={thread}
+                    />
+                }
+                {!isSystemPost && !post.rootId &&
+                    <AskAi
+                        bottomSheetId={Screens.POST_OPTIONS}
+                        post={post}
                     />
                 }
                 {canMarkAsUnread && !isSystemPost &&

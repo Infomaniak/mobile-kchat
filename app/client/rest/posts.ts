@@ -34,6 +34,8 @@ export interface ClientPostsMix {
     doPostActionWithCookie: (postId: string, actionId: string, actionCookie: string, selectedOption?: string) => Promise<any>;
     acknowledgePost: (postId: string, userId: string) => Promise<PostAcknowledgement>;
     unacknowledgePost: (postId: string, userId: string) => Promise<any>;
+    doSummarize: (postId: string, botUsername: string) => Promise<any>;
+    doReaction: (postId: string) => Promise<any>;
 }
 
 const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) => class extends superclass {
@@ -226,6 +228,20 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
         return this.doFetch(
             `${this.getUserRoute(userId)}/posts/${postId}/ack`,
             {method: 'delete'},
+        );
+    };
+
+    doSummarize = (postId: string, botUsername: string) => {
+        return this.doFetch(
+            `${this.getPostRoute(postId)}/summarize?botUsername=${botUsername}`,
+            {method: 'post'},
+        );
+    };
+
+    doReaction = (postId: string) => {
+        return this.doFetch(
+            `${this.getPostRoute(postId)}/react`,
+            {method: 'post'},
         );
     };
 };

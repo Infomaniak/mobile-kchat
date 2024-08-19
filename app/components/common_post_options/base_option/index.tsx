@@ -9,14 +9,16 @@ import OptionItem from '@components/option_item';
 type BaseOptionType = {
     defaultMessage: string;
     i18nId: string;
-    iconName: string;
+    iconName?: string;
     isDestructive?: boolean;
     onPress: () => void;
     testID: string;
+    customIcon?: React.ReactNode;
 }
 
 const BaseOption = ({
     defaultMessage,
+    customIcon,
     i18nId,
     iconName,
     isDestructive = false,
@@ -30,6 +32,7 @@ const BaseOption = ({
             action={onPress}
             destructive={isDestructive}
             icon={iconName}
+            customIcon={customIcon}
             label={intl.formatMessage({id: i18nId, defaultMessage})}
             testID={testID}
             type='default'
