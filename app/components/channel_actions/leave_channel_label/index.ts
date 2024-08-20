@@ -3,10 +3,10 @@
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$} from 'rxjs';
-import {combineLatestWith, switchMap} from 'rxjs/operators';
+import {combineLatestWith, switchMap, distinctUntilChanged} from 'rxjs/operators';
 
 import {General} from '@constants';
-import {observeChannel} from '@queries/servers/channel';
+import {observeChannel, observeIsLastAdminInChannel} from '@queries/servers/channel';
 import {observeCurrentUser} from '@queries/servers/user';
 
 import LeaveChannelLabel from './leave_channel_label';
@@ -20,6 +20,13 @@ type OwnProps = WithDatabaseArgs & {
 const enhanced = withObservables(['channelId'], ({channelId, database}: OwnProps) => {
     const currentUser = observeCurrentUser(database);
     const channel = observeChannel(database, channelId);
+    const channelMembersLength = channel.pipe(
+        switchMap((c) => {
+            return c?.members.observeCount(false) ?? of$(0);
+        }),
+        distinctUntilChanged(),
+    );
+    const isLastAdminInChannel = observeIsLastAdminInChannel(database, channelId);
     const canLeave = channel.pipe(
         combineLatestWith(currentUser),
         switchMap(([ch, u]) => {
@@ -36,6 +43,8 @@ const enhanced = withObservables(['channelId'], ({channelId, database}: OwnProps
     );
 
     return {
+        channelMembersLength,
+        isLastAdminInChannel,
         canLeave,
         displayName,
         type,

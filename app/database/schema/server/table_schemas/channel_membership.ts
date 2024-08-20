@@ -13,5 +13,6 @@ export default tableSchema({
         {name: 'channel_id', type: 'string', isIndexed: true},
         {name: 'user_id', type: 'string', isIndexed: true},
         {name: 'scheme_admin', type: 'boolean'},
+        {name: 'roles', type: 'string'},
     ],
 });

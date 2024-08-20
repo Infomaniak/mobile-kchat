@@ -33,6 +33,7 @@ export const INTERACTIVE_DIALOG = 'InteractiveDialog';
 export const INVITE = 'Invite';
 export const IN_APP_NOTIFICATION = 'InAppNotification';
 export const JOIN_TEAM = 'JoinTeam';
+export const LEAVE_CHANNEL_MEMBERS = 'LeaveChannelModal';
 export const LATEX = 'Latex';
 export const LOGIN = 'Login';
 export const MANAGE_CHANNEL_MEMBERS = 'ManageChannelMembers';
@@ -112,6 +113,7 @@ export default {
     INVITE,
     IN_APP_NOTIFICATION,
     JOIN_TEAM,
+    LEAVE_CHANNEL_MEMBERS,
     LATEX,
     LOGIN,
     MANAGE_CHANNEL_MEMBERS,

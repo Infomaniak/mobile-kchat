@@ -13,6 +13,7 @@ import {fetchRolesIfNeeded} from '@actions/remote/role';
 import {fetchUsersByIds, updateUsersNoLongerVisible} from '@actions/remote/user';
 import {Events, General} from '@constants';
 import DatabaseManager from '@database/manager';
+import NetworkManager from '@managers/network_manager';
 import {deleteChannelMembership, getChannelById, prepareMyChannelsForTeam, getCurrentChannel} from '@queries/servers/channel';
 import {getConfig, getCurrentChannelId, getCurrentTeamId, setCurrentTeamId} from '@queries/servers/system';
 import {getCurrentUser, getTeammateNameDisplay, getUserById} from '@queries/servers/user';
@@ -277,6 +278,7 @@ export async function handleUserAddedToChannelEvent(serverUrl: string, msg: any)
     const userId = msg.data.user_id || msg.data.userId;
     const channelId = msg.data.channel_id || msg.data.channel_id;
     const {team_id: teamId} = msg.data;
+    const client = NetworkManager.getClient(serverUrl);
 
     try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
@@ -325,9 +327,11 @@ export async function handleUserAddedToChannelEvent(serverUrl: string, msg: any)
                 models.push(...await operator.handleUsers({users, prepareRecordsOnly: true}));
             }
             const channel = await getChannelById(database, channelId);
+            const channelMembership = await client.getChannelMembersByIds(channelId, userId);
+
             if (channel) {
                 models.push(...await operator.handleChannelMembership({
-                    channelMemberships: [{channel_id: channelId, user_id: userId}],
+                    channelMemberships: channelMembership,
                     prepareRecordsOnly: true,
                 }));
             }

@@ -19,6 +19,7 @@ type Props = {
     searchFunction: (term: string) => Promise<UserProfile[]>;
     createFilter: (exactMatches: UserProfile[], term: string) => ((p: UserProfile) => boolean);
     testID: string;
+    loadUsers?: boolean;
 }
 
 export default function ServerUserList({
@@ -30,6 +31,7 @@ export default function ServerUserList({
     fetchFunction,
     searchFunction,
     createFilter,
+    loadUsers,
     testID,
 }: Props) {
     const serverUrl = useServerUrl();
@@ -55,6 +57,9 @@ export default function ServerUserList({
             setLoading(false);
             setProfiles((current) => {
                 if (users?.length) {
+                    if (loadUsers) {
+                        return [...users];
+                    }
                     return [...current, ...users];
                 }
 
