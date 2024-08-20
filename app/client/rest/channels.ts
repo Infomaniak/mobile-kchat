@@ -4,7 +4,6 @@
 import {buildQueryString} from '@utils/helpers';
 
 import {PER_PAGE_DEFAULT} from './constants';
-import ClientError from './error';
 
 import type ClientBase from './base';
 
@@ -214,32 +213,10 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
     };
 
     getChannelMember = async (channelId: string, userId: string) => {
-        try {
-            const response = await this.doFetch(
-                `${this.getChannelMemberRoute(channelId, userId)}`,
-                {method: 'get'},
-            );
-            return response;
-        } catch (error) {
-            if (
-                error instanceof ClientError &&
-                error.status_code === 404 &&
-                userId === 'me'
-            ) {
-                const membership: ChannelMembership = {
-                    user_id: userId,
-                    channel_id: channelId,
-                    roles: '',
-                    last_viewed_at: 0,
-                    msg_count: 0,
-                    mention_count: 0,
-                    notify_props: {},
-                    last_update_at: 0,
-                };
-                return membership;
-            }
-            throw error;
-        }
+        return this.doFetch(
+            `${this.getChannelMemberRoute(channelId, userId)}`,
+            {method: 'get'},
+        );
     };
 
     getChannelMembersByIds = async (channelId: string, userIds: string[]) => {
