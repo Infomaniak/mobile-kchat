@@ -33,6 +33,14 @@ export const showFavoriteChannelSnackbar = (favorited: boolean, onAction: () => 
     });
 };
 
+export const showLeaveChannelMembersSnackbar = (channelDisplayName: string) => {
+    return showSnackBar({
+        barType: SNACK_BAR_TYPE.LEAVE_PRIVATE_CHANNEL,
+        sourceScreen: Screens.LEAVE_CHANNEL_MEMBERS,
+        messageValues: {displayName: channelDisplayName},
+    });
+};
+
 export const showAddChannelMembersSnackbar = (count: number) => {
     return showSnackBar({
         barType: SNACK_BAR_TYPE.ADD_CHANNEL_MEMBERS,
