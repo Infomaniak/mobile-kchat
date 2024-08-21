@@ -232,7 +232,12 @@ export default class ClientBase {
         return `${this.urlVersion}/client_perf`;
     }
 
-    doFetch = async (url: string, options: ClientOptions, returnDataOnly = true) => {
+    doFetch = async <T>(url: string, options: ClientOptions) => {
+        const response = await this.doFetchResponse(url, options);
+        return (response.data || {}) as T;
+    };
+
+    doFetchResponse = async (url: string, options: ClientOptions) => {
         let request;
         const method = options.method?.toLowerCase();
         switch (method) {
@@ -315,7 +320,7 @@ export default class ClientBase {
         }
 
         if (response.ok) {
-            return returnDataOnly ? (response.data || {}) : response;
+            return response;
         }
 
         throw new ClientError(this.apiClient.baseUrl, {

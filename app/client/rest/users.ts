@@ -127,14 +127,13 @@ const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
             body.ldap_only = 'true';
         }
 
-        const {data} = await this.doFetch(
+        const {data} = await this.doFetchResponse(
             `${this.getUsersRoute()}/login`,
             {
                 method: 'post',
                 body,
                 headers: {'Cache-Control': 'no-store'},
             },
-            false,
         );
 
         return data;
@@ -148,14 +147,13 @@ const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
             token,
         };
 
-        const {data} = await this.doFetch(
+        const {data} = await this.doFetchResponse(
             `${this.getUsersRoute()}/login`,
             {
                 method: 'post',
                 body,
                 headers: {'Cache-Control': 'no-store'},
             },
-            false,
         );
 
         return data;
