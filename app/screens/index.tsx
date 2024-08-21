@@ -154,6 +154,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.JOIN_TEAM:
             screen = withServerDatabase(require('@screens/join_team').default);
             break;
+        case Screens.LEAVE_CHANNEL_MEMBERS:
+            screen = withServerDatabase(require('@screens/leave_channel_modal').default);
+            break;
         case Screens.LATEX:
             screen = withServerDatabase(require('@screens/latex').default);
             break;

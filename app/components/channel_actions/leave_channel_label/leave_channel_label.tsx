@@ -9,10 +9,10 @@ import {leaveChannel} from '@actions/remote/channel';
 import {setDirectChannelVisible} from '@actions/remote/preference';
 import OptionItem from '@components/option_item';
 import SlideUpPanelItem from '@components/slide_up_panel_item';
-import {General} from '@constants';
+import {General, Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useIsTablet} from '@hooks/device';
-import {dismissAllModalsAndPopToRoot, dismissBottomSheet} from '@screens/navigation';
+import {dismissAllModalsAndPopToRoot, dismissBottomSheet, showModal} from '@screens/navigation';
 
 type Props = {
     isOptionItem?: boolean;
@@ -21,9 +21,12 @@ type Props = {
     displayName?: string;
     type?: string;
     testID?: string;
+    isLastAdminInChannel?: boolean;
+    channelMembersLength: number;
 }
 
-const LeaveChannelLabel = ({canLeave, channelId, displayName, isOptionItem, type, testID}: Props) => {
+const LeaveChannelLabel = (props: Props) => {
+    const {canLeave, channelId, channelMembersLength, displayName, isOptionItem, type, isLastAdminInChannel, testID} = props;
     const intl = useIntl();
     const serverUrl = useServerUrl();
     const isTablet = useIsTablet();
@@ -99,24 +102,45 @@ const LeaveChannelLabel = ({canLeave, channelId, displayName, isOptionItem, type
     };
 
     const leavePrivateChannel = () => {
-        Alert.alert(
-            intl.formatMessage({id: 'channel_info.leave_channel', defaultMessage: 'Leave Channel'}),
-            intl.formatMessage({
-                id: 'channel_info.leave_private_channel',
-                defaultMessage: "Are you sure you want to leave the private channel {displayName}? You cannot rejoin the channel unless you're invited again.",
-            }, {displayName}),
-            [{
-                text: intl.formatMessage({id: 'mobile.post.cancel', defaultMessage: 'Cancel'}),
-                style: 'cancel',
-            }, {
-                text: intl.formatMessage({id: 'channel_info.leave', defaultMessage: 'Leave'}),
-                style: 'destructive',
-                onPress: () => {
-                    leaveChannel(serverUrl, channelId);
-                    close();
-                },
-            }], {cancelable: false},
-        );
+        const title = intl.formatMessage({id: 'channel_info.leave_channel', defaultMessage: 'Leave channel'});
+        if (isLastAdminInChannel && channelMembersLength > 1) {
+            Alert.alert(
+                intl.formatMessage({id: 'channel_info.leave_channel', defaultMessage: 'Leave Channel'}),
+                intl.formatMessage({
+                    id: 'channel_info.leave_private_channel_last_admin',
+                    defaultMessage: 'As the last administrator, you will need to assign administrative rights to another user to leave this channel.',
+                }, {displayName}),
+                [{
+                    text: intl.formatMessage({id: 'mobile.post.cancel', defaultMessage: 'Cancel'}),
+                    style: 'cancel',
+                }, {
+                    text: intl.formatMessage({id: 'mobile.components.select_server_view.proceed', defaultMessage: 'Continuer'}),
+                    style: 'destructive',
+                    onPress: () => {
+                        showModal(Screens.LEAVE_CHANNEL_MEMBERS, title, {channelId});
+                    },
+                }], {cancelable: false},
+            );
+        } else {
+            Alert.alert(
+                intl.formatMessage({id: 'channel_info.leave_channel', defaultMessage: 'Leave Channel'}),
+                intl.formatMessage({
+                    id: 'channel_info.leave_private_channel',
+                    defaultMessage: "Are you sure you want to leave the private channel {displayName}? You cannot rejoin the channel unless you're invited again.",
+                }, {displayName}),
+                [{
+                    text: intl.formatMessage({id: 'mobile.post.cancel', defaultMessage: 'Cancel'}),
+                    style: 'cancel',
+                }, {
+                    text: intl.formatMessage({id: 'channel_info.leave', defaultMessage: 'Leave'}),
+                    style: 'destructive',
+                    onPress: () => {
+                        leaveChannel(serverUrl, channelId);
+                        close();
+                    },
+                }], {cancelable: false},
+            );
+        }
     };
 
     const onLeave = () => {

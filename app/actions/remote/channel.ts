@@ -78,13 +78,10 @@ export async function fetchChannelMembersByIds(serverUrl: string, channelId: str
         if (!fetchOnly) {
             const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
             if (operator && members.length) {
-                const memberships = members.map((u) => ({
-                    channel_id: channelId,
-                    user_id: u.user_id,
-                    scheme_admin: u.scheme_admin,
-                }));
+                const channelMembership = await client.getChannelMembersByIds(channelId, userIds);
+
                 await operator.handleChannelMembership({
-                    channelMemberships: memberships,
+                    channelMemberships: channelMembership,
                     prepareRecordsOnly: false,
                 });
             }
@@ -363,9 +360,10 @@ export async function fetchChannelCreator(serverUrl: string, channelId: string, 
                         prepareRecordsOnly: true,
                     }));
                 }
+                const channelMembership = await client.getChannelMembersByIds(channelId, [channel.creatorId]);
 
                 modelPromises.push(operator.handleChannelMembership({
-                    channelMemberships: [{channel_id: channelId, user_id: channel.creatorId}],
+                    channelMemberships: channelMembership,
                     prepareRecordsOnly: true,
                 }));
 
