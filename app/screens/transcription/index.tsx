@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {type FC} from 'react';
-import {Animated, ScrollView, Text, View} from 'react-native';
+import {ScrollView, Text, View} from 'react-native';
 
 import FormattedText from '@app/components/formatted_text';
 import {Screens} from '@app/constants';
@@ -22,7 +22,7 @@ const Transcription: FC<Props> = ({closeButtonId, transcriptDatas}) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
 
-    const snapPoints = [1, '50%', '90%'];
+    const snapPoints = ['10%', '60%'];
 
     const renderContent = () => {
         return (
@@ -35,12 +35,12 @@ const Transcription: FC<Props> = ({closeButtonId, transcriptDatas}) => {
                 <View
                     style={styles.separator}
                 />
-                <Animated.View >
+                <View style={styles.parentView}>
                     <ScrollView
-                        keyboardShouldPersistTaps={'always'}
                         scrollEnabled={true}
-                        showsVerticalScrollIndicator={false}
+                        showsVerticalScrollIndicator={true}
                         showsHorizontalScrollIndicator={false}
+                        style={styles.scrollView}
                     >
                         {transcriptDatas.segments.map((segment, index) => {
                             const minutes = Math.floor(segment.start / 60);
@@ -65,7 +65,7 @@ const Transcription: FC<Props> = ({closeButtonId, transcriptDatas}) => {
                             );
                         })}
                     </ScrollView>
-                </Animated.View>
+                </View>
             </>
         );
     };
