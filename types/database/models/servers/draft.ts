@@ -14,19 +14,33 @@ declare class DraftModel extends Model {
     /** associations : Describes every relationship to this table. */
     static associations: Associations;
 
+    createAt: number;
+
+    updateAt: number;
+
+    deleteAt: number;
+
+    userId: string;
+
     /** channel_id : The foreign key pointing to the channel in which the draft was made */
     channelId: string;
+
+    /** root_id : The root_id will be empty most of the time unless the draft relates to a draft reply of a thread */
+    rootId: string;
 
     /** message : The draft message */
     message: string;
 
-    /** root_id : The root_id will be empty most of the time unless the draft relates to a draft reply of a thread */
-    rootId: string;
+    props: any;
 
     /** files : The files field will hold an array of files object that have not yet been uploaded and persisted within the FILE table */
     files: FileInfo[];
 
     metadata?: PostMetadata;
+
+    priority?: PostPriority;
+
+    timestamp?: number;
 }
 
 export default DraftModel;
