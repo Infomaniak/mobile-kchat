@@ -11,7 +11,7 @@ import {
     type NativeSyntheticEvent, Platform, type TextInputSelectionChangeEventData,
 } from 'react-native';
 
-import {updateDraftMessage} from '@actions/local/draft';
+import {updateDraftMessage} from '@actions/remote/draft';
 import {userTyping} from '@actions/websocket/users';
 import {Events, Screens} from '@constants';
 import {useServerUrl} from '@context/server';

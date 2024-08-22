@@ -20,3 +20,6 @@ type Draft = {
      */
     timestamp?: number;
 };
+
+type DraftWithFiles = Omit<Draft, 'file_ids'> & {files: FileInfo[]};
+

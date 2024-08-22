@@ -104,7 +104,7 @@ type RawValue =
   | Conference
   | ConferenceParticipant
   | CustomEmoji
-  | Draft
+  | DraftWithFiles
   | FileInfo
   | Group
   | GroupChannel

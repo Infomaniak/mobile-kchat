@@ -28,6 +28,28 @@ export default class DraftModel extends Model implements DraftModelInterface {
         [POST]: {type: 'belongs_to', key: 'root_id'},
     };
 
+    /** Convert a draftModel to an API draft */
+    static toApi = async (draft: DraftModel): Promise<Draft> => ({
+        id: draft.id,
+        create_at: draft.createAt,
+        update_at: draft.updateAt,
+        delete_at: draft.deleteAt,
+        user_id: draft.userId,
+        channel_id: draft.channelId,
+        root_id: draft.rootId,
+        message: draft.message,
+        props: draft.props,
+        file_ids: draft.files.reduce<string[]>((acc, curr) => {
+            if (curr.id) {
+                acc.push(curr.id);
+            }
+            return acc;
+        }, []),
+        metadata: (draft.metadata ? draft.metadata : {}) as PostMetadata,
+        priority: draft.priority,
+        timestamp: draft.timestamp,
+    });
+
     /** create_at : The creation date for this draft */
     @field('create_at') createAt!: number;
 
@@ -63,25 +85,4 @@ export default class DraftModel extends Model implements DraftModelInterface {
 
     /** timestamp : Every scheduled draft as a unix timestamp */
     @field('timestamp') timestamp?: number;
-
-    toApi = async (): Promise<Draft> => ({
-        id: this.id,
-        create_at: this.createAt,
-        update_at: this.updateAt,
-        delete_at: this.deleteAt,
-        user_id: this.userId,
-        channel_id: this.channelId,
-        root_id: this.rootId,
-        message: this.message,
-        props: this.props,
-        file_ids: this.files.reduce<string[]>((acc, curr) => {
-            if (curr.id) {
-                acc.push(curr.id);
-            }
-            return acc;
-        }, []),
-        metadata: (this.metadata ? this.metadata : {}) as PostMetadata,
-        priority: this.priority,
-        timestamp: this.timestamp,
-    });
 }

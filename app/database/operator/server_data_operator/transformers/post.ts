@@ -139,7 +139,7 @@ export const transformFileRecord = ({action, database, value}: TransformerArgs):
 export const transformDraftRecord = ({action, database, value}: TransformerArgs): Promise<DraftModel> => {
     const emptyFileInfo: FileInfo[] = [];
     const emptyPostMetadata: PostMetadata = {};
-    const raw = value.raw as Draft & {files?: FileInfo[]};
+    const raw = value.raw as DraftWithFiles;
 
     const fieldsMapper = (draft: DraftModel) => {
         draft._raw.id = (raw.id || draft.id);

@@ -21,7 +21,7 @@ import {logWarning} from '@utils/log';
 import type ServerDataOperatorBase from '.';
 import type Database from '@nozbe/watermelondb/Database';
 import type Model from '@nozbe/watermelondb/Model';
-import type {HandleDraftArgs, HandleFilesArgs, HandlePostsArgs, RecordPair} from '@typings/database/database';
+import type {HandleDraftArgs, HandleDraftsArgs, HandleFilesArgs, HandlePostsArgs, RecordPair} from '@typings/database/database';
 import type DraftModel from '@typings/database/models/servers/draft';
 import type FileModel from '@typings/database/models/servers/file';
 import type PostModel from '@typings/database/models/servers/post';
@@ -40,7 +40,8 @@ const {
 type PostActionType = keyof typeof ActionType.POSTS;
 
 export interface PostHandlerMix {
-    handleDraft: ({drafts, prepareRecordsOnly}: HandleDraftArgs) => Promise<DraftModel[]>;
+    handleDraft: ({draft, prepareRecordsOnly}: HandleDraftArgs) => Promise<DraftModel>;
+    handleDrafts: ({drafts, prepareRecordsOnly}: HandleDraftsArgs) => Promise<DraftModel[]>;
     handleFiles: ({files, prepareRecordsOnly}: HandleFilesArgs) => Promise<FileModel[]>;
     handlePosts: ({actionType, order, posts, previousPostId, prepareRecordsOnly}: HandlePostsArgs) => Promise<Model[]>;
     handlePostsInChannel: (posts: Post[]) => Promise<void>;
@@ -107,16 +108,28 @@ export const exportedForTest = {
 
 const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(superclass: TBase) => class extends superclass {
     /**
-     * handleDraft: Handler responsible for the Create/Update operations occurring the Draft table from the 'Server' schema
-     * @param {HandleDraftArgs} draftsArgs
+     * handleDrafts: Handler responsible for the Create/Update operations occurring the Draft table from the 'Server' schema
+     * @param {HandleDraftArgs} draftArgs
+     * @param {RawDraft[]} draftsArgs.drafts
+     * @param {boolean} draftsArgs.prepareRecordsOnly
+     * @returns {Promise<DraftModel>}
+     */
+    handleDraft = async ({draft, prepareRecordsOnly = true}: HandleDraftArgs): Promise<DraftModel> => {
+        const drafts = await this.handleDrafts({drafts: [draft], prepareRecordsOnly});
+        return drafts[0];
+    };
+
+    /**
+     * handleDrafts: Handler responsible for the Create/Update operations occurring the Draft table from the 'Server' schema
+     * @param {HandleDraftsArgs} draftsArgs
      * @param {RawDraft[]} draftsArgs.drafts
      * @param {boolean} draftsArgs.prepareRecordsOnly
      * @returns {Promise<DraftModel[]>}
      */
-    handleDraft = async ({drafts, prepareRecordsOnly = true}: HandleDraftArgs): Promise<DraftModel[]> => {
+    handleDrafts = async ({drafts, prepareRecordsOnly = true}: HandleDraftsArgs): Promise<DraftModel[]> => {
         if (!drafts?.length) {
             logWarning(
-                'An empty or undefined "drafts" array has been passed to the handleDraft method',
+                'An empty or undefined "drafts" array has been passed to the handleDrafts method',
             );
             return [];
         }
@@ -130,7 +143,7 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             prepareRecordsOnly,
             createOrUpdateRawValues,
             tableName: DRAFT,
-        }, 'handleDraft');
+        }, 'handleDrafts');
     };
 
     /**

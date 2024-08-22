@@ -3,7 +3,7 @@
 
 import {AppState, type AppStateStatus} from 'react-native';
 
-import {updateDraftFile} from '@actions/local/draft';
+import {updateDraftFile} from '@actions/remote/draft';
 import {uploadFile} from '@actions/remote/file';
 import {PROGRESS_TIME_TO_STORE} from '@constants/files';
 import {getFullErrorMessage} from '@utils/errors';
