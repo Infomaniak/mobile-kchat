@@ -27,4 +27,10 @@ export const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
         flexDirection: 'row',
         margin: 4,
     },
+    parentView: {
+        flex: 1,
+    },
+    scrollView: {
+        flexGrow: 1,
+    },
 }));
