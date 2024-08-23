@@ -17,7 +17,7 @@ const AnimatedImage = Animated.createAnimatedComponent(Image);
 type Props = ProgressiveImageProps & {
     children?: ReactNode | ReactNode[];
     forwardRef?: React.RefObject<any>;
-    id: string;
+    id: string | undefined;
     imageStyle?: StyleProp<ImageStyle>;
     isBackgroundImage?: boolean;
     onError: () => void;

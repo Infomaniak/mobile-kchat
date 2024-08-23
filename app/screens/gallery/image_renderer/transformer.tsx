@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Image, type ImageSource} from 'expo-image';
+import {type ImageSource} from 'expo-image';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {StyleSheet} from 'react-native';
 import {
@@ -15,6 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {SvgUri} from 'react-native-svg';
 
+import ProgressiveImage from '@app/components/progressive_image';
 import {useServerUrl} from '@context/server';
 import {useAnimatedGestureHandler} from '@hooks/gallery';
 import NetworkManager from '@managers/network_manager';
@@ -78,6 +79,7 @@ export interface ImageTransformerProps extends ImageTransformerReusableProps {
     source: ImageSource | string;
     targetDimensions: { width: number; height: number };
     width: number;
+    itemId: string | undefined;
 }
 
 const DOUBLE_TAP_SCALE = 3;
@@ -99,13 +101,14 @@ const ImageTransformer = (
         enabled = true, height, isActive,
         onDoubleTap = workletNoop, onInteraction = workletNoop, onStateChange = workletNoop, onTap = workletNoop,
         outerGestureHandlerActive, outerGestureHandlerRefs = [], source, isSvg,
-        targetDimensions, width,
+        targetDimensions, width, itemId,
     }: ImageTransformerProps) => {
     const imageSource = typeof source === 'string' ? {uri: source} : source;
     const serverUrl = useServerUrl();
     const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
     imageSource.headers = {Authorization: token};
     const [pinchEnabled, setPinchEnabledState] = useState(true);
+    const [failed, setFailed] = useState(false);
     const interactionsEnabled = useSharedValue(false);
 
     const setInteractionsEnabled = useCallback((value: boolean) => {
@@ -118,6 +121,10 @@ const ImageTransformer = (
 
     const disablePinch = useCallback(() => {
         setPinchEnabledState(false);
+    }, []);
+
+    const handleError = useCallback(() => {
+        setFailed(true);
     }, []);
 
     useEffect(() => {
@@ -546,12 +553,16 @@ const ImageTransformer = (
         );
     } else {
         element = (
-            <Image
-                onLoad={onLoadImageSuccess}
-                source={imageSource}
+            <ProgressiveImage
+                id={itemId}
                 style={{width: targetWidth, height: targetHeight}}
+                onError={handleError}
+                defaultSource={imageSource}
             />
         );
+    }
+    if (failed) {
+        return null;
     }
 
     return (
