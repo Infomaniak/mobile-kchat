@@ -37,6 +37,7 @@ function ImageRenderer({
 
     return (
         <ImageTransformer
+            itemId={item.postId}
             outerGestureHandlerActive={isPagerInProgress}
             isActive={isPageActive}
             targetDimensions={targetDimensions}

@@ -2,10 +2,7 @@
 // See LICENSE.txt for license information.
 
 type ProgressiveImageProps = {
-    defaultSource?: {
-        headers?: { Authorization: string };
-        uri: string;
-    };
+    defaultSource?: Source;
     imageUri?: string;
     inViewPort?: boolean;
     thumbnailUri?: string;

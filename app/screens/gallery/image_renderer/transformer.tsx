@@ -3,7 +3,7 @@
 
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {StyleSheet} from 'react-native';
-import FastImage, {type Source} from 'react-native-fast-image';
+import {type Source} from 'react-native-fast-image';
 import {
     PanGestureHandler, type PanGestureHandlerGestureEvent, PinchGestureHandler, type PinchGestureHandlerGestureEvent,
     State, TapGestureHandler, type TapGestureHandlerGestureEvent,
@@ -15,6 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {SvgUri} from 'react-native-svg';
 
+import ProgressiveImage from '@app/components/progressive_image';
 import {useServerUrl} from '@context/server';
 import {useAnimatedGestureHandler} from '@hooks/gallery';
 import NetworkManager from '@managers/network_manager';
@@ -78,6 +79,7 @@ export interface ImageTransformerProps extends ImageTransformerReusableProps {
     source: Source | string;
     targetDimensions: { width: number; height: number };
     width: number;
+    itemId: string | undefined;
 }
 
 const DOUBLE_TAP_SCALE = 3;
@@ -99,7 +101,7 @@ const ImageTransformer = (
         enabled = true, height, isActive,
         onDoubleTap = workletNoop, onInteraction = workletNoop, onStateChange = workletNoop, onTap = workletNoop,
         outerGestureHandlerActive, outerGestureHandlerRefs = [], source, isSvg,
-        targetDimensions, width,
+        targetDimensions, width, itemId,
     }: ImageTransformerProps) => {
     const imageSource = typeof source === 'string' ? {uri: source} : source;
     const serverUrl = useServerUrl();
@@ -107,6 +109,7 @@ const ImageTransformer = (
     imageSource.headers = {Authorization: token};
     const [pinchEnabled, setPinchEnabledState] = useState(true);
     const interactionsEnabled = useSharedValue(false);
+    const [failed, setFailed] = useState(false);
 
     const setInteractionsEnabled = useCallback((value: boolean) => {
         interactionsEnabled.value = value;
@@ -506,6 +509,10 @@ const ImageTransformer = (
         },
     });
 
+    const handleError = useCallback(() => {
+        setFailed(true);
+    }, []);
+
     const animatedStyles = useAnimatedStyle(() => {
         const noOffset = offset.x.value === 0 && offset.y.value === 0;
         const noTranslation = translation.x.value === 0 && translation.y.value === 0;
@@ -546,12 +553,16 @@ const ImageTransformer = (
         );
     } else {
         element = (
-            <FastImage
-                onLoad={onLoadImageSuccess}
-                source={imageSource}
+            <ProgressiveImage
+                id={itemId}
                 style={{width: targetWidth, height: targetHeight}}
+                onError={handleError}
+                defaultSource={imageSource}
             />
         );
+    }
+    if (failed) {
+        return null;
     }
 
     return (
