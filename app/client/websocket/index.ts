@@ -9,7 +9,7 @@ import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
 import {getConfigValue} from '@queries/servers/system';
 import {toMilliseconds} from '@utils/datetime';
-import {logError, logInfo, logWarning} from '@utils/log';
+import {logDebug, logError, logInfo, logWarning} from '@utils/log';
 
 const MAX_WEBSOCKET_FAILS = 7;
 const WEBSOCKET_TIMEOUT = toMilliseconds({seconds: 30});
@@ -70,6 +70,7 @@ export default class WebSocketClient {
     }
 
     public async initialize(opts = {}, shouldSkipSync = false) {
+        logDebug('app/client/websocket/index - initialize', {opts, shouldSkipSync});
         const {forceConnection} = Object.assign({}, DEFAULT_OPTIONS, opts);
 
         if (forceConnection) {
@@ -122,6 +123,7 @@ export default class WebSocketClient {
         }
 
         this.bindConnection('connected', () => {
+            logDebug('app/client/websocket/index - WSEvent.connected!');
             clearTimeout(this.connectionTimeout);
 
             // No need to reset sequence number here.
@@ -147,6 +149,7 @@ export default class WebSocketClient {
         });
 
         this.bindConnection('disconnected', () => {
+            logDebug('app/client/websocket/index - WSEvent.disconnected!');
             clearTimeout(this.connectionTimeout);
             this.conn = undefined;
             this.responseSequence = 1;
@@ -195,6 +198,7 @@ export default class WebSocketClient {
         });
 
         this.bindConnection('error', (evt: PusherEvent) => {
+            logDebug('app/client/websocket/index - WSEvent.error!');
             if (evt?.url === this.url) {
                 this.onError(evt);
             }
@@ -206,6 +210,7 @@ export default class WebSocketClient {
 
     private async connOpen() {
         if (typeof this.conn !== 'undefined') {
+            logDebug('app/client/websocket/index - connOpen');
             if (this.connState !== WebSocketReadyState.OPEN) {
                 this.conn.connect();
             }
@@ -244,6 +249,8 @@ export default class WebSocketClient {
     }
 
     private onError(evt: PusherEvent) {
+        logDebug('app/client/websocket/index - onError', {evt});
+
         if (this.connectFailCount <= 1) {
             logError('websocket error', this.url);
             logError('WEBSOCKET ERROR EVENT', evt);
@@ -255,6 +262,7 @@ export default class WebSocketClient {
     }
 
     private onMessage(event: string, evt: PusherEvent) {
+        logDebug('app/client/websocket/index - onMessage', {event, evt});
         const msg = evt;
 
         // This indicates a reply to a websocket request.
@@ -271,6 +279,7 @@ export default class WebSocketClient {
     }
 
     private bindConnection(...args: Parameters<ConnectionManager['bind']>) {
+        logDebug('app/client/websocket/index - bindConnection', {args});
         const [eventName, fn, ...rest] = args;
 
         if (typeof this.conn !== 'undefined') {
@@ -298,6 +307,7 @@ export default class WebSocketClient {
     }
 
     public bindChannel(channelName: string, ignoreSubscriptionErrors = true) {
+        logDebug('app/client/websocket/index - bindChannel', {channelName, ignoreSubscriptionErrors});
         let channel: Channel | undefined;
         if (typeof this.conn !== 'undefined') {
             if (!this.conn.channel(channelName)) {
@@ -315,6 +325,7 @@ export default class WebSocketClient {
     }
 
     public unbindChannel(channelOrName: Channel | string) {
+        logDebug('app/client/websocket/index - unbindChannel', {channelOrName});
         if (typeof this.conn !== 'undefined') {
             const channelName = typeof channelOrName === 'string' ? channelOrName : channelOrName.name;
             this.conn.unsubscribe(channelName);
@@ -378,6 +389,7 @@ export default class WebSocketClient {
     }
 
     public invalidate() {
+        logDebug('app/client/websocket/index - invalidate', {serverUrl: this.serverUrl});
         clearTimeout(this.connectionTimeout);
 
         // this.conn?.invalidate();
@@ -440,6 +452,7 @@ export default class WebSocketClient {
     }
 
     public isConnected(): boolean {
+        logDebug('app/client/websocket/index - isConnected', {serverUrl: this.serverUrl, state: this.connState === WebSocketReadyState.OPEN});
         return this.connState === WebSocketReadyState.OPEN;
     }
 }
