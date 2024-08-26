@@ -46,11 +46,16 @@ export type ProfilesInChannelRequest = {
 }
 
 export const fetchMe = async (serverUrl: string, fetchOnly = false): Promise<MyUserRequest> => {
+    logDebug('app/actions/remote/user.ts - fetchMe', {serverUrl, fetchOnly});
     try {
+        logDebug('#fetchMe NetworkManager.getClient?', typeof NetworkManager.getClient);
         const client = NetworkManager.getClient(serverUrl);
+        logDebug('#fetchMe DatabaseManager.getServerDatabaseAndOperator?', typeof DatabaseManager.getServerDatabaseAndOperator);
         const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
 
+        logDebug('#fetchMe', {'client.getMe': typeof client.getMe, 'client.getStatus': typeof client.getStatus});
         const resultSettled = await Promise.allSettled([client.getMe(), client.getStatus('me')]);
+        logDebug('#fetchMe', JSON.stringify(inspect({resultSettled})));
         let user: UserProfile|undefined;
         let userStatus: UserStatus|undefined;
         for (const result of resultSettled) {
@@ -69,13 +74,16 @@ export const fetchMe = async (serverUrl: string, fetchOnly = false): Promise<MyU
         }
 
         user.status = userStatus?.status;
+        logDebug('#fetchMe user.status', JSON.stringify(inspect(user.status)));
 
         if (!fetchOnly) {
+            logDebug('#fetchMe operator.handleUsers?', typeof operator.handleUsers);
             await operator.handleUsers({users: [user], prepareRecordsOnly: false});
         }
 
         return {user};
     } catch (error) {
+        logDebug('#fetchMe getFullErrorMessage?', typeof getFullErrorMessage);
         logDebug('error on fetchMe', getFullErrorMessage(error));
         await forceLogoutIfNecessary(serverUrl, error);
         return {error};

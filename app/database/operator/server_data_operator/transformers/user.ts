@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {logDebug} from '@app/utils/log';
 import {MM_TABLES, OperationType} from '@constants/database';
 import {prepareBaseRecord} from '@database/operator/server_data_operator/transformers/index';
 
@@ -18,6 +19,8 @@ const {PREFERENCE, USER} = MM_TABLES.SERVER;
  * @returns {Promise<UserModel>}
  */
 export const transformUserRecord = ({action, database, value}: TransformerArgs): Promise<UserModel> => {
+    logDebug('app/database/operator/server_data_operator/transformers/user.ts - transformUserRecord');
+
     const raw = value.raw as UserProfile;
     const record = value.record as UserModel;
     const isCreateAction = action === OperationType.CREATE;
@@ -30,6 +33,8 @@ export const transformUserRecord = ({action, database, value}: TransformerArgs):
         user.updateAt = raw.update_at;
         user.email = raw.email;
         user.firstName = raw.first_name;
+        logDebug('transformUserRecord', {roles: raw.roles});
+        logDebug('transformUserRecord raw.roles.includes?', {roles: typeof raw?.roles?.includes});
         user.isGuest = raw.roles.includes('system_guest');
         user.lastName = raw.last_name;
         user.lastPictureUpdate = raw.last_picture_update || 0;
