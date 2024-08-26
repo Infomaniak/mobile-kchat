@@ -53,7 +53,11 @@ export const fetchMe = async (serverUrl: string, fetchOnly = false): Promise<MyU
         logDebug('#fetchMe DatabaseManager.getServerDatabaseAndOperator?', typeof DatabaseManager.getServerDatabaseAndOperator);
         const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
 
-        logDebug('#fetchMe', {'client.getMe': typeof client.getMe, 'client.getStatus': typeof client.getStatus});
+        logDebug('#fetchMe', {
+            'client.getMe': typeof client.getMe,
+            'client.getStatus': typeof client.getStatus,
+            'Promise.allSettled': typeof Promise.allSettled,
+        });
         const resultSettled = await Promise.allSettled([client.getMe(), client.getStatus('me')]);
         logDebug('#fetchMe', JSON.stringify(inspect({resultSettled})));
         let user: UserProfile|undefined;

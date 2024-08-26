@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {logDebug} from '@app/utils/log';
 import {General} from '@constants';
 import {buildQueryString} from '@utils/helpers';
 
@@ -249,6 +250,9 @@ const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     getMe = async () => {
+        logDebug('app/client/rest/users.ts - getMe');
+        logDebug('#getMe doFetch?', typeof this.doFetch);
+        logDebug('#getMe getUserRoute?', typeof this.getUserRoute);
         return this.doFetch(
             `${this.getUserRoute('me')}`,
             {method: 'get'},
@@ -351,6 +355,9 @@ const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     getStatus = async (userId: string) => {
+        logDebug('app/client/rest/users.ts - getStatus', {userId});
+        logDebug('#getStatus doFetch?', typeof this.doFetch);
+        logDebug('#getStatus getUserRoute?', typeof this.getUserRoute);
         return this.doFetch(
             `${this.getUserRoute(userId)}/status`,
             {method: 'get'},
