@@ -20,6 +20,7 @@ import {getCurrentUserId, setCurrentUserId} from '@queries/servers/system';
 import {getCurrentUser, prepareUsers, queryAllUsers, queryUsersById, queryUsersByIdsOrUsernames, queryUsersByUsername} from '@queries/servers/user';
 import {getFullErrorMessage} from '@utils/errors';
 import {logDebug} from '@utils/log';
+import {allSettled} from '@utils/promise';
 import {getDeviceTimezone} from '@utils/timezone';
 import {getLastPictureUpdate, getUserTimezoneProps, removeUserFromList} from '@utils/user';
 
@@ -58,7 +59,7 @@ export const fetchMe = async (serverUrl: string, fetchOnly = false): Promise<MyU
             'client.getStatus': typeof client.getStatus,
             'Promise.allSettled': typeof Promise.allSettled,
         });
-        const resultSettled = await Promise.allSettled([client.getMe(), client.getStatus('me')]);
+        const resultSettled = await allSettled([client.getMe(), client.getStatus('me')]);
         logDebug('#fetchMe', JSON.stringify(inspect({resultSettled})));
         let user: UserProfile|undefined;
         let userStatus: UserStatus|undefined;

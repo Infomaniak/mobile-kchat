@@ -17,6 +17,7 @@ import {generateId} from '@utils/general';
 import keyMirror from '@utils/key_mirror';
 import {logError} from '@utils/log';
 import {deleteEntitiesFile, getIOSAppGroupDetails} from '@utils/mattermost_managed';
+import {allSettled} from '@utils/promise';
 import {urlSafeBase64Encode} from '@utils/security';
 
 import type {PastedFile} from '@mattermost/react-native-paste-input';
@@ -545,7 +546,7 @@ export const getAllFilesInCachesDirectory = async (serverUrl: string) => {
             promises.push(getInfoAsync(cacheDir, {size: true}));
         }
 
-        const dirs = await Promise.allSettled(promises);
+        const dirs = await allSettled(promises);
         dirs.forEach((p) => {
             if (p.status === 'fulfilled' && 'size' in p.value) {
                 files.push(p.value);

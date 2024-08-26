@@ -9,6 +9,7 @@ import NetworkManager from '@managers/network_manager';
 import {queryCustomEmojisByName} from '@queries/servers/custom_emoji';
 import {getFullErrorMessage} from '@utils/errors';
 import {logDebug} from '@utils/log';
+import {allSettled} from '@utils/promise';
 
 export const fetchCustomEmojis = async (serverUrl: string, page = 0, perPage = General.PAGE_SIZE_DEFAULT, sort = Emoji.SORT_BY_NAME) => {
     try {
@@ -62,7 +63,7 @@ const debouncedFetchEmojiByNames = debounce(async (serverUrl: string) => {
         for (const name of names) {
             promises.push(client.getCustomEmojiByName(name));
         }
-        const emojisResult = await Promise.allSettled(promises);
+        const emojisResult = await allSettled(promises);
         const emojis = emojisResult.reduce<CustomEmoji[]>((result, e) => {
             if (e.status === 'fulfilled') {
                 result.push(e.value);
