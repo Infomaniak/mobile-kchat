@@ -6,6 +6,7 @@ import {DeviceEventEmitter} from 'react-native';
 import {loginEntry} from '@actions/remote/entry/login';
 import {addPushProxyVerificationStateFromLogin} from '@actions/remote/session';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
+import {logDebug} from '@app/utils/log';
 import {BASE_SERVER_URL} from '@client/rest/constants';
 import {Events} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
@@ -65,10 +66,12 @@ const configureServer = async (teamServer: TeamServer, accessToken: string) => {
 };
 
 export const syncMultiTeam = async (accessToken: string) => {
+    logDebug('app/actions/remote/entry/ikcommon - syncMultiTeam', {accessToken});
     try {
         const client = await NetworkManager.createGlobalClient(accessToken);
         const teamServers = await client.getMultiTeams();
         await removeServerCredentials(BASE_SERVER_URL);
+        logDebug('#syncMultiTeam', {teamServers});
 
         const serverCredentials = await getAllServerCredentials();
         const serverCreationPromises = [];
@@ -80,9 +83,11 @@ export const syncMultiTeam = async (accessToken: string) => {
         }
 
         const serverCreationResults = await Promise.all(serverCreationPromises);
+        logDebug('#syncMultiTeam', {serverCreationResults});
         for (const serverCredential of serverCredentials) {
             // The server doesn't exist anymore, remove it
             if (!teamServers.some((element) => element.url === serverCredential.serverUrl)) {
+                logDebug('#syncMultiTeam !Emit.SERVER_LOGOUT', {serverUrl: serverCredential.serverUrl, removeServer: true});
                 DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: serverCredential.serverUrl, removeServer: true});
             }
         }

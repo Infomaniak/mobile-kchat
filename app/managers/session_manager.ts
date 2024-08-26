@@ -8,6 +8,7 @@ import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react
 import {storeOnboardingViewedValue} from '@actions/app/global';
 import {syncMultiTeam} from '@actions/remote/entry/ikcommon';
 import {cancelSessionNotification, logout} from '@actions/remote/session';
+import {logDebug} from '@app/utils/log';
 import {Events, Launch} from '@constants';
 import DatabaseManager from '@database/manager';
 import {resetMomentLocale} from '@i18n';
@@ -152,6 +153,8 @@ class SessionManager {
     };
 
     private onLogout = async ({serverUrl, removeServer}: LogoutCallbackArg) => {
+        logDebug('app/managers/session_manager - onLogout', {serverUrl, removeServer});
+
         if (this.terminatingSessionUrl === serverUrl) {
             return;
         }

@@ -8,7 +8,7 @@ import semver from 'semver';
 import {switchToChannelById} from '@actions/remote/channel';
 import {switchToConferenceByChannelId} from '@actions/remote/conference';
 import CallManager, {CallAnsweredEvent, CallEndedEvent, CallMutedEvent, CallVideoMutedEvent} from '@app/store/CallManager';
-import {logError} from '@app/utils/log';
+import {logDebug, logError} from '@app/utils/log';
 import {Device, Events, Sso} from '@constants';
 import {MIN_REQUIRED_VERSION} from '@constants/supported_server';
 import DatabaseManager from '@database/manager';
@@ -171,9 +171,12 @@ class GlobalEventHandler {
     };
 
     serverUpgradeNeeded = async (serverUrl: string) => {
+        logDebug('app/managers/global_event_handler - serverUpgradeNeeded', {serverUrl});
         const credentials = await getServerCredentials(serverUrl);
+        logDebug('#serverUpgradeNeeded', {credentials});
 
         if (credentials) {
+            logDebug('#serverUpgradeNeeded !Emit.SERVER_LOGOUT', {serverUrl, removeServer: false});
             DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl, removeServer: false});
         }
     };

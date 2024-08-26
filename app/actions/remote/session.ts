@@ -130,6 +130,7 @@ export const login = async (serverUrl: string, {ldapOnly = false, loginId, mfaTo
 };
 
 export const logout = async (serverUrl: string, skipServerLogout = false, removeServer = false, skipEvents = false) => {
+    logDebug('app/actions/remote/session - logout', {serverUrl, skipServerLogout, removeServer, skipEvents});
     if (!skipServerLogout) {
         const appDatabase = DatabaseManager.appDatabase?.database;
         const serverCredentials = await getAllServerCredentials();
