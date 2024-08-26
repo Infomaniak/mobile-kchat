@@ -1,6 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {inspect} from 'util';
+
+import {logDebug} from '@app/utils/log';
 import {MM_TABLES} from '@constants/database';
 import DatabaseManager from '@database/manager';
 
@@ -44,40 +47,62 @@ const {
 } = MM_TABLES.SERVER;
 
 export async function prepareModels({operator, initialTeamId, removeTeams, removeChannels, teamData, chData, prefData, meData, isCRTEnabled}: PrepareModelsArgs): Promise<Array<Promise<Model[]>>> {
+    logDebug('app/queries/servers/entry.ts - prepareModels', JSON.stringify(inspect({operator, initialTeamId, removeTeams, removeChannels, teamData, chData, prefData, meData, isCRTEnabled})));
     const modelPromises: Array<Promise<Model[]>> = [];
 
     if (removeTeams?.length) {
         removeTeams.forEach((team) => {
-            modelPromises.push(prepareDeleteTeam(team));
+            modelPromises.push(prepareDeleteTeam(team).then((model) => {
+                logDebug('#prepareModels prepareDeleteTeam!', {model});
+                return model;
+            }));
         });
     }
 
     if (removeChannels?.length) {
         removeChannels.forEach((channel) => {
-            modelPromises.push(prepareDeleteChannel(channel));
+            modelPromises.push(prepareDeleteChannel(channel).then((model) => {
+                logDebug('#prepareModels prepareDeleteChannel!', {model});
+                return model;
+            }));
         });
     }
 
     if (teamData?.teams?.length && teamData.memberships?.length) {
-        modelPromises.push(...prepareMyTeams(operator, teamData.teams, teamData.memberships));
+        modelPromises.push(...prepareMyTeams(operator, teamData.teams, teamData.memberships).map((promise) => promise.then((model) => {
+            logDebug('#prepareModels prepareMyTeams!', {model});
+            return model;
+        })));
     }
 
     if (chData?.categories?.length) {
-        modelPromises.push(prepareCategoriesAndCategoriesChannels(operator, chData.categories, true));
+        modelPromises.push(prepareCategoriesAndCategoriesChannels(operator, chData.categories, true).then((model) => {
+            logDebug('#prepareModels prepareCategoriesAndCategoriesChannels!', {model});
+            return model;
+        }));
     }
 
     if (chData?.channels?.length && chData.memberships?.length) {
         if (initialTeamId) {
-            modelPromises.push(...await prepareMyChannelsForTeam(operator, initialTeamId, chData.channels, chData.memberships, isCRTEnabled));
+            modelPromises.push(...await prepareMyChannelsForTeam(operator, initialTeamId, chData.channels, chData.memberships, isCRTEnabled).then((model) => {
+                logDebug('#prepareModels prepareMyChannelsForTeam!', {model});
+                return model;
+            }));
         }
     }
 
     if (prefData?.preferences?.length) {
-        modelPromises.push(prepareMyPreferences(operator, prefData.preferences, true));
+        modelPromises.push(prepareMyPreferences(operator, prefData.preferences, true).then((model) => {
+            logDebug('#prepareModels prepareMyPreferences!', {model});
+            return model;
+        }));
     }
 
     if (meData?.user) {
-        modelPromises.push(prepareUsers(operator, [meData.user]));
+        modelPromises.push(prepareUsers(operator, [meData.user]).then((model) => {
+            logDebug('#prepareModels prepareUsers!', {model});
+            return model;
+        }));
     }
 
     return modelPromises;

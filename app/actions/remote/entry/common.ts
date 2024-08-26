@@ -72,6 +72,7 @@ const FETCH_MISSING_DM_TIMEOUT = 2500;
 export const FETCH_UNREADS_TIMEOUT = 2500;
 
 export const entry = async (serverUrl: string, teamId?: string, channelId?: string, since = 0): Promise<EntryResponse> => {
+    logDebug('app/actions/remote/entry/common.ts - entry', JSON.stringify(inspect({serverUrl, teamId, channelId, since})));
     const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
     const result = entryRest(serverUrl, teamId, channelId, since);
 
@@ -123,50 +124,68 @@ const teamsToRemove = async (serverUrl: string, removeTeamIds?: string[]) => {
 };
 
 const entryRest = async (serverUrl: string, teamId?: string, channelId?: string, since = 0): Promise<EntryResponse> => {
+    logDebug('app/actions/remote/entry/common.ts - entryRest', JSON.stringify(inspect({serverUrl, teamId, channelId, since})));
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
         return {error: `${serverUrl} database not found`};
     }
     const {database} = operator;
 
+    logDebug('#entryRest database!');
     const lastDisconnectedAt = since || await getLastFullSync(database);
+    logDebug('#entryRest', JSON.stringify(inspect({lastDisconnectedAt})));
 
     const fetchedData = await fetchAppEntryData(serverUrl, lastDisconnectedAt, teamId, channelId);
+    logDebug('#entryRest', JSON.stringify(inspect({fetchedData})));
     if ('error' in fetchedData) {
         return {error: fetchedData.error};
     }
 
     const {initialTeamId, initialChannelId: fetchedChannelId, teamData, chData, prefData, meData, removeTeamIds, removeChannelIds, isCRTEnabled, gmConverted} = fetchedData;
     const chError = chData?.error;
+    logDebug('#entryRest', JSON.stringify(inspect({chError})));
     if (isErrorWithStatusCode(chError) && chError.status_code === 403) {
         // if the user does not have appropriate permissions, which means the user those not belong to the team,
         // we set it as there is no errors, so that the teams and others can be properly handled
         chData!.error = undefined;
     }
     const error = teamData.error || chData?.error || prefData.error || meData.error;
+    logDebug('#entryRest', JSON.stringify(inspect({error})));
     if (error) {
         return {error};
     }
 
     const rolesData = await fetchRoles(serverUrl, teamData.memberships, chData?.memberships, meData.user, true);
+    logDebug('#entryRest', JSON.stringify(inspect({rolesData})));
 
     const initialChannelId = await entryInitialChannelId(database, fetchedChannelId, teamId, initialTeamId, meData?.user?.locale || '', chData?.channels, chData?.memberships);
+    logDebug('#entryRest', JSON.stringify(inspect({initialChannelId})));
 
     const removeTeams = await teamsToRemove(serverUrl, removeTeamIds);
+    logDebug('#entryRest', JSON.stringify(inspect({removeTeams})));
 
     let removeChannels;
     if (removeChannelIds?.length) {
         removeChannels = await queryChannelsById(database, removeChannelIds).fetch();
+        logDebug('#entryRest', JSON.stringify(inspect({removeChannels})));
     }
 
+    logDebug('#entryRest modelPromises!');
     const modelPromises = await prepareModels({operator, initialTeamId, removeTeams, removeChannels, teamData, chData, prefData, meData, isCRTEnabled});
+    logDebug('#entryRest', JSON.stringify(inspect({modelPromises})));
     if (rolesData.roles?.length) {
         modelPromises.push(operator.handleRole({roles: rolesData.roles, prepareRecordsOnly: true}));
     }
 
+    logDebug('#entryRest Promise.all(modelPromises)!');
     const models = await Promise.all(modelPromises);
+    logDebug('#entryRest', JSON.stringify(inspect({models})));
 
-    return {models: models.flat(), initialChannelId, initialTeamId, prefData, teamData, chData, meData, gmConverted};
+    logDebug('#entryRest models.flat!', JSON.stringify(inspect({models})));
+    const flatModels = models.flat();
+    logDebug('#entryRest', JSON.stringify(inspect({flatModels})));
+
+    return {models: flatModels, initialChannelId, initialTeamId, prefData, teamData, chData, meData, gmConverted};
 };
 
 const fetchAppEntryData = async (serverUrl: string, sinceArg: number, onLoadTeamId = '', channelId?: string): Promise<AppEntryData | AppEntryError> => {
