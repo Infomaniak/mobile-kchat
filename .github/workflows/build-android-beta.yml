@@ -48,9 +48,6 @@ jobs:
           echo "::group::Build"
           bundle exec fastlane android build --env android.beta
           echo "::endgroup::"
-          echo "::group::Deploy to Play Store"
-          bundle exec fastlane android deploy file:"${{ github.workspace }}/*.aab" --env android.beta
-          echo "::endgroup::"
         working-directory: ./fastlane
 
       - name: ci/upload-android-beta-build
