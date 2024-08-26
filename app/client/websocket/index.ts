@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {inspect} from 'util';
+
 import {type ClientHeaders, getOrCreateWebSocketClient, WebSocketReadyState} from '@mattermost/react-native-network-client';
 import Pusher, {ConnectionManager, type Channel} from 'pusher-js/react-native';
 
@@ -70,7 +72,7 @@ export default class WebSocketClient {
     }
 
     public async initialize(opts = {}, shouldSkipSync = false) {
-        logDebug('app/client/websocket/index - initialize', {opts, shouldSkipSync});
+        logDebug('app/client/websocket/index - initialize', JSON.stringify(inspect({opts, shouldSkipSync})));
         const {forceConnection} = Object.assign({}, DEFAULT_OPTIONS, opts);
 
         if (forceConnection) {
@@ -249,7 +251,7 @@ export default class WebSocketClient {
     }
 
     private onError(evt: PusherEvent) {
-        logDebug('app/client/websocket/index - onError', {evt});
+        logDebug('app/client/websocket/index - onError', JSON.stringify(inspect({evt})));
 
         if (this.connectFailCount <= 1) {
             logError('websocket error', this.url);
@@ -262,7 +264,7 @@ export default class WebSocketClient {
     }
 
     private onMessage(event: string, evt: PusherEvent) {
-        logDebug('app/client/websocket/index - onMessage', {event, evt});
+        logDebug('app/client/websocket/index - onMessage', JSON.stringify(inspect({event, evt})));
         const msg = evt;
 
         // This indicates a reply to a websocket request.
@@ -279,7 +281,7 @@ export default class WebSocketClient {
     }
 
     private bindConnection(...args: Parameters<ConnectionManager['bind']>) {
-        logDebug('app/client/websocket/index - bindConnection', {args});
+        logDebug('app/client/websocket/index - bindConnection', JSON.stringify(inspect({args})));
         const [eventName, fn, ...rest] = args;
 
         if (typeof this.conn !== 'undefined') {
@@ -307,7 +309,7 @@ export default class WebSocketClient {
     }
 
     public bindChannel(channelName: string, ignoreSubscriptionErrors = true) {
-        logDebug('app/client/websocket/index - bindChannel', {channelName, ignoreSubscriptionErrors});
+        logDebug('app/client/websocket/index - bindChannel', JSON.stringify(inspect({channelName, ignoreSubscriptionErrors})));
         let channel: Channel | undefined;
         if (typeof this.conn !== 'undefined') {
             if (!this.conn.channel(channelName)) {
@@ -325,7 +327,7 @@ export default class WebSocketClient {
     }
 
     public unbindChannel(channelOrName: Channel | string) {
-        logDebug('app/client/websocket/index - unbindChannel', {channelOrName});
+        logDebug('app/client/websocket/index - unbindChannel', JSON.stringify(inspect({channelOrName})));
         if (typeof this.conn !== 'undefined') {
             const channelName = typeof channelOrName === 'string' ? channelOrName : channelOrName.name;
             this.conn.unsubscribe(channelName);
@@ -389,7 +391,7 @@ export default class WebSocketClient {
     }
 
     public invalidate() {
-        logDebug('app/client/websocket/index - invalidate', {serverUrl: this.serverUrl});
+        logDebug('app/client/websocket/index - invalidate', JSON.stringify(inspect({serverUrl: this.serverUrl})));
         clearTimeout(this.connectionTimeout);
 
         // this.conn?.invalidate();
@@ -452,7 +454,7 @@ export default class WebSocketClient {
     }
 
     public isConnected(): boolean {
-        logDebug('app/client/websocket/index - isConnected', {serverUrl: this.serverUrl, state: this.connState === WebSocketReadyState.OPEN});
+        logDebug('app/client/websocket/index - isConnected', JSON.stringify(inspect({serverUrl: this.serverUrl, state: this.connState === WebSocketReadyState.OPEN})));
         return this.connState === WebSocketReadyState.OPEN;
     }
 }

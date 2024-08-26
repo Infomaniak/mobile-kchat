@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {inspect} from 'util';
+
 import RNUtils from '@mattermost/rnutils/src';
 import {AppState, DeviceEventEmitter, Platform, type EmitterSubscription} from 'react-native';
 import {
@@ -180,7 +182,7 @@ class PushNotifications {
     };
 
     handleSessionNotification = async (notification: NotificationWithData) => {
-        logDebug('app/init/push_notifications - handleSessionNotification', {notification});
+        logDebug('app/init/push_notifications - handleSessionNotification', JSON.stringify(inspect({notification})));
         logInfo('Session expired notification');
 
         const serverUrl = await this.getServerUrlFromNotification(notification);
@@ -189,7 +191,7 @@ class PushNotifications {
             if (notification.userInteraction) {
                 DeviceEventEmitter.emit(Events.SESSION_EXPIRED, serverUrl);
             } else {
-                logDebug('#handleSessionNotification !Emit.SERVER_LOGOUT', {serverUrl});
+                logDebug('#handleSessionNotification !Emit.SERVER_LOGOUT', JSON.stringify(inspect({serverUrl})));
                 DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl});
             }
         }

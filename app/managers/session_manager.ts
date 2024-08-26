@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {inspect} from 'util';
+
 import CookieManager, {type Cookie} from '@react-native-cookies/cookies';
 import {Image} from 'expo-image';
 import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react-native';
@@ -153,7 +155,7 @@ class SessionManager {
     };
 
     private onLogout = async ({serverUrl, removeServer}: LogoutCallbackArg) => {
-        logDebug('app/managers/session_manager - onLogout', {serverUrl, removeServer});
+        logDebug('app/managers/session_manager - onLogout', JSON.stringify(inspect({serverUrl, removeServer})));
 
         if (this.terminatingSessionUrl === serverUrl) {
             return;

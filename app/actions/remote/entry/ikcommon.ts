@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {inspect} from 'util';
+
 import {DeviceEventEmitter} from 'react-native';
 
 import {loginEntry} from '@actions/remote/entry/login';
@@ -66,12 +68,12 @@ const configureServer = async (teamServer: TeamServer, accessToken: string) => {
 };
 
 export const syncMultiTeam = async (accessToken: string) => {
-    logDebug('app/actions/remote/entry/ikcommon - syncMultiTeam', {accessToken});
+    logDebug('app/actions/remote/entry/ikcommon - syncMultiTeam', JSON.stringify(inspect({accessToken})));
     try {
         const client = await NetworkManager.createGlobalClient(accessToken);
         const teamServers = await client.getMultiTeams();
         await removeServerCredentials(BASE_SERVER_URL);
-        logDebug('#syncMultiTeam', {teamServers});
+        logDebug('#syncMultiTeam', JSON.stringify(inspect({teamServers})));
 
         const serverCredentials = await getAllServerCredentials();
         const serverCreationPromises = [];
@@ -83,11 +85,11 @@ export const syncMultiTeam = async (accessToken: string) => {
         }
 
         const serverCreationResults = await Promise.all(serverCreationPromises);
-        logDebug('#syncMultiTeam', {serverCreationResults});
+        logDebug('#syncMultiTeam', JSON.stringify(inspect({serverCreationResults})));
         for (const serverCredential of serverCredentials) {
             // The server doesn't exist anymore, remove it
             if (!teamServers.some((element) => element.url === serverCredential.serverUrl)) {
-                logDebug('#syncMultiTeam !Emit.SERVER_LOGOUT', {serverUrl: serverCredential.serverUrl, removeServer: true});
+                logDebug('#syncMultiTeam !Emit.SERVER_LOGOUT', JSON.stringify(inspect({serverUrl: serverCredential.serverUrl, removeServer: true})));
                 DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: serverCredential.serverUrl, removeServer: true});
             }
         }

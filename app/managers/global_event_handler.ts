@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {inspect} from 'util';
+
 import RNUtils, {type SplitViewResult} from '@mattermost/rnutils';
 import {Alert, DeviceEventEmitter, Linking, NativeEventEmitter, NativeModules, Platform} from 'react-native';
 import semver from 'semver';
@@ -171,12 +173,12 @@ class GlobalEventHandler {
     };
 
     serverUpgradeNeeded = async (serverUrl: string) => {
-        logDebug('app/managers/global_event_handler - serverUpgradeNeeded', {serverUrl});
+        logDebug('app/managers/global_event_handler - serverUpgradeNeeded', JSON.stringify(inspect({serverUrl})));
         const credentials = await getServerCredentials(serverUrl);
-        logDebug('#serverUpgradeNeeded', {credentials});
+        logDebug('#serverUpgradeNeeded', JSON.stringify(inspect({credentials})));
 
         if (credentials) {
-            logDebug('#serverUpgradeNeeded !Emit.SERVER_LOGOUT', {serverUrl, removeServer: false});
+            logDebug('#serverUpgradeNeeded !Emit.SERVER_LOGOUT', JSON.stringify(inspect({serverUrl, removeServer: false})));
             DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl, removeServer: false});
         }
     };

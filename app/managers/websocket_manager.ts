@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {inspect} from 'util';
+
 import NetInfo, {type NetInfoState, type NetInfoSubscription} from '@react-native-community/netinfo';
 import {AppState, type AppStateStatus, type NativeEventSubscription} from 'react-native';
 import BackgroundTimer from 'react-native-background-timer';
@@ -42,7 +44,7 @@ class WebsocketManager {
     }
 
     public init = async (serverCredentials: ServerCredential[]) => {
-        logDebug('app/managers/websocket_manager - init', {serverCredentials});
+        logDebug('app/managers/websocket_manager - init', JSON.stringify(inspect({serverCredentials})));
         this.netConnected = Boolean((await NetInfo.fetch()).isConnected);
         serverCredentials.forEach(
             ({serverUrl, token}) => {
@@ -63,7 +65,7 @@ class WebsocketManager {
     };
 
     public invalidateClient = (serverUrl: string) => {
-        logDebug('app/managers/websocket_manager - invalidateClient', {serverUrl});
+        logDebug('app/managers/websocket_manager - invalidateClient', JSON.stringify(inspect({serverUrl})));
         this.clients[serverUrl]?.close(true);
         this.clients[serverUrl]?.invalidate();
         clearTimeout(this.connectionTimerIDs[serverUrl]);
@@ -79,7 +81,7 @@ class WebsocketManager {
     };
 
     public createClient = (serverUrl: string, bearerToken: string) => {
-        logDebug('app/managers/websocket_manager - createClient', {serverUrl, bearerToken});
+        logDebug('app/managers/websocket_manager - createClient', JSON.stringify(inspect({serverUrl, bearerToken})));
         if (this.clients[serverUrl]) {
             this.invalidateClient(serverUrl);
         }
@@ -124,19 +126,19 @@ class WebsocketManager {
     };
 
     public isConnected = (serverUrl: string): boolean => {
-        logDebug('app/managers/websocket_manager - isConnected', {serverUrl, isConnected: this.clients[serverUrl]?.isConnected()});
+        logDebug('app/managers/websocket_manager - isConnected', JSON.stringify(inspect({serverUrl, isConnected: this.clients[serverUrl]?.isConnected()})));
         return this.clients[serverUrl]?.isConnected();
     };
 
     public observeWebsocketState = (serverUrl: string) => {
-        logDebug('app/managers/websocket_manager - observeWebsocketState', {serverUrl});
+        logDebug('app/managers/websocket_manager - observeWebsocketState', JSON.stringify(inspect({serverUrl})));
         return this.getConnectedSubject(serverUrl).asObservable().pipe(
             distinctUntilChanged(),
         );
     };
 
     private getConnectedSubject = (serverUrl: string) => {
-        logDebug('app/managers/websocket_manager - getConnectedSubject', {serverUrl});
+        logDebug('app/managers/websocket_manager - getConnectedSubject', JSON.stringify(inspect({serverUrl})));
         if (!this.connectedSubjects[serverUrl]) {
             this.connectedSubjects[serverUrl] = new BehaviorSubject(this.isConnected(serverUrl) ? 'connected' : 'not_connected');
         }
@@ -153,7 +155,7 @@ class WebsocketManager {
     };
 
     public initializeClient = async (serverUrl: string) => {
-        logDebug('app/managers/websocket_manager - initializeClient', {serverUrl});
+        logDebug('app/managers/websocket_manager - initializeClient', JSON.stringify(inspect({serverUrl})));
         const client: WebSocketClient = this.clients[serverUrl];
         clearTimeout(this.connectionTimerIDs[serverUrl]);
         delete this.connectionTimerIDs[serverUrl];
@@ -176,13 +178,13 @@ class WebsocketManager {
     };
 
     private onFirstConnect = (serverUrl: string) => {
-        logDebug('app/managers/websocket_manager - onFirstConnect', {serverUrl});
+        logDebug('app/managers/websocket_manager - onFirstConnect', JSON.stringify(inspect({serverUrl})));
         this.startPeriodicStatusUpdates(serverUrl);
         this.getConnectedSubject(serverUrl).next('connected');
     };
 
     private onReconnect = async (serverUrl: string) => {
-        logDebug('app/managers/websocket_manager - onReconnect', {serverUrl});
+        logDebug('app/managers/websocket_manager - onReconnect', JSON.stringify(inspect({serverUrl})));
         this.startPeriodicStatusUpdates(serverUrl);
         this.getConnectedSubject(serverUrl).next('connected');
         const error = await handleReconnect(serverUrl);
@@ -192,12 +194,12 @@ class WebsocketManager {
     };
 
     private onReliableReconnect = async (serverUrl: string) => {
-        logDebug('app/managers/websocket_manager - onReliableReconnect', {serverUrl});
+        logDebug('app/managers/websocket_manager - onReliableReconnect', JSON.stringify(inspect({serverUrl})));
         this.getConnectedSubject(serverUrl).next('connected');
     };
 
     private onWebsocketClose = async (serverUrl: string, connectFailCount: number) => {
-        logDebug('app/managers/websocket_manager - onWebsocketClose', {serverUrl, connectFailCount});
+        logDebug('app/managers/websocket_manager - onWebsocketClose', JSON.stringify(inspect({serverUrl, connectFailCount})));
         this.getConnectedSubject(serverUrl).next('not_connected');
         if (connectFailCount <= 1) { // First fail
             await setCurrentUserStatus(serverUrl, General.OFFLINE);
@@ -206,7 +208,7 @@ class WebsocketManager {
     };
 
     private startPeriodicStatusUpdates(serverUrl: string) {
-        logDebug('app/managers/websocket_manager - startPeriodicStatusUpdates', {serverUrl});
+        logDebug('app/managers/websocket_manager - startPeriodicStatusUpdates', JSON.stringify(inspect({serverUrl})));
         let currentId = this.statusUpdatesIntervalIDs[serverUrl];
         if (currentId != null) {
             clearInterval(currentId);
@@ -230,13 +232,13 @@ class WebsocketManager {
     }
 
     private stopPeriodicStatusUpdates(serverUrl: string) {
-        logDebug('app/managers/websocket_manager - stopPeriodicStatusUpdates', {serverUrl});
+        logDebug('app/managers/websocket_manager - stopPeriodicStatusUpdates', JSON.stringify(inspect({serverUrl})));
         clearInterval(this.statusUpdatesIntervalIDs[serverUrl]);
         delete this.statusUpdatesIntervalIDs[serverUrl];
     }
 
     private onAppStateChange = (appState: AppStateStatus) => {
-        logDebug('app/managers/websocket_manager - onAppStateChange', {appState});
+        logDebug('app/managers/websocket_manager - onAppStateChange', JSON.stringify(inspect({appState})));
         const isMain = isMainActivity();
         if (!isMain) {
             return;
@@ -247,7 +249,7 @@ class WebsocketManager {
     };
 
     private onNetStateChange = (netState: NetInfoState) => {
-        logDebug('app/managers/websocket_manager - onNetStateChange', {netState});
+        logDebug('app/managers/websocket_manager - onNetStateChange', JSON.stringify(inspect({netState})));
         const newState = Boolean(netState.isConnected);
         if (this.netConnected === newState) {
             return;
@@ -257,7 +259,7 @@ class WebsocketManager {
     };
 
     private handleStateChange = (currentIsConnected: boolean, currentIsActive: boolean) => {
-        logDebug('app/managers/websocket_manager - handleStateChange', {currentIsConnected, currentIsActive});
+        logDebug('app/managers/websocket_manager - handleStateChange', JSON.stringify(inspect({currentIsConnected, currentIsActive})));
         if (currentIsActive === this.previousActiveState && currentIsConnected === this.netConnected) {
             return;
         }
