@@ -3,6 +3,8 @@
 
 /* eslint-disable max-lines */
 
+import {inspect} from 'util';
+
 import {chunk, flatten} from 'lodash';
 
 import {updateChannelsDisplayName} from '@actions/local/channel';
@@ -815,6 +817,7 @@ export const buildProfileImageUrlFromUser = (serverUrl: string, user: UserModel 
 };
 
 export const autoUpdateTimezone = async (serverUrl: string) => {
+    logDebug('app/actions/remote/entry/common.ts - autoUpdateTimezone', JSON.stringify(inspect({serverUrl})));
     let database;
     try {
         const result = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
@@ -824,6 +827,7 @@ export const autoUpdateTimezone = async (serverUrl: string) => {
     }
 
     const currentUser = await getCurrentUser(database);
+    logDebug('#autoUpdateTimezone', JSON.stringify(inspect({currentUser})));
 
     if (!currentUser) {
         return;

@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {inspect} from 'util';
+
 import {markChannelAsViewed} from '@actions/local/channel';
 import {dataRetentionCleanup} from '@actions/local/systems';
 import {markChannelAsRead} from '@actions/remote/channel';
@@ -95,6 +97,7 @@ import {handleThreadUpdatedEvent, handleThreadReadChangedEvent, handleThreadFoll
 import {handleUserUpdatedEvent, handleUserTypingEvent, handleStatusChangedEvent, handleUserRecordingEvent} from './users';
 
 export async function handleFirstConnect(serverUrl: string) {
+    logDebug('app/actions/websocket/index.ts - handleFirstConnect', JSON.stringify(inspect({serverUrl})));
     registerDeviceToken(serverUrl);
     autoUpdateTimezone(serverUrl);
     return doReconnect(serverUrl);
@@ -105,6 +108,7 @@ export async function handleReconnect(serverUrl: string) {
 }
 
 async function doReconnect(serverUrl: string) {
+    logDebug('app/actions/websocket/index.ts - doReconnect', JSON.stringify(inspect({serverUrl})));
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
         return new Error('cannot find server database');
@@ -118,13 +122,17 @@ async function doReconnect(serverUrl: string) {
     const {database} = operator;
 
     const lastFullSync = await getLastFullSync(database);
+    logDebug('#doReconnect', JSON.stringify(inspect({lastFullSync})));
     const now = Date.now();
 
     const currentTeamId = await getCurrentTeamId(database);
+    logDebug('#doReconnect', JSON.stringify(inspect({currentTeamId})));
     const currentChannelId = await getCurrentChannelId(database);
+    logDebug('#doReconnect', JSON.stringify(inspect({currentChannelId})));
 
     setTeamLoading(serverUrl, true);
     const entryData = await entry(serverUrl, currentTeamId, currentChannelId, lastFullSync);
+    logDebug('#doReconnect', JSON.stringify(inspect({entryData})));
     if ('error' in entryData) {
         setTeamLoading(serverUrl, false);
         return entryData.error;
@@ -132,6 +140,7 @@ async function doReconnect(serverUrl: string) {
     const {models, initialTeamId, initialChannelId, prefData, teamData, chData, gmConverted} = entryData;
 
     await handleEntryAfterLoadNavigation(serverUrl, teamData.memberships || [], chData?.memberships || [], currentTeamId || '', currentChannelId || '', initialTeamId, initialChannelId, gmConverted);
+    logDebug('#doReconnect handleEntryAfterLoadNavigation!');
 
     const dt = Date.now();
     if (models?.length) {
@@ -139,11 +148,14 @@ async function doReconnect(serverUrl: string) {
     }
 
     await setLastFullSync(operator, now);
+    logDebug('#doReconnect setLastFullSync!', JSON.stringify(inspect({operator, now})));
 
     const tabletDevice = isTablet();
     const isActiveServer = (await getActiveServerUrl()) === serverUrl;
+    logDebug('#doReconnect', JSON.stringify(inspect({isActiveServer})));
     if (isActiveServer && tabletDevice && initialChannelId === currentChannelId) {
         await markChannelAsRead(serverUrl, initialChannelId);
+        logDebug('#doReconnect markChannelAsRead!');
         markChannelAsViewed(serverUrl, initialChannelId);
     }
 

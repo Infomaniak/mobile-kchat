@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {inspect} from 'util';
+
 import {NativeModules, Platform} from 'react-native';
 
 import {fetchMissingDirectChannelsInfo, fetchMyChannelsForTeam, handleKickFromChannel, type MyChannelsRequest} from '@actions/remote/channel';
@@ -410,6 +412,7 @@ async function restDeferredAppEntryActions(
 }
 
 export const registerDeviceToken = async (serverUrl: string) => {
+    logDebug('app/actions/remote/entry/common.ts - registerDeviceToken', JSON.stringify(inspect({serverUrl})));
     try {
         const client = NetworkManager.getClient(serverUrl);
 

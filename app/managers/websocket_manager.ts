@@ -164,6 +164,7 @@ class WebsocketManager {
             client.initialize({}, !hasSynced);
             if (!hasSynced) {
                 const error = await handleFirstConnect(serverUrl);
+                logDebug('#initializeClient - handleFirstConnect', JSON.stringify(inspect({error})));
                 if (error) {
                     // This will try to reconnect and try to sync again
                     client.close(false);
