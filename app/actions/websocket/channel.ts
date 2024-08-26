@@ -20,6 +20,7 @@ import {getCurrentUser, getTeammateNameDisplay, getUserById} from '@queries/serv
 import EphemeralStore from '@store/ephemeral_store';
 import MyChannelModel from '@typings/database/models/servers/my_channel';
 import {logDebug} from '@utils/log';
+import {allSettled} from '@utils/promise';
 
 import type {Model} from '@nozbe/watermelondb';
 
@@ -156,7 +157,7 @@ export async function handleMultipleChannelsViewedEvent(serverUrl: string, msg: 
             promises.push(markChannelAsViewed(serverUrl, id, false, true));
         }
 
-        const members = (await Promise.allSettled(promises)).reduce<MyChannelModel[]>((acum, v) => {
+        const members = (await allSettled(promises)).reduce<MyChannelModel[]>((acum, v) => {
             if (v.status === 'rejected') {
                 return acum;
             }

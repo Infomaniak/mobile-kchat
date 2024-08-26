@@ -26,6 +26,7 @@ import {getFullErrorMessage, isServerError} from '@utils/errors';
 import {logDebug, logError} from '@utils/log';
 import {processPostsFetched} from '@utils/post';
 import {getPostIdsForCombinedUserActivityPost} from '@utils/post_list';
+import {allSettled} from '@utils/promise';
 
 import {forceLogoutIfNecessary} from './session';
 
@@ -550,7 +551,7 @@ export const fetchPostAuthors = async (serverUrl: string, posts: Post[], fetchOn
         }
 
         if (promises.length) {
-            const authorsResult = await Promise.allSettled(promises);
+            const authorsResult = await allSettled(promises);
             const result = authorsResult.reduce<UserProfile[][]>((acc, item) => {
                 if (item.status === 'fulfilled') {
                     acc.push(item.value);

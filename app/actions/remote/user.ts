@@ -18,6 +18,7 @@ import {getCurrentUserId, setCurrentUserId} from '@queries/servers/system';
 import {getCurrentUser, prepareUsers, queryAllUsers, queryUsersById, queryUsersByIdsOrUsernames, queryUsersByUsername} from '@queries/servers/user';
 import {getFullErrorMessage} from '@utils/errors';
 import {logDebug} from '@utils/log';
+import {allSettled} from '@utils/promise';
 import {getDeviceTimezone} from '@utils/timezone';
 import {getLastPictureUpdate, getUserTimezoneProps, removeUserFromList} from '@utils/user';
 
@@ -48,7 +49,7 @@ export const fetchMe = async (serverUrl: string, fetchOnly = false): Promise<MyU
         const client = NetworkManager.getClient(serverUrl);
         const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
 
-        const resultSettled = await Promise.allSettled([client.getMe(), client.getStatus('me')]);
+        const resultSettled = await allSettled([client.getMe(), client.getStatus('me')]);
         let user: UserProfile|undefined;
         let userStatus: UserStatus|undefined;
         for (const result of resultSettled) {
