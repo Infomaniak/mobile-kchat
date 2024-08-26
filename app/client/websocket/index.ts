@@ -21,7 +21,7 @@ const DEFAULT_OPTIONS = {
     forceConnection: true,
 };
 
-Pusher.logToConsole = false;
+Pusher.logToConsole = true;
 
 type PusherEvent = {[k: string]: any} | undefined;
 
@@ -383,6 +383,7 @@ export default class WebSocketClient {
     }
 
     public close(stop = false) {
+        logDebug('app/client/websocket/index - close', JSON.stringify(inspect({stop})));
         this.stop = stop;
         this.connectFailCount = 0;
         this.responseSequence = 1;
