@@ -42,7 +42,8 @@ const extractKey = (item: CategoryModel | 'UNREADS') => (item === 'UNREADS' ? 'U
 const Categories = ({
     categories,
     onlyUnreads,
-    unreadsOnTop,
+
+    // unreadsOnTop,
 }: Props) => {
     const intl = useIntl();
     const listRef = useRef<FlatList>(null);
@@ -50,6 +51,7 @@ const Categories = ({
     const isTablet = useIsTablet();
     const switchingTeam = useTeamSwitch();
     const teamId = categories[0]?.teamId;
+    const unreadsOnTop = true; // Infomaniak
     const showOnlyUnreadsCategory = onlyUnreads && !unreadsOnTop;
 
     const categoriesToShow = useMemo(() => {
