@@ -125,7 +125,7 @@ class GlobalEventHandler {
         if (parsed.success) {
             CallManager.toggleAudioMuted(parsed.data.isMuted === 'true');
         } else {
-            logError('UNABLE TO PARSE CallEndedEvent', parsed.error);
+            logError('UNABLE TO PARSE CallMutedEvent', parsed.error);
         }
     };
 
@@ -134,7 +134,7 @@ class GlobalEventHandler {
         if (parsed.success) {
             CallManager.toggleAudioMuted(parsed.data.isMuted === 'true');
         } else {
-            logError('UNABLE TO PARSE CallEndedEvent', parsed.error);
+            logError('UNABLE TO PARSE CallVideoMutedEvent', parsed.error);
         }
     };
 
