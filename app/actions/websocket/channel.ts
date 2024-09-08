@@ -11,17 +11,16 @@ import {fetchMissingDirectChannelsInfo, fetchMyChannel, fetchChannelStats, fetch
 import {fetchPostsForChannel} from '@actions/remote/post';
 import {fetchRolesIfNeeded} from '@actions/remote/role';
 import {fetchUsersByIds, updateUsersNoLongerVisible} from '@actions/remote/user';
-import {loadCallForChannel, leaveCall} from '@calls/actions/calls';
-import {userLeftChannelErr, userRemovedFromChannelErr} from '@calls/errors';
-import {getCurrentCall} from '@calls/state';
 import {Events, General} from '@constants';
 import DatabaseManager from '@database/manager';
+import NetworkManager from '@managers/network_manager';
 import {deleteChannelMembership, getChannelById, prepareMyChannelsForTeam, getCurrentChannel} from '@queries/servers/channel';
 import {getConfig, getCurrentChannelId, getCurrentTeamId, setCurrentTeamId} from '@queries/servers/system';
 import {getCurrentUser, getTeammateNameDisplay, getUserById} from '@queries/servers/user';
 import EphemeralStore from '@store/ephemeral_store';
 import MyChannelModel from '@typings/database/models/servers/my_channel';
 import {logDebug} from '@utils/log';
+import {allSettled} from '@utils/promise';
 
 import type {Model} from '@nozbe/watermelondb';
 
@@ -158,7 +157,7 @@ export async function handleMultipleChannelsViewedEvent(serverUrl: string, msg: 
             promises.push(markChannelAsViewed(serverUrl, id, false, true));
         }
 
-        const members = (await Promise.allSettled(promises)).reduce<MyChannelModel[]>((acum, v) => {
+        const members = (await allSettled(promises)).reduce<MyChannelModel[]>((acum, v) => {
             if (v.status === 'rejected') {
                 return acum;
             }
@@ -280,6 +279,7 @@ export async function handleUserAddedToChannelEvent(serverUrl: string, msg: any)
     const userId = msg.data.user_id || msg.data.userId;
     const channelId = msg.data.channel_id || msg.data.channel_id;
     const {team_id: teamId} = msg.data;
+    const client = NetworkManager.getClient(serverUrl);
 
     try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
@@ -320,8 +320,6 @@ export async function handleUserAddedToChannelEvent(serverUrl: string, msg: any)
                     models.push(...prepared);
                 }
             }
-
-            loadCallForChannel(serverUrl, channelId);
         } else {
             const addedUser = getUserById(database, userId);
             if (!addedUser) {
@@ -330,9 +328,11 @@ export async function handleUserAddedToChannelEvent(serverUrl: string, msg: any)
                 models.push(...await operator.handleUsers({users, prepareRecordsOnly: true}));
             }
             const channel = await getChannelById(database, channelId);
+            const channelMembership = await client.getChannelMembersByIds(channelId, userId);
+
             if (channel) {
                 models.push(...await operator.handleChannelMembership({
-                    channelMemberships: [{channel_id: channelId, user_id: userId}],
+                    channelMemberships: channelMembership,
                     prepareRecordsOnly: true,
                 }));
             }
@@ -357,9 +357,6 @@ export async function handleUserRemovedFromChannelEvent(serverUrl: string, msg: 
         const channelId = msg.data.channel_id || msg.data.channel_id;
 
         if (EphemeralStore.isLeavingChannel(channelId)) {
-            if (getCurrentCall()?.channelId === channelId) {
-                leaveCall(userLeftChannelErr);
-            }
             return;
         }
 
@@ -384,10 +381,6 @@ export async function handleUserRemovedFromChannelEvent(serverUrl: string, msg: 
             }
 
             await removeCurrentUserFromChannel(serverUrl, channelId);
-
-            if (getCurrentCall()?.channelId === channelId) {
-                leaveCall(userRemovedFromChannelErr);
-            }
         } else {
             const {models: deleteMemberModels} = await deleteChannelMembership(operator, userId, channelId, true);
             if (deleteMemberModels) {

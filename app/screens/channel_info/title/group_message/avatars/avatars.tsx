@@ -1,16 +1,17 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {Image, type ImageSource} from 'expo-image';
 import React from 'react';
 import {View} from 'react-native';
-import FastImage from 'react-native-fast-image';
 
+import {buildAbsoluteUrl} from '@actions/remote/file';
+import {buildProfileImageUrlFromUser} from '@actions/remote/user';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
-import type {Client} from '@client/rest';
 import type UserModel from '@typings/database/models/servers/user';
 
 type Props = {
@@ -37,26 +38,16 @@ const GroupAvatars = ({users}: Props) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
 
-    let client: Client | undefined;
-
-    try {
-        client = NetworkManager.getClient(serverUrl);
-    } catch {
-        return null;
-    }
+    const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
+    const headers: ImageSource['headers'] = {Authorization: token};
 
     const group = users.map((u, i) => {
-        const pictureUrl = client!.getProfilePictureUrl(u.id, u.lastPictureUpdate);
+        const pictureUrl = buildProfileImageUrlFromUser(serverUrl, u);
         return (
-            <FastImage
+            <Image
                 key={pictureUrl + i.toString()}
                 style={[styles.profile, {transform: [{translateX: -(i * 12)}]}]}
-                source={{
-                    uri: `${serverUrl}${pictureUrl}`,
-                    headers: {
-                        Authorization: client?.getCurrentBearerToken() ?? '',
-                    },
-                }}
+                source={{uri: buildAbsoluteUrl(serverUrl, pictureUrl), headers}}
             />
         );
     });

@@ -4,6 +4,7 @@
 import {type ClientHeaders, getOrCreateWebSocketClient, WebSocketReadyState} from '@mattermost/react-native-network-client';
 import Pusher, {ConnectionManager, type Channel} from 'pusher-js/react-native';
 
+import {WebsocketEvents} from '@app/constants';
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
 import {getConfigValue} from '@queries/servers/system';
@@ -56,9 +57,12 @@ export default class WebSocketClient {
     private closeCallback?: (connectFailCount: number) => void;
     private connectingCallback?: () => void;
 
-    // Infomaniak
+    // INFOMANIAK
     // Current Pusher channel the user is connected to
     private presenceChannel?: Channel;
+
+    // Recording polling ws event
+    private recordingInterval: ReturnType<typeof setInterval> | null = null;
 
     constructor(serverUrl: string, token: string) {
         this.token = token;
@@ -72,7 +76,7 @@ export default class WebSocketClient {
             this.stop = false;
         }
 
-        if (this.conn && this.conn.connection.state !== WebSocketReadyState.CLOSED) {
+        if (this.conn && this.connState !== WebSocketReadyState.CLOSED) {
             return;
         }
 
@@ -106,7 +110,7 @@ export default class WebSocketClient {
             if (this.conn === client) {
                 // In case turning on/off Wi-fi on Samsung devices
                 // the websocket will call onClose then onError then initialize again with readyState CLOSED, we need to open it again
-                if (this.conn.connection.state === WebSocketReadyState.CLOSED) {
+                if (this.connState === WebSocketReadyState.CLOSED) {
                     clearTimeout(this.connectionTimeout);
                     this.connOpen();
                 }
@@ -202,7 +206,7 @@ export default class WebSocketClient {
 
     private async connOpen() {
         if (typeof this.conn !== 'undefined') {
-            if (this.conn.connection.state !== WebSocketReadyState.OPEN) {
+            if (this.connState !== WebSocketReadyState.OPEN) {
                 this.conn.connect();
             }
 
@@ -215,6 +219,27 @@ export default class WebSocketClient {
             this.bindChannel(`private-team.${user.team_id}`, false);
             this.bindChannel(`presence-user.${user.user_id}`, false);
             this.bindChannel(`presence-teamUser.${user.id}`);
+        }
+    }
+
+    private get connState() {
+        // Convert Pusher.js connection state to WebSocketReadyState
+        // Ref. https://pusher.com/docs/channels/using_channels/connection/#available-states
+        switch (this.conn?.connection.state) {
+            case 'initialized':
+            case 'connecting':
+                return WebSocketReadyState.CONNECTING;
+            case 'connected':
+                return WebSocketReadyState.OPEN;
+            case 'unavailable':
+            case 'failed':
+            case 'disconnected':
+                return WebSocketReadyState.CLOSED;
+            default:
+                return undefined;
+
+            // No Pusher.js equivalent
+            // return WebSocketReadyState.CLOSING;
         }
     }
 
@@ -265,7 +290,7 @@ export default class WebSocketClient {
             // with mattermost's .onOpen()
             if (
                 (eventName === 'connected') &&
-                (this.conn.connection.state === WebSocketReadyState.OPEN)
+                (this.connState === WebSocketReadyState.OPEN)
             ) {
                 fn();
             }
@@ -366,7 +391,7 @@ export default class WebSocketClient {
             data,
         };
 
-        if (this.conn && this.conn.connection.state === WebSocketReadyState.OPEN) {
+        if (this.conn && this.connState === WebSocketReadyState.OPEN) {
             if (typeof channel === 'undefined') {
                 // Global message
                 this.conn.send_event(action, msg);
@@ -374,7 +399,7 @@ export default class WebSocketClient {
                 // Channel message
                 channel.trigger(action, msg);
             }
-        } else if (!this.conn || this.conn.connection.state === WebSocketReadyState.CLOSED) {
+        } else if (!this.conn || this.connState === WebSocketReadyState.CLOSED) {
             this.conn = undefined;
             this.initialize(this.token);
         }
@@ -390,14 +415,31 @@ export default class WebSocketClient {
     }
 
     public sendUserTypingEvent(userId: string, channelId: string, parentId?: string) {
-        this.sendPresenceMessage('client-user_typing', {
+        this.sendPresenceMessage(WebsocketEvents.TYPING, {
             channel_id: channelId,
             parent_id: parentId,
             user_id: userId,
         });
     }
 
+    public sendUserRecordingEvent(userId: string, channelId: string, parentId?: string) {
+        const TIMER = 1000;
+        this.recordingInterval = setInterval(() => {
+            this.sendPresenceMessage(WebsocketEvents.RECORDING, {
+                channel_id: channelId,
+                parent_id: parentId,
+                user_id: userId,
+            });
+        }, TIMER);
+    }
+
+    public stopRecordingEvent() {
+        if (this.recordingInterval !== null) {
+            clearInterval(this.recordingInterval);
+        }
+    }
+
     public isConnected(): boolean {
-        return this.conn?.connection.state === WebSocketReadyState.OPEN;
+        return this.connState === WebSocketReadyState.OPEN;
     }
 }

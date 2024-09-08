@@ -9,39 +9,39 @@ exports[`AttachmentAuthor it matches snapshot when both name and icon are provid
     }
   }
 >
-  <View
-    style={
+  <ViewManagerAdapter_ExpoImage
+    contentFit="cover"
+    contentPosition={
+      {
+        "left": "50%",
+        "top": "50%",
+      }
+    }
+    height={12}
+    marginRight={3}
+    nativeViewRef={"[React.ref]"}
+    onError={[Function]}
+    onLoad={[Function]}
+    onLoadStart={[Function]}
+    onProgress={[Function]}
+    placeholder={[]}
+    source={
       [
         {
-          "overflow": "hidden",
-        },
-        {
-          "height": 12,
-          "marginRight": 3,
-          "width": 12,
+          "uri": "https://images.com/image.png",
         },
       ]
     }
-  >
-    <FastImageView
-      defaultSource={null}
-      resizeMode="cover"
-      source={
-        {
-          "uri": "https://images.com/image.png",
-        }
+    style={
+      {
+        "height": 12,
+        "marginRight": 3,
+        "width": 12,
       }
-      style={
-        {
-          "bottom": 0,
-          "left": 0,
-          "position": "absolute",
-          "right": 0,
-          "top": 0,
-        }
-      }
-    />
-  </View>
+    }
+    transition={null}
+    width={12}
+  />
   <Text
     onPress={[Function]}
     style={
@@ -51,7 +51,7 @@ exports[`AttachmentAuthor it matches snapshot when both name and icon are provid
           "fontSize": 11,
         },
         {
-          "color": "rgba(28,88,217,0.5)",
+          "color": "rgba(56,111,229,0.5)",
         },
       ]
     }
@@ -70,39 +70,39 @@ exports[`AttachmentAuthor it matches snapshot when only icon is provided 1`] = `
     }
   }
 >
-  <View
-    style={
+  <ViewManagerAdapter_ExpoImage
+    contentFit="cover"
+    contentPosition={
+      {
+        "left": "50%",
+        "top": "50%",
+      }
+    }
+    height={12}
+    marginRight={3}
+    nativeViewRef={"[React.ref]"}
+    onError={[Function]}
+    onLoad={[Function]}
+    onLoadStart={[Function]}
+    onProgress={[Function]}
+    placeholder={[]}
+    source={
       [
         {
-          "overflow": "hidden",
-        },
-        {
-          "height": 12,
-          "marginRight": 3,
-          "width": 12,
+          "uri": "https://images.com/image.png",
         },
       ]
     }
-  >
-    <FastImageView
-      defaultSource={null}
-      resizeMode="cover"
-      source={
-        {
-          "uri": "https://images.com/image.png",
-        }
+    style={
+      {
+        "height": 12,
+        "marginRight": 3,
+        "width": 12,
       }
-      style={
-        {
-          "bottom": 0,
-          "left": 0,
-          "position": "absolute",
-          "right": 0,
-          "top": 0,
-        }
-      }
-    />
-  </View>
+    }
+    transition={null}
+    width={12}
+  />
 </View>
 `;
 
@@ -124,7 +124,7 @@ exports[`AttachmentAuthor it matches snapshot when only name is provided 1`] = `
           "fontSize": 11,
         },
         {
-          "color": "rgba(28,88,217,0.5)",
+          "color": "rgba(56,111,229,0.5)",
         },
       ]
     }

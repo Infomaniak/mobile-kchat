@@ -5,6 +5,7 @@ import React, {useCallback, useEffect, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {Alert, Platform, View} from 'react-native';
 
+import {getUserTimezoneProps} from '@app/utils/user';
 import CompassIcon from '@components/compass_icon';
 import SettingContainer from '@components/settings/container';
 import SettingItem from '@components/settings/item';
@@ -18,9 +19,21 @@ import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {tryOpenURL} from '@utils/url';
 
+import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 const CLOSE_BUTTON_ID = 'close-settings';
+
+const TIMEZONE_FORMAT = [
+    {
+        id: ('display_settings.tz.auto'),
+        defaultMessage: 'Auto',
+    },
+    {
+        id: ('display_settings.tz.manual'),
+        defaultMessage: 'Manual',
+    },
+];
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
@@ -44,15 +57,16 @@ type SettingsProps = {
     helpLink: string;
     showHelp: boolean;
     siteName: string;
+    currentUser?: UserModel;
 }
 
 //todo: Profile the whole feature - https://mattermost.atlassian.net/browse/MM-39711
 
-const Settings = ({componentId, helpLink, showHelp}: SettingsProps) => {
+const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps) => {
     const theme = useTheme();
     const intl = useIntl();
     const styles = getStyleSheet(theme);
-
+    const timezone = useMemo(() => getUserTimezoneProps(currentUser), [currentUser?.timezone]);
     const closeButton = useMemo(() => {
         return {
             id: CLOSE_BUTTON_ID,
@@ -87,6 +101,12 @@ const Settings = ({componentId, helpLink, showHelp}: SettingsProps) => {
             defaultMessage: 'Push Notifications',
         });
 
+        gotoSettingsScreen(screen, title);
+    });
+
+    const goToTimezoneSettings = preventDoubleTap(() => {
+        const screen = Screens.SETTINGS_DISPLAY_TIMEZONE;
+        const title = intl.formatMessage({id: 'display_settings.timezone', defaultMessage: 'Timezone'});
         gotoSettingsScreen(screen, title);
     });
 
@@ -129,6 +149,12 @@ const Settings = ({componentId, helpLink, showHelp}: SettingsProps) => {
                 onPress={goToThemeSettings}
                 info={theme.ikName!}
                 testID='display_settings.theme.option'
+            />
+            <SettingItem
+                optionName='timezone'
+                onPress={goToTimezoneSettings}
+                info={intl.formatMessage(timezone.useAutomaticTimezone ? TIMEZONE_FORMAT[0] : TIMEZONE_FORMAT[1])}
+                testID='display_settings.timezone.option'
             />
             {Platform.OS === 'android' && <View style={styles.helpGroup}/>}
             {showHelp &&

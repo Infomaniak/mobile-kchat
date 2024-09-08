@@ -1,10 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {Image as ExpoImage, type ImageSource} from 'expo-image';
 import React, {useMemo} from 'react';
-import {Image as RNImage} from 'react-native';
 import {Grayscale} from 'react-native-color-matrix-image-filters';
-import FastImage, {type Source} from 'react-native-fast-image';
 import Animated from 'react-native-reanimated';
 
 import CompassIcon from '@components/compass_icon';
@@ -14,7 +13,6 @@ import {useTheme} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
-import type {Client} from '@client/rest';
 import type UserModel from '@typings/database/models/servers/user';
 
 type Props = {
@@ -23,13 +21,11 @@ type Props = {
     grayscale?: boolean;
     iconSize?: number;
     size: number;
-    source?: Source | string;
+    source?: ImageSource | string;
     url?: string;
 };
 
-// @ts-expect-error FastImage does work with Animated.createAnimatedComponent
-const AnimatedFastImage = Animated.createAnimatedComponent(FastImage);
-const AnimatedImage = Animated.createAnimatedComponent(RNImage);
+const AnimatedImage = Animated.createAnimatedComponent(ExpoImage);
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
@@ -62,15 +58,8 @@ const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Pro
         );
     }
 
-    let client: Client | undefined;
-
-    try {
-        client = NetworkManager.getClient(serverUrl);
-    } catch {
-        // handle below that the client is not set
-    }
-
     const image = (() => {
+        const client = NetworkManager.getClient(serverUrl);
         if (author && client) {
             let lastPictureUpdate = 0;
             const isBot = ('isBot' in author) ? author.isBot : author.is_bot;
@@ -98,10 +87,8 @@ const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Pro
                 );
             }
             return (
-                <AnimatedFastImage
+                <AnimatedImage
                     key={pictureUrl}
-
-                    // @ts-expect-error TS expects old type ref
                     ref={forwardRef}
                     style={fIStyle}
                     source={imgSource}

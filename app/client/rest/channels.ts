@@ -66,8 +66,6 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
     };
 
     createChannel = async (channel: Channel) => {
-        this.analytics?.trackAPI('api_channels_create', {team_id: channel.team_id});
-
         return this.doFetch(
             `${this.getChannelsRoute()}`,
             {method: 'post', body: channel},
@@ -75,8 +73,6 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
     };
 
     createDirectChannel = async (userIds: string[]) => {
-        this.analytics?.trackAPI('api_channels_create_direct');
-
         return this.doFetch(
             `${this.getChannelsRoute()}/direct`,
             {method: 'post', body: userIds},
@@ -84,8 +80,6 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
     };
 
     createGroupChannel = async (userIds: string[]) => {
-        this.analytics?.trackAPI('api_channels_create_group');
-
         return this.doFetch(
             `${this.getChannelsRoute()}/group`,
             {method: 'post', body: userIds},
@@ -93,8 +87,6 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
     };
 
     deleteChannel = async (channelId: string) => {
-        this.analytics?.trackAPI('api_channels_delete', {channel_id: channelId});
-
         return this.doFetch(
             `${this.getChannelRoute(channelId)}`,
             {method: 'delete'},
@@ -102,8 +94,6 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
     };
 
     unarchiveChannel = async (channelId: string) => {
-        this.analytics?.trackAPI('api_channels_unarchive', {channel_id: channelId});
-
         return this.doFetch(
             `${this.getChannelRoute(channelId)}/restore`,
             {method: 'post'},
@@ -111,8 +101,6 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
     };
 
     updateChannel = async (channel: Channel) => {
-        this.analytics?.trackAPI('api_channels_update', {channel_id: channel.id});
-
         return this.doFetch(
             `${this.getChannelRoute(channel.id)}`,
             {method: 'put', body: channel},
@@ -124,8 +112,6 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
     };
 
     updateChannelPrivacy = async (channelId: string, privacy: any) => {
-        this.analytics?.trackAPI('api_channels_update_privacy', {channel_id: channelId, privacy});
-
         return this.doFetch(
             `${this.getChannelRoute(channelId)}/privacy`,
             {method: 'put', body: {privacy}},
@@ -133,8 +119,6 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
     };
 
     patchChannel = async (channelId: string, channelPatch: ChannelPatch) => {
-        this.analytics?.trackAPI('api_channels_patch', {channel_id: channelId});
-
         return this.doFetch(
             `${this.getChannelRoute(channelId)}/patch`,
             {method: 'put', body: channelPatch},
@@ -142,8 +126,6 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
     };
 
     updateChannelNotifyProps = async (props: ChannelNotifyProps & {channel_id: string; user_id: string}) => {
-        this.analytics?.trackAPI('api_users_update_channel_notifications', {channel_id: props.channel_id});
-
         return this.doFetch(
             `${this.getChannelMemberRoute(props.channel_id, props.user_id)}/notify_props`,
             {method: 'put', body: props},
@@ -151,8 +133,6 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
     };
 
     getChannel = async (channelId: string) => {
-        this.analytics?.trackAPI('api_channel_get', {channel_id: channelId});
-
         return this.doFetch(
             `${this.getChannelRoute(channelId)}`,
             {method: 'get'},
@@ -167,8 +147,6 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
     };
 
     getChannelByNameAndTeamName = async (teamName: string, channelName: string, includeDeleted = false) => {
-        this.analytics?.trackAPI('api_channel_get_by_name_and_teamName', {channel_name: channelName, team_name: teamName, include_deleted: includeDeleted});
-
         return this.doFetch(
             `${this.getTeamNameRoute(teamName)}/channels/name/${channelName}?include_deleted=${includeDeleted}`,
             {method: 'get'},
@@ -249,8 +227,6 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
     };
 
     addToChannel = async (userId: string, channelId: string, postRootId = '') => {
-        this.analytics?.trackAPI('api_channels_add_member', {channel_id: channelId});
-
         const member = {user_id: userId, channel_id: channelId, post_root_id: postRootId};
         return this.doFetch(
             `${this.getChannelMembersRoute(channelId)}`,
@@ -274,8 +250,6 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
     };
 
     removeFromChannel = async (userId: string, channelId: string) => {
-        this.analytics?.trackAPI('api_channels_remove_member', {channel_id: channelId});
-
         return this.doFetch(
             `${this.getChannelMemberRoute(channelId, userId)}`,
             {method: 'delete'},

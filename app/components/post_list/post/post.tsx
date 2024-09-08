@@ -1,13 +1,15 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {type ReactNode, useEffect, useMemo, useRef, useState} from 'react';
+import React, {type ReactNode, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {Keyboard, Platform, type StyleProp, View, type ViewStyle, TouchableHighlight} from 'react-native';
+import {Keyboard, Platform, type StyleProp, View, type ViewStyle, TouchableHighlight, TouchableOpacity} from 'react-native';
 
 import {removePost} from '@actions/local/post';
 import {showPermalink} from '@actions/remote/permalink';
+import {markPostReminderAsDone} from '@actions/remote/post';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
+import FormattedText from '@app/components/formatted_text';
 import {getMarkdownTextStyles} from '@app/utils/markdown';
 import IkCallsCustomMessage from '@calls/components/ik_calls_custom_message';
 import {isCallsCustomMessage} from '@calls/utils';
@@ -19,7 +21,9 @@ import * as Screens from '@constants/screens';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
+import PerformanceMetricsManager from '@managers/performance_metrics_manager';
 import {openAsBottomSheet} from '@screens/navigation';
+import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {hasJumboEmojiOnly} from '@utils/emoji/helpers';
 import {fromAutoResponder, isFromWebhook, isPostFailed, isPostPendingOrFailed, isSystemMessage} from '@utils/post';
 import {preventDoubleTap} from '@utils/tap';
@@ -62,6 +66,7 @@ type PostProps = {
     post: PostModel;
     rootId?: string;
     previousPost?: PostModel;
+    isLastPost: boolean;
     hasReactions: boolean;
     searchPatterns?: SearchPattern[];
     shouldRenderReplyButton?: boolean;
@@ -111,10 +116,39 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 });
 
 const Post = ({
-    appsEnabled, canDelete, currentUser, customEmojiNames, differentThreadSequence, hasFiles, hasReplies, highlight, highlightPinnedOrSaved = true, highlightReplyBar,
-    isCRTEnabled, isConsecutivePost, isEphemeral, isFirstReply, isSaved, isLastReply, isPostAcknowledgementEnabled, isPostAddChannelMember, isPostPriorityEnabled,
-    location, post, rootId, hasReactions, searchPatterns, shouldRenderReplyButton, skipSavedHeader, skipPinnedHeader, showAddReaction = true, style,
-    testID, thread, previousPost,
+    appsEnabled,
+    canDelete,
+    currentUser,
+    customEmojiNames,
+    differentThreadSequence,
+    hasFiles,
+    hasReplies,
+    highlight,
+    highlightPinnedOrSaved = true,
+    highlightReplyBar,
+    isCRTEnabled,
+    isConsecutivePost,
+    isEphemeral,
+    isFirstReply,
+    isSaved,
+    isLastReply,
+    isPostAcknowledgementEnabled,
+    isPostAddChannelMember,
+    isPostPriorityEnabled,
+    location,
+    post,
+    rootId,
+    hasReactions,
+    searchPatterns,
+    shouldRenderReplyButton,
+    skipSavedHeader,
+    skipPinnedHeader,
+    showAddReaction = true,
+    style,
+    testID,
+    thread,
+    previousPost,
+    isLastPost,
 }: PostProps) => {
     const pressDetected = useRef(false);
     const intl = useIntl();
@@ -179,6 +213,27 @@ const Post = ({
         }
     });
 
+    const handlePostponePress = useCallback(async () => {
+        const postId = post.props.post_id;
+
+        openAsBottomSheet({
+            closeButtonId: 'close-quota-exceeded',
+            screen: Screens.INFOMANIAK_REMINDER,
+            theme,
+            title: '',
+            props: {
+                post,
+                postId,
+                postpone: true,
+            },
+        });
+    }, [post]);
+
+    const handleMarkRemindAsDone = async () => {
+        const postId = post.id;
+        markPostReminderAsDone(serverUrl, postId);
+    };
+
     const showPostOptions = () => {
         if (!post) {
             return;
@@ -219,11 +274,38 @@ const Post = ({
         };
     }, [post.id]);
 
+    useEffect(() => {
+        if (!isLastPost) {
+            return;
+        }
+
+        if (location !== 'Channel' && location !== 'Thread') {
+            return;
+        }
+
+        PerformanceMetricsManager.finishLoad(location === 'Thread' ? 'THREAD' : 'CHANNEL', serverUrl);
+        PerformanceMetricsManager.endMetric('mobile_channel_switch', serverUrl);
+    }, []);
+
     const highlightSaved = isSaved && !skipSavedHeader;
     const hightlightPinned = post.isPinned && !skipPinnedHeader;
     const itemTestID = `${testID}.${post.id}`;
     const rightColumnStyle: StyleProp<ViewStyle> = [styles.rightColumn, (Boolean(post.rootId) && isLastReply && styles.rightColumnPadding)];
     const pendingPostStyle: StyleProp<ViewStyle> | undefined = isPendingOrFailed ? styles.pendingPost : undefined;
+    const getEmbedFromMetadata = (metadata: PostMetadata) => {
+        if (!metadata || !metadata.embeds || metadata.embeds.length === 0) {
+            return null;
+        }
+        return metadata.embeds[0];
+    };
+    const getEmbed = () => {
+        const {metadata} = post;
+        if (metadata) {
+            return getEmbedFromMetadata(metadata);
+        }
+        return null;
+    };
+    const embed = getEmbed();
 
     let highlightedStyle: StyleProp<ViewStyle>;
     if (highlight) {
@@ -290,14 +372,43 @@ const Post = ({
     let body;
     if (isSystemPost && !isEphemeral && !isAutoResponder) {
         body = (
-            <SystemMessage
-                location={location}
-                post={post}
-            />
+            <>
+                <SystemMessage
+                    location={location}
+                    post={post}
+                />
+                {post.type === 'system_post_reminder' && !(post.props.reschedule || post.props.completed) && (
+                    <View>
+                        <TouchableOpacity
+                            style={[buttonBackgroundStyle(theme, 'm', 'primary'), {width: '100%'}]}
+                            onPress={handlePostponePress}
+                        >
+                            <FormattedText
+                                id='infomaniak.post.reminder.postpone'
+                                defaultMessage='Postpone the reminder'
+                                style={buttonTextStyle(theme, 's', 'primary')}
+                            />
+                        </TouchableOpacity>
+                        <View style={{marginTop: 10}}>
+                            <TouchableOpacity
+                                style={[buttonBackgroundStyle(theme, 'm', 'secondary'), {width: '100%'}]}
+                                onPress={handleMarkRemindAsDone}
+                            >
+                                <FormattedText
+                                    id='infomaniak.post.reminder.markAsCompleted'
+                                    defaultMessage='Mark as completed'
+                                    style={buttonTextStyle(theme, 's', 'secondary')}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )}
+            </>
+
         );
     } else if (isCallsPost && !hasBeenDeleted) {
         body = <IkCallsCustomMessage post={post}/>;
-    } else if (post.metadata && post.metadata.embeds && post.metadata.embeds.length > 0 && post.metadata.embeds[0].type === 'permalink') {
+    } else if (post.metadata && post.metadata.embeds && post.metadata.embeds.length > 0 && post.metadata.embeds[0].type === 'permalink' && embed) {
         const postLink = `/${post.metadata.embeds[0].data.team_name}/pl/${post.metadata.embeds[0].data.post_id}`;
         body = (
             <>
@@ -323,8 +434,8 @@ const Post = ({
                 />
 
                 <PreviewMessage
+                    metadata={embed.data}
                     post={post}
-                    channelDisplayName={post.metadata.embeds[0].data.channel_display_name}
                     theme={theme}
                     location={location}
                     postLink={postLink}

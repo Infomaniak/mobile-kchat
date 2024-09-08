@@ -6,29 +6,29 @@ on:
       - labeled
 
 env:
-  NODE_VERSION: 20.11.0
+  NODE_VERSION: 20.13.1
   TERM: xterm
 
 jobs:
   test:
-    runs-on: [ self-hosted, macOS, iOS ]
+    runs-on: [self-hosted, macOS, iOS]
     if: ${{ github.event.label.name == 'Build Apps for PR' || github.event.label.name == 'Build App for iOS' || github.event.label.name == 'Build App for Android' }}
     steps:
       - name: ci/checkout-repo
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: ci/test
         uses: ./.github/actions/test
 
   build-ios-pr:
-    runs-on: [ self-hosted, macOS, iOS ]
+    runs-on: [self-hosted, macOS, iOS]
     if: ${{ github.event.label.name == 'Build Apps for PR' || github.event.label.name == 'Build App for iOS' }}
     needs:
       - test
     steps:
       - name: ci/checkout-repo
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
@@ -62,19 +62,19 @@ jobs:
         working-directory: ./fastlane
 
       - name: ci/upload-ios-pr-build
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: ios-build-pr-${{ github.run_id }}
           path: "*.ipa"
 
   build-android-pr:
-    runs-on: [ self-hosted, macOS, Android ]
+    runs-on: [self-hosted, macOS, Android]
     if: ${{ github.event.label.name == 'Build Apps for PR' || github.event.label.name == 'Build App for Android' }}
     needs:
       - test
     steps:
       - name: ci/checkout-repo
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
@@ -96,7 +96,7 @@ jobs:
         working-directory: ./fastlane
 
       - name: ci/upload-android-pr-build
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: android-build-pr-${{ github.run_id }}
           path: "*.apk"

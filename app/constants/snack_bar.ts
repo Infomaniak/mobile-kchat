@@ -9,6 +9,7 @@ export const SNACK_BAR_TYPE = keyMirror({
     FAVORITE_CHANNEL: null,
     FOLLOW_THREAD: null,
     INFO_COPIED: null,
+    LEAVE_PRIVATE_CHANNEL: null,
     LINK_COPIED: null,
     MESSAGE_COPIED: null,
     MUTE_CHANNEL: null,
@@ -57,6 +58,12 @@ export const SNACK_BAR_CONFIG: Record<string, SnackBarConfig> = {
         defaultMessage: 'Info copied to clipboard',
         iconName: 'content-copy',
         canUndo: false,
+    },
+    LEAVE_PRIVATE_CHANNEL: {
+        id: t('snack.bar.leave.private.channel'),
+        defaultMessage: 'You left the channel {displayName}',
+        iconName: 'exit-to-app',
+        canUndo: true,
     },
     LINK_COPIED: {
         id: t('snack.bar.link.copied'),

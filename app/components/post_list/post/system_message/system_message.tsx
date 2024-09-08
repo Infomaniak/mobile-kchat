@@ -1,10 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import moment from 'moment-timezone';
 import React from 'react';
 import {type IntlShape, useIntl} from 'react-intl';
 import {type StyleProp, Text, type TextStyle, View, type ViewStyle} from 'react-native';
 
+import {getUserTimezone} from '@app/utils/user';
 import Markdown from '@components/markdown';
 import {postTypeMessages} from '@components/post_list/combined_user_activity/messages';
 import PreviewMessage from '@components/post_list/post/preview_message';
@@ -23,6 +25,7 @@ type SystemMessageProps = {
     author?: UserModel;
     location: string;
     post: PostModel;
+    currentUser?: UserModel;
 }
 
 type RenderersProps = SystemMessageProps & {
@@ -37,7 +40,7 @@ type RenderersProps = SystemMessageProps & {
     theme: Theme;
 }
 
-type RenderMessageProps = RenderersProps & {
+type RenderMessageProps = Omit<RenderersProps, 'currentUser'> & {
     localeHolder: {
         id: string;
         defaultMessage: string;
@@ -83,6 +86,23 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
         previewUserId = post.metadata.embeds[0].data.post.user_id;
     }
 
+    const getEmbedFromMetadata = (metadata: PostMetadata) => {
+        if (!metadata || !metadata.embeds || metadata.embeds.length === 0) {
+            return null;
+        }
+        return metadata.embeds[0];
+    };
+
+    const getEmbed = () => {
+        const {metadata} = post;
+        if (metadata) {
+            return getEmbedFromMetadata(metadata);
+        }
+        return null;
+    };
+
+    const embed = getEmbed();
+
     return (
         <View style={containerStyle}>
             <Markdown
@@ -94,14 +114,19 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
                 value={intl.formatMessage(localeHolder, values)}
                 theme={theme}
             />
-            {post.type === Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL && previewUserId && (
+            {(
+                post.type === Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL ||
+                post.type === Post.POST_TYPES.IK_SYSTEM_POST_REMINDER
+            ) &&
+            previewUserId &&
+            embed != null && (
                 <View>
                     <PreviewMessage
-                        channelDisplayName={post.props.channel_name}
+                        metadata={embed.data}
                         post={post}
                         previewUserId={previewUserId}
                         theme={theme}
-                        postLink={post.props.post_link}
+                        postLink={post.type === Post.POST_TYPES.IK_SYSTEM_POST_REMINDER ? post.props.link : post.props.post_link}
                         location={location}
                         textStyles={textStyles}
                     />
@@ -288,20 +313,60 @@ const renderGuestJoinChannelMessage = ({post, styles, location, intl, theme}: Re
     return renderMessage({post, styles, intl, location, localeHolder, values, theme});
 };
 
-const renderReminderSystemBotMessage = ({post, styles, location, intl, theme}: RenderersProps) => {
+const renderReminderSystemBotMessage = ({post, styles, location, intl, theme, currentUser}: RenderersProps) => {
     if (!post.props.username) {
         return null;
     }
 
     const username = renderUsername(post.props.username);
     const permaLink = `[${post.props.link}](${post.props.link})`;
+    const link = `[this message](${post.props.link})`;
 
-    const localeHolder = {
-        id: t('infomaniak.post.reminder.systemBot'),
+    const timezone = getUserTimezone(currentUser);
+    const targetMoment = moment.tz(post.props.target_time, timezone as string);
+    const startOfDay = moment().startOf('day');
+    const diffInDays = startOfDay.diff(targetMoment, 'days');
+
+    let formattedTargetTime;
+
+    switch (diffInDays) {
+        case 0:
+            formattedTargetTime = intl.formatMessage(
+                {id: 'infomaniak.post.reminder.systemBot.today', defaultMessage: 'at {time}'},
+                {time: targetMoment.format('LT')},
+            );
+            break;
+        case 1:
+            formattedTargetTime = intl.formatMessage(
+                {id: 'infomaniak.post.reminder.systemBot.tomorrow', defaultMessage: 'tomorrow at {time}'},
+                {time: targetMoment.format('LT')},
+            );
+            break;
+        default:
+            formattedTargetTime = targetMoment.format('MMMM D, h:mm A');
+            break;
+    }
+
+    let localeHolder = {
+        id: 'infomaniak.post.reminder.systemBot',
         defaultMessage: 'Hi there, here\'s your reminder about this message from {username}:\n{permaLink}',
     };
 
-    const values = {username, permaLink};
+    if (post.props.reschedule) {
+        localeHolder = {
+            id: 'infomaniak.post.reminder.reschedule',
+            defaultMessage: 'Alright, I will remind you of {link} {formattedTargetTime}.',
+        };
+    }
+
+    if (post.props.completed) {
+        localeHolder = {
+            id: 'infomaniak.post.reminder.completed',
+            defaultMessage: 'Alright, I have marked the reminder for {link} as completed!',
+        };
+    }
+
+    const values = {username, permaLink, link, formattedTargetTime};
     return renderMessage({post, styles, intl, location, localeHolder, values, theme});
 };
 
@@ -315,7 +380,7 @@ const systemMessageRenderers = {
     [Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL]: renderUserMentionedInChannelMessage,
 };
 
-export const SystemMessage = ({post, location, author, hideGuestTags}: SystemMessageProps & { hideGuestTags: boolean}) => {
+export const SystemMessage = ({post, location, author, hideGuestTags, currentUser}: SystemMessageProps & { hideGuestTags: boolean}) => {
     const intl = useIntl();
     const theme = useTheme();
     const style = getStyleSheet(theme);
@@ -347,7 +412,7 @@ export const SystemMessage = ({post, location, author, hideGuestTags}: SystemMes
         );
     }
 
-    return renderer({post, author, location, styles, intl, theme});
+    return renderer({post, author, location, styles, intl, theme, currentUser});
 };
 
 export default SystemMessage;

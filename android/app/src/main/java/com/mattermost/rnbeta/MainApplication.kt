@@ -1,0 +1,155 @@
+package com.mattermost.rnbeta
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.res.Configuration
+import android.os.Build
+import android.os.Bundle
+import android.util.Log
+
+import com.facebook.react.bridge.ReactContext
+import com.facebook.react.bridge.UiThreadUtil
+import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
+import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
+import com.facebook.react.defaults.DefaultReactNativeHost
+import com.facebook.react.modules.network.OkHttpClientProvider
+import com.facebook.react.PackageList
+import com.facebook.react.ReactHost
+import com.facebook.react.ReactInstanceManager
+import com.facebook.react.ReactNativeHost
+import com.facebook.react.ReactPackage
+import com.facebook.soloader.SoLoader
+
+import com.mattermost.networkclient.RCTOkHttpClientFactory
+import com.mattermost.notification.NotificationUtils.createCallNotificationChannel
+import com.mattermost.rnshare.helpers.RealPathUtil
+
+import com.nozbe.watermelondb.jsi.JSIInstaller
+
+import com.oney.WebRTCModule.WebRTCModuleOptions;
+
+import com.reactnativenavigation.NavigationApplication
+
+import com.wix.reactnativenotifications.core.AppLaunchHelper
+import com.wix.reactnativenotifications.core.AppLifecycleFacade
+import com.wix.reactnativenotifications.core.JsIOHelper
+import com.wix.reactnativenotifications.core.notification.INotificationsApplication
+import com.wix.reactnativenotifications.core.notification.IPushNotification
+import com.wix.reactnativenotifications.RNNotificationsPackage
+
+import expo.modules.ApplicationLifecycleDispatcher
+import expo.modules.ReactNativeHostWrapper
+import expo.modules.image.okhttp.ExpoImageOkHttpClientGlideModule
+
+import java.io.File
+
+class MainApplication : NavigationApplication(), INotificationsApplication {
+    private var listenerAdded = false
+
+    override val reactNativeHost: ReactNativeHost =
+        ReactNativeHostWrapper(this,
+            object : DefaultReactNativeHost(this) {
+                override fun getPackages(): List<ReactPackage> =
+                    PackageList(this).packages.apply {
+                        // Packages that cannot be autolinked yet can be added manually here, for example:
+                        // add(MyReactNativePackage())
+                        add(RNNotificationsPackage(this@MainApplication))
+                    }
+
+                override fun getJSMainModuleName(): String = "index"
+
+                override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
+
+                override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
+                override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
+            })
+
+    override val reactHost: ReactHost
+        get() = getDefaultReactHost(applicationContext, reactNativeHost)
+
+    override fun onCreate() {
+        super.onCreate()
+
+        // Delete any previous temp files created by the app
+        val tempFolder = File(applicationContext.cacheDir, RealPathUtil.CACHE_DIR_NAME)
+        RealPathUtil.deleteTempFiles(tempFolder)
+        Log.i("ReactNative", "Cleaning temp cache " + tempFolder.absolutePath)
+
+        // Tells React Native to use our RCTOkHttpClientFactory which builds an OKHttpClient
+        // with a cookie jar defined in APIClientModule and an interceptor to intercept all
+        // requests that originate from React Native's OKHttpClient
+        OkHttpClientProvider.setOkHttpClientFactory(RCTOkHttpClientFactory())
+        ExpoImageOkHttpClientGlideModule.okHttpClient = RCTOkHttpClientFactory().createNewNetworkModuleClient()
+
+        SoLoader.init(this, false)
+        if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
+            // If you opted-in for the New Architecture, we load the native entry point for this app.
+            load(bridgelessEnabled = false)
+        }
+
+        // @jitsi/react-native-sdk setup
+        // Ref https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#android
+        val options: WebRTCModuleOptions = WebRTCModuleOptions.getInstance()
+        options.enableMediaProjectionService = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createCallNotificationChannel()
+        }
+
+        ApplicationLifecycleDispatcher.onApplicationCreate(this)
+        registerJSIModules()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        ApplicationLifecycleDispatcher.onConfigurationChanged(this, newConfig)
+    }
+
+    override fun getPushNotification(
+        context: Context?,
+        bundle: Bundle?,
+        defaultFacade: AppLifecycleFacade?,
+        defaultAppLaunchHelper: AppLaunchHelper?
+    ): IPushNotification {
+        return CustomPushNotification(
+            context!!,
+            bundle!!,
+            defaultFacade!!,
+            defaultAppLaunchHelper!!,
+            JsIOHelper()
+        )
+    }
+
+    @SuppressLint("VisibleForTests")
+    private fun runOnJSQueueThread(action: () -> Unit) {
+        reactNativeHost.reactInstanceManager.currentReactContext?.runOnJSQueueThread {
+            action()
+        } ?: UiThreadUtil.runOnUiThread {
+            reactNativeHost.reactInstanceManager.currentReactContext?.runOnJSQueueThread {
+                action()
+            }
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun registerJSIModules() {
+        val reactInstanceManager = reactNativeHost.reactInstanceManager
+
+        if (!listenerAdded) {
+            listenerAdded = true
+            reactInstanceManager.addReactInstanceEventListener(object : ReactInstanceManager.ReactInstanceEventListener {
+                override fun onReactContextInitialized(context: ReactContext) {
+                    runOnJSQueueThread {
+                        registerWatermelonJSI(context)
+                    }
+                }
+            })
+        }
+    }
+
+    private fun registerWatermelonJSI(context: ReactContext) {
+        val holder = context.javaScriptContextHolder?.get()
+        if (holder != null) {
+            JSIInstaller.install(context, holder)
+        }
+    }
+}

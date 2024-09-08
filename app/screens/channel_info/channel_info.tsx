@@ -28,7 +28,6 @@ type Props = {
     closeButtonId: string;
     componentId: AvailableScreens;
     type?: ChannelType;
-    canEnableDisableCalls: boolean;
     isCallsEnabledInChannel: boolean;
     canManageMembers: boolean;
     isCRTEnabled: boolean;
@@ -102,7 +101,6 @@ const ChannelInfo = ({
                 <ChannelActions
                     channelId={channelId}
                     inModal={true}
-                    dismissChannelInfo={onPressed}
                     callsEnabled={callsAvailable}
                     testID='channel_info.channel_actions'
                 />

@@ -8,6 +8,16 @@
 	<string>kChat</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.infomaniak.chat.ShareExtension</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>XPC!</string>
+	<key>CFBundleShortVersionString</key>
+	<string>2.18.0</string>
+	<key>CFBundleVersion</key>
+	<string>535</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -31,9 +41,9 @@
 				<integer>10</integer>
 				<key>NSExtensionActivationSupportsText</key>
 				<true/>
-				<key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
-				<integer>1</integer>
 				<key>NSExtensionActivationSupportsWebPageWithMaxCount</key>
+				<integer>1</integer>
+				<key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
 				<integer>1</integer>
 			</dict>
 		</dict>
@@ -65,8 +75,8 @@
 		<string>Metropolis-Light.ttf</string>
 		<string>compass-icons.ttf</string>
 		<string>SuisseIntl-Regular.ttf</string>
-        <string>SuisseIntl-RegularItalic.ttf</string>
-        <string>SuisseIntl-SemiBold.ttf</string>
+		<string>SuisseIntl-RegularItalic.ttf</string>
+		<string>SuisseIntl-SemiBold.ttf</string>
 	</array>
 </dict>
 </plist>

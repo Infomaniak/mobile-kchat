@@ -7,12 +7,13 @@
 #import <RNKeychain/RNKeychainManager.h>
 #import <ReactNativeNavigation/ReactNativeNavigation.h>
 #import <UserNotifications/UserNotifications.h>
-#import <RNHWKeyboardEvent.h>
 
 #import "kChat-Swift.h"
 #import <os/log.h>
 
 @implementation AppDelegate
+
+@synthesize orientationLock;
 
 NSString* const NOTIFICATION_MESSAGE_ACTION = @"message";
 NSString* const NOTIFICATION_CLEAR_ACTION = @"clear";
@@ -36,11 +37,8 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  if ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad )
-  {
-    _allowRotation = YES;
-  }
-
+  OrientationManager.shared.delegate = self;
+  
   // Clear keychain on first run in case of reinstallation
   if (![[NSUserDefaults standardUserDefaults] objectForKey:@"FirstRun"]) {
 
@@ -60,15 +58,14 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
 
   [RNNotifications startMonitorNotifications];
 
-  self.moduleName = @"Mattermost";
-  // You can add your custom initial props in the dictionary below.
-  // They will be passed down to the ViewController used by React Native.
-  self.initialProps = @{};
+  os_log(OS_LOG_DEFAULT, "Mattermost started!!");
   [ReactNativeNavigation bootstrapWithDelegate:self launchOptions:launchOptions];
 
-  os_log(OS_LOG_DEFAULT, "Mattermost started!!");
-
   return YES;
+}
+
+-(BOOL)bridgelessEnabled {
+  return NO;
 }
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
@@ -109,6 +106,13 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
     return;
   }
 
+  if (![[GekidouWrapper default] verifySignature:userInfo]) {
+      NSMutableDictionary *notification = [userInfo mutableCopy];
+      [notification setValue:@"false" forKey:@"verified"];
+      [RNNotifications didReceiveBackgroundNotification:notification withCompletionHandler:completionHandler];
+      return;
+  }
+
   if (isClearAction) {
     // When CRT is OFF:
     // If received a notification that a channel was read, remove all notifications from that channel (only with app in foreground/background)
@@ -138,18 +142,39 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
 }
 
 // Required for deeplinking
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options{
+- (BOOL) application: (UIApplication *)application
+             openURL: (NSURL *)url
+             options: (NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
+{
+  // https://commerce.nearform.com/open-source/react-native-app-auth/docs#define-openurl-callback-in-appdelegate
+  if ([self.authorizationFlowManagerDelegate resumeExternalUserAgentFlowWithURL:url]) {
+    return YES;
+  }
   return [RCTLinkingManager application:application openURL:url options:options];
 }
 
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+- (BOOL) application: (UIApplication *)application
+             openURL: (NSURL *)url
+   sourceApplication: (NSString *)sourceApplication
+          annotation: (id)annotation
+{
   return [RCTLinkingManager application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
 }
 
 // Only if your app is using [Universal Links](https://developer.apple.com/library/prerelease/ios/documentation/General/Conceptual/AppSearch/UniversalLinks.html).
-- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity
- restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> *restorableObjects))restorationHandler
+- (BOOL) application: (UIApplication *)application
+continueUserActivity: (nonnull NSUserActivity *)userActivity
+  restorationHandler: (nonnull void (^)(NSArray<id<UIUserActivityRestoring>> *_Nullable))restorationHandler
 {
+  if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
+    if (self.authorizationFlowManagerDelegate) {
+      BOOL resumableAuth = [self.authorizationFlowManagerDelegate resumeExternalUserAgentFlowWithURL:userActivity.webpageURL];
+      if (resumableAuth) {
+        return YES;
+      }
+    }
+  }
+
   INInteraction *interaction = userActivity.interaction;
   if ([interaction.intent isKindOfClass:[INStartAudioCallIntent class]]) {
       INStartAudioCallIntent *startAudioCallIntent = (INStartAudioCallIntent *)interaction.intent;
@@ -187,11 +212,7 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
 }
 
 - (UIInterfaceOrientationMask)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window {
-  if (_allowRotation == YES) {
-        return UIInterfaceOrientationMaskAllButUpsideDown;
-    }else{
-        return (UIInterfaceOrientationMaskPortrait);
-    }
+  return self.orientationLock;
 }
 
 - (NSArray<id<RCTBridgeModule>> *)extraModulesForBridge:(RCTBridge *)bridge
@@ -202,58 +223,6 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
   // You can inject any extra modules that you would like here, more information at:
   // https://facebook.github.io/react-native/docs/native-modules-ios.html#dependency-injection
   return extraModules;
-}
-
-/*
-  https://mattermost.atlassian.net/browse/MM-10601
-  Required by react-native-hw-keyboard-event
-  (https://github.com/emilioicai/react-native-hw-keyboard-event)
-*/
-RNHWKeyboardEvent *hwKeyEvent = nil;
-- (NSMutableArray<UIKeyCommand *> *)keyCommands {
-  if (hwKeyEvent == nil) {
-    hwKeyEvent = [[RNHWKeyboardEvent alloc] init];
-  }
-
-  NSMutableArray *commands = [NSMutableArray new];
-
-  if ([hwKeyEvent isListening]) {
-    UIKeyCommand *enter = [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(sendEnter:)];
-    UIKeyCommand *shiftEnter = [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:UIKeyModifierShift action:@selector(sendShiftEnter:)];
-    UIKeyCommand *findChannels = [UIKeyCommand keyCommandWithInput:@"k" modifierFlags:UIKeyModifierCommand action:@selector(sendFindChannels:)];
-    if (@available(iOS 13.0, *)) {
-      [enter setTitle:@"Send message"];
-      [enter setDiscoverabilityTitle:@"Send message"];
-      [shiftEnter setTitle:@"Add new line"];
-      [shiftEnter setDiscoverabilityTitle:@"Add new line"];
-      [findChannels setTitle:@"Find channels"];
-      [findChannels setDiscoverabilityTitle:@"Find channels"];
-    }
-    if (@available(iOS 15.0, *)) {
-      [enter setWantsPriorityOverSystemBehavior:YES];
-      [shiftEnter setWantsPriorityOverSystemBehavior:YES];
-      [findChannels setWantsPriorityOverSystemBehavior:YES];
-    }
-
-    [commands addObject: enter];
-    [commands addObject: shiftEnter];
-    [commands addObject: findChannels];
-  }
-
-  return commands;
-}
-
-- (void)sendEnter:(UIKeyCommand *)sender {
-  NSString *selected = sender.input;
-  [hwKeyEvent sendHWKeyEvent:@"enter"];
-}
-- (void)sendShiftEnter:(UIKeyCommand *)sender {
-  NSString *selected = sender.input;
-  [hwKeyEvent sendHWKeyEvent:@"shift-enter"];
-}
-- (void)sendFindChannels:(UIKeyCommand *)sender {
-  NSString *selected = sender.input;
-  [hwKeyEvent sendHWKeyEvent:@"find-channels"];
 }
 
 - (NSDictionary *)prepareInitialProps
@@ -267,11 +236,33 @@ RNHWKeyboardEvent *hwKeyEvent = nil;
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
+  return [self getBundleURL];
+}
+
+- (NSURL *)getBundleURL
+{
   #if DEBUG
     return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
   #else
     return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
   #endif
+}
+
+- (NSMutableArray<UIKeyCommand *> *)keyCommands {
+  return [MattermostHardwareKeyboardWrapper registerKeyCommandsWithEnterPressed:
+          @selector(sendEnter:) shiftEnterPressed:@selector(sendShiftEnter:) findChannels:@selector(sendFindChannels:)];
+}
+
+- (void)sendEnter:(UIKeyCommand *)sender {
+  [MattermostHardwareKeyboardWrapper enterKeyPressed];
+}
+
+- (void)sendShiftEnter:(UIKeyCommand *)sender {
+  [MattermostHardwareKeyboardWrapper shiftEnterKeyPressed];
+}
+
+- (void)sendFindChannels:(UIKeyCommand *)sender {
+  [MattermostHardwareKeyboardWrapper findChannels];
 }
 
 @end

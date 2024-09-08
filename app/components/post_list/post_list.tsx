@@ -415,7 +415,6 @@ const PostList = ({
             }
             {limit && !limit.ignored &&
                 <LimitedMessages
-                    channelId={channelId}
                     theme={theme}
                     testID={`${testID}.limited_messages_button`}
                     onClose={onCloseLimitView}

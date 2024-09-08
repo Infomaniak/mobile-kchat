@@ -7,7 +7,6 @@ import {type LayoutChangeEvent, StyleSheet, View} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {storeLastViewedThreadIdAndServer, removeLastViewedThreadIdAndServer} from '@actions/app/global';
-import FloatingCallContainer from '@calls/components/floating_call_container';
 import FreezeScreen from '@components/freeze_screen';
 import PostDraft from '@components/post_draft';
 import RoundedHeaderContext from '@components/rounded_header_context';
@@ -22,16 +21,13 @@ import NavigationStore from '@store/navigation_store';
 
 import ThreadPostList from './thread_post_list';
 
+import type {KeyboardTrackingViewRef} from '@mattermost/keyboard-tracker';
 import type PostModel from '@typings/database/models/servers/post';
 import type {AvailableScreens} from '@typings/screens/navigation';
-import type {KeyboardTrackingViewRef} from 'react-native-keyboard-tracking-view';
 
 type ThreadProps = {
     componentId: AvailableScreens;
     isCRTEnabled: boolean;
-    showJoinCallBanner: boolean;
-    isInACall: boolean;
-    showIncomingCalls: boolean;
     rootId: string;
     rootPost?: PostModel;
 };
@@ -48,9 +44,6 @@ const Thread = ({
     isCRTEnabled,
     rootId,
     rootPost,
-    showJoinCallBanner,
-    isInACall,
-    showIncomingCalls,
 }: ThreadProps) => {
     const postDraftRef = useRef<KeyboardTrackingViewRef>(null);
     const [containerHeight, setContainerHeight] = useState(0);
@@ -109,8 +102,6 @@ const Thread = ({
         setContainerHeight(e.nativeEvent.layout.height);
     }, []);
 
-    const showFloatingCallContainer = showJoinCallBanner || isInACall || showIncomingCalls;
-
     return (
         <FreezeScreen>
             <SafeAreaView
@@ -140,15 +131,6 @@ const Thread = ({
                         isChannelScreen={false}
                     />
                 </>
-                }
-                {showFloatingCallContainer &&
-                    <FloatingCallContainer
-                        channelId={rootPost!.channelId}
-                        showJoinCallBanner={showJoinCallBanner}
-                        showIncomingCalls={showIncomingCalls}
-                        isInACall={isInACall}
-                        threadScreen={true}
-                    />
                 }
             </SafeAreaView>
         </FreezeScreen>

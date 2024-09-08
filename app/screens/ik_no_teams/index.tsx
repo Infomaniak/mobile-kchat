@@ -1,12 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback} from 'react';
+import {Button} from '@rneui/base';
+import React, {useCallback, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Image, Linking, Text, View} from 'react-native';
-import Button from 'react-native-button';
 
-import FormattedText from '@components/formatted_text';
 import LaunchType from '@constants/launch';
 import {getDefaultThemeByAppearance} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
@@ -58,8 +57,8 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         marginTop: 16,
     },
     ikButton: {
-        width: '100%',
-        borderRadius: 8,
+        minWidth: 196,
+        borderRadius: 16,
         marginLeft: 20,
         marginRight: 20,
     },
@@ -67,10 +66,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 
 const InfomaniakNoTeams = () => {
     const theme = getDefaultThemeByAppearance();
-    const styleButtonText = buttonTextStyle(theme, 'lg', 'primary', 'default');
-    const styleButtonBackground = buttonBackgroundStyle(theme, 'lg', 'primary', 'default');
-    const styleDisconnectButtonText = buttonTextStyle(theme, 'lg', 'primary', 'inverted');
-    const styleDisconnectButtonBackground = buttonBackgroundStyle(theme, 'lg', 'link', 'inverted');
 
     const styles = getStyleSheet(theme);
     const intl = useIntl();
@@ -79,7 +74,9 @@ const InfomaniakNoTeams = () => {
         Linking.openURL('https://www.infomaniak.com/ksuite');
     }, [theme]);
 
+    const [loading, setLoading] = useState(false);
     const onDisconnectPressed = useCallback(() => {
+        setLoading(true);
         NetworkManager.invalidateGlobalClient();
         resetToInfomaniakLogin({launchType: LaunchType.Normal});
     }, [theme]);
@@ -107,25 +104,32 @@ const InfomaniakNoTeams = () => {
                     })}
                 </Text>
                 <Button
-                    containerStyle={[styles.discoverButton, styleButtonBackground, styles.ikButton]}
+                    title={intl.formatMessage({
+                        id: 'infomaniak.no_team.discover_ksuite',
+                        defaultMessage: 'Discover kSuite',
+                    })}
+                    titleStyle={buttonTextStyle(theme, 'lg', 'primary', 'default')}
+                    containerStyle={styles.discoverButton}
+                    buttonStyle={[
+                        buttonBackgroundStyle(theme, 'lg', 'primary', 'default'),
+                        styles.ikButton,
+                    ]}
                     onPress={onDiscoverKSuitePressed}
-                >
-                    <FormattedText
-                        defaultMessage={'Discover kSuite'}
-                        id={'infomaniak.no_team.discover_ksuite'}
-                        style={styleButtonText}
-                    />
-                </Button>
+                />
                 <Button
-                    containerStyle={[styles.disconnectButton, styleDisconnectButtonBackground, styles.ikButton]}
+                    title={intl.formatMessage({
+                        id: 'account.logout',
+                        defaultMessage: 'Disconnect',
+                    })}
+                    titleStyle={buttonTextStyle(theme, 'lg', 'primary', 'inverted')}
+                    containerStyle={styles.disconnectButton}
+                    buttonStyle={[
+                        buttonBackgroundStyle(theme, 'lg', 'link', 'inverted'),
+                        styles.ikButton,
+                    ]}
+                    loading={loading}
                     onPress={onDisconnectPressed}
-                >
-                    <FormattedText
-                        defaultMessage={'Disconnect'}
-                        id={'account.logout'}
-                        style={styleDisconnectButtonText}
-                    />
-                </Button>
+                />
             </View>
         </>
     );

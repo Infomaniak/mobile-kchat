@@ -1,10 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+/* eslint-disable max-nested-callbacks */
 /* eslint-disable max-lines */
 
 import {Database, Model, Q, Query, Relation} from '@nozbe/watermelondb';
-import {of as of$, Observable} from 'rxjs';
+import {of as of$, Observable, combineLatest, combineLatestWith} from 'rxjs';
 import {map as map$, switchMap, distinctUntilChanged} from 'rxjs/operators';
 
 import {General, Permissions} from '@constants';
@@ -241,6 +242,64 @@ export const getChannelById = async (database: Database, channelId: string) => {
     }
 };
 
+export const observeCurrentMember = (database: Database, channelId: string) => {
+    const channelMembers = observeChannelMembers(database, channelId);
+    const currentUserId = observeCurrentUserId(database);
+
+    const currentMember = combineLatest([channelMembers, currentUserId]).pipe(
+        map$(([members, userId]) => members.find((m) => m.userId === userId)),
+        distinctUntilChanged(),
+    );
+
+    return currentMember;
+};
+
+export const observeCurrentMemberIsChannelAdmin = (database: Database, channelId: string) => {
+    const channelMembers = observeChannelMembers(database, channelId);
+
+    return channelMembers.pipe(
+        switchMap((members) => of$(members.some((member) => member.schemeAdmin))),
+        distinctUntilChanged(),
+    );
+};
+
+export const observeIsLastAdminInChannel = (database: Database, channelId: string) => {
+    return observeChannelMembers(database, channelId).pipe(
+        combineLatestWith(
+            observeChannel(database, channelId),
+            observeCurrentUserId(database),
+            queryRoles(database).observe().pipe(map$((roles) => roles.map((r) => r))),
+            observeCurrentMemberIsChannelAdmin(database, channelId),
+        ),
+        switchMap(([
+            channelMembers,
+            channel,
+            currentUserId,
+            roles,
+            currentMemberIsChannelAdmin,
+        ]) => {
+            const guestsInChannelArray = Object.values(channelMembers).filter((user: {userId: string}) => user.userId !== '' && user.userId !== currentUserId);
+            const isPrivateChannel = channel && channel.type === General.PRIVATE_CHANNEL;
+            let hasChannelMembersAdmin = false;
+            if (isPrivateChannel && currentMemberIsChannelAdmin) {
+                hasChannelMembersAdmin = guestsInChannelArray.some((user: { userId: string; roles?: string }) => {
+                    if (user.userId === currentUserId) {
+                        return false;
+                    }
+                    return user.roles?.split(' ').some((roleName: string) => {
+                        const role = roles.find((r) => r.name === roleName);
+                        return role && role.permissions.includes('manage_private_channel_members');
+                    });
+                });
+                if (!hasChannelMembersAdmin) {
+                    return of$(true);
+                }
+            }
+            return of$(false);
+        }),
+    );
+};
+
 export const observeChannel = (database: Database, channelId: string) => {
     return database.get<ChannelModel>(CHANNEL).query(Q.where('id', channelId), Q.take(1)).observe().pipe(
         switchMap((result) => (result.length ? result[0].observe() : of$(undefined))),
@@ -356,9 +415,9 @@ export async function deleteChannelMembership(operator: ServerDataOperator, user
     }
 }
 
-export const addChannelMembership = async (operator: ServerDataOperator, userId: string, channelId: string) => {
+export const addChannelMembership = async (operator: ServerDataOperator, channelMembership: ChannelMembership) => {
     try {
-        await operator.handleChannelMembership({channelMemberships: [{channel_id: channelId, user_id: userId}], prepareRecordsOnly: false});
+        await operator.handleChannelMembership({channelMemberships: [channelMembership], prepareRecordsOnly: false});
         return {};
     } catch (error) {
         return {error};

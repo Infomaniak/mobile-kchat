@@ -3,10 +3,13 @@
 
 export const ABOUT = 'About';
 export const ACCOUNT = 'Account';
+export const AI_OPTIONS = 'AiOptions';
 export const APPS_FORM = 'AppForm';
 export const BOTTOM_SHEET = 'BottomSheet';
 export const BROWSE_CHANNELS = 'BrowseChannels';
 export const CALL = 'Call';
+export const CALL_PARTICIPANTS = 'CallParticipants';
+export const CALL_HOST_CONTROLS = 'CallHostControls';
 export const CHANNEL = 'Channel';
 export const CHANNEL_ADD_MEMBERS = 'ChannelAddMembers';
 export const CHANNEL_FILES = 'ChannelFiles';
@@ -33,6 +36,7 @@ export const INTERACTIVE_DIALOG = 'InteractiveDialog';
 export const INVITE = 'Invite';
 export const IN_APP_NOTIFICATION = 'InAppNotification';
 export const JOIN_TEAM = 'JoinTeam';
+export const LEAVE_CHANNEL_MEMBERS = 'LeaveChannelModal';
 export const LATEX = 'Latex';
 export const LOGIN = 'Login';
 export const MANAGE_CHANNEL_MEMBERS = 'ManageChannelMembers';
@@ -62,6 +66,7 @@ export const SETTINGS_NOTIFICATION_AUTO_RESPONDER = 'SettingsNotificationAutoRes
 export const SETTINGS_NOTIFICATION_EMAIL = 'SettingsNotificationEmail';
 export const SETTINGS_NOTIFICATION_MENTION = 'SettingsNotificationMention';
 export const SETTINGS_NOTIFICATION_PUSH = 'SettingsNotificationPush';
+export const SETTINGS_NOTIFICATION_CALL = 'SettingsNotificationCall';
 export const SHARE_FEEDBACK = 'ShareFeedback';
 export const SNACK_BAR = 'SnackBar';
 export const SSO = 'SSO';
@@ -82,10 +87,13 @@ export const TRANSCRIPTION = 'Transcription';
 export default {
     ABOUT,
     ACCOUNT,
+    AI_OPTIONS,
     APPS_FORM,
     BOTTOM_SHEET,
     BROWSE_CHANNELS,
     CALL,
+    CALL_PARTICIPANTS,
+    CALL_HOST_CONTROLS,
     CHANNEL,
     CHANNEL_ADD_MEMBERS,
     CHANNEL_FILES,
@@ -112,6 +120,7 @@ export default {
     INVITE,
     IN_APP_NOTIFICATION,
     JOIN_TEAM,
+    LEAVE_CHANNEL_MEMBERS,
     LATEX,
     LOGIN,
     MANAGE_CHANNEL_MEMBERS,
@@ -141,6 +150,7 @@ export default {
     SETTINGS_NOTIFICATION_EMAIL,
     SETTINGS_NOTIFICATION_MENTION,
     SETTINGS_NOTIFICATION_PUSH,
+    SETTINGS_NOTIFICATION_CALL,
     SHARE_FEEDBACK,
     SNACK_BAR,
     SSO,
@@ -189,6 +199,8 @@ export const SCREENS_AS_BOTTOM_SHEET = new Set<string>([
     THREAD_OPTIONS,
     REACTIONS,
     USER_PROFILE,
+    CALL_PARTICIPANTS,
+    CALL_HOST_CONTROLS,
     INFOMANIAK_QUOTA_EXCEEDED,
     INFOMANIAK_REMINDER,
 ]);

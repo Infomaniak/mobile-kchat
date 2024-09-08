@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useMemo} from 'react';
-import {useIntl} from 'react-intl';
+import {defineMessages, useIntl} from 'react-intl';
 
 import SettingContainer from '@components/settings/container';
 import SettingItem from '@components/settings/item';
@@ -16,16 +16,24 @@ import {getEmailInterval, getEmailIntervalTexts, getNotificationProps} from '@ut
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
-const mentionTexts = {
+const mentionTexts = defineMessages({
     crtOn: {
-        id: t('notification_settings.mentions'),
+        id: 'notification_settings.mentions',
         defaultMessage: 'Mentions',
     },
     crtOff: {
-        id: t('notification_settings.mentions_replies'),
+        id: 'notification_settings.mentions_replies',
         defaultMessage: 'Mentions and Replies',
     },
-};
+    callsOn: {
+        id: 'notification_settings.calls_on',
+        defaultMessage: 'On',
+    },
+    callsOff: {
+        id: 'notification_settings.calls_off',
+        defaultMessage: 'Off',
+    },
+});
 
 type NotificationsProps = {
     componentId: AvailableScreens;

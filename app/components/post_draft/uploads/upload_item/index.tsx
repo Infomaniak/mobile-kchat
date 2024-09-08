@@ -115,7 +115,7 @@ export default function UploadItem({
                 <ImageFile
                     file={file}
                     forwardRef={ref}
-                    resizeMode='cover'
+                    contentFit='cover'
                 />
             );
         }

@@ -2,8 +2,8 @@
 // See LICENSE.txt for license information.
 
 import CookieManager, {type Cookie} from '@react-native-cookies/cookies';
+import {Image} from 'expo-image';
 import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react-native';
-import FastImage from 'react-native-fast-image';
 
 import {storeOnboardingViewedValue} from '@actions/app/global';
 import {syncMultiTeam} from '@actions/remote/entry/ikcommon';
@@ -14,7 +14,6 @@ import {resetMomentLocale} from '@i18n';
 import {getAllServerCredentials, removeServerCredentials} from '@init/credentials';
 import {relaunchApp} from '@init/launch';
 import PushNotifications from '@init/push_notifications';
-import * as analytics from '@managers/analytics';
 import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {getAllServers, getServerDisplayName} from '@queries/app/servers';
@@ -72,8 +71,6 @@ class SessionManager {
     private clearCookiesForServer = async (serverUrl: string) => {
         if (Platform.OS === 'ios') {
             this.clearCookies(serverUrl, false);
-
-            // Also delete any cookies that were set by react-native-webview
             this.clearCookies(serverUrl, true);
         } else if (Platform.OS === 'android') {
             CookieManager.flush();
@@ -113,15 +110,9 @@ class SessionManager {
             await DatabaseManager.deleteServerDatabase(serverUrl);
         }
 
-        const analyticsClient = analytics.get(serverUrl);
-        if (analyticsClient) {
-            analyticsClient.reset();
-            analytics.invalidate(serverUrl);
-        }
-
         this.resetLocale();
         this.clearCookiesForServer(serverUrl);
-        FastImage.clearDiskCache();
+        Image.clearDiskCache();
         deleteFileCache(serverUrl);
         deleteFileCacheByDir('mmPasteInput');
         deleteFileCacheByDir('thumbnails');
@@ -160,14 +151,13 @@ class SessionManager {
         }
     };
 
-    private onLogout = async ({serverUrl}: LogoutCallbackArg) => {
+    private onLogout = async ({serverUrl, removeServer}: LogoutCallbackArg) => {
         if (this.terminatingSessionUrl === serverUrl) {
             return;
         }
         const activeServerUrl = await DatabaseManager.getActiveServerUrl();
         const activeServerDisplayName = await DatabaseManager.getActiveServerDisplayName();
-
-        await this.terminateSession(serverUrl, true);
+        await this.terminateSession(serverUrl, removeServer);
 
         if (activeServerUrl === serverUrl) {
             let displayName = '';

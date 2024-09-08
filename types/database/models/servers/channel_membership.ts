@@ -23,6 +23,9 @@ declare class ChannelMembershipModel extends Model {
     /* user_id: The foreign key to the related User record*/
     userId: string;
 
+    /* roles: The roles the user has in the channel */
+    roles: string;
+
     /* scheme_admin: Determines if the user is an admin of the channel*/
     schemeAdmin: boolean;
 

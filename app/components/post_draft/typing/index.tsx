@@ -18,6 +18,8 @@ type Props = {
     currentUserId: string;
 }
 
+type Action = 'typing' | 'recording';
+
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
         typing: {
@@ -33,9 +35,10 @@ function Typing({
     rootId,
     currentUserId,
 }: Props) {
-    const typingHeight = useSharedValue(0);
+    const height = useSharedValue(0);
     const typing = useRef<Array<{id: string; now: number; username: string}>>([]);
-    const timeoutToDisappear = useRef<NodeJS.Timeout>();
+    const recording = useRef<Array<{id: string; now: number; username: string}>>([]);
+    const timeoutToDisappear = useRef<{ [k in Action]?: NodeJS.Timeout }>({});
     const mounted = useRef(false);
     const [refresh, setRefresh] = useState(0);
 
@@ -45,12 +48,12 @@ function Typing({
     // This moves the list of post up. This may be rethought by UX in https://mattermost.atlassian.net/browse/MM-39681
     const typingAnimatedStyle = useAnimatedStyle(() => {
         return {
-            height: withTiming(typingHeight.value),
+            height: withTiming(height.value),
             marginBottom: 4,
         };
     });
 
-    const onUserStartTyping = useCallback((msg: any) => {
+    const useCreateOnUserStartAction = (action: Action) => useCallback((msg: any) => {
         if (channelId !== msg.channelId) {
             return;
         }
@@ -64,18 +67,24 @@ function Typing({
             return;
         }
 
-        typing.current = typing.current.filter(({id}) => id !== msg.userId);
-        typing.current.push({id: msg.userId, now: msg.now, username: msg.username});
-        if (timeoutToDisappear.current) {
-            clearTimeout(timeoutToDisappear.current);
-            timeoutToDisappear.current = undefined;
+        const ref = action === 'typing' ? typing : recording;
+        ref.current = ref.current.filter(({id}) => id !== msg.userId);
+        ref.current.push({id: msg.userId, now: msg.now, username: msg.username});
+        if (timeoutToDisappear.current[action]) {
+            clearTimeout(timeoutToDisappear.current[action]);
+            timeoutToDisappear.current[action] = undefined;
         }
         if (mounted.current) {
             setRefresh(Date.now());
         }
     }, [channelId, rootId]);
+    const onUserStartTyping = useCreateOnUserStartAction('typing');
+    const onUserStartRecording = useCreateOnUserStartAction('recording');
 
-    const onUserStopTyping = useCallback((msg: any) => {
+    const useCreateOnUserStopAction = (
+        action: Action,
+        ref: React.MutableRefObject<Array<{ id: string; now: number; username: string}>>,
+    ) => useCallback((msg: any) => {
         if (channelId !== msg.channelId) {
             return;
         }
@@ -85,24 +94,26 @@ function Typing({
             return;
         }
 
-        typing.current = typing.current.filter(({id, now}) => id !== msg.userId && now !== msg.now);
+        ref.current = ref.current.filter(({id, now}) => id !== msg.userId && now !== msg.now);
 
         if (timeoutToDisappear.current) {
-            clearTimeout(timeoutToDisappear.current);
-            timeoutToDisappear.current = undefined;
+            clearTimeout(timeoutToDisappear.current[action]);
+            timeoutToDisappear.current[action] = undefined;
         }
 
-        if (typing.current.length === 0) {
-            timeoutToDisappear.current = setTimeout(() => {
+        if (ref.current.length === 0) {
+            timeoutToDisappear.current[action] = setTimeout(() => {
                 if (mounted.current) {
                     setRefresh(Date.now());
                 }
-                timeoutToDisappear.current = undefined;
+                timeoutToDisappear.current[action] = undefined;
             }, 500);
         } else if (mounted.current) {
             setRefresh(Date.now());
         }
     }, [channelId, rootId]);
+    const onUserStopTyping = useCreateOnUserStopAction('typing', typing);
+    const onUserStopRecording = useCreateOnUserStopAction('recording', recording);
 
     useEffect(() => {
         mounted.current = true;
@@ -112,39 +123,48 @@ function Typing({
     }, []);
 
     useEffect(() => {
-        const listener = DeviceEventEmitter.addListener(Events.USER_TYPING, onUserStartTyping);
+        const listeners = [
+            DeviceEventEmitter.addListener(Events.USER_TYPING, onUserStartTyping),
+            DeviceEventEmitter.addListener(Events.USER_RECORDING, onUserStartRecording),
+            DeviceEventEmitter.addListener(Events.USER_STOP_TYPING, onUserStopTyping),
+            DeviceEventEmitter.addListener(Events.USER_STOP_RECORDING, onUserStopRecording),
+        ];
         return () => {
-            listener.remove();
+            for (const listener of listeners) {
+                listener.remove();
+            }
         };
-    }, [onUserStartTyping]);
+    }, []);
 
     useEffect(() => {
-        const listener = DeviceEventEmitter.addListener(Events.USER_STOP_TYPING, onUserStopTyping);
-        return () => {
-            listener.remove();
-        };
-    }, [onUserStopTyping]);
-
-    useEffect(() => {
-        typingHeight.value = typing.current.length ? TYPING_HEIGHT : 0;
+        height.value = (typing.current.length + recording.current.length) ? TYPING_HEIGHT : 0;
     }, [refresh]);
 
     useEffect(() => {
         typing.current = [];
-        typingHeight.value = 0;
-        if (timeoutToDisappear.current) {
-            clearTimeout(timeoutToDisappear.current);
-            timeoutToDisappear.current = undefined;
+        recording.current = [];
+        height.value = 0;
+        for (const action of ['typing', 'recording'] as Action[]) {
+            if (timeoutToDisappear.current[action]) {
+                clearTimeout(timeoutToDisappear.current[action]);
+                timeoutToDisappear.current[action] = undefined;
+            }
         }
     }, [channelId, rootId]);
 
-    const renderTyping = () => {
-        const nextTyping = typing.current.map(({username}) => username);
+    const renderAction = (action: Action) => {
+        const ref = action === 'typing' ? typing : recording;
+        const nextAction = ref.current.map(({username}) => username);
 
         // Max three names
-        nextTyping.splice(3);
+        nextAction.splice(3);
 
-        const numUsers = nextTyping.length;
+        const numUsers = nextAction.length;
+
+        const singleMessageId = action === 'typing' ? 'msg_typing.isTyping' : 'msg_recording.isRecording';
+        const singleDefaultMessage = action === 'typing' ? '{user} is typing...' : '{user} is recording...';
+        const pluralMessageId = action === 'typing' ? 'msg_typing.areTyping' : 'msg_recording.areRecording';
+        const pluralDefaultMessage = action === 'typing' ? '{users} and {last} are typing...' : '{users} et {last} are recording...';
 
         switch (numUsers) {
             case 0:
@@ -152,27 +172,27 @@ function Typing({
             case 1:
                 return (
                     <FormattedText
-                        id='msg_typing.isTyping'
-                        defaultMessage='{user} is typing...'
+                        id={singleMessageId}
+                        defaultMessage={singleDefaultMessage}
                         style={style.typing}
                         ellipsizeMode='tail'
                         numberOfLines={1}
                         values={{
-                            user: nextTyping[0],
+                            user: nextAction[0],
                         }}
                     />
                 );
             default: {
-                const last = nextTyping.pop();
+                const last = nextAction.pop();
                 return (
                     <FormattedText
-                        id='msg_typing.areTyping'
-                        defaultMessage='{users} and {last} are typing...'
+                        id={pluralMessageId}
+                        defaultMessage={pluralDefaultMessage}
                         style={style.typing}
                         ellipsizeMode='tail'
                         numberOfLines={1}
                         values={{
-                            users: (nextTyping.join(', ')),
+                            users: (nextAction.join(', ')),
                             last,
                         }}
                     />
@@ -183,7 +203,7 @@ function Typing({
 
     return (
         <Animated.View style={typingAnimatedStyle}>
-            {renderTyping()}
+            {renderAction('typing') || renderAction('recording')}
         </Animated.View>
     );
 }

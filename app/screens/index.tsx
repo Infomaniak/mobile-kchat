@@ -63,6 +63,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.ABOUT:
             screen = withServerDatabase(require('@screens/settings/about').default);
             break;
+        case Screens.AI_OPTIONS:
+            screen = withServerDatabase(require('@screens/ai_options/index').default);
+            break;
         case Screens.APPS_FORM:
             screen = withServerDatabase(require('@screens/apps_form').default);
             break;
@@ -154,6 +157,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.JOIN_TEAM:
             screen = withServerDatabase(require('@screens/join_team').default);
             break;
+        case Screens.LEAVE_CHANNEL_MEMBERS:
+            screen = withServerDatabase(require('@screens/leave_channel_modal').default);
+            break;
         case Screens.LATEX:
             screen = withServerDatabase(require('@screens/latex').default);
             break;
@@ -225,6 +231,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             break;
         case Screens.SETTINGS_NOTIFICATION_PUSH:
             screen = withServerDatabase(require('@screens/settings/notification_push').default);
+            break;
+        case Screens.SETTINGS_NOTIFICATION_CALL:
+            screen = withServerDatabase(require('@screens/settings/notification_call').default);
             break;
         case Screens.SHARE_FEEDBACK:
             screen = withServerDatabase(require('@screens/share_feedback').default);

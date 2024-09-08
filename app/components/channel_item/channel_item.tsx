@@ -7,7 +7,6 @@ import {StyleSheet, TouchableOpacity, View} from 'react-native';
 
 import Badge from '@components/badge';
 import ChannelIcon from '@components/channel_icon';
-import CompassIcon from '@components/compass_icon';
 import {General} from '@constants';
 import {HOME_PADDING} from '@constants/view';
 import {useTheme} from '@context/theme';
@@ -33,7 +32,6 @@ type Props = {
     onPress: (channel: ChannelModel | Channel) => void;
     teamDisplayName?: string;
     testID?: string;
-    hasCall: boolean;
     isOnCenterBg?: boolean;
     showChannelName?: boolean;
     isOnHome?: boolean;
@@ -116,7 +114,6 @@ const ChannelItem = ({
     onPress,
     teamDisplayName = '',
     testID,
-    hasCall,
     isOnCenterBg = false,
     showChannelName = false,
     isOnHome = false,
@@ -206,13 +203,6 @@ const ChannelItem = ({
                     value={mentionsCount}
                     style={[styles.badge, isMuted && styles.mutedBadge, isOnCenterBg && styles.badgeOnCenterBg]}
                 />
-                {hasCall &&
-                <CompassIcon
-                    name='phone-in-talk'
-                    size={16}
-                    style={[textStyles, styles.hasCall]}
-                />
-                }
             </View>
         </TouchableOpacity>
     );

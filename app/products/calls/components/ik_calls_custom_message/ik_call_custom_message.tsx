@@ -44,6 +44,18 @@ const CallPropsSchema = (() => {
 })();
 type CallPropsSchema = z.infer<typeof CallPropsSchema>
 
+type Props = {
+    currentUser?: UserModel;
+    isDM: boolean;
+    isMilitaryTime: boolean;
+    post: PostModel;
+};
+
+type PropsInner = Omit<Props, 'post'> & {
+    callProps: CallPropsSchema;
+    channelId: string;
+};
+
 const HORIZONTAL_SPACING = 14;
 const VERTICAL_SPACING = 9;
 
@@ -106,12 +118,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
 }));
 
-export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: {
-    currentUser?: UserModel;
-    isDM: boolean;
-    isMilitaryTime: boolean;
-    post: PostModel;
-}) => {
+const IkCallsCustomMessageInner = ({currentUser, isDM, isMilitaryTime, callProps, channelId}: PropsInner) => {
     const theme = useTheme();
     const isDark = isDarkTheme(theme);
     const timezone = getUserTimezone(currentUser);
@@ -119,8 +126,6 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
     const styles = getStyleSheet(theme);
     const isTabletDevice = isTablet();
 
-    const channelId = post.channelId;
-    const callProps = CallPropsSchema.parse(post.props);
     const {
         conference_id: conferenceId,
         status,
@@ -367,4 +372,21 @@ export const IkCallsCustomMessage = ({currentUser, isDM, isMilitaryTime, post}: 
 
         </View>
     );
+};
+
+export const IkCallsCustomMessage = ({post, ...props}: Props) => {
+    const channelId = post.channelId;
+    const callProps = CallPropsSchema.safeParse(post.props);
+
+    if (callProps.success) {
+        return (
+            <IkCallsCustomMessageInner
+                channelId={channelId}
+                callProps={callProps.data}
+                {...props}
+            />
+        );
+    }
+
+    return null;
 };

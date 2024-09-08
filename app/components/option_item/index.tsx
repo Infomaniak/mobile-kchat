@@ -132,6 +132,7 @@ export type OptionItemProps = {
     value?: string;
     onLayout?: (event: LayoutChangeEvent) => void;
     descriptionNumberOfLines?: number;
+    customIcon?: React.ReactNode;
 }
 
 const OptionItem = ({
@@ -140,6 +141,7 @@ const OptionItem = ({
     containerStyle,
     description,
     destructive,
+    customIcon,
     icon,
     iconColor,
     info,
@@ -247,7 +249,6 @@ const OptionItem = ({
     const onPress = useCallback(() => {
         action?.(value || '');
     }, [value, action]);
-
     const component = (
         <View
             testID={testID}
@@ -265,6 +266,9 @@ const OptionItem = ({
                             />
                         </View>
                     )}
+                    <View style={styles.iconContainer}>
+                        {customIcon}
+                    </View>
                     {type === OptionType.RADIO && radioComponent}
                     <View style={labelStyle}>
                         <Text

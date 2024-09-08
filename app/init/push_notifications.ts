@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import RNUtils from '@mattermost/rnutils/src';
 import {AppState, DeviceEventEmitter, Platform, type EmitterSubscription} from 'react-native';
 import {
     Notification,
@@ -18,11 +19,9 @@ import {storeDeviceToken} from '@actions/app/global';
 import {markChannelAsViewed} from '@actions/local/channel';
 import {updateThread} from '@actions/local/thread';
 import {backgroundNotification, openNotification} from '@actions/remote/notifications';
-import {isCallsStartedMessage} from '@calls/utils';
 import {Device, Events, Navigation, PushNotification, Screens} from '@constants';
 import DatabaseManager from '@database/manager';
 import {DEFAULT_LOCALE, getLocalizedMessage, t} from '@i18n';
-import NativeNotifications from '@notifications';
 import {getServerDisplayName} from '@queries/app/servers';
 import {getCurrentChannelId} from '@queries/servers/system';
 import {getIsCRTEnabled, getThreadById} from '@queries/servers/thread';
@@ -31,7 +30,7 @@ import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {isBetaApp} from '@utils/general';
 import {isMainActivity, isTablet} from '@utils/helpers';
-import {logInfo} from '@utils/log';
+import {logDebug, logInfo} from '@utils/log';
 import {convertToNotificationData} from '@utils/notification';
 
 class PushNotifications {
@@ -111,11 +110,6 @@ class PushNotifications {
 
     handleInAppNotification = async (serverUrl: string, notification: NotificationWithData) => {
         const {payload} = notification;
-
-        // Do not show overlay if this is a call-started message (the call_notification will alert the user)
-        if (isCallsStartedMessage(payload)) {
-            return;
-        }
 
         const database = DatabaseManager.serverDatabases[serverUrl]?.database;
         if (database) {
@@ -232,6 +226,10 @@ class PushNotifications {
 
     // This triggers when the app was in the background (iOS)
     onNotificationReceivedBackground = async (incoming: Notification, completion: (response: NotificationBackgroundFetchResult) => void) => {
+        if (incoming.payload.verified === 'false') {
+            logDebug('not handling background notification because it was not verified, ackId=', incoming.payload.ackId);
+            return;
+        }
         const notification = convertToNotificationData(incoming, false);
         this.processNotification(notification);
 
@@ -241,12 +239,18 @@ class PushNotifications {
     // This triggers when the app was in the foreground (Android and iOS)
     // Also triggers when the app was in the background (Android)
     onNotificationReceivedForeground = (incoming: Notification, completion: (response: NotificationCompletion) => void) => {
+        if (incoming.payload.verified === 'false') {
+            logDebug('not handling foreground notification because it was not verified, ackId=', incoming.payload.ackId);
+            return;
+        }
         const notification = convertToNotificationData(incoming, false);
         if (AppState.currentState !== 'inactive') {
             notification.foreground = AppState.currentState === 'active' && isMainActivity();
 
             this.processNotification(notification);
         }
+
+        // Always play a sound
         completion({alert: false, sound: true, badge: true});
     };
 
@@ -274,15 +278,15 @@ class PushNotifications {
     };
 
     removeChannelNotifications = async (serverUrl: string, channelId: string) => {
-        NativeNotifications.removeChannelNotifications(serverUrl, channelId);
+        RNUtils.removeChannelNotifications(serverUrl, channelId);
     };
 
     removeServerNotifications = (serverUrl: string) => {
-        NativeNotifications.removeServerNotifications(serverUrl);
+        RNUtils.removeServerNotifications(serverUrl);
     };
 
     removeThreadNotifications = async (serverUrl: string, threadId: string) => {
-        NativeNotifications.removeThreadNotifications(serverUrl, threadId);
+        RNUtils.removeThreadNotifications(serverUrl, threadId);
     };
 
     requestNotificationReplyPermissions = () => {

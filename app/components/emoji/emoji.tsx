@@ -2,14 +2,13 @@
 // See LICENSE.txt for license information.
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
+import {Image} from 'expo-image';
 import React from 'react';
 import {
-    Image,
     Platform,
     StyleSheet,
     Text,
 } from 'react-native';
-import FastImage from 'react-native-fast-image';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
@@ -27,6 +26,14 @@ import type {WithDatabaseArgs} from '@typings/database/database';
 const assetImages = new Map([
     ['kchat.png', require('@assets/images/emojis/kchat.png')],
     ['kmeet.png', require('@assets/images/emojis/kmeet.png')],
+    ['calendar.png', require('@assets/images/emojis/calendar.png')],
+    ['chk.png', require('@assets/images/emojis/chk.png')],
+    ['contacts.png', require('@assets/images/emojis/contacts.png')],
+    ['kdrive.png', require('@assets/images/emojis/kdrive.png')],
+    ['mail.png', require('@assets/images/emojis/mail.png')],
+    ['kpaste.png', require('@assets/images/emojis/kpaste.png')],
+    ['swisstransfer.png', require('@assets/images/emojis/swisstransfer.png')],
+    ['tasks.png', require('@assets/images/emojis/tasks.png')],
 ]);
 
 const Emoji = (props: EmojiProps) => {
@@ -138,11 +145,11 @@ const Emoji = (props: EmojiProps) => {
     };
 
     return (
-        <FastImage
+        <Image
             key={key}
             style={[commonStyle, imageStyle, {width, height}]}
             source={imgSource}
-            resizeMode={FastImage.resizeMode.contain}
+            contentFit='contain'
             testID={testID}
         />
     );

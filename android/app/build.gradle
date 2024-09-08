@@ -1,6 +1,6 @@
 apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
-apply plugin: 'kotlin-android'
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -111,8 +111,8 @@ android {
         applicationId "com.infomaniak.chat"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1_00_024_39
-        versionName "1.0.24"
+        versionCode 1_00_025_21
+        versionName "1.0.25"
         testBuildType System.getProperty('testBuildType', 'debug')
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         manifestPlaceholders = [
@@ -125,6 +125,7 @@ android {
             if (project.hasProperty('MATTERMOST_RELEASE_STORE_FILE')) {
                 storeFile file(MATTERMOST_RELEASE_STORE_FILE)
                 storePassword MATTERMOST_RELEASE_PASSWORD
+                keyAlias MATTERMOST_RELEASE_KEY_ALIAS
                 keyAlias MATTERMOST_RELEASE_KEY_ALIAS
                 keyPassword MATTERMOST_RELEASE_PASSWORD
             }
@@ -170,6 +171,7 @@ android {
             matchingFallbacks = ['release']
         }
     }
+
     // applicationVariants are e.g. debug, release
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
@@ -200,27 +202,15 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 
-    debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
-    debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
-        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
-    }
-
-    debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}")
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {
         implementation jscFlavor
     }
 
-    implementation "androidx.core:core-ktx:1.11.0-beta02"
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
-    implementation 'io.reactivex.rxjava3:rxjava:3.1.6'
-    implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
-    implementation 'androidx.window:window-core:1.1.0'
-    implementation 'androidx.window:window-rxjava3:1.0.0'
-    implementation 'androidx.window:window:1.0.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation "com.google.firebase:firebase-messaging:$firebaseVersion"
     implementation 'com.airbnb.android:lottie:6.4.0'
@@ -231,6 +221,12 @@ dependencies {
     androidTestImplementation('com.wix:detox:+')
     implementation project(':reactnativenotifications')
     implementation project(':watermelondb-jsi')
+
+    api('io.jsonwebtoken:jjwt-api:0.12.5')
+    runtimeOnly('io.jsonwebtoken:jjwt-impl:0.12.5')
+    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.12.5') {
+        exclude(group: 'org.json', module: 'json') //provided by Android natively
+    }
 }
 
 configurations.all {
@@ -260,7 +256,7 @@ configurations.all {
 
 // Run this once to be able to run the application with BUCK
 // puts all compile dependencies into folder libs for BUCK to use
-task copyDownloadableDepsToLibs(type: Copy) {
+tasks.register('copyDownloadableDepsToLibs', Copy) {
     from configurations.implementation
     into 'libs'
 }

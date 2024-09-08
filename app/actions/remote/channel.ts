@@ -7,7 +7,6 @@ import {DeviceEventEmitter} from 'react-native';
 import {addChannelToDefaultCategory, handleConvertedGMCategories, storeCategories} from '@actions/local/category';
 import {markChannelAsViewed, removeCurrentUserFromChannel, setChannelDeleteAt, storeMyChannelsForTeam, switchToChannel} from '@actions/local/channel';
 import {switchToGlobalThreads} from '@actions/local/thread';
-import {loadCallForChannel} from '@calls/actions/calls';
 import {DeepLink, Events, General, Preferences, Screens} from '@constants';
 import DatabaseManager from '@database/manager';
 import {privateChannelJoinPrompt} from '@helpers/api/channel';
@@ -79,13 +78,10 @@ export async function fetchChannelMembersByIds(serverUrl: string, channelId: str
         if (!fetchOnly) {
             const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
             if (operator && members.length) {
-                const memberships = members.map((u) => ({
-                    channel_id: channelId,
-                    user_id: u.user_id,
-                    scheme_admin: u.scheme_admin,
-                }));
+                const channelMembership = await client.getChannelMembersByIds(channelId, userIds);
+
                 await operator.handleChannelMembership({
-                    channelMemberships: memberships,
+                    channelMemberships: channelMembership,
                     prepareRecordsOnly: false,
                 });
             }
@@ -364,9 +360,10 @@ export async function fetchChannelCreator(serverUrl: string, channelId: string, 
                         prepareRecordsOnly: true,
                     }));
                 }
+                const channelMembership = await client.getChannelMembersByIds(channelId, [channel.creatorId]);
 
                 modelPromises.push(operator.handleChannelMembership({
-                    channelMemberships: [{channel_id: channelId, user_id: channel.creatorId}],
+                    channelMemberships: channelMembership,
                     prepareRecordsOnly: true,
                 }));
 
@@ -653,7 +650,6 @@ export async function joinChannel(serverUrl: string, teamId: string, channelId?:
     }
 
     if (channelId || channel?.id) {
-        loadCallForChannel(serverUrl, channelId || channel!.id);
         EphemeralStore.removeJoiningChannel(channelId || channel!.id);
     }
     return {channel, member};
@@ -683,6 +679,17 @@ export async function markChannelAsRead(serverUrl: string, channelId: string, up
             await markChannelAsViewed(serverUrl, channelId, true);
         }
 
+        return {};
+    } catch (error) {
+        logDebug('error on markChannelAsRead', getFullErrorMessage(error));
+        return {error};
+    }
+}
+
+export async function unsetActiveChannelOnServer(serverUrl: string) {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        await client.viewMyChannel('');
         return {};
     } catch (error) {
         logDebug('error on markChannelAsRead', getFullErrorMessage(error));

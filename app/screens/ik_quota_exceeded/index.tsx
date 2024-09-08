@@ -2,12 +2,11 @@
 // See LICENSE.txt for license information.
 
 import BottomSheetM, {BottomSheetBackdrop, type BottomSheetBackdropProps} from '@gorhom/bottom-sheet';
+import {Button} from '@rneui/base';
 import React, {useCallback, useRef} from 'react';
 import {useIntl} from 'react-intl';
 import {Image, Text, View} from 'react-native';
-import Button from 'react-native-button';
 
-import FormattedText from '@components/formatted_text';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
@@ -70,7 +69,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         marginTop: 16,
     },
     ikButton: {
-        width: '100%',
         borderRadius: 8,
     },
     content: {
@@ -86,7 +84,11 @@ export type IKQuotaExceeded = {
     image: 'channels' | 'storage';
 }
 
-const IKChannelQuotaExceeded = ({closeButtonId, quotaType, componentId}: Props) => {
+const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
+    title: 'infomaniak.size_quota_exceeded.title',
+    description: 'infomaniak.size_quota_exceeded.description',
+    image: 'storage',
+}, componentId}: Props) => {
     const allImages = {
         channels: {path: require('@assets/images/channels.png'), ratio: 1780 / 690},
         storage: {path: require('@assets/images/storage_full_light.png'), ratio: 632 / 651},
@@ -95,8 +97,6 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType, componentId}: Props) 
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const intl = useIntl();
-    const styleButtonText = buttonTextStyle(theme, 'lg', 'primary', 'default');
-    const styleButtonBackground = buttonBackgroundStyle(theme, 'lg', 'primary', 'default');
 
     const handleCloseButton = useCallback(() => {
         handleClose();
@@ -133,15 +133,18 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType, componentId}: Props) 
                     {intl.formatMessage({id: quotaType.description, defaultMessage: 'You have no kChat, discover it with kSuite'})}
                 </Text>
                 <Button
-                    containerStyle={[styles.discoverButton, styleButtonBackground, styles.ikButton]}
+                    title={intl.formatMessage({
+                        id: 'channel_info.close',
+                        defaultMessage: 'Close',
+                    })}
+                    titleStyle={buttonTextStyle(theme, 'lg', 'primary', 'default')}
+                    containerStyle={styles.discoverButton}
+                    buttonStyle={[
+                        buttonBackgroundStyle(theme, 'lg', 'primary', 'default'),
+                        styles.ikButton,
+                    ]}
                     onPress={handleCloseButton}
-                >
-                    <FormattedText
-                        defaultMessage={'Close'}
-                        id={'channel_info.close'}
-                        style={styleButtonText}
-                    />
-                </Button>
+                />
             </View>
         );
     }, []);

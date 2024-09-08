@@ -3,7 +3,7 @@
 
 /* eslint-disable max-lines */
 
-import {chunk} from 'lodash';
+import {chunk, flatten} from 'lodash';
 
 import {updateChannelsDisplayName} from '@actions/local/channel';
 import {updateRecentCustomStatuses, updateLocalUser} from '@actions/local/user';
@@ -18,8 +18,9 @@ import {getCurrentUserId, setCurrentUserId} from '@queries/servers/system';
 import {getCurrentUser, prepareUsers, queryAllUsers, queryUsersById, queryUsersByIdsOrUsernames, queryUsersByUsername} from '@queries/servers/user';
 import {getFullErrorMessage} from '@utils/errors';
 import {logDebug} from '@utils/log';
+import {allSettled} from '@utils/promise';
 import {getDeviceTimezone} from '@utils/timezone';
-import {getUserTimezoneProps, removeUserFromList} from '@utils/user';
+import {getLastPictureUpdate, getUserTimezoneProps, removeUserFromList} from '@utils/user';
 
 import {fetchGroupsByNames} from './groups';
 import {forceLogoutIfNecessary} from './session';
@@ -48,7 +49,7 @@ export const fetchMe = async (serverUrl: string, fetchOnly = false): Promise<MyU
         const client = NetworkManager.getClient(serverUrl);
         const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
 
-        const resultSettled = await Promise.allSettled([client.getMe(), client.getStatus('me')]);
+        const resultSettled = await allSettled([client.getMe(), client.getStatus('me')]);
         let user: UserProfile|undefined;
         let userStatus: UserStatus|undefined;
         for (const result of resultSettled) {
@@ -104,15 +105,13 @@ export async function fetchProfilesInChannel(serverUrl: string, channelId: strin
         const users = await client.getProfilesInChannel(channelId, options);
         const uniqueUsers = Array.from(new Set(users));
         const filteredUsers = uniqueUsers.filter((u) => u.id !== excludeUserId);
+        const memberships = await client.getChannelMembersByIds(channelId, filteredUsers.map((u) => u.id));
+
         if (!fetchOnly) {
             if (filteredUsers.length) {
                 const modelPromises: Array<Promise<Model[]>> = [];
-                const membership = filteredUsers.map((u) => ({
-                    channel_id: channelId,
-                    user_id: u.id,
-                }));
                 modelPromises.push(operator.handleChannelMembership({
-                    channelMemberships: membership,
+                    channelMemberships: memberships,
                     prepareRecordsOnly: true,
                 }));
                 const prepare = prepareUsers(operator, filteredUsers);
@@ -163,18 +162,22 @@ export async function fetchProfilesInGroupChannels(serverUrl: string, groupChann
         if (!fetchOnly) {
             const modelPromises: Array<Promise<Model[]>> = [];
             const users = new Set<UserProfile>();
-            const memberships: Array<{channel_id: string; user_id: string}> = [];
-            for (const item of data) {
-                if (item.users?.length) {
-                    for (const u of item.users) {
-                        users.add(u);
-                        memberships.push({channel_id: item.channelId, user_id: u.id});
+
+            const memberships = await Promise.all(data.reduce(
+                (acc, {channelId, users: usersChannels}) => {
+                    if (usersChannels) {
+                        const channelMembership = client.getChannelMembersByIds(channelId, usersChannels.map((u) => u.id));
+                        acc.push(channelMembership);
                     }
-                }
-            }
-            if (memberships.length) {
+                    return acc;
+                },
+                [] as Array<Promise<ChannelMembership[]>>,
+            ));
+            const flatMemberships = flatten(memberships);
+
+            if (flatMemberships.length) {
                 modelPromises.push(operator.handleChannelMembership({
-                    channelMemberships: memberships,
+                    channelMemberships: flatMemberships,
                     prepareRecordsOnly: true,
                 }));
             }
@@ -197,6 +200,7 @@ export async function fetchProfilesInGroupChannels(serverUrl: string, groupChann
 export async function fetchProfilesPerChannels(serverUrl: string, channelIds: string[], excludeUserId?: string, fetchOnly = false): Promise<ProfilesPerChannelRequest> {
     try {
         const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        const client = NetworkManager.getClient(serverUrl);
 
         // Batch fetching profiles per channel by chunks of 250
         const channels = chunk(channelIds, 250);
@@ -211,20 +215,31 @@ export async function fetchProfilesPerChannels(serverUrl: string, channelIds: st
         if (!fetchOnly) {
             const modelPromises: Array<Promise<Model[]>> = [];
             const users = new Set<UserProfile>();
-            const memberships: Array<{channel_id: string; user_id: string}> = [];
             for (const item of data) {
                 if (item.users?.length) {
                     for (const u of item.users) {
                         if (u.id !== excludeUserId) {
                             users.add(u);
-                            memberships.push({channel_id: item.channelId, user_id: u.id});
                         }
                     }
                 }
             }
-            if (memberships.length) {
+
+            const memberships = await Promise.all(data.reduce(
+                (acc, {channelId, users: usersChannels}) => {
+                    if (usersChannels) {
+                        const channelMembership = client.getChannelMembersByIds(channelId, usersChannels.map((u) => u.id));
+                        acc.push(channelMembership);
+                    }
+                    return acc;
+                },
+                [] as Array<Promise<ChannelMembership[]>>,
+            ));
+            const flatMemberships = flatten(memberships);
+
+            if (flatMemberships.length) {
                 modelPromises.push(operator.handleChannelMembership({
-                    channelMemberships: memberships,
+                    channelMemberships: flatMemberships,
                     prepareRecordsOnly: true,
                 }));
             }
@@ -795,6 +810,11 @@ export const buildProfileImageUrl = (serverUrl: string, userId: string, timestam
     }
 };
 
+export const buildProfileImageUrlFromUser = (serverUrl: string, user: UserModel | UserProfile) => {
+    const lastPictureUpdate = getLastPictureUpdate(user);
+    return buildProfileImageUrl(serverUrl, user.id, lastPictureUpdate);
+};
+
 export const autoUpdateTimezone = async (serverUrl: string) => {
     let database;
     try {
@@ -854,6 +874,15 @@ export const fetchTeamAndChannelMembership = async (serverUrl: string, userId: s
     }
 };
 
-export const getAllSupportedTimezones = async () => {
-    return [];
+export const getAllSupportedTimezones = async (serverUrl: string) => {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        const allTzs = await client.getTimezones();
+        return allTzs;
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new Error(`error while getting all timezones : ${error}`);
+        }
+        return [];
+    }
 };

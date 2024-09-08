@@ -26,6 +26,7 @@ import {getFullErrorMessage, isServerError} from '@utils/errors';
 import {logDebug, logError} from '@utils/log';
 import {processPostsFetched} from '@utils/post';
 import {getPostIdsForCombinedUserActivityPost} from '@utils/post_list';
+import {allSettled} from '@utils/promise';
 
 import {forceLogoutIfNecessary} from './session';
 
@@ -52,7 +53,7 @@ type AuthorsRequest = {
     error?: unknown;
 }
 
-export async function createPost(serverUrl: string, post: Partial<Post>, files: FileInfo[] = []): Promise<{data?: boolean; error?: any}> {
+export async function createPost(serverUrl: string, post: Partial<Post>, files: FileInfo[] = []): Promise<{data?: boolean; error?: unknown}> {
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
         return {error: `${serverUrl} database not found`};
@@ -550,7 +551,7 @@ export const fetchPostAuthors = async (serverUrl: string, posts: Post[], fetchOn
         }
 
         if (promises.length) {
-            const authorsResult = await Promise.allSettled(promises);
+            const authorsResult = await allSettled(promises);
             const result = authorsResult.reduce<UserProfile[][]>((acc, item) => {
                 if (item.status === 'fulfilled') {
                     acc.push(item.value);
@@ -595,7 +596,7 @@ export async function fetchPostThread(serverUrl: string, postId: string, options
         EphemeralStore.setServerHasLimit(serverUrl, data.has_limitation);
         const result = processPostsFetched(data);
         let posts: Model[] = [];
-        if (!fetchOnly) {
+        if (result.posts.length && !fetchOnly) {
             const models: Model[] = [];
             posts = await operator.handlePosts({
                 ...result,
@@ -1121,4 +1122,14 @@ export async function deletePersistedPosts(serverUrl: string, channelId: string,
     } catch (error) {
         // Do nothing
     }
+}
+
+export async function markPostReminderAsDone(serverUrl: string, postId: string) {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        await client.markPostReminderAsDone(postId);
+    } catch (e) {
+        // do nothing
+    }
+    return {};
 }

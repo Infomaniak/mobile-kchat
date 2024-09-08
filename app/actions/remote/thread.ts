@@ -440,3 +440,27 @@ export const loadEarlierThreads = async (serverUrl: string, teamId: string, last
         return {error};
     }
 };
+
+export const summarizeThread = async (serverUrl: string, postId: string, botUsername: string) => {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        const data = await client.doSummarize(postId, botUsername);
+        return {data};
+    } catch (error) {
+        logDebug('error on summarizeThread', getFullErrorMessage(error));
+        forceLogoutIfNecessary(serverUrl, error);
+        return {error};
+    }
+};
+
+export const reactForMe = async (serverUrl: string, postId: string) => {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        const data = await client.doReaction(postId);
+        return {data};
+    } catch (error) {
+        logDebug('error on reactForMe', getFullErrorMessage(error));
+        forceLogoutIfNecessary(serverUrl, error);
+        return {error};
+    }
+};

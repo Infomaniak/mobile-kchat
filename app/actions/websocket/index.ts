@@ -14,42 +14,18 @@ import {fetchPostsForChannel, fetchPostThread} from '@actions/remote/post';
 import {openAllUnreadChannels} from '@actions/remote/preference';
 import {autoUpdateTimezone} from '@actions/remote/user';
 import {handleTeamSyncEvent} from '@actions/websocket/ikTeams';
-import {loadConfigAndCalls} from '@calls/actions/calls';
-import {
-    handleCallCaption,
-    handleCallChannelDisabled,
-    handleCallChannelEnabled,
-    handleCallEnded,
-    handleCallHostChanged,
-    handleCallJobState,
-    handleCallRecordingState,
-    handleCallScreenOff,
-    handleCallScreenOn,
-    handleCallStarted, handleCallUserConnected, handleCallUserDisconnected,
-    handleCallUserJoined,
-    handleCallUserLeft,
-    handleCallUserMuted,
-    handleCallUserRaiseHand,
-    handleCallUserReacted,
-    handleCallUserUnmuted,
-    handleCallUserUnraiseHand,
-    handleCallUserVoiceOff,
-    handleCallUserVoiceOn,
-    handleUserDismissedNotification,
-} from '@calls/connection/websocket_event_handlers';
-import {isSupportedServerCalls} from '@calls/utils';
 import {Screens, WebsocketEvents} from '@constants';
-import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import AppsManager from '@managers/apps_manager';
+import {getActiveServerUrl} from '@queries/app/servers';
 import {getLastPostInThread} from '@queries/servers/post';
 import {
     getConfig,
     getCurrentChannelId,
     getCurrentTeamId,
     getLicense,
-    getWebSocketLastDisconnected,
-    resetWebSocketLastDisconnected,
+    getLastFullSync,
+    setLastFullSync,
 } from '@queries/servers/system';
 import {getIsCRTEnabled} from '@queries/servers/thread';
 import {getCurrentUser} from '@queries/servers/user';
@@ -116,7 +92,7 @@ import {
     handleTeamRestored,
 } from './teams';
 import {handleThreadUpdatedEvent, handleThreadReadChangedEvent, handleThreadFollowChangedEvent} from './threads';
-import {handleUserUpdatedEvent, handleUserTypingEvent, handleStatusChangedEvent} from './users';
+import {handleUserUpdatedEvent, handleUserTypingEvent, handleStatusChangedEvent, handleUserRecordingEvent} from './users';
 
 export async function handleFirstConnect(serverUrl: string) {
     registerDeviceToken(serverUrl);
@@ -126,22 +102,6 @@ export async function handleFirstConnect(serverUrl: string) {
 
 export async function handleReconnect(serverUrl: string) {
     return doReconnect(serverUrl);
-}
-
-export async function handleClose(serverUrl: string, lastDisconnect: number) {
-    const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
-    if (!operator) {
-        return;
-    }
-    await operator.handleSystem({
-        systems: [
-            {
-                id: SYSTEM_IDENTIFIERS.WEBSOCKET,
-                value: lastDisconnect.toString(10),
-            },
-        ],
-        prepareRecordsOnly: false,
-    });
 }
 
 async function doReconnect(serverUrl: string) {
@@ -157,14 +117,14 @@ async function doReconnect(serverUrl: string) {
 
     const {database} = operator;
 
-    const lastDisconnectedAt = await getWebSocketLastDisconnected(database);
-    resetWebSocketLastDisconnected(operator);
+    const lastFullSync = await getLastFullSync(database);
+    const now = Date.now();
 
     const currentTeamId = await getCurrentTeamId(database);
     const currentChannelId = await getCurrentChannelId(database);
 
     setTeamLoading(serverUrl, true);
-    const entryData = await entry(serverUrl, currentTeamId, currentChannelId, lastDisconnectedAt);
+    const entryData = await entry(serverUrl, currentTeamId, currentChannelId, lastFullSync);
     if ('error' in entryData) {
         setTeamLoading(serverUrl, false);
         return entryData.error;
@@ -178,8 +138,11 @@ async function doReconnect(serverUrl: string) {
         await operator.batchRecords(models, 'doReconnect');
     }
 
+    await setLastFullSync(operator, now);
+
     const tabletDevice = isTablet();
-    if (tabletDevice && initialChannelId === currentChannelId) {
+    const isActiveServer = (await getActiveServerUrl()) === serverUrl;
+    if (isActiveServer && tabletDevice && initialChannelId === currentChannelId) {
         await markChannelAsRead(serverUrl, initialChannelId);
         markChannelAsViewed(serverUrl, initialChannelId);
     }
@@ -193,11 +156,7 @@ async function doReconnect(serverUrl: string) {
     const license = await getLicense(database);
     const config = await getConfig(database);
 
-    if (isSupportedServerCalls(config?.Version)) {
-        loadConfigAndCalls(serverUrl, currentUserId);
-    }
-
-    await deferredAppEntryActions(serverUrl, lastDisconnectedAt, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, initialTeamId);
+    await deferredAppEntryActions(serverUrl, lastFullSync, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, initialTeamId);
 
     openAllUnreadChannels(serverUrl);
 
@@ -335,6 +294,9 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
         case WebsocketEvents.TYPING:
             handleUserTypingEvent(serverUrl, msg);
             break;
+        case WebsocketEvents.RECORDING:
+            handleUserRecordingEvent(serverUrl, msg);
+            break;
 
         case WebsocketEvents.REACTION_ADDED:
             handleReactionAddedToPostEvent(serverUrl, msg);
@@ -384,81 +346,6 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
             break;
 
             // return dispatch(handleRefreshAppsBindings());
-
-        // Calls ws events:
-        case WebsocketEvents.CALLS_CHANNEL_ENABLED:
-            handleCallChannelEnabled(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_CHANNEL_DISABLED:
-            handleCallChannelDisabled(serverUrl, msg);
-            break;
-
-        // DEPRECATED in favour of user_joined (since v0.21.0)
-        case WebsocketEvents.CALLS_USER_CONNECTED:
-            handleCallUserConnected(serverUrl, msg);
-            break;
-
-        // DEPRECATED in favour of user_left (since v0.21.0)
-        case WebsocketEvents.CALLS_USER_DISCONNECTED:
-            handleCallUserDisconnected(serverUrl, msg);
-            break;
-
-        case WebsocketEvents.CALLS_USER_JOINED:
-            handleCallUserJoined(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_LEFT:
-            handleCallUserLeft(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_MUTED:
-            handleCallUserMuted(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_UNMUTED:
-            handleCallUserUnmuted(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_VOICE_ON:
-            handleCallUserVoiceOn(msg);
-            break;
-        case WebsocketEvents.CALLS_USER_VOICE_OFF:
-            handleCallUserVoiceOff(msg);
-            break;
-        case WebsocketEvents.CALLS_CALL_START:
-            handleCallStarted(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_SCREEN_ON:
-            handleCallScreenOn(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_SCREEN_OFF:
-            handleCallScreenOff(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_RAISE_HAND:
-            handleCallUserRaiseHand(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_UNRAISE_HAND:
-            handleCallUserUnraiseHand(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_CALL_END:
-            handleCallEnded(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_REACTED:
-            handleCallUserReacted(serverUrl, msg);
-            break;
-
-        // DEPRECATED in favour of CALLS_JOB_STATE (since v2.15.0)
-        case WebsocketEvents.CALLS_RECORDING_STATE:
-            handleCallRecordingState(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_JOB_STATE:
-            handleCallJobState(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_HOST_CHANGED:
-            handleCallHostChanged(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_USER_DISMISSED_NOTIFICATION:
-            handleUserDismissedNotification(serverUrl, msg);
-            break;
-        case WebsocketEvents.CALLS_CAPTION:
-            handleCallCaption(serverUrl, msg);
-            break;
 
         case WebsocketEvents.GROUP_RECEIVED:
             handleGroupReceivedEvent(serverUrl, msg);
@@ -514,6 +401,11 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
 
 async function fetchPostDataIfNeeded(serverUrl: string) {
     try {
+        const isActiveServer = (await getActiveServerUrl()) === serverUrl;
+        if (!isActiveServer) {
+            return;
+        }
+
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const currentChannelId = await getCurrentChannelId(database);
         const isCRTEnabled = await getIsCRTEnabled(database);

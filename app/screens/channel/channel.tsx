@@ -1,12 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {type KeyboardTrackingViewRef} from 'libraries/@mattermost/keyboard-tracker/src';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {type LayoutChangeEvent, StyleSheet, View} from 'react-native';
 import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {storeLastViewedChannelIdAndServer, removeLastViewedChannelIdAndServer} from '@actions/app/global';
-import FloatingCallContainer from '@calls/components/floating_call_container';
 import FreezeScreen from '@components/freeze_screen';
 import PostDraft from '@components/post_draft';
 import {Screens} from '@constants';
@@ -28,15 +28,11 @@ import useGMasDMNotice from './use_gm_as_dm_notice';
 
 import type PreferenceModel from '@typings/database/models/servers/preference';
 import type {AvailableScreens} from '@typings/screens/navigation';
-import type {KeyboardTrackingViewRef} from 'react-native-keyboard-tracking-view';
 
 type ChannelProps = {
     channelId: string;
     componentId?: AvailableScreens;
-    showJoinCallBanner: boolean;
-    isInACall: boolean;
     isCallsEnabledInChannel: boolean;
-    showIncomingCalls: boolean;
     isTabletView?: boolean;
     dismissedGMasDMNotice: PreferenceModel[];
     currentUserId: string;
@@ -56,10 +52,7 @@ const styles = StyleSheet.create({
 const Channel = ({
     channelId,
     componentId,
-    showJoinCallBanner,
-    isInACall,
     isCallsEnabledInChannel,
-    showIncomingCalls,
     isTabletView,
     dismissedGMasDMNotice,
     channelType,
@@ -115,8 +108,6 @@ const Channel = ({
         setContainerHeight(e.nativeEvent.layout.height);
     }, []);
 
-    const showFloatingCallContainer = showJoinCallBanner || isInACall || showIncomingCalls;
-
     return (
         <FreezeScreen>
             <SafeAreaView
@@ -151,14 +142,6 @@ const Channel = ({
                         canShowPostPriority={true}
                     />
                 </>
-                }
-                {showFloatingCallContainer &&
-                    <FloatingCallContainer
-                        channelId={channelId}
-                        showJoinCallBanner={showJoinCallBanner}
-                        showIncomingCalls={showIncomingCalls}
-                        isInACall={isInACall}
-                    />
                 }
             </SafeAreaView>
         </FreezeScreen>
