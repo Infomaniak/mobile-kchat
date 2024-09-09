@@ -18,5 +18,4 @@ export async function handleOpenDialogEvent(serverUrl: string, msg: WebSocketMes
     } catch {
         // Do nothing
     }
-    
 }
