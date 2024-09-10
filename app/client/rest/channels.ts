@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import General from '@constants/general';
 import {buildQueryString} from '@utils/helpers';
 
 import {PER_PAGE_DEFAULT} from './constants';
@@ -32,7 +33,7 @@ export interface ClientChannelsMix {
     getTranscript: (file_id: string) => Promise<any>;
     getChannelMembers: (channelId: string, page?: number, perPage?: number) => Promise<ChannelMembership[]>;
     getChannelTimezones: (channelId: string) => Promise<string[]>;
-    getChannelMember: (channelId: string, userId: string) => Promise<ChannelMembership>;
+    getChannelMember: (channelId: string, userId: string, isGuest?: boolean) => Promise<ChannelMembership>;
     getChannelMembersByIds: (channelId: string, userIds: string[]) => Promise<ChannelMembership[]>;
     addToChannel: (userId: string, channelId: string, postRootId?: string) => Promise<ChannelMembership>;
     notifyUser: (channelId: string, userIds: string[], postId?: string) => Promise<any>;
@@ -213,7 +214,7 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
         );
     };
 
-    getChannelMember = async (channelId: string, userId: string) => {
+    getChannelMember = async (channelId: string, userId: string, isGuest: boolean) => {
         try {
             const response = await this.doFetch(
                 `${this.getChannelMemberRoute(channelId, userId)}`,
@@ -224,7 +225,9 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
             if (
                 error instanceof ClientError &&
                 error.status_code === 404 &&
-                userId === 'me'
+                userId === 'me' &&
+                General.OPEN_CHANNEL &&
+                isGuest
             ) {
                 const membership: ChannelMembership = {
                     user_id: userId,

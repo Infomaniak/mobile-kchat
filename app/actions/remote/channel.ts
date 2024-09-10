@@ -465,9 +465,13 @@ export async function fetchMyChannel(serverUrl: string, teamId: string, channelI
     try {
         const client = NetworkManager.getClient(serverUrl);
 
+        const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        const user = await getCurrentUser(database);
+        const isGuest = Boolean(user?.isGuest);
+
         const [channel, member] = await Promise.all([
             client.getChannel(channelId),
-            client.getChannelMember(channelId, 'me'),
+            client.getChannelMember(channelId, 'me', isGuest),
         ]);
 
         if (!fetchOnly) {
