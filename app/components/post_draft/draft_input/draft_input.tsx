@@ -286,6 +286,7 @@ export default function DraftInput({
                                 updateValue={updateValue}
                                 value={value}
                                 focus={focus}
+                                channelId={channelId}
                             />
                         }
                         {!isHandlingVoice && getActionButton()}
