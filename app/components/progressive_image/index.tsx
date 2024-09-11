@@ -3,7 +3,7 @@
 
 import {Image, ImageBackground, type ImageContentFit, type ImageStyle} from 'expo-image';
 import React, {type ReactNode, useEffect, useState} from 'react';
-import {ActivityIndicator, type StyleProp, StyleSheet, View, type ViewStyle} from 'react-native';
+import {type StyleProp, StyleSheet, View, type ViewStyle} from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import {useServerUrl} from '@context/server';
@@ -45,7 +45,6 @@ const ProgressiveImage = ({
     onError, contentFit = 'contain', style = {}, thumbnailUri, tintDefaultSource,
 }: Props) => {
     const [showHighResImage, setShowHighResImage] = useState(false);
-    const [loading, setLoading] = useState(true);
     const theme = useTheme();
     const styles = getStyleSheet(theme);
 
@@ -62,17 +61,6 @@ const ProgressiveImage = ({
     const thumbnailSource = {uri: thumbnailUri, headers};
     const showImage = showHighResImage || !thumbnailUri;
 
-    const handleLoad = () => {
-        setLoading(false);
-    };
-
-    const handleError = () => {
-        setLoading(false);
-        if (onError) {
-            onError();
-        }
-    };
-
     if (isBackgroundImage && imageUri) {
         return (
             <View style={[styles.defaultImageContainer, style]}>
@@ -81,8 +69,6 @@ const ProgressiveImage = ({
                     source={imgSource}
                     contentFit='cover'
                     style={[StyleSheet.absoluteFill, imageStyle]}
-                    onLoad={handleLoad}
-                    onError={handleError}
                 >
                     {children}
                 </AnimatedImageBackground>
@@ -105,18 +91,13 @@ const ProgressiveImage = ({
                     onError={onError}
                     nativeID={`image-${id}`}
                     recyclingKey={`image-${id}`}
-                    onLoad={handleLoad}
                 />
             </View>
         );
     }
+
     return (
         <Animated.View style={[styles.defaultImageContainer, style]}>
-            {loading &&
-            <ActivityIndicator
-                size='small'
-                color={theme.centerChannelColor}
-            />}
             <Image
                 ref={forwardRef}
                 placeholder={thumbnailSource}
@@ -128,8 +109,6 @@ const ProgressiveImage = ({
                 style={[StyleSheet.absoluteFill, imageStyle]}
                 source={showImage ? imgSource : undefined}
                 autoplay={false}
-                onLoad={handleLoad}
-                onError={handleError}
             />
         </Animated.View>
     );
