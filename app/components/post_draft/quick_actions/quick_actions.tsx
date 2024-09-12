@@ -8,6 +8,7 @@ import CameraAction from './camera_quick_action';
 import FileAction from './file_quick_action';
 import ImageAction from './image_quick_action';
 import InputAction from './input_quick_action';
+import Poll from './poll_action';
 import PostPriorityAction from './post_priority_action';
 
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
     isPostPriorityEnabled: boolean;
     canShowPostPriority?: boolean;
     maxFileCount: number;
+    channelId: string;
 
     // Draft Handler
     value: string;
@@ -48,6 +50,7 @@ export default function QuickActions({
     postPriority,
     updatePostPriority,
     focus,
+    channelId,
 }: Props) {
     const atDisabled = value[value.length - 1] === '@';
     const slashDisabled = value.length > 0;
@@ -58,6 +61,7 @@ export default function QuickActions({
     const imageActionTestID = `${testID}.image_action`;
     const cameraActionTestID = `${testID}.camera_action`;
     const postPriorityActionTestID = `${testID}.post_priority_action`;
+    const pollActionTestID = `${testID}.poll_action`;
 
     const uploadProps = {
         disabled: !canUploadFiles,
@@ -105,6 +109,10 @@ export default function QuickActions({
                     updatePostPriority={updatePostPriority}
                 />
             )}
+            <Poll
+                testID={pollActionTestID}
+                channelId={channelId}
+            />
         </View>
     );
 }

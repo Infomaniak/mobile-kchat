@@ -161,19 +161,29 @@ function Typing({
 
         const numUsers = nextAction.length;
 
-        const singleMessageId = action === 'typing' ? 'msg_typing.isTyping' : 'msg_recording.isRecording';
-        const singleDefaultMessage = action === 'typing' ? '{user} is typing...' : '{user} is recording...';
-        const pluralMessageId = action === 'typing' ? 'msg_typing.areTyping' : 'msg_recording.areRecording';
-        const pluralDefaultMessage = action === 'typing' ? '{users} and {last} are typing...' : '{users} et {last} are recording...';
-
         switch (numUsers) {
             case 0:
                 return null;
             case 1:
+                if (action === 'recording') {
+                    return (
+                        <FormattedText
+                            id='msg_recording.isRecording'
+                            defaultMessage='{user} record a voice message...'
+                            style={style.typing}
+                            ellipsizeMode='tail'
+                            numberOfLines={1}
+                            values={{
+                                user: nextAction[0],
+                            }}
+                        />
+                    );
+                }
+
                 return (
                     <FormattedText
-                        id={singleMessageId}
-                        defaultMessage={singleDefaultMessage}
+                        id='msg_typing.isTyping'
+                        defaultMessage='{user} is typing...'
                         style={style.typing}
                         ellipsizeMode='tail'
                         numberOfLines={1}
@@ -184,10 +194,27 @@ function Typing({
                 );
             default: {
                 const last = nextAction.pop();
+
+                if (action === 'recording') {
+                    return (
+                        <FormattedText
+                            id='msg_recording.areRecording'
+                            defaultMessage='{users} and {last} record a voice message...'
+                            style={style.typing}
+                            ellipsizeMode='tail'
+                            numberOfLines={1}
+                            values={{
+                                users: (nextAction.join(', ')),
+                                last,
+                            }}
+                        />
+                    );
+                }
+
                 return (
                     <FormattedText
-                        id={pluralMessageId}
-                        defaultMessage={pluralDefaultMessage}
+                        id='msg_typing.areTyping'
+                        defaultMessage='{users} and {last} are typing...'
                         style={style.typing}
                         ellipsizeMode='tail'
                         numberOfLines={1}
