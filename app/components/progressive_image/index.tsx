@@ -66,13 +66,6 @@ const ProgressiveImage = ({
         setLoading(false);
     };
 
-    const handleError = () => {
-        setLoading(false);
-        if (onError) {
-            onError();
-        }
-    };
-
     if (isBackgroundImage && imageUri) {
         return (
             <View style={[styles.defaultImageContainer, style]}>
@@ -82,7 +75,6 @@ const ProgressiveImage = ({
                     contentFit='cover'
                     style={[StyleSheet.absoluteFill, imageStyle]}
                     onLoad={handleLoad}
-                    onError={handleError}
                 >
                     {children}
                 </AnimatedImageBackground>
@@ -129,7 +121,6 @@ const ProgressiveImage = ({
                 source={showImage ? imgSource : undefined}
                 autoplay={false}
                 onLoad={handleLoad}
-                onError={handleError}
             />
         </Animated.View>
     );
