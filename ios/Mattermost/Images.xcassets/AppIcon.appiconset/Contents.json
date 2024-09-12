@@ -5,6 +5,30 @@
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "kChat-Dark.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "tinted"
+        }
+      ],
+      "filename" : "kChat-Tinted.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
     }
   ],
   "info" : {
