@@ -17,6 +17,7 @@ import {handleTeamSyncEvent} from '@actions/websocket/ikTeams';
 import {Screens, WebsocketEvents} from '@constants';
 import DatabaseManager from '@database/manager';
 import AppsManager from '@managers/apps_manager';
+import NetworkManager from '@managers/network_manager';
 import {getActiveServerUrl} from '@queries/app/servers';
 import {getLastPostInThread} from '@queries/servers/post';
 import {
@@ -104,6 +105,16 @@ export async function handleReconnect(serverUrl: string) {
     return doReconnect(serverUrl);
 }
 
+export async function fetchDrafts(serverUrl: string, currentTeamId: string) {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        const drafts = await client.getDrafts(currentTeamId);
+        logInfo('doReconnect : Drafts retrieved successfully:', drafts);
+    } catch (error) {
+        logDebug('Error retrieving drafts:', error);
+    }
+}
+
 async function doReconnect(serverUrl: string) {
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
@@ -139,6 +150,8 @@ async function doReconnect(serverUrl: string) {
     }
 
     await setLastFullSync(operator, now);
+
+    await fetchDrafts(serverUrl, initialTeamId);
 
     const tabletDevice = isTablet();
     const isActiveServer = (await getActiveServerUrl()) === serverUrl;

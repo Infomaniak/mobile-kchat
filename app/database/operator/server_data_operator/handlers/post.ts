@@ -321,7 +321,8 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             );
             return [];
         }
-        logDebug(`[DraftHandler] Handling ${files.length} files`);
+
+        //logDebug(`[DraftHandler] Handling ${files.length} files`);
 
         const processedFiles = (await this.processRecords({
             createOrUpdateRawValues: files,

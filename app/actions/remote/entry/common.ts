@@ -29,7 +29,7 @@ import NavigationStore from '@store/navigation_store';
 import {isDMorGM, sortChannelsByDisplayName} from '@utils/channel';
 import {getFullErrorMessage, isErrorWithStatusCode} from '@utils/errors';
 import {isTablet} from '@utils/helpers';
-import {logDebug} from '@utils/log';
+import {logDebug, logInfo} from '@utils/log';
 import {processIsCRTEnabled} from '@utils/thread';
 
 import type {Database, Model} from '@nozbe/watermelondb';
@@ -120,6 +120,17 @@ const teamsToRemove = async (serverUrl: string, removeTeamIds?: string[]) => {
     return [];
 };
 
+const fetchDrafts = async (serverUrl: string, initialTeamId: string) => {
+    let drafts = [];
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        drafts = await client.getDrafts(initialTeamId);
+        logInfo('entryRest : Drafts retrieved successfully during entry:', drafts);
+    } catch (catchError) {
+        logDebug('Error retrieving drafts during entry:', catchError);
+    }
+};
+
 const entryRest = async (serverUrl: string, teamId?: string, channelId?: string, since = 0): Promise<EntryResponse> => {
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
@@ -145,6 +156,8 @@ const entryRest = async (serverUrl: string, teamId?: string, channelId?: string,
     if (error) {
         return {error};
     }
+
+    await fetchDrafts(serverUrl, initialTeamId);
 
     const rolesData = await fetchRoles(serverUrl, teamData.memberships, chData?.memberships, meData.user, true);
 
