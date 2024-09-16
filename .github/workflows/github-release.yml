@@ -15,7 +15,7 @@ jobs:
         uses: ./.github/actions/test
 
   build-ios-unsigned:
-    runs-on: [self-hosted, macOS, iOS, xcode16]
+    runs-on: [self-hosted, macOS, iOS]
     needs:
       - test
     steps:
