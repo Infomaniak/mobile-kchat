@@ -8,7 +8,7 @@ import {DraftModel} from '@database/models/server';
 import NetworkManager from '@managers/network_manager';
 import {getDraft} from '@queries/servers/drafts';
 import {getCurrentUserId} from '@queries/servers/system';
-import {logError} from '@utils/log';
+import {logDebug, logError} from '@utils/log';
 
 import type Model from '@nozbe/watermelondb/Model';
 
@@ -45,6 +45,7 @@ const createDraft = async (
 ): DraftRemoteResponse => {
     const {operator, database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
     const client = NetworkManager.getClient(serverUrl);
+    logDebug('createDraft', newDraft);
 
     // Add all missing properties to the partial draft
     const mergedDraft = {
@@ -69,9 +70,11 @@ const createDraft = async (
     // Prepare new records or update DB
     // LOCAL create
     const draft = await operator.handleDraft({draft: mergedDraft, prepareRecordsOnly: false});
+    logDebug('local draft', draft);
 
     // REMOTE create
     client.upsertDraft(mergedDraft);
+    logDebug('remote draft', mergedDraft);
 
     return {success: true, draft};
 };
@@ -107,9 +110,11 @@ const syncDraft = async (
 ): DraftRemoteResponse => {
     const {operator, database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
     const client = NetworkManager.getClient(serverUrl);
+    logDebug('syncDraft', draft);
 
     // Try to find a draft that matches the draft
     const existingDraftModel = await getDraft(database, draft.channel_id, draft.root_id);
+    logDebug('existingDraftModel', existingDraftModel);
 
     // Update existing draft
     if (existingDraftModel) {
@@ -152,13 +157,16 @@ const syncDraft = async (
 
         // If no properties were updated cancel the actual process
         if (!updated) {
+            logDebug('no update');
             return {success: true, draft: existingDraftModel};
         }
 
         // LOCAL update
+        logDebug('update', existingDraftModel);
         await operator.batchRecords([existingDraftModel], 'updateDraft');
 
         // REMOTE update
+        logDebug('toApi', await DraftModel.toApi(existingDraftModel));
         const remoteDraft = await client.upsertDraft(await DraftModel.toApi(existingDraftModel));
 
         // LOCAL sync
@@ -167,10 +175,11 @@ const syncDraft = async (
             draft: {...remoteDraft, files: draft.files ?? []},
             prepareRecordsOnly: true,
         });
+        logDebug('updatedDraftModel', updatedDraftModel);
         models.push(updatedDraftModel);
-
+        logDebug('models', models);
         await operator.batchRecords(models, 'updateSyncDraft');
-
+        logDebug('batchRecords');
         return {success: true, draft: updatedDraftModel};
     }
 
@@ -183,6 +192,7 @@ export async function updateDraftFile(serverUrl: string, channelId: string, root
         // Get the existing draft
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const draft = await getDraft(database, channelId, rootId);
+        logDebug('updateDraftFile', draft);
         if (!draft) {
             return {success: false, error: 'no draft'};
         }
@@ -240,6 +250,7 @@ export async function removeDraftFile(serverUrl: string, channelId: string, root
 
 export async function updateDraftMessage(serverUrl: string, channelId: string, rootId: string, message: string): DraftRemoteResponse {
     try {
+        logDebug('updateDraftMessage', message);
         return syncDraft(serverUrl, {
             channel_id: channelId,
             root_id: rootId,
@@ -258,7 +269,7 @@ export async function addFilesToDraft(serverUrl: string, channelId: string, root
 
         // Update/create the files
         const files = draft ? [...draft.files, ...newFiles] : newFiles;
-
+        logDebug('addFilesToDraft', files);
         return syncDraft(serverUrl, {
             channel_id: channelId,
             root_id: rootId,
@@ -274,6 +285,7 @@ export const removeDraft = async (serverUrl: string, channelId: string, rootId =
     try {
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const draft = await getDraft(database, channelId, rootId);
+        logDebug('removeDraft', draft);
 
         return draft ? deleteDraft(serverUrl, draft) : {success: true, draft: undefined};
     } catch (error) {
@@ -284,6 +296,7 @@ export const removeDraft = async (serverUrl: string, channelId: string, rootId =
 
 export async function updateDraftPriority(serverUrl: string, channelId: string, rootId: string, priority: PostPriority): DraftRemoteResponse {
     try {
+        logDebug('updateDraftPriority', priority);
         return syncDraft(serverUrl, {
             channel_id: channelId,
             root_id: rootId,
