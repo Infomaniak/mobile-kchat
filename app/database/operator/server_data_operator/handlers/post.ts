@@ -5,7 +5,6 @@ import {Q} from '@nozbe/watermelondb';
 
 import {ActionType} from '@constants';
 import {MM_TABLES} from '@constants/database';
-import {buildDraftKey} from '@database/operator/server_data_operator/comparators';
 import {shouldUpdateFileRecord} from '@database/operator/server_data_operator/comparators/files';
 import {
     transformDraftRecord,
@@ -16,7 +15,7 @@ import {
 } from '@database/operator/server_data_operator/transformers/post';
 import {getRawRecordPairs, getUniqueRawsBy, getValidRecordsForUpdate} from '@database/operator/utils/general';
 import {createPostsChain, getPostListEdges} from '@database/operator/utils/post';
-import {logDebug, logWarning} from '@utils/log';
+import {logWarning} from '@utils/log';
 
 import type ServerDataOperatorBase from '.';
 import type Database from '@nozbe/watermelondb/Database';
@@ -115,8 +114,6 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
      * @returns {Promise<DraftModel>}
      */
     handleDraft = async ({draft, prepareRecordsOnly = true}: HandleDraftArgs): Promise<DraftModel> => {
-        logDebug(`[DraftHandler] Handling draft for channel ${draft.channel_id} with message: ${draft.message}`);
-
         const drafts = await this.handleDrafts({drafts: [draft], prepareRecordsOnly});
         return drafts[0];
     };
@@ -135,13 +132,10 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             );
             return [];
         }
-        logDebug(`[DraftHandler] Handling ${drafts.length} drafts`);
 
         const createOrUpdateRawValues = getUniqueRawsBy({raws: drafts, key: 'channel_id'});
-
         return this.handleRecords({
-            fieldName: 'channel_id',
-            buildKeyRecordBy: buildDraftKey,
+            fieldName: 'id',
             transformer: transformDraftRecord,
             prepareRecordsOnly,
             createOrUpdateRawValues,
@@ -321,9 +315,6 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             );
             return [];
         }
-
-        //logDebug(`[DraftHandler] Handling ${files.length} files`);
-
         const processedFiles = (await this.processRecords({
             createOrUpdateRawValues: files,
             tableName: FILE,

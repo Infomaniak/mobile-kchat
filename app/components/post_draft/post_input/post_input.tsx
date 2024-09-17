@@ -296,7 +296,9 @@ export default function PostInput({
         });
         return () => {
             listener.remove();
-            updateDraftMessage(serverUrl, channelId, rootId, lastNativeValue.current); // safe draft on unmount
+
+            // Redundont with onBlur method l147
+            // updateDraftMessage(serverUrl, channelId, rootId, lastNativeValue.current); // safe draft on unmount
         };
     }, [updateValue, channelId, rootId]);
 

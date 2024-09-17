@@ -1,5 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
+import {omit} from 'lodash';
 
 import type ClientBase from './base';
 
@@ -23,10 +24,12 @@ const ClientDrafts = <TBase extends Constructor<ClientBase>>(superclass: TBase) 
         this.doFetch<Draft[]>(`${this.getUserRoute('me')}/teams/${teamId}/drafts`, {method: 'get'});
 
     // - normal draft
-    upsertDraft = (draft: Draft) => this.doFetch<Draft>(
-        this.getDraftsRoute(),
-        {method: 'post', body: JSON.stringify(draft)},
-    );
+    upsertDraft = (draft: Draft) => {
+        return this.doFetch<Draft>(
+            this.getDraftsRoute(),
+            {method: 'post', body: omit(draft, 'props')},
+        );
+    };
     deleteDraft = (channelId: Channel['id'], rootId = '') => {
         let endpoint = `${this.getUserRoute('me')}/channels/${channelId}/drafts`;
         if (rootId !== '') {

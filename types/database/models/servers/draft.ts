@@ -14,11 +14,14 @@ declare class DraftModel extends Model {
     /** associations : Describes every relationship to this table. */
     static associations: Associations;
 
+    /** create_at : The timestamp to when this post was first created */
     createAt: number;
 
-    updateAt: number;
-
+    /** delete_at : The timestamp to when this post was last archived/deleted */
     deleteAt: number;
+
+    /** update_at : The timestamp to when this post was last updated on the server */
+    updateAt: number;
 
     userId: string;
 

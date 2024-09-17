@@ -20,9 +20,9 @@ export default schemaMigrations({migrations: [
             addColumns({
                 table: DRAFT,
                 columns: [
-                    {name: 'created_at', type: 'number'},
-                    {name: 'updated_at', type: 'number'},
-                    {name: 'deleted_at', type: 'number'},
+                    {name: 'create_at', type: 'number'},
+                    {name: 'update_at', type: 'number'},
+                    {name: 'delete_at', type: 'number'},
                     {name: 'user_id', type: 'string', isIndexed: true},
                     {name: 'props', type: 'string'},
                     {name: 'priority', type: 'string', isOptional: true},

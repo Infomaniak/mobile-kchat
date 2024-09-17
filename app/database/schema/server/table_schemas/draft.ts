@@ -10,9 +10,9 @@ const {DRAFT} = MM_TABLES.SERVER;
 export default tableSchema({
     name: DRAFT,
     columns: [
-        {name: 'created_at', type: 'number'},
-        {name: 'updated_at', type: 'number'},
-        {name: 'deleted_at', type: 'number'},
+        {name: 'create_at', type: 'number'},
+        {name: 'update_at', type: 'number'},
+        {name: 'delete_at', type: 'number'},
         {name: 'user_id', type: 'string', isIndexed: true},
         {name: 'channel_id', type: 'string', isIndexed: true},
         {name: 'root_id', type: 'string', isIndexed: true},
