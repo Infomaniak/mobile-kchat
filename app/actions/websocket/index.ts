@@ -4,6 +4,7 @@
 import {markChannelAsViewed} from '@actions/local/channel';
 import {dataRetentionCleanup} from '@actions/local/systems';
 import {markChannelAsRead} from '@actions/remote/channel';
+import {fetchDrafts} from '@actions/remote/draft_fetcher';
 import {
     deferredAppEntryActions,
     entry,
@@ -17,7 +18,6 @@ import {handleTeamSyncEvent} from '@actions/websocket/ikTeams';
 import {Screens, WebsocketEvents} from '@constants';
 import DatabaseManager from '@database/manager';
 import AppsManager from '@managers/apps_manager';
-import NetworkManager from '@managers/network_manager';
 import {getActiveServerUrl} from '@queries/app/servers';
 import {getLastPostInThread} from '@queries/servers/post';
 import {
@@ -103,16 +103,6 @@ export async function handleFirstConnect(serverUrl: string) {
 
 export async function handleReconnect(serverUrl: string) {
     return doReconnect(serverUrl);
-}
-
-export async function fetchDrafts(serverUrl: string, currentTeamId: string) {
-    try {
-        const client = NetworkManager.getClient(serverUrl);
-        const drafts = await client.getDrafts(currentTeamId);
-        logInfo('doReconnect : Drafts retrieved successfully:', drafts);
-    } catch (error) {
-        logDebug('Error retrieving drafts:', error);
-    }
 }
 
 async function doReconnect(serverUrl: string) {

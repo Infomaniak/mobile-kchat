@@ -5,6 +5,7 @@ import {Q} from '@nozbe/watermelondb';
 
 import {ActionType} from '@constants';
 import {MM_TABLES} from '@constants/database';
+import {DraftModel} from '@database/models/server';
 import {shouldUpdateFileRecord} from '@database/operator/server_data_operator/comparators/files';
 import {
     transformDraftRecord,
@@ -21,7 +22,6 @@ import type ServerDataOperatorBase from '.';
 import type Database from '@nozbe/watermelondb/Database';
 import type Model from '@nozbe/watermelondb/Model';
 import type {HandleDraftArgs, HandleDraftsArgs, HandleFilesArgs, HandlePostsArgs, RecordPair} from '@typings/database/database';
-import type DraftModel from '@typings/database/models/servers/draft';
 import type FileModel from '@typings/database/models/servers/file';
 import type PostModel from '@typings/database/models/servers/post';
 import type PostsInChannelModel from '@typings/database/models/servers/posts_in_channel';
@@ -40,7 +40,7 @@ type PostActionType = keyof typeof ActionType.POSTS;
 
 export interface PostHandlerMix {
     handleDraft: ({draft, prepareRecordsOnly}: HandleDraftArgs) => Promise<DraftModel>;
-    handleDrafts: ({drafts, prepareRecordsOnly}: HandleDraftsArgs) => Promise<DraftModel[]>;
+    handleDrafts: ({drafts, prepareRecordsOnly, prune}: HandleDraftsArgs) => Promise<DraftModel[]>;
     handleFiles: ({files, prepareRecordsOnly}: HandleFilesArgs) => Promise<FileModel[]>;
     handlePosts: ({actionType, order, posts, previousPostId, prepareRecordsOnly}: HandlePostsArgs) => Promise<Model[]>;
     handlePostsInChannel: (posts: Post[]) => Promise<void>;
@@ -125,20 +125,46 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
      * @param {boolean} draftsArgs.prepareRecordsOnly
      * @returns {Promise<DraftModel[]>}
      */
-    handleDrafts = async ({drafts, prepareRecordsOnly = true}: HandleDraftsArgs): Promise<DraftModel[]> => {
-        if (!drafts?.length) {
-            logWarning(
-                'An empty or undefined "drafts" array has been passed to the handleDrafts method',
-            );
+    handleDrafts = async ({drafts = [], prepareRecordsOnly = true, prune = false}: HandleDraftsArgs): Promise<DraftModel[]> => {
+        if (!prune) {
+            if (!drafts?.length) {
+                logWarning(
+                    'An empty or undefined "drafts" array has been passed to the handleDrafts method',
+                );
+                return [];
+            }
+            const createOrUpdateRawValues = getUniqueRawsBy({raws: drafts, key: 'channel_id'});
+            return this.handleRecords({
+                fieldName: 'id',
+                transformer: transformDraftRecord,
+                prepareRecordsOnly,
+                createOrUpdateRawValues,
+                tableName: DRAFT,
+            }, 'handleDrafts');
+        }
+        const database: Database = this.database;
+        const localDrafts = await database.get<DraftModel>(DRAFT).query().fetch();
+
+        const remoteDraftIds = new Set(drafts?.map((d) => d.id));
+
+        const createOrUpdateRawValues = getUniqueRawsBy({raws: drafts, key: 'channel_id'});
+        const deleteRawValues = await Promise.all(localDrafts.reduce((arr, draft) => {
+            if (!remoteDraftIds.has(draft.id)) {
+                arr.push(DraftModel.toApi(draft));
+            }
+            return arr;
+        }, [] as Array<Promise<Draft>>));
+
+        if (!createOrUpdateRawValues.length && !deleteRawValues.length) {
             return [];
         }
 
-        const createOrUpdateRawValues = getUniqueRawsBy({raws: drafts, key: 'channel_id'});
         return this.handleRecords({
             fieldName: 'id',
             transformer: transformDraftRecord,
             prepareRecordsOnly,
             createOrUpdateRawValues,
+            deleteRawValues,
             tableName: DRAFT,
         }, 'handleDrafts');
     };

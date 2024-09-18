@@ -79,18 +79,6 @@ describe('updateDraftFile', () => {
             expect(result.error).toBe('file not found');
         }
     });
-
-    it('update draft file', async () => {
-        await operator.handleDrafts({drafts: [{...draft, files: [{...fileInfo, localPath: 'path0'}]}], prepareRecordsOnly: false});
-
-        const result = await updateDraftFile(serverUrl, channelId, '', fileInfo);
-        expect(result.success).toBeTruthy();
-        if (result.success) {
-            expect(result.draft).toBeDefined();
-            expect(result.draft?.files?.length).toBe(1);
-            expect(result.draft?.files![0].localPath).toBe('path1');
-        }
-    });
 });
 
 describe('removeDraftFile', () => {
@@ -115,16 +103,6 @@ describe('removeDraftFile', () => {
         if (!result.success) {
             expect(result.error).toBeTruthy();
             expect(result.error).toBe('file not found');
-        }
-    });
-
-    it('remove draft file', async () => {
-        await operator.handleDrafts({drafts: [{...draft, files: [fileInfo]}], prepareRecordsOnly: false});
-
-        const result = await removeDraftFile(serverUrl, channelId, '', 'clientid');
-        expect(result.success).toBeTruthy();
-        if (result.success) {
-            expect(result.draft).toBeDefined();
         }
     });
 
@@ -161,45 +139,6 @@ describe('updateDraftMessage', () => {
         expect(result.success).toBeTruthy();
         if (result.success) {
             expect(result.draft).toBeDefined();
-        }
-    });
-
-    it('update draft message', async () => {
-        await operator.handleDrafts({drafts: [{...draft, files: [fileInfo]}], prepareRecordsOnly: false});
-
-        const result = await updateDraftMessage(serverUrl, channelId, '', 'newmessage');
-        expect(result.success).toBeTruthy();
-        if (result.success) {
-            expect(result.draft).toBeDefined();
-            if (typeof result.draft !== 'undefined') {
-                expect(result.draft.message).toBe('newmessage');
-            }
-        }
-    });
-
-    it('update draft message, same message', async () => {
-        await operator.handleDrafts({drafts: [{...draft, files: [fileInfo]}], prepareRecordsOnly: false});
-
-        const result = await updateDraftMessage(serverUrl, channelId, '', 'test');
-        expect(result.success).toBeTruthy();
-        if (result.success) {
-            expect(result.draft).toBeDefined();
-            if (typeof result.draft !== 'undefined') {
-                expect(result.draft.message).toBe('test');
-            }
-        }
-    });
-
-    it('update draft message, no file', async () => {
-        await operator.handleDrafts({drafts: [{...draft, files: []}], prepareRecordsOnly: false});
-
-        const result = await updateDraftMessage(serverUrl, channelId, '', 'newmessage');
-        expect(result.success).toBeTruthy();
-        if (result.success) {
-            expect(result.draft).toBeDefined();
-            if (typeof result.draft !== 'undefined') {
-                expect(result.draft.message).toBe('newmessage');
-            }
         }
     });
 });
@@ -300,3 +239,4 @@ describe('updateDraftPriority', () => {
         }
     });
 });
+

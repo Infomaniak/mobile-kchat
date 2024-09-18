@@ -29,8 +29,10 @@ import NavigationStore from '@store/navigation_store';
 import {isDMorGM, sortChannelsByDisplayName} from '@utils/channel';
 import {getFullErrorMessage, isErrorWithStatusCode} from '@utils/errors';
 import {isTablet} from '@utils/helpers';
-import {logDebug, logInfo} from '@utils/log';
+import {logDebug} from '@utils/log';
 import {processIsCRTEnabled} from '@utils/thread';
+
+import {fetchDrafts} from '../draft_fetcher';
 
 import type {Database, Model} from '@nozbe/watermelondb';
 
@@ -118,17 +120,6 @@ const teamsToRemove = async (serverUrl: string, removeTeamIds?: string[]) => {
     }
 
     return [];
-};
-
-const fetchDrafts = async (serverUrl: string, initialTeamId: string) => {
-    let drafts = [];
-    try {
-        const client = NetworkManager.getClient(serverUrl);
-        drafts = await client.getDrafts(initialTeamId);
-        logInfo('entryRest : Drafts retrieved successfully during entry:', drafts);
-    } catch (catchError) {
-        logDebug('Error retrieving drafts during entry:', catchError);
-    }
 };
 
 const entryRest = async (serverUrl: string, teamId?: string, channelId?: string, since = 0): Promise<EntryResponse> => {

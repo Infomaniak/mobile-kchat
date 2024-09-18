@@ -294,6 +294,7 @@ export type HandleDraftArgs = PrepareOnly & {
 
 export type HandleDraftsArgs = PrepareOnly & {
   drafts?: Draft[];
+  prune?: boolean;
 };
 
 export type HandleConferencesArgs = PrepareOnly & {
