@@ -4,7 +4,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 
-import {addFilesToDraft, removeDraft} from '@actions/local/draft';
+import {addFilesToDraft, removeDraft} from '@actions/remote/draft';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';

@@ -5,7 +5,7 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {StyleSheet, TouchableWithoutFeedback, useWindowDimensions, View} from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import {updateDraftFile} from '@actions/local/draft';
+import {updateDraftFile} from '@actions/remote/draft';
 import FileIcon from '@components/files/file_icon';
 import ImageFile from '@components/files/image_file';
 import VoiceRecordingFile from '@components/files/voice_recording_file';

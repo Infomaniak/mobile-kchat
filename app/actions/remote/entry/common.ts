@@ -32,6 +32,8 @@ import {isTablet} from '@utils/helpers';
 import {logDebug} from '@utils/log';
 import {processIsCRTEnabled} from '@utils/thread';
 
+import {fetchDrafts} from '../draft_fetcher';
+
 import type {Database, Model} from '@nozbe/watermelondb';
 
 const {CallManagerModule} = NativeModules;
@@ -145,6 +147,8 @@ const entryRest = async (serverUrl: string, teamId?: string, channelId?: string,
     if (error) {
         return {error};
     }
+
+    await fetchDrafts(serverUrl, initialTeamId);
 
     const rolesData = await fetchRoles(serverUrl, teamData.memberships, chData?.memberships, meData.user, true);
 

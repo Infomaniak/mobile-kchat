@@ -28,17 +28,61 @@ export default class DraftModel extends Model implements DraftModelInterface {
         [POST]: {type: 'belongs_to', key: 'root_id'},
     };
 
+    /** Convert a draftModel to an API draft */
+    static toApi = async (draft: DraftModel): Promise<Draft> => ({
+        id: draft.id,
+        create_at: draft.createAt,
+        update_at: draft.updateAt,
+        delete_at: draft.deleteAt,
+        user_id: draft.userId,
+        channel_id: draft.channelId,
+        root_id: draft.rootId,
+        message: draft.message,
+        props: draft.props,
+        file_ids: draft.files.reduce<string[]>((acc, curr) => {
+            if (curr.id) {
+                acc.push(curr.id);
+            }
+            return acc;
+        }, []),
+        metadata: (draft.metadata ? draft.metadata : {}) as PostMetadata,
+        priority: draft.priority,
+        timestamp: draft.timestamp,
+    });
+
+    /** create_at : The creation date for this draft */
+    @field('create_at') createAt!: number;
+
+    /** update_at : The creation date for this draft */
+    @field('update_at') updateAt!: number;
+
+    /** delete_at : The deletion date for this draft */
+    @field('delete_at') deleteAt!: number;
+
+    /** user_id : The user id of the user that owns this draft */
+    @field('user_id') userId!: string;
+
     /** channel_id : The foreign key pointing to the channel in which the draft was made */
     @field('channel_id') channelId!: string;
-
-    /** message : The draft message */
-    @field('message') message!: string;
 
     /** root_id : The root_id will be empty most of the time unless the draft relates to a draft reply of a thread */
     @field('root_id') rootId!: string;
 
+    /** message : The draft message */
+    @field('message') message!: string;
+
+    /** props : Additional attributes for this props */
+    @json('props', safeParseJSON) props!: any;
+
     /** files : The files field will hold an array of file objects that have not yet been uploaded and persisted within the FILE table */
     @json('files', safeParseJSON) files!: FileInfo[];
 
+    /** metadata : Draft's post acknowledgements, embeds, emojis, etc... */
     @json('metadata', identity) metadata?: PostMetadata;
+
+    /** priority : Draft's post priority */
+    @json('priority', identity) priority?: PostPriority;
+
+    /** timestamp : Every scheduled draft as a unix timestamp */
+    @field('timestamp') timestamp?: number;
 }

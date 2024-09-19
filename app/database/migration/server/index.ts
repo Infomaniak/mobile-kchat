@@ -4,13 +4,32 @@
 // NOTE : To implement migration, please follow this document
 // https://nozbe.github.io/WatermelonDB/Advanced/Migrations.html
 
-import {addColumns, createTable, schemaMigrations} from '@nozbe/watermelondb/Schema/migrations';
+import {addColumns, createTable, schemaMigrations, unsafeExecuteSql} from '@nozbe/watermelondb/Schema/migrations';
 
 import {MM_TABLES} from '@constants/database';
 
 const {CONFERENCE, CONFERENCE_PARTICIPANT, CHANNEL_INFO, DRAFT, POST, CHANNEL_MEMBERSHIP} = MM_TABLES.SERVER;
 
 export default schemaMigrations({migrations: [
+    {
+        toVersion: 6,
+        steps: [
+
+            //We are cleaning DRAFT to replace the old draft table that was only local with the new one.
+            unsafeExecuteSql(`DELETE FROM ${DRAFT};`),
+            addColumns({
+                table: DRAFT,
+                columns: [
+                    {name: 'create_at', type: 'number'},
+                    {name: 'update_at', type: 'number'},
+                    {name: 'delete_at', type: 'number'},
+                    {name: 'user_id', type: 'string', isIndexed: true},
+                    {name: 'props', type: 'string'},
+                    {name: 'priority', type: 'string', isOptional: true},
+                    {name: 'timestamp', type: 'string', isOptional: true}],
+            }),
+        ],
+    },
     {
         toVersion: 5,
         steps: [

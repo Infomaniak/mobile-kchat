@@ -289,7 +289,12 @@ export type HandleUsersArgs = PrepareOnly & {
  };
 
 export type HandleDraftArgs = PrepareOnly & {
+  draft: Draft;
+};
+
+export type HandleDraftsArgs = PrepareOnly & {
   drafts?: Draft[];
+  prune?: boolean;
 };
 
 export type HandleConferencesArgs = PrepareOnly & {
