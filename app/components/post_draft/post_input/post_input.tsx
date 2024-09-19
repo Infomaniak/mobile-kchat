@@ -11,7 +11,7 @@ import {
     type NativeSyntheticEvent, Platform, type TextInputSelectionChangeEventData,
 } from 'react-native';
 
-import {updateDraftMessage} from '@actions/remote/draft';
+import {updateDraftMessage} from '@actions/local/draft';
 import {userTyping} from '@actions/websocket/users';
 import {Events, Screens} from '@constants';
 import {useServerUrl} from '@context/server';
@@ -296,9 +296,7 @@ export default function PostInput({
         });
         return () => {
             listener.remove();
-
-            // Redundont with onBlur method l147
-            // updateDraftMessage(serverUrl, channelId, rootId, lastNativeValue.current); // safe draft on unmount
+            updateDraftMessage(serverUrl, channelId, rootId, lastNativeValue.current); // safe draft on unmount
         };
     }, [updateValue, channelId, rootId]);
 

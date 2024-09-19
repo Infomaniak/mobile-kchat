@@ -33,9 +33,10 @@ const ClientGeneral = <TBase extends Constructor<ClientBase>>(superclass: TBase)
         if (deviceId) {
             url = `${url}&device_id=${deviceId}`;
         }
-        return this.doFetchResponse(
+        return this.doFetch(
             url,
             {method: 'get', timeoutInterval},
+            false,
         );
     };
 

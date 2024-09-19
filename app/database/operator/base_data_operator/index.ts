@@ -245,9 +245,8 @@ export default class BaseDataOperator {
         ...processRecordArgs
     }: HandleRecordsArgs<T, R>, description: string): Promise<T[]> {
         const {tableName, createOrUpdateRawValues} = processRecordArgs;
-        const deleteRawValues = processRecordArgs.deleteRawValues ?? [];
 
-        if (!createOrUpdateRawValues.length && !deleteRawValues.length) {
+        if (!createOrUpdateRawValues.length) {
             logWarning(
                 `An empty "rawValues" array has been passed to the handleRecords method for tableName ${tableName}`,
             );

@@ -4,7 +4,7 @@
 import React from 'react';
 import {View, Platform, type StyleProp, type ViewStyle} from 'react-native';
 
-import {removeDraftFile} from '@actions/remote/draft';
+import {removeDraftFile} from '@actions/local/draft';
 import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {useServerUrl} from '@context/server';

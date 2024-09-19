@@ -53,16 +53,10 @@ describe('*** Operator: Post Handlers tests ***', () => {
                 ],
                 message: 'test draft message for post',
                 root_id: '',
-                user_id: 'user_id',
-                post_id: 'post_id',
-                props: {},
-                create_at: 123,
-                update_at: 456,
-                delete_at: 789,
             },
         ];
 
-        await operator.handleDrafts({drafts, prepareRecordsOnly: false});
+        await operator.handleDraft({drafts, prepareRecordsOnly: false});
 
         expect(spyOnHandleRecords).toHaveBeenCalledWith({
             buildKeyRecordBy: buildDraftKey,
@@ -71,7 +65,7 @@ describe('*** Operator: Post Handlers tests ***', () => {
             createOrUpdateRawValues: drafts,
             tableName: 'Draft',
             prepareRecordsOnly: false,
-        }, 'handleDrafts');
+        }, 'handleDraft');
     });
 
     it('=> HandlePosts: should write to the Post and its sub-child tables', async () => {

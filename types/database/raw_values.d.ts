@@ -17,6 +17,14 @@ type ChannelInfo = {
     purpose: string;
 };
 
+type Draft = {
+    channel_id: string;
+    files?: FileInfo[];
+    message?: string;
+    root_id: string;
+    metadata?: PostMetadata;
+};
+
 type MyTeam = {
     id: string;
     roles: string;
@@ -104,7 +112,7 @@ type RawValue =
   | Conference
   | ConferenceParticipant
   | CustomEmoji
-  | DraftWithFiles
+  | Draft
   | FileInfo
   | Group
   | GroupChannel

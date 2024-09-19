@@ -139,21 +139,16 @@ export const transformFileRecord = ({action, database, value}: TransformerArgs):
 export const transformDraftRecord = ({action, database, value}: TransformerArgs): Promise<DraftModel> => {
     const emptyFileInfo: FileInfo[] = [];
     const emptyPostMetadata: PostMetadata = {};
-    const raw = value.raw as DraftWithFiles;
+    const raw = value.raw as Draft;
 
+    // We use the raw id as  Draft is client side only and  we would only be creating/deleting drafts
     const fieldsMapper = (draft: DraftModel) => {
-        draft._raw.id = (raw.id || draft.id);
-        draft.createAt = raw.create_at;
-        draft.updateAt = raw.update_at;
-        draft.deleteAt = raw.delete_at;
-        draft.userId = raw.user_id;
-        draft.channelId = raw.channel_id;
-        draft.rootId = raw.root_id;
-        draft.message = raw.message;
+        draft._raw.id = draft.id;
+        draft.rootId = raw?.root_id ?? '';
+        draft.message = raw?.message ?? '';
+        draft.channelId = raw?.channel_id ?? '';
         draft.files = raw?.files ?? emptyFileInfo;
         draft.metadata = raw?.metadata ?? emptyPostMetadata;
-        draft.priority = raw.priority;
-        draft.timestamp = raw.timestamp;
     };
 
     return prepareBaseRecord({

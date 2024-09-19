@@ -114,7 +114,6 @@ describe('***  POST Prepare Records Test ***', () => {
         const database = await createTestConnection({databaseName: 'post_prepare_records', setActive: true});
         expect(database).toBeTruthy();
 
-        const now = Date.now();
         const preparedRecords = await transformDraftRecord({
             action: OperationType.CREATE,
             database: database!,
@@ -125,11 +124,6 @@ describe('***  POST Prepare Records Test ***', () => {
                     root_id: 'ps81iqbddesfby8jayz7owg4yypoo',
                     message: 'draft message',
                     channel_id: 'channel_idp23232e',
-                    user_id: 'user_id123',
-                    props: {},
-                    create_at: now,
-                    delete_at: 0,
-                    update_at: now,
                     files: [],
                 },
             },

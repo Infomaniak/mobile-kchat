@@ -3,7 +3,7 @@
 
 import {AppState, type AppStateStatus} from 'react-native';
 
-import {addFilesToDraft} from '@actions/remote/draft';
+import {addFilesToDraft} from '@actions/local/draft';
 import {PROGRESS_TIME_TO_STORE} from '@constants/files';
 import DatabaseManager from '@database/manager';
 import {getDraft} from '@queries/servers/drafts';

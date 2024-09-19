@@ -4,7 +4,6 @@
 import {markChannelAsViewed} from '@actions/local/channel';
 import {dataRetentionCleanup} from '@actions/local/systems';
 import {markChannelAsRead} from '@actions/remote/channel';
-import {fetchDrafts} from '@actions/remote/draft_fetcher';
 import {
     deferredAppEntryActions,
     entry,
@@ -140,8 +139,6 @@ async function doReconnect(serverUrl: string) {
     }
 
     await setLastFullSync(operator, now);
-
-    await fetchDrafts(serverUrl, initialTeamId);
 
     const tabletDevice = isTablet();
     const isActiveServer = (await getActiveServerUrl()) === serverUrl;
