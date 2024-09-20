@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {Q} from '@nozbe/watermelondb';
+import {omit} from 'lodash';
 
 import {ActionType} from '@constants';
 import {MM_TABLES} from '@constants/database';
@@ -133,7 +134,7 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
                 );
                 return [];
             }
-            const createOrUpdateRawValues = getUniqueRawsBy({raws: drafts, key: 'channel_id'});
+            const createOrUpdateRawValues = getUniqueRawsBy({raws: drafts, key: 'id'});
             return this.handleRecords({
                 fieldName: 'id',
                 transformer: transformDraftRecord,
@@ -147,13 +148,18 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
         const remoteDraftIds = new Set(drafts?.map((d) => d.id));
 
-        const createOrUpdateRawValues = getUniqueRawsBy({raws: drafts, key: 'channel_id'});
+        const createOrUpdateRawValues = getUniqueRawsBy({raws: drafts, key: 'id'});
         const deleteRawValues = await Promise.all(localDrafts.reduce((arr, draft) => {
             if (!remoteDraftIds.has(draft.id)) {
-                arr.push(DraftModel.toApi(draft));
+                arr.push(DraftModel.toApi(draft).then(
+                    (apiDraft) => ({
+                        ...omit(apiDraft, 'file_ids'),
+                        files: draft.files,
+                    } as DraftWithFiles)),
+                );
             }
             return arr;
-        }, [] as Array<Promise<Draft>>));
+        }, [] as Array<Promise<DraftWithFiles>>));
 
         if (!createOrUpdateRawValues.length && !deleteRawValues.length) {
             return [];

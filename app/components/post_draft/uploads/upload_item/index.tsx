@@ -102,7 +102,7 @@ export default function UploadItem({
         const newFile = {...file};
         newFile.failed = false;
 
-        updateDraftFile(serverUrl, channelId, rootId, newFile);
+        updateDraftFile(serverUrl, channelId, rootId, newFile, false);
         DraftUploadManager.prepareUpload(serverUrl, newFile, channelId, rootId, newFile.bytesRead);
         DraftUploadManager.registerProgressHandler(newFile.clientId!, setProgress);
     }, [serverUrl, channelId, rootId, file]);

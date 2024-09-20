@@ -8,6 +8,7 @@ import type {ClientResponse, ClientResponseError, ProgressPromise, UploadRequest
 
 export interface ClientFilesMix {
     getFileUrl: (fileId: string, timestamp: number) => string;
+    getFileInfosForFile: (fileId: string) => Promise<FileInfo>;
     getFileThumbnailUrl: (fileId: string, timestamp: number) => string;
     getFilePreviewUrl: (fileId: string, timestamp: number) => string;
     getFilePublicLink: (fileId: string) => Promise<{link: string}>;
@@ -32,6 +33,13 @@ const ClientFiles = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
 
         return url;
     }
+
+    getFileInfosForFile = (fileId: string) => {
+        return this.doFetch(
+            `${this.getFileRoute(fileId)}/info`,
+            {method: 'get'},
+        );
+    };
 
     getFileThumbnailUrl(fileId: string, timestamp: number) {
         let url = `${this.apiClient.baseUrl}${this.getFileRoute(fileId)}/thumbnail`;

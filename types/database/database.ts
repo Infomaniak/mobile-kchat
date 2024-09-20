@@ -289,11 +289,11 @@ export type HandleUsersArgs = PrepareOnly & {
  };
 
 export type HandleDraftArgs = PrepareOnly & {
-  draft: Draft;
+  draft: DraftWithFiles;
 };
 
 export type HandleDraftsArgs = PrepareOnly & {
-  drafts?: Draft[];
+  drafts?: DraftWithFiles[];
   prune?: boolean;
 };
 

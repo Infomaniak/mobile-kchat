@@ -120,7 +120,7 @@ export default function DraftHandler(props: Props) {
             return;
         }
 
-        addFilesToDraft(serverUrl, channelId, rootId, newFiles);
+        addFilesToDraft(serverUrl, channelId, rootId, newFiles, false);
 
         for (const file of newFiles) {
             DraftUploadManager.prepareUpload(serverUrl, file, channelId, rootId);

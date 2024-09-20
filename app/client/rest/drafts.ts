@@ -6,7 +6,7 @@ import type ClientBase from './base';
 
 export interface ClientDraftsMix {
     getDrafts: (teamId: string) => Promise<Draft[]>;
-    upsertDraft: (draft: Draft) => Promise<Draft>;
+    upsertDraft: (draft: Partial<Draft> & Pick<Draft, 'channel_id' | 'root_id'>) => Promise<Draft>;
     deleteDraft: (channelId: Channel['id'], rootId?: string) => Promise<null>;
     updateScheduledDraft: (draft: ScheduledDraft) => Promise<Draft>;
     deleteScheduledDraft: (draftId: ScheduledDraft['id']) => Promise<Draft>;
@@ -24,7 +24,7 @@ const ClientDrafts = <TBase extends Constructor<ClientBase>>(superclass: TBase) 
         this.doFetch<Draft[]>(`${this.getUserRoute('me')}/teams/${teamId}/drafts`, {method: 'get'});
 
     // - normal draft
-    upsertDraft = (draft: Draft) => {
+    upsertDraft = (draft: Partial<DraftWithFiles> & Pick<Draft, 'channel_id' | 'root_id'>) => {
         return this.doFetch<Draft>(
             this.getDraftsRoute(),
             {method: 'post', body: omit(draft, 'props')},
