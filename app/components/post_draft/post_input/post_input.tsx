@@ -13,6 +13,7 @@ import {
 
 import {updateDraftMessage} from '@actions/remote/draft';
 import {userTyping} from '@actions/websocket/users';
+import {logDebug} from '@app/utils/log';
 import {Events, Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
@@ -255,6 +256,7 @@ export default function PostInput({
 
     const onAppStateChange = useCallback((appState: AppStateStatus) => {
         if (appState !== 'active' && previousAppState.current === 'active') {
+            logDebug('App is moving to background or closing. Saving draft...');
             updateDraftMessage(serverUrl, channelId, rootId, value);
         }
 

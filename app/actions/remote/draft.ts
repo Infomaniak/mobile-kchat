@@ -119,16 +119,19 @@ const syncDraft = async (
     // Update existing draft
     if (draftModel) {
         // Local update
+        logDebug('syncDraft - Existing draft found:', draftModel);
         let updated = false;
         let allPropertiesAreEmpty = true;
         draftModel.prepareUpdate((d) => {
             // Update each column one by one
             // - files
             const newFiles = draft.files ?? [];
+            logDebug('syncDraft - Checking files before update:', newFiles);
             if (!isEqual(d.files, newFiles)) {
                 updated = true;
                 d.files = newFiles;
                 allPropertiesAreEmpty &&= isEqual(newFiles, []);
+                logDebug('syncDraft - Updated files in draft:', newFiles);
             }
 
             // - message
@@ -137,19 +140,18 @@ const syncDraft = async (
                 updated = true;
                 d.message = newMessage;
                 allPropertiesAreEmpty &&= newMessage === '';
-            }
-
-            // - priority
-            if (isEqual(d.priority, draft.priority)) {
-                updated = true;
-                d.priority = draft.priority;
-                d.metadata = {...d.metadata, priority: draft.priority};
-                allPropertiesAreEmpty &&= (typeof draft.priority === 'undefined');
+                logDebug('syncDraft - Updated message in draft:', newMessage);
             }
         });
 
+        // Ne pas supprimer le brouillon si les fichiers existent
+        if (!isEqual(draftModel.files, [])) {
+            allPropertiesAreEmpty = false;
+            logDebug('syncDraft - Draft has files, not empty.');
+        }
+
         // If all properties of the draft are empty
-        // we are actually deleting this draft
+        // we are actually deleting this draft        const shouldDelete = allPropertiesAreEmpty;
         const shouldDelete = allPropertiesAreEmpty;
         if (shouldDelete) {
             return deleteDraft(serverUrl, draftModel);
@@ -162,6 +164,7 @@ const syncDraft = async (
 
         // LOCAL update
         await operator.batchRecords([draftModel], 'updateDraft');
+        logDebug('syncDraft - Draft updated locally with files:', draftModel.files);
 
         // Trigger the lazy remote update
         if (remoteUpdate) {
@@ -224,7 +227,7 @@ const lazyRemoteSyncDraft = debounce(
 );
 
 export async function updateDraftFile(serverUrl: string, channelId: string, rootId: string, file: FileInfo, remoteUpdate = true): DraftRemoteResponse {
-    logDebug('updateDraftFile');
+    logDebug('updateDraftFile', file);
     try {
         // Get the existing draft
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
@@ -256,23 +259,28 @@ export async function updateDraftFile(serverUrl: string, channelId: string, root
 }
 
 export async function removeDraftFile(serverUrl: string, channelId: string, rootId: string, clientId: string): DraftRemoteResponse {
-    logDebug('removeDraftFile');
+    logDebug('removeDraftFile - Removing file with clientId:', clientId);
+
     try {
         // Get the existing draft
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const draft = await getDraft(database, channelId, rootId);
         if (!draft) {
+            logError('removeDraftFile - No draft found for file removal.');
             return {success: false, error: 'no draft'};
         }
 
         // Find the related file we want to delete
         const i = draft.files.findIndex((v) => v.clientId === clientId);
         if (i === -1) {
+            logError('removeDraftFile - File not found in draft.');
             return {success: false, error: 'file not found'};
         }
+        logDebug('removeDraftFile - File found, proceeding to remove:', draft.files[i]);
 
         // Update the files
         const files = draft.files.filter((v, index) => index !== i);
+        logDebug('removeDraftFile - Remaining files after removal:', files);
 
         return syncDraft(serverUrl, {
             channel_id: channelId,
@@ -280,7 +288,7 @@ export async function removeDraftFile(serverUrl: string, channelId: string, root
             files,
         });
     } catch (error) {
-        logError('Failed removeDraftFile', error);
+        logError('Failed to remove draft file', error);
         return {success: false, error};
     }
 }
@@ -288,32 +296,37 @@ export async function removeDraftFile(serverUrl: string, channelId: string, root
 export async function updateDraftMessage(serverUrl: string, channelId: string, rootId: string, message: string): DraftRemoteResponse {
     logDebug('updateDraftMessage');
     try {
+        const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        const draft = await getDraft(database, channelId, rootId);
         return syncDraft(serverUrl, {
             channel_id: channelId,
             root_id: rootId,
             message,
+            files: draft?.files,
         });
     } catch (error) {
-        logError('Failed updateDraftMessage', error);
+        logError('Failed to update draft message', error);
         return {success: false, error};
     }
 }
 
 export async function addFilesToDraft(serverUrl: string, channelId: string, rootId: string, newFiles: FileInfo[], remoteUpdate = false): DraftRemoteResponse {
-    logDebug('addFilesToDraft');
+    logDebug('addFilesToDraft - New files:', newFiles);
     try {
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const draft = await getDraft(database, channelId, rootId);
 
         // Update/create the files
         const files = draft ? [...draft.files, ...newFiles] : newFiles;
+        logDebug('addFilesToDraft - Files to be added to the draft:', files);
+
         return syncDraft(serverUrl, {
             channel_id: channelId,
             root_id: rootId,
             files,
         }, remoteUpdate);
     } catch (error) {
-        logError('Failed addFilesToDraft', error);
+        logError('Failed to add files to draft', error);
         return {success: false, error};
     }
 }

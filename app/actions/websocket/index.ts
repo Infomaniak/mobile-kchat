@@ -141,7 +141,7 @@ async function doReconnect(serverUrl: string) {
 
     await setLastFullSync(operator, now);
 
-    await fetchDrafts(serverUrl, initialTeamId);
+    fetchDrafts(serverUrl, initialTeamId);
 
     const tabletDevice = isTablet();
     const isActiveServer = (await getActiveServerUrl()) === serverUrl;
