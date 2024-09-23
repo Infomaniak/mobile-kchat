@@ -253,7 +253,6 @@ export default function PostInput({
             propagateValue(newValue!);
         }
     };
-
     const onAppStateChange = useCallback((appState: AppStateStatus) => {
         if (appState !== 'active' && previousAppState.current === 'active') {
             logDebug('App is moving to background or closing. Saving draft...');

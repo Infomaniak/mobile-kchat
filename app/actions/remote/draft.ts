@@ -35,6 +35,15 @@ const newEmptyDraft = (): Omit<DraftWithFiles, 'user_id' | 'channel_id' | 'root_
     };
 };
 
+/** Make sure that there is at least one usefull property
+ * of the draft that is not empty
+ */
+const isEmptyDraft = (draft: Partial<DraftWithFiles>) => (
+    isEqual(draft.files ?? [], []) &&
+    ((draft.message ?? '') === '') &&
+    (typeof draft.priority === 'undefined')
+);
+
 /**
  * Create a new draft:
  *  - Add a new row to the DB so that the update is immediatly visible
@@ -55,16 +64,8 @@ const createDraft = async (
         ...newDraft,
     };
 
-    // Make sure that there is at least one usefull property
-    // of the draft that is not empty
-    const allPropertiesAreEmpty = (
-        isEqual(mergedDraft.files ?? [], []) &&
-        ((mergedDraft.message ?? '') === '') &&
-        (typeof mergedDraft.priority === 'undefined')
-    );
-
     // If the draft is empty, it's not created
-    if (allPropertiesAreEmpty) {
+    if (isEmptyDraft(mergedDraft)) {
         return {success: true, draft: undefined};
     }
 
@@ -89,6 +90,7 @@ const createDraft = async (
 const deleteDraft = async (serverUrl: string, draft: DraftModel): DraftRemoteResponse => {
     const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
     const client = NetworkManager.getClient(serverUrl);
+    logDebug('deleteDraft', draft);
 
     // LOCAL delete
     draft.prepareDestroyPermanently();
@@ -118,57 +120,58 @@ const syncDraft = async (
 
     // Update existing draft
     if (draftModel) {
+        const mergedDraft = {
+            ...(await DraftModel.toApi(draftModel)),
+            ...draft,
+        };
+        logDebug('draftModel message', {message: (await DraftModel.toApi(draftModel)).message});
+        logDebug('draft message', {message: draft.message});
+        logDebug('mergedDraft message', {message: mergedDraft.message});
+
+        // If all properties of the draft are empty
+        // we are actually deleting this draft
+        if (isEmptyDraft(mergedDraft)) {
+            return deleteDraft(serverUrl, draftModel);
+        }
+
         // Local update
-        logDebug('syncDraft - Existing draft found:', draftModel);
         let updated = false;
-        let allPropertiesAreEmpty = true;
         draftModel.prepareUpdate((d) => {
             // Update each column one by one
             // - files
-            const newFiles = draft.files ?? [];
-            logDebug('syncDraft - Checking files before update:', newFiles);
+            const newFiles = mergedDraft.files ?? [];
             if (!isEqual(d.files, newFiles)) {
                 updated = true;
                 d.files = newFiles;
-                allPropertiesAreEmpty &&= isEqual(newFiles, []);
-                logDebug('syncDraft - Updated files in draft:', newFiles);
             }
 
             // - message
-            const newMessage = draft.message ?? '';
-            if (d.message !== draft.message) {
+            const newMessage = mergedDraft.message ?? '';
+            if (d.message !== newMessage) {
                 updated = true;
                 d.message = newMessage;
-                allPropertiesAreEmpty &&= newMessage === '';
-                logDebug('syncDraft - Updated message in draft:', newMessage);
+            }
+
+            // - priority
+            const newPriority = mergedDraft.priority;
+            if (!isEqual(d.priority, newPriority)) {
+                updated = true;
+                d.priority = newPriority;
+                d.metadata = {...d.metadata, priority: newPriority};
             }
         });
 
-        // Ne pas supprimer le brouillon si les fichiers existent
-        if (!isEqual(draftModel.files, [])) {
-            allPropertiesAreEmpty = false;
-            logDebug('syncDraft - Draft has files, not empty.');
-        }
-
-        // If all properties of the draft are empty
-        // we are actually deleting this draft        const shouldDelete = allPropertiesAreEmpty;
-        const shouldDelete = allPropertiesAreEmpty;
-        if (shouldDelete) {
-            return deleteDraft(serverUrl, draftModel);
-        }
+        // LOCAL update
+        await operator.batchRecords([draftModel], 'updateDraft');
 
         // If no properties were updated cancel the actual process
         if (!updated) {
             return {success: true, draft: draftModel};
         }
 
-        // LOCAL update
-        await operator.batchRecords([draftModel], 'updateDraft');
-        logDebug('syncDraft - Draft updated locally with files:', draftModel.files);
-
         // Trigger the lazy remote update
         if (remoteUpdate) {
-            lazyRemoteSyncDraft(serverUrl, draft);
+            lazyRemoteSyncDraft(serverUrl, mergedDraft);
         }
 
         return {success: true, draft: draftModel};
@@ -183,43 +186,61 @@ const syncDraft = async (
  * stack all calls and only fire the last one
  */
 const lazyRemoteSyncDraft = debounce(
-    async (serverUrl: string, draft: Partial<DraftWithFiles> & Pick<Draft, 'channel_id' | 'root_id'>) => {
+    async (serverUrl: string, draft: DraftWithFiles) => {
         const {operator, database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const client = NetworkManager.getClient(serverUrl);
 
-        // REMOTE update
-        const remoteDraft = await client.upsertDraft({
-            ...draft,
-            file_ids: (draft.files ?? []).reduce((acc, file) => {
-                if (typeof file.id === 'string') {
-                    acc.push(file.id);
-                }
+        logDebug('lazyRemoteSyncDraft - Starting remote sync for draft:', draft);
 
-                return acc;
-            }, [] as string[]),
-        });
-        const remoteDraftWithFiles = {
-            ...omit(remoteDraft, 'file_ids'),
-            files: draft.files ?? [],
-        };
-
-        // LOCAL sync
-        // Find the matching local draft in DB
-        const channelId = remoteDraftWithFiles.channel_id;
-        const rootId = remoteDraftWithFiles.root_id;
-        const localDraft = await getDraft(database, channelId, rootId);
-
-        // If no matching local draft is found, create a new one
-        if (localDraft) {
-            const models: Model[] = [localDraft.prepareDestroyPermanently()];
-            const updatedDraftModel = await operator.handleDraft({
-                draft: remoteDraftWithFiles,
-                prepareRecordsOnly: true,
+        try {
+            // REMOTE update
+            logDebug({
+                ...omit(draft, 'files'),
+                file_ids: (draft.files ?? []).reduce((acc, file) => {
+                    if (typeof file.id === 'string') {
+                        acc.push(file.id);
+                    }
+                    return acc;
+                }, [] as string[]),
             });
-            models.push(updatedDraftModel);
-            await operator.batchRecords(models, 'updateSyncDraft');
-        } else {
-            await operator.handleDraft({draft: remoteDraftWithFiles, prepareRecordsOnly: false});
+            const remoteDraft = await client.upsertDraft({
+                ...omit(draft, 'files'),
+                file_ids: (draft.files ?? []).reduce((acc, file) => {
+                    if (typeof file.id === 'string') {
+                        acc.push(file.id);
+                    }
+                    return acc;
+                }, [] as string[]),
+            });
+
+            const remoteDraftWithFiles = {
+                ...omit(remoteDraft, 'file_ids'),
+                files: draft.files ?? [],
+            };
+
+            // LOCAL sync
+            // Find the matching local draft in DB
+            const channelId = remoteDraftWithFiles.channel_id;
+            const rootId = remoteDraftWithFiles.root_id;
+            const localDraft = await getDraft(database, channelId, rootId);
+
+            // If no matching local draft is found, create a new one
+            if (localDraft) {
+                logDebug('lazyRemoteSyncDraft - Matching local draft found:', localDraft);
+
+                const models: Model[] = [await operator.handleDraft({
+                    draft: remoteDraftWithFiles,
+                    prepareRecordsOnly: true,
+                })];
+                if (draft.id !== remoteDraftWithFiles.id) {
+                    models.push(localDraft.prepareDestroyPermanently());
+                }
+                await operator.batchRecords(models, 'updateSyncDraft');
+            } else {
+                await operator.handleDraft({draft: remoteDraftWithFiles, prepareRecordsOnly: false});
+            }
+        } catch (error) {
+            logError('lazyRemoteSyncDraft - Error during remote sync:', error);
         }
     },
     2000, // ms
@@ -276,11 +297,9 @@ export async function removeDraftFile(serverUrl: string, channelId: string, root
             logError('removeDraftFile - File not found in draft.');
             return {success: false, error: 'file not found'};
         }
-        logDebug('removeDraftFile - File found, proceeding to remove:', draft.files[i]);
 
         // Update the files
         const files = draft.files.filter((v, index) => index !== i);
-        logDebug('removeDraftFile - Remaining files after removal:', files);
 
         return syncDraft(serverUrl, {
             channel_id: channelId,
@@ -296,13 +315,10 @@ export async function removeDraftFile(serverUrl: string, channelId: string, root
 export async function updateDraftMessage(serverUrl: string, channelId: string, rootId: string, message: string): DraftRemoteResponse {
     logDebug('updateDraftMessage');
     try {
-        const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const draft = await getDraft(database, channelId, rootId);
         return syncDraft(serverUrl, {
             channel_id: channelId,
             root_id: rootId,
             message,
-            files: draft?.files,
         });
     } catch (error) {
         logError('Failed to update draft message', error);

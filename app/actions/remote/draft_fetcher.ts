@@ -14,8 +14,7 @@ export const fetchDrafts = async (serverUrl: string, currentTeamId: string) => {
         const drafts = await client.getDrafts(currentTeamId);
 
         // Flatten all file ids from all drafts
-        const fileIds = drafts.
-            reduce((arr, draft) => [...arr, ...draft.file_ids ?? []], [] as string []);
+        const fileIds = drafts.reduce((arr, draft) => [...arr, ...draft.file_ids ?? []], [] as string[]);
         const fileInfos = await Promise.all(fileIds.map(client.getFileInfosForFile));
 
         // Create a byId map
@@ -24,7 +23,7 @@ export const fetchDrafts = async (serverUrl: string, currentTeamId: string) => {
                 byId[fileInfo.id] = fileInfo;
             }
             return byId;
-        }, {} as {[k: string]: FileInfo});
+        }, {} as { [k: string]: FileInfo });
 
         // Replace all fileIds in drafts, to create the draft with files
         const draftWithFiles = drafts.map((draft) => ({
