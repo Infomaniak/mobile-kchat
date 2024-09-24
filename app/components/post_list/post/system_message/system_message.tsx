@@ -219,7 +219,13 @@ const renderPurposeChangeMessage = ({post, author, location, styles, intl, theme
         return renderMessage({post, styles, intl, location, localeHolder, values, skipMarkdown: true, theme});
     }
 
-    return null;
+    localeHolder = {
+        id: t('mobile.system_message.update_channel_purpose'),
+        defaultMessage: '{username} updated the channel purpose.',
+    };
+
+    values = {username, oldPurpose, newPurpose};
+    return renderMessage({post, styles, intl, location, localeHolder, values, skipMarkdown: true, theme});
 };
 
 const renderDisplayNameChangeMessage = ({post, author, location, styles, intl, theme}: RenderersProps) => {
