@@ -3,12 +3,12 @@
 
 import {field, json} from '@nozbe/watermelondb/decorators';
 import Model, {type Associations} from '@nozbe/watermelondb/Model';
+import {omit} from 'lodash';
 
 import {MM_TABLES} from '@constants/database';
 import {identity, safeParseJSON} from '@utils/helpers';
 
 import type DraftModelInterface from '@typings/database/models/servers/draft';
-
 const {CHANNEL, DRAFT, POST} = MM_TABLES.SERVER;
 
 /**
@@ -27,9 +27,7 @@ export default class DraftModel extends Model implements DraftModelInterface {
         /** A DRAFT is associated to only one POST */
         [POST]: {type: 'belongs_to', key: 'root_id'},
     };
-
-    /** Convert a draftModel to an API draft */
-    static toApi = async (draft: DraftModel): Promise<Draft> => ({
+    static toDraftWithFile = (draft: DraftModel): DraftWithFiles => ({
         id: draft.id,
         create_at: draft.createAt,
         update_at: draft.updateAt,
@@ -39,15 +37,31 @@ export default class DraftModel extends Model implements DraftModelInterface {
         root_id: draft.rootId,
         message: draft.message,
         props: draft.props,
+        files: draft.files,
+        metadata: (draft.metadata ? draft.metadata : {}) as PostMetadata,
+        priority: draft.priority,
+        timestamp: draft.timestamp,
+    });
+
+    static toDraft = (draftWithFile: DraftWithFiles): Draft => ({
+        ...omit(draftWithFile, 'files'),
+        file_ids: draftWithFile.files?.reduce<string[]>((acc, curr) => {
+            if (curr.id) {
+                acc.push(curr.id);
+            }
+            return acc;
+        }, []),
+    });
+
+    /** Convert a draftModel to an API draft */
+    static toApi = (draft: DraftModel): Draft => ({
+        ...omit(DraftModel.toDraftWithFile(draft), 'files'),
         file_ids: draft.files.reduce<string[]>((acc, curr) => {
             if (curr.id) {
                 acc.push(curr.id);
             }
             return acc;
         }, []),
-        metadata: (draft.metadata ? draft.metadata : {}) as PostMetadata,
-        priority: draft.priority,
-        timestamp: draft.timestamp,
     });
 
     /** create_at : The creation date for this draft */
