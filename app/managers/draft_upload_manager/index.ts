@@ -128,7 +128,7 @@ class DraftUploadManager {
         logDebug(`[DraftUploadManager] Storing progress for file ${clientId}: ${progress}%`);
         h.onProgress.forEach((c) => c(progress, bytes));
         if (AppState.currentState !== 'active' && h.lastTimeStored + PROGRESS_TIME_TO_STORE < Date.now()) {
-            updateDraftFile(h.serverUrl, h.channelId, h.rootId, this.handlers[clientId].fileInfo, false);
+            updateDraftFile(h.serverUrl, h.channelId, h.rootId, this.handlers[clientId].fileInfo);
             h.lastTimeStored = Date.now();
             logDebug(`[DraftUploadManager] Progress stored locally for file ${clientId}`);
         }
