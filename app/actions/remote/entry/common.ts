@@ -162,6 +162,8 @@ const entryRest = async (serverUrl: string, teamId?: string, channelId?: string,
         modelPromises.push(operator.handleRole({roles: rolesData.roles, prepareRecordsOnly: true}));
     }
 
+    // fetchDrafts(serverUrl, initialTeamId);
+
     const models = await Promise.all(modelPromises);
 
     return {models: models.flat(), initialChannelId, initialTeamId, prefData, teamData, chData, meData, gmConverted};
