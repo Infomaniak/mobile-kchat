@@ -182,7 +182,6 @@ const syncDraft = async (
         // Trigger remote update
         if (remoteUpdate) {
             syncRemoteDraft(serverUrl, mergedDraft);
-            logDebug('syncRemoteDraft - After API sync, draft priority:', mergedDraft.priority);
         }
 
         return {success: true, draft: draftModel};

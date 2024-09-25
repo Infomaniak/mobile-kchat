@@ -42,14 +42,14 @@ const enhanced = withObservables([], (ownProps: WithDatabaseArgs & OwnProps) => 
         switchMap((u) => of$(u?.status === General.OUT_OF_OFFICE)),
     );
 
-    const postPriority = queryDraft(database, channelId, rootId).observeWithColumns(['metadata']).pipe(
+    const postPriority = queryDraft(database, channelId, rootId).observeWithColumns(['priority']).pipe(
         switchMap(observeFirstDraft),
         switchMap((d) => {
-            if (!d?.metadata?.priority) {
+            if (!d?.priority) {
                 return of$(INITIAL_PRIORITY);
             }
 
-            return of$(d.metadata.priority);
+            return of$(d.priority);
         }),
     );
 
