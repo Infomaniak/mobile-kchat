@@ -155,6 +155,7 @@
   "channel_info.leave": "Leave",
   "channel_info.leave_channel": "Leave channel",
   "channel_info.leave_private_channel": "Are you sure you want to leave the private channel {displayName}? You cannot rejoin the channel unless you're invited again.",
+  "channel_info.leave_private_channel_last_user": "As the last user, you cannot leave this private channel but only archive it. You, or an administrator, can always unarchive it.",
   "channel_info.leave_private_channel_last_admin": "As the last administrator, you will need to assign administrative rights to another user to leave this channel.",
   "channel_info.leave_private_channel_last_admin_end": "Finish",
   "channel_info.leave_public_channel": "Are you sure you want to leave the public channel {displayName}? You can always rejoin.",

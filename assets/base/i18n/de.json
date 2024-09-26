@@ -153,6 +153,7 @@
     "channel_info.ignore_mentions": "@channel, @here, @all ignorieren",
     "channel_info.leave_channel": "Kanal verlassen",
     "channel_info.leave_private_channel": "Bist du sicher, dass du den privaten Kanal {displayName} verlassen willst? Du kannst dem Channel erst wieder beitreten, wenn du erneut eingeladen wirst.",
+    "channel_info.leave_private_channel_last_user": "Als letzter Benutzer können Sie diesen privaten Kanal nicht verlassen, sondern nur archivieren. Sie oder ein Administrator können ihn jederzeit wiederherstellen.",
     "channel_info.leave_private_channel_last_admin": "Als letzter Administrator müssen Sie einem anderen Benutzer Administratorrechte zuweisen, um diesen Kanal zu verlassen.",
     "channel_info.leave_private_channel_last_admin_end": "Beenden",
     "channel_info.leave_public_channel": "Bist du sicher, dass du den öffentlichen Kanal {displayName} verlassen willst? Du kannst jederzeit wieder beitreten.",

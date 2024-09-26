@@ -138,6 +138,7 @@
   "channel_info.leave": "Abandonar",
   "channel_info.leave_channel": "Abandonar canal",
   "channel_info.leave_private_channel": "¿Realmente quieres abandonar el canal privado {displayName}? No podrás reunirte al canal a menos que te inviten de nuevo.",
+  "channel_info.leave_private_channel_last_user": "Como último usuario, no puedes abandonar este canal privado, solo archivarlo. Tú, o un administrador, siempre pueden desarchivarlo.",
   "channel_info.leave_private_channel_last_admin": "Como último administrador, deberá asignar derechos administrativos a otro usuario para abandonar este canal.",
   "channel_info.leave_private_channel_last_admin_end": "Terminar",
   "channel_info.leave_public_channel": "¿Realmente quieres abandonar el canal público {displayName}? Siempre puedes reunirte.",

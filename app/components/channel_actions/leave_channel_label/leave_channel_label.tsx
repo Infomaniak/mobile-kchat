@@ -5,8 +5,10 @@ import React from 'react';
 import {useIntl} from 'react-intl';
 import {Alert} from 'react-native';
 
-import {leaveChannel} from '@actions/remote/channel';
+import {archiveChannel, leaveChannel} from '@actions/remote/channel';
 import {setDirectChannelVisible} from '@actions/remote/preference';
+import {t} from '@app/i18n';
+import {alertErrorWithFallback} from '@app/utils/draft';
 import OptionItem from '@components/option_item';
 import SlideUpPanelItem from '@components/slide_up_panel_item';
 import {General, Screens} from '@constants';
@@ -101,9 +103,41 @@ const LeaveChannelLabel = (props: Props) => {
         );
     };
 
+    const onPressAction = async () => {
+        const result = await archiveChannel(serverUrl, channelId);
+        if (result.error) {
+            alertErrorWithFallback(
+                intl,
+                result.error,
+                {
+                    id: t('channel_info.archive_failed'),
+                    defaultMessage: 'An error occurred trying to archive the channel',
+                },
+            );
+        }
+    };
+
     const leavePrivateChannel = () => {
         const title = intl.formatMessage({id: 'channel_info.leave_channel', defaultMessage: 'Leave channel'});
-        if (isLastAdminInChannel && channelMembersLength > 1) {
+        if (isLastAdminInChannel && channelMembersLength === 1) {
+            Alert.alert(
+                intl.formatMessage({id: 'channel_info.archive_title', defaultMessage: 'Archive {term}'}, ({term: displayName})),
+                intl.formatMessage({
+                    id: 'channel_info.leave_private_channel_last_user',
+                    defaultMessage: 'As the last user, you cannot leave this private channel but only archive it. You, or an administrator, can always unarchive it.',
+                }, {displayName}),
+                [{
+                    text: intl.formatMessage({id: 'mobile.post.cancel', defaultMessage: 'Cancel'}),
+                    style: 'cancel',
+                }, {
+                    text: intl.formatMessage({id: 'channel_info.archive', defaultMessage: 'Archive Channel'}),
+                    style: 'destructive',
+                    onPress: () => {
+                        onPressAction();
+                    },
+                }], {cancelable: false},
+            );
+        } else if (isLastAdminInChannel && channelMembersLength > 1) {
             Alert.alert(
                 intl.formatMessage({id: 'channel_info.leave_channel', defaultMessage: 'Leave Channel'}),
                 intl.formatMessage({
