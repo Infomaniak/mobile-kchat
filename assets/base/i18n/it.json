@@ -140,6 +140,7 @@
     "channel_info.leave": "Lasciare",
     "channel_info.leave_channel": "Lasciare il canale",
     "channel_info.leave_private_channel": "Sei sicuro di voler lasciare il canale privato {displayName}? Non puoi rientrare nel canale a meno che tu non venga invitato di nuovo.",
+    "channel_info.leave_private_channel_last_user": "Come ultimo utente, non puoi lasciare questo canale privato ma solo archiviarlo. Tu, o un amministratore, potete sempre ripristinarlo.",
     "channel_info.leave_private_channel_last_admin": "In qualità di ultimo amministratore, dovrai assegnare i diritti di amministrazione a un altro utente per lasciare questo canale.",
     "channel_info.leave_private_channel_last_admin_end": "Finire",
     "channel_info.leave_public_channel": "Sei sicuro di voler lasciare il canale pubblico {displayName}? Puoi sempre rientrare.",
