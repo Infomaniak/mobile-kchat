@@ -14,7 +14,7 @@ env:
 
 jobs:
   test:
-    runs-on: [self-hosted, macOS, iOS, xcode16]
+    runs-on: [self-hosted, macOS, iOS]
     steps:
       - name: ci/checkout-repo
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -50,7 +50,7 @@ jobs:
   #         path: Mattermost-simulator-x86_64.app.zip
 
   build-and-deploy-ios-beta:
-    runs-on: [self-hosted, macOS, iOS, xcode16]
+    runs-on: [self-hosted, macOS, iOS]
     if: ${{ !contains(github.ref_name, 'beta-sim') }}
     needs:
       - test
