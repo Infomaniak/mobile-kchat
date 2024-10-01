@@ -429,9 +429,11 @@ export async function extractFileInfo(files: Array<Asset | DocumentPickerRespons
             const localPath = file.uri || '';
             try {
                 const fileInfo = await getInfoAsync(decodeURIComponent(localPath), {size: true});
+
+                outFile.name = localPath.substring(localPath.lastIndexOf('/') + 1);
+
                 if ('size' in fileInfo) {
                     outFile.size = fileInfo.size || 0;
-                    outFile.name = localPath.substring(localPath.lastIndexOf('/') + 1);
                 }
             } catch (e) {
                 logError('extractFileInfo', e);
