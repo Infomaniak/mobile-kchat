@@ -735,7 +735,7 @@
     "notification_settings.mentions.channelWide": "Menzioni a livello di canale",
     "notification_settings.mentions.keywords": "Parole chiave",
     "notification_settings.mentions.keywordsLabel": "Le parole chiave non fanno distinzione tra maiuscole e minuscole. Separare le parole chiave con le virgole.",
-    "notification_settings.mentions.keywords_mention": "Parole chiave che attivano le menzioni",
+    "notification_settings.mentions.keywords_mention": "Ricevi notifiche per determinate parole chiave",
     "notification_settings.mentions.sensitiveName": "Il vostro nome, sensibile alle maiuscole e minuscole",
     "notification_settings.mentions.sensitiveUsername": "Il vostro nome utente non sensibile alle maiuscole",
     "notification_settings.mentions_replies": "Menzioni e risposte",

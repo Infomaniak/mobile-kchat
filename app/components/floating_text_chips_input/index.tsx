@@ -238,25 +238,22 @@ const FloatingTextChipsInput = forwardRef<Ref, Props>(({
     const textAnimatedTextStyle = useAnimatedStyle(() => {
         const inputText = placeholder || hasValues;
         const index = inputText || focusedLabel ? 1 : 0;
-
         const toValue = positions[index];
 
-        const size = [styles.textInput.fontSize, styles.smallLabel.fontSize];
-        const toSize = size[index] as number;
+        // const size = [styles.textInput.fontSize, styles.smallLabel.fontSize];
 
-        let color = styles.label.color;
-        if (shouldShowError) {
-            color = theme.errorTextColor;
-        } else if (focused) {
-            color = theme.buttonBg;
-        }
+        // const toSize = size[index] as number;
+        // const color = styles.label.color;
 
         return {
             top: withTiming(toValue, {duration: 100, easing: Easing.linear}),
-            fontSize: withTiming(toSize, {duration: 100, easing: Easing.linear}),
+
+            // fontSize: withTiming(toSize, {duration: 100, easing: Easing.linear}),
+
             backgroundColor: focusedLabel || inputText ? theme.centerChannelBg : 'transparent',
             paddingHorizontal: focusedLabel || inputText ? 4 : 0,
-            color,
+
+            // color,
         };
     });
 

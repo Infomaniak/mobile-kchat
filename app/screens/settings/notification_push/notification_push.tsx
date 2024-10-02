@@ -13,6 +13,8 @@ import useBackNavigation from '@hooks/navigate_back';
 import {popTopScreen} from '@screens/navigation';
 import {getNotificationProps} from '@utils/user';
 
+import MentionSettings from '../notification_mention/mention_settings';
+
 import MobileSendPush from './push_send';
 import MobilePushStatus from './push_status';
 import MobilePushThread from './push_thread';
@@ -92,6 +94,11 @@ const NotificationPush = ({componentId, currentUser, isCRTEnabled, sendPushNotif
                     />
                 </>
             )}
+            <MentionSettings
+                currentUser={currentUser}
+                componentId={componentId}
+                isCRTEnabled={isCRTEnabled}
+            />
         </SettingContainer>
     );
 };
