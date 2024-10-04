@@ -73,7 +73,8 @@
             <category android:name="android.intent.category.LAUNCHER" />
             <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
         </intent-filter>
-        <intent-filter>
+<!-- INFOMANIAK: Commented out the blocks below to prevent kChat from being proposed alongside Mattermost when opening Mattermost links -->
+        <!-- <intent-filter>
           <action android:name="android.intent.action.VIEW" />
           <category android:name="android.intent.category.DEFAULT" />
           <category android:name="android.intent.category.BROWSABLE" />
@@ -84,7 +85,7 @@
           <category android:name="android.intent.category.DEFAULT" />
           <category android:name="android.intent.category.BROWSABLE" />
           <data android:scheme="mmauthbeta" />
-        </intent-filter>
+        </intent-filter> -->
       </activity>
       <service android:name=".NotificationDismissService"
                 android:enabled="true"
