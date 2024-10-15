@@ -69,7 +69,7 @@ export async function removeDraftFile(serverUrl: string, channelId: string, root
         return {error};
     }
 }
-
+let destroyDraftTimeout: ReturnType<typeof setTimeout> | null = null;
 export async function updateDraftMessage(serverUrl: string, channelId: string, rootId: string, message: string, prepareRecordsOnly = false) {
     try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
@@ -92,9 +92,26 @@ export async function updateDraftMessage(serverUrl: string, channelId: string, r
             return {draft};
         }
 
+        // Handle case where the draft should be deleted if empty (message and files).
         if (draft.files.length === 0 && !message) {
-            draft.prepareDestroyPermanently();
+            if (destroyDraftTimeout) {
+                clearTimeout(destroyDraftTimeout);
+                destroyDraftTimeout = null;
+            }
+
+            // Set a timeout to wait before destroying the draft to avoid premature deletion on slow devices.
+            destroyDraftTimeout = setTimeout(() => {
+                if (!draft.message && draft.files.length === 0) {
+                    draft.prepareDestroyPermanently();
+                }
+            }, 1000);
         } else {
+            // If there is a timeout set for destroying the draft, clear it since we have new content.
+            if (destroyDraftTimeout) {
+                clearTimeout(destroyDraftTimeout);
+                destroyDraftTimeout = null;
+            }
+
             draft.prepareUpdate((d) => {
                 d.message = message;
             });
