@@ -834,6 +834,7 @@
     "mobile.vocals.transcript_title": "Audio-Transkript (automatisch generiert)",
     "mobile.vocals.transcript.error": "Die Audio ist leer.",
     "mobile.vocals.transcript.too_many": "Zu viele Anfragen, bitte warten...",
+    "mobile.vocals.transcript_loading": "Audiotranskription läuft...",
     "mobile.write_storage_permission_denied_description": "Speichere Dateien auf deinem Gerät. Öffne die Einstellungen, um {applicationName} Schreibzugriff auf Dateien auf diesem Gerät zu gewähren.",
     "modal.manual_status.auto_responder.message_": "Möchtest du deinen Status auf \"{status}\" umschalten und automatische Antworten deaktivieren?",
     "modal.manual_status.auto_responder.message_away": "Möchtest du deinen Status auf \"Abwesend\" umschalten und automatische Antworten deaktivieren?",

@@ -13,6 +13,7 @@ export const shouldUpdateFileRecord = (e: FileModel, n: FileInfo): boolean => {
         (n.width && n.width !== e.width) ||
         (n.height && n.height !== e.height) ||
         (n.mini_preview && n.mini_preview !== e.imageThumbnail) ||
+        (n.transcript && n.transcript !== e.transcript) ||
         (n.localPath && n.localPath !== e.localPath),
     );
 };

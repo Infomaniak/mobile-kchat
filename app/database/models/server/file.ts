@@ -47,6 +47,9 @@ export default class FileModel extends Model implements FileModelInterface {
     /** post_id : The foreign key of the related Post model */
     @field('post_id') postId!: string;
 
+    /** post_id : The transcript related to the file */
+    @field('transcript') transcript!: string;
+
     /** size : The numeric value of the size for the file */
     @field('size') size!: number;
 
@@ -61,6 +64,7 @@ export default class FileModel extends Model implements FileModelInterface {
         user_id: authorId,
         post_id: this.postId,
         name: this.name,
+        transcript: this.transcript,
         extension: this.extension,
         mini_preview: this.imageThumbnail,
         size: this.size,
