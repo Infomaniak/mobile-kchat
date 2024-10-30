@@ -739,6 +739,7 @@
   "mobile.vocals.transcript_title": "Transcription audio (générée automatiquement)",
   "mobile.vocals.transcript.too_many": "Trop de demandes, veuillez patienter...",
   "mobile.vocals.transcript.error": "L'audio est vide.",
+  "mobile.vocals.transcript_loading": "Transcription audio en cours...",
   "modal.manual_status.auto_responder.message_": "Voulez-vous changer votre statut sur « {status} » et désactiver les Réponses Automatiques ?",
   "modal.manual_status.auto_responder.message_away": "Voulez-vous changer votre statut sur « Absent » et désactiver les Réponses Automatiques ?",
   "modal.manual_status.auto_responder.message_dnd": "Voulez-vous changer votre statut sur « Ne pas déranger » et désactiver les Réponses Automatiques ?",

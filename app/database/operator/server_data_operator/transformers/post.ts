@@ -118,6 +118,10 @@ export const transformFileRecord = ({action, database, value}: TransformerArgs):
         file.height = raw?.height || record?.height || 0;
         file.imageThumbnail = raw?.mini_preview || record?.imageThumbnail || '';
         file.localPath = raw?.localPath || record?.localPath || null;
+        file.transcript = '';
+        if (raw && raw.transcript && typeof raw.transcript === 'object') {
+            file.transcript = JSON.stringify(raw.transcript);
+        }
     };
 
     return prepareBaseRecord({

@@ -702,6 +702,7 @@
     "mobile.vocals.transcript_title": "Trascrizione audio (generata automaticamente)",
     "mobile.vocals.transcript.too_many": "Troppe richieste, attendere prego...",
     "mobile.vocals.transcript.error": "L'audio è vuoto.",
+    "mobile.vocals.transcript_loading": "Trascrizione audio in corso...",
     "modal.manual_status.auto_responder.message_": "Vuoi modificare il tuo stato a \"{status}\" e disattivare le risposte automatiche?",
     "modal.manual_status.auto_responder.message_away": "Vuoi modificare il tuo stato a \"Non disponibile\" e disattivare le risposte automatiche?",
     "modal.manual_status.auto_responder.message_dnd": "Vuoi modificare il tuo stato a \"Non disturbare\" e disattivare le risposte automatiche?",

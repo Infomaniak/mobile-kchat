@@ -647,6 +647,7 @@
   "mobile.vocals.transcript_title": "Transcripción de audio (generada automáticamente)",
   "mobile.vocals.transcript.too_many": "Demasiadas solicitudes, por favor espere...",
   "mobile.vocals.transcript.error": "El audio está vacío.",
+  "mobile.vocals.transcript_loading": "Transcripción de audio en progreso...",
   "modal.manual_status.auto_responder.message_": "¿Quieres cambiar to estado a \"{status}\" e inhabilitar las respuestas automáticas?",
   "modal.manual_status.auto_responder.message_away": "¿Quieres cambiar to estado a \"Ausente\" e inhabilitar las respuestas automáticas?",
   "modal.manual_status.auto_responder.message_dnd": "¿Quieres cambiar to estado a \"No Molestar\" e inhabilitar las respuestas automáticas?",
