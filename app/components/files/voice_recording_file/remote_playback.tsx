@@ -8,7 +8,7 @@ import {Text, TouchableOpacity, View, Keyboard} from 'react-native';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
-import {fetchPostThread} from '@actions/remote/post';
+import {fetchPostById} from '@actions/remote/post';
 import FormattedText from '@app/components/formatted_text';
 import TranscriptIcon from '@app/components/illustrations/icon_transcript';
 import Slider from '@app/components/slider';
@@ -126,7 +126,7 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
         setIsLoadingTranscript(true);
         const handlePosts = async () => {
             try {
-                await fetchPostThread(serverUrl, currentPost.id);
+                await fetchPostById(serverUrl, currentPost.id);
             } catch (err) {
                 setIsLoadingTranscript(false);
 
@@ -150,7 +150,7 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
                 /* empty */
             }
         }
-    }, [files]);
+    }, [files[0]?.transcript]);
 
     const listener = (e: PlayBackType) => {
         setProgress(e.currentPosition);
