@@ -42,6 +42,9 @@ declare class FileModel extends Model {
     /** width : The width of the file object/image */
     width: number;
 
+    /** transcript : Text transcript of voice recording attachment, only present for voice type messages, can be asynchronously added to the message once it has been processed via websocket*/
+    transcript: string;
+
     /** post : The related Post record for this file */
     post: Relation<PostModel>;
 

@@ -26,7 +26,7 @@
     "@mattermost/keyboard-tracker": "file:./libraries/@mattermost/keyboard-tracker",
     "@mattermost/react-native-emm": "1.5.0",
     "@mattermost/react-native-network-client": "1.6.0",
-    "@mattermost/react-native-paste-input": "0.8.0",
+    "@mattermost/react-native-paste-input": "github:mattermost/react-native-paste-input#6b98901580a3781253758f1ec3c278a597430b32",
     "@mattermost/react-native-turbo-log": "0.4.0",
     "@mattermost/rnshare": "file:./libraries/@mattermost/rnshare",
     "@mattermost/rnutils": "file:./libraries/@mattermost/rnutils",
@@ -58,6 +58,7 @@
     "expo-crypto": "13.0.2",
     "expo-device": "6.0.2",
     "expo-image": "1.12.12",
+    "expo-keep-awake": "13.0.2",
     "expo-linear-gradient": "13.0.2",
     "expo-store-review": "7.0.2",
     "expo-video-thumbnails": "8.0.0",
@@ -261,7 +262,6 @@
   "expo": {
     "autolinking": {
       "exclude": [
-        "expo-keep-awake",
         "expo-asset",
         "expo-font"
       ]

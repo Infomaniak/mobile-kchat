@@ -90,6 +90,7 @@ export const galleryItemToFileInfo = (item: GalleryItemType): FileInfo => ({
     post_id: item.postId!,
     size: 0,
     user_id: item.authorId!,
+    transcript: '',
 });
 
 export const getShouldRender = (index: number, activeIndex: number, diffValue = 3) => {

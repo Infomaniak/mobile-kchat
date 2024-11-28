@@ -130,7 +130,7 @@ export default class WebSocketClient {
             if (this.token) {
                 // we check for the platform as a workaround until we fix on the server that further authentications
                 // are ignored
-                this.sendMessage('authentication_challenge', {token: this.token});
+                //this.sendMessage('authentication_challenge', {token: this.token});
             }
 
             if (this.shouldSkipSync) {

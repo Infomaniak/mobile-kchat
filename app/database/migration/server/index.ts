@@ -8,9 +8,20 @@ import {addColumns, createTable, schemaMigrations} from '@nozbe/watermelondb/Sch
 
 import {MM_TABLES} from '@constants/database';
 
-const {CONFERENCE, CONFERENCE_PARTICIPANT, CHANNEL_INFO, DRAFT, POST, CHANNEL_MEMBERSHIP} = MM_TABLES.SERVER;
+const {CONFERENCE, CONFERENCE_PARTICIPANT, FILE, CHANNEL_INFO, DRAFT, POST, CHANNEL_MEMBERSHIP} = MM_TABLES.SERVER;
 
 export default schemaMigrations({migrations: [
+    {
+        toVersion: 6,
+        steps: [
+            addColumns({
+                table: FILE,
+                columns: [
+                    {name: 'transcript', type: 'string'},
+                ],
+            }),
+        ],
+    },
     {
         toVersion: 5,
         steps: [

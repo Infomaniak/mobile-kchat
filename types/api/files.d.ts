@@ -16,6 +16,7 @@ type FileInfo = {
     mime_type: string;
     mini_preview?: string;
     name: string;
+    transcript: string;
     post_id: string;
     size: number;
     update_at?: number;
