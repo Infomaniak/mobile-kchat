@@ -6,7 +6,7 @@ import {Image} from 'expo-image';
 import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react-native';
 
 import {storeOnboardingViewedValue} from '@actions/app/global';
-import {syncMultiTeam} from '@actions/remote/entry/ikcommon';
+import {syncMultiTeam, syncServerData} from '@actions/remote/entry/ikcommon';
 import {cancelSessionNotification, logout} from '@actions/remote/session';
 import {Events, Launch} from '@constants';
 import DatabaseManager from '@database/manager';
@@ -129,6 +129,7 @@ class SessionManager {
         this.previousAppState = appState;
         switch (appState) {
             case 'active':
+                this.syncServerData();
                 this.syncMultiTeam();
                 setTimeout(this.cancelAllSessionNotifications, 750);
                 break;
@@ -136,6 +137,14 @@ class SessionManager {
             case 'inactive':
                 this.scheduleAllSessionNotifications();
                 break;
+        }
+    };
+
+    private syncServerData = async () => {
+        try {
+            await syncServerData();
+        } catch (error) {
+            // do nothing
         }
     };
 
