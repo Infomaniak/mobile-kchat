@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Database, Q} from '@nozbe/watermelondb';
+import {Database, Model, Q} from '@nozbe/watermelondb';
 
 import {OperationType} from '@constants/database';
 import {
@@ -11,7 +11,6 @@ import {
 } from '@database/operator/utils/general';
 import {logWarning} from '@utils/log';
 
-import type Model from '@nozbe/watermelondb/Model';
 import type {
     HandleRecordsArgs,
     OperationArgs,
@@ -22,10 +21,10 @@ import type {
 
 export interface BaseDataOperatorType {
     database: Database;
-    handleRecords: <T extends Model, R extends RawValue>(args: HandleRecordsArgs<T, R>, description: string) => Promise<Model[]>;
-    processRecords: <T extends Model, R extends RawValue>(args: ProcessRecordsArgs<T, R>) => Promise<ProcessRecordResults<T>>;
+    handleRecords: <T extends Model>({buildKeyRecordBy, fieldName, transformer, createOrUpdateRawValues, deleteRawValues, tableName, prepareRecordsOnly}: HandleRecordsArgs<T>, description: string) => Promise<Model[]>;
+    processRecords: <T extends Model>({createOrUpdateRawValues, deleteRawValues, tableName, buildKeyRecordBy, fieldName}: ProcessRecordsArgs) => Promise<ProcessRecordResults<T>>;
     batchRecords: (models: Model[], description: string) => Promise<void>;
-    prepareRecords: <T extends Model>(args: OperationArgs<T>) => Promise<Model[]>;
+    prepareRecords: <T extends Model>({tableName, createRaws, deleteRaws, updateRaws, transformer}: OperationArgs<T>) => Promise<Model[]>;
 }
 
 export default class BaseDataOperator {
@@ -40,48 +39,34 @@ export default class BaseDataOperator {
      * the same value.  Hence, prior to that we query the database and pick only those values that are  'new' from the 'Raw' array.
      * @param {ProcessRecordsArgs} inputsArg
      * @param {RawValue[]} inputsArg.createOrUpdateRawValues
+     * @param {RawValue[]} inputsArg.deleteRawValues
      * @param {string} inputsArg.tableName
      * @param {string} inputsArg.fieldName
-     * @param {(record: Model) => boolean} inputsArg.buildKeyRecordBy
-     * @param {(rawValues: RawValue[]) => Q.Clause} inputsArg.buildClauseFromRawValues
-     * @param {(existing: Model, newElement: RawValue) => boolean} inputsArg.matchRecord
-     * @param {(existing: Model, newElement: RawValue) => boolean} inputsArg.shouldUpdate
-     * @returns {Promise<{ProcessRecordResults}>}
+     * @param {(existing: Model, newElement: RawValue) => boolean} inputsArg.buildKeyRecordBy
+     * @returns {Promise<{ProcessRecordResults<T>}>}
      */
-    processRecords = async <T extends Model, R extends RawValue>({createOrUpdateRawValues = [], deleteRawValues = [], tableName, fieldName, buildKeyRecordBy, buildClauseFromRawValues, matchRecord, shouldUpdate}: ProcessRecordsArgs<T, R>): Promise<ProcessRecordResults<T>> => {
-        let getClauseFromRawValues: ProcessRecordsArgs<T, R>['buildClauseFromRawValues'];
-        if (typeof buildClauseFromRawValues === 'function') {
-            // Create the raw value to Q.Clause condition
-            getClauseFromRawValues = buildClauseFromRawValues;
-        } else if (typeof fieldName === 'string') {
-            getClauseFromRawValues = (rawValues: R[]) => {
-                // We will query a table where one of its fields can match a range of values.  Hence, here we are extracting all those potential values.
-                const columnValues = getRangeOfValues({fieldName, raws: rawValues});
+    processRecords = async <T extends Model>({createOrUpdateRawValues = [], deleteRawValues = [], tableName, buildKeyRecordBy, fieldName, shouldUpdate}: ProcessRecordsArgs): Promise<ProcessRecordResults<T>> => {
+        const getRecords = async (rawValues: RawValue[]) => {
+            // We will query a table where one of its fields can match a range of values.  Hence, here we are extracting all those potential values.
+            const columnValues: string[] = getRangeOfValues({fieldName, raws: rawValues});
 
-                if (!columnValues.length && rawValues.length) {
-                    throw new Error(
-                        `Invalid "fieldName" or "tableName" has been passed to the processRecords method for tableName ${tableName} fieldName ${fieldName}`,
-                    );
-                }
+            if (!columnValues.length && rawValues.length) {
+                throw new Error(
+                    `Invalid "fieldName" or "tableName" has been passed to the processRecords method for tableName ${tableName} fieldName ${fieldName}`,
+                );
+            }
 
-                if (!rawValues.length) {
-                    return null;
-                }
-
-                return Q.where(fieldName, Q.oneOf(columnValues));
-            };
-        }
-        if (typeof getClauseFromRawValues === 'undefined') {
-            // Either "fieldName" or "buildClauseFromRawValues" must be specified
-            throw new Error('Invalid call to processRecords either "fieldName" or "buildClauseFromRawValues" must be specified');
-        }
-
-        const getRecords = async (rawValues: R[]) => {
-            const condition = getClauseFromRawValues!(rawValues);
-            if (condition === null) {
+            if (!rawValues.length) {
                 return [];
             }
-            return retrieveRecords<T>({database: this.database, tableName, condition});
+
+            const existingRecords = await retrieveRecords<T>({
+                database: this.database,
+                tableName,
+                condition: Q.where(fieldName, Q.oneOf(columnValues)),
+            });
+
+            return existingRecords;
         };
 
         const createRaws: RecordPair[] = [];
@@ -92,38 +77,18 @@ export default class BaseDataOperator {
 
         // for create or update flow
         const createOrUpdateRaws = await getRecords(createOrUpdateRawValues);
-
-        // Create the existing record finder function based on arguments
-        let getExistingRecord: (RawValue: R) => T | undefined;
-        if (typeof matchRecord === 'function') {
-            // Find a matching record using the "Array.find" function
-            getExistingRecord = (rawValue: R) =>
-                createOrUpdateRaws.find((existing) => matchRecord(existing, rawValue));
-        } else if (typeof fieldName === 'string') {
-            // Match the existing record using the fieldName as key
-            const getKey = (thing: T | R) => {
-                if (typeof buildKeyRecordBy === 'function') {
-                    return buildKeyRecordBy(thing);
-                }
-
-                return thing[fieldName as keyof R & keyof T] as string | number;
-            };
-
-            // Pre-construct a key to record dictionnary
-            const recordsByKeys = createOrUpdateRaws.reduce((result, record) => {
-                result[getKey(record)] = record;
-                return result;
-            }, {} as Record<ReturnType<typeof getKey>, T>);
-
-            // Simple dict by key accessor function
-            getExistingRecord = (rawValue: R) => recordsByKeys[getKey(rawValue)];
-        } else {
-            throw new Error('Invalid call to processRecords either "fieldName" or "matchRecord" must be specified');
-        }
+        const recordsByKeys = createOrUpdateRaws.reduce((result: Record<string, T>, record) => {
+            // @ts-expect-error object with string key
+            const key = buildKeyRecordBy?.(record) || record[fieldName];
+            result[key] = record;
+            return result;
+        }, {});
 
         if (createOrUpdateRawValues.length > 0) {
             for (const newElement of createOrUpdateRawValues) {
-                const existingRecord = getExistingRecord(newElement);
+                // @ts-expect-error object with string key
+                const key = buildKeyRecordBy?.(newElement) || newElement[fieldName];
+                const existingRecord = recordsByKeys[key];
 
                 // We found a record in the database that matches this element; hence, we'll proceed for an UPDATE operation
                 if (existingRecord) {
@@ -160,9 +125,9 @@ export default class BaseDataOperator {
      * @param {string} prepareRecord.tableName
      * @param {RawValue[]} prepareRecord.createRaws
      * @param {RawValue[]} prepareRecord.updateRaws
-     * @param {Model[]} prepareRecord.deleteRaws
-     * @param {(TransformerArgs) => Promise<Model>;} transformer
-     * @returns {Promise<Model[]>}
+     * @param {T extends Model[]} prepareRecord.deleteRaws
+     * @param {(TransformerArgs) => Promise<T extends Model>;} transformer
+     * @returns {Promise<T extends Model[]>}
      */
     prepareRecords = async <T extends Model>({tableName, createRaws, deleteRaws, updateRaws, transformer}: OperationArgs<T>): Promise<T[]> => {
         if (!this.database) {
@@ -236,24 +201,30 @@ export default class BaseDataOperator {
     /**
      * handleRecords : Utility that processes some records' data against values already present in the database so as to avoid duplicity.
      * @param {HandleRecordsArgs} handleRecordsArgs
-     * @param {string} description
+     * @param {(existing: Model, newElement: RawValue) => boolean} handleRecordsArgs.buildKeyRecordBy
+     * @param {string} handleRecordsArgs.fieldName
+     * @param {(TransformerArgs) => Promise<Model>} handleRecordsArgs.composer
+     * @param {RawValue[]} handleRecordsArgs.createOrUpdateRawValues
+     * @param {RawValue[]} handleRecordsArgs.deleteRawValues
+     * @param {string} handleRecordsArgs.tableName
      * @returns {Promise<Model[]>}
      */
-    async handleRecords<T extends Model, R extends RawValue>({
-        prepareRecordsOnly,
-        transformer,
-        ...processRecordArgs
-    }: HandleRecordsArgs<T, R>, description: string): Promise<T[]> {
-        const {tableName, createOrUpdateRawValues} = processRecordArgs;
-
-        if (!createOrUpdateRawValues.length) {
+    async handleRecords<T extends Model>({buildKeyRecordBy, fieldName, transformer, createOrUpdateRawValues, deleteRawValues = [], tableName, prepareRecordsOnly = true, shouldUpdate}: HandleRecordsArgs<T>, description: string): Promise<T[]> {
+        if (!createOrUpdateRawValues.length && !deleteRawValues.length) {
             logWarning(
                 `An empty "rawValues" array has been passed to the handleRecords method for tableName ${tableName}`,
             );
             return [];
         }
 
-        const {createRaws, deleteRaws, updateRaws} = await this.processRecords(processRecordArgs);
+        const {createRaws, deleteRaws, updateRaws} = await this.processRecords<T>({
+            createOrUpdateRawValues,
+            deleteRawValues,
+            tableName,
+            buildKeyRecordBy,
+            fieldName,
+            shouldUpdate,
+        });
 
         let models: T[] = [];
         models = await this.prepareRecords<T>({

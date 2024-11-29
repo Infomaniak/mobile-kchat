@@ -11,6 +11,7 @@ export const SNACK_BAR_TYPE = keyMirror({
     INFO_COPIED: null,
     LEAVE_PRIVATE_CHANNEL: null,
     LINK_COPIED: null,
+    LINK_COPY_FAILED: null,
     MESSAGE_COPIED: null,
     MUTE_CHANNEL: null,
     REMOVE_CHANNEL_USER: null,
@@ -71,6 +72,13 @@ export const SNACK_BAR_CONFIG: Record<string, SnackBarConfig> = {
         iconName: 'link-variant',
         canUndo: false,
         type: MESSAGE_TYPE.SUCCESS,
+    },
+    LINK_COPY_FAILED: {
+        id: t('gallery.copy_link.failed'),
+        defaultMessage: 'Failed to copy link to clipboard',
+        iconName: 'link-variant',
+        canUndo: false,
+        type: MESSAGE_TYPE.ERROR,
     },
     MESSAGE_COPIED: {
         id: t('snack.bar.message.copied'),

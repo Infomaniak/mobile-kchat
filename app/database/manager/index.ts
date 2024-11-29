@@ -12,9 +12,9 @@ import {DatabaseType, MIGRATION_EVENTS, MM_TABLES} from '@constants/database';
 import AppDatabaseMigrations from '@database/migration/app';
 import ServerDatabaseMigrations from '@database/migration/server';
 import {InfoModel, GlobalModel, ServersModel} from '@database/models/app';
-import {CategoryModel, CategoryChannelModel, ChannelModel, ChannelInfoModel, ChannelMembershipModel, ConferenceModel, ConferenceParticipantModel,
-    CustomEmojiModel, DraftModel, FileModel, GroupModel, GroupChannelModel, GroupTeamModel, GroupMembershipModel, MyChannelModel,
-    MyChannelSettingsModel, MyTeamModel, PostModel, PostsInChannelModel, PostsInThreadModel, PreferenceModel, ReactionModel, RoleModel,
+import {CategoryModel, CategoryChannelModel, ChannelModel, ChannelBookmarkModel, ChannelInfoModel, ChannelMembershipModel, CustomEmojiModel, DraftModel, FileModel,
+    GroupModel, GroupChannelModel, GroupTeamModel, GroupMembershipModel, MyChannelModel, MyChannelSettingsModel, MyTeamModel,
+    PostModel, PostsInChannelModel, PostsInThreadModel, PreferenceModel, ReactionModel, RoleModel,
     SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
     ThreadModel, ThreadParticipantModel, ThreadInTeamModel, TeamThreadsSyncModel, UserModel, ConfigModel,
 } from '@database/models/server';
@@ -44,10 +44,10 @@ class DatabaseManager {
     constructor() {
         this.appModels = [InfoModel, GlobalModel, ServersModel];
         this.serverModels = [
-            CategoryModel, CategoryChannelModel, ChannelModel, ChannelInfoModel, ChannelMembershipModel, ConfigModel, CustomEmojiModel,
-            ConferenceModel, ConferenceParticipantModel, DraftModel, FileModel, GroupModel, GroupChannelModel, GroupTeamModel,
-            GroupMembershipModel, MyChannelModel, MyChannelSettingsModel, MyTeamModel, PostModel, PostsInChannelModel, PostsInThreadModel,
-            PreferenceModel, ReactionModel, RoleModel, SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
+            CategoryModel, CategoryChannelModel, ChannelModel, ChannelBookmarkModel, ChannelInfoModel, ChannelMembershipModel, ConfigModel, CustomEmojiModel, DraftModel, FileModel,
+            GroupModel, GroupChannelModel, GroupTeamModel, GroupMembershipModel, MyChannelModel, MyChannelSettingsModel, MyTeamModel,
+            PostModel, PostsInChannelModel, PostsInThreadModel, PreferenceModel, ReactionModel, RoleModel,
+            SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
             ThreadModel, ThreadParticipantModel, ThreadInTeamModel, TeamThreadsSyncModel, UserModel,
         ];
 
@@ -55,10 +55,10 @@ class DatabaseManager {
     }
 
     /**
-    * init : Retrieves all the servers registered in the default database
-    * @param {string[]} serverUrls
-    * @returns {Promise<void>}
-    */
+     * init : Retrieves all the servers registered in the default database
+     * @param {string[]} serverUrls
+     * @returns {Promise<void>}
+     */
     public init = async (serverUrls: string[]): Promise<void> => {
         await this.createAppDatabase();
         const buildNumber = nativeBuildVersion;
@@ -78,10 +78,10 @@ class DatabaseManager {
     };
 
     /**
-    * createAppDatabase: Creates the App database. However,
-    * if a database could not be created, it will return undefined.
-    * @returns {Promise<AppDatabase|undefined>}
-    */
+     * createAppDatabase: Creates the App database. However,
+     * if a database could not be created, it will return undefined.
+     * @returns {Promise<AppDatabase|undefined>}
+     */
     private createAppDatabase = async (): Promise<AppDatabase|undefined> => {
         try {
             const databaseName = APP_DATABASE;
@@ -118,12 +118,12 @@ class DatabaseManager {
     };
 
     /**
-    * createServerDatabase: Creates a server database and registers the the server in the app database. However,
-    * if a database connection could not be created, it will return undefined.
-    * @param {CreateServerDatabaseArgs} createServerDatabaseArgs
-    *
-    * @returns {Promise<ServerDatabase|undefined>}
-    */
+     * createServerDatabase: Creates a server database and registers the the server in the app database. However,
+     * if a database connection could not be created, it will return undefined.
+     * @param {CreateServerDatabaseArgs} createServerDatabaseArgs
+     *
+     * @returns {Promise<ServerDatabase|undefined>}
+     */
     public createServerDatabase = async ({config}: CreateServerDatabaseArgs): Promise<ServerDatabase|undefined> => {
         const {dbName, displayName, identifier, serverUrl} = config;
 
@@ -167,10 +167,10 @@ class DatabaseManager {
     };
 
     /**
-    * initServerDatabase : initializes the server database.
-    * @param {string} serverUrl
-    * @returns {Promise<void>}
-    */
+     * initServerDatabase : initializes the server database.
+     * @param {string} serverUrl
+     * @returns {Promise<void>}
+     */
     private initServerDatabase = async (serverUrl: string): Promise<void> => {
         await this.createServerDatabase({
             config: {
@@ -182,13 +182,13 @@ class DatabaseManager {
     };
 
     /**
-    * addServerToAppDatabase: Adds a record in the 'app' database - into the 'servers' table - for this new server connection
-    * @param {string} databaseFilePath
-    * @param {string} displayName
-    * @param {string} serverUrl
-    * @param {string} identifier
-    * @returns {Promise<void>}
-    */
+     * addServerToAppDatabase: Adds a record in the 'app' database - into the 'servers' table - for this new server connection
+     * @param {string} databaseFilePath
+     * @param {string} displayName
+     * @param {string} serverUrl
+     * @param {string} identifier
+     * @returns {Promise<void>}
+     */
     private addServerToAppDatabase = async ({databaseFilePath, displayName, serverUrl, identifier = ''}: RegisterServerDatabaseArgs): Promise<void> => {
         try {
             const appDatabase = this.appDatabase?.database;
@@ -249,28 +249,28 @@ class DatabaseManager {
     };
 
     /**
-    * isServerPresent : Confirms if the current serverUrl does not already exist in the database
-    * @param {String} serverUrl
-    * @returns {Promise<boolean>}
-    */
+     * isServerPresent : Confirms if the current serverUrl does not already exist in the database
+     * @param {String} serverUrl
+     * @returns {Promise<boolean>}
+     */
     private isServerPresent = async (serverUrl: string): Promise<boolean> => {
         const server = await getServer(serverUrl);
         return Boolean(server);
     };
 
     /**
-    * getActiveServerUrl: Get the server url for active server database.
-    * @returns {Promise<string|undefined>}
-    */
+     * getActiveServerUrl: Get the server url for active server database.
+     * @returns {Promise<string|undefined>}
+     */
     public getActiveServerUrl = async (): Promise<string|undefined> => {
         const server = await getActiveServer();
         return server?.url;
     };
 
     /**
-    * getActiveServerDisplayName: Get the server display name for active server database.
-    * @returns {Promise<string|undefined>}
-    */
+     * getActiveServerDisplayName: Get the server display name for active server database.
+     * @returns {Promise<string|undefined>}
+     */
     public getActiveServerDisplayName = async (): Promise<string|undefined> => {
         const server = await getActiveServer();
         return server?.displayName;
@@ -282,9 +282,9 @@ class DatabaseManager {
     };
 
     /**
-    * getActiveServerDatabase: Get the record for active server database.
-    * @returns {Promise<Database|undefined>}
-    */
+     * getActiveServerDatabase: Get the record for active server database.
+     * @returns {Promise<Database|undefined>}
+     */
     public getActiveServerDatabase = async (): Promise<Database|undefined> => {
         const server = await getActiveServer();
         if (server?.url) {
@@ -327,11 +327,11 @@ class DatabaseManager {
     };
 
     /**
-    * setActiveServerDatabase: Set the new active server database.
-    * This method should be called when switching to another server.
-    * @param {string} serverUrl
-    * @returns {Promise<void>}
-    */
+     * setActiveServerDatabase: Set the new active server database.
+     * This method should be called when switching to another server.
+     * @param {string} serverUrl
+     * @returns {Promise<void>}
+     */
     public setActiveServerDatabase = async (serverUrl: string): Promise<void> => {
         if (this.appDatabase?.database) {
             const database = this.appDatabase?.database;
@@ -347,11 +347,11 @@ class DatabaseManager {
     };
 
     /**
-    * deleteServerDatabase: Removes the *.db file from the App-Group directory for iOS or the files directory on Android.
-    * Also, it sets the last_active_at to '0' entry in the 'servers' table from the APP database
-    * @param  {string} serverUrl
-    * @returns {Promise<boolean>}
-    */
+     * deleteServerDatabase: Removes the *.db file from the App-Group directory for iOS or the files directory on Android.
+     * Also, it sets the last_active_at to '0' entry in the 'servers' table from the APP database
+     * @param  {string} serverUrl
+     * @returns {Promise<boolean>}
+     */
     public deleteServerDatabase = async (serverUrl: string): Promise<void> => {
         const database = this.appDatabase?.database;
         if (database) {
@@ -371,11 +371,11 @@ class DatabaseManager {
     };
 
     /**
-    * destroyServerDatabase: Removes the *.db file from the App-Group directory for iOS or the files directory on Android.
-    * Also, removes the entry in the 'servers' table from the APP database
-    * @param  {string} serverUrl
-    * @returns {Promise<boolean>}
-    */
+     * destroyServerDatabase: Removes the *.db file from the App-Group directory for iOS or the files directory on Android.
+     * Also, removes the entry in the 'servers' table from the APP database
+     * @param  {string} serverUrl
+     * @returns {Promise<boolean>}
+     */
     public destroyServerDatabase = async (serverUrl: string): Promise<void> => {
         const database = this.appDatabase?.database;
         if (database) {
@@ -392,20 +392,20 @@ class DatabaseManager {
     };
 
     /**
-    * deleteServerDatabaseFiles: Removes the *.db file from the App-Group directory for iOS or the files directory on Android.
-    * @param  {string} serverUrl
-    * @returns {Promise<void>}
-    */
+     * deleteServerDatabaseFiles: Removes the *.db file from the App-Group directory for iOS or the files directory on Android.
+     * @param  {string} serverUrl
+     * @returns {Promise<void>}
+     */
     private deleteServerDatabaseFiles = async (serverUrl: string): Promise<void> => {
         const databaseName = urlSafeBase64Encode(serverUrl);
         return this.deleteServerDatabaseFilesByName(databaseName);
     };
 
     /**
-    * deleteServerDatabaseFilesByName: Removes the *.db file from the App-Group directory for iOS or the files directory for Android, given the database name
-    * @param {string} databaseName
-    * @returns {Promise<void>}
-    */
+     * deleteServerDatabaseFilesByName: Removes the *.db file from the App-Group directory for iOS or the files directory for Android, given the database name
+     * @param {string} databaseName
+     * @returns {Promise<void>}
+     */
     private deleteServerDatabaseFilesByName = async (databaseName: string): Promise<void> => {
         if (Platform.OS === 'ios') {
             // On iOS, we'll delete the *.db file under the shared app-group/databases folder
@@ -425,11 +425,11 @@ class DatabaseManager {
     };
 
     /**
-    * renameDatabase: Renames the *.db file from the App-Group directory for iOS or the files directory for Android
-    * @param {string} databaseName
-    * @param {string} newDBName
-    * @returns {Promise<void>}
-    */
+     * renameDatabase: Renames the *.db file from the App-Group directory for iOS or the files directory for Android
+     * @param {string} databaseName
+     * @param {string} newDBName
+     * @returns {Promise<void>}
+     */
     private renameDatabase = async (databaseName: string, newDBName: string): Promise<void> => {
         if (Platform.OS === 'ios') {
             // On iOS, we'll move the *.db file under the shared app-group/databases folder
@@ -467,10 +467,10 @@ class DatabaseManager {
     };
 
     /**
-    * factoryReset: Removes the databases directory and all its contents on the respective platform
-    * @param {boolean} shouldRemoveDirectory
-    * @returns {Promise<boolean>}
-    */
+     * factoryReset: Removes the databases directory and all its contents on the respective platform
+     * @param {boolean} shouldRemoveDirectory
+     * @returns {Promise<boolean>}
+     */
     factoryReset = async (shouldRemoveDirectory: boolean): Promise<boolean> => {
         try {
             //On iOS, we'll delete the databases folder under the shared AppGroup folder
@@ -489,12 +489,12 @@ class DatabaseManager {
     };
 
     /**
-    * buildMigrationCallbacks: Creates a set of callbacks that can be used to monitor the migration process.
-    * For example, we can display a processing spinner while we have a migration going on. Moreover, we can also
-    * hook into those callbacks to assess how many of our servers successfully completed their migration.
-    * @param {string} dbName
-    * @returns {MigrationEvents}
-    */
+     * buildMigrationCallbacks: Creates a set of callbacks that can be used to monitor the migration process.
+     * For example, we can display a processing spinner while we have a migration going on. Moreover, we can also
+     * hook into those callbacks to assess how many of our servers successfully completed their migration.
+     * @param {string} dbName
+     * @returns {MigrationEvents}
+     */
     private buildMigrationCallbacks = (dbName: string) => {
         const migrationEvents = {
             onSuccess: () => {
@@ -522,15 +522,15 @@ class DatabaseManager {
     };
 
     /**
-    * getDatabaseFilePath: Using the database name, this method will return the database file path for each platform.
-    * On iOS, it will point towards the AppGroup shared directory while on Android, it will point towards the Files Directory.
-    * Please note that in each case, the *.db files will be created/grouped under a 'databases' sub-folder.
-    * iOS Simulator : appGroup => /Users/{username}/Library/Developer/CoreSimulator/Devices/DA6F1C73/data/Containers/Shared/AppGroup/ACA65327/databases"}
-    * Android Device: file:///data/user/0/com.mattermost.rnbeta/files/databases
-    *
-    * @param {string} dbName
-    * @returns {string}
-    */
+     * getDatabaseFilePath: Using the database name, this method will return the database file path for each platform.
+     * On iOS, it will point towards the AppGroup shared directory while on Android, it will point towards the Files Directory.
+     * Please note that in each case, the *.db files will be created/grouped under a 'databases' sub-folder.
+     * iOS Simulator : appGroup => /Users/{username}/Library/Developer/CoreSimulator/Devices/DA6F1C73/data/Containers/Shared/AppGroup/ACA65327/databases"}
+     * Android Device: file:///data/user/0/com.mattermost.rnbeta/files/databases
+     *
+     * @param {string} dbName
+     * @returns {string}
+     */
     private getDatabaseFilePath = (dbName: string): string => {
         return Platform.OS === 'ios' ? `${this.databaseDirectory}/${dbName}.db` : `${this.databaseDirectory}${dbName}.db`;
     };

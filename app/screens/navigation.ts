@@ -820,7 +820,7 @@ export function setButtons(componentId: AvailableScreens, buttons: NavButtons = 
     mergeNavigationOptions(componentId, options);
 }
 
-export function showOverlay(name: AvailableScreens, passProps = {}, options: Options = {}) {
+export function showOverlay(name: AvailableScreens, passProps = {}, options: Options = {}, id?: string) {
     if (!isScreenRegistered(name)) {
         return;
     }
@@ -837,6 +837,7 @@ export function showOverlay(name: AvailableScreens, passProps = {}, options: Opt
 
     Navigation.showOverlay({
         component: {
+            id,
             name,
             passProps,
             options: merge(defaultOptions, options),
@@ -844,7 +845,7 @@ export function showOverlay(name: AvailableScreens, passProps = {}, options: Opt
     });
 }
 
-export async function dismissOverlay(componentId: AvailableScreens) {
+export async function dismissOverlay(componentId: string) {
     try {
         await Navigation.dismissOverlay(componentId);
     } catch (error) {

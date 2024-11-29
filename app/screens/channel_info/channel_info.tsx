@@ -7,6 +7,7 @@ import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import ChannelActions from '@components/channel_actions';
 import ConvertToChannelLabel from '@components/channel_actions/convert_to_channel/convert_to_channel_label';
+import ChannelBookmarks from '@components/channel_bookmarks';
 import {General} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
@@ -24,16 +25,18 @@ import Title from './title';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
+    canAddBookmarks: boolean;
+    canManageMembers: boolean;
+    canManageSettings: boolean;
     channelId: string;
     closeButtonId: string;
     componentId: AvailableScreens;
-    type?: ChannelType;
+    isBookmarksEnabled: boolean;
     isCallsEnabledInChannel: boolean;
-    canManageMembers: boolean;
-    isCRTEnabled: boolean;
-    canManageSettings: boolean;
-    isGuestUser: boolean;
     isConvertGMFeatureAvailable: boolean;
+    isCRTEnabled: boolean;
+    isGuestUser: boolean;
+    type?: ChannelType;
 }
 
 const edges: Edge[] = ['bottom', 'left', 'right'];
@@ -54,16 +57,18 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 }));
 
 const ChannelInfo = ({
-    isCRTEnabled,
+    canAddBookmarks,
+    canManageMembers,
+    canManageSettings,
     channelId,
     closeButtonId,
     componentId,
-    type,
+    isBookmarksEnabled,
     isCallsEnabledInChannel,
-    canManageMembers,
-    canManageSettings,
-    isGuestUser,
     isConvertGMFeatureAvailable,
+    isCRTEnabled,
+    isGuestUser,
+    type,
 }: Props) => {
     const theme = useTheme();
     const serverUrl = useServerUrl();
@@ -98,6 +103,13 @@ const ChannelInfo = ({
                     channelId={channelId}
                     type={type}
                 />
+                {isBookmarksEnabled &&
+                    <ChannelBookmarks
+                        channelId={channelId}
+                        canAddBookmarks={canAddBookmarks}
+                        showInInfo={true}
+                    />
+                }
                 <ChannelActions
                     channelId={channelId}
                     inModal={true}
@@ -116,10 +128,10 @@ const ChannelInfo = ({
                 />
                 <View style={styles.separator}/>
                 {convertGMOptionAvailable &&
-                <>
-                    <ConvertToChannelLabel channelId={channelId}/>
-                    <View style={styles.separator}/>
-                </>
+                    <>
+                        <ConvertToChannelLabel channelId={channelId}/>
+                        <View style={styles.separator}/>
+                    </>
                 }
                 <ChannelInfoAppBindings
                     channelId={channelId}

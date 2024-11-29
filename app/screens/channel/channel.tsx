@@ -122,26 +122,27 @@ const Channel = ({
                     componentId={componentId}
                     callsEnabledInChannel={isCallsEnabledInChannel}
                     isTabletView={isTabletView}
+                    shouldRenderBookmarks={shouldRender}
                 />
                 {shouldRender &&
-                <>
-                    <View style={[styles.flex, {marginTop}]}>
-                        <ChannelPostList
+                    <>
+                        <View style={[styles.flex, {marginTop}]}>
+                            <ChannelPostList
+                                channelId={channelId}
+                                nativeID={channelId}
+                            />
+                        </View>
+                        <PostDraft
                             channelId={channelId}
-                            nativeID={channelId}
+                            keyboardTracker={postDraftRef}
+                            scrollViewNativeID={channelId}
+                            accessoriesContainerID={ACCESSORIES_CONTAINER_NATIVE_ID}
+                            testID='channel.post_draft'
+                            containerHeight={containerHeight}
+                            isChannelScreen={true}
+                            canShowPostPriority={true}
                         />
-                    </View>
-                    <PostDraft
-                        channelId={channelId}
-                        keyboardTracker={postDraftRef}
-                        scrollViewNativeID={channelId}
-                        accessoriesContainerID={ACCESSORIES_CONTAINER_NATIVE_ID}
-                        testID='channel.post_draft'
-                        containerHeight={containerHeight}
-                        isChannelScreen={true}
-                        canShowPostPriority={true}
-                    />
-                </>
+                    </>
                 }
             </SafeAreaView>
         </FreezeScreen>

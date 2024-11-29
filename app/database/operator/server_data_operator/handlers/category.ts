@@ -100,7 +100,7 @@ const CategoryHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supe
 
         const createOrUpdateRawValues = getUniqueRawsBy({raws: categoryChannels, key: 'id'});
 
-        return this.handleRecords<CategoryChannelModel, CategoryChannel>({
+        return this.handleRecords({
             fieldName: 'id',
             transformer: transformCategoryChannelRecord,
             createOrUpdateRawValues,

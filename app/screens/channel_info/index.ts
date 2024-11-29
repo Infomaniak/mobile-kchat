@@ -5,13 +5,17 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$} from 'rxjs';
 import {distinctUntilChanged, switchMap, combineLatestWith} from 'rxjs/operators';
 
-import {observeIsCallsEnabledInChannel} from '@calls/observers';
 import {withServerUrl} from '@context/server';
 import {observeCurrentChannel} from '@queries/servers/channel';
+import {observeCanAddBookmarks} from '@queries/servers/channel_bookmark';
 import {observeCanManageChannelMembers, observeCanManageChannelSettings} from '@queries/servers/role';
-import {observeConfigValue, observeCurrentUserId} from '@queries/servers/system';
+import {
+    observeConfigBooleanValue,
+    observeConfigValue,
+} from '@queries/servers/system';
 import {observeIsCRTEnabled} from '@queries/servers/thread';
 import {observeCurrentUser} from '@queries/servers/user';
+import {isMinimumServerVersion} from '@utils/helpers';
 
 import ChannelInfo from './channel_info';
 
@@ -25,10 +29,8 @@ const enhanced = withObservables([], ({database}: Props) => {
     const channel = observeCurrentChannel(database);
     const type = channel.pipe(switchMap((c) => of$(c?.type)));
     const channelId = channel.pipe(switchMap((c) => of$(c?.id || '')));
-    const userId = observeCurrentUserId(database);
     const currentUser = observeCurrentUser(database);
-
-    const isCallsEnabledInChannel = observeIsCallsEnabledInChannel(userId, channel);
+    const serverVersion = observeConfigValue(database, 'Version');
 
     const canManageMembers = currentUser.pipe(
         combineLatestWith(channelId),
@@ -47,16 +49,25 @@ const enhanced = withObservables([], ({database}: Props) => {
         distinctUntilChanged(),
     );
 
-    const isConvertGMFeatureAvailable = observeConfigValue(database, 'Version').pipe(
-        switchMap(() => of$(true)),
+    const isConvertGMFeatureAvailable = serverVersion.pipe(
+        switchMap((version) => of$(isMinimumServerVersion(version || '', 9, 1))),
+    );
+
+    const isBookmarksEnabled = observeConfigBooleanValue(database, 'FeatureFlagChannelBookmarks');
+
+    const canAddBookmarks = channelId.pipe(
+        switchMap((cId) => {
+            return observeCanAddBookmarks(database, cId);
+        }),
     );
 
     return {
         type,
-        isCallsEnabledInChannel,
+        canAddBookmarks,
         canManageMembers,
-        isCRTEnabled: observeIsCRTEnabled(database),
         canManageSettings,
+        isBookmarksEnabled,
+        isCRTEnabled: observeIsCRTEnabled(database),
         isGuestUser,
         isConvertGMFeatureAvailable,
     };

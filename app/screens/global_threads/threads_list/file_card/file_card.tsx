@@ -41,9 +41,10 @@ export const FileCard: React.FC<CardProps> = ({post, theme}) => {
 
     let file = null;
     if (files.length > 0) {
+        const fileInfo = files[0].toFileInfo(post.author.id);
         const thumbnailUri = buildFileThumbnailUrl(serverUrl, files[0].id);
         const imageUri = buildFilePreviewUrl(serverUrl, files[0].id);
-        const fileType = getFileType(files[0]);
+        const fileType = getFileType(fileInfo);
 
         switch (fileType) {
             case FileTypes.IMAGE:

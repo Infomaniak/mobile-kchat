@@ -121,6 +121,7 @@ interface ClientConfig {
     FeatureFlagAppsEnabled?: string;
     FeatureFlagCollapsedThreads?: string;
     FeatureFlagPostPriority?: string;
+    FeatureFlagChannelBookmarks?: string;
     FeatureFlagEnableVoiceMessages?: string;
     ForgotPasswordLink?: string;
     GfycatApiKey: string;

@@ -342,7 +342,7 @@ export function getFormattedFileSize(bytes: number): string {
     return `${bytes} B`;
 }
 
-export function getFileType(file: Pick<FileInfo, 'extension'>): string {
+export function getFileType(file: FileInfo | ExtractedFileInfo): string {
     if (!file || !file.extension) {
         return 'other';
     }
