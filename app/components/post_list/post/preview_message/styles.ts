@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import {blendColors, changeOpacity, makeStyleSheetFromTheme} from '@app/utils/theme';
-import {typography} from '@app/utils/typography';
+import {blendColors, changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {typography} from '@utils/typography';
 
 export const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
     previewMessageContainer: {

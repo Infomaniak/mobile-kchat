@@ -6,7 +6,7 @@ import {useIntl} from 'react-intl';
 import {StyleSheet, TouchableOpacity, View, type StyleProp, type ViewStyle} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-import Loading from '@app/components/loading';
+import Loading from '@components/loading';
 import IkCallsParticipantStackIcon from '@calls/components/ik_calls_participant_stack/icon';
 import IkCallsParticipantStackIconOverflow from '@calls/components/ik_calls_participant_stack/icon_overflow';
 import IkCallsParticipantStackList from '@calls/components/ik_calls_participant_stack/list';
@@ -22,7 +22,7 @@ import {preventDoubleTap} from '@utils/tap';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import type ConferenceParticipantModel from '@app/database/models/server/conference_participant';
+import type ConferenceParticipantModel from '@database/models/server/conference_participant';
 
 const ROW_HEIGHT = 40;
 

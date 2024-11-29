@@ -7,7 +7,7 @@ import {StyleSheet, View} from 'react-native';
 
 import {buildAbsoluteUrl} from '@actions/remote/file';
 import {buildProfileImageUrlFromUser} from '@actions/remote/user';
-import {useServerUrl} from '@app/context/server';
+import {useServerUrl} from '@context/server';
 import CompassIcon from '@components/compass_icon';
 import NetworkManager from '@managers/network_manager';
 import {changeOpacity} from '@utils/theme';

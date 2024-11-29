@@ -38,7 +38,7 @@ export interface ClientUsersMix {
     autocompleteUsers: (name: string, teamId: string, channelId?: string, options?: Record<string, any>) => Promise<{users: UserProfile[]; out_of_channel?: UserProfile[]}>;
     getSessions: (userId: string) => Promise<Session[]>;
     checkUserMfa: (loginId: string) => Promise<{mfa_required: boolean}>;
-    attachDevice: (deviceId: string, puskKitId?: string) => Promise<any>;
+    setExtraSessionProps: (deviceId: string, notificationsEnabled: boolean, version: string | null, puskKitId: string | null) => Promise<{}>;
     searchUsers: (term: string, options: SearchUserOptions) => Promise<UserProfile[]>;
     getStatusesByIds: (userIds: string[]) => Promise<UserStatus[]>;
     getStatus: (userId: string) => Promise<UserStatus>;
@@ -329,10 +329,18 @@ const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
         );
     };
 
-    attachDevice = async (deviceId: string, pushKitId?: string) => {
+    setExtraSessionProps = async (deviceId: string, deviceNotificationDisabled: boolean, version: string | null, puskKitId: string | null) => {
         return this.doFetch(
             `${this.getUsersRoute()}/sessions/device`,
-            {method: 'put', body: {device_id: deviceId, pushkit_id: pushKitId}},
+            {
+                method: 'put',
+                body: {
+                    device_id: deviceId,
+                    device_notification_disabled: deviceNotificationDisabled ? 'true' : 'false',
+                    mobile_version: version || '',
+                    pushkit_id: puskKitId,
+                },
+            },
         );
     };
 

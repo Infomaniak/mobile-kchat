@@ -9,7 +9,6 @@ import Foundation
 import SQLite3
 import SQLite
 
-// Prevent namespace issue with Xcode 16
 typealias Expression = SQLite.Expression
 
 enum DatabaseError: Error {

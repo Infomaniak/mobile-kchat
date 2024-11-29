@@ -1,14 +1,17 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {nativeApplicationVersion} from 'expo-application';
 import {NativeModules, Platform} from 'react-native';
+import {RESULTS, checkNotifications} from 'react-native-permissions';
 
 import {fetchMissingDirectChannelsInfo, fetchMyChannelsForTeam, handleKickFromChannel, type MyChannelsRequest} from '@actions/remote/channel';
 import {fetchGroupsForMember} from '@actions/remote/groups';
+import {fetchPostsForUnreadChannels} from '@actions/remote/post';
 import {type MyPreferencesRequest, fetchMyPreferences} from '@actions/remote/preference';
 import {fetchRoles} from '@actions/remote/role';
 import {fetchConfigAndLicense, fetchDataRetentionPolicy} from '@actions/remote/systems';
-import {fetchMyTeams, fetchTeamsChannelsAndUnreadPosts, handleKickFromTeam, type MyTeamsRequest, updateCanJoinTeams} from '@actions/remote/team';
+import {fetchMyTeams, fetchTeamsChannelsThreadsAndUnreadPosts, handleKickFromTeam, type MyTeamsRequest, updateCanJoinTeams} from '@actions/remote/team';
 import {syncTeamThreads} from '@actions/remote/thread';
 import {fetchMe, type MyUserRequest, updateAllUsersSince, autoUpdateTimezone} from '@actions/remote/user';
 import {General, Preferences, Screens} from '@constants';
@@ -23,12 +26,12 @@ import {getDeviceToken} from '@queries/app/global';
 import {getChannelById, queryAllChannelsForTeam, queryChannelsById} from '@queries/servers/channel';
 import {prepareModels, truncateCrtRelatedTables} from '@queries/servers/entry';
 import {getHasCRTChanged} from '@queries/servers/preference';
-import {getConfig, getCurrentChannelId, getCurrentTeamId, getIsDataRetentionEnabled, getPushVerificationStatus, getLastFullSync, setCurrentTeamAndChannelId} from '@queries/servers/system';
+import {getConfig, getCurrentChannelId, getCurrentTeamId, getIsDataRetentionEnabled, getPushVerificationStatus, getLastFullSync, setCurrentTeamAndChannelId, getConfigValue} from '@queries/servers/system';
 import {deleteMyTeams, getAvailableTeamIds, getTeamChannelHistory, queryMyTeams, queryMyTeamsByIds, queryTeamsById} from '@queries/servers/team';
 import NavigationStore from '@store/navigation_store';
 import {isDMorGM, sortChannelsByDisplayName} from '@utils/channel';
 import {getFullErrorMessage, isErrorWithStatusCode} from '@utils/errors';
-import {isTablet} from '@utils/helpers';
+import {isMinimumServerVersion, isTablet} from '@utils/helpers';
 import {logDebug} from '@utils/log';
 import {processIsCRTEnabled} from '@utils/thread';
 
@@ -66,9 +69,6 @@ export type EntryResponse = {
     error: unknown;
 }
 
-const FETCH_MISSING_DM_TIMEOUT = 2500;
-export const FETCH_UNREADS_TIMEOUT = 2500;
-
 export const entry = async (serverUrl: string, teamId?: string, channelId?: string, since = 0): Promise<EntryResponse> => {
     const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
     const result = entryRest(serverUrl, teamId, channelId, since);
@@ -85,8 +85,8 @@ export const entry = async (serverUrl: string, teamId?: string, channelId?: stri
 export async function deferredAppEntryActions(
     serverUrl: string, since: number, currentUserId: string, currentUserLocale: string, preferences: PreferenceType[] | undefined,
     config: ClientConfig, license: ClientLicense | undefined, teamData: MyTeamsRequest, chData: MyChannelsRequest | undefined,
-    initialTeamId?: string) {
-    const result = restDeferredAppEntryActions(serverUrl, since, currentUserId, currentUserLocale, preferences, config, license, teamData, chData, initialTeamId);
+    initialTeamId?: string, initialChannelId?: string) {
+    const result = restDeferredAppEntryActions(serverUrl, since, currentUserId, currentUserLocale, preferences, config, license, teamData, chData, initialTeamId, initialChannelId);
 
     autoUpdateTimezone(serverUrl);
 
@@ -311,8 +311,7 @@ const fetchAlternateTeamData = async (
     let initialTeamId = '';
     let chData;
 
-    for (const teamId of availableTeamIds) {
-        // eslint-disable-next-line no-await-in-loop
+    for await (const teamId of availableTeamIds) {
         chData = await fetchMyChannelsForTeam(serverUrl, teamId, includeDeleted, since, fetchOnly, false, isCRTEnabled);
         const chError = chData.error;
         if (isErrorWithStatusCode(chError) && chError.status_code === 403) {
@@ -371,61 +370,90 @@ async function entryInitialChannelId(database: Database, requestedChannelId = ''
 async function restDeferredAppEntryActions(
     serverUrl: string, since: number, currentUserId: string, currentUserLocale: string, preferences: PreferenceType[] | undefined,
     config: ClientConfig, license: ClientLicense | undefined, teamData: MyTeamsRequest, chData: MyChannelsRequest | undefined,
-    initialTeamId?: string) {
-    // defer fetch channels and unread posts for other teams
-    if (teamData.teams?.length && teamData.memberships?.length) {
-        fetchTeamsChannelsAndUnreadPosts(serverUrl, since, teamData.teams, teamData.memberships, initialTeamId);
+    initialTeamId?: string, initialChannelId?: string,
+) {
+    const isCRTEnabled = (preferences && processIsCRTEnabled(preferences, config.CollapsedThreads, config.FeatureFlagCollapsedThreads, config.Version)) || false;
+    const directChannels = chData?.channels?.filter(isDMorGM);
+    const channelsToFetchProfiles = new Set<Channel>(directChannels);
+
+    // sidebar DM & GM profiles
+    if (channelsToFetchProfiles.size) {
+        const teammateDisplayNameSetting = getTeammateNameDisplaySetting(preferences || [], config.LockTeammateNameDisplay, config.TeammateNameDisplay, license);
+        fetchMissingDirectChannelsInfo(serverUrl, Array.from(channelsToFetchProfiles), currentUserLocale, teammateDisplayNameSetting, currentUserId);
     }
 
-    if (preferences && processIsCRTEnabled(preferences, config.CollapsedThreads, config.FeatureFlagCollapsedThreads, config.Version)) {
-        if (initialTeamId) {
-            await syncTeamThreads(serverUrl, initialTeamId);
+    updateAllUsersSince(serverUrl, since);
+    updateCanJoinTeams(serverUrl);
+
+    // defer fetch channels and unread posts for other teams
+    setTimeout(async () => {
+        if (chData?.channels?.length && chData.memberships?.length && initialTeamId) {
+            if (isCRTEnabled && initialTeamId) {
+                await syncTeamThreads(serverUrl, initialTeamId);
+            }
+            fetchPostsForUnreadChannels(serverUrl, chData.channels, chData.memberships, initialChannelId);
         }
 
-        if (teamData.teams?.length) {
-            for await (const team of teamData.teams) {
-                if (team.id !== initialTeamId) {
-                    // need to await here since GM/DM threads in different teams overlap
-                    await syncTeamThreads(serverUrl, team.id);
-                }
+        if (teamData.teams?.length && teamData.memberships?.length) {
+            const teamsOrder = preferences?.find((p) => p.category === Preferences.CATEGORIES.TEAMS_ORDER);
+            const sortedTeamIds = new Set(teamsOrder?.value.split(','));
+            const membershipSet = new Set(teamData.memberships.map((m) => m.team_id));
+            const teamMap = new Map(teamData.teams.map((t) => [t.id, t]));
+            if (initialTeamId) {
+                sortedTeamIds.delete(initialTeamId);
+                membershipSet.delete(initialTeamId);
+                teamMap.delete(initialTeamId);
+            }
+
+            let myTeams: Team[];
+            if (sortedTeamIds.size) {
+                const mySortedTeams = [...sortedTeamIds].
+                    filter((id) => membershipSet.has(id) && teamMap.has(id)).
+                    map((id) => teamMap.get(id)!);
+                const extraTeams = [...membershipSet].
+                    filter((id) => !sortedTeamIds.has(id) && teamMap.get(id)).
+                    map((id) => teamMap.get(id)!).
+                    sort((a, b) => a.display_name.toLocaleLowerCase().localeCompare(b.display_name.toLocaleLowerCase()));
+                myTeams = [...mySortedTeams, ...extraTeams];
+            } else {
+                myTeams = teamData.teams.
+                    sort((a, b) => a.display_name.toLocaleLowerCase().localeCompare(b.display_name.toLocaleLowerCase()));
+            }
+
+            if (myTeams.length) {
+                fetchTeamsChannelsThreadsAndUnreadPosts(serverUrl, since, myTeams, isCRTEnabled);
             }
         }
-    }
-
-    updateCanJoinTeams(serverUrl);
-    await updateAllUsersSince(serverUrl, since);
+    });
 
     // Fetch groups for current user
     fetchGroupsForMember(serverUrl, currentUserId);
-
-    // defer sidebar DM & GM profiles
-    setTimeout(async () => {
-        const directChannels = chData?.channels?.filter(isDMorGM);
-        const channelsToFetchProfiles = new Set<Channel>(directChannels);
-        if (channelsToFetchProfiles.size) {
-            const teammateDisplayNameSetting = getTeammateNameDisplaySetting(preferences || [], config.LockTeammateNameDisplay, config.TeammateNameDisplay, license);
-            fetchMissingDirectChannelsInfo(serverUrl, Array.from(channelsToFetchProfiles), currentUserLocale, teammateDisplayNameSetting, currentUserId);
-        }
-    }, FETCH_MISSING_DM_TIMEOUT);
 }
 
-export const registerDeviceToken = async (serverUrl: string) => {
+export const setExtraSessionProps = async (serverUrl: string) => {
     try {
-        const client = NetworkManager.getClient(serverUrl);
-
+        const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        const serverVersion = await getConfigValue(database, 'Version');
+        const deviceToken = await getDeviceToken();
         let pushKitToken: string | undefined;
         if (Platform.OS === 'ios') {
             const pushKitTokenResult = await CallManagerModule.getToken();
             pushKitToken = pushKitTokenResult;
         }
 
-        const deviceToken = await getDeviceToken();
-        if (deviceToken) {
-            client.attachDevice(deviceToken, pushKitToken);
+        // For new servers, we want to send all the information.
+        // For old servers, we only want to send the information when there
+        // is a device token. Sending the rest of the information should not
+        // create any issue.
+        if (isMinimumServerVersion(serverVersion, 10, 1, 0) || deviceToken) {
+            const res = await checkNotifications();
+            const granted = res.status === RESULTS.GRANTED || res.status === RESULTS.LIMITED;
+            const client = NetworkManager.getClient(serverUrl);
+            client.setExtraSessionProps(deviceToken, !granted, nativeApplicationVersion, pushKitToken);
         }
         return {};
     } catch (error) {
-        logDebug('error on registerDeviceToken', getFullErrorMessage(error));
+        logDebug('error on setExtraSessionProps', getFullErrorMessage(error));
         return {error};
     }
 };

@@ -3,11 +3,13 @@ import React
 
 @objc public class RNUtilsWrapper: NSObject {
     @objc public weak var delegate: RNUtilsDelegate? = nil
+    @objc private var hasRegisteredLoad = false
     
     deinit {
-        NotificationCenter.default.removeObserver(self,
-           name: NSNotification.Name.RCTUserInterfaceStyleDidChange,
-           object: nil)
+        DispatchQueue.main.sync {
+            guard let w = UIApplication.shared.delegate?.window, let window = w else { return }
+            window.removeObserver(self, forKeyPath: "frame")
+        }
     }
     
     func getSharedDirectory() -> URL? {
@@ -22,24 +24,48 @@ import React
         return sharedDirectory.appendingPathComponent("databases").path
     }
     
+    func getWindowSize() -> (CGSize?, CGSize?) {
+        guard let w = UIApplication.shared.delegate?.window, let window = w else { return (nil, nil) }
+        return (window.screen.bounds.size, window.bounds.size)
+    }
+    
     func isRunningInFullScreen() -> Bool {
         guard let w = UIApplication.shared.delegate?.window, let window = w else { return false }
-        let screenSize = window.screen.bounds.size.width
-        let frameSize = window.frame.size.width
-        let shouldBeConsideredFullScreen = frameSize >= (screenSize * 0.6)
-        return shouldBeConsideredFullScreen
+        let screenWidth = window.screen.bounds.size.width
+        let windowWidth = window.bounds.size.width
+        return windowWidth >= screenWidth * (2.0 / 3.0)
+    }
+    
+    func isRunningInFullScreen(screen: CGSize?, bounds: CGSize?) -> Bool {
+        guard let screenWidth = screen?.width,
+              let windowWidth = bounds?.width else {return false}
+        return windowWidth >= screenWidth * (2.0 / 3.0)
     }
     
     @objc public func captureEvents() {
-            NotificationCenter.default.addObserver(self,
-               selector: #selector(isSplitView), name: NSNotification.Name.RCTUserInterfaceStyleDidChange,
-               object: nil)
+        DispatchQueue.main.async {
+            guard let w = UIApplication.shared.delegate?.window, let window = w else { return }
+            window.addObserver(self, forKeyPath: "frame", options: .new, context: nil)
+        }
     }
     
-    @objc func isSplitView() {
+    override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == "frame" {
+            let (screen, bounds) = getWindowSize()
+            guard let screen = screen, let bounds = bounds else {return}
+            isSplitView(screen: screen, bounds: bounds)
+            
+            delegate?.sendEvent(name: "DimensionsChanged", result: [
+                "width": bounds.width,
+                "height": bounds.height
+            ])
+        }
+    }
+    
+    @objc func isSplitView(screen: CGSize, bounds: CGSize) {
         if UIDevice.current.userInterfaceIdiom == .pad {
             delegate?.sendEvent(name: "SplitViewChanged", result: [
-                "isSplitView": !isRunningInFullScreen(),
+                "isSplit": !isRunningInFullScreen(screen: screen, bounds: bounds),
                 "isTablet": UIDevice.current.userInterfaceIdiom == .pad,
             ])
         }
@@ -201,6 +227,36 @@ import React
               "isSplit": !shouldBeConsideredFullScreen,
               "isTablet": UIDevice.current.userInterfaceIdiom == .pad,
             ]
+    }
+    
+    @objc public func getWindowDimensions() -> Dictionary<String, Any> {
+        let queue = DispatchQueue.main
+            let group = DispatchGroup()
+            var dimensions = [
+                "width": 0.0,
+                "height": 0.0
+            ]
+            group.enter()
+            queue.async(group: group) { [weak self] in
+                if let (_, frame) = self?.getWindowSize(),
+                   let frame = frame {
+                    dimensions = [
+                        "width": frame.width,
+                        "height": frame.height
+                    ]
+                }
+              group.leave()
+            }
+            group.wait()
+            return dimensions
+    }
+
+    @objc public func setHasRegisteredLoad() {
+        hasRegisteredLoad = true
+    }
+
+    @objc public func getHasRegisteredLoad() -> Dictionary<String, Any> {
+        return ["hasRegisteredLoad": hasRegisteredLoad]
     }
     
     @objc public func unlockOrientation() {

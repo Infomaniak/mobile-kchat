@@ -3,8 +3,8 @@
 
 import React, {useCallback} from 'react';
 
-import {Screens} from '@app/constants';
-import {dismissBottomSheet, openAsBottomSheet} from '@app/screens/navigation';
+import {Screens} from '@constants';
+import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
 import {BaseOption} from '@components/common_post_options';
 import {useTheme} from '@context/theme';
 import {t} from '@i18n';

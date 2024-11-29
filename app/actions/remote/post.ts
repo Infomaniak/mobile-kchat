@@ -4,6 +4,8 @@
 
 /* eslint-disable max-lines */
 
+import {chunk} from 'lodash';
+
 import {markChannelAsUnread, updateLastPostAt, updateMyChannelLastFetchedAt} from '@actions/local/channel';
 import {addPostAcknowledgement, removePost, removePostAcknowledgement, storePostsForChannel} from '@actions/local/post';
 import {addRecentReaction} from '@actions/local/reactions';
@@ -16,7 +18,7 @@ import NetworkManager from '@managers/network_manager';
 import {getMyChannel, prepareMissingChannelsForAllTeams, queryAllMyChannel} from '@queries/servers/channel';
 import {queryAllCustomEmojis} from '@queries/servers/custom_emoji';
 import {getPostById, getRecentPostsInChannel} from '@queries/servers/post';
-import {getCurrentUserId, getCurrentChannelId} from '@queries/servers/system';
+import {getCurrentUserId} from '@queries/servers/system';
 import {getIsCRTEnabled, prepareThreadsFromReceivedPosts} from '@queries/servers/thread';
 import {queryAllUsers} from '@queries/servers/user';
 import EphemeralStore from '@store/ephemeral_store';
@@ -26,7 +28,6 @@ import {getFullErrorMessage, isServerError} from '@utils/errors';
 import {logDebug, logError} from '@utils/log';
 import {processPostsFetched} from '@utils/post';
 import {getPostIdsForCombinedUserActivityPost} from '@utils/post_list';
-import {allSettled} from '@utils/promise';
 
 import {forceLogoutIfNecessary} from './session';
 
@@ -40,6 +41,13 @@ type PostsRequest = {
     posts?: Post[];
     previousPostId?: string;
 }
+
+export type PostsForChannel = PostsRequest & {
+    actionType?: string;
+    authors?: UserProfile[];
+    channelId?: string;
+    error?: unknown;
+};
 
 type PostsObjectsRequest = {
     error?: unknown;
@@ -72,7 +80,7 @@ export async function createPost(serverUrl: string, post: Partial<Post>, files: 
     const pendingPostId = post.pending_post_id || `${currentUserId}:${timestamp}`;
 
     const existing = await getPostById(database, pendingPostId);
-    if (existing && !existing.props.failed) {
+    if (existing && !existing.props?.failed) {
         return {data: false};
     }
 
@@ -232,7 +240,7 @@ export const retryFailedPost = async (serverUrl: string, post: PostModel) => {
         // timestamps will remain the same as the initial attempt for createAt
         // but updateAt will be use for the optimistic post UI
         post.prepareUpdate((p) => {
-            p.props = newPost.props;
+            p.props = newPost.props || null;
             p.updateAt = timestamp;
         });
         await operator.batchRecords([post], 'retryFailedPost - first update');
@@ -276,17 +284,7 @@ export const retryFailedPost = async (serverUrl: string, post: PostModel) => {
     return {};
 };
 
-export const fetchPostsForCurrentChannel = async (serverUrl: string) => {
-    const database = DatabaseManager.serverDatabases[serverUrl]?.database;
-    if (!database) {
-        return {error: `${serverUrl} database not found`};
-    }
-
-    const currentChannelId = await getCurrentChannelId(database);
-    return fetchPostsForChannel(serverUrl, currentChannelId);
-};
-
-export async function fetchPostsForChannel(serverUrl: string, channelId: string, fetchOnly = false) {
+export async function fetchPostsForChannel(serverUrl: string, channelId: string, fetchOnly = false): Promise<PostsForChannel> {
     try {
         if (!fetchOnly) {
             EphemeralStore.addLoadingMessagesForChannel(serverUrl, channelId);
@@ -331,7 +329,7 @@ export async function fetchPostsForChannel(serverUrl: string, channelId: string,
             }
         }
 
-        return {posts: data.posts, order: data.order, authors, actionType, previousPostId: data.previousPostId};
+        return {posts: data.posts, order: data.order, authors, actionType, previousPostId: data.previousPostId, channelId};
     } catch (error) {
         logDebug('error on fetchPostsForChannel', getFullErrorMessage(error));
         return {error};
@@ -342,15 +340,34 @@ export async function fetchPostsForChannel(serverUrl: string, channelId: string,
     }
 }
 
-export const fetchPostsForUnreadChannels = async (serverUrl: string, channels: Channel[], memberships: ChannelMembership[], excludeChannelId?: string) => {
-    const promises = [];
+export const fetchPostsForUnreadChannels = async (serverUrl: string, channels: Channel[], memberships: ChannelMembership[], excludeChannelId?: string, fetchOnly = false): Promise<PostsForChannel[]> => {
+    const membersMap = new Map<string, ChannelMembership>();
     for (const member of memberships) {
-        const channel = channels.find((c) => c.id === member.channel_id);
-        if (channel && !channel.delete_at && (channel.total_msg_count - member.msg_count) > 0 && channel.id !== excludeChannelId) {
-            promises.push(fetchPostsForChannel(serverUrl, channel.id));
-        }
+        membersMap.set(member.channel_id, member);
     }
-    await Promise.all(promises);
+
+    const unreadChannelIds = channels.reduce<string[]>((result, channel) => {
+        const member = membersMap.get(channel.id);
+        if (member && !channel.delete_at && (channel.total_msg_count - member.msg_count) > 0 && channel.id !== excludeChannelId) {
+            result.push(channel.id);
+        }
+        return result;
+    }, []);
+
+    const postsForChannel: PostsForChannel[] = [];
+
+    // process 10 unread channels at a time
+    const chunks = chunk(unreadChannelIds, 10);
+    for await (const channelIds of chunks) {
+        const promises = [];
+        for (const channelId of channelIds) {
+            promises.push(fetchPostsForChannel(serverUrl, channelId, fetchOnly));
+        }
+
+        const results = await Promise.all(promises);
+        postsForChannel.push(...results);
+    }
+    return postsForChannel;
 };
 
 export async function fetchPosts(serverUrl: string, channelId: string, page = 0, perPage = General.POST_CHUNK_SIZE, fetchOnly = false): Promise<PostsRequest> {
@@ -551,7 +568,7 @@ export const fetchPostAuthors = async (serverUrl: string, posts: Post[], fetchOn
         }
 
         if (promises.length) {
-            const authorsResult = await allSettled(promises);
+            const authorsResult = await Promise.allSettled(promises);
             const result = authorsResult.reduce<UserProfile[][]>((acc, item) => {
                 if (item.status === 'fulfilled') {
                     acc.push(item.value);
@@ -1107,7 +1124,7 @@ export async function deletePersistedPosts(serverUrl: string, channelId: string,
                 p.message = '';
                 p.messageSource = '';
                 p.metadata = null;
-                p.props = undefined;
+                p.props = null;
             });
 
             if (model) {

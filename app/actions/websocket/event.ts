@@ -2,18 +2,10 @@
 // See LICENSE.txt for license information.
 
 import * as bookmark from '@actions/local/channel_bookmark';
-import {handleTeamSyncEvent} from '@actions/websocket/ikTeams';
 import {WebsocketEvents} from '@constants';
 
 import * as category from './category';
 import * as channel from './channel';
-import {
-    handleConferenceAdded,
-    handleConferenceDeleted,
-    handleConferenceUserConnected,
-    handleConferenceUserDenied,
-    handleConferenceUserDisconnected,
-} from './conference';
 import * as group from './group';
 import {handleOpenDialogEvent} from './integrations';
 import * as posts from './posts';
@@ -213,30 +205,6 @@ export async function handleWebSocketEvent(serverUrl: string, msg: WebSocketMess
             break;
         case WebsocketEvents.CHANNEL_BOOKMARK_SORTED:
             bookmark.handleBookmarkSorted(serverUrl, msg);
-            break;
-
-        case WebsocketEvents.KSUITE_ADDED:
-            handleTeamSyncEvent(serverUrl);
-            break;
-        case WebsocketEvents.KSUITE_DELETED:
-            handleTeamSyncEvent(serverUrl);
-            break;
-
-        // kMeet
-        case WebsocketEvents.CONFERENCE_ADDED:
-            handleConferenceAdded(serverUrl, msg);
-            break;
-        case WebsocketEvents.CONFERENCE_DELETED:
-            handleConferenceDeleted(serverUrl, msg);
-            break;
-        case WebsocketEvents.CONFERENCE_USER_CONNECTED:
-            handleConferenceUserConnected(serverUrl, msg);
-            break;
-        case WebsocketEvents.CONFERENCE_USER_DENIED:
-            handleConferenceUserDenied(serverUrl, msg);
-            break;
-        case WebsocketEvents.CONFERENCE_USER_DISCONNECTED:
-            handleConferenceUserDisconnected(serverUrl, msg);
             break;
     }
 }

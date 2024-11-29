@@ -5,9 +5,8 @@ import CookieManager, {type Cookie} from '@react-native-cookies/cookies';
 import {Image} from 'expo-image';
 import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react-native';
 
-import {storeOnboardingViewedValue} from '@actions/app/global';
-import {syncMultiTeam, syncServerData} from '@actions/remote/entry/ikcommon';
-import {cancelSessionNotification, logout} from '@actions/remote/session';
+import {removePushDisabledInServerAcknowledged, storeOnboardingViewedValue} from '@actions/app/global';
+import {cancelSessionNotification, logout, scheduleSessionNotification} from '@actions/remote/session';
 import {Events, Launch} from '@constants';
 import DatabaseManager from '@database/manager';
 import {resetMomentLocale} from '@i18n';
@@ -22,6 +21,7 @@ import {getThemeFromState} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import {deleteFileCache, deleteFileCacheByDir} from '@utils/file';
 import {isMainActivity} from '@utils/helpers';
+import {urlSafeBase64Encode} from '@utils/security';
 import {addNewServer} from '@utils/server';
 
 import type {LaunchType} from '@typings/launch';
@@ -34,10 +34,19 @@ type LogoutCallbackArg = {
 class SessionManager {
     private previousAppState: AppStateStatus;
     private scheduling = false;
-    private terminatingSessionUrl: undefined|string;
+    private terminatingSessionUrl = new Set<string>();
 
     constructor() {
-        AppState.addEventListener('change', this.onAppStateChange);
+        if (Platform.OS === 'android') {
+            AppState.addEventListener('blur', () => {
+                this.onAppStateChange('inactive');
+            });
+            AppState.addEventListener('focus', () => {
+                this.onAppStateChange('active');
+            });
+        } else {
+            AppState.addEventListener('change', this.onAppStateChange);
+        }
 
         DeviceEventEmitter.addListener(Events.SERVER_LOGOUT, this.onLogout);
         DeviceEventEmitter.addListener(Events.SESSION_EXPIRED, this.onSessionExpired);
@@ -80,7 +89,12 @@ class SessionManager {
     private scheduleAllSessionNotifications = async () => {
         if (!this.scheduling) {
             this.scheduling = true;
-            const promises: Array<Promise<void>> = [];
+            const serverCredentials = await getAllServerCredentials();
+            const promises: Array<Promise<{error: unknown} | {error?: undefined}>> = [];
+            for (const {serverUrl} of serverCredentials) {
+                promises.push(scheduleSessionNotification(serverUrl));
+            }
+
             await Promise.all(promises);
             this.scheduling = false;
         }
@@ -105,6 +119,7 @@ class SessionManager {
         WebsocketManager.invalidateClient(serverUrl);
 
         if (removeServer) {
+            await removePushDisabledInServerAcknowledged(urlSafeBase64Encode(serverUrl));
             await DatabaseManager.destroyServerDatabase(serverUrl);
         } else {
             await DatabaseManager.deleteServerDatabase(serverUrl);
@@ -129,41 +144,20 @@ class SessionManager {
         this.previousAppState = appState;
         switch (appState) {
             case 'active':
-                this.syncServerData();
-                this.syncMultiTeam();
                 setTimeout(this.cancelAllSessionNotifications, 750);
                 break;
-            case 'background':
             case 'inactive':
                 this.scheduleAllSessionNotifications();
                 break;
         }
     };
 
-    private syncServerData = async () => {
-        try {
-            await syncServerData();
-        } catch (error) {
-            // do nothing
-        }
-    };
-
-    private syncMultiTeam = async () => {
-        try {
-            const credentials = await getAllServerCredentials();
-
-            if (credentials?.length > 0) {
-                await syncMultiTeam(credentials[0].token);
-            }
-        } catch (error) {
-            // do nothing
-        }
-    };
-
     private onLogout = async ({serverUrl, removeServer}: LogoutCallbackArg) => {
-        if (this.terminatingSessionUrl === serverUrl) {
+        if (this.terminatingSessionUrl.has(serverUrl)) {
             return;
         }
+        this.terminatingSessionUrl.add(serverUrl);
+
         const activeServerUrl = await DatabaseManager.getActiveServerUrl();
         const activeServerDisplayName = await DatabaseManager.getActiveServerDisplayName();
         await this.terminateSession(serverUrl, removeServer);
@@ -188,10 +182,11 @@ class SessionManager {
 
             relaunchApp({launchType, serverUrl, displayName});
         }
+        this.terminatingSessionUrl.delete(serverUrl);
     };
 
     private onSessionExpired = async (serverUrl: string) => {
-        this.terminatingSessionUrl = serverUrl;
+        this.terminatingSessionUrl.add(serverUrl);
         await logout(serverUrl, false, false, true);
         await this.terminateSession(serverUrl, false);
 
@@ -204,7 +199,7 @@ class SessionManager {
         } else {
             EphemeralStore.theme = undefined;
         }
-        this.terminatingSessionUrl = undefined;
+        this.terminatingSessionUrl.delete(serverUrl);
     };
 }
 

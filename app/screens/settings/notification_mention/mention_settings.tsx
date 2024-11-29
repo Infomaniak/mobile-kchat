@@ -5,7 +5,7 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Text} from 'react-native';
 
-// import SettingOption from '@app/components/settings/option';
+// import SettingOption from '@components/settings/option';
 // import SettingSeparator from '@components/settings/separator';
 // import ReplySettings from '@screens/settings/notification_mention/reply_settings';
 

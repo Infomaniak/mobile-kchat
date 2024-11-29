@@ -44,6 +44,7 @@ import type ChannelModel from '@typings/database/models/servers/channel';
 import type {IntlShape} from 'react-intl';
 
 export type MyChannelsRequest = {
+    teamId?: string;
     categories?: CategoryWithChannels[];
     channels?: Channel[];
     memberships?: ChannelMembership[];
@@ -450,7 +451,7 @@ export async function fetchMyChannelsForTeam(serverUrl: string, teamId: string, 
             setTeamLoading(serverUrl, false);
         }
 
-        return {channels, memberships, categories};
+        return {channels, memberships, categories, teamId};
     } catch (error) {
         logDebug('error on fetchMyChannelsForTeam', getFullErrorMessage(error));
         if (!fetchOnly) {
@@ -817,7 +818,7 @@ export async function createDirectChannel(serverUrl: string, userId: string, dis
             const config = await getConfig(database);
             const teammateDisplayNameSetting = getTeammateNameDisplaySetting(preferences || [], config.LockTeammateNameDisplay, config.TeammateNameDisplay, license);
             const {directChannels, users} = await fetchMissingDirectChannelsInfo(serverUrl, [created], currentUser.locale, teammateDisplayNameSetting, currentUser.id, true);
-            created.display_name = directChannels?.[0].display_name || created.display_name;
+            created.display_name = (directChannels?.length && directChannels?.[0].display_name) || created.display_name;
             if (users?.length) {
                 profiles.push(...users);
             }
@@ -1269,7 +1270,7 @@ export const handleKickFromChannel = async (serverUrl: string, channelId: string
 
         const currentChannelId = await getCurrentChannelId(database);
         if (currentChannelId !== channelId) {
-            return;
+            return {};
         }
 
         const currentServer = await getActiveServer();
@@ -1299,8 +1300,10 @@ export const handleKickFromChannel = async (serverUrl: string, channelId: string
         } else {
             await setCurrentChannelId(operator, '');
         }
+        return {};
     } catch (error) {
         logDebug('cannot kick user from channel', error);
+        return {error};
     }
 };
 

@@ -58,7 +58,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     badge: {
         left: 18,
         top: -5,
-        borderColor: theme.centerChannelBg,
     },
     button: {
         borderRadius: 8,
@@ -365,9 +364,9 @@ const ServerItem = ({
                         <View style={serverStyle}>
                             {!switching &&
                             <ServerIcon
-                                badgeBackgroundColor={theme.mentionColor}
-                                badgeBorderColor={theme.mentionBg}
-                                badgeColor={theme.mentionBg}
+                                badgeBackgroundColor={theme.buttonBg}
+                                badgeBorderColor={theme.centerChannelBg}
+                                badgeColor={theme.buttonColor}
                                 badgeStyle={styles.badge}
                                 iconColor={changeOpacity(theme.centerChannelColor, 0.56)}
                                 hasUnreads={badge.isUnread}

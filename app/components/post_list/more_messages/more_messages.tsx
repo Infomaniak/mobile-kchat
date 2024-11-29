@@ -7,11 +7,13 @@ import Animated, {interpolate, useAnimatedStyle, useSharedValue, withSpring} fro
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {resetMessageCount} from '@actions/local/channel';
+import {useCallsAdjustment} from '@calls/hooks';
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {Events} from '@constants';
 import {useServerUrl} from '@context/server';
+import {useIsTablet} from '@hooks/device';
 import useDidUpdate from '@hooks/did_update';
 import EphemeralStore from '@store/ephemeral_store';
 import {makeStyleSheetFromTheme, hexToHue, changeOpacity} from '@utils/theme';
@@ -115,6 +117,7 @@ const MoreMessages = ({
 }: Props) => {
     const serverUrl = useServerUrl();
     const insets = useSafeAreaInsets();
+    const isTablet = useIsTablet();
     const pressed = useRef(false);
     const resetting = useRef(false);
     const initialScroll = useRef(false);
@@ -123,9 +126,10 @@ const MoreMessages = ({
     const underlayColor = useMemo(() => `hsl(${hexToHue(theme.buttonBg)}, 50%, 38%)`, [theme]);
     const styles = getStyleSheet(theme);
     const top = useSharedValue(0);
+    const callsAdjustment = useCallsAdjustment(serverUrl, channelId);
 
     // The final top:
-    const adjustedTop = insets.top;
+    const adjustedTop = (isTablet ? 0 : insets.top) + callsAdjustment;
 
     const BARS_FACTOR = Math.abs((1) / (HIDDEN_TOP - SHOWN_TOP));
 

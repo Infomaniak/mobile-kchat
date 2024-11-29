@@ -1,6 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import {blendColors, makeStyleSheetFromTheme, changeOpacity} from '@app/utils/theme';
+import {blendColors, makeStyleSheetFromTheme, changeOpacity} from '@utils/theme';
 
 export const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
     previewThreadContainer: {

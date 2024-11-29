@@ -4,9 +4,9 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {switchMap} from '@nozbe/watermelondb/utils/rx';
 import {of as of$} from 'rxjs';
 
-import {General} from '@app/constants';
-import {observeChannel} from '@app/queries/servers/channel';
-import {observeConfigValue} from '@app/queries/servers/system';
+import {General} from '@constants';
+import {observeChannel} from '@queries/servers/channel';
+import {observeConfigValue} from '@queries/servers/system';
 import {observeUser} from '@queries/servers/user';
 
 import PreviewMessage from './preview_message';

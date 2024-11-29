@@ -6,6 +6,7 @@ import React, {type ReactElement, useCallback, useEffect, useMemo, useRef, useSt
 import {DeviceEventEmitter, type ListRenderItemInfo, Platform, type StyleProp, StyleSheet, type ViewStyle, type NativeSyntheticEvent, type NativeScrollEvent} from 'react-native';
 import Animated, {type AnimatedStyle} from 'react-native-reanimated';
 
+import {removePost} from '@actions/local/post';
 import {fetchPosts, fetchPostThread} from '@actions/remote/post';
 import CombinedUserActivity from '@components/post_list/combined_user_activity';
 import DateSeparator from '@components/post_list/date_separator';
@@ -14,6 +15,7 @@ import NewMessagesLine from '@components/post_list/new_message_line';
 import Post from '@components/post_list/post';
 import ThreadOverview from '@components/post_list/thread_overview';
 import {Events, Screens} from '@constants';
+import {PostTypes} from '@constants/post';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import EphemeralStore from '@store/ephemeral_store';
@@ -182,6 +184,10 @@ const PostList = ({
             }
             await fetchPostThread(serverUrl, rootId, options);
         }
+        const removalPromises = posts.
+            filter((post) => post.type === PostTypes.EPHEMERAL).
+            map((post) => removePost(serverUrl, post));
+        await Promise.all(removalPromises);
         setRefreshing(false);
         setLimit(EphemeralStore.serverHasLimit(serverUrl));
     }, [channelId, location, posts, rootId]);

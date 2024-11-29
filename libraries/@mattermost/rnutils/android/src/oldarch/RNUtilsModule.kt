@@ -39,6 +39,21 @@ class RNUtilsModule(context: ReactApplicationContext) :
         return implementation.isRunningInSplitView()
     }
 
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun getWindowDimensions(): WritableMap? {
+        return implementation.getWindowDimensions()
+    }
+
+    @ReactMethod
+    fun setHasRegisteredLoad() {
+        implementation.setHasRegisteredLoad()
+    }
+
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun getHasRegisteredLoad(): WritableMap {
+        return implementation.getHasRegisteredLoad()
+    }
+
     @ReactMethod
     fun unlockOrientation() {
         implementation.unlockOrientation()
@@ -82,5 +97,15 @@ class RNUtilsModule(context: ReactApplicationContext) :
     @ReactMethod
     fun removeServerNotifications(serverUrl: String?) {
         implementation.removeServerNotifications(serverUrl)
+    }
+
+    @ReactMethod
+    fun setSoftKeyboardToAdjustResize() {
+        implementation.setSoftKeyboardToAdjustResize()
+    }
+
+    @ReactMethod
+    fun setSoftKeyboardToAdjustNothing() {
+        implementation.setSoftKeyboardToAdjustNothing()
     }
 }

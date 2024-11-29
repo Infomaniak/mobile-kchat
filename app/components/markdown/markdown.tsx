@@ -10,12 +10,14 @@ import {Dimensions, type GestureResponderEvent, Platform, type StyleProp, StyleS
 import CompassIcon from '@components/compass_icon';
 import Emoji from '@components/emoji';
 import FormattedText from '@components/formatted_text';
+import {logError} from '@utils/log';
 import {computeTextStyle} from '@utils/markdown';
 import {blendColors, changeOpacity, concatStyles, makeStyleSheetFromTheme} from '@utils/theme';
+import {typography} from '@utils/typography';
 import {getScheme} from '@utils/url';
 
 import AtMention from './at_mention';
-import ChannelMention, {type ChannelMentions} from './channel_mention';
+import ChannelMention from './channel_mention';
 import Hashtag from './hashtag';
 import MarkdownBlockQuote from './markdown_block_quote';
 import MarkdownCodeBlock from './markdown_code_block';
@@ -31,6 +33,7 @@ import MarkdownTableImage from './markdown_table_image';
 import MarkdownTableRow, {type MarkdownTableRowProps} from './markdown_table_row';
 import {addListItemIndices, combineTextNodes, highlightMentions, highlightWithoutNotification, highlightSearchPatterns, parseTaskLists, pullOutImages} from './transform';
 
+import type {ChannelMentions} from './channel_mention/channel_mention';
 import type {
     MarkdownAtMentionRenderer, MarkdownBaseRenderer, MarkdownBlockStyles, MarkdownChannelMentionRenderer,
     MarkdownEmojiRenderer, MarkdownImageRenderer, MarkdownLatexRenderer, MarkdownTextStyles, SearchPattern, UserMentionKey, HighlightWithoutNotificationKey,
@@ -97,6 +100,10 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         editedIndicatorText: {
             color: editedColor,
             opacity: editedOpacity,
+        },
+        errorMessage: {
+            color: theme.errorTextColor,
+            ...typography('Body', 100),
         },
         maxNodesWarning: {
             color: theme.errorTextColor,
@@ -357,11 +364,15 @@ const Markdown = ({
             return null;
         }
 
+        const isInsideLink = context.indexOf('link') !== -1;
+
+        const disableInteraction = (disableGallery ?? Boolean(!location)) || isInsideLink;
+
         if (context.indexOf('table') !== -1) {
             // We have enough problems rendering images as is, so just render a link inside of a table
             return (
                 <MarkdownTableImage
-                    disabled={disableGallery ?? Boolean(!location)}
+                    disabled={disableInteraction}
                     imagesMetadata={imagesMetadata}
                     location={location}
                     postId={postId!}
@@ -372,7 +383,7 @@ const Markdown = ({
 
         return (
             <MarkdownImage
-                disabled={disableGallery ?? Boolean(!location)}
+                disabled={disableInteraction}
                 errorTextStyle={[computeTextStyle(textStyles, baseTextStyle, context), textStyles.error]}
                 layoutHeight={layoutHeight}
                 layoutWidth={layoutWidth}
@@ -407,6 +418,7 @@ const Markdown = ({
         if (isUnsafeLinksPost) {
             return renderText({context: [], literal: href});
         }
+
         return (
             <MarkdownLink
                 href={href}
@@ -536,7 +548,7 @@ const Markdown = ({
                 style={styles}
                 selectable={selectable}
             >
-                {transformedText}
+                {literal}
             </Text>
         );
     };
@@ -617,35 +629,75 @@ const Markdown = ({
     };
 
     const parser = useRef(new Parser({urlFilter, minimumHashtagLength})).current;
-    const renderer = useMemo(createRenderer, [theme, textStyles, imagesMetadata]);
-    let ast = parser.parse(value.toString());
+    const renderer = useMemo(createRenderer, [theme, textStyles]);
 
-    ast = combineTextNodes(ast);
-    ast = addListItemIndices(ast);
-    ast = pullOutImages(ast);
-    ast = parseTaskLists(ast);
-    if (mentionKeys) {
-        ast = highlightMentions(ast, mentionKeys);
-    }
-    if (highlightKeys) {
-        ast = highlightWithoutNotification(ast, highlightKeys);
-    }
-    if (searchPatterns) {
-        ast = highlightSearchPatterns(ast, searchPatterns);
-    }
-    if (isEdited) {
-        const editIndicatorNode = new Node('edited_indicator');
-        if (ast.lastChild && ['heading', 'paragraph'].includes(ast.lastChild.type)) {
-            ast.appendChild(editIndicatorNode);
-        } else {
-            const node = new Node('paragraph');
-            node.appendChild(editIndicatorNode);
+    const errorLogged = useRef(false);
 
-            ast.appendChild(node);
+    let ast;
+    try {
+        ast = parser.parse(value.toString());
+
+        ast = combineTextNodes(ast);
+        ast = addListItemIndices(ast);
+        ast = pullOutImages(ast);
+        ast = parseTaskLists(ast);
+        if (mentionKeys) {
+            ast = highlightMentions(ast, mentionKeys);
         }
+        if (highlightKeys) {
+            ast = highlightWithoutNotification(ast, highlightKeys);
+        }
+        if (searchPatterns) {
+            ast = highlightSearchPatterns(ast, searchPatterns);
+        }
+
+        if (isEdited) {
+            const editIndicatorNode = new Node('edited_indicator');
+            if (ast.lastChild && ['heading', 'paragraph'].includes(ast.lastChild.type)) {
+                ast.appendChild(editIndicatorNode);
+            } else {
+                const node = new Node('paragraph');
+                node.appendChild(editIndicatorNode);
+
+                ast.appendChild(node);
+            }
+        }
+    } catch (e) {
+        if (!errorLogged.current) {
+            logError('An error occurred while parsing Markdown', e);
+
+            errorLogged.current = true;
+        }
+
+        return (
+            <FormattedText
+                id='markdown.parse_error'
+                defaultMessage='An error occurred while parsing this text'
+                style={style.errorMessage}
+            />
+        );
     }
 
-    return renderer.render(ast) as JSX.Element;
+    let output;
+    try {
+        output = renderer.render(ast);
+    } catch (e) {
+        if (!errorLogged.current) {
+            logError('An error occurred while rendering Markdown', e);
+
+            errorLogged.current = true;
+        }
+
+        return (
+            <FormattedText
+                id='markdown.render_error'
+                defaultMessage='An error occurred while rendering this text'
+                style={style.errorMessage}
+            />
+        );
+    }
+
+    return output;
 };
 
 export default Markdown;

@@ -4,13 +4,14 @@
 import {useHardwareKeyboardEvents} from '@mattermost/hardware-keyboard';
 import {createBottomTabNavigator, type BottomTabBarProps} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
-import React, {useEffect} from 'react';
+import React, {useCallback, useEffect, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {DeviceEventEmitter, Platform} from 'react-native';
 import {enableFreeze, enableScreens} from 'react-native-screens';
 
 import {autoUpdateTimezone} from '@actions/remote/user';
-import {Events, Screens} from '@constants';
+import ServerVersion from '@components/server_version';
+import {Events, Launch, Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {useAppState} from '@hooks/device';
 import {getAllServers} from '@queries/app/servers';
@@ -56,21 +57,22 @@ const updateTimezoneIfNeeded = async () => {
     }
 };
 
-export default function HomeScreen(props: HomeProps) {
+export function HomeScreen(props: HomeProps) {
     const theme = useTheme();
     const intl = useIntl();
     const appState = useAppState();
 
-    const handleFindChannels = () => {
+    const handleFindChannels = useCallback(() => {
         if (!NavigationStore.getScreensInStack().includes(Screens.FIND_CHANNELS)) {
             findChannels(
                 intl.formatMessage({id: 'find_channels.title', defaultMessage: 'Find Channels'}),
                 theme,
             );
         }
-    };
+    }, [intl, theme]);
 
-    useHardwareKeyboardEvents({onFindChannels: handleFindChannels});
+    const events = useMemo(() => ({onFindChannels: handleFindChannels}), [handleFindChannels]);
+    useHardwareKeyboardEvents(events);
 
     useEffect(() => {
         const listener = DeviceEventEmitter.addListener(Events.NOTIFICATION_ERROR, (value: 'Team' | 'Channel' | 'Post' | 'Connection') => {
@@ -80,7 +82,7 @@ export default function HomeScreen(props: HomeProps) {
         return () => {
             listener.remove();
         };
-    }, [intl.locale]);
+    }, [intl]);
 
     useEffect(() => {
         const leaveTeamListener = DeviceEventEmitter.addListener(Events.LEAVE_TEAM, (displayName: string) => {
@@ -107,7 +109,7 @@ export default function HomeScreen(props: HomeProps) {
             archivedChannelListener.remove();
             crtToggledListener.remove();
         };
-    }, [intl.locale]);
+    }, [intl]);
 
     useEffect(() => {
         if (appState === 'active') {
@@ -116,7 +118,7 @@ export default function HomeScreen(props: HomeProps) {
     }, [appState]);
 
     useEffect(() => {
-        if (props.launchType === 'deeplink') {
+        if (props.launchType === Launch.DeepLink) {
             if (props.launchError) {
                 alertInvalidDeepLink(intl);
                 return;
@@ -124,7 +126,7 @@ export default function HomeScreen(props: HomeProps) {
 
             const deepLink = props.extra as DeepLinkWithData;
             if (deepLink?.url) {
-                handleDeepLink(deepLink.url).then((result) => {
+                handleDeepLink(deepLink.url, intl, props.componentId, true).then((result) => {
                     if (result.error) {
                         alertInvalidDeepLink(intl);
                     }
@@ -188,3 +190,5 @@ export default function HomeScreen(props: HomeProps) {
         </>
     );
 }
+
+export default HomeScreen;

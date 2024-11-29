@@ -35,6 +35,7 @@ const draft: Draft = {
     channel_id: channel.id,
     message: 'test',
     root_id: '',
+    update_at: Date.now(),
 } as Draft;
 
 beforeEach(async () => {
@@ -69,7 +70,7 @@ describe('updateDraftFile', () => {
     it('update draft file', async () => {
         await operator.handleDraft({drafts: [{...draft, files: [{...fileInfo, localPath: 'path0'}]}], prepareRecordsOnly: false});
 
-        const {draft: draftModel, error} = await updateDraftFile(serverUrl, channelId, '', fileInfo, false);
+        const {draft: draftModel, error} = await updateDraftFile(serverUrl, channelId, '', fileInfo);
         expect(error).toBeUndefined();
         expect(draftModel).toBeDefined();
         expect(draftModel?.files?.length).toBe(1);
@@ -100,13 +101,13 @@ describe('removeDraftFile', () => {
     it('remove draft file', async () => {
         await operator.handleDraft({drafts: [{...draft, files: [fileInfo]}], prepareRecordsOnly: false});
 
-        const {draft: draftModel, error} = await removeDraftFile(serverUrl, channelId, '', 'clientid', false);
+        const {draft: draftModel, error} = await removeDraftFile(serverUrl, channelId, '', 'clientid');
         expect(error).toBeUndefined();
         expect(draftModel).toBeDefined();
     });
 
     it('remove draft file, no message', async () => {
-        await operator.handleDraft({drafts: [{channel_id: channel.id, files: [fileInfo], root_id: ''}], prepareRecordsOnly: false});
+        await operator.handleDraft({drafts: [{channel_id: channel.id, files: [fileInfo], root_id: '', update_at: Date.now()}], prepareRecordsOnly: false});
 
         const {draft: draftModel, error} = await removeDraftFile(serverUrl, channelId, '', 'clientid', false);
         expect(error).toBeUndefined();
@@ -136,7 +137,7 @@ describe('updateDraftMessage', () => {
     it('update draft message', async () => {
         await operator.handleDraft({drafts: [{...draft, files: [fileInfo]}], prepareRecordsOnly: false});
 
-        const result = await updateDraftMessage(serverUrl, channelId, '', 'newmessage', false) as {draft: DraftModel; error: unknown};
+        const result = await updateDraftMessage(serverUrl, channelId, '', 'newmessage') as {draft: DraftModel; error: unknown};
         expect(result.error).toBeUndefined();
         expect(result.draft).toBeDefined();
         expect(result.draft.message).toBe('newmessage');
@@ -152,7 +153,7 @@ describe('updateDraftMessage', () => {
     });
 
     it('update draft message, no file', async () => {
-        await operator.handleDraft({drafts: [{channel_id: channel.id, files: [], root_id: ''}], prepareRecordsOnly: false});
+        await operator.handleDraft({drafts: [{channel_id: channel.id, files: [], root_id: '', update_at: Date.now()}], prepareRecordsOnly: false});
 
         const result = await updateDraftMessage(serverUrl, channelId, '', 'newmessage', false) as {draft: DraftModel; error: unknown};
         expect(result.error).toBeUndefined();
@@ -177,7 +178,7 @@ describe('addFilesToDraft', () => {
     it('add draft files', async () => {
         await operator.handleDraft({drafts: [draft], prepareRecordsOnly: false});
 
-        const result = await addFilesToDraft(serverUrl, channelId, '', [fileInfo], false) as {draft: DraftModel; error: unknown};
+        const result = await addFilesToDraft(serverUrl, channelId, '', [fileInfo]) as {draft: DraftModel; error: unknown};
         expect(result.error).toBeUndefined();
         expect(result.draft).toBeDefined();
         expect(result?.draft.files.length).toBe(1);
@@ -200,7 +201,15 @@ describe('removeDraft', () => {
     it('remove draft', async () => {
         await operator.handleDraft({drafts: [draft], prepareRecordsOnly: false});
 
-        const result = await removeDraft(serverUrl, channelId, '');
+        const result = await removeDraft(serverUrl, channelId);
+        expect(result.error).toBeUndefined();
+        expect(result.draft).toBeDefined();
+    });
+
+    it('remove draft with root id', async () => {
+        await operator.handleDraft({drafts: [{...draft, root_id: 'postid'}], prepareRecordsOnly: false});
+
+        const result = await removeDraft(serverUrl, channelId, 'postid');
         expect(result.error).toBeUndefined();
         expect(result.draft).toBeDefined();
     });

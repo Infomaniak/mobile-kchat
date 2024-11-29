@@ -4,8 +4,8 @@
 import React, {type FC} from 'react';
 import {ScrollView, Text, View} from 'react-native';
 
-import FormattedText from '@app/components/formatted_text';
-import {Screens} from '@app/constants';
+import FormattedText from '@components/formatted_text';
+import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import BottomSheet from '@screens/bottom_sheet';
 

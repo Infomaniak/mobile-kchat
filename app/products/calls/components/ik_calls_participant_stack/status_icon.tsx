@@ -4,11 +4,11 @@
 import React, {useMemo} from 'react';
 import {type StyleProp, View, type ViewStyle} from 'react-native';
 
-import CompassIcon from '@app/components/compass_icon';
+import CompassIcon from '@components/compass_icon';
 import {useTheme} from '@context/theme';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
-import type ConferenceParticipantModel from '@app/database/models/server/conference_participant';
+import type ConferenceParticipantModel from '@database/models/server/conference_participant';
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {

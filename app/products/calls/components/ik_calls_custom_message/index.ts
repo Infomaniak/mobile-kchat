@@ -5,8 +5,8 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
-import {observeChannel} from '@app/queries/servers/channel';
-import {isTypeDMorGM} from '@app/utils/channel';
+import {observeChannel} from '@queries/servers/channel';
+import {isTypeDMorGM} from '@utils/channel';
 import {IkCallsCustomMessage} from '@calls/components/ik_calls_custom_message/ik_call_custom_message';
 import {Preferences} from '@constants';
 import {getDisplayNamePreferenceAsBool} from '@helpers/api/preference';

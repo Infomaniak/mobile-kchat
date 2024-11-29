@@ -7,8 +7,8 @@ import Permissions, {openSettings} from 'react-native-permissions';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {userTyping} from '@actions/websocket/users';
-import GuestBanner from '@app/components/guest_banner';
-import {logInfo} from '@app/utils/log';
+import GuestBanner from '@components/guest_banner';
+import {logInfo} from '@utils/log';
 import QuickActions from '@components/post_draft/quick_actions';
 import PostPriorityLabel from '@components/post_priority/post_priority_label';
 import {useTheme} from '@context/theme';

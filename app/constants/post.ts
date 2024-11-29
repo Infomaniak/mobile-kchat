@@ -84,4 +84,5 @@ export default {
         PostTypes.ADD_TO_TEAM,
         PostTypes.REMOVE_FROM_TEAM,
     ],
+    POST_TIME_TO_FAIL,
 };

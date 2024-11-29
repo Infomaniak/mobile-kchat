@@ -4,9 +4,9 @@
 import React from 'react';
 
 import {fetchAndSwitchToThread, summarizeThread} from '@actions/remote/thread';
-import {useServerUrl} from '@app/context/server';
-import {useTheme} from '@app/context/theme';
-import {dismissBottomSheet} from '@app/screens/navigation';
+import {useServerUrl} from '@context/server';
+import {useTheme} from '@context/theme';
+import {dismissBottomSheet} from '@screens/navigation';
 import {BaseOption} from '@components/common_post_options';
 import {t} from '@i18n';
 

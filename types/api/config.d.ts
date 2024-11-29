@@ -149,6 +149,7 @@ interface ClientConfig {
     MaxNotificationsPerChannel: string;
     MaxPostSize: string;
     MinimumHashtagLength: string;
+    MobileExternalBrowser: string;
     OpenIdButtonColor: string;
     OpenIdButtonText: string;
     PasswordEnableForgotLink: string;
@@ -189,6 +190,7 @@ interface ClientConfig {
     SiteURL: string;
     SupportEmail: string;
     TeammateNameDisplay: string;
+    TelemetryId: string;
     TermsOfServiceLink: string;
     TimeBetweenUserTypingUpdatesMilliseconds: string;
     Version: string;

@@ -6,8 +6,8 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {TouchableOpacity, View} from 'react-native';
 import AudioRecorderPlayer, {AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption, AudioEncoderAndroidType, AudioSourceAndroidType, type AudioSet} from 'react-native-audio-recorder-player';
 
-import {useAudioPlayerContext} from '@app/context/audio_player';
-import {mmssss} from '@app/utils/datetime';
+import {useAudioPlayerContext} from '@context/audio_player';
+import {mmssss} from '@utils/datetime';
 import CompassIcon from '@components/compass_icon';
 import {MIC_SIZE} from '@constants/view';
 import {useTheme} from '@context/theme';

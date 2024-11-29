@@ -11,7 +11,8 @@ import {executeCommand, handleGotoLocation} from '@actions/remote/command';
 import {createPost} from '@actions/remote/post';
 import {handleReactionToLatestPost} from '@actions/remote/reactions';
 import {setStatus} from '@actions/remote/user';
-import {deleteDeviceFile} from '@app/utils/file';
+import {deleteDeviceFile} from '@utils/file';
+import {handleCallsSlashCommand} from '@calls/actions/calls';
 import {Events, Screens} from '@constants';
 import {PostPriorityType, PostTypes} from '@constants/post';
 import {NOTIFY_ALL_MEMBERS} from '@constants/post_draft';
@@ -30,6 +31,8 @@ import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji
 type Props = {
     testID?: string;
     channelId: string;
+    channelType?: ChannelType;
+    channelName?: string;
     rootId: string;
     canShowPostPriority?: boolean;
     setIsFocused: (isFocused: boolean) => void;
@@ -67,6 +70,8 @@ export const INITIAL_PRIORITY = {
 export default function SendHandler({
     testID,
     channelId,
+    channelType,
+    channelName,
     currentUserId,
     enableConfirmNotificationsToChannel,
     files,
@@ -86,6 +91,8 @@ export default function SendHandler({
     updateCursorPosition,
     updatePostInputTop,
     setIsFocused,
+    persistentNotificationInterval,
+    persistentNotificationMaxRecipients,
     postPriority,
 }: Props) {
     const intl = useIntl();
@@ -256,6 +263,8 @@ export default function SendHandler({
         <DraftInput
             testID={testID}
             channelId={channelId}
+            channelType={channelType}
+            channelName={channelName}
             currentUserId={currentUserId}
             rootId={rootId}
             canShowPostPriority={canShowPostPriority}
@@ -272,8 +281,9 @@ export default function SendHandler({
             updatePostInputTop={updatePostInputTop}
             postPriority={postPriority}
             updatePostPriority={handlePostPriority}
+            persistentNotificationInterval={persistentNotificationInterval}
+            persistentNotificationMaxRecipients={persistentNotificationMaxRecipients}
             setIsFocused={setIsFocused}
-            serverUrl={serverUrl}
         />
     );
 }

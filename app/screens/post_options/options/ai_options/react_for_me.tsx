@@ -4,8 +4,8 @@
 import React from 'react';
 
 import {reactForMe} from '@actions/remote/thread';
-import {useServerUrl} from '@app/context/server';
-import {dismissBottomSheet} from '@app/screens/navigation';
+import {useServerUrl} from '@context/server';
+import {dismissBottomSheet} from '@screens/navigation';
 import {BaseOption} from '@components/common_post_options';
 import {useTheme} from '@context/theme';
 import {t} from '@i18n';

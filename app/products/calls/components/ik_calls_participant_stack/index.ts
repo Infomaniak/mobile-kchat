@@ -3,7 +3,7 @@
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 
-import {observeConferenceParticipantCount, observeConferenceParticipants} from '@app/queries/servers/conference';
+import {observeConferenceParticipantCount, observeConferenceParticipants} from '@queries/servers/conference';
 import {IkCallsParticipantStack} from '@calls/components/ik_calls_participant_stack/stack';
 
 import type {WithDatabaseArgs} from '@typings/database/database';

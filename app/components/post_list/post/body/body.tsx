@@ -4,8 +4,8 @@
 import React, {useCallback, useState} from 'react';
 import {type LayoutChangeEvent, type StyleProp, View, type ViewStyle} from 'react-native';
 
-import RemotePlayback from '@app/components/files/voice_recording_file/remote_playback';
-import {PostTypes} from '@app/constants/post';
+import RemotePlayback from '@components/files/voice_recording_file/remote_playback';
+import {PostTypes} from '@constants/post';
 import Files from '@components/files';
 import FormattedText from '@components/formatted_text';
 import JumboEmoji from '@components/jumbo_emoji';

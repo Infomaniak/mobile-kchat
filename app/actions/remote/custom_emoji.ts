@@ -9,7 +9,6 @@ import NetworkManager from '@managers/network_manager';
 import {queryCustomEmojisByName} from '@queries/servers/custom_emoji';
 import {getFullErrorMessage} from '@utils/errors';
 import {logDebug} from '@utils/log';
-import {allSettled} from '@utils/promise';
 
 export const fetchCustomEmojis = async (serverUrl: string, page = 0, perPage = General.PAGE_SIZE_DEFAULT, sort = Emoji.SORT_BY_NAME) => {
     try {
@@ -54,7 +53,8 @@ export const searchCustomEmojis = async (serverUrl: string, term: string) => {
 };
 
 const names = new Set<string>();
-const debouncedFetchEmojiByNames = debounce(async (serverUrl: string) => {
+
+export const fetchEmojisByName = async (serverUrl: string) => {
     try {
         const client = NetworkManager.getClient(serverUrl);
         const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
@@ -63,7 +63,7 @@ const debouncedFetchEmojiByNames = debounce(async (serverUrl: string) => {
         for (const name of names) {
             promises.push(client.getCustomEmojiByName(name));
         }
-        const emojisResult = await allSettled(promises);
+        const emojisResult = await Promise.allSettled(promises);
         const emojis = emojisResult.reduce<CustomEmoji[]>((result, e) => {
             if (e.status === 'fulfilled') {
                 result.push(e.value);
@@ -78,11 +78,18 @@ const debouncedFetchEmojiByNames = debounce(async (serverUrl: string) => {
         logDebug('error on debouncedFetchEmojiByNames', getFullErrorMessage(error));
         return {error};
     }
-}, 200, {callback: () => {
+};
+
+const debouncedFetchEmojiByNames = debounce(fetchEmojisByName, 200, false, () => {
     names.clear();
-}});
+});
 
 export const fetchCustomEmojiInBatch = (serverUrl: string, emojiName: string) => {
     names.add(emojiName);
     return debouncedFetchEmojiByNames.apply(null, [serverUrl]);
+};
+
+export const fetchCustomEmojiInBatchForTest = (serverUrl: string, emojiName: string) => {
+    names.add(emojiName);
+    return fetchEmojisByName(serverUrl);
 };
