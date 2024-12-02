@@ -4,12 +4,12 @@
 import React, {useCallback, useState} from 'react';
 import {type LayoutChangeEvent, type StyleProp, View, type ViewStyle} from 'react-native';
 
-import RemotePlayback from '@components/files/voice_recording_file/remote_playback';
-import {PostTypes} from '@constants/post';
 import Files from '@components/files';
+import RemotePlayback from '@components/files/voice_recording_file/remote_playback';
 import FormattedText from '@components/formatted_text';
 import JumboEmoji from '@components/jumbo_emoji';
 import {Screens} from '@constants';
+import {PostTypes} from '@constants/post';
 import {THREAD} from '@constants/screens';
 import {isEdited as postEdited, isPostFailed} from '@utils/post';
 import {makeStyleSheetFromTheme} from '@utils/theme';

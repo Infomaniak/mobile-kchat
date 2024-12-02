@@ -82,7 +82,7 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
     const postId = post.props.add_channel_member.post_id;
     const noGroupsUsernames = post.props.add_channel_member.not_in_groups_usernames || [];
     const userIds = post.props.add_channel_member.not_in_channel_user_ids || post.props.add_channel_member.user_ids || [];
-    const usernames = post.props.add_channel_member.not_in_channel_usernames || post.props.add_channel_member?.usernames || [];
+    const usernames: string[] = post.props.add_channel_member.not_in_channel_usernames || post.props.add_channel_member?.usernames || [];
 
     if (!postId || !channelType) {
         return null;

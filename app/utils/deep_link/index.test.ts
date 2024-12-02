@@ -20,7 +20,7 @@ import {addNewServer} from '@utils/server';
 
 import {alertErrorWithFallback, errorBadChannel, errorUnkownUser} from '../draft';
 
-import {alertInvalidDeepLink, extractServerUrl, getLaunchPropsFromDeepLink, handleDeepLink} from '.';
+import {alertInvalidDeepLink, getLaunchPropsFromDeepLink, handleDeepLink} from '.';
 
 jest.mock('@actions/remote/user', () => ({
     fetchUsersByUsernames: jest.fn(),
@@ -81,19 +81,6 @@ jest.mock('@i18n', () => ({
     t: jest.fn((id) => id),
 }));
 
-describe('extractServerUrl', () => {
-    it('should extract the sanitized server url', () => {
-        expect(extractServerUrl('example.com:8080//path/to///login')).toEqual('example.com:8080/path/to');
-        expect(extractServerUrl('localhost:3000/signup')).toEqual('localhost:3000');
-        expect(extractServerUrl('192.168.0.1/admin_console')).toEqual('192.168.0.1');
-        expect(extractServerUrl('example.com/path//to/resource')).toEqual('example.com/path/to/resource');
-        expect(extractServerUrl('my.local.network/.../resource/admin_console')).toEqual('my.local.network/resource');
-        expect(extractServerUrl('my.local.network//ad-1/channels/%252f%252e.town-square')).toEqual(null);
-        expect(extractServerUrl('example.com:8080')).toEqual('example.com:8080');
-        expect(extractServerUrl('example.com:8080/')).toEqual('example.com:8080');
-    });
-});
-
 describe('handleDeepLink', () => {
     const intl = createIntl({locale: 'en', messages: {}});
 
@@ -136,7 +123,7 @@ describe('handleDeepLink', () => {
         (DatabaseManager.searchUrl as jest.Mock).mockReturnValueOnce(null);
 
         (NavigationStore.getVisibleScreen as jest.Mock).mockReturnValueOnce(Screens.SERVER);
-        const result = await handleDeepLink('https://currentserver.com/team/channels/town-square', undefined, undefined, true);
+        const result = await handleDeepLink('https://currentserver.com/team/channels/town-square', undefined, undefined);
         const spyOnUpdateProps = jest.spyOn(Navigation, 'updateProps');
         expect(spyOnUpdateProps).toHaveBeenCalledWith(Screens.SERVER, {serverUrl: 'currentserver.com'});
         expect(result).toEqual({error: false});
@@ -148,7 +135,7 @@ describe('handleDeepLink', () => {
 
         (NavigationStore.getVisibleScreen as jest.Mock).mockReturnValueOnce(Screens.LOGIN);
         (NavigationStore.getScreensInStack as jest.Mock).mockReturnValueOnce([Screens.SERVER, Screens.LOGIN]);
-        const result = await handleDeepLink('https://currentserver.com/team/channels/town-square', undefined, undefined, true);
+        const result = await handleDeepLink('https://currentserver.com/team/channels/town-square', undefined, undefined);
         expect(addNewServer).not.toHaveBeenCalled();
         expect(result).toEqual({error: false});
     });

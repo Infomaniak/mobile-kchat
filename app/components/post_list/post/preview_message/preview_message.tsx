@@ -5,10 +5,10 @@ import {useIntl} from 'react-intl';
 import {Text, View, Alert, TouchableOpacity, type LayoutChangeEvent, useWindowDimensions, ScrollView} from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import ProfilePicture from '@components/post_list/post/profile_picture/profile_picture';
 import Files from '@components/files';
 import FormattedRelativeTime from '@components/formatted_relative_time';
 import Markdown from '@components/markdown';
+import ProfilePicture from '@components/post_list/post/profile_picture/profile_picture';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useShowMoreAnimatedStyle} from '@hooks/show_more';
@@ -66,13 +66,13 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
 
     const displayName = useMemo(() => {
         if (user) {
-            if (metadata.post?.props.from_webhook === 'true') {
+            if (metadata?.post?.props && metadata.post?.props.from_webhook === 'true') {
                 return metadata.post.props.override_username;
             }
             return displayUsername(user, undefined, 'full_name', true);
         }
         return '';
-    }, [user, metadata?.post?.props.from_webhook, metadata?.post?.props.override_username]);
+    }, [user, metadata?.post?.props]);
 
     const handlePress = async () => {
         const url = normalizeProtocol(postLink);

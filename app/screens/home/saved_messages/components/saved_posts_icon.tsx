@@ -3,8 +3,8 @@
 import React from 'react';
 import Svg, {Path, Circle} from 'react-native-svg';
 
-import {isDarkTheme} from '@utils/theme';
 import {useTheme} from '@context/theme';
+import {isDarkTheme} from '@utils/theme';
 
 export default function SavedPostsIcon() {
     const theme = useTheme();

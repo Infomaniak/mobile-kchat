@@ -6,12 +6,12 @@ import {useIntl} from 'react-intl';
 import {StyleSheet, TouchableOpacity, View, type StyleProp, type ViewStyle} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-import Loading from '@components/loading';
 import IkCallsParticipantStackIcon from '@calls/components/ik_calls_participant_stack/icon';
 import IkCallsParticipantStackIconOverflow from '@calls/components/ik_calls_participant_stack/icon_overflow';
 import IkCallsParticipantStackList from '@calls/components/ik_calls_participant_stack/list';
 import {useFetchParticipantUsers} from '@calls/components/ik_calls_participant_stack/list/list';
 import FormattedText from '@components/formatted_text';
+import Loading from '@components/loading';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';

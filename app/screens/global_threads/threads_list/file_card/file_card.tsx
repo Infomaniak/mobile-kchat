@@ -7,8 +7,8 @@ import {buildFilePreviewUrl, buildFileThumbnailUrl} from '@actions/remote/file';
 import FileIcon from '@components/files/file_icon';
 import ProgressiveImage from '@components/progressive_image';
 import {useServerUrl} from '@context/server';
-import {FileTypes} from '@utils/file/constants';
 import {getFileType, getFormattedFileSize} from '@utils/file';
+import {FileTypes} from '@utils/file/constants';
 
 import {getStyleSheet} from './styles';
 

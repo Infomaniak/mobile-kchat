@@ -435,7 +435,7 @@ export const setExtraSessionProps = async (serverUrl: string) => {
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const serverVersion = await getConfigValue(database, 'Version');
         const deviceToken = await getDeviceToken();
-        let pushKitToken: string | undefined;
+        let pushKitToken: string | null = null;
         if (Platform.OS === 'ios') {
             const pushKitTokenResult = await CallManagerModule.getToken();
             pushKitToken = pushKitTokenResult;

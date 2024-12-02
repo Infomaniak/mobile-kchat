@@ -10,7 +10,6 @@ import {DeviceEventEmitter, Platform} from 'react-native';
 import {enableFreeze, enableScreens} from 'react-native-screens';
 
 import {autoUpdateTimezone} from '@actions/remote/user';
-import ServerVersion from '@components/server_version';
 import {Events, Launch, Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {useAppState} from '@hooks/device';
@@ -126,7 +125,7 @@ export function HomeScreen(props: HomeProps) {
 
             const deepLink = props.extra as DeepLinkWithData;
             if (deepLink?.url) {
-                handleDeepLink(deepLink.url, intl, props.componentId, true).then((result) => {
+                handleDeepLink(deepLink.url, intl, props.componentId).then((result) => {
                     if (result.error) {
                         alertInvalidDeepLink(intl);
                     }

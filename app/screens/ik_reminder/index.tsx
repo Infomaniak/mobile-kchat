@@ -6,12 +6,12 @@ import React, {useMemo} from 'react';
 import {ScrollView} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-import {useTheme} from '@context/theme';
 import {BaseOption} from '@components/common_post_options';
 import FormattedText from '@components/formatted_text';
 import {ITEM_HEIGHT} from '@components/option_item';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
+import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import NetworkManager from '@managers/network_manager';

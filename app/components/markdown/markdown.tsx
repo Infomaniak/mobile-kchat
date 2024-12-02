@@ -548,7 +548,7 @@ const Markdown = ({
                 style={styles}
                 selectable={selectable}
             >
-                {literal}
+                {transformedText}
             </Text>
         );
     };

@@ -4,11 +4,11 @@
 import React from 'react';
 
 import {fetchAndSwitchToThread, summarizeThread} from '@actions/remote/thread';
+import {BaseOption} from '@components/common_post_options';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
-import {dismissBottomSheet} from '@screens/navigation';
-import {BaseOption} from '@components/common_post_options';
 import {t} from '@i18n';
+import {dismissBottomSheet} from '@screens/navigation';
 
 import IconThreadSummarization from '../../../../components/illustrations/icon_thread_summarization';
 

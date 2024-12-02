@@ -3,30 +3,33 @@
 
 import React from 'react';
 
-import {reactForMe} from '@actions/remote/thread';
-import {useServerUrl} from '@context/server';
-import {dismissBottomSheet} from '@screens/navigation';
 import {BaseOption} from '@components/common_post_options';
 import {useTheme} from '@context/theme';
 import {t} from '@i18n';
+import {dismissBottomSheet} from '@screens/navigation';
 
 import IconReactForMe from '../../../../components/illustrations/icon_react_for_me';
 
-import type PostModel from '@typings/database/models/servers/post';
+// import {reactForMe} from '@actions/remote/thread';
+
+// import {useServerUrl} from '@context/server';
+// import type PostModel from '@typings/database/models/servers/post';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
-    post: PostModel;
+
+    // post: PostModel;
     bottomSheetId: AvailableScreens;
 }
 
 const ReactForMe = (props: Props) => {
-    const {bottomSheetId, post} = props;
-    const serverUrl = useServerUrl();
+    const {bottomSheetId} = props;
+
+    // const serverUrl = useServerUrl();
     const theme = useTheme();
 
     const handleReactForMe = (async () => {
-        await reactForMe(serverUrl, post.id);
+        // await reactForMe(serverUrl, post.id);
         await dismissBottomSheet(bottomSheetId);
     });
 

@@ -3,8 +3,8 @@
 
 import {switchMap, combineLatest, Observable, of as of$} from 'rxjs';
 
-import {getUserIdFromChannelName} from '@utils/user';
 import {General} from '@constants';
+import {getUserIdFromChannelName} from '@utils/user';
 
 import type {ChannelModel} from '@database/models/server';
 

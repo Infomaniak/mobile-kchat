@@ -9,8 +9,8 @@ import {makeDirectChannel, switchToChannelByName} from '@actions/remote/channel'
 import {switchToConferenceByChannelId} from '@actions/remote/conference';
 import {showPermalink} from '@actions/remote/permalink';
 import {fetchUsersByUsernames} from '@actions/remote/user';
-import DeepLinkType from '@constants/deep_linking';
 import {DeepLink, Launch, Screens} from '@constants';
+import DeepLinkType from '@constants/deep_linking';
 import {getDefaultThemeByAppearance} from '@context/theme';
 import DatabaseManager from '@database/manager';
 import {DEFAULT_LOCALE, getTranslations, t} from '@i18n';

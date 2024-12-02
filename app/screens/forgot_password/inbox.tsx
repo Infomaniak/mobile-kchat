@@ -104,9 +104,6 @@ const Inbox = (props: SvgProps) => (
             x={71}
             y={91}
             maskUnits='userSpaceOnUse'
-            style={{
-                maskType: 'alpha',
-            }}
         >
             <Path
                 fill='#1C58D9'
@@ -142,9 +139,6 @@ const Inbox = (props: SvgProps) => (
             x={56}
             y={52}
             maskUnits='userSpaceOnUse'
-            style={{
-                maskType: 'alpha',
-            }}
         >
             <Path
                 fill='#fff'

@@ -8,13 +8,13 @@ import {StyleSheet, type ListRenderItemInfo} from 'react-native';
 import {of as of$} from 'rxjs';
 
 import {fetchUsersByIds} from '@actions/remote/user';
-import {useOpenUserProfile} from '@components/user_avatars_stack/users_list';
-import GestureResponsiveFlatList from '@components/user_avatars_stack/users_list/gesture_responsive_flat_list';
-import {useServerUrl} from '@context/server';
-import {useMountedRef} from '@hooks/utils';
 import IkCallsParticipantStackStatusIcon from '@calls/components/ik_calls_participant_stack/status_icon';
 import Loading from '@components/loading';
+import {useOpenUserProfile} from '@components/user_avatars_stack/users_list';
+import GestureResponsiveFlatList from '@components/user_avatars_stack/users_list/gesture_responsive_flat_list';
 import BaseUserItem from '@components/user_item';
+import {useServerUrl} from '@context/server';
+import {useMountedRef} from '@hooks/utils';
 
 import type ConferenceParticipantModel from '@database/models/server/conference_participant';
 

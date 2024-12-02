@@ -495,15 +495,3 @@ export const summarizeThread = async (serverUrl: string, postId: string, botUser
         return {error};
     }
 };
-
-export const reactForMe = async (serverUrl: string, postId: string) => {
-    try {
-        const client = NetworkManager.getClient(serverUrl);
-        const data = await client.doReaction(postId);
-        return {data};
-    } catch (error) {
-        logDebug('error on reactForMe', getFullErrorMessage(error));
-        forceLogoutIfNecessary(serverUrl, error);
-        return {error};
-    }
-};

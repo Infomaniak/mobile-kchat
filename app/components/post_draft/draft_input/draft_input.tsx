@@ -8,10 +8,10 @@ import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {userTyping} from '@actions/websocket/users';
 import GuestBanner from '@components/guest_banner';
-import {logInfo} from '@utils/log';
 import QuickActions from '@components/post_draft/quick_actions';
 import PostPriorityLabel from '@components/post_priority/post_priority_label';
 import {useTheme} from '@context/theme';
+import {logInfo} from '@utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import RecordAction from '../record_action';

@@ -107,6 +107,7 @@ export default schemaMigrations({
                 addColumns({
                     table: DRAFT,
                     columns: [
+                        {name: 'update_at', type: 'number'},
                         {name: 'metadata', type: 'string', isOptional: true},
                     ],
                 }),

@@ -6,11 +6,11 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {TouchableOpacity, View} from 'react-native';
 import AudioRecorderPlayer, {AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption, AudioEncoderAndroidType, AudioSourceAndroidType, type AudioSet} from 'react-native-audio-recorder-player';
 
-import {useAudioPlayerContext} from '@context/audio_player';
-import {mmssss} from '@utils/datetime';
 import CompassIcon from '@components/compass_icon';
 import {MIC_SIZE} from '@constants/view';
+import {useAudioPlayerContext} from '@context/audio_player';
 import {useTheme} from '@context/theme';
+import {mmssss} from '@utils/datetime';
 import {deleteDeviceFile, extractFileInfo} from '@utils/file';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
