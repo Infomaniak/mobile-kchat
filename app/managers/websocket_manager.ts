@@ -7,7 +7,6 @@ import BackgroundTimer from 'react-native-background-timer';
 import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged} from 'rxjs/operators';
 
-import {setCurrentUserStatus} from '@actions/local/user';
 import {fetchStatusByIds} from '@actions/remote/user';
 import {handleEvent, handleFirstConnect, handleReconnect} from '@actions/websocket';
 import WebSocketClient from '@client/websocket';
@@ -190,7 +189,6 @@ class WebsocketManager {
     private onWebsocketClose = async (serverUrl: string, connectFailCount: number) => {
         this.getConnectedSubject(serverUrl).next('not_connected');
         if (connectFailCount <= 1) { // First fail
-            await setCurrentUserStatus(serverUrl, General.OFFLINE);
             this.stopPeriodicStatusUpdates(serverUrl);
         }
     };
