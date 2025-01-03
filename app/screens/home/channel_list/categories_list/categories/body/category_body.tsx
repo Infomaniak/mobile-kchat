@@ -41,6 +41,12 @@ const CategoryBody = ({sortedChannels, unreadIds, unreadsOnTop, category, onChan
     }, [ids.length, unreadChannels.length]);
 
     const renderItem = useCallback(({item}: {item: ChannelModel}) => {
+        if (!item.displayName) {
+            return (
+                <></>
+            );
+        }
+
         return (
             <ChannelItem
                 channel={item}
@@ -52,7 +58,7 @@ const CategoryBody = ({sortedChannels, unreadIds, unreadsOnTop, category, onChan
                 isOnHome={true}
             />
         );
-    }, [onChannelSwitch]);
+    }, [onChannelSwitch, category.displayName]);
 
     const sharedValue = useSharedValue(category.collapsed);
 
