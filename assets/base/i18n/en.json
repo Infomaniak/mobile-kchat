@@ -699,6 +699,7 @@
   "mobile.system_message.update_channel_purpose_message.removed": "{username} removed the channel purpose (was: {oldPurpose})",
   "mobile.system_message.update_channel_purpose_message.updated_from": "{username} updated the channel purpose from: {oldPurpose} to: {newPurpose}",
   "mobile.system_message.update_channel_purpose_message.updated_to": "{username} updated the channel purpose to: {newPurpose}",
+  "mobile.system_message.update_channel_purpose": "{username} updated the channel purpose.",
   "mobile.tos_link": "Terms of Service",
   "mobile.user_list.deactivated": "Deactivated",
   "mobile.vocals.load_error": "Your audio file could not be loaded.",

@@ -827,6 +827,7 @@
     "mobile.system_message.update_channel_purpose_message.removed": "{username} hat den Kanalzweck entfernt (war: {oldPurpose})",
     "mobile.system_message.update_channel_purpose_message.updated_from": "{username} hat den Kanalzweck aktualisiert von: {oldPurpose} auf: {newPurpose}",
     "mobile.system_message.update_channel_purpose_message.updated_to": "{username} hat den Kanalzweck geändert zu: {newPurpose}",
+    "mobile.system_message.update_channel_purpose": "{username} hat den Kanalzweck aktualisiert.",
     "mobile.tos_link": "Nutzungsbedingungen",
     "mobile.user_list.deactivated": "Deaktiviert",
     "mobile.vocals.load_error": "Ihre Audiodatei konnte nicht geladen werden.",

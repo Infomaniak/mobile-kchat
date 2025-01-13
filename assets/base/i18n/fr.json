@@ -731,6 +731,7 @@
   "mobile.system_message.update_channel_purpose_message.removed": "{username} a supprimé la description du canal (précédemment : {oldPurpose})",
   "mobile.system_message.update_channel_purpose_message.updated_from": "{username} a mis à jour la description du canal de : {oldPurpose} en : {newPurpose}",
   "mobile.system_message.update_channel_purpose_message.updated_to": "{username} a mis à jour la description du canal en : {newPurpose}",
+  "mobile.system_message.update_channel_purpose": "{username} a mis à jour la description du canal.",
   "mobile.tos_link": "Conditions d'utilisation",
   "mobile.user_list.deactivated": "Désactivé",
   "mobile.write_storage_permission_denied_description": "Enregistrer des fichiers dans votre appareil. Ouvrez les paramètres pour autoriser {applicationName} à accéder en écriture aux fichiers sur cet appareil.",
