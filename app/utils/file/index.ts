@@ -276,8 +276,27 @@ export const isGif = (file?: FileInfo | FileModel) => {
     return mime === 'image/gif';
 };
 
+export const isSvg = (file?: FileInfo | FileModel) => {
+    if (!file) {
+        return false;
+    }
+
+    let mime = 'mime_type' in file ? file.mime_type : file.mimeType;
+    if (mime && mime.includes(';')) {
+        mime = mime.split(';')[0];
+    } else if (!mime && file?.name) {
+        mime = lookupMimeType(file.name);
+    }
+
+    return mime === 'image/svg+xml';
+};
+
 export const isImage = (file?: FileInfo | FileModel) => {
     if (!file) {
+        return false;
+    }
+
+    if (isSvg(file)) {
         return false;
     }
 
