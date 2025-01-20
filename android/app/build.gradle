@@ -111,8 +111,8 @@ android {
         applicationId "com.infomaniak.chat"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1_00_030_04
-        versionName "1.0.30"
+        versionCode 1_00_031_01
+        versionName "1.0.31"
         testBuildType System.getProperty('testBuildType', 'debug')
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         manifestPlaceholders = [
