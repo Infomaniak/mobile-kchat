@@ -45,7 +45,14 @@ const CategoryHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supe
             return [];
         }
 
-        const uniqueRaws = getUniqueRawsBy({raws: categories, key: 'id'}) as Category[];
+        const categoriesWithSortOrder = categories.map((category, index) => { // IK changes : add sort_order index to category
+            if (category.sort_order === undefined) {
+                category.sort_order = index * 10;
+            }
+            return category;
+        });
+
+        const uniqueRaws = getUniqueRawsBy({raws: categoriesWithSortOrder, key: 'id'}) as Category[];
         const ids = uniqueRaws.map((c) => c.id);
         const db: Database = this.database;
         const exists = await db.get<CategoryModel>(CATEGORY).query(
