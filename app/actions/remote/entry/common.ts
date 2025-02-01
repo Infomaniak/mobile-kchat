@@ -379,14 +379,14 @@ async function restDeferredAppEntryActions(
 
     if (preferences && processIsCRTEnabled(preferences, config.CollapsedThreads, config.FeatureFlagCollapsedThreads, config.Version)) {
         if (initialTeamId) {
-            await syncTeamThreads(serverUrl, initialTeamId);
+            await syncTeamThreads(serverUrl, initialTeamId, false, since);
         }
 
         if (teamData.teams?.length) {
             for await (const team of teamData.teams) {
                 if (team.id !== initialTeamId) {
                     // need to await here since GM/DM threads in different teams overlap
-                    await syncTeamThreads(serverUrl, team.id);
+                    await syncTeamThreads(serverUrl, team.id, false, since);
                 }
             }
         }

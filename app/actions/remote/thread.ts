@@ -277,7 +277,7 @@ export const fetchThreads = async (
     return {error: false, threads: threadsData};
 };
 
-export const syncTeamThreads = async (serverUrl: string, teamId: string, prepareRecordsOnly = false) => {
+export const syncTeamThreads = async (serverUrl: string, teamId: string, prepareRecordsOnly = false, since = 0) => {
     try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const syncData = await getTeamThreadsSyncData(database, teamId);
@@ -325,10 +325,17 @@ export const syncTeamThreads = async (serverUrl: string, teamId: string, prepare
                 threads.push(...allUnreadThreads.threads);
             }
         } else {
+            // IK: for some reason on reconnect syncData.latest is already
+            // set to the latest thread > last reply at timestamp, and not to the last sync before going to sleep,
+            // as if syncing already happened somewhere else... this means that only the latest thread will be synced.
+            // to avoid this, on reconnect, take the last disconnect timestamp instead. =
+            // logTimestamp('since', since);
+            // logTimestamp('syncData?.latest', syncData?.latest);
+            const earliestSync = Math.min(since || syncData.latest + 1, syncData.latest + 1);
             const allNewThreads = await fetchThreads(
                 serverUrl,
                 teamId,
-                {deleted: true, since: syncData.latest + 1},
+                {deleted: true, since: earliestSync},
             );
             if (allNewThreads.error) {
                 return {error: allNewThreads.error};
@@ -337,6 +344,8 @@ export const syncTeamThreads = async (serverUrl: string, teamId: string, prepare
                 // As we are syncing, we get all new threads and we will update the "latest" value.
                 const {latestThread} = getThreadsListEdges(allNewThreads.threads);
                 syncDataUpdate.latest = latestThread.last_reply_at;
+
+                // logTimestamp('latestThread.last_reply_at', latestThread.last_reply_at);
 
                 threads.push(...allNewThreads.threads);
             }
