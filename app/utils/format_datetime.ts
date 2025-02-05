@@ -40,11 +40,9 @@ interface FormatDateTimeProps {
 }
 
 export function getDateParts(value: Date, timeZone: string, comparisonDate = new Date()): ResolvedFormats['date'] {
-    if (isWithin(value, comparisonDate, timeZone, 'day', -6)) {
-        return {day: '2-digit', weekday: 'long', month: 'long'};
-    }
-    if (isSameYear(value, comparisonDate)) {
-        return {day: '2-digit', month: 'long', weekday: 'long'};
+    const isWithinWeek = isWithin(value, comparisonDate, timeZone, 'day', -6);
+    if (isWithinWeek || isSameYear(value, comparisonDate)) {
+        return {weekday: 'long', day: '2-digit', month: 'long'};
     }
 
     return {year: 'numeric', month: 'long', day: '2-digit'};
@@ -56,12 +54,12 @@ const defaultDateTimeProps: FormatDateTimeProps = {
 };
 
 export function formatDateTime(value: string | number | Date, options = defaultDateTimeProps): string {
-    const {capitalize, timeZone, locale, comparisonDate} = options;
+    const {capitalize = true, timeZone, locale, comparisonDate} = options;
     const date = new Date(value);
     const dateTime = new Intl.DateTimeFormat(locale, {timeZone, ...getDateParts(date, timeZone, comparisonDate)}).format(date);
 
     // French is not capitalized
-    return capitalize === false ? dateTime.toLowerCase() : toCapitalized(dateTime);
+    return capitalize ? toCapitalized(dateTime) : dateTime.toLowerCase();
 }
 
 export default formatDateTime;
