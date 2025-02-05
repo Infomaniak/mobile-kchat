@@ -37,7 +37,7 @@ describe('Datetime', () => {
 });
 
 describe('getDiff', () => {
-    const tz = '';
+    const tz = 'Europe/Zurich';
 
     test('tomorrow at 12am', () => {
         const now = new Date();
