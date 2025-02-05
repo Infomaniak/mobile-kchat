@@ -3,7 +3,7 @@
 
 import keyMirror from '@utils/key_mirror';
 
-import {logError, logWarning, logInfo, logDebug} from './log';
+import {logError, logWarning, logInfo, logDebug, logTimestamp} from './log';
 
 // Mock Sentry
 jest.mock('@sentry/react-native', () => ({
@@ -75,5 +75,14 @@ describe('Logging functions', () => {
             message: args.join(','),
             type: 'console-log',
         });
+    });
+
+    test('logTimestamp ', () => {
+        logTimestamp('timestamp', 0);
+        expect(console.log).toHaveBeenNthCalledWith(1, 'timestamp', 0, '0');
+        logTimestamp('timestamp', undefined);
+        expect(console.log).toHaveBeenNthCalledWith(2, 'timestamp', undefined, '');
+        logTimestamp('timestamp', 1738350000000);
+        expect(console.log).toHaveBeenNthCalledWith(3, 'timestamp', 1738350000000, '20:00:00');
     });
 });

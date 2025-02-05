@@ -29,6 +29,17 @@ export function logDebug(...args: any[]) {
     addBreadcrumb(SentryLevels.debug, ...args);
 }
 
+export function logTimestamp(label: string, timestamp: number | undefined) {
+    let time = '';
+    if (timestamp === 0) {
+        time = '0';
+    } else if (typeof timestamp !== 'undefined') {
+        const date = new Date(timestamp);
+        time = `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+    }
+    logInfo(label, timestamp, time);
+}
+
 const addBreadcrumb = (logLevel: keyof typeof SentryLevels, ...args: any[]) => {
     const Sentry = require('@sentry/react-native');
     Sentry.addBreadcrumb({
