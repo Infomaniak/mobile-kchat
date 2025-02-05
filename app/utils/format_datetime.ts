@@ -34,13 +34,16 @@ interface FormatDateTimeProps {
     timeZone: string;
     locale?: string;
     capitalize?: boolean;
+
+    // IK: Mostly for tests
+    comparisonDate?: Date;
 }
 
-export function getDateParts(value: Date, timeZone: string): ResolvedFormats['date'] {
-    if (isWithin(value, new Date(), timeZone, 'day', -6)) {
+export function getDateParts(value: Date, timeZone: string, comparisonDate = new Date()): ResolvedFormats['date'] {
+    if (isWithin(value, comparisonDate, timeZone, 'day', -6)) {
         return {day: '2-digit', weekday: 'long', month: 'long'};
     }
-    if (isSameYear(value)) {
+    if (isSameYear(value, comparisonDate)) {
         return {day: '2-digit', month: 'long', weekday: 'long'};
     }
 
@@ -50,15 +53,15 @@ export function getDateParts(value: Date, timeZone: string): ResolvedFormats['da
 const defaultDateTimeProps: FormatDateTimeProps = {
     timeZone: '',
     locale: 'en',
-    capitalize: true,
 };
 
 export function formatDateTime(value: string | number | Date, options = defaultDateTimeProps): string {
-    const {capitalize, timeZone, locale} = options;
+    const {capitalize, timeZone, locale, comparisonDate} = options;
     const date = new Date(value);
-    const dateTime = new Intl.DateTimeFormat(locale, {timeZone, ...getDateParts(date, timeZone)}).format(date);
+    const dateTime = new Intl.DateTimeFormat(locale, {timeZone, ...getDateParts(date, timeZone, comparisonDate)}).format(date);
 
-    return capitalize ? toCapitalized(dateTime) : dateTime;
+    // French is not capitalized
+    return capitalize === false ? dateTime.toLowerCase() : toCapitalized(dateTime);
 }
 
 export default formatDateTime;

@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 const shouldTruncate = new Map<Intl.RelativeTimeFormatUnit, boolean>([
     ['year', true],
