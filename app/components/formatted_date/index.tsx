@@ -16,7 +16,7 @@ type FormattedDateProps = TextProps & {
 const FormattedDate = ({timezone, value, ...props}: FormattedDateProps) => {
     const {locale} = useIntl();
 
-    let zone = '';
+    let zone: string | undefined;
     if (timezone) {
         if (typeof timezone === 'object') {
             zone = timezone.useAutomaticTimezone ? timezone.automaticTimezone : timezone.manualTimezone;

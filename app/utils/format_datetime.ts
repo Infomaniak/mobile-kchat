@@ -31,7 +31,7 @@ type ResolvedFormats = {
 }
 
 interface FormatDateTimeProps {
-    timeZone: string;
+    timeZone?: string;
     locale?: string;
     capitalize?: boolean;
 
@@ -39,7 +39,7 @@ interface FormatDateTimeProps {
     comparisonDate?: Date;
 }
 
-export function getDateParts(value: Date, timeZone: string, comparisonDate = new Date()): ResolvedFormats['date'] {
+export function getDateParts(value: Date, timeZone?: string, comparisonDate = new Date()): ResolvedFormats['date'] {
     const isWithinWeek = isWithin(value, comparisonDate, timeZone, 'day', -6);
     if (isWithinWeek || isSameYear(value, comparisonDate)) {
         return {weekday: 'long', day: '2-digit', month: 'long'};
@@ -49,17 +49,18 @@ export function getDateParts(value: Date, timeZone: string, comparisonDate = new
 }
 
 const defaultDateTimeProps: FormatDateTimeProps = {
-    timeZone: '',
+    timeZone: undefined,
     locale: 'en',
 };
 
 export function formatDateTime(value: string | number | Date, options = defaultDateTimeProps): string {
-    const {capitalize = true, timeZone, locale, comparisonDate} = options;
+    const {capitalize, locale, comparisonDate} = options;
+    const timeZone = options.timeZone || undefined;
     const date = new Date(value);
     const dateTime = new Intl.DateTimeFormat(locale, {timeZone, ...getDateParts(date, timeZone, comparisonDate)}).format(date);
 
     // French is not capitalized
-    return capitalize ? toCapitalized(dateTime) : dateTime.toLowerCase();
+    return capitalize ? toCapitalized(dateTime) : dateTime;
 }
 
 export default formatDateTime;

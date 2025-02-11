@@ -27,7 +27,7 @@ describe('Format Datetime', () => {
         date.setMonth(date.getMonth() - 1);
 
         expect(formatDateTime(date, options)).toEqual('Wednesday, February 28');
-        expect(formatDateTime(date, {...options, capitalize: false, locale: 'de'})).toEqual('mittwoch, 28. februar');
+        expect(formatDateTime(date, {...options, capitalize: false, locale: 'de'})).toEqual('Mittwoch, 28. Februar');
     });
     test('Beyond past | Date as number', () => {
         const date = d();
@@ -36,5 +36,11 @@ describe('Format Datetime', () => {
         expect(formatDateTime(date, options)).toEqual('March 28, 2023');
         expect(formatDateTime(date.valueOf(), {...options, locale: 'de'})).toEqual('28. März 2023');
         expect(formatDateTime(date.valueOf(), {...options, locale: 'fr'})).toEqual('28 mars 2023');
+    });
+    test('Empty string timezone', () => {
+        const date = d();
+        date.setFullYear(date.getFullYear() - 1);
+
+        expect(formatDateTime(date, {...options, timeZone: ''})).toEqual('March 28, 2023');
     });
 });
