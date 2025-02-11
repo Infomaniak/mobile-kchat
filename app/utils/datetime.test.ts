@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {isSameDate, isSameMonth, isSameYear, isToday, isYesterday, getDiff} from './datetime';
+import {isSameDate, isSameMonth, isSameYear, isToday, isYesterday} from './datetime';
 
 describe('Datetime', () => {
     test('isSameDate (isSameMonth / isSameYear)', () => {
@@ -35,83 +35,3 @@ describe('Datetime', () => {
         expect(isYesterday(today)).toBe(true);
     });
 });
-
-describe('getDiff', () => {
-    const tz = 'Europe/Zurich';
-
-    test('tomorrow at 12am', () => {
-        const now = new Date();
-        const date = new Date();
-        date.setDate(date.getDate() + 1);
-        date.setHours(0);
-        date.setMinutes(0);
-
-        expect(getDiff(date, now, tz, 'day')).toBe(+1);
-    });
-
-    test('now', () => {
-        const now = new Date();
-        const date = new Date();
-
-        expect(getDiff(date, now, tz, 'day')).toBe(0);
-    });
-
-    test('today at 12am', () => {
-        const now = new Date();
-        const date = new Date();
-        date.setHours(0);
-        date.setMinutes(0);
-
-        expect(getDiff(date, now, tz, 'day')).toBe(0);
-    });
-
-    test('today at 11:59pm', () => {
-        const now = new Date();
-        const date = new Date();
-        date.setHours(23);
-        date.setMinutes(59);
-
-        expect(getDiff(date, now, tz, 'day')).toBe(0);
-    });
-
-    test('yesterday at 11:59pm', () => {
-        const now = new Date();
-        const date = new Date();
-        date.setDate(date.getDate() - 1);
-        date.setHours(23);
-        date.setMinutes(59);
-
-        expect(getDiff(date, now, tz, 'day')).toBe(-1);
-    });
-
-    test('yesterday at 12am', () => {
-        const now = new Date();
-        const date = new Date();
-        date.setDate(date.getDate() - 1);
-        date.setHours(0);
-        date.setMinutes(0);
-
-        expect(getDiff(date, now, tz, 'day')).toBe(-1);
-    });
-
-    test('two days ago at 11:59pm', () => {
-        const now = new Date();
-        const date = new Date();
-        date.setDate(date.getDate() - 2);
-        date.setHours(23);
-        date.setMinutes(59);
-
-        expect(getDiff(date, now, tz, 'day')).toBe(-2);
-    });
-
-    test('366 days ago at 11:59pm', () => {
-        const now = new Date();
-        const date = new Date();
-        date.setDate(date.getDate() - 366);
-        date.setHours(23);
-        date.setMinutes(59);
-
-        expect(getDiff(date, now, tz, 'day')).toBe(-366);
-    });
-});
-

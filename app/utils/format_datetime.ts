@@ -4,7 +4,7 @@
 import {type ReactNode} from 'react';
 import {type FormatRelativeTimeOptions, type FormatDateOptions} from 'react-intl';
 
-import {isWithin, isSameYear} from '@utils/datetime';
+import {isSameYear} from '@utils/datetime';
 import {toCapitalized} from '@utils/strings';
 
 type RelativeOptions = FormatRelativeTimeOptions & {
@@ -40,8 +40,7 @@ interface FormatDateTimeProps {
 }
 
 export function getDateParts(value: Date, timeZone?: string, comparisonDate = new Date()): ResolvedFormats['date'] {
-    const isWithinWeek = isWithin(value, comparisonDate, timeZone, 'day', -6);
-    if (isWithinWeek || isSameYear(value, comparisonDate)) {
+    if (isSameYear(value, comparisonDate)) {
         return {weekday: 'long', day: '2-digit', month: 'long'};
     }
 
