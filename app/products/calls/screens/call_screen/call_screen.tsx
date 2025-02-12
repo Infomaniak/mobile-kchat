@@ -681,6 +681,8 @@ const CallScreen = ({
 
                 // Disable screensharing on android
                 'android.screensharing.enabled': false,
+
+                'pip.enabled': false,
             }}
             style={styles.flex}
             room={channelId}
