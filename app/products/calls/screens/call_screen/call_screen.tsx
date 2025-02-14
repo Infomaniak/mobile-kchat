@@ -682,9 +682,6 @@ const CallScreen = ({
                 // Disable screensharing on android
                 'android.screensharing.enabled': false,
 
-                // Disable car mode - Would require react-native-orientation
-                'car-mode.enabled': false,
-
                 // Disable live streaming - Same as kMeet
                 'live-streaming.enabled': false,
 
