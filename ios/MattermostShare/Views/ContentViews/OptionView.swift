@@ -13,11 +13,18 @@ struct OptionView<Content: View>: View {
   var label: String
   var value: String
   @ViewBuilder let content: Content
-  
+
   var body: some View {
     NavigationLink {
       content
-        .navigationTitle(navigationTitle)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+          ToolbarItem(placement: .principal) {
+            Text(navigationTitle)
+              .foregroundColor(.white)
+              .font(Font.custom("Metropolis-SemiBold", size: 18))
+            }
+        }
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackButton())
         .accentColor(.white)
