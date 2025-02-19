@@ -31,8 +31,14 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             paddingVertical: 6,
             paddingHorizontal: 12,
         },
-        text: typography('Body', 200),
-        boldText: typography('Body', 200, 'SemiBold'),
+        text: {
+            ...typography('Body', 200),
+            color: theme.centerChannelColor,
+        },
+        boldText: {
+            ...typography('Body', 200, 'SemiBold'),
+            color: theme.centerChannelColor,
+        },
     };
 });
 
