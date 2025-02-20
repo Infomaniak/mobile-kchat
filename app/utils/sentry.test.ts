@@ -81,7 +81,11 @@ describe('initializeSentry function', () => {
 
     it('should log a warning if DSN is missing', () => {
         Config.SentryEnabled = true;
+
+        // @ts-expect-error types are inferred from json
         Config.SentryDsnAndroid = '';
+
+        // @ts-expect-error types are inferred from json
         Config.SentryDsnIos = '';
 
         initializeSentry();
@@ -91,7 +95,11 @@ describe('initializeSentry function', () => {
 
     it('should initialize Sentry correctly', () => {
         Config.SentryEnabled = true;
+
+        // @ts-expect-error types are inferred from json
         Config.SentryDsnAndroid = 'YOUR_ANDROID_DSN_HERE';
+
+        // @ts-expect-error types are inferred from json
         Config.SentryDsnIos = 'YOUR_IOS_DSN_HERE';
 
         initializeSentry();
