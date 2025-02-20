@@ -383,6 +383,7 @@ const systemMessageRenderers = {
     [Post.POST_TYPES.CHANNEL_DELETED]: renderArchivedMessage,
     [Post.POST_TYPES.CHANNEL_UNARCHIVED]: renderUnarchivedMessage,
     [Post.POST_TYPES.IK_SYSTEM_POST_REMINDER]: renderReminderSystemBotMessage,
+    [Post.POST_TYPES.IK_SYSTEM_WELCOME_MESSAGE]: () => null,
     [Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL]: renderUserMentionedInChannelMessage,
 };
 

@@ -13,10 +13,11 @@ import FormattedText from '@app/components/formatted_text';
 import {getMarkdownTextStyles} from '@app/utils/markdown';
 import IkCallsCustomMessage from '@calls/components/ik_calls_custom_message';
 import {isCallsCustomMessage} from '@calls/utils';
+import IkWelcomeMessage from '@components/post_list/post/ik_welcome_message';
 import PreviewMessage from '@components/post_list/post/preview_message';
 import SystemAvatar from '@components/system_avatar';
 import SystemHeader from '@components/system_header';
-import {POST_TIME_TO_FAIL} from '@constants/post';
+import {POST_TIME_TO_FAIL, PostTypes} from '@constants/post';
 import * as Screens from '@constants/screens';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
@@ -377,7 +378,7 @@ const Post = ({
                     location={location}
                     post={post}
                 />
-                {post.type === 'system_post_reminder' && !(post.props.reschedule || post.props.completed) && (
+                {post.type === PostTypes.IK_SYSTEM_POST_REMINDER && !(post.props.reschedule || post.props.completed) && (
                     <View>
                         <TouchableOpacity
                             style={[buttonBackgroundStyle(theme, 'm', 'primary'), {width: '100%'}]}
@@ -403,6 +404,7 @@ const Post = ({
                         </View>
                     </View>
                 )}
+                {post.type === PostTypes.IK_SYSTEM_WELCOME_MESSAGE && <IkWelcomeMessage/>}
             </>
 
         );
