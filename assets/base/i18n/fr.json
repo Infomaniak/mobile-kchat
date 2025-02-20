@@ -699,6 +699,7 @@
   "mobile.search.modifier.from": "un utilisateur spécifique",
   "mobile.search.modifier.in": "un canal spécifique",
   "mobile.search.modifier.phrases": "messages avec des phrases",
+  "mobile.search.results": "{count} {count, plural, one {résultat} other {résultats}} de recherche",
   "mobile.search.show_less": "Afficher moins",
   "mobile.search.show_more": "Afficher plus",
   "mobile.search.team.select": "Sélectionner une équipe à rechercher",

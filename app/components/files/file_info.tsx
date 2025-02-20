@@ -84,7 +84,7 @@ const FileInfo = ({file, channelName, showDate, onPress}: FileInfoProps) => {
                     }
                     <View style={style.fileStatsContainer}>
                         <Text style={style.infoText}>
-                            {`${getFormattedFileSize(file.size)}`}
+                            {`${getFormattedFileSize(file.size)}${showDate ? ' • ' : ''}`}
                         </Text>
                         {showDate &&
                             <FormattedDate
