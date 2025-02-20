@@ -681,6 +681,12 @@ const CallScreen = ({
 
                 // Disable screensharing on android
                 'android.screensharing.enabled': false,
+
+                // Disable live streaming - Same as kMeet
+                'live-streaming.enabled': false,
+
+                // Disable video share - Same as kMeet
+                'video-share.enabled': false,
             }}
             style={styles.flex}
             room={channelId}
