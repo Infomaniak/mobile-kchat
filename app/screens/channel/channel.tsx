@@ -8,8 +8,8 @@ import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area
 import {storeLastViewedChannelIdAndServer, removeLastViewedChannelIdAndServer} from '@actions/app/global';
 import FreezeScreen from '@components/freeze_screen';
 import PostDraft from '@components/post_draft';
-import {useServerUrl} from '@context/server';
 import {ExtraKeyboardProvider} from '@context/extra_keyboard';
+import {useServerUrl} from '@context/server';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useChannelSwitch} from '@hooks/channel_switch';
 import {useIsTablet} from '@hooks/device';
