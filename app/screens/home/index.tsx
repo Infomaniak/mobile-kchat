@@ -56,7 +56,7 @@ const updateTimezoneIfNeeded = async () => {
     }
 };
 
-export default function HomeScreen(props: HomeProps) {
+export function HomeScreen(props: HomeProps) {
     const theme = useTheme();
     const intl = useIntl();
     const appState = useAppState();
@@ -80,7 +80,7 @@ export default function HomeScreen(props: HomeProps) {
         return () => {
             listener.remove();
         };
-    }, [intl.locale]);
+    }, [intl]);
 
     useEffect(() => {
         const leaveTeamListener = DeviceEventEmitter.addListener(Events.LEAVE_TEAM, (displayName: string) => {
@@ -107,7 +107,7 @@ export default function HomeScreen(props: HomeProps) {
             archivedChannelListener.remove();
             crtToggledListener.remove();
         };
-    }, [intl.locale]);
+    }, [intl]);
 
     useEffect(() => {
         if (appState === 'active') {
@@ -188,3 +188,5 @@ export default function HomeScreen(props: HomeProps) {
         </>
     );
 }
+
+export default HomeScreen;

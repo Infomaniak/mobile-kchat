@@ -18,6 +18,7 @@ import SystemAvatar from '@components/system_avatar';
 import SystemHeader from '@components/system_header';
 import {POST_TIME_TO_FAIL} from '@constants/post';
 import * as Screens from '@constants/screens';
+import {useHideExtraKeyboardIfNeeded} from '@context/extra_keyboard';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
@@ -26,7 +27,6 @@ import {openAsBottomSheet} from '@screens/navigation';
 import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {hasJumboEmojiOnly} from '@utils/emoji/helpers';
 import {fromAutoResponder, isFromWebhook, isPostFailed, isPostPendingOrFailed, isSystemMessage} from '@utils/post';
-import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import Avatar from './avatar';
@@ -182,7 +182,7 @@ const Post = ({
         return false;
     }, [customEmojiNames, post.message]);
 
-    const handlePostPress = () => {
+    const handlePostPress = useCallback(() => {
         if ([Screens.SAVED_MESSAGES, Screens.MENTIONS, Screens.SEARCH, Screens.PINNED_MESSAGES].includes(location)) {
             showPermalink(serverUrl, '', post.id);
             return;
@@ -201,17 +201,18 @@ const Post = ({
         setTimeout(() => {
             pressDetected.current = false;
         }, 300);
-    };
+    }, [
+        hasBeenDeleted, isAutoResponder, isEphemeral,
+        isPendingOrFailed, isSystemPost, location, serverUrl, post,
+    ]);
 
-    const handlePress = preventDoubleTap(() => {
+    const handlePress = useHideExtraKeyboardIfNeeded(() => {
         pressDetected.current = true;
 
         if (post) {
-            Keyboard.dismiss();
-
             setTimeout(handlePostPress, 300);
         }
-    });
+    }, [handlePostPress, post]);
 
     const handlePostponePress = useCallback(async () => {
         const postId = post.props.post_id;
@@ -234,7 +235,7 @@ const Post = ({
         markPostReminderAsDone(serverUrl, postId);
     };
 
-    const showPostOptions = () => {
+    const showPostOptions = useHideExtraKeyboardIfNeeded(() => {
         if (!post) {
             return;
         }
@@ -258,7 +259,11 @@ const Post = ({
             title,
             props: passProps,
         });
-    };
+    }, [
+        canDelete, hasBeenDeleted, intl,
+        isEphemeral, isPendingOrFailed, isTablet, isSystemPost,
+        location, post, serverUrl, showAddReaction, theme,
+    ]);
 
     const [, rerender] = useState(false);
     useEffect(() => {

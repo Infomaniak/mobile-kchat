@@ -151,27 +151,6 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - mattermost-keyboard-tracker (0.0.0):
-    - DoubleConversion
-    - glog
-    - hermes-engine
-    - RCT-Folly (= 2024.01.01.00)
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Codegen
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-rendererdebug
-    - React-utils
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - Yoga
   - mattermost-react-native-turbo-log (0.4.0):
     - CocoaLumberjack (~> 3.8.5)
     - DoubleConversion
@@ -1580,14 +1559,14 @@ PODS:
     - React-Core
   - ReactNativeIncallManager (4.2.0):
     - React-Core
-  - ReactNativeNavigation (7.40.0):
+  - ReactNativeNavigation (7.40.1):
     - HMSegmentedControl
     - React-Core
     - React-CoreModules
     - React-RCTImage
     - React-RCTText
-    - ReactNativeNavigation/Core (= 7.40.0)
-  - ReactNativeNavigation/Core (7.40.0):
+    - ReactNativeNavigation/Core (= 7.40.1)
+  - ReactNativeNavigation/Core (7.40.1):
     - HMSegmentedControl
     - React-Core
     - React-CoreModules
@@ -1781,7 +1760,6 @@ DEPENDENCIES:
   - "jitsi-meet-rnsdk (from `../node_modules/@jitsi/react-native-sdk`)"
   - JitsiMeetSDKLite (= 9.2.2-lite)
   - "mattermost-hardware-keyboard (from `../node_modules/@mattermost/hardware-keyboard`)"
-  - "mattermost-keyboard-tracker (from `../node_modules/@mattermost/keyboard-tracker`)"
   - "mattermost-react-native-turbo-log (from `../node_modules/@mattermost/react-native-turbo-log`)"
   - "mattermost-rnutils (from `../node_modules/@mattermost/rnutils`)"
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
@@ -1953,8 +1931,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@jitsi/react-native-sdk"
   mattermost-hardware-keyboard:
     :path: "../node_modules/@mattermost/hardware-keyboard"
-  mattermost-keyboard-tracker:
-    :path: "../node_modules/@mattermost/keyboard-tracker"
   mattermost-react-native-turbo-log:
     :path: "../node_modules/@mattermost/react-native-turbo-log"
   mattermost-rnutils:
@@ -2183,7 +2159,6 @@ SPEC CHECKSUMS:
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
   mattermost-hardware-keyboard: b916a168bb3add779bb226b3a62d6ac5ec225a79
-  mattermost-keyboard-tracker: b48752a97e731fdae5e8259a4ea0e731e1a05094
   mattermost-react-native-turbo-log: c446c7e8a39c131d6bafa6ae6f830c735030ed5e
   mattermost-rnutils: 01504fb26beb75594f4c6e2150668b27783112f5
   ObjectiveDropboxOfficial: fe206ce8c0bc49976c249d472db7fdbc53ebbd53
@@ -2256,7 +2231,7 @@ SPEC CHECKSUMS:
   ReactCommon: ecad995f26e0d1e24061f60f4e5d74782f003f12
   ReactNativeExceptionHandler: b11ff67c78802b2f62eed0e10e75cb1ef7947c60
   ReactNativeIncallManager: bfc9c67358cd524882a7c4116dcb311ac2293d4b
-  ReactNativeNavigation: e62ba14d9cd44774dca6068b6559ec872e0e61a6
+  ReactNativeNavigation: 84cfcceb62947491beda20b96c5999c15ff5b959
   RNAudioRecorderPlayer: f790fc1afb118552ae6285d60adde52ee6b5d9ef
   RNCAsyncStorage: 3a8f7145d17cdd9f88e7b77666c94a09e4f759c8
   RNCClipboard: 0a720adef5ec193aa0e3de24c3977222c7e52a37
