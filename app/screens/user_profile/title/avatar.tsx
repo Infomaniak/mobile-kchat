@@ -45,7 +45,12 @@ const UserProfileAvatar = ({enablePostIconOverride, forwardRef, imageSize, user,
 
     if (enablePostIconOverride && userIconOverride) {
         const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
-        const source = {uri: serverUrl + userIconOverride, headers: {Authorization: token}};
+        let source;
+        if (userIconOverride.startsWith('http')) {
+            source = {uri: userIconOverride, headers: {Authorization: token}};
+        } else {
+            source = {uri: serverUrl + userIconOverride, headers: {Authorization: token}};
+        }
         return (
             <View style={styles.avatar}>
                 <AnimatedImage
