@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {createContext, useCallback, useContext, useEffect, useState} from 'react';
-import {Keyboard, Platform} from 'react-native';
+import {Keyboard, Platform, AccessibilityInfo} from 'react-native';
 import Animated, {KeyboardState, useAnimatedKeyboard, useAnimatedStyle, useDerivedValue, withTiming} from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
@@ -20,6 +20,8 @@ export type ExtraKeyboardContextProps = {
     hideExtraKeyboard: () => void;
     registerTextInputFocus: () => void;
     registerTextInputBlur: () => void;
+    crossFadeIsEnabled: boolean;
+    defaultKeyboardHeight: number;
 };
 
 // This is based on the size of the tab bar
@@ -48,10 +50,39 @@ const useOffetForCurrentScreen = (): number => {
     return offset;
 };
 
+let DEFAULTKEYBOARDHEIGHT = 0;
+
 export const ExtraKeyboardProvider = (({children}: {children: React.ReactElement|React.ReactElement[]}) => {
     const [isExtraKeyboardVisible, setExtraKeyboardVisible] = useState(false);
     const [component, setComponent] = useState<React.ReactElement|null>(null);
     const [isTextInputFocused, setIsTextInputFocused] = useState(false);
+    const [crossFadeIsEnabled, setCrossFade] = useState(false);
+    const [defaultKeyboardHeight, setHeight] = useState(DEFAULTKEYBOARDHEIGHT);
+
+    const updateHeight = useCallback(() => {
+        try {
+            const height = Keyboard.metrics()?.height;
+            setHeight((prev) => {
+                if (height && prev !== height) {
+                    DEFAULTKEYBOARDHEIGHT = height;
+                    return height;
+                }
+                return prev;
+            });
+            return undefined;
+        } catch {
+            return undefined;
+        }
+    }, []);
+
+    useEffect(() => {
+        const subscription = Keyboard.addListener('keyboardDidShow', updateHeight);
+        return () => subscription.remove();
+    }, [Keyboard.metrics(), Keyboard, updateHeight]);
+
+    useEffect(() => {
+        AccessibilityInfo.prefersCrossFadeTransitions().then(setCrossFade);
+    }, []);
 
     const showExtraKeyboard = useCallback((newComponent: React.ReactElement|null) => {
         setExtraKeyboardVisible(true);
@@ -103,6 +134,8 @@ export const ExtraKeyboardProvider = (({children}: {children: React.ReactElement
                 hideExtraKeyboard,
                 registerTextInputBlur,
                 registerTextInputFocus,
+                crossFadeIsEnabled,
+                defaultKeyboardHeight,
             }}
         >
             {children}
@@ -169,7 +202,17 @@ export const ExtraKeyboard = () => {
             height = withTiming(0, {duration: 250});
         }
 
+        if (context?.crossFadeIsEnabled && context?.defaultKeyboardHeight) {
+            if (keyb.height.value > context?.defaultKeyboardHeight && keyb.state.value === KeyboardState.OPEN) {
+                height = withTiming(0, {duration: 250});
+                keyb.state.value = KeyboardState.CLOSED;
+            }
+        }
+
+        const needToProtect = context?.crossFadeIsEnabled && context?.defaultKeyboardHeight && keyb.state.value !== KeyboardState.OPENING;
+
         return {
+            maxHeight: needToProtect ? withTiming(context?.defaultKeyboardHeight) : undefined,
             height,
             marginBottom: withTiming((keyb.state.value === KeyboardState.CLOSED || keyb.state.value === KeyboardState.CLOSING || keyb.state.value === KeyboardState.UNKNOWN) ? insets.bottom : 0, {duration: 250}),
         };
