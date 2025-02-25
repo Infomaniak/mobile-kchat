@@ -4,12 +4,12 @@
 import RNUtils, {type WindowDimensions} from '@mattermost/rnutils';
 import React, {type RefObject, useEffect, useRef, useState, useContext} from 'react';
 import {AppState, Keyboard, NativeEventEmitter, Platform, View} from 'react-native';
+import {KeyboardState} from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {DeviceContext} from '@context/device';
 
 import type {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import { KeyboardState } from 'react-native-reanimated';
 
 const utilsEmitter = new NativeEventEmitter(RNUtils);
 
@@ -96,17 +96,15 @@ export function useKeyboardState() {
             } else {
                 setState(KeyboardState.OPEN);
             }
+        } else if (duration) {
+            setState(KeyboardState.CLOSING);
+            timeId = setTimeout(setState, duration, KeyboardState.CLOSED);
         } else {
-            if (duration) {
-                setState(KeyboardState.CLOSING);
-                timeId = setTimeout(setState, duration, KeyboardState.CLOSED);
-            } else {
-                setState(KeyboardState.CLOSED);
-            }
+            setState(KeyboardState.CLOSED);
         }
         return () => {
             clearTimeout(timeId);
-        }
+        };
     }, [height, duration]);
 
     return state;
@@ -122,10 +120,10 @@ export function useLastKeyboardHeight() {
         setLastHeight((prev) => {
             if (height && prev !== height) {
                 LAST_KEYBOARD_HEIGHT = Math.round(height);
-                return height
+                return height;
             }
 
-            return prev
+            return prev;
         });
     }, [height]);
 
