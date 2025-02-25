@@ -7,7 +7,7 @@ import Animated, {KeyboardState, useAnimatedKeyboard, useAnimatedStyle, useDeriv
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {Screens} from '@constants';
-import {useIsTablet} from '@hooks/device';
+import {useIsTablet, useKeyboardState} from '@hooks/device';
 import NavigationStore from '@store/navigation_store';
 import {preventDoubleTap} from '@utils/tap';
 
@@ -21,13 +21,10 @@ export type ExtraKeyboardContextProps = {
     registerTextInputFocus: () => void;
     registerTextInputBlur: () => void;
     crossFadeIsEnabled: boolean;
-    defaultKeyboardHeight: number;
 };
 
 // This is based on the size of the tab bar
 const KEYBOARD_OFFSET = -77;
-
-let DEFAULT_KEYBOARD_HEIGHT = 0;
 
 export const ExtraKeyboardContext = createContext<ExtraKeyboardContextProps|undefined>(undefined);
 
@@ -57,31 +54,6 @@ export const ExtraKeyboardProvider = (({children}: {children: React.ReactElement
     const [component, setComponent] = useState<React.ReactElement|null>(null);
     const [isTextInputFocused, setIsTextInputFocused] = useState(false);
     const [crossFadeIsEnabled, setCrossFade] = useState(false);
-
-    // IK: Fix: To prevent blank screen when Cross-Fade is on,
-    // Saving react-native retrieve keyboard size
-    const [defaultKeyboardHeight, setHeight] = useState(DEFAULT_KEYBOARD_HEIGHT);
-
-    const updateHeight = useCallback(() => {
-        try {
-            const height = Keyboard.metrics()?.height;
-            setHeight((prev) => {
-                if (height && prev !== height) {
-                    DEFAULT_KEYBOARD_HEIGHT = height;
-                    return height;
-                }
-                return prev;
-            });
-            return undefined;
-        } catch {
-            return undefined;
-        }
-    }, []);
-
-    useEffect(() => {
-        const subscription = Keyboard.addListener('keyboardDidShow', updateHeight);
-        return () => subscription.remove();
-    }, [Keyboard.metrics(), Keyboard, updateHeight]);
 
     useEffect(() => {
         AccessibilityInfo.prefersCrossFadeTransitions().then(setCrossFade);
@@ -138,7 +110,6 @@ export const ExtraKeyboardProvider = (({children}: {children: React.ReactElement
                 registerTextInputBlur,
                 registerTextInputFocus,
                 crossFadeIsEnabled,
-                defaultKeyboardHeight,
             }}
         >
             {children}
@@ -180,10 +151,11 @@ export const useHideExtraKeyboardIfNeeded = (callback: (...args: any) => void, d
 
 export const ExtraKeyboard = () => {
     const keyb = useAnimatedKeyboard({isStatusBarTranslucentAndroid: true});
-    const defaultKeyboardHeight = DEFAULT_KEYBOARD_HEIGHT || Platform.select({ios: 291, default: 240});
+    const defaultKeyboardHeight = Platform.select({ios: 291, default: 240});
     const context = useExtraKeyboardContext();
     const insets = useSafeAreaInsets();
     const offset = useOffetForCurrentScreen();
+    const keyboardState = useKeyboardState();
 
     const maxKeyboardHeight = useDerivedValue(() => {
         if (keyb.state.value === KeyboardState.OPEN) {
@@ -196,31 +168,35 @@ export const ExtraKeyboard = () => {
 
     const animatedStyle = useAnimatedStyle(() => {
         let height = keyb.height.value + offset;
-        if (keyb.height.value < 70) {
-            height = 0; // When using a hw keyboard
-        }
-        if (context?.isExtraKeyboardVisible) {
-            height = withTiming(maxKeyboardHeight.value, {duration: 250});
-        } else if (keyb.state.value === KeyboardState.CLOSED || keyb.state.value === KeyboardState.UNKNOWN) {
-            height = withTiming(0, {duration: 250});
-        }
+
+        const closeOrClosing = [KeyboardState.CLOSED, KeyboardState.CLOSING, KeyboardState.UNKNOWN].includes(keyb.state.value);
+        const openOrOpening = [KeyboardState.OPEN, KeyboardState.OPENING].includes(keyb.state.value);
+
+        const marginBottom = withTiming(closeOrClosing ? insets.bottom : 0, {duration: 250});
 
         // IK: If keyboard height calculated by react-native-reanimated
         // is higher than what react-native got,
         // It is highly a bug when in crossFade mode
         // Resetting keyboard and closing it:
-        if (context?.crossFadeIsEnabled && context?.defaultKeyboardHeight) {
-            if (keyb.height.value > context?.defaultKeyboardHeight && keyb.state.value === KeyboardState.OPEN) {
-                height = withTiming(0, {duration: 250});
-                keyb.state.value = KeyboardState.CLOSED;
-            }
+        const shouldClose = context?.crossFadeIsEnabled && keyboardState === KeyboardState.CLOSED && openOrOpening;
+        if (shouldClose) {
+            keyb.state.value = KeyboardState.CLOSED;
+        }
+
+        if (keyb.height.value < 70) {
+            height = 0; // When using a hw keyboard
+        }
+        if (!shouldClose && context?.isExtraKeyboardVisible) {
+            height = withTiming(maxKeyboardHeight.value, {duration: 250});
+        } else if (keyb.state.value === KeyboardState.CLOSED || keyb.state.value === KeyboardState.UNKNOWN) {
+            height = withTiming(0, {duration: 250});
         }
 
         return {
             height,
-            marginBottom: withTiming((keyb.state.value === KeyboardState.CLOSED || keyb.state.value === KeyboardState.CLOSING || keyb.state.value === KeyboardState.UNKNOWN) ? insets.bottom : 0, {duration: 250}),
+            marginBottom,
         };
-    }, [context, insets.bottom, offset]);
+    }, [context, insets.bottom, offset, keyboardState, keyb.state.value]);
 
     return (
         <Animated.View style={animatedStyle}>

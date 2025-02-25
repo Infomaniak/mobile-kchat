@@ -1,0 +1,16 @@
+diff --git a/node_modules/react-native-reanimated/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin b/node_modules/react-native-reanimated/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin
+new file mode 100644
+index 0000000..1b7f461
+Binary files /dev/null and b/node_modules/react-native-reanimated/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin differ
+diff --git a/node_modules/react-native-reanimated/src/mock.ts b/node_modules/react-native-reanimated/src/mock.ts
+index cdc5e96..711c916 100644
+--- a/node_modules/react-native-reanimated/src/mock.ts
++++ b/node_modules/react-native-reanimated/src/mock.ts
+@@ -75,6 +75,7 @@ const hook = {
+   }),
+   // useFrameCallback: ADD ME IF NEEDED
+   useAnimatedKeyboard: () => ({ height: 0, state: 0 }),
++  useReducedMotion: () => false
+   // useScrollViewOffset: ADD ME IF NEEDED
+ };
+ 

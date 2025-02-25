@@ -9,6 +9,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {DeviceContext} from '@context/device';
 
 import type {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import { KeyboardState } from 'react-native-reanimated';
 
 const utilsEmitter = new NativeEventEmitter(RNUtils);
 
@@ -77,9 +78,58 @@ export function useKeyboardHeightWithDuration() {
     return keyboardHeight;
 }
 
-export function useKeyboardHeight() {
+export function useKeyboardHeight(round = false) {
     const {height} = useKeyboardHeightWithDuration();
-    return height;
+    return round ? Math.round(height) : height;
+}
+
+export function useKeyboardState() {
+    const {height, duration} = useKeyboardHeightWithDuration();
+    const [state, setState] = useState<KeyboardState>(KeyboardState.UNKNOWN);
+
+    useEffect(() => {
+        let timeId: NodeJS.Timeout | undefined;
+        if (height) {
+            if (duration) {
+                setState(KeyboardState.OPENING);
+                timeId = setTimeout(setState, duration, KeyboardState.OPEN);
+            } else {
+                setState(KeyboardState.OPEN);
+            }
+        } else {
+            if (duration) {
+                setState(KeyboardState.CLOSING);
+                timeId = setTimeout(setState, duration, KeyboardState.CLOSED);
+            } else {
+                setState(KeyboardState.CLOSED);
+            }
+        }
+        return () => {
+            clearTimeout(timeId);
+        }
+    }, [height, duration]);
+
+    return state;
+}
+
+let LAST_KEYBOARD_HEIGHT = 0;
+
+export function useLastKeyboardHeight() {
+    const height = useKeyboardHeight(true);
+    const [lastHeight, setLastHeight] = useState(LAST_KEYBOARD_HEIGHT);
+
+    useEffect(() => {
+        setLastHeight((prev) => {
+            if (height && prev !== height) {
+                LAST_KEYBOARD_HEIGHT = Math.round(height);
+                return height
+            }
+
+            return prev
+        });
+    }, [height]);
+
+    return lastHeight;
 }
 
 export function useViewPosition(viewRef: RefObject<View>, deps: React.DependencyList = []) {
