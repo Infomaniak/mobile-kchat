@@ -100,7 +100,7 @@ const ScrollToEndView = ({
                     translateY: withTiming(showScrollToEndBtn ? -80 - keyboardOverlap - bottomAdjustment : 0, {duration: 300}),
                 },
             ],
-            maxWidth: withTiming(isNewMessage ? 169 : 40, {duration: 300}),
+            maxWidth: withTiming(isNewMessage ? 189 : 40, {duration: 300}),
         }),
         [showScrollToEndBtn, isNewMessage, keyboardOverlap, bottomAdjustment],
     );
