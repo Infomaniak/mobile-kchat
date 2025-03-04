@@ -277,7 +277,7 @@ export const fetchThreads = async (
     return {error: false, threads: threadsData};
 };
 
-export const syncTeamThreads = async (serverUrl: string, teamId: string, prepareRecordsOnly = false) => {
+export const syncTeamThreads = async (serverUrl: string, teamId: string, prepareRecordsOnly = false, refresh = false) => {
     try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const syncData = await getTeamThreadsSyncData(database, teamId);
@@ -328,7 +328,7 @@ export const syncTeamThreads = async (serverUrl: string, teamId: string, prepare
             const allNewThreads = await fetchThreads(
                 serverUrl,
                 teamId,
-                {deleted: true, since: syncData?.latest},
+                {deleted: true, since: refresh ? undefined : syncData.latest},
             );
             if (allNewThreads.error) {
                 return {error: allNewThreads.error};

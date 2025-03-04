@@ -379,14 +379,16 @@ async function restDeferredAppEntryActions(
 
     if (preferences && processIsCRTEnabled(preferences, config.CollapsedThreads, config.FeatureFlagCollapsedThreads, config.Version)) {
         if (initialTeamId) {
-            await syncTeamThreads(serverUrl, initialTeamId);
+            // IK: on initial load and reconnect, sync threads with refresh = true
+            await syncTeamThreads(serverUrl, initialTeamId, undefined, true);
         }
 
         if (teamData.teams?.length) {
             for await (const team of teamData.teams) {
                 if (team.id !== initialTeamId) {
                     // need to await here since GM/DM threads in different teams overlap
-                    await syncTeamThreads(serverUrl, team.id);
+                    // IK: on initial load and reconnect, sync threads with refresh = true
+                    await syncTeamThreads(serverUrl, team.id, undefined, true);
                 }
             }
         }
