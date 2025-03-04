@@ -10,7 +10,7 @@ import AppsManager from '@managers/apps_manager';
 import NetworkManager from '@managers/network_manager';
 import {getPostById} from '@queries/servers/post';
 import {getConfigValue, getCurrentChannelId, getCurrentTeamId} from '@queries/servers/system';
-import {getIsCRTEnabled, getThreadById, getTeamThreadsSyncData} from '@queries/servers/thread';
+import {getIsCRTEnabled, getThreadById, getTeamThreadsSyncData, queryThreadsInTeam} from '@queries/servers/thread';
 import {getCurrentUser} from '@queries/servers/user';
 import {getFullErrorMessage} from '@utils/errors';
 import {logDebug} from '@utils/log';
@@ -277,7 +277,7 @@ export const fetchThreads = async (
     return {error: false, threads: threadsData};
 };
 
-export const syncTeamThreads = async (serverUrl: string, teamId: string, prepareRecordsOnly = false, refresh = false) => {
+export const syncTeamThreads = async (serverUrl: string, teamId: string, prepareRecordsOnly = false, initialSync = false) => {
     try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const syncData = await getTeamThreadsSyncData(database, teamId);
@@ -325,10 +325,25 @@ export const syncTeamThreads = async (serverUrl: string, teamId: string, prepare
                 threads.push(...allUnreadThreads.threads);
             }
         } else {
+            // IK: on initial sync, make sure we update any unread threads already in store.
+            // Scenario where user opens app and has unreads but does not read them,
+            // then reads them on another device, then comes back and still has unreads.
+            let since = syncData.latest;
+            if (initialSync) {
+                // get sorted unreads from local database
+                const localUnreads = await queryThreadsInTeam(database, teamId, true, true, true, true).fetch();
+                if (localUnreads.length > 0) {
+                    since = localUnreads[localUnreads.length - 1].lastReplyAt;
+
+                    // logTimestamp('localThreads.earliest', since);
+                    // logTimestamp('syncData.latest', syncData.latest);
+                }
+            }
+
             const allNewThreads = await fetchThreads(
                 serverUrl,
                 teamId,
-                {deleted: true, since: refresh ? undefined : syncData.latest},
+                {deleted: true, since},
             );
             if (allNewThreads.error) {
                 return {error: allNewThreads.error};
@@ -337,9 +352,6 @@ export const syncTeamThreads = async (serverUrl: string, teamId: string, prepare
                 // As we are syncing, we get all new threads and we will update the "latest" value.
                 const {latestThread} = getThreadsListEdges(allNewThreads.threads);
                 syncDataUpdate.latest = latestThread.last_reply_at;
-
-                // logTimestamp('latestThread.last_reply_at', latestThread.last_reply_at);
-
                 threads.push(...allNewThreads.threads);
             }
         }
