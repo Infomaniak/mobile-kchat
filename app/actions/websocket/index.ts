@@ -138,8 +138,6 @@ async function doReconnect(serverUrl: string) {
         await operator.batchRecords(models, 'doReconnect');
     }
 
-    await setLastFullSync(operator, now);
-
     const tabletDevice = isTablet();
     const isActiveServer = (await getActiveServerUrl()) === serverUrl;
     if (isActiveServer && tabletDevice && initialChannelId === currentChannelId) {
@@ -157,6 +155,10 @@ async function doReconnect(serverUrl: string) {
     const config = await getConfig(database);
 
     await deferredAppEntryActions(serverUrl, lastFullSync, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, initialTeamId);
+
+    // IK: fix threads read status (mobile vs desktop)
+    // last full sync should be set after all data has been loaded
+    await setLastFullSync(operator, now);
 
     openAllUnreadChannels(serverUrl);
 
