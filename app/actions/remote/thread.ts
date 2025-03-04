@@ -277,7 +277,7 @@ export const fetchThreads = async (
     return {error: false, threads: threadsData};
 };
 
-export const syncTeamThreads = async (serverUrl: string, teamId: string, prepareRecordsOnly = false, since = 0) => {
+export const syncTeamThreads = async (serverUrl: string, teamId: string, prepareRecordsOnly = false) => {
     try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const syncData = await getTeamThreadsSyncData(database, teamId);
@@ -325,17 +325,10 @@ export const syncTeamThreads = async (serverUrl: string, teamId: string, prepare
                 threads.push(...allUnreadThreads.threads);
             }
         } else {
-            // IK: for some reason on reconnect syncData.latest is already
-            // set to the latest thread > last reply at timestamp, and not to the last sync before going to sleep,
-            // as if syncing already happened somewhere else... this means that only the latest thread will be synced.
-            // to avoid this, on reconnect, take the last disconnect timestamp instead. =
-            // logTimestamp('since', since);
-            // logTimestamp('syncData?.latest', syncData?.latest);
-            const earliestSync = Math.min(since || syncData.latest + 1, syncData.latest + 1);
             const allNewThreads = await fetchThreads(
                 serverUrl,
                 teamId,
-                {deleted: true, since: earliestSync},
+                {deleted: true, since: syncData?.latest},
             );
             if (allNewThreads.error) {
                 return {error: allNewThreads.error};
