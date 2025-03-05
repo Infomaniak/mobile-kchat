@@ -193,7 +193,7 @@ export const ExtraKeyboard = () => {
         }
 
         return {
-            height,
+            height: Platform.OS === 'ios' ? height : 0,
             marginBottom,
         };
     }, [context, insets.bottom, offset, keyboardState, keyb.state.value]);
