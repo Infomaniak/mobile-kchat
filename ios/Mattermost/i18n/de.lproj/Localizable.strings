@@ -392,10 +392,19 @@ Bist du sicher, dass du **{displayName}**** in einen privaten Kanal umwandeln m�
 "infomaniak.post_info.post_translate.menu" = "Übersetzen";
 "infomaniak.size_quota_exceeded.description" = "Ihr Speicherplatz ist voll. Abonnieren Sie ein höheres Angebot, um weiterhin Dateien zu versenden.";
 "infomaniak.size_quota_exceeded.title" = "Erhöhen Sie den Speicherplatz in Ihrer kSuite";
-"infomanial.post.reminder.systemBot" = "Hallo, hier ist Ihre Erinnerung an diese Nachricht von {username}:
+"infomaniak.post.reminder.postpone" = "Erinnerung verschieben";
+"infomaniak.post.reminder.markAsCompleted" = "Als erledigt markieren";
+"infomaniak.post.reminder.systemBot" = "Hallo, hier ist Ihre Erinnerung an diese Nachricht von {username}:
 {permaLink}";
 "infomaniak.post.reminder.systemBot.today" = "um {time}";
 "infomaniak.post.reminder.systemBot.tomorrow" = "morgen um {time}";
+"infomaniak.post.welcome.action.send_message" = "<emoji>writing_hand</emoji> Write to someone";
+"infomaniak.post.welcome.action.browse_channels" = "<emoji>mag</emoji> Browse channels";
+"infomaniak.post.welcome.action.download_app" = "<span><emoji>computer</emoji><emoji>iphone</emoji></span> Download the apps";
+"infomaniak.post.welcome.line1" = "Hello! Happy to see you here and welcome <emoji>blush</emoji>";
+"infomaniak.post.welcome.line2" = "I'm here to answer your questions and send you reminders and notifications about your kSuite products when needed.";
+"infomaniak.post.welcome.line3" = "<b>To get started</b>, here are some quick actions to explore kChat";
+"infomaniak.post.welcome.line4" = "<emoji>arrow_down</emoji> Or <b>ask me a question</b> directly here!";
 "integration_selector.multiselect.submit" = "Erledigt";
 "interactive_dialog.submit" = "Absenden";
 "intro.add_members" = "Mitglieder hinzufügen";
@@ -1244,5 +1253,3 @@ Du kannst dies in den Benachrichtigungseinstellungen für jede Gruppennachricht 
 "your.servers" = "Deine Server";
 "your.teams" = "Deine Teams";
 "guest_banner.text" = "Es gibt {count} externe Benutzer in diesem Gespräch.";
-"infomaniak.post.reminder.postpone" = "Erinnerung verschieben";
-"infomaniak.post.reminder.markAsCompleted" = "Als erledigt markieren";

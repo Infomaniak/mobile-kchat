@@ -33,6 +33,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         body: {
             flexDirection: 'row',
             marginVertical: 18,
+            flexWrap: 'wrap',
         },
     };
 });

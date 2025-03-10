@@ -7,7 +7,7 @@ import {type StyleProp, View, type ViewStyle} from 'react-native';
 import FormattedDate from '@components/formatted_date';
 import FormattedText from '@components/formatted_text';
 import {useTheme} from '@context/theme';
-import {isSameYear, isToday, isYesterday} from '@utils/datetime';
+import {isToday, isYesterday} from '@utils/datetime';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
@@ -60,12 +60,9 @@ const RecentDate = (props: DateSeparatorProps) => {
         );
     }
 
-    const format = isSameYear(when, new Date()) ? 'MMM DD' : 'MMM DD, YYYY';
-
     return (
         <FormattedDate
             {...otherProps}
-            format={format}
             value={date}
         />
     );

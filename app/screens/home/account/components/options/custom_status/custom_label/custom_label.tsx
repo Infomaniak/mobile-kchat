@@ -39,7 +39,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         },
         retryMessage: {
             color: theme.errorTextColor,
-            paddingBottom: 25,
         },
     };
 });

@@ -1,7 +1,3 @@
-diff --git a/node_modules/react-native-reanimated/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin b/node_modules/react-native-reanimated/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin
-new file mode 100644
-index 0000000..1b7f461
-Binary files /dev/null and b/node_modules/react-native-reanimated/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin differ
 diff --git a/node_modules/react-native-reanimated/src/mock.ts b/node_modules/react-native-reanimated/src/mock.ts
 index cdc5e96..711c916 100644
 --- a/node_modules/react-native-reanimated/src/mock.ts
@@ -14,3 +10,23 @@ index cdc5e96..711c916 100644
    // useScrollViewOffset: ADD ME IF NEEDED
  };
  
+diff --git a/node_modules/react-native-reanimated/android/src/main/java/com/swmansion/reanimated/layoutReanimation/ReanimatedNativeHierarchyManager.java b/node_modules/react-native-reanimated/android/src/main/java/com/swmansion/reanimated/layoutReanimation/ReanimatedNativeHierarchyManager.java
+index 98d1d61..c0aa100 100644
+--- a/node_modules/react-native-reanimated/android/src/main/java/com/swmansion/reanimated/layoutReanimation/ReanimatedNativeHierarchyManager.java
++++ b/node_modules/react-native-reanimated/android/src/main/java/com/swmansion/reanimated/layoutReanimation/ReanimatedNativeHierarchyManager.java
+@@ -324,8 +324,13 @@ public class ReanimatedNativeHierarchyManager extends NativeViewHierarchyManager
+       @Nullable ViewAtIndex[] viewsToAdd,
+       @Nullable int[] tagsToDelete) {
+     if (isLayoutAnimationDisabled()) {
+-      super.manageChildren(tag, indicesToRemove, viewsToAdd, tagsToDelete);
+-      return;
++      try {
++        super.manageChildren(tag, indicesToRemove, viewsToAdd, tagsToDelete);
++        return;
++      } catch (Exception e) {
++        e.printStackTrace();
++        return;
++      }
+     }
+     ViewGroup viewGroup;
+     ViewGroupManager viewGroupManager;

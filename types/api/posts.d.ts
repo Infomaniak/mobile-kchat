@@ -16,7 +16,9 @@ type PostType =
     | 'system_join_leave'
     | 'system_leave_channel'
     | 'system_purpose_change'
-    | 'system_remove_from_channel';
+    | 'system_remove_from_channel'
+    | 'system_post_reminder'
+    | 'system_welcome_message';
 
 type PostEmbedType = 'image' | 'message_attachment' | 'opengraph' | 'permalink';
 

@@ -42,6 +42,7 @@ export const PostTypes: Record<string, string> = {
     VOICE_MESSAGE: 'voice',
 
     IK_SYSTEM_POST_REMINDER: 'system_post_reminder',
+    IK_SYSTEM_WELCOME_MESSAGE: 'system_welcome_message',
 };
 
 export const PostPriorityColors = {

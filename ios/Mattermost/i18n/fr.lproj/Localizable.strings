@@ -1142,6 +1142,13 @@ Vous pouvez le configurer dans les préférences des notification pour chaque me
 "infomaniak.post.reminder.systemBot.today" = "à {time}";
 "infomaniak.post.reminder.systemBot.tomorrow" = "demain à {time}";
 "infomaniak.post_info.post_translate.menu" = "Traduire";
+"infomaniak.post.welcome.action.send_message" = "<emoji>writing_hand</emoji> Écrire à quelqu’un";
+"infomaniak.post.welcome.action.browse_channels" = "<emoji>mag</emoji> Parcourir les canaux";
+"infomaniak.post.welcome.action.download_app" = "<span><emoji>computer</emoji><emoji>iphone</emoji></span> Télécharger les apps";
+"infomaniak.post.welcome.line1" = "Bonjour ! Heureux de vous voir ici et bienvenue <emoji>blush</emoji>";
+"infomaniak.post.welcome.line2" = "Je suis là pour répondre à vos questions et vous envoyer, quand nécessaire, vos rappels ainsi que des notifications sur vos produits kSuite.";
+"infomaniak.post.welcome.line3" = "<b>Pour bien démarrer</b>, voici quelques actions rapides pour explorer kChat";
+"infomaniak.post.welcome.line4" = "<emoji>arrow_down</emoji> Ou <b>posez-moi une question</b> directement ici !";
 "infomaniak.intro_messages.botGPT" = "{limit} requêtes ChatGPT quotidiennes sont gratuitement incluses avec kChat jusqu'au {day} décembre 2024 afin de vous permettre de comparer et tester la puissance de {botName}, notre IA souveraine. Avec {botName}, les données sont exclusivement traitées en Suisse sur les serveurs d'Infomaniak. En utilisant ChatGPT, les données sont envoyées et analysées sur les serveurs d'OpenAI aux Etats-Unis. Nous vous conseillons de ne pas partager des informations sensibles à ChatGPT et nous vous rappelons que les IA peuvent générer des informations inexactes, incomplètes ou trompeuses.";
 "infomaniak.intro_messages.botFalcon" = "{botName} est une IA souveraine. Les données sont traitées exclusivement en Suisse sur les serveurs d'Infomaniak. Nous vous rappelons que les informations générées par {botName} et les IA peuvent être inexactes, incomplètes ou trompeuses.";
 "user_status.away" = "En déplacement";

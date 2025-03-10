@@ -45,3 +45,21 @@ else
     mkdir -p "android/app/src/main/res/raw/"
     cp $SOUNDS/* "android/app/src/main/res/raw/"
 fi
+
+K_CHAT_SOUNDS="assets/base/sounds/"
+K_TONE_WAV="${K_CHAT_SOUNDS}/kchat-ringtone.wav"
+K_TONE_MP3="${K_CHAT_SOUNDS}/kchat-ringtone.mp3"
+JITSI_MODULE="node_modules/@jitsi/react-native-sdk/sounds"
+if [ -z "$K_CHAT_SOUNDS" ]; then
+    echo "Sounds to override not found"
+    exit 1
+else
+    echo "Overriding @jitsi/react-native-sdk sound assets for bundling"
+    if [ -z "$JITSI_MODULE" ]; then
+        echo "Jitsi module not found"
+        exit 1
+    else
+        cp $K_TONE_WAV ${JITSI_MODULE}/ring.wav
+        cp $K_TONE_MP3 ${JITSI_MODULE}/ring.mp3
+    fi
+fi
