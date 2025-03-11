@@ -176,7 +176,7 @@ export const ExtraKeyboard = () => {
         }
 
         return {
-            height: Platform.OS === 'ios' ? height : 0,
+            height,
             marginBottom,
         };
     }, [context, insets.bottom, offset]);
