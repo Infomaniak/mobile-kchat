@@ -2,12 +2,12 @@
 // See LICENSE.txt for license information.
 
 import React, {createContext, useCallback, useContext, useEffect, useState} from 'react';
-import {Keyboard, Platform, AccessibilityInfo} from 'react-native';
+import {Keyboard, Platform} from 'react-native';
 import Animated, {KeyboardState, useAnimatedKeyboard, useAnimatedStyle, useDerivedValue, withTiming} from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {Screens} from '@constants';
-import {useIsTablet, useKeyboardState} from '@hooks/device';
+import {useIsTablet} from '@hooks/device';
 import NavigationStore from '@store/navigation_store';
 import {preventDoubleTap} from '@utils/tap';
 
@@ -20,7 +20,6 @@ export type ExtraKeyboardContextProps = {
     hideExtraKeyboard: () => void;
     registerTextInputFocus: () => void;
     registerTextInputBlur: () => void;
-    crossFadeIsEnabled: boolean;
 };
 
 // This is based on the size of the tab bar
@@ -53,11 +52,6 @@ export const ExtraKeyboardProvider = (({children}: {children: React.ReactElement
     const [isExtraKeyboardVisible, setExtraKeyboardVisible] = useState(false);
     const [component, setComponent] = useState<React.ReactElement|null>(null);
     const [isTextInputFocused, setIsTextInputFocused] = useState(false);
-    const [crossFadeIsEnabled, setCrossFade] = useState(false);
-
-    useEffect(() => {
-        AccessibilityInfo.prefersCrossFadeTransitions().then(setCrossFade);
-    }, []);
 
     const showExtraKeyboard = useCallback((newComponent: React.ReactElement|null) => {
         setExtraKeyboardVisible(true);
@@ -109,7 +103,6 @@ export const ExtraKeyboardProvider = (({children}: {children: React.ReactElement
                 hideExtraKeyboard,
                 registerTextInputBlur,
                 registerTextInputFocus,
-                crossFadeIsEnabled,
             }}
         >
             {children}
@@ -155,7 +148,6 @@ export const ExtraKeyboard = () => {
     const context = useExtraKeyboardContext();
     const insets = useSafeAreaInsets();
     const offset = useOffetForCurrentScreen();
-    const keyboardState = useKeyboardState();
 
     const maxKeyboardHeight = useDerivedValue(() => {
         if (keyb.state.value === KeyboardState.OPEN) {
@@ -169,24 +161,15 @@ export const ExtraKeyboard = () => {
     const animatedStyle = useAnimatedStyle(() => {
         let height = keyb.height.value + offset;
 
-        const closeOrClosing = [KeyboardState.CLOSED, KeyboardState.CLOSING, KeyboardState.UNKNOWN].includes(keyb.state.value);
-        const openOrOpening = [KeyboardState.OPEN, KeyboardState.OPENING].includes(keyb.state.value);
+        const isClose = keyb.state.value === KeyboardState.CLOSED || keyb.state.value === KeyboardState.UNKNOWN;
+        const isCloseOrClosing = isClose || keyb.state.value === KeyboardState.CLOSING;
 
-        const marginBottom = withTiming(closeOrClosing ? insets.bottom : 0, {duration: 250});
-
-        // IK: If keyboard height calculated by react-native-reanimated
-        // is higher than what react-native got,
-        // It is highly a bug when in crossFade mode
-        // Resetting keyboard and closing it:
-        const shouldClose = context?.crossFadeIsEnabled && keyboardState === KeyboardState.CLOSED && openOrOpening;
-        if (shouldClose) {
-            keyb.state.value = KeyboardState.CLOSED;
-        }
+        const marginBottom = withTiming(isCloseOrClosing ? insets.bottom : 0, {duration: 250});
 
         if (keyb.height.value < 70) {
             height = 0; // When using a hw keyboard
         }
-        if (!shouldClose && context?.isExtraKeyboardVisible) {
+        if (context?.isExtraKeyboardVisible) {
             height = withTiming(maxKeyboardHeight.value, {duration: 250});
         } else if (keyb.state.value === KeyboardState.CLOSED || keyb.state.value === KeyboardState.UNKNOWN) {
             height = withTiming(0, {duration: 250});
@@ -196,7 +179,7 @@ export const ExtraKeyboard = () => {
             height: Platform.OS === 'ios' ? height : 0,
             marginBottom,
         };
-    }, [context, insets.bottom, offset, keyboardState, keyb.state.value]);
+    }, [context, insets.bottom, offset]);
 
     return (
         <Animated.View style={animatedStyle}>

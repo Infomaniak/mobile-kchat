@@ -1,20 +1,8 @@
-diff --git a/node_modules/react-native-reanimated/src/mock.ts b/node_modules/react-native-reanimated/src/mock.ts
-index cdc5e96..711c916 100644
---- a/node_modules/react-native-reanimated/src/mock.ts
-+++ b/node_modules/react-native-reanimated/src/mock.ts
-@@ -75,6 +75,7 @@ const hook = {
-   }),
-   // useFrameCallback: ADD ME IF NEEDED
-   useAnimatedKeyboard: () => ({ height: 0, state: 0 }),
-+  useReducedMotion: () => false
-   // useScrollViewOffset: ADD ME IF NEEDED
- };
- 
 diff --git a/node_modules/react-native-reanimated/android/src/main/java/com/swmansion/reanimated/layoutReanimation/ReanimatedNativeHierarchyManager.java b/node_modules/react-native-reanimated/android/src/main/java/com/swmansion/reanimated/layoutReanimation/ReanimatedNativeHierarchyManager.java
-index 98d1d61..c0aa100 100644
+index 32a24f3..f50a67c 100644
 --- a/node_modules/react-native-reanimated/android/src/main/java/com/swmansion/reanimated/layoutReanimation/ReanimatedNativeHierarchyManager.java
 +++ b/node_modules/react-native-reanimated/android/src/main/java/com/swmansion/reanimated/layoutReanimation/ReanimatedNativeHierarchyManager.java
-@@ -324,8 +324,13 @@ public class ReanimatedNativeHierarchyManager extends NativeViewHierarchyManager
+@@ -146,8 +146,13 @@ public class ReanimatedNativeHierarchyManager extends ReanimatedNativeHierarchyM
        @Nullable ViewAtIndex[] viewsToAdd,
        @Nullable int[] tagsToDelete) {
      if (isLayoutAnimationDisabled()) {
@@ -30,3 +18,23 @@ index 98d1d61..c0aa100 100644
      }
      ViewGroup viewGroup;
      ViewGroupManager viewGroupManager;
+diff --git a/node_modules/react-native-reanimated/src/mock.ts b/node_modules/react-native-reanimated/src/mock.ts
+index a6ff0ce..40c0192 100644
+--- a/node_modules/react-native-reanimated/src/mock.ts
++++ b/node_modules/react-native-reanimated/src/mock.ts
+@@ -31,6 +31,7 @@ import {
+   SensorType,
+   setUpTests,
+   SharedTransitionType,
++  useReducedMotion,
+   withReanimatedTimer,
+ } from './index';
+ 
+@@ -119,6 +120,7 @@ const hook = {
+   }),
+   // useFrameCallback: ADD ME IF NEEDED
+   useAnimatedKeyboard: () => ({ height: 0, state: 0 }),
++  useReducedMotion: () => false,
+   // useScrollViewOffset: ADD ME IF NEEDED
+ };
+ 

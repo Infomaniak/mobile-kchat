@@ -4,12 +4,9 @@
 import RNUtils, {type WindowDimensions} from '@mattermost/rnutils';
 import React, {type RefObject, useEffect, useRef, useState, useContext} from 'react';
 import {AppState, Keyboard, NativeEventEmitter, Platform, View} from 'react-native';
-import {KeyboardState} from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {DeviceContext} from '@context/device';
-
-import type {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 const utilsEmitter = new NativeEventEmitter(RNUtils);
 
@@ -83,53 +80,6 @@ export function useKeyboardHeight(round = false) {
     return round ? Math.round(height) : height;
 }
 
-export function useKeyboardState() {
-    const {height, duration} = useKeyboardHeightWithDuration();
-    const [state, setState] = useState<KeyboardState>(KeyboardState.UNKNOWN);
-
-    useEffect(() => {
-        let timeId: NodeJS.Timeout | undefined;
-        if (height) {
-            if (duration) {
-                setState(KeyboardState.OPENING);
-                timeId = setTimeout(setState, duration, KeyboardState.OPEN);
-            } else {
-                setState(KeyboardState.OPEN);
-            }
-        } else if (duration) {
-            setState(KeyboardState.CLOSING);
-            timeId = setTimeout(setState, duration, KeyboardState.CLOSED);
-        } else {
-            setState(KeyboardState.CLOSED);
-        }
-        return () => {
-            clearTimeout(timeId);
-        };
-    }, [height, duration]);
-
-    return state;
-}
-
-let LAST_KEYBOARD_HEIGHT = 0;
-
-export function useLastKeyboardHeight() {
-    const height = useKeyboardHeight(true);
-    const [lastHeight, setLastHeight] = useState(LAST_KEYBOARD_HEIGHT);
-
-    useEffect(() => {
-        setLastHeight((prev) => {
-            if (height && prev !== height) {
-                LAST_KEYBOARD_HEIGHT = Math.round(height);
-                return height;
-            }
-
-            return prev;
-        });
-    }, [height]);
-
-    return lastHeight;
-}
-
 export function useViewPosition(viewRef: RefObject<View>, deps: React.DependencyList = []) {
     const [modalPosition, setModalPosition] = useState(0);
     const isTablet = useIsTablet();
@@ -164,17 +114,4 @@ export function useKeyboardOverlap(viewRef: RefObject<View>, containerHeight: nu
     });
 
     return overlap;
-}
-
-export function useAvoidKeyboard(ref: RefObject<KeyboardAwareScrollView>, dimisher = 3) {
-    const height = useKeyboardHeight();
-
-    useEffect(() => {
-        let offsetY = height / dimisher;
-        if (offsetY < 80) {
-            offsetY = 0;
-        }
-
-        ref.current?.scrollToPosition(0, offsetY);
-    }, [height, dimisher, ref]);
 }
