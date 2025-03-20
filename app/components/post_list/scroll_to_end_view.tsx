@@ -89,9 +89,7 @@ const ScrollToEndView = ({
     const shouldAdjustBottom = (Platform.OS === 'ios') && isTablet && (location === Screens.THREAD) && !keyboardHeight;
     const bottomAdjustment = shouldAdjustBottom ? insets.bottom : 0;
 
-    const message = location === Screens.THREAD ?
-        intl.formatMessage({id: 'postList.scrollToBottom.newReplies', defaultMessage: 'New replies'}) :
-        intl.formatMessage({id: 'postList.scrollToBottom.newMessages', defaultMessage: 'New messages'});
+    const message = location === Screens.THREAD ? intl.formatMessage({id: 'postList.scrollToBottom.newReplies', defaultMessage: 'New replies'}) : intl.formatMessage({id: 'postList.scrollToBottom.newMessages', defaultMessage: 'New messages'});
 
     const animatedStyle = useAnimatedStyle(
         () => ({
@@ -100,7 +98,7 @@ const ScrollToEndView = ({
                     translateY: withTiming(showScrollToEndBtn ? -80 - keyboardOverlap - bottomAdjustment : 0, {duration: 300}),
                 },
             ],
-            maxWidth: withTiming(isNewMessage ? 169 : 40, {duration: 300}),
+            maxWidth: withTiming(isNewMessage ? dimensions.width * 0.75 : dimensions.width * 0.1, {duration: 300}),
         }),
         [showScrollToEndBtn, isNewMessage, keyboardOverlap, bottomAdjustment],
     );
@@ -120,7 +118,13 @@ const ScrollToEndView = ({
                         color={isNewMessage ? theme.buttonColor : changeOpacity(theme.centerChannelColor, 0.56)}
                     />
                     {isNewMessage && (
-                        <Text style={styles.newMessagesText}>{message}</Text>
+                        <Text
+                            style={styles.newMessagesText}
+                            numberOfLines={1}
+                            ellipsizeMode='tail'
+                        >
+                            {message}
+                        </Text>
                     )}
                 </Pressable>
             </Animated.View>
