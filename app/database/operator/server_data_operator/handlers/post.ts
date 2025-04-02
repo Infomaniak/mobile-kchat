@@ -6,16 +6,16 @@ import {Q} from '@nozbe/watermelondb';
 import {ActionType} from '@constants';
 import {MM_TABLES} from '@constants/database';
 import {buildDraftKey} from '@database/operator/server_data_operator/comparators';
-import {shouldUpdateFileRecord} from '@database/operator/server_data_operator/comparators/files';
 import {
     transformDraftRecord,
-    transformFileRecord,
     transformPostInThreadRecord,
     transformPostRecord,
     transformPostsInChannelRecord,
 } from '@database/operator/server_data_operator/transformers/post';
 import {getRawRecordPairs, getUniqueRawsBy, getValidRecordsForUpdate} from '@database/operator/utils/general';
 import {createPostsChain, getPostListEdges} from '@database/operator/utils/post';
+import FileModel from '@typings/database/models/servers/file';
+import {safeParseJSON} from '@utils/helpers';
 import {logWarning} from '@utils/log';
 
 import type ServerDataOperatorBase from '.';
@@ -23,7 +23,6 @@ import type Database from '@nozbe/watermelondb/Database';
 import type Model from '@nozbe/watermelondb/Model';
 import type {HandleDraftArgs, HandleFilesArgs, HandlePostsArgs, RecordPair} from '@typings/database/database';
 import type DraftModel from '@typings/database/models/servers/draft';
-import type FileModel from '@typings/database/models/servers/file';
 import type PostModel from '@typings/database/models/servers/post';
 import type PostsInChannelModel from '@typings/database/models/servers/posts_in_channel';
 import type PostsInThreadModel from '@typings/database/models/servers/posts_in_thread';
@@ -31,7 +30,6 @@ import type ReactionModel from '@typings/database/models/servers/reaction';
 
 const {
     DRAFT,
-    FILE,
     POST,
     POSTS_IN_CHANNEL,
     POSTS_IN_THREAD,
@@ -159,6 +157,7 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         const postsReactions: ReactionsPerPost[] = [];
         const pendingPostsToDelete: Post[] = [];
         const postsInThread: Record<string, Post[]> = {};
+        const receivedFilesSet = new Set<string>();
 
         // Let's process the post data
         for (const post of posts) {
@@ -180,7 +179,8 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
             // Process the metadata of each post
             if (post?.metadata && Object.keys(post?.metadata).length > 0) {
-                const data = post.metadata;
+                // parsing into json since notifications are sending metadata as a string
+                const data = safeParseJSON(post.metadata) as PostMetadata;
 
                 // Extracts reaction from post's metadata
                 if (data.reactions) {
@@ -202,6 +202,8 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
                 post.metadata = data;
             }
+
+            post.file_ids?.forEach((fileId) => receivedFilesSet.add(fileId));
         }
 
         // Get unique posts in case they are duplicated
@@ -218,8 +220,8 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             return result;
         }, new Set<string>());
 
+        const database: Database = this.database;
         if (deletedPostIds.size) {
-            const database: Database = this.database;
             const postsToDelete = await database.get<PostModel>(POST).query(Q.where('id', Q.oneOf(Array.from(deletedPostIds)))).fetch();
             if (postsToDelete.length) {
                 await database.write(async () => {
@@ -261,6 +263,13 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             batch.push(...postFiles);
         }
 
+        const allFiles = await database.get<FileModel>(MM_TABLES.SERVER.FILE).query(Q.where('post_id', Q.oneOf(uniquePosts.map((p) => p.id)))).fetch();
+        allFiles.forEach((f) => {
+            if (!receivedFilesSet.has(f.id)) {
+                batch.push(f.prepareDestroyPermanently());
+            }
+        });
+
         if (emojis.length) {
             const postEmojis = await this.handleCustomEmojis({emojis, prepareRecordsOnly: true});
             batch.push(...postEmojis);
@@ -289,47 +298,6 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         }
 
         return batch;
-    };
-
-    /**
-     * handleFiles: Handler responsible for the Create/Update operations occurring on the File table from the 'Server' schema
-     * @param {HandleFilesArgs} handleFiles
-     * @param {RawFile[]} handleFiles.files
-     * @param {boolean} handleFiles.prepareRecordsOnly
-     * @returns {Promise<FileModel[]>}
-     */
-    handleFiles = async ({files, prepareRecordsOnly}: HandleFilesArgs): Promise<FileModel[]> => {
-        if (!files?.length) {
-            logWarning(
-                'An empty or undefined "files" array has been passed to the handleFiles method',
-            );
-            return [];
-        }
-
-        const processedFiles = (await this.processRecords({
-            createOrUpdateRawValues: files,
-            tableName: FILE,
-            fieldName: 'id',
-            deleteRawValues: [],
-            shouldUpdate: shouldUpdateFileRecord,
-        }));
-
-        const postFiles = await this.prepareRecords({
-            createRaws: processedFiles.createRaws,
-            updateRaws: processedFiles.updateRaws,
-            transformer: transformFileRecord,
-            tableName: FILE,
-        });
-
-        if (prepareRecordsOnly) {
-            return postFiles;
-        }
-
-        if (postFiles?.length) {
-            await this.batchRecords(postFiles, 'handleFiles');
-        }
-
-        return postFiles;
     };
 
     /**
@@ -633,15 +601,15 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             return [];
         }
 
-        const update: RecordPair[] = [];
+        const update: Array<RecordPair<PostsInThreadModel, PostsInThread>> = [];
         const create: PostsInThread[] = [];
         const ids = Object.keys(postsMap);
         for await (const rootId of ids) {
             const {firstPost, lastPost} = getPostListEdges(postsMap[rootId]);
-            const chunks = (await this.database.get(POSTS_IN_THREAD).query(
+            const chunks = (await this.database.get<PostsInThreadModel>(POSTS_IN_THREAD).query(
                 Q.where('root_id', rootId),
                 Q.sortBy('latest', Q.desc),
-            ).fetch()) as PostsInThreadModel[];
+            ).fetch());
 
             if (chunks.length) {
                 const chunk = chunks[0];
@@ -665,12 +633,12 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             }
         }
 
-        const postInThreadRecords = (await this.prepareRecords({
+        const postInThreadRecords = await this.prepareRecords<PostsInThreadModel, PostsInThread>({
             createRaws: getRawRecordPairs(create),
             updateRaws: update,
             transformer: transformPostInThreadRecord,
             tableName: POSTS_IN_THREAD,
-        })) as PostsInThreadModel[];
+        });
 
         if (postInThreadRecords?.length && !prepareRecordsOnly) {
             await this.batchRecords(postInThreadRecords, 'handleReceivedPostsInThread');

@@ -12,12 +12,14 @@ import {Screens, Sso} from '@constants';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import NetworkManager from '@managers/network_manager';
+import SecurityManager from '@managers/security_manager';
 import Background from '@screens/background';
 import {dismissModal, popTopScreen, resetToHome} from '@screens/navigation';
 import {getFullErrorMessage, isErrorWithUrl} from '@utils/errors';
 import {logWarning} from '@utils/log';
 
 import SSOAuthentication from './sso_authentication';
+import SSOAuthenticationWithExternalBrowser from './sso_authentication_with_external_browser';
 
 import type {LaunchProps} from '@typings/launch';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -155,14 +157,29 @@ const SSO = ({
         theme,
     };
 
+    let authentication;
+    if (config.MobileExternalBrowser === 'true') {
+        authentication = (
+            <SSOAuthenticationWithExternalBrowser
+                {...props}
+            />
+        );
+    } else {
+        authentication = (
+            <SSOAuthentication
+                {...props}
+            />
+        );
+    }
+
     return (
-        <View style={styles.flex}>
+        <View
+            nativeID={SecurityManager.getShieldScreenId(componentId, false, true)}
+            style={styles.flex}
+        >
             <Background theme={theme}/>
             <AnimatedSafeArea style={[styles.flex, transform]}>
-                <SSOAuthentication
-                    {...props}
-                    serverUrl={serverUrl!}
-                />
+                {authentication}
             </AnimatedSafeArea>
         </View>
     );

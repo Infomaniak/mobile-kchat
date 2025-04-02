@@ -3,7 +3,7 @@
 
 // Check if calls is enabled. If it is, then run fn; if it isn't, show an alert and set
 // msgPostfix to ' (Not Available)'.
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {Platform} from 'react-native';
 import Permissions from 'react-native-permissions';
 
@@ -17,13 +17,15 @@ const micPermission = Platform.select({
 
 export const usePermissionsChecker = (micPermissionsGranted: boolean) => {
     const appState = useAppState();
+    const [hasPermission, setHasPermission] = useState(micPermissionsGranted);
 
     useEffect(() => {
         const asyncFn = async () => {
             if (appState === 'active') {
-                const hasPermission = (await Permissions.check(micPermission)) === Permissions.RESULTS.GRANTED;
-                if (hasPermission) {
-                    setMicPermissionsGranted(hasPermission);
+                const result = (await Permissions.check(micPermission)) === Permissions.RESULTS.GRANTED;
+                setHasPermission(result);
+                if (result) {
+                    setMicPermissionsGranted(result);
                 }
             }
         };
@@ -31,4 +33,6 @@ export const usePermissionsChecker = (micPermissionsGranted: boolean) => {
             asyncFn();
         }
     }, [appState]);
+
+    return hasPermission;
 };

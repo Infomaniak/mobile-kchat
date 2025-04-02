@@ -1,0 +1,32 @@
+diff --git a/node_modules/react-native-reanimated/android/src/main/java/com/swmansion/reanimated/layoutReanimation/ReanimatedNativeHierarchyManager.java b/node_modules/react-native-reanimated/android/src/main/java/com/swmansion/reanimated/layoutReanimation/ReanimatedNativeHierarchyManager.java
+index 32a24f3..f50a67c 100644
+--- a/node_modules/react-native-reanimated/android/src/main/java/com/swmansion/reanimated/layoutReanimation/ReanimatedNativeHierarchyManager.java
++++ b/node_modules/react-native-reanimated/android/src/main/java/com/swmansion/reanimated/layoutReanimation/ReanimatedNativeHierarchyManager.java
+@@ -146,8 +146,13 @@ public class ReanimatedNativeHierarchyManager extends ReanimatedNativeHierarchyM
+       @Nullable ViewAtIndex[] viewsToAdd,
+       @Nullable int[] tagsToDelete) {
+     if (isLayoutAnimationDisabled()) {
+-      super.manageChildren(tag, indicesToRemove, viewsToAdd, tagsToDelete);
+-      return;
++      try {
++        super.manageChildren(tag, indicesToRemove, viewsToAdd, tagsToDelete);
++        return;
++      } catch (Exception e) {
++        e.printStackTrace();
++        return;
++      }
+     }
+     ViewGroup viewGroup;
+     ViewGroupManager viewGroupManager;
+diff --git a/node_modules/react-native-reanimated/src/mock.ts b/node_modules/react-native-reanimated/src/mock.ts
+index 3d8e3f8..b32d457 100644
+--- a/node_modules/react-native-reanimated/src/mock.ts
++++ b/node_modules/react-native-reanimated/src/mock.ts
+@@ -114,6 +114,7 @@ const hook = {
+   }),
+   // useFrameCallback: ADD ME IF NEEDED
+   useAnimatedKeyboard: () => ({ height: 0, state: 0 }),
++  useReducedMotion: () => false,
+   // useScrollViewOffset: ADD ME IF NEEDED
+ };
+ 

@@ -12,7 +12,7 @@ require File.join(File.dirname(`node --print "require.resolve('expo/package.json
 node_require('react-native/scripts/react_native_pods.rb')
 node_require('react-native-permissions/scripts/setup.rb')
 
-platform :ios, '13.4'
+platform :ios, '15.1' #min_ios_version_supported
 prepare_react_native_project!
 
 setup_permissions([
@@ -36,14 +36,17 @@ target 'kChat' do
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
+    :hermes_enabled => false
   )
 
   pod 'React-jsi', :path => '../node_modules/react-native/ReactCommon/jsi', :modular_headers => true
   pod 'React-jsc', :path => '../node_modules/react-native/ReactCommon/jsc', :modular_headers => true
   pod 'simdjson', path: '../node_modules/@nozbe/simdjson', :modular_headers => true
+  pod 'CocoaLumberjack', :modular_headers => true
+  pod 'TurboLogIOSNative', :git => 'https://github.com/larkox/react-native-turbo-log-ios-native.git', :modular_headers => true
 
-  pod 'JitsiMeetSDKLite', '9.2.2-lite'
+  pod 'JitsiMeetSDKLite', '11.1.3-lite'
 
   post_install do |installer|
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
@@ -52,11 +55,12 @@ target 'kChat' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
-  
+
     # Xcode 14 fix
     installer.generated_projects.each do |project|
       project.targets.each do |target|
         target.build_configurations.each do |config|
+          # config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
           config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
           config.build_settings['ENABLE_BITCODE'] = 'NO'
         
@@ -68,3 +72,7 @@ target 'kChat' do
     end
   end
 end
+
+# target 'NotificationService' do
+#   pod 'TurboLogIOSNative', :git => 'https://github.com/larkox/react-native-turbo-log-ios-native.git', :modular_headers => true
+# end

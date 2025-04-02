@@ -8,6 +8,10 @@ export interface DeepLink {
     teamName: string;
 }
 
+export interface DeepLinkServer {
+    serverUrl: string;
+}
+
 export interface DeepLinkChannel extends DeepLink {
     channelName: string;
 }
@@ -40,7 +44,7 @@ export type DeepLinkType = typeof DeepLink[keyof typeof DeepLink];
 export interface DeepLinkWithData {
     type: DeepLinkType;
     url: string;
-    data?: DeepLinkChannel | DeepLinkDM | DeepLinkGM | DeepLinkPermalink | DeepLinkPlugin | DeepLinkConference;
+    data?: DeepLinkChannel | DeepLinkDM | DeepLinkGM | DeepLinkPermalink | DeepLinkPlugin | DeepLinkConference | DeepLinkServer;
 }
 
 export type LaunchType = typeof Launch[keyof typeof Launch];

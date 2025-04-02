@@ -12,9 +12,31 @@ import {DatabaseType, MIGRATION_EVENTS, MM_TABLES} from '@constants/database';
 import AppDatabaseMigrations from '@database/migration/app';
 import ServerDatabaseMigrations from '@database/migration/server';
 import {InfoModel, GlobalModel, ServersModel} from '@database/models/app';
-import {CategoryModel, CategoryChannelModel, ChannelModel, ChannelInfoModel, ChannelMembershipModel, ConferenceModel, ConferenceParticipantModel,
-    CustomEmojiModel, DraftModel, FileModel, GroupModel, GroupChannelModel, GroupTeamModel, GroupMembershipModel, MyChannelModel,
-    MyChannelSettingsModel, MyTeamModel, PostModel, PostsInChannelModel, PostsInThreadModel, PreferenceModel, ReactionModel, RoleModel,
+import {
+    CategoryModel,
+    CategoryChannelModel,
+    ChannelModel,
+    ChannelBookmarkModel,
+    ChannelInfoModel,
+    ChannelMembershipModel,
+    ConferenceModel,
+    ConferenceParticipantModel,
+    CustomEmojiModel,
+    DraftModel,
+    FileModel,
+    GroupModel,
+    GroupChannelModel,
+    GroupTeamModel,
+    GroupMembershipModel,
+    MyChannelModel,
+    MyChannelSettingsModel,
+    MyTeamModel,
+    PostModel,
+    PostsInChannelModel,
+    PostsInThreadModel,
+    PreferenceModel,
+    ReactionModel,
+    RoleModel,
     SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
     ThreadModel, ThreadParticipantModel, ThreadInTeamModel, TeamThreadsSyncModel, UserModel, ConfigModel,
 } from '@database/models/server';
@@ -34,7 +56,7 @@ import type {AppDatabase, CreateServerDatabaseArgs, RegisterServerDatabaseArgs, 
 const {SERVERS} = MM_TABLES.APP;
 const APP_DATABASE = 'app';
 
-class DatabaseManager {
+class DatabaseManagerSingleton {
     public appDatabase?: AppDatabase;
     public serverDatabases: ServerDatabases = {};
     private readonly appModels: Models;
@@ -44,7 +66,7 @@ class DatabaseManager {
     constructor() {
         this.appModels = [InfoModel, GlobalModel, ServersModel];
         this.serverModels = [
-            CategoryModel, CategoryChannelModel, ChannelModel, ChannelInfoModel, ChannelMembershipModel, ConfigModel, CustomEmojiModel,
+            CategoryModel, CategoryChannelModel, ChannelModel, ChannelBookmarkModel, ChannelInfoModel, ChannelMembershipModel, ConfigModel, CustomEmojiModel,
             ConferenceModel, ConferenceParticipantModel, DraftModel, FileModel, GroupModel, GroupChannelModel, GroupTeamModel,
             GroupMembershipModel, MyChannelModel, MyChannelSettingsModel, MyTeamModel, PostModel, PostsInChannelModel, PostsInThreadModel,
             PreferenceModel, ReactionModel, RoleModel, SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
@@ -554,4 +576,5 @@ if (!__DEV__) {
     logger.silence();
 }
 
-export default new DatabaseManager();
+const DatabaseManager = new DatabaseManagerSingleton();
+export default DatabaseManager;

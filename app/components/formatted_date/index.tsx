@@ -8,7 +8,6 @@ import {Text, type TextProps} from 'react-native';
 import formatDateTime from '@utils/format_datetime';
 
 type FormattedDateProps = TextProps & {
-    format?: string;
     timezone?: string | UserTimezone | null;
     value: number | string | Date;
 }

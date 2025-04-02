@@ -2,7 +2,8 @@
 // See LICENSE.txt for license information.
 
 import NetInfo from '@react-native-community/netinfo';
-import {DeviceEventEmitter} from 'react-native';
+import {defineMessages, type IntlShape} from 'react-intl';
+import {Alert, DeviceEventEmitter, type AlertButton} from 'react-native';
 
 import {Database, Events} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
@@ -23,6 +24,33 @@ import type {LoginArgs} from '@typings/database/database';
 
 const HTTP_UNAUTHORIZED = 401;
 
+const logoutMessages = defineMessages({
+    title: {
+        id: 'logout.fail.title',
+        defaultMessage: 'Logout not complete',
+    },
+    bodyForced: {
+        id: 'logout.fail.message.forced',
+        defaultMessage: 'We could not log you out of the server. Some data may continue to be accessible to this device once the device goes back online.',
+    },
+    body: {
+        id: 'logout.fail.message',
+        defaultMessage: 'You’re not fully logged out. Some data may continue to be accessible to this device once the device goes back online. What do you want to do?',
+    },
+    cancel: {
+        id: 'logout.fail.cancel',
+        defaultMessage: 'Cancel',
+    },
+    continue: {
+        id: 'logout.fail.continue_anyway',
+        defaultMessage: 'Continue Anyway',
+    },
+    ok: {
+        id: 'logout.fail.ok',
+        defaultMessage: 'OK',
+    },
+});
+
 export const addPushProxyVerificationStateFromLogin = async (serverUrl: string) => {
     try {
         const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
@@ -38,23 +66,27 @@ export const addPushProxyVerificationStateFromLogin = async (serverUrl: string) 
         if (systems.length) {
             await operator.handleSystem({systems, prepareRecordsOnly: false});
         }
+
+        return {};
     } catch (error) {
         logDebug('error setting the push proxy verification state on login', error);
+        return {error};
     }
 };
 export const forceLogoutIfNecessary = async (serverUrl: string, err: unknown) => {
     const database = DatabaseManager.serverDatabases[serverUrl]?.database;
     if (!database) {
-        return {error: `${serverUrl} database not found`};
+        return {error: `${serverUrl} database not found`, logout: false};
     }
 
     const currentUserId = await getCurrentUserId(database);
 
     if (isErrorWithStatusCode(err) && err.status_code === HTTP_UNAUTHORIZED && isErrorWithUrl(err) && err.url?.indexOf('/login') === -1 && currentUserId) {
-        await logout(serverUrl);
+        await logout(serverUrl, undefined, {skipServerLogout: true});
+        return {error: null, logout: true};
     }
 
-    return {error: null};
+    return {error: null, logout: false};
 };
 
 export const fetchSessions = async (serverUrl: string, currentUserId: string) => {
@@ -129,8 +161,24 @@ export const login = async (serverUrl: string, {ldapOnly = false, loginId, mfaTo
     }
 };
 
-export const logout = async (serverUrl: string, skipServerLogout = false, removeServer = false, skipEvents = false) => {
+type LogoutOptions = {
+    skipServerLogout?: boolean;
+    removeServer?: boolean;
+    skipEvents?: boolean;
+    logoutOnAlert?: boolean;
+};
+
+export const logout = async (
+    serverUrl: string,
+    intl: IntlShape | undefined,
+    {
+        skipServerLogout = false,
+        removeServer = false,
+        skipEvents = false,
+        logoutOnAlert = false,
+    }: LogoutOptions = {}) => {
     if (!skipServerLogout) {
+        let loggedOut = false;
         const appDatabase = DatabaseManager.appDatabase?.database;
         const serverCredentials = await getAllServerCredentials();
         for (const credential of serverCredentials) {
@@ -143,17 +191,50 @@ export const logout = async (serverUrl: string, skipServerLogout = false, remove
                     deviceToken = await getDeviceToken();
                 }
                 // eslint-disable-next-line no-await-in-loop
-                await client.logout(deviceToken);
+                const response = await client.logout(deviceToken);
+                if (response.status === 'OK') {
+                    loggedOut = true;
+                }
             } catch (error) {
                 // We want to log the user even if logging out from the server failed
                 logWarning('An error occurred logging out from the server', savedServerUrl, error);
             }
         }
+
+        if (!loggedOut) {
+            const title = intl?.formatMessage(logoutMessages.title) || logoutMessages.title.defaultMessage;
+
+            const bodyMessage = logoutOnAlert ? logoutMessages.bodyForced : logoutMessages.body;
+            const confirmMessage = logoutOnAlert ? logoutMessages.ok : logoutMessages.continue;
+            const body = intl?.formatMessage(bodyMessage) || bodyMessage.defaultMessage;
+            const cancel = intl?.formatMessage(logoutMessages.cancel) || logoutMessages.cancel.defaultMessage;
+            const confirm = intl?.formatMessage(confirmMessage) || confirmMessage.defaultMessage;
+
+            const buttons: AlertButton[] = logoutOnAlert ? [] : [{text: cancel, style: 'cancel'}];
+            buttons.push({
+                text: confirm,
+                onPress: logoutOnAlert ? undefined : () => {
+                    logout(serverUrl, intl, {skipEvents, removeServer, logoutOnAlert, skipServerLogout: true});
+                },
+            });
+            Alert.alert(
+                title,
+                body,
+                buttons,
+            );
+
+            if (!logoutOnAlert) {
+                return {data: false};
+            }
+        }
+
         if (!skipEvents) {
             DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl, removeServer});
         }
         NetworkManager.invalidateGlobalClient();
     }
+
+    return {data: true};
 };
 
 export const cancelSessionNotification = async (serverUrl: string) => {
@@ -172,8 +253,11 @@ export const cancelSessionNotification = async (serverUrl: string) => {
                 prepareRecordsOnly: false,
             });
         }
+
+        return {};
     } catch (e) {
         logError('cancelSessionNotification', e);
+        return {error: e};
     }
 };
 

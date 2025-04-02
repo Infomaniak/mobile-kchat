@@ -4,7 +4,7 @@
 import React from 'react';
 import Svg, {Path, Circle} from 'react-native-svg';
 
-import {isDarkTheme} from '@app/utils/theme';
+import {isDarkTheme} from '@utils/theme';
 
 type Props = {
     theme: Theme;

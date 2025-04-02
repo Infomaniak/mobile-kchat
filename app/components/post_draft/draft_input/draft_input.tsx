@@ -7,11 +7,11 @@ import Permissions, {openSettings} from 'react-native-permissions';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {userTyping} from '@actions/websocket/users';
-import GuestBanner from '@app/components/guest_banner';
-import {logInfo} from '@app/utils/log';
+import GuestBanner from '@components/guest_banner';
 import QuickActions from '@components/post_draft/quick_actions';
 import PostPriorityLabel from '@components/post_priority/post_priority_label';
 import {useTheme} from '@context/theme';
+import {logInfo} from '@utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import RecordAction from '../record_action';
@@ -26,6 +26,7 @@ import type {PasteInputRef} from '@mattermost/react-native-paste-input';
 type Props = {
     testID?: string;
     channelId: string;
+
     rootId?: string;
     currentUserId: string;
     voiceMessageEnabled: boolean;
@@ -59,12 +60,31 @@ const SAFE_AREA_VIEW_EDGES: Edge[] = ['left', 'right'];
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
     return {
+        actionsContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingBottom: Platform.select({
+                ios: 1,
+                android: 2,
+            }),
+        },
         inputContainer: {
             flex: 1,
             flexDirection: 'column',
         },
         inputContentContainer: {
             alignItems: 'stretch',
+            paddingTop: Platform.select({
+                ios: 7,
+                android: 0,
+            }),
+        },
+        sendVoiceMessage: {
+            position: 'absolute',
+            right: -5,
+            top: 16,
         },
         inputWrapper: {
             alignItems: 'flex-end',
@@ -79,21 +99,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             borderTopRightRadius: 12,
             overflow: 'hidden',
         },
-        actionsContainer: {
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingBottom: Platform.select({
-                ios: 1,
-                android: 2,
-            }),
-        },
-        sendVoiceMessage: {
-            position: 'absolute',
-            right: -5,
-            top: 16,
-        },
         postPriorityLabel: {
             marginLeft: 12,
             marginTop: Platform.select({
@@ -105,31 +110,30 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
 });
 
 export default function DraftInput({
-    addFiles,
-    canSend,
+    testID,
     channelId,
     currentUserId,
-    cursorPosition,
     canShowPostPriority,
     files,
     maxMessageLength,
     rootId = '',
-    sendMessage,
-    testID,
-    updateCursorPosition,
-    updatePostInputTop,
-    updateValue,
-    uploadFileError,
     value,
-    voiceMessageEnabled,
+    uploadFileError,
+    sendMessage,
+    canSend,
+    updateValue,
+    addFiles,
+    updateCursorPosition,
+    cursorPosition,
+    updatePostInputTop,
     postPriority,
     updatePostPriority,
     setIsFocused,
+    voiceMessageEnabled,
     serverUrl,
 }: Props) {
-    const [recording, setRecording] = useState(false);
     const theme = useTheme();
-    const style = getStyleSheet(theme);
+    const [recording, setRecording] = useState(false);
 
     const handleLayout = useCallback((e: LayoutChangeEvent) => {
         updatePostInputTop(e.nativeEvent.layout.height);
@@ -188,6 +192,8 @@ export default function DraftInput({
     const sendActionTestID = `${testID}.send_action`;
     const recordActionTestID = `${testID}.record_action`;
 
+    const style = getStyleSheet(theme);
+
     const getActionButton = useCallback(() => {
         if (value.length === 0 && files.length === 0 && voiceMessageEnabled) {
             return (
@@ -232,15 +238,15 @@ export default function DraftInput({
                 testID={testID}
             >
                 <ScrollView
-                    contentContainerStyle={style.inputContentContainer}
-                    disableScrollViewPanResponder={true}
-                    keyboardShouldPersistTaps={'always'}
-                    overScrollMode={'never'}
-                    pinchGestureEnabled={false}
-                    scrollEnabled={false}
-                    showsHorizontalScrollIndicator={false}
-                    showsVerticalScrollIndicator={false}
                     style={style.inputContainer}
+                    contentContainerStyle={style.inputContentContainer}
+                    keyboardShouldPersistTaps={'always'}
+                    scrollEnabled={false}
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    pinchGestureEnabled={false}
+                    overScrollMode={'never'}
+                    disableScrollViewPanResponder={true}
                 >
                     <GuestBanner channelId={channelId}/>
                     {Boolean(postPriority?.priority) && (

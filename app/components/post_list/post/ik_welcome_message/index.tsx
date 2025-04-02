@@ -4,13 +4,13 @@ import {useIntl} from 'react-intl';
 import {Text, View} from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 
-import Emoji from '@app/components/emoji/emoji';
-import {buttonBackgroundStyle} from '@app/utils/buttonStyles';
 import CompassIcon from '@components/compass_icon';
+import Emoji from '@components/emoji/emoji';
 import FormattedText from '@components/formatted_text';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {showModal} from '@screens/navigation';
+import {buttonBackgroundStyle} from '@utils/buttonStyles';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 

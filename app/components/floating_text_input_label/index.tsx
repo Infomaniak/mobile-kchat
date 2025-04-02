@@ -59,7 +59,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         maxWidth: 315,
     },
     readOnly: {
-        backgroundColor: changeOpacity(theme.centerChannelBg, 0.16),
+        backgroundColor: changeOpacity(theme.centerChannelColor, 0.16),
     },
     smallLabel: {
         fontSize: 10,
@@ -224,6 +224,7 @@ const FloatingTextInput = forwardRef<FloatingTextInputRef, FloatingTextInputProp
         }
 
         return res;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [styles, theme, shouldShowError, focused, textInputStyle, focusedLabel, multiline, multilineInputHeight, editable]);
 
     const textAnimatedTextStyle = useAnimatedStyle(() => {
@@ -255,7 +256,7 @@ const FloatingTextInput = forwardRef<FloatingTextInputRef, FloatingTextInputProp
                 >
                     {label}
                 </Animated.Text>
-                <View style={combinedTextInputContainerStyle}>
+                <View style={combinedTextInputContainerStyle as StyleProp<ViewStyle>}>
                     <TextInput
                         {...props}
                         editable={isKeyboardInput && editable}

@@ -14,12 +14,13 @@ import {doPing} from '@actions/remote/general';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
 import LocalConfig from '@assets/config.json';
 import AppVersion from '@components/app_version';
-import {Screens, Launch} from '@constants';
+import {Screens, Launch, DeepLink} from '@constants';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {t} from '@i18n';
 import {getServerCredentials} from '@init/credentials';
 import PushNotifications from '@init/push_notifications';
 import NetworkManager from '@managers/network_manager';
+import SecurityManager from '@managers/security_manager';
 import {getServerByDisplayName, getServerByIdentifier} from '@queries/app/servers';
 import Background from '@screens/background';
 import {dismissModal, goToScreen, loginAnimationOptions, popTopScreen} from '@screens/navigation';
@@ -136,7 +137,7 @@ const Server = ({
             // If no other servers are allowed or the local config for AutoSelectServerUrl is set, attempt to connect
             handleConnect(managedConfig?.serverUrl || LocalConfig.DefaultServerUrl);
         }
-    }, [managedConfig?.allowOtherServers, managedConfig?.serverUrl, managedConfig?.serverName]);
+    }, [managedConfig?.allowOtherServers, managedConfig?.serverUrl, managedConfig?.serverName, defaultServerUrl]);
 
     useEffect(() => {
         if (url && displayName) {
@@ -208,6 +209,12 @@ const Server = ({
         if (redirectSSO) {
             // @ts-expect-error ssoType not in definition
             passProps.ssoType = enabledSSOs[0];
+        }
+
+        // if deeplink is of type server removing the deeplink info on new login
+        if (extra?.type === DeepLink.Server) {
+            passProps.extra = undefined;
+            passProps.launchType = Launch.Normal;
         }
 
         goToScreen(screen, '', passProps, loginAnimationOptions());
@@ -334,6 +341,22 @@ const Server = ({
             return;
         }
 
+        if (data.config.MobileJailbreakProtection === 'true') {
+            const isJailbroken = await SecurityManager.isDeviceJailbroken(ping.url, data.config.SiteName);
+            if (isJailbroken) {
+                setConnecting(false);
+                return;
+            }
+        }
+
+        if (data.config.MobileEnableBiometrics === 'true') {
+            const biometricsResult = await SecurityManager.authenticateWithBiometrics(ping.url, data.config.SiteName);
+            if (!biometricsResult) {
+                setConnecting(false);
+                return;
+            }
+        }
+
         const server = await getServerByIdentifier(data.config.DiagnosticId);
         const credentials = await getServerCredentials(ping.url);
         setConnecting(false);
@@ -361,6 +384,7 @@ const Server = ({
         <View
             style={styles.flex}
             testID='server.screen'
+            nativeID={SecurityManager.getShieldScreenId(componentId, false, true)}
         >
             <Background theme={theme}/>
             <AnimatedSafeArea
@@ -370,7 +394,7 @@ const Server = ({
                 <KeyboardAwareScrollView
                     bounces={false}
                     contentContainerStyle={styles.scrollContainer}
-                    enableAutomaticScroll={Platform.OS === 'android'}
+                    enableAutomaticScroll={false}
                     enableOnAndroid={false}
                     enableResetScrollToCoords={true}
                     extraScrollHeight={20}
@@ -394,7 +418,6 @@ const Server = ({
                         handleConnect={handleConnect}
                         handleDisplayNameTextChanged={handleDisplayNameTextChanged}
                         handleUrlTextChanged={handleUrlTextChanged}
-                        isModal={isModal}
                         keyboardAwareRef={keyboardAwareRef}
                         theme={theme}
                         url={url}

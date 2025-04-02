@@ -4,8 +4,9 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Text} from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
-// import SettingOption from '@app/components/settings/option';
+// import SettingOption from '@components/settings/option';
 // import SettingSeparator from '@components/settings/separator';
 // import ReplySettings from '@screens/settings/notification_mention/reply_settings';
 
@@ -35,6 +36,7 @@ const COMMA_KEY = ',';
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
     return {
+        flex: {flex: 1},
         input: {
             color: theme.centerChannelColor,
             paddingHorizontal: 25,
@@ -196,6 +198,7 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
         // replyNotificationType,
         serverUrl,
         currentUser,
+        close,
     ]);
 
     const toggleInputVisibility = useCallback(() => {
@@ -272,7 +275,17 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
     useAndroidHardwareBackHandler(componentId, saveMention);
 
     return (
-        <>
+        <KeyboardAwareScrollView
+            bounces={false}
+            enableAutomaticScroll={true}
+            enableOnAndroid={true}
+            keyboardShouldPersistTaps='handled'
+            keyboardDismissMode='none'
+            scrollToOverflowEnabled={true}
+
+            // noPaddingBottomOnAndroid={true}
+            style={styles.flex}
+        >
             <SettingBlock
                 headerText={mentionHeaderText}
                 addButton={true}
@@ -356,7 +369,7 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
                     setReplyNotificationType={setReplyNotificationType}
                 />
             )} */}
-        </>
+        </KeyboardAwareScrollView>
     );
 };
 

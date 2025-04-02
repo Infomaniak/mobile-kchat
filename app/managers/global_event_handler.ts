@@ -7,8 +7,6 @@ import semver from 'semver';
 
 import {switchToChannelById} from '@actions/remote/channel';
 import {switchToConferenceByChannelId} from '@actions/remote/conference';
-import CallManager, {CallAnsweredEvent, CallEndedEvent, CallMutedEvent, CallVideoMutedEvent} from '@app/store/CallManager';
-import {logError} from '@app/utils/log';
 import {Device, Events, Sso} from '@constants';
 import {MIN_REQUIRED_VERSION} from '@constants/supported_server';
 import DatabaseManager from '@database/manager';
@@ -19,15 +17,17 @@ import {queryTeamDefaultChannel} from '@queries/servers/channel';
 import {getCommonSystemValues} from '@queries/servers/system';
 import {getTeamChannelHistory} from '@queries/servers/team';
 import {setScreensOrientation} from '@screens/navigation';
+import CallManager, {CallAnsweredEvent, CallEndedEvent, CallMutedEvent, CallVideoMutedEvent} from '@store/CallManager';
 import {alertInvalidDeepLink, handleDeepLink} from '@utils/deep_link';
 import {getIntlShape} from '@utils/general';
+import {logError} from '@utils/log';
 
 type LinkingCallbackArg = {url: string};
 
 const callManagerEmitter = new NativeEventEmitter(NativeModules.CallManagerModule);
 const splitViewEmitter = new NativeEventEmitter(RNUtils);
 
-class GlobalEventHandler {
+class GlobalEventHandlerSingleton {
     JavascriptAndNativeErrorHandler: jsAndNativeErrorHandler | undefined;
 
     constructor() {
@@ -67,7 +67,7 @@ class GlobalEventHandler {
         }
 
         if (event.url) {
-            const {error} = await handleDeepLink(event.url);
+            const {error} = await handleDeepLink(event.url, undefined, undefined, true);
             if (error) {
                 alertInvalidDeepLink(getIntlShape(DEFAULT_LOCALE));
             }
@@ -179,4 +179,5 @@ class GlobalEventHandler {
     };
 }
 
-export default new GlobalEventHandler();
+const GlobalEventHandler = new GlobalEventHandlerSingleton();
+export default GlobalEventHandler;

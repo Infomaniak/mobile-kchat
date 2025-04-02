@@ -39,7 +39,7 @@ interface FormatDateTimeProps {
     comparisonDate?: Date;
 }
 
-export function getDateParts(value: Date, timeZone?: string, comparisonDate = new Date()): ResolvedFormats['date'] {
+export function getDateParts(value: Date, comparisonDate = new Date()): ResolvedFormats['date'] {
     if (isSameYear(value, comparisonDate)) {
         return {weekday: 'long', day: '2-digit', month: 'long'};
     }
@@ -56,7 +56,7 @@ export function formatDateTime(value: string | number | Date, options = defaultD
     const {capitalize, locale, comparisonDate} = options;
     const timeZone = options.timeZone || undefined;
     const date = new Date(value);
-    const dateTime = new Intl.DateTimeFormat(locale, {timeZone, ...getDateParts(date, timeZone, comparisonDate)}).format(date);
+    const dateTime = new Intl.DateTimeFormat(locale, {timeZone, ...getDateParts(date, comparisonDate)}).format(date);
 
     // French is not capitalized
     return capitalize ? toCapitalized(dateTime) : dateTime;

@@ -27,6 +27,11 @@ class RNUtilsModule(val reactContext: ReactApplicationContext) : NativeRNUtilsSp
 
     override fun isRunningInSplitView(): WritableMap? = implementation.isRunningInSplitView()
 
+    override fun getWindowDimensions(): WritableMap? = implementation.getWindowDimensions()
+
+    override fun setHasRegisteredLoad() = implementation.setHasRegisteredLoad()
+    override fun getHasRegisteredLoad(): WritableMap = implementation.getHasRegisteredLoad()
+
     override fun unlockOrientation() {
         implementation.unlockOrientation()
     }
@@ -61,5 +66,13 @@ class RNUtilsModule(val reactContext: ReactApplicationContext) : NativeRNUtilsSp
 
     override fun removeServerNotifications(serverUrl: String?) {
         implementation.removeServerNotifications(serverUrl)
+    }
+
+    override fun setSoftKeyboardToAdjustResize() {
+        implementation.setSoftKeyboardToAdjustResize()
+    }
+
+    override fun setSoftKeyboardToAdjustNothing() {
+        implementation.setSoftKeyboardToAdjustNothing()
     }
 }

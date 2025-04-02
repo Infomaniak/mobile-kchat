@@ -31,6 +31,10 @@ jest.mock('expo-application', () => {
     };
 });
 
+jest.mock('expo-crypto', () => ({
+    randomUUID: jest.fn(() => '12345678-1234-1234-1234-1234567890ab'),
+}));
+
 jest.mock('expo-device', () => {
     return {
         deviceName: 'Device',
@@ -69,6 +73,7 @@ jest.mock('@nozbe/watermelondb/utils/common/randomId/randomId', () => ({}));
 jest.mock('@database/manager');
 jest.doMock('react-native', () => {
     const {
+        AppState: RNAppState,
         Platform,
         StyleSheet,
         requireNativeComponent,
@@ -81,6 +86,13 @@ jest.doMock('react-native', () => {
     const Alert = {
         ...RNAlert,
         alert: jest.fn(),
+    };
+
+    const AppState = {
+        ...RNAppState,
+        addEventListener: jest.fn(() => ({
+            remove: jest.fn(),
+        })),
     };
 
     const InteractionManager = {
@@ -145,11 +157,15 @@ jest.doMock('react-native', () => {
             addListener: jest.fn(),
             removeListeners: jest.fn(),
             isRunningInSplitView: jest.fn().mockReturnValue({isSplit: false, isTablet: false}),
+            getHasRegisteredLoad: jest.fn().mockReturnValue({hasRegisteredLoad: false}),
+            setHasRegisteredLoad: jest.fn(),
 
             getDeliveredNotifications: jest.fn().mockResolvedValue([]),
             removeChannelNotifications: jest.fn().mockImplementation(),
             removeThreadNotifications: jest.fn().mockImplementation(),
             removeServerNotifications: jest.fn().mockImplementation(),
+
+            unlockOrientation: jest.fn(),
         },
         APIClient: {
             getConstants: () => ({
@@ -206,10 +222,12 @@ jest.doMock('react-native', () => {
                     minor: 64,
                 },
             },
+            select: jest.fn((dict) => dict.ios || dict.default),
         },
         StyleSheet,
         requireNativeComponent,
         Alert,
+        AppState,
         InteractionManager,
         NativeModules,
         Linking,
@@ -231,7 +249,6 @@ jest.mock('react-native-vector-icons', () => {
     };
 });
 
-jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
 jest.mock('../node_modules/react-native/Libraries/EventEmitter/NativeEventEmitter');
 
 jest.mock('react-native-localize', () => ({
@@ -289,6 +306,7 @@ jest.mock('react-native-navigation', () => {
             mergeOptions: jest.fn(),
             showOverlay: jest.fn(),
             dismissOverlay: jest.fn(),
+            updateProps: jest.fn(),
         },
     };
 });
@@ -320,6 +338,7 @@ jest.mock('react-native-notifications', () => {
                 }),
                 setBadgeCount: jest.fn(),
             },
+            postLocalNotification: jest.fn((notification) => notification),
         },
     };
 });
@@ -386,7 +405,7 @@ jest.mock('react-native-reanimated', () => require('react-native-reanimated/mock
 jest.mock('react-native-permissions', () => require('react-native-permissions/mock'));
 
 jest.mock('react-native-haptic-feedback', () => {
-    const RNHF = jest.requireActual('react-native-haptic-feedback');
+    const RNHF = jest.requireActual('react-native-haptic-feedback/src/types');
     return {
         ...RNHF,
         trigger: () => '',

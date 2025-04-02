@@ -4,12 +4,12 @@
 import React, {useCallback, useState} from 'react';
 import {type LayoutChangeEvent, type StyleProp, View, type ViewStyle} from 'react-native';
 
-import RemotePlayback from '@app/components/files/voice_recording_file/remote_playback';
-import {PostTypes} from '@app/constants/post';
 import Files from '@components/files';
+import RemotePlayback from '@components/files/voice_recording_file/remote_playback';
 import FormattedText from '@components/formatted_text';
 import JumboEmoji from '@components/jumbo_emoji';
 import {Screens} from '@constants';
+import {PostTypes} from '@constants/post';
 import {THREAD} from '@constants/screens';
 import {isEdited as postEdited, isPostFailed} from '@utils/post';
 import {makeStyleSheetFromTheme} from '@utils/theme';
@@ -115,8 +115,11 @@ const Body = ({
     let body;
     let message;
 
+    const nBindings = Array.isArray(post.props?.app_bindings) ? post.props?.app_bindings.length : 0;
+    const nAttachments = Array.isArray(post.props?.attachments) ? post.props?.attachments.length : 0;
+
     const isReplyPost = Boolean(post.rootId && (!isEphemeral || !hasBeenDeleted) && location !== THREAD);
-    const hasContent = (post.metadata?.embeds?.length || (appsEnabled && post.props?.app_bindings?.length)) || post.props?.attachments?.length;
+    const hasContent = Boolean((post.metadata?.embeds?.length || (appsEnabled && nBindings)) || nAttachments);
 
     const replyBarStyle = useCallback((): StyleProp<ViewStyle> | undefined => {
         if (!isReplyPost || (isCRTEnabled && location === Screens.PERMALINK)) {

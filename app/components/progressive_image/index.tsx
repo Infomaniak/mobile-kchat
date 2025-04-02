@@ -11,7 +11,6 @@ import {useTheme} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
-const AnimatedImageBackground = Animated.createAnimatedComponent(ImageBackground);
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 type Props = ProgressiveImageProps & {
@@ -69,15 +68,15 @@ const ProgressiveImage = ({
     if (isBackgroundImage && imageUri) {
         return (
             <View style={[styles.defaultImageContainer, style]}>
-                <AnimatedImageBackground
+                <ImageBackground
                     key={id}
                     source={imgSource}
                     contentFit='cover'
-                    style={[StyleSheet.absoluteFill, imageStyle]}
+                    style={[StyleSheet.absoluteFill, imageStyle as StyleProp<ViewStyle>]}
                     onLoad={handleLoad}
                 >
                     {children}
-                </AnimatedImageBackground>
+                </ImageBackground>
             </View>
         );
     }
@@ -119,7 +118,7 @@ const ProgressiveImage = ({
                 transition={300}
                 style={[StyleSheet.absoluteFill, imageStyle]}
                 source={showImage ? imgSource : undefined}
-                autoplay={false}
+                autoplay={true}
                 onLoad={handleLoad}
             />
         </Animated.View>

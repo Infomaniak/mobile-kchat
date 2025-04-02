@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useMemo} from 'react';
-import {DeviceEventEmitter, StyleSheet} from 'react-native';
+import {DeviceEventEmitter, StyleSheet, View} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 import WebView from 'react-native-webview';
 
@@ -13,6 +13,7 @@ import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import NetworkManager from '@managers/network_manager';
+import SecurityManager from '@managers/security_manager';
 import {dismissModal, popTopScreen, setButtons} from '@screens/navigation';
 
 import type {EditProfileProps} from '@typings/screens/edit_profile';
@@ -52,7 +53,7 @@ const EditProfile = ({
                 leftButtons: [leftButton!],
             });
         }
-    }, []);
+    }, [isTablet, componentId, leftButton]);
 
     const close = useCallback(() => {
         if (isModal) {
@@ -62,26 +63,31 @@ const EditProfile = ({
         } else {
             popTopScreen(componentId);
         }
-    }, []);
+    }, [componentId, isModal, isTablet]);
 
     useAndroidHardwareBackHandler(componentId, close);
     useNavButtonPressed(CLOSE_BUTTON_ID, componentId, close, []);
 
     const currentToken = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
     return (
-        <SafeAreaView
-            edges={edges}
+        <View
             style={styles.flex}
-            testID='edit_profile.screen'
+            nativeID={SecurityManager.getShieldScreenId(componentId)}
         >
-            <WebView
-                sharedCookiesEnabled={true}
-                source={{
-                    uri: 'https://manager.infomaniak.com/v3/mobile_login/?url=https://manager.infomaniak.com/v3/ng/profile/user/dashboard',
-                    headers: {Authorization: currentToken},
-                }}
-            />
-        </SafeAreaView>
+            <SafeAreaView
+                edges={edges}
+                style={styles.flex}
+                testID='edit_profile.screen'
+            >
+                <WebView
+                    sharedCookiesEnabled={true}
+                    source={{
+                        uri: 'https://manager.infomaniak.com/v3/mobile_login/?url=https://manager.infomaniak.com/v3/ng/profile/user/dashboard',
+                        headers: {Authorization: currentToken},
+                    }}
+                />
+            </SafeAreaView>
+        </View>
     );
 };
 

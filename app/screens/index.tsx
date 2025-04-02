@@ -81,6 +81,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.CHANNEL:
             screen = withServerDatabase(require('@screens/channel').default);
             break;
+        case Screens.CHANNEL_BOOKMARK:
+            screen = withServerDatabase(require('@screens/channel_bookmark').default);
+            break;
         case Screens.CHANNEL_NOTIFICATION_PREFERENCES:
             screen = withServerDatabase(require('@screens/channel_notification_preferences').default);
             break;
@@ -99,6 +102,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.CREATE_OR_EDIT_CHANNEL:
             screen = withServerDatabase(require('@screens/create_or_edit_channel').default);
             break;
+        case Screens.COMPONENT_LIBRARY:
+            screen = withServerDatabase(require('@screens/component_library').default);
+            break;
         case Screens.CUSTOM_STATUS:
             screen = withServerDatabase(require('@screens/custom_status').default);
             break;
@@ -110,6 +116,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             break;
         case Screens.CHANNEL_ADD_MEMBERS:
             screen = withServerDatabase(require('@screens/channel_add_members').default);
+            break;
+        case Screens.DRAFT_OPTIONS:
+            screen = withServerDatabase(require('@screens/draft_options').default);
             break;
         case Screens.EDIT_POST:
             screen = withServerDatabase(require('@screens/edit_post').default);
@@ -131,6 +140,12 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             break;
         case Screens.GALLERY:
             screen = withServerDatabase(require('@screens/gallery').default);
+            break;
+        case Screens.GENERIC_OVERLAY:
+            screen = withServerDatabase(require('@screens/overlay').default);
+            break;
+        case Screens.GLOBAL_DRAFTS:
+            screen = withServerDatabase(require('@screens/global_drafts').default);
             break;
         case Screens.GLOBAL_THREADS:
             screen = withServerDatabase(require('@screens/global_threads').default);
@@ -298,7 +313,7 @@ export function registerScreens() {
     const serverScreen = require('@screens/server').default;
     const onboardingScreen = require('@screens/onboarding').default;
     Navigation.registerComponent(Screens.ONBOARDING, () => withGestures(withIntl(withManagedConfig(onboardingScreen)), undefined));
-    Navigation.registerComponent(Screens.SERVER, () => withGestures(withIntl(withManagedConfig(serverScreen)), undefined));
+    Navigation.registerComponent(Screens.SERVER, () => withSafeAreaInsets(withGestures(withIntl(withManagedConfig(serverScreen)), undefined)));
     Navigation.registerComponent(Screens.HOME, () => withGestures(withSafeAreaInsets(withServerDatabase(withManagedConfig(homeScreen))), undefined));
     const infomaniakLoginScreen = require('@screens/ik_login').default;
     const infomaniakNoTeams = require('@screens/ik_no_teams').default;

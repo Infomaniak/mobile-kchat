@@ -7,6 +7,7 @@
 #import <RNKeychain/RNKeychainManager.h>
 #import <ReactNativeNavigation/ReactNativeNavigation.h>
 #import <UserNotifications/UserNotifications.h>
+#import <TurboLogIOSNative/TurboLog.h>
 
 #import "kChat-Swift.h"
 #import <os/log.h>
@@ -37,6 +38,15 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  NSString *appGroupId = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"AppGroupIdentifier"];
+  NSURL *containerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:appGroupId];
+  containerURL = [containerURL URLByAppendingPathComponent:@"Logs"];
+  NSError *error = nil;
+  [TurboLog configureWithDailyRolling:FALSE maximumFileSize:1024*1024 maximumNumberOfFiles:2 logsDirectory:containerURL.path logsFilename:@"MMLogs" error:&error];
+  if (error) {
+      NSLog(@"Failed to configure TurboLog: %@", error.localizedDescription);
+    }
+  [TurboLog writeWithLogLevel:TurboLogLevelInfo message:@[@"Configured turbolog"]];
   OrientationManager.shared.delegate = self;
   
   // Clear keychain on first run in case of reinstallation
@@ -44,9 +54,9 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
 
     RNKeychainManager *keychain = [[RNKeychainManager alloc] init];
     NSArray<NSString*> *servers = [keychain getAllServersForInternetPasswords];
-    NSLog(@"Servers %@", servers);
+    [TurboLog writeWithLogLevel:TurboLogLevelInfo message:@[@"Servers", servers]];
     for (NSString *server in servers) {
-      [keychain deleteCredentialsForServer:server];
+      [keychain deleteCredentialsForServer:server withOptions:nil];
     }
 
     [[NSUserDefaults standardUserDefaults] setValue:@YES forKey:@"FirstRun"];

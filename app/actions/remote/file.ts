@@ -18,21 +18,22 @@ export const downloadFile = (serverUrl: string, fileId: string, desitnation: str
 
 export const downloadProfileImage = (serverUrl: string, userId: string, lastPictureUpdate: number, destination: string) => { // Let it throw and handle it accordingly
     const client = NetworkManager.getClient(serverUrl);
-    return client.apiClient.download(client.getProfilePictureUrl(userId, lastPictureUpdate), destination.replace('file://', ''), {timeoutInterval: DOWNLOAD_TIMEOUT});
+    return client.apiClient.download(client.getProfilePictureUrl(userId, lastPictureUpdate), destination.replace('file://', ''), {headers: {Authorization: client.getCurrentBearerToken()}, timeoutInterval: DOWNLOAD_TIMEOUT});
 };
 
 export const uploadFile = (
     serverUrl: string,
-    file: FileInfo,
+    file: FileInfo | ExtractedFileInfo,
     channelId: string,
     onProgress: (fractionCompleted: number, bytesRead?: number | null | undefined) => void = () => {/*Do Nothing*/},
     onComplete: (response: ClientResponse) => void = () => {/*Do Nothing*/},
     onError: (response: ClientResponseError) => void = () => {/*Do Nothing*/},
     skipBytes = 0,
+    isBookmark = false,
 ) => {
     try {
         const client = NetworkManager.getClient(serverUrl);
-        return {cancel: client.uploadPostAttachment(file, channelId, onProgress, onComplete, onError, skipBytes)};
+        return {cancel: client.uploadAttachment(file, channelId, onProgress, onComplete, onError, skipBytes, isBookmark)};
     } catch (error) {
         logDebug('error on uploadFile', getFullErrorMessage(error));
         return {error};

@@ -11,7 +11,17 @@ import {DatabaseType, MIGRATION_EVENTS, MM_TABLES} from '@constants/database';
 import AppDatabaseMigrations from '@database/migration/app';
 import ServerDatabaseMigrations from '@database/migration/server';
 import {InfoModel, GlobalModel, ServersModel} from '@database/models/app';
-import {CategoryModel, CategoryChannelModel, ChannelModel, ChannelInfoModel, ChannelMembershipModel, ConfigModel, CustomEmojiModel, DraftModel, FileModel,
+import {
+    CategoryModel,
+    CategoryChannelModel,
+    ChannelModel,
+    ChannelBookmarkModel,
+    ChannelInfoModel,
+    ChannelMembershipModel,
+    ConfigModel,
+    CustomEmojiModel,
+    DraftModel,
+    FileModel,
     GroupModel, GroupChannelModel, GroupTeamModel, GroupMembershipModel, MyChannelModel, MyChannelSettingsModel, MyTeamModel,
     PostModel, PostsInChannelModel, PostsInThreadModel, PreferenceModel, ReactionModel, RoleModel,
     SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
@@ -37,7 +47,7 @@ if (__DEV__) {
     logger.silence();
 }
 
-class DatabaseManager {
+class DatabaseManagerSingleton {
     public appDatabase?: AppDatabase;
     public serverDatabases: ServerDatabases = {};
     private readonly appModels: Models;
@@ -47,7 +57,7 @@ class DatabaseManager {
     constructor() {
         this.appModels = [InfoModel, GlobalModel, ServersModel];
         this.serverModels = [
-            CategoryModel, CategoryChannelModel, ChannelModel, ChannelInfoModel, ChannelMembershipModel, ConfigModel, CustomEmojiModel, DraftModel, FileModel,
+            CategoryModel, CategoryChannelModel, ChannelModel, ChannelBookmarkModel, ChannelInfoModel, ChannelMembershipModel, ConfigModel, CustomEmojiModel, DraftModel, FileModel,
             GroupModel, GroupChannelModel, GroupTeamModel, GroupMembershipModel, MyChannelModel, MyChannelSettingsModel, MyTeamModel,
             PostModel, PostsInChannelModel, PostsInThreadModel, PreferenceModel, ReactionModel, RoleModel,
             SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
@@ -399,4 +409,5 @@ class DatabaseManager {
     };
 }
 
-export default new DatabaseManager();
+const DatabaseManager = new DatabaseManagerSingleton();
+export default DatabaseManager;

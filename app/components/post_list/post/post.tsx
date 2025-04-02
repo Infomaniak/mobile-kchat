@@ -9,16 +9,16 @@ import {removePost} from '@actions/local/post';
 import {showPermalink} from '@actions/remote/permalink';
 import {markPostReminderAsDone} from '@actions/remote/post';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
-import FormattedText from '@app/components/formatted_text';
-import {getMarkdownTextStyles} from '@app/utils/markdown';
 import IkCallsCustomMessage from '@calls/components/ik_calls_custom_message';
 import {isCallsCustomMessage} from '@calls/utils';
+import FormattedText from '@components/formatted_text';
 import IkWelcomeMessage from '@components/post_list/post/ik_welcome_message';
 import PreviewMessage from '@components/post_list/post/preview_message';
 import SystemAvatar from '@components/system_avatar';
 import SystemHeader from '@components/system_header';
 import {POST_TIME_TO_FAIL, PostTypes} from '@constants/post';
 import * as Screens from '@constants/screens';
+import {useHideExtraKeyboardIfNeeded} from '@context/extra_keyboard';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
@@ -26,8 +26,8 @@ import PerformanceMetricsManager from '@managers/performance_metrics_manager';
 import {openAsBottomSheet} from '@screens/navigation';
 import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {hasJumboEmojiOnly} from '@utils/emoji/helpers';
+import {getMarkdownTextStyles} from '@utils/markdown';
 import {fromAutoResponder, isFromWebhook, isPostFailed, isPostPendingOrFailed, isSystemMessage} from '@utils/post';
-import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import Avatar from './avatar';
@@ -183,7 +183,7 @@ const Post = ({
         return false;
     }, [customEmojiNames, post.message]);
 
-    const handlePostPress = () => {
+    const handlePostPress = useCallback(() => {
         if ([Screens.SAVED_MESSAGES, Screens.MENTIONS, Screens.SEARCH, Screens.PINNED_MESSAGES].includes(location)) {
             showPermalink(serverUrl, '', post.id);
             return;
@@ -202,20 +202,21 @@ const Post = ({
         setTimeout(() => {
             pressDetected.current = false;
         }, 300);
-    };
+    }, [
+        hasBeenDeleted, isAutoResponder, isEphemeral,
+        isPendingOrFailed, isSystemPost, location, serverUrl, post,
+    ]);
 
-    const handlePress = preventDoubleTap(() => {
+    const handlePress = useHideExtraKeyboardIfNeeded(() => {
         pressDetected.current = true;
 
         if (post) {
-            Keyboard.dismiss();
-
             setTimeout(handlePostPress, 300);
         }
-    });
+    }, [handlePostPress, post]);
 
     const handlePostponePress = useCallback(async () => {
-        const postId = post.props.post_id;
+        const postId = post.props?.post_id;
 
         openAsBottomSheet({
             closeButtonId: 'close-quota-exceeded',
@@ -235,7 +236,7 @@ const Post = ({
         markPostReminderAsDone(serverUrl, postId);
     };
 
-    const showPostOptions = () => {
+    const showPostOptions = useHideExtraKeyboardIfNeeded(() => {
         if (!post) {
             return;
         }
@@ -259,7 +260,11 @@ const Post = ({
             title,
             props: passProps,
         });
-    };
+    }, [
+        canDelete, hasBeenDeleted, intl,
+        isEphemeral, isPendingOrFailed, isTablet, isSystemPost,
+        location, post, serverUrl, showAddReaction, theme,
+    ]);
 
     const [, rerender] = useState(false);
     useEffect(() => {
@@ -348,6 +353,7 @@ const Post = ({
                 <SystemHeader
                     createAt={post.createAt}
                     theme={theme}
+                    isEphemeral={isEphemeral}
                 />
             );
         } else {
@@ -378,7 +384,7 @@ const Post = ({
                     location={location}
                     post={post}
                 />
-                {post.type === PostTypes.IK_SYSTEM_POST_REMINDER && !(post.props.reschedule || post.props.completed) && (
+                {post.type === PostTypes.IK_SYSTEM_POST_REMINDER && !(post.props?.reschedule || post.props?.completed) && (
                     <View>
                         <TouchableOpacity
                             style={[buttonBackgroundStyle(theme, 'm', 'primary'), {width: '100%'}]}

@@ -11,6 +11,7 @@ import com.facebook.react.bridge.ReadableMap;
 
 import com.mattermost.networkclient.ApiClientModuleImpl;
 import com.mattermost.networkclient.enums.RetryTypes;
+import com.mattermost.turbolog.TurboLog;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -26,10 +27,12 @@ public class Network {
     private static ReactApplicationContext reactContext;
 
     public static void init(Context context) {
-        final ReactApplicationContext reactContext = (ApiClientModuleImpl.context == null) ? new ReactApplicationContext(context) : ApiClientModuleImpl.context;
-        clientModule = new ApiClientModuleImpl(reactContext);
-        Network.reactContext = reactContext;
-        createClientOptions();
+        if (clientModule == null) {
+            clientModule = new ApiClientModuleImpl(context);
+            createClientOptions();
+        } else {
+            TurboLog.Companion.i("ReactNative", "Network already initialized");
+        }
     }
 
     public static WritableMap addHeaders(String baseUrl, ReadableMap options) {

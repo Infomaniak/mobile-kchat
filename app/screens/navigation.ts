@@ -39,6 +39,15 @@ export function registerNavigationListeners() {
         Navigation.events().registerScreenPoppedListener(onPoppedListener),
         Navigation.events().registerCommandListener(onCommandListener),
         Navigation.events().registerComponentWillAppearListener(onScreenWillAppear),
+
+        /**
+         * For the time being and until we add the emoji picker in the keyboard area
+         * will keep Android as adjustResize cause useAnimatedKeyboard from reanimated
+         * is reporting the wrong values when the keyboard was opened but we switch
+         * to a different channel or thread.
+         */
+        // Navigation.events().registerComponentDidAppearListener(onScreenDidAppear),
+        // Navigation.events().registerComponentDidDisappearListener(onScreenDidDisappear),
     ];
 }
 
@@ -167,7 +176,7 @@ export const bottomSheetModalOptions = (theme: Theme, closeButtonId?: string): O
             default: OptionsModalPresentationStyle.overCurrentContext,
         }),
         statusBar: {
-            backgroundColor: null,
+            backgroundColor: theme.sidebarBg,
             drawBehind: true,
             translucent: true,
         },
@@ -267,7 +276,7 @@ export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}
     const isDark = tinyColor(theme.sidebarBg).isDark();
     StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
 
-    if (passProps.launchType === Launch.AddServer || passProps.launchType === Launch.AddServerFromDeepLink) {
+    if (!passProps.coldStart && (passProps.launchType === Launch.AddServer || passProps.launchType === Launch.AddServerFromDeepLink)) {
         dismissModal({componentId: Screens.SERVER});
         dismissModal({componentId: Screens.LOGIN});
         dismissModal({componentId: Screens.SSO});
@@ -559,6 +568,7 @@ export function goToScreen(name: AvailableScreens, title: string, passProps = {}
         },
         statusBar: {
             style: isDark ? 'light' : 'dark',
+            backgroundColor: theme.sidebarBg,
         },
         topBar: {
             animate: true,
@@ -670,6 +680,7 @@ export function showModal(name: AvailableScreens, title: string, passProps = {},
         },
         statusBar: {
             visible: true,
+            backgroundColor: theme.sidebarBg,
         },
         topBar: {
             animate: true,
@@ -820,7 +831,7 @@ export function setButtons(componentId: AvailableScreens, buttons: NavButtons = 
     mergeNavigationOptions(componentId, options);
 }
 
-export function showOverlay(name: AvailableScreens, passProps = {}, options: Options = {}) {
+export function showOverlay(name: AvailableScreens, passProps = {}, options: Options = {}, id?: string) {
     if (!isScreenRegistered(name)) {
         return;
     }
@@ -837,6 +848,7 @@ export function showOverlay(name: AvailableScreens, passProps = {}, options: Opt
 
     Navigation.showOverlay({
         component: {
+            id,
             name,
             passProps,
             options: merge(defaultOptions, options),
@@ -844,7 +856,7 @@ export function showOverlay(name: AvailableScreens, passProps = {}, options: Opt
     });
 }
 
-export async function dismissOverlay(componentId: AvailableScreens) {
+export async function dismissOverlay(componentId: string) {
     try {
         await Navigation.dismissOverlay(componentId);
     } catch (error) {

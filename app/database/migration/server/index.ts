@@ -4,13 +4,63 @@
 // NOTE : To implement migration, please follow this document
 // https://nozbe.github.io/WatermelonDB/Advanced/Migrations.html
 
-import {addColumns, createTable, schemaMigrations} from '@nozbe/watermelondb/Schema/migrations';
+import {addColumns, createTable, schemaMigrations, unsafeExecuteSql} from '@nozbe/watermelondb/Schema/migrations';
 
 import {MM_TABLES} from '@constants/database';
 
-const {CONFERENCE, CONFERENCE_PARTICIPANT, FILE, CHANNEL_INFO, DRAFT, POST, CHANNEL_MEMBERSHIP} = MM_TABLES.SERVER;
+const {
+    CONFERENCE,
+    CONFERENCE_PARTICIPANT,
+    CHANNEL_BOOKMARK,
+    FILE,
+    CHANNEL_INFO,
+    DRAFT,
+    POST,
+    CHANNEL_MEMBERSHIP,
+} = MM_TABLES.SERVER;
 
 export default schemaMigrations({migrations: [
+    {
+        toVersion: 9,
+        steps: [
+            unsafeExecuteSql('CREATE INDEX IF NOT EXISTS Post_type ON Post (type)'),
+        ],
+    },
+    {
+        toVersion: 8,
+        steps: [
+            addColumns({
+                table: DRAFT,
+                columns: [
+                    {name: 'update_at', type: 'number'},
+                ],
+            }),
+        ],
+    },
+    {
+        toVersion: 7,
+        steps: [
+            createTable({
+                name: CHANNEL_BOOKMARK,
+                columns: [
+                    {name: 'create_at', type: 'number'},
+                    {name: 'update_at', type: 'number'},
+                    {name: 'delete_at', type: 'number'},
+                    {name: 'channel_id', type: 'string', isIndexed: true},
+                    {name: 'owner_id', type: 'string'},
+                    {name: 'file_id', type: 'string', isOptional: true},
+                    {name: 'display_name', type: 'string'},
+                    {name: 'sort_order', type: 'number'},
+                    {name: 'link_url', type: 'string', isOptional: true},
+                    {name: 'image_url', type: 'string', isOptional: true},
+                    {name: 'emoji', type: 'string', isOptional: true},
+                    {name: 'type', type: 'string'},
+                    {name: 'original_id', type: 'string', isOptional: true},
+                    {name: 'parent_id', type: 'string', isOptional: true},
+                ],
+            }),
+        ],
+    },
     {
         toVersion: 6,
         steps: [

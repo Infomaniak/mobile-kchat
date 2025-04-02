@@ -58,7 +58,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     badge: {
         left: 18,
         top: -5,
-        borderColor: theme.centerChannelBg,
     },
     button: {
         borderRadius: 8,
@@ -204,7 +203,7 @@ const ServerItem = ({
                 setShowTutorial(true);
             });
         }
-    }, [showTutorial]);
+    }, [highlight, isTablet, tutorialWatched]);
 
     useLayoutEffect(() => {
         if (showTutorial && !tutorialShown.current) {
@@ -221,7 +220,7 @@ const ServerItem = ({
         }
 
         return style;
-    }, [isActive]);
+    }, [isActive, styles.active, styles.container]);
 
     const serverStyle = useMemo(() => {
         const style: StyleProp<ViewStyle> = [styles.row];
@@ -230,7 +229,7 @@ const ServerItem = ({
         }
 
         return style;
-    }, [server.lastActiveAt]);
+    }, [server.lastActiveAt, styles.offline, styles.row]);
 
     const handleLogin = useCallback(async () => {
         swipeable.current?.close();
@@ -257,7 +256,7 @@ const ServerItem = ({
 
         canReceiveNotifications(server.url, result.canReceiveNotifications as string, intl);
         loginToServer(theme, server.url, displayName, data.config!, data.license!);
-    }, [server, theme, intl]);
+    }, [server.url, intl, theme]);
 
     const handleDismissTutorial = useCallback(() => {
         swipeable.current?.close();
@@ -280,12 +279,12 @@ const ServerItem = ({
             await dismissBottomSheet();
             Navigation.updateProps(Screens.HOME, {extra: undefined});
             DatabaseManager.setActiveServerDatabase(server.url);
-            WebsocketManager.initializeClient(server.url);
+            WebsocketManager.initializeClient(server.url, 'Server Switch');
             return;
         }
 
         handleLogin();
-    }, [server, isActive, theme, intl]);
+    }, [isActive, server.lastActiveAt, theme, intl, handleLogin]);
 
     const onSwipeableWillOpen = useCallback(() => {
         DeviceEventEmitter.emit(Events.SWIPEABLE, server.url);
@@ -365,9 +364,9 @@ const ServerItem = ({
                         <View style={serverStyle}>
                             {!switching &&
                             <ServerIcon
-                                badgeBackgroundColor={theme.mentionColor}
-                                badgeBorderColor={theme.mentionBg}
-                                badgeColor={theme.mentionBg}
+                                badgeBackgroundColor={theme.buttonBg}
+                                badgeBorderColor={theme.centerChannelBg}
+                                badgeColor={theme.buttonColor}
                                 badgeStyle={styles.badge}
                                 iconColor={changeOpacity(theme.centerChannelColor, 0.56)}
                                 hasUnreads={badge.isUnread}

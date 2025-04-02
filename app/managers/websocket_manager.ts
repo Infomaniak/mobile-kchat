@@ -8,7 +8,8 @@ import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged} from 'rxjs/operators';
 
 import {fetchStatusByIds} from '@actions/remote/user';
-import {handleEvent, handleFirstConnect, handleReconnect} from '@actions/websocket';
+import {handleFirstConnect, handleReconnect} from '@actions/websocket';
+import {handleWebSocketEvent} from '@actions/websocket/event';
 import WebSocketClient from '@client/websocket';
 import {General} from '@constants';
 import DatabaseManager from '@database/manager';
@@ -21,7 +22,7 @@ import {logError} from '@utils/log';
 const WAIT_TO_CLOSE = toMilliseconds({seconds: 2});
 const WAIT_UNTIL_NEXT = toMilliseconds({seconds: 5});
 
-class WebsocketManager {
+class WebsocketManagerSingleton {
     private connectedSubjects: {[serverUrl: string]: BehaviorSubject<WebsocketConnectedState>} = {};
 
     private clients: Record<string, WebSocketClient> = {};
@@ -86,7 +87,7 @@ class WebsocketManager {
         const client = new WebSocketClient(serverUrl, bearerToken);
 
         client.setFirstConnectCallback(() => this.onFirstConnect(serverUrl));
-        client.setEventCallback((evt: any) => handleEvent(serverUrl, evt));
+        client.setEventCallback((evt: WebSocketMessage) => handleWebSocketEvent(serverUrl, evt));
 
         //client.setMissedEventsCallback(() => {}) Nothing to do on missedEvents callback
         client.setReconnectCallback(() => this.onReconnect(serverUrl));
@@ -107,16 +108,16 @@ class WebsocketManager {
         }
     };
 
-    public openAll = async () => {
+    public openAll = async (groupLabel?: BaseRequestGroupLabel) => {
         let queued = 0;
         for await (const clientUrl of Object.keys(this.clients)) {
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
             if (clientUrl === activeServerUrl) {
-                this.initializeClient(clientUrl);
+                this.initializeClient(clientUrl, groupLabel);
             } else {
                 queued += 1;
                 this.getConnectedSubject(clientUrl).next('connecting');
-                this.connectionTimerIDs[clientUrl] = setTimeout(() => this.initializeClient(clientUrl), WAIT_UNTIL_NEXT * queued);
+                this.connectionTimerIDs[clientUrl] = setTimeout(() => this.initializeClient(clientUrl, groupLabel), WAIT_UNTIL_NEXT * queued);
             }
         }
     };
@@ -146,7 +147,7 @@ class WebsocketManager {
         }
     };
 
-    public initializeClient = async (serverUrl: string) => {
+    public initializeClient = async (serverUrl: string, groupLabel: BaseRequestGroupLabel = 'WebSocket Reconnect') => {
         const client: WebSocketClient = this.clients[serverUrl];
         clearTimeout(this.connectionTimerIDs[serverUrl]);
         delete this.connectionTimerIDs[serverUrl];
@@ -154,7 +155,7 @@ class WebsocketManager {
             const hasSynced = this.firstConnectionSynced[serverUrl];
             client.initialize({}, !hasSynced);
             if (!hasSynced) {
-                const error = await handleFirstConnect(serverUrl);
+                const error = await handleFirstConnect(serverUrl, groupLabel);
                 if (error) {
                     // This will try to reconnect and try to sync again
                     client.close(false);
@@ -268,7 +269,7 @@ class WebsocketManager {
             }
             this.isBackgroundTimerRunning = false;
             if (this.netConnected) {
-                this.openAll();
+                this.openAll('WebSocket Reconnect');
             }
 
             return;
@@ -289,4 +290,5 @@ class WebsocketManager {
     };
 }
 
-export default new WebsocketManager();
+const WebsocketManager = new WebsocketManagerSingleton();
+export default WebsocketManager;

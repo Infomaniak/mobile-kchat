@@ -42,6 +42,8 @@ const WebsocketEvents = {
     PREFERENCES_DELETED: 'preferences_deleted',
     EPHEMERAL_MESSAGE: 'ephemeral_message',
     STATUS_CHANGED: 'status_change',
+    PING: 'ping',
+    PONG: 'pong',
     HELLO: 'hello',
     WEBRTC: 'webrtc',
     REACTION_ADDED: 'reaction_added',
@@ -109,5 +111,9 @@ const WebsocketEvents = {
     CONFERENCE_USER_CONNECTED: 'conference_user_connected',
     CONFERENCE_USER_DENIED: 'conference_user_denied',
     CONFERENCE_USER_DISCONNECTED: 'conference_user_disconnected',
+    CHANNEL_BOOKMARK_CREATED: 'channel_bookmark_created',
+    CHANNEL_BOOKMARK_UPDATED: 'channel_bookmark_updated',
+    CHANNEL_BOOKMARK_SORTED: 'channel_bookmark_sorted',
+    CHANNEL_BOOKMARK_DELETED: 'channel_bookmark_deleted',
 };
 export default WebsocketEvents;

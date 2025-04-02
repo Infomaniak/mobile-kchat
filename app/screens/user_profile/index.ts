@@ -71,6 +71,7 @@ const enhanced = withObservables([], ({channelId, database, userId}: EnhancedPro
         user,
         canChangeMemberRoles,
         hideGuestTags: observeConfigBooleanValue(database, 'HideGuestTags'),
+        enableCustomAttributes: observeConfigBooleanValue(database, 'FeatureFlagCustomProfileAttributes'),
     };
 });
 

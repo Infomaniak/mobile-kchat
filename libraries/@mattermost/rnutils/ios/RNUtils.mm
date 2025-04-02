@@ -72,6 +72,18 @@ RCT_REMAP_BLOCKING_SYNCHRONOUS_METHOD(isRunningInSplitView, NSDictionary*, isSpl
     return [wrapper isRunningInSplitView];
 }
 
+RCT_REMAP_BLOCKING_SYNCHRONOUS_METHOD(getWindowDimensions, NSDictionary*, windowDimensions) {
+    return [wrapper getWindowDimensions];
+}
+
+RCT_REMAP_BLOCKING_SYNCHRONOUS_METHOD(getHasRegisteredLoad, NSDictionary*, getLoad) {
+    return [wrapper getHasRegisteredLoad];
+}
+
+RCT_REMAP_METHOD(setHasRegisteredLoad, setLoad) {
+    [wrapper setHasRegisteredLoad];
+}
+
 RCT_REMAP_METHOD(unlockOrientation, unlock) {
     [wrapper unlockOrientation];
 }
@@ -109,6 +121,14 @@ RCT_EXPORT_METHOD(saveFile:(NSString *)filePath
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject) {
     [self saveFile:filePath resolve:resolve reject:reject];
+}
+
+RCT_REMAP_METHOD(setSoftKeyboardToAdjustResize, setAdjustResize) {
+    [self setSoftKeyboardToAdjustResize];
+}
+
+RCT_REMAP_METHOD(setSoftKeyboardToAdjustNothing, setAdjustNothing) {
+    [self setSoftKeyboardToAdjustNothing];
 }
 
 // Don't compile this code when we build for the old architecture.
@@ -158,6 +178,17 @@ RCT_EXPORT_METHOD(saveFile:(NSString *)filePath
     return [wrapper isRunningInSplitView];
 }
 
+- (NSDictionary *)getWindowDimensions {
+    return [wrapper getWindowDimensions];
+}
+
+- (NSDictionary *)getHasRegisteredLoad {
+    return [wrapper getHasRegisteredLoad];
+}
+
+- (void)setHasRegisteredLoad {
+    [wrapper setHasRegisteredLoad];
+}
 
 - (void)lockPortrait {
     [wrapper lockOrientation];
@@ -191,6 +222,14 @@ RCT_EXPORT_METHOD(saveFile:(NSString *)filePath
 
 - (void)saveFile:(NSString *)filePath resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
     resolve(@"");
+}
+
+-(void)setSoftKeyboardToAdjustResize {
+    // Do nothing as it does not apply to iOS
+}
+
+-(void)setSoftKeyboardToAdjustNothing {
+    // Do nothing as it does not apply to iOS
 }
 
 #pragma helpers

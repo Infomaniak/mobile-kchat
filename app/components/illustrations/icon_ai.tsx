@@ -4,7 +4,7 @@
 import * as React from 'react';
 import Svg, {Path} from 'react-native-svg';
 
-import {changeOpacity} from '@app/utils/theme';
+import {changeOpacity} from '@utils/theme';
 
 type Props = {
     theme: Theme;

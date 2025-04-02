@@ -13,7 +13,7 @@ import React, {useCallback, useEffect, useMemo, useRef} from 'react';
 import {type WithTranslation} from 'react-i18next';
 import {Platform, View, type ViewStyle} from 'react-native';
 
-import {noop} from '@app/helpers/api/general';
+import {noop} from '@helpers/api/general';
 
 import type {AudioElement} from '@jitsi/react-native-sdk/react/features/base/media/components/AbstractAudio';
 

@@ -1,12 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {isCaption, type Caption} from '@mattermost/calls/lib/types';
 import {SelectedTrackType, TextTrackType, type ISO639_1, type SelectedTrack, type TextTracks} from 'react-native-video';
 
 import {buildFileUrl} from '@actions/remote/file';
 import {Post} from '@constants';
+import {isArrayOf} from '@utils/types';
 
-import type {Caption} from '@mattermost/calls/lib/types';
 import type PostModel from '@typings/database/models/servers/post';
 
 export function isCallsCustomMessage(post: PostModel | Post): boolean {
@@ -17,13 +18,13 @@ export const hasCaptions = (postProps?: Record<string, any> & { captions?: Capti
     return !(!postProps || !postProps.captions?.[0]);
 };
 
-export const getTranscriptionUri = (serverUrl: string, postProps?: Record<string, any> & { captions?: Caption[] }): {
+export const getTranscriptionUri = (serverUrl: string, postProps?: Record<string, unknown>): {
     tracks?: TextTracks;
     selected: SelectedTrack;
 } => {
     // Note: We're not using hasCaptions above because this tells typescript that the caption exists later.
     // We could use some fancy typescript to do the same, but it's not worth the complexity.
-    if (!postProps || !postProps.captions?.[0]) {
+    if (!isArrayOf<Caption>(postProps?.captions, isCaption) || !postProps.captions[0]) {
         return {
             tracks: undefined,
             selected: {type: SelectedTrackType.DISABLED, value: ''},

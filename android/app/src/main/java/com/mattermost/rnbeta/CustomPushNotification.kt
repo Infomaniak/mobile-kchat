@@ -4,7 +4,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.mattermost.call.CallActivity
@@ -19,6 +18,7 @@ import com.mattermost.notification.NotificationUtils.NOTIFICATION_TYPE_JOINED_CA
 import com.mattermost.notification.NotificationUtils.createCallNotification
 import com.mattermost.notification.NotificationUtils.dismissCallNotification
 import com.mattermost.rnutils.helpers.NotificationHelper
+import com.mattermost.turbolog.TurboLog
 import com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME
 import com.wix.reactnativenotifications.core.AppLaunchHelper
 import com.wix.reactnativenotifications.core.AppLifecycleFacade
@@ -41,7 +41,6 @@ class CustomPushNotification(
     init {
         try {
             DatabaseHelper.instance?.init(context)
-            Network.init(context)
             NotificationHelper.cleanNotificationPreferencesIfNeeded(context)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -64,6 +63,7 @@ class CustomPushNotification(
             initialData.getString(NotificationUtils.NOTIFICATION_ID_LOADED_KEY) == "true"
         val notificationId = NotificationHelper.getNotificationId(initialData)
         val serverUrl = addServerUrlToBundle(initialData)
+        Network.init(mContext)
 
         GlobalScope.launch {
             try {
@@ -103,11 +103,8 @@ class CustomPushNotification(
             }
         }
 
-        if (!CustomPushNotificationHelper.verifySignature(context, signature, serverUrl, ackId)) {
-            Log.i(
-                "Mattermost Notifications Signature verification",
-                "Notification skipped because we could not verify it."
-            )
+        if (!CustomPushNotificationHelper.verifySignature(mContext, signature, serverUrl, ackId)) {
+            TurboLog.i("Mattermost Notifications Signature verification", "Notification skipped because we could not verify it.")
             return
         }
 
@@ -142,38 +139,20 @@ class CustomPushNotification(
     ) {
         val isReactInit = mAppLifecycleFacade.isReactInitialized()
 
-        if ((type == NOTIFICATION_TYPE_CANCEL_CALL_VALUE || type == NOTIFICATION_TYPE_JOINED_CALL_VALUE) && conferenceId != null) {
-            context.dismissCallNotification(conferenceId)
-            broadcastCallEvent(conferenceId)
-        } else if (conferenceJWT != null) {
-            val callExtras = NotificationUtils.CallExtras(
-                channelId, serverId, conferenceId,
-                channelName, conferenceJWT
-            )
-            val callNotification = context.createCallNotification(callExtras)
-            super.postNotification(callNotification, notificationId)
-        } else {
-            when (type) {
-                CustomPushNotificationHelper.PUSH_TYPE_MESSAGE, CustomPushNotificationHelper.PUSH_TYPE_SESSION -> {
-                    val currentActivityName =
-                        mAppLifecycleFacade.runningReactContext?.currentActivity?.componentName?.className
-                            ?: ""
-                    Log.i("ReactNative", currentActivityName)
-                    if (!mAppLifecycleFacade.isAppVisible() || currentActivityName != "MainActivity") {
-                        var createSummary = type == CustomPushNotificationHelper.PUSH_TYPE_MESSAGE
-                        if (type == CustomPushNotificationHelper.PUSH_TYPE_MESSAGE) {
-                            channelId?.let {
-                                val notificationBundle = mNotificationProps.asBundle()
-                                serverUrl?.let {
-                                    val notificationResult =
-                                        dataHelper.fetchAndStoreDataForPushNotification(
-                                            notificationBundle,
-                                            isReactInit
-                                        )
-                                    notificationResult?.let { result ->
-                                        notificationBundle.putBundle("data", result)
-                                        mNotificationProps = createProps(notificationBundle)
-                                    }
+        when (type) {
+            CustomPushNotificationHelper.PUSH_TYPE_MESSAGE, CustomPushNotificationHelper.PUSH_TYPE_SESSION -> {
+                val currentActivityName = mAppLifecycleFacade.runningReactContext?.currentActivity?.componentName?.className ?: ""
+                TurboLog.i("ReactNative", currentActivityName)
+                if (!mAppLifecycleFacade.isAppVisible() || currentActivityName != "MainActivity") {
+                    var createSummary = type == CustomPushNotificationHelper.PUSH_TYPE_MESSAGE
+                    if (type == CustomPushNotificationHelper.PUSH_TYPE_MESSAGE) {
+                        channelId?.let {
+                            val notificationBundle = mNotificationProps.asBundle()
+                            serverUrl?.let {
+                                val notificationResult = dataHelper.fetchAndStoreDataForPushNotification(notificationBundle, isReactInit)
+                                notificationResult?.let { result ->
+                                    notificationBundle.putBundle("data", result)
+                                    mNotificationProps = createProps(notificationBundle)
                                 }
                                 createSummary = NotificationHelper.addNotificationToPreferences(
                                     context,

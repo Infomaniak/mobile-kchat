@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useMemo, useState, useEffect} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 
 import {saveThemePreference} from '@actions/local/preferences';
 import SettingContainer from '@components/settings/container';
@@ -27,16 +27,6 @@ const DisplayTheme = ({allowedThemeKeys, componentId, currentTeamId}: DisplayThe
     const initialTheme = useMemo(() => theme, [/* dependency array should remain empty */]);
     const [newTheme, setNewTheme] = useState<string | undefined>(undefined);
     const close = () => popTopScreen(componentId);
-
-    useEffect(() => {
-        const differentTheme = theme.type?.toLowerCase() !== newTheme?.toLowerCase();
-
-        if (!differentTheme) {
-            close();
-            return;
-        }
-        setThemePreference();
-    }, [newTheme]);
 
     const setThemePreference = useCallback(() => {
         const allowedTheme = allowedThemeKeys.find((tk) => tk === newTheme);

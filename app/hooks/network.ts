@@ -5,9 +5,9 @@ import CookieManager from '@react-native-cookies/cookies';
 import {useCallback, useEffect, useState} from 'react';
 import RNRestart from 'react-native-restart';
 
-import {useTransientRef} from '@app/hooks/utils';
 import {BASE_SERVER_URL} from '@client/rest/constants';
 import {useServerUrl} from '@context/server';
+import {useTransientRef} from '@hooks/utils';
 import {preventDoubleTap} from '@utils/tap';
 
 const COOKIE_NEXT_NAME = 'KCHAT_NEXT';

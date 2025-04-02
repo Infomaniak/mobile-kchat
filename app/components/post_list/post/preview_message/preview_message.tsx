@@ -5,10 +5,10 @@ import {useIntl} from 'react-intl';
 import {Text, View, Alert, TouchableOpacity, type LayoutChangeEvent, useWindowDimensions, ScrollView} from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import ProfilePicture from '@app/components/post_list/post/profile_picture/profile_picture';
 import Files from '@components/files';
 import FormattedRelativeTime from '@components/formatted_relative_time';
 import Markdown from '@components/markdown';
+import ProfilePicture from '@components/post_list/post/profile_picture/profile_picture';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useShowMoreAnimatedStyle} from '@hooks/show_more';
@@ -21,7 +21,7 @@ import ShowMoreButton from '../body/message/show_more_button';
 
 import {getStyleSheet} from './styles';
 
-import type {UserModel} from '@app/database/models/server';
+import type {UserModel} from '@database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 import type {MarkdownTextStyles} from '@typings/global/markdown';
 

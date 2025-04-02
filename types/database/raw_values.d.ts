@@ -23,6 +23,7 @@ type Draft = {
     message?: string;
     root_id: string;
     metadata?: PostMetadata;
+    update_at: number;
 };
 
 type MyTeam = {
@@ -106,6 +107,7 @@ type RawValue =
   | Category
   | CategoryChannel
   | Channel
+  | ChannelBookmark
   | ChannelInfo
   | ChannelMember
   | ChannelMembership
@@ -136,4 +138,5 @@ type RawValue =
   | ThreadParticipant
   | TeamThreadsSync
   | UserProfile
+  | SlashCommand
   | Pick<ChannelMembership, 'channel_id' | 'user_id'>

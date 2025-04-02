@@ -9,6 +9,7 @@ const DeepLinkType = {
     Permalink: 'permalink',
     Conference: 'conference',
     Redirect: '_redirect',
+    Server: 'server',
 } as const;
 
 export default DeepLinkType;

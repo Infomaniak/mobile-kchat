@@ -57,18 +57,18 @@ export default function MessageInput({
         <>
             {!isHandlingVoice && (
                 <PostInput
-                    addFiles={addFiles}
+                    testID={postInputTestID}
                     channelId={channelId}
-                    cursorPosition={cursorPosition}
-                    inputRef={inputRef}
                     maxMessageLength={maxMessageLength}
                     rootId={rootId}
-                    sendMessage={sendMessage}
-                    setIsFocused={setIsFocused}
-                    testID={postInputTestID}
+                    cursorPosition={cursorPosition}
                     updateCursorPosition={updateCursorPosition}
                     updateValue={updateValue}
                     value={value}
+                    addFiles={addFiles}
+                    sendMessage={sendMessage}
+                    inputRef={inputRef}
+                    setIsFocused={setIsFocused}
                 />
             )}
             <Uploads

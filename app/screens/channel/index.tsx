@@ -2,15 +2,16 @@
 // See LICENSE.txt for license information.
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
-import {of as of$, switchMap} from 'rxjs';
+import {combineLatestWith, distinctUntilChanged, of as of$, switchMap} from 'rxjs';
 
 import {observeIsCallsEnabledInChannel} from '@calls/observers';
 import {Preferences} from '@constants';
 import {withServerUrl} from '@context/server';
 import {observeCurrentChannel} from '@queries/servers/channel';
+import {queryBookmarks} from '@queries/servers/channel_bookmark';
 import {observeHasGMasDMFeature} from '@queries/servers/features';
 import {queryPreferencesByCategoryAndName} from '@queries/servers/preference';
-import {observeCurrentChannelId, observeCurrentUserId} from '@queries/servers/system';
+import {observeConfigBooleanValue, observeCurrentChannelId, observeCurrentUserId} from '@queries/servers/system';
 
 import Channel from './channel';
 
@@ -27,6 +28,21 @@ const enhanced = withObservables([], ({database}: EnhanceProps) => {
     const channelType = channel.pipe(switchMap((c) => of$(c?.type)));
     const currentUserId = observeCurrentUserId(database);
     const hasGMasDMFeature = observeHasGMasDMFeature(database);
+    const isBookmarksEnabled = observeConfigBooleanValue(database, 'FeatureFlagChannelBookmarks');
+    const hasBookmarks = (count: number) => of$(count > 0);
+    const includeBookmarkBar = channelId.pipe(
+        combineLatestWith(isBookmarksEnabled),
+        switchMap(([cId, enabled]) => {
+            if (!enabled) {
+                return of$(false);
+            }
+
+            return queryBookmarks(database, cId).observeCount(false).pipe(
+                switchMap(hasBookmarks),
+                distinctUntilChanged(),
+            );
+        }),
+    );
 
     return {
         channelId,
@@ -35,6 +51,7 @@ const enhanced = withObservables([], ({database}: EnhanceProps) => {
         channelType,
         currentUserId,
         hasGMasDMFeature,
+        includeBookmarkBar,
     };
 });
 

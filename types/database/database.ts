@@ -43,24 +43,24 @@ export type ServerDatabases = {
   [x: string]: ServerDatabase | undefined;
 };
 
-export type TransformerArgs = {
+export type TransformerArgs<T extends Model, R extends RawValue> = {
   action: string;
   database: Database;
   fieldsMapper?: (model: Model) => void;
   tableName?: string;
-  value: RecordPair;
+  value: RecordPair<T, R>;
 };
 
-export type PrepareBaseRecordArgs = TransformerArgs & {
+export type PrepareBaseRecordArgs<T extends Model, R extends RawValue> = TransformerArgs<T, R> & {
   fieldsMapper: (model: Model) => void;
 }
 
-export type OperationArgs<T extends Model> = {
+export type OperationArgs<T extends Model, R extends RawValue> = {
   tableName: string;
-  createRaws?: RecordPair[];
-  updateRaws?: RecordPair[];
+  createRaws?: Array<RecordPair<T, R>>;
+  updateRaws?: Array<RecordPair<T, R>>;
   deleteRaws?: T[];
-  transformer: (args: TransformerArgs) => Promise<T>;
+  transformer: (args: TransformerArgs<T, R>) => Promise<T>;
 };
 
 export type Models = Array<Class<Model>>;
@@ -137,9 +137,9 @@ export type SanitizePostsArgs = {
   posts: Post[];
 };
 
-export type IdenticalRecordArgs = {
-  existingRecord: Model;
-  newValue: RawValue;
+export type IdenticalRecordArgs<T extends Model, R extends RawValue> = {
+  existingRecord: T;
+  newValue: R;
   tableName: string;
 };
 
@@ -168,7 +168,7 @@ export type ProcessRecordsArgs<T extends Model, R extends RawValue> = {
 
 export type HandleRecordsArgs<T extends Model, R extends RawValue> = ProcessRecordsArgs<T, R> & {
   prepareRecordsOnly: boolean;
-  transformer: (args: TransformerArgs) => Promise<T>;
+  transformer: (args: TransformerArgs<T, R>) => Promise<T>;
 };
 
 export type RangeOfValueArgs<R extends RawValue> = {
@@ -176,9 +176,9 @@ export type RangeOfValueArgs<R extends RawValue> = {
   fieldName: keyof R;
 };
 
-export type RecordPair = {
-  record?: Model;
-  raw: RawValue;
+export type RecordPair<T extends Model, R extends RawValue> = {
+  record?: T;
+  raw: R;
 };
 
 type PrepareOnly = {
@@ -226,6 +226,10 @@ export type HandleMyChannelSettingsArgs = PrepareOnly & {
 
 export type HandleChannelArgs = PrepareOnly & {
   channels?: Channel[];
+};
+
+export type HandleChannelBookmarkArgs = PrepareOnly & {
+  bookmarks?: ChannelBookmarkWithFileInfo[];
 };
 
 export type HandleCategoryArgs = PrepareOnly & {
@@ -323,8 +327,8 @@ export type GetDatabaseConnectionArgs = {
   setAsActiveDatabase: boolean;
 }
 
-export type ProcessRecordResults<T extends Model> = {
-    createRaws: RecordPair[];
-    updateRaws: RecordPair[];
+export type ProcessRecordResults<T extends Model, R extends RawValue> = {
+    createRaws: Array<RecordPair<T, R>>;
+    updateRaws: Array<RecordPair<T, R>>;
     deleteRaws: T[];
 }

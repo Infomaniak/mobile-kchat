@@ -6,10 +6,11 @@ import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, type ListRenderItemInfo} from 'react-native';
 
-import GestureResponsiveFlatList from '@app/components/user_avatars_stack/users_list/gesture_responsive_flat_list';
+import GestureResponsiveFlatList from '@components/user_avatars_stack/users_list/gesture_responsive_flat_list';
 import UserItem from '@components/user_item';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
+import {useBottomSheetListsFix} from '@hooks/bottom_sheet_lists_fix';
 import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
 
 import type UserModel from '@typings/database/models/servers/user';
@@ -51,6 +52,7 @@ const Item = ({channelId, location, user}: ItemProps) => (
 );
 
 const UsersList = ({channelId, location, type = 'FlatList', users}: Props) => {
+    const {enabled, panResponder} = useBottomSheetListsFix();
     const renderItem = useCallback(({item}: ListRenderItemInfo<UserModel>) => (
         <Item
             channelId={channelId}
@@ -65,6 +67,8 @@ const UsersList = ({channelId, location, type = 'FlatList', users}: Props) => {
                 data={users}
                 renderItem={renderItem}
                 overScrollMode={'always'}
+                scrollEnabled={enabled}
+                {...panResponder.panHandlers}
             />
         );
     }

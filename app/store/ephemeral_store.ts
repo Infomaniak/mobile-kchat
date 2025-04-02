@@ -10,7 +10,7 @@ import {toMilliseconds} from '@utils/datetime';
 const TIME_TO_CLEAR_WEBSOCKET_ACTIONS = toMilliseconds({seconds: 30});
 import type {KSuiteLimit} from '@components/post_list/limited_messages/limited_messages';
 
-class EphemeralStore {
+class EphemeralStoreSingleton {
     theme: Theme | undefined;
     creatingChannel = false;
     creatingDMorGMTeammates: string[] = [];
@@ -304,4 +304,5 @@ class EphemeralStore {
     };
 }
 
-export default new EphemeralStore();
+const EphemeralStore = new EphemeralStoreSingleton();
+export default EphemeralStore;

@@ -62,6 +62,7 @@ type Props = {
     isNewMessage: boolean;
     showScrollToEndBtn: boolean;
     location: string;
+    testID?: string;
 };
 
 const ScrollToEndView = ({
@@ -69,6 +70,7 @@ const ScrollToEndView = ({
     isNewMessage,
     showScrollToEndBtn,
     location,
+    testID = 'scroll-to-end-view',
 }: Props) => {
     const intl = useIntl();
     const theme = useTheme();
@@ -106,7 +108,10 @@ const ScrollToEndView = ({
     const scrollButtonStyles = isNewMessage ? styles.scrollToEndBadge : styles.scrollToEndButton;
 
     return (
-        <View ref={guidingViewRef}>
+        <View
+            ref={guidingViewRef}
+            testID={testID}
+        >
             <Animated.View style={[animatedStyle, styles.buttonStyle]}>
                 <Pressable
                     onPress={onPress}

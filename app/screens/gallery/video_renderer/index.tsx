@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
-import {DeviceEventEmitter, StyleSheet, useWindowDimensions} from 'react-native';
+import {DeviceEventEmitter, StyleSheet} from 'react-native';
 import Animated, {
     Easing,
     useAnimatedStyle,
@@ -48,7 +48,6 @@ const styles = StyleSheet.create({
 });
 
 const VideoRenderer = ({height, index, initialIndex, item, isPageActive, onShouldHideControls, width}: VideoRendererProps) => {
-    const dimensions = useWindowDimensions();
     const fullscreen = useSharedValue(false);
     const {bottom} = useSafeAreaInsets();
     const serverUrl = useServerUrl();
@@ -128,30 +127,18 @@ const VideoRenderer = ({height, index, initialIndex, item, isPageActive, onShoul
     }, []);
 
     const dimensionsStyle = useMemo(() => {
-        let w = width;
-        let h = height - (VIDEO_INSET + GALLERY_FOOTER_HEIGHT + bottom);
-
-        if (hasError) {
-            return {height: 0, width: 0};
-        }
-
-        if (fullscreen.value) {
-            w = dimensions.width;
-            h = dimensions.height;
-        } else if (dimensions.width > dimensions.height) {
-            w = h;
-            h = width;
-        }
+        const w = width;
+        const h = height - (VIDEO_INSET + GALLERY_FOOTER_HEIGHT + bottom);
 
         return {width: w, height: h};
-    }, [hasError, fullscreen.value, dimensions.height]);
+    }, [width, height, bottom]);
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
             width: withTiming(dimensionsStyle.width, timingConfig),
             height: withTiming(dimensionsStyle.height, timingConfig),
         };
-    }, [dimensionsStyle, hasError]);
+    }, [dimensionsStyle]);
 
     useEffect(() => {
         if (initialIndex === index && videoReady) {

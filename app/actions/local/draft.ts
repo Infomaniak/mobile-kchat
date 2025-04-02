@@ -1,9 +1,24 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {DeviceEventEmitter, Image} from 'react-native';
+
+import {Navigation, Screens} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getDraft} from '@queries/servers/drafts';
+import {goToScreen} from '@screens/navigation';
+import {isTablet} from '@utils/helpers';
 import {logError} from '@utils/log';
+import {isParsableUrl} from '@utils/url';
+
+export const switchToGlobalDrafts = async () => {
+    const isTablelDevice = isTablet();
+    if (isTablelDevice) {
+        DeviceEventEmitter.emit(Navigation.NAVIGATION_HOME, Screens.GLOBAL_DRAFTS);
+    } else {
+        goToScreen(Screens.GLOBAL_DRAFTS, '', {}, {topBar: {visible: false}});
+    }
+};
 
 export async function updateDraftFile(serverUrl: string, channelId: string, rootId: string, file: FileInfo, prepareRecordsOnly = false) {
     try {
@@ -25,6 +40,7 @@ export async function updateDraftFile(serverUrl: string, channelId: string, root
         newFiles[i] = file;
         draft.prepareUpdate((d) => {
             d.files = newFiles;
+            d.updateAt = Date.now();
         });
 
         if (!prepareRecordsOnly) {
@@ -56,6 +72,7 @@ export async function removeDraftFile(serverUrl: string, channelId: string, root
         } else {
             draft.prepareUpdate((d) => {
                 d.files = draft.files.filter((v, index) => index !== i);
+                d.updateAt = Date.now();
             });
         }
 
@@ -83,6 +100,7 @@ export async function updateDraftMessage(serverUrl: string, channelId: string, r
                 channel_id: channelId,
                 root_id: rootId,
                 message,
+                update_at: Date.now(),
             };
 
             return operator.handleDraft({drafts: [newDraft], prepareRecordsOnly});
@@ -97,6 +115,7 @@ export async function updateDraftMessage(serverUrl: string, channelId: string, r
         } else {
             draft.prepareUpdate((d) => {
                 d.message = message;
+                d.updateAt = Date.now();
             });
         }
 
@@ -121,6 +140,7 @@ export async function addFilesToDraft(serverUrl: string, channelId: string, root
                 root_id: rootId,
                 files,
                 message: '',
+                update_at: Date.now(),
             };
 
             return operator.handleDraft({drafts: [newDraft], prepareRecordsOnly});
@@ -128,6 +148,7 @@ export async function addFilesToDraft(serverUrl: string, channelId: string, root
 
         draft.prepareUpdate((d) => {
             d.files = [...draft.files, ...files];
+            d.updateAt = Date.now();
         });
 
         if (!prepareRecordsOnly) {
@@ -169,6 +190,7 @@ export async function updateDraftPriority(serverUrl: string, channelId: string, 
                 metadata: {
                     priority: postPriority,
                 },
+                update_at: Date.now(),
             };
 
             return operator.handleDraft({drafts: [newDraft], prepareRecordsOnly});
@@ -179,6 +201,7 @@ export async function updateDraftPriority(serverUrl: string, channelId: string, 
                 ...d.metadata,
                 priority: postPriority,
             };
+            d.updateAt = Date.now();
         });
 
         if (!prepareRecordsOnly) {
@@ -190,4 +213,106 @@ export async function updateDraftPriority(serverUrl: string, channelId: string, 
         logError('Failed updateDraftPriority', error);
         return {error};
     }
+}
+
+export async function updateDraftMarkdownImageMetadata({
+    serverUrl,
+    channelId,
+    rootId,
+    imageMetadata,
+    prepareRecordsOnly = false,
+}: {
+    serverUrl: string;
+    channelId: string;
+    rootId: string;
+    imageMetadata: Dictionary<PostImage | undefined>;
+    prepareRecordsOnly?: boolean;
+}) {
+    try {
+        const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        const draft = await getDraft(database, channelId, rootId);
+        if (draft) {
+            draft.prepareUpdate((d) => {
+                d.metadata = {
+                    ...d.metadata,
+                    images: imageMetadata,
+                };
+                d.updateAt = Date.now();
+            });
+            if (!prepareRecordsOnly) {
+                await operator.batchRecords([draft], 'updateDraftImageMetadata');
+            }
+        }
+        return {draft};
+    } catch (error) {
+        logError('Failed updateDraftMarkdownImageMetadata', error);
+        return {error};
+    }
+}
+
+async function getImageMetadata(url: string) {
+    let height = 0;
+    let width = 0;
+    let format;
+    await new Promise((resolve) => {
+        Image.getSize(
+            url,
+            (imageWidth, imageHeight) => {
+                width = imageWidth;
+                height = imageHeight;
+                resolve(null);
+            },
+            (error) => {
+                logError('Failed getImageMetadata to get image size', error);
+            },
+        );
+    });
+
+    /**
+     * Regex Explanation:
+     * \.       - Matches a literal period (e.g., before "jpg").
+     * (\w+)    - Captures the file extension (letters, digits, or underscores).
+     * (?=\?|$) - Ensures the extension is followed by "?" or the end of the URL.
+     *
+     * * Example Matches:
+     * "https://example.com/image.jpg"         -> Matches "jpg"
+     * "https://example.com/image.png?size=1"  -> Matches "png"
+     * "https://example.com/file"              -> No match (no file extension).
+     */
+    const match = url.match(/\.(\w+)(?=\?|$)/);
+    if (match) {
+        format = match[1];
+    }
+    return {
+        height,
+        width,
+        format,
+        frame_count: 1,
+        url,
+    };
+}
+
+export async function parseMarkdownImages(markdown: string, imageMetadata: Dictionary<PostImage | undefined>) {
+    // Regex break down
+    // ([a-zA-Z][a-zA-Z\d+\-.]*):\/\/ - Matches any valid scheme (protocol), such as http, https, ftp, mailto, file, etc.
+    // [^\s()<>]+ - Matches the main part of the URL, excluding spaces, parentheses, and angle brackets.
+    // (?:\([^\s()<>]+\))* - Allows balanced parentheses inside the URL path or query parameters.
+    // !\[.*?\]\((...)\) - Matches an image markdown syntax ![alt text](image url)
+    const imageRegex = /!\[.*?\]\((([a-zA-Z][a-zA-Z\d+\-.]*):\/\/[^\s()<>]+(?:\([^\s()<>]+\))*)\)/g;
+    const matches = Array.from(markdown.matchAll(imageRegex));
+
+    const promises = matches.reduce<Array<Promise<PostImage & {url: string}>>>((result, match) => {
+        const imageUrl = match[1];
+        if (isParsableUrl(imageUrl)) {
+            result.push(getImageMetadata(imageUrl));
+        }
+        return result;
+    }, []);
+
+    const metadataArray = await Promise.all(promises);
+    metadataArray.forEach((metadata) => {
+        if (metadata) {
+            imageMetadata[metadata.url] = metadata;
+        }
+    });
 }

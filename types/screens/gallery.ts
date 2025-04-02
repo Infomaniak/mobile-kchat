@@ -60,8 +60,10 @@ export type OnGestureEvent<T extends GestureHandlerGestureEvent> = (
   event: T,
 ) => void;
 
+export type GalleryFileType = 'image' | 'video' | 'file' | 'avatar';
+
 export type GalleryItemType = {
-    type: 'image' | 'video' | 'file' | 'avatar';
+    type: GalleryFileType;
     id: string;
     width: number;
     height: number;
@@ -74,7 +76,7 @@ export type GalleryItemType = {
     authorId?: string;
     size?: number;
     postId?: string;
-    postProps?: Record<string, any> & {captions?: Caption[]};
+    postProps?: Record<string, unknown> & {captions?: Caption[]};
 };
 
 export type GalleryAction = 'none' | 'downloading' | 'copying' | 'sharing' | 'opening' | 'external';
