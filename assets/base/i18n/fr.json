@@ -1012,7 +1012,7 @@
   "smobile.search.recent_title": "Recherches récentes dans {teamName}",
   "snack.bar.channel.members.added": "{numMembers, number} {numMembers, plural, one {membre ajouté} other {memebres ajoutés}}",
   "snack.bar.favorited.channel": "Ce canal a été ajouté aux favoris",
-  "snack.bar.following.thread": "Discussion suivuie",
+  "snack.bar.following.thread": "Discussion suivie",
   "snack.bar.info.copied": "Informations copiées dans le presse-papiers",
   "snack.bar.link.copied": "Lien copié dans le presse-papier",
   "snack.bar.leave.private.channel": "Vous avez quitté le canal {displayName}",
