@@ -25,7 +25,7 @@ const SummarizeThread = ({post, bottomSheetId}: Props) => {
     const theme = useTheme();
 
     const handleSummarizeThread = (async () => {
-        const summarizePost = await summarizeThread(serverUrl, post.id, 'kchat.bot');
+        const summarizePost = await summarizeThread(serverUrl, post.id, 'euria');
         await dismissBottomSheet(bottomSheetId);
         fetchAndSwitchToThread(serverUrl, summarizePost.data.postid);
     });

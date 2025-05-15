@@ -69,6 +69,12 @@ const Message = ({currentUser, isHighlightWithoutNotificationLicensed, highlight
     const onLayout = useCallback((event: LayoutChangeEvent) => setHeight(event.nativeEvent.layout.height), []);
     const onPress = () => setOpen(!open);
 
+    // Clean up escaped underscores in channel mentions (e.g. ~team\_dev becomes ~team_dev)
+    // This ensures that channel mentions written with escaped underscores (as in Markdown) are recognized by the parser.
+    const cleanMessage = post.message.replace(/~([a-zA-Z0-9\\_\\-]+)/g, (match) =>
+        match.replace(/\\_/g, '_'),
+    );
+
     return (
         <>
             <Animated.View style={animatedStyle}>
@@ -95,7 +101,7 @@ const Message = ({currentUser, isHighlightWithoutNotificationLicensed, highlight
                             location={location}
                             postId={post.id}
                             textStyles={textStyles}
-                            value={post.message}
+                            value={cleanMessage}
                             mentionKeys={currentUser?.mentionKeys ?? EMPTY_MENTION_KEYS}
                             highlightKeys={isHighlightWithoutNotificationLicensed ? (currentUser?.highlightKeys ?? EMPTY_HIGHLIGHT_KEYS) : EMPTY_HIGHLIGHT_KEYS}
                             searchPatterns={searchPatterns}

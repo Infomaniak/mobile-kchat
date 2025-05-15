@@ -1,5 +1,6 @@
 package com.mattermost.rnshare
 
+import android.content.pm.ServiceInfo
 import android.content.Context
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -144,10 +145,10 @@ class ShareWorker(context: Context, workerParameters: WorkerParameters) : Worker
                 .setContentTitle("Uploading Files")
                 .setTicker("Uploading Files")
                 .setContentText("File upload in progress")
-                .setSmallIcon(applicationContext.resources.getIdentifier("ic_notification", "mipmap", applicationContext.packageName))
+                .setSmallIcon(applicationContext.resources.getIdentifier("ic_kchat_notification", "drawable", applicationContext.packageName))
                 .setOngoing(true)
                 .build()
-        return ForegroundInfo(1, notification)
+        return ForegroundInfo(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
 
     }
 }
