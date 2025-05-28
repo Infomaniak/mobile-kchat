@@ -59,6 +59,10 @@ export function isSystemMessage(post: PostModel | Post): boolean {
     return Boolean(post.type && post.type?.startsWith(Post.POST_TYPES.SYSTEM_MESSAGE_PREFIX));
 }
 
+export function isMailAttachmentMessage(post: PostModel | Post): boolean {
+    return Boolean(post.type && post.type === (Post.POST_TYPES.MAIL_ATTACHMENT)) && 'mail_attachment' in post.props;
+}
+
 export function fromAutoResponder(post: PostModel): boolean {
     return Boolean(post.type && (post.type === Post.POST_TYPES.SYSTEM_AUTO_RESPONDER));
 }

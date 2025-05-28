@@ -91,6 +91,7 @@ const Preferences = {
             mentionHighlightLink: '#1b1d22',
             codeTheme: 'github',
             guestBannerBackground: '#F4F6FD',
+            bgSecondary: '#F5F5F5',
         },
         denim: {
             type: 'Denim',
@@ -234,6 +235,7 @@ const Preferences = {
             mentionHighlightLink: '#a4f4f4',
             codeTheme: 'monokai',
             guestBannerBackground: '#1f2328',
+            bgSecondary: '#2A2E35',
         },
     } as Record<ThemeKey, Theme>,
 };
