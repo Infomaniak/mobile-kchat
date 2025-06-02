@@ -473,6 +473,8 @@
   "mobile.android.photos_permission_denied_description": "Upload photos to your server or save them to your device. Open Settings to grant {applicationName} Read and Write access to your photo library.",
   "mobile.android.photos_permission_denied_title": "{applicationName} would like to access your photos",
   "mobile.announcement_banner.title": "Announcement",
+  "mobile.mail_preview.title": "About the email:",
+  "mobile.mail_preview.subject": "Subject:",
   "mobile.call_participants.header": "Call Participants",
   "mobile.calls_call_back": "Call back",
   "mobile.calls_call_declined": "Call rejected",

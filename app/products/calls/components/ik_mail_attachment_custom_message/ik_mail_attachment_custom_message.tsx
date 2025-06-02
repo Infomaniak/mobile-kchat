@@ -5,6 +5,7 @@ import React from 'react';
 import {FormattedDate} from 'react-intl';
 import {Text, View} from 'react-native';
 
+import FormattedText from '@components/formatted_text';
 import {useTheme} from '@context/theme';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -82,9 +83,11 @@ export const IkMailAttachmentCustomMessage = (props: MailAttachmentProps) => {
     const styles = getStyleSheet(theme);
     return (
         <View style={styles.mail_attachment}>
-            {/* TODO translation */}
-            {/* eslint-disable-next-line react/jsx-no-literals */}
-            <Text style={styles.thin} >À propos de l’e-mail :</Text>
+            <FormattedText
+                id='mobile.mail_preview.title'
+                style={styles.thin}
+                defaultMessage='About the email:'
+            />
 
             <View style={styles.container}>
                 <View style={styles.icon}>
@@ -99,17 +102,17 @@ export const IkMailAttachmentCustomMessage = (props: MailAttachmentProps) => {
                                 ...styles.bold,
                             }}
                         >{to}</Text>
-
                         <Text
                             style={styles.thin}
                         >
-
                             <FormattedDate value={created_at * 1000}/></Text>
                     </View>
                     <View style={styles.row}>
-                        {/* TODO translation */}
-                        {/* eslint-disable-next-line react/jsx-no-literals */}
-                        <Text style={styles.thin}>Objet:</Text>
+                        <FormattedText
+                            id='mobile.mail_preview.subject'
+                            style={styles.thin}
+                            defaultMessage='Subject:'
+                        />
                         <Text
                             numberOfLines={3}
                             style={styles.bold}
