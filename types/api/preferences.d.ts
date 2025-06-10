@@ -40,6 +40,7 @@ type Theme = {
     mentionHighlightLink: string;
     codeTheme: string;
     guestBannerBackground: string;
+    bgSecondary: string;
 };
 
 type ExtendedTheme = Theme & {[key: string]: string | undefined};

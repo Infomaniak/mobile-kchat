@@ -437,6 +437,8 @@
   "mobile.android.photos_permission_denied_description": "Chargez des photos dans votre serveur ou enregistrez-les sur votre appareil. Ouvrez les paramètres pour autoriser {applicationName} à accéder en lecture et en écriture à votre bibliothèque de photos.",
   "mobile.android.photos_permission_denied_title": "{applicationName} souhaiterait accéder à vos photos",
   "mobile.announcement_banner.title": "Annonce",
+  "mobile.mail_preview.title": "À propos de l’e-mail :",
+  "mobile.mail_preview.subject": "Objet :",
   "mobile.calls_audio_device": "Sélectionner un appareil audio",
   "mobile.calls_bluetooth": "Bluetooth",
   "mobile.calls_call_ended": "Appel terminé",
