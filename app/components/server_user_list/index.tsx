@@ -113,7 +113,9 @@ export default function ServerUserList({
             const results = filterProfilesMatchingTerm(profilesToFilter, term).filter(filterByTerm);
             return [...exactMatches, ...results];
         }
-        return profiles;
+
+        const activeProfiles = profiles.filter((p) => p.delete_at === 0);
+        return activeProfiles;
     }, [term, isSearch, isSearch && searchResults, profiles]);
 
     return (
