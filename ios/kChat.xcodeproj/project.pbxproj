@@ -1550,7 +1550,7 @@
 				PRODUCT_NAME = kChat;
 				PROVISIONING_PROFILE = "25a67915-c0b2-4f20-a908-9765779b89d0";
 				PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.infomaniak.chat 1685967118";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore com.infomaniak.chat 1717666010";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore com.infomaniak.chat";
 				SWIFT_OBJC_BRIDGING_HEADER = "Mattermost/Mattermost-Bridging-Header.h";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1648,7 +1648,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "ef6fc8a4-2d00-4e2a-9e70-2f385a1d465e";
 				PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.infomaniak.chat.NotificationService 1685967101";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore com.infomaniak.chat.NotificationService 1717665974";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore com.infomaniak.chat.NotificationService";
 				SKIP_INSTALL = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -1751,7 +1751,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "605f9321-1e14-42b9-8b23-320788fb835f";
 				PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.infomaniak.chat.ShareExtension 1685967110";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore com.infomaniak.chat.ShareExtension 1717665990";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore com.infomaniak.chat.ShareExtension";
 				SKIP_INSTALL = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = YES;
