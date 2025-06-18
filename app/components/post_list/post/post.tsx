@@ -1,9 +1,17 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {type ReactNode, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {Fragment, type ReactNode, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {Keyboard, Platform, type StyleProp, View, type ViewStyle, TouchableHighlight, TouchableOpacity} from 'react-native';
+import {
+    Keyboard,
+    Platform,
+    type StyleProp,
+    View,
+    type ViewStyle,
+    TouchableHighlight,
+    TouchableOpacity,
+} from 'react-native';
 
 import {removePost} from '@actions/local/post';
 import {showPermalink} from '@actions/remote/permalink';
@@ -12,6 +20,9 @@ import {fetchAndSwitchToThread} from '@actions/remote/thread';
 import FormattedText from '@app/components/formatted_text';
 import {getMarkdownTextStyles} from '@app/utils/markdown';
 import IkCallsCustomMessage from '@calls/components/ik_calls_custom_message';
+import {
+    IkMailAttachmentCustomMessage, type MailAttachmentProps,
+} from '@calls/components/ik_mail_attachment_custom_message/ik_mail_attachment_custom_message';
 import {isCallsCustomMessage} from '@calls/utils';
 import IkWelcomeMessage from '@components/post_list/post/ik_welcome_message';
 import PreviewMessage from '@components/post_list/post/preview_message';
@@ -26,7 +37,14 @@ import PerformanceMetricsManager from '@managers/performance_metrics_manager';
 import {openAsBottomSheet} from '@screens/navigation';
 import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {hasJumboEmojiOnly} from '@utils/emoji/helpers';
-import {fromAutoResponder, isFromWebhook, isPostFailed, isPostPendingOrFailed, isSystemMessage} from '@utils/post';
+import {
+    fromAutoResponder,
+    isFromWebhook,
+    isMailAttachmentMessage,
+    isPostFailed,
+    isPostPendingOrFailed,
+    isSystemMessage,
+} from '@utils/post';
 import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
@@ -162,6 +180,7 @@ const Post = ({
     const isPendingOrFailed = isPostPendingOrFailed(post);
     const isFailed = isPostFailed(post);
     const isSystemPost = isSystemMessage(post);
+    const isMailAttachment = isMailAttachmentMessage(post);
     const isCallsPost = isCallsCustomMessage(post);
     const hasBeenDeleted = (post.deleteAt !== 0);
     const isWebHook = isFromWebhook(post);
@@ -407,6 +426,37 @@ const Post = ({
                 {post.type === PostTypes.IK_SYSTEM_WELCOME_MESSAGE && <IkWelcomeMessage/>}
             </>
 
+        );
+    } else if (isMailAttachment) {
+        const {to, subject, created_at} = (post.props as {mail_attachment: MailAttachmentProps}).mail_attachment;
+        body = (
+            <Fragment>
+                <IkMailAttachmentCustomMessage
+                    to={to}
+                    subject={subject}
+                    created_at={created_at}
+                />
+                <Body
+                    appsEnabled={appsEnabled}
+                    hasFiles={hasFiles}
+                    hasReactions={hasReactions}
+                    highlight={Boolean(highlightedStyle)}
+                    highlightReplyBar={highlightReplyBar}
+                    isCRTEnabled={isCRTEnabled}
+                    isEphemeral={isEphemeral}
+                    isFirstReply={isFirstReply}
+                    isJumboEmoji={isJumboEmoji}
+                    isLastReply={isLastReply}
+                    isPendingOrFailed={isPendingOrFailed}
+                    isPostAcknowledgementEnabled={isPostAcknowledgementEnabled}
+                    isPostAddChannelMember={isPostAddChannelMember}
+                    location={location}
+                    post={post}
+                    searchPatterns={searchPatterns}
+                    showAddReaction={showAddReaction}
+                    theme={theme}
+                />
+            </Fragment>
         );
     } else if (isCallsPost && !hasBeenDeleted) {
         body = <IkCallsCustomMessage post={post}/>;

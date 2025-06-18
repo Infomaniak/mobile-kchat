@@ -1251,6 +1251,29 @@ PODS:
     - Yoga
   - react-native-notifications (5.1.0):
     - React-Core
+  - react-native-orientation-locker (1.6.0):
+    - React-Core
+  - react-native-pager-view (6.4.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-paste-input (0.8.0):
     - DoubleConversion
     - glog
@@ -1822,6 +1845,8 @@ DEPENDENCIES:
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - "react-native-network-client (from `../node_modules/@mattermost/react-native-network-client`)"
   - react-native-notifications (from `../node_modules/react-native-notifications`)
+  - react-native-orientation-locker (from `../node_modules/react-native-orientation-locker`)
+  - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - "react-native-paste-input (from `../node_modules/@mattermost/react-native-paste-input`)"
   - react-native-performance (from `../node_modules/react-native-performance`)
   - react-native-restart (from `../node_modules/react-native-restart`)
@@ -2031,6 +2056,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@mattermost/react-native-network-client"
   react-native-notifications:
     :path: "../node_modules/react-native-notifications"
+  react-native-orientation-locker:
+    :path: "../node_modules/react-native-orientation-locker"
+  react-native-pager-view:
+    :path: "../node_modules/react-native-pager-view"
   react-native-paste-input:
     :path: "../node_modules/@mattermost/react-native-paste-input"
   react-native-performance:
@@ -2223,6 +2252,8 @@ SPEC CHECKSUMS:
   react-native-netinfo: 076df4f9b07f6670acf4ce9a75aac8d34c2e2ccc
   react-native-network-client: a862d041763721fddb9802a24fb6bb28208781cb
   react-native-notifications: 4601a5a8db4ced6ae7cfc43b44d35fe437ac50c4
+  react-native-orientation-locker: 4409c5b12b65f942e75449872b4f078b6f27af81
+  react-native-pager-view: bc6cf48ea4f08ea5c5a74e19c6579e9b86d8729c
   react-native-paste-input: 011a9916ef3acf809a7da122847c61ca0f93a60e
   react-native-performance: ff93f8af3b2ee9519fd7879896aa9b8b8272691d
   react-native-restart: 7595693413fe3ca15893702f2c8306c62a708162

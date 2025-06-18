@@ -63,6 +63,9 @@ export async function start() {
     registerNavigationListeners();
     registerScreens();
 
+    // IK change : add 2 seconds delay for splash screen
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     await WebsocketManager.init(serverCredentials);
 
     initialLaunch();

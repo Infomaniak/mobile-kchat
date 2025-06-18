@@ -13,7 +13,7 @@ export const PostTypes: Record<string, string> = {
     EPHEMERAL_ADD_TO_CHANNEL: 'system_ephemeral_add_to_channel',
     HEADER_CHANGE: 'system_header_change',
     PURPOSE_CHANGE: 'system_purpose_change',
-
+    MAIL_ATTACHMENT: 'mail_attachment',
     SYSTEM_MESSAGE_PREFIX: 'system_',
     JOIN_LEAVE: 'system_join_leave',
     JOIN_CHANNEL: 'system_join_channel',
