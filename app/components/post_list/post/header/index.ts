@@ -5,6 +5,7 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
 
+import {observeFilesForPost} from '@app/queries/servers/file';
 import {getDisplayNamePreferenceAsBool} from '@helpers/api/preference';
 import {observePost, observePostAuthor, queryPostReplies} from '@queries/servers/post';
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
@@ -32,6 +33,8 @@ const withHeaderProps = withObservables(
         const teammateNameDisplay = observeTeammateNameDisplay(database);
         const commentCount = queryPostReplies(database, post.rootId || post.id).observeCount();
         const isCustomStatusEnabled = observeConfigBooleanValue(database, 'EnableCustomUserStatuses');
+        const files = observeFilesForPost(database, post.id).pipe(switchMap((items) => of$(items)));
+
         const rootPostAuthor = differentThreadSequence ? observePost(database, post.rootId).pipe(switchMap((root) => {
             if (root) {
                 return observeUser(database, root.userId);
@@ -48,6 +51,7 @@ const withHeaderProps = withObservables(
             isMilitaryTime,
             rootPostAuthor,
             teammateNameDisplay,
+            files,
             hideGuestTags: observeConfigBooleanValue(database, 'HideGuestTags'),
         };
     });

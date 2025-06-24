@@ -1,9 +1,10 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {View} from 'react-native';
 
+import {PostPriorityType} from '@app/constants/post';
 import FormattedTime from '@components/formatted_time';
 import PostPriorityLabel from '@components/post_priority/post_priority_label';
 import {CHANNEL, THREAD} from '@constants/screens';
@@ -19,6 +20,7 @@ import HeaderDisplayName from './display_name';
 import HeaderReply from './reply';
 import HeaderTag from './tag';
 
+import type {FileModel} from '@app/database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
 
@@ -42,6 +44,7 @@ type HeaderProps = {
     shouldRenderReplyButton?: boolean;
     teammateNameDisplay: string;
     hideGuestTags: boolean;
+    files?: FileModel[];
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -74,7 +77,7 @@ const Header = (props: HeaderProps) => {
     const {
         author, commentCount = 0, currentUser, enablePostUsernameOverride, isAutoResponse, isCRTEnabled, isCustomStatusEnabled,
         isEphemeral, isMilitaryTime, isPendingOrFailed, isSystemPost, isWebHook,
-        location, post, rootPostAuthor, showPostPriority, shouldRenderReplyButton, teammateNameDisplay, hideGuestTags,
+        location, post, rootPostAuthor, showPostPriority, shouldRenderReplyButton, teammateNameDisplay, hideGuestTags, files,
     } = props;
     const theme = useTheme();
     const style = getStyleSheet(theme);
@@ -84,10 +87,28 @@ const Header = (props: HeaderProps) => {
     const displayName = postUserDisplayName(post, author, teammateNameDisplay, enablePostUsernameOverride);
     const rootAuthorDisplayName = rootPostAuthor ? displayUsername(rootPostAuthor, currentUser?.locale, teammateNameDisplay, true) : undefined;
     const customStatus = getUserCustomStatus(author);
+    const [isTranscriptAvailable, setIsTranscriptAvailable] = useState(false);
     const showCustomStatusEmoji = Boolean(
         isCustomStatusEnabled && displayName && customStatus &&
         !(isSystemPost || author?.isBot || isAutoResponse || isWebHook),
     ) && !isCustomStatusExpired(author) && Boolean(customStatus?.emoji);
+
+    useEffect(() => {
+        if (files && files[0]?.transcript) {
+            try {
+                const transcriptObj = JSON.parse(files[0].transcript);
+                if (transcriptObj.text) {
+                    setIsTranscriptAvailable(true);
+                } else {
+                    setIsTranscriptAvailable(false);
+                }
+            } catch (err) {
+                setIsTranscriptAvailable(false);
+
+                /* empty */
+            }
+        }
+    }, [files]);
 
     return (
         <>
@@ -126,6 +147,13 @@ const Header = (props: HeaderProps) => {
                         <View style={style.postPriority}>
                             <PostPriorityLabel
                                 label={post.metadata.priority.priority}
+                            />
+                        </View>
+                    )}
+                    {isTranscriptAvailable && post.type === 'voice' && (
+                        <View style={style.postPriority}>
+                            <PostPriorityLabel
+                                label={PostPriorityType.TRANSCRIPT}
                             />
                         </View>
                     )}

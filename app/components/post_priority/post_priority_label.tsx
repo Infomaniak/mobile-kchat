@@ -3,7 +3,7 @@
 
 import React from 'react';
 import {useIntl} from 'react-intl';
-import {type StyleProp, StyleSheet, Text, View, type ViewStyle} from 'react-native';
+import {type StyleProp, StyleSheet, Text, type TextStyle, View, type ViewStyle} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
 import {PostPriorityColors, PostPriorityType} from '@constants/post';
@@ -22,6 +22,15 @@ const style = StyleSheet.create({
     },
     important: {
         backgroundColor: PostPriorityColors.IMPORTANT,
+    },
+    transcript: {
+        backgroundColor: PostPriorityColors.TRANSCRIPT,
+    },
+    transcriptLabel: {
+        color: PostPriorityColors.TRANSCRIPT_LABEL,
+    },
+    transcriptIcon: {
+        color: PostPriorityColors.TRANSCRIPT_ICON,
     },
     label: {
         color: '#fff',
@@ -42,6 +51,9 @@ const PostPriorityLabel = ({label}: Props) => {
     const intl = useIntl();
 
     const containerStyle: StyleProp<ViewStyle> = [style.container];
+    const labelStyle: StyleProp<TextStyle> = [style.label];
+    const iconStyle: StyleProp<TextStyle> = [style.icon];
+
     let iconName = '';
     let labelText = '';
     if (label === PostPriorityType.URGENT) {
@@ -52,14 +64,21 @@ const PostPriorityLabel = ({label}: Props) => {
         containerStyle.push(style.important);
         iconName = 'alert-circle-outline';
         labelText = intl.formatMessage({id: 'post_priority.label.important', defaultMessage: 'IMPORTANT'});
+    } else if (label === PostPriorityType.TRANSCRIPT) {
+        containerStyle.push(style.transcript);
+        iconStyle.push(style.transcriptIcon);
+        labelStyle.push(style.transcriptLabel);
+        iconName = 'microphone-outline';
+        labelText = intl.formatMessage({id: 'post_priority.label.iortant', defaultMessage: 'Transcrit Automatiquement'});
     }
+
     return (
         <View style={containerStyle}>
             <CompassIcon
                 name={iconName}
-                style={style.icon}
+                style={iconStyle}
             />
-            <Text style={style.label}>{labelText}</Text>
+            <Text style={labelStyle}>{labelText}</Text>
         </View>
     );
 };
