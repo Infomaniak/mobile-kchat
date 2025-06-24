@@ -69,7 +69,7 @@ const PostPriorityLabel = ({label}: Props) => {
         iconStyle.push(style.transcriptIcon);
         labelStyle.push(style.transcriptLabel);
         iconName = 'microphone-outline';
-        labelText = intl.formatMessage({id: 'post_priority.label.iortant', defaultMessage: 'Transcrit Automatiquement'});
+        labelText = intl.formatMessage({id: 'post_priority.label.transcript', defaultMessage: 'Transcrit Automatiquement'});
     }
 
     return (

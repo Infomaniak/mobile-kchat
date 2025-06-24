@@ -985,6 +985,7 @@
     "post_info.system": "System",
     "post_message_view.edited": "(bearbeitet)",
     "post_priority.button.acknowledge": "Bestätigen",
+    "post_priority.label.transcript": "Automatisch transkribiert",
     "post_priority.label.important": "WICHTIG",
     "post_priority.label.urgent": "DRINGEND",
     "post_priority.picker.apply": "Anwenden",

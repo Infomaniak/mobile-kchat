@@ -819,6 +819,7 @@
     "post_info.system": "Sistema",
     "post_message_view.edited": "(modificato)",
     "post_priority.button.acknowledge": "Preso nota",
+    "post_priority.label.transcript": "Trascritto automaticamente",
     "post_priority.label.important": "IMPORTANTE",
     "post_priority.label.urgent": "URGENTE",
     "post_priority.picker.apply": "Applica",
