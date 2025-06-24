@@ -967,6 +967,7 @@
   "post_message_view.edited": "(édité)",
   "post_priority.button.acknowledge": "Accuser réception",
   "post_priority.label.important": "IMPORTANT",
+  "post_priority.label.transcript": "Transcrit automatiquement",
   "post_priority.label.urgent": "URGENT",
   "post_priority.picker.apply": "Appliquer",
   "post_priority.picker.beta": "BETA",
