@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {View} from 'react-native';
 
 import FormattedText from '@components/formatted_text';
@@ -21,6 +21,7 @@ import HeaderDisplayName from './display_name';
 import HeaderReply from './reply';
 import HeaderTag from './tag';
 
+import type {FileModel} from '@database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -45,6 +46,7 @@ type HeaderProps = {
     shouldRenderReplyButton?: boolean;
     teammateNameDisplay: string;
     hideGuestTags: boolean;
+    files?: FileModel[];
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -79,7 +81,7 @@ const Header = (props: HeaderProps) => {
     const {
         author, commentCount = 0, currentUser, enablePostUsernameOverride, isAutoResponse, isCRTEnabled, isCustomStatusEnabled,
         isEphemeral, isMilitaryTime, isPendingOrFailed, isSystemPost, isWebHook,
-        location, post, rootPostAuthor, showPostPriority, shouldRenderReplyButton, teammateNameDisplay, hideGuestTags,
+        location, post, rootPostAuthor, showPostPriority, shouldRenderReplyButton, teammateNameDisplay, hideGuestTags, files,
     } = props;
     const theme = useTheme();
     const style = getStyleSheet(theme);
@@ -89,12 +91,30 @@ const Header = (props: HeaderProps) => {
     const displayName = postUserDisplayName(post, author, teammateNameDisplay, enablePostUsernameOverride);
     const rootAuthorDisplayName = rootPostAuthor ? displayUsername(rootPostAuthor, currentUser?.locale, teammateNameDisplay, true) : undefined;
     const customStatus = getUserCustomStatus(author);
+    const [isTranscriptAvailable, setIsTranscriptAvailable] = useState(false);
     const showCustomStatusEmoji = Boolean(
         isCustomStatusEnabled && displayName && customStatus &&
         !(isSystemPost || author?.isBot || isAutoResponse || isWebHook),
     ) && !isCustomStatusExpired(author) && Boolean(customStatus?.emoji);
     const userIconOverride = ensureString(post.props?.override_icon_url);
     const usernameOverride = ensureString(post.props?.override_username);
+
+    useEffect(() => {
+        if (files && files[0]?.transcript) {
+            try {
+                const transcriptObj = JSON.parse(files[0].transcript);
+                if (transcriptObj.text) {
+                    setIsTranscriptAvailable(true);
+                } else {
+                    setIsTranscriptAvailable(false);
+                }
+            } catch (err) {
+                setIsTranscriptAvailable(false);
+
+                /* empty */
+            }
+        }
+    }, [files]);
 
     return (
         <>
@@ -141,6 +161,13 @@ const Header = (props: HeaderProps) => {
                         <PostPriorityLabel
                             label={post.metadata.priority.priority}
                         />
+                    )}
+                    {isTranscriptAvailable && post.type === 'voice' && (
+                        <View style={style.postPriority}>
+                            <PostPriorityLabel
+                                label={PostPriorityType.TRANSCRIPT}
+                            />
+                        </View>
                     )}
                     {!isCRTEnabled && showReply && commentCount > 0 &&
                         <HeaderReply

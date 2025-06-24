@@ -4,24 +4,21 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import React, {useEffect, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {Text, TouchableOpacity, View, Keyboard} from 'react-native';
+import {Text, TouchableOpacity, View} from 'react-native';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
 import {fetchPostById} from '@actions/remote/post';
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
-import TranscriptIcon from '@components/illustrations/icon_transcript';
-import LoadingTranscript from '@components/illustrations/load_transcript';
+import Loading from '@components/loading';
 import TimeElapsed from '@components/post_draft/draft_input/voice_input/time_elapsed';
 import Slider from '@components/slider';
-import {Screens} from '@constants';
 import {MIC_SIZE} from '@constants/view';
 import {useAudioPlayerContext} from '@context/audio_player';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {observeFilesForPost} from '@queries/servers/file';
-import {openAsBottomSheet} from '@screens/navigation';
 import {mmssss} from '@utils/datetime';
 import {getMarkdownTextStyles} from '@utils/markdown';
 import {preventDoubleTap} from '@utils/tap';
@@ -61,10 +58,15 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         },
         transcriptText: {
             color: theme.centerChannelColor,
-            fontSize: 13,
             textAlign: 'left',
-            paddingTop: 3,
             overflow: 'hidden',
+            fontSize: 16,
+            lineHeight: 20,
+            paddingTop: 1,
+        },
+        openVoiceMessageButtonText: {
+            fontSize: 14,
+            color: '#3F4350BF',
         },
         centeredView: {
             alignItems: 'flex-start',
@@ -81,6 +83,16 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 5,
+        },
+        transcriptContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        openVoiceMessageButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingTop: 10,
         },
     };
 });
@@ -115,7 +127,7 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
     const [error, setError] = useState('');
     const [status, setStatus] = useState<'stopped' | 'playing' | 'buffering'>('stopped');
     const [transcript, setTranscript] = useState('');
-    const [transcriptDatas, setTranscriptDatas] = useState({});
+    const [isOpen, setIsOpen] = useState(false);
     const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
     const {loadAudio, pauseAudio, playing} = useAudioPlayerContext();
     const serverUrl = useServerUrl();
@@ -134,13 +146,13 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
             }
         };
         handlePosts();
+
         if (files[0]?.transcript) {
             try {
                 const transcriptObj = JSON.parse(files[0].transcript);
                 if (transcriptObj.text) {
                     setIsLoadingTranscript(false);
                     setTranscript(transcriptObj.text.trim());
-                    setTranscriptDatas(transcriptObj);
                 } else {
                     setIsLoadingTranscript(false);
                 }
@@ -173,114 +185,76 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
         }));
     };
 
-    const renderContent = () => {
-        if (!transcript) {
-            return;
-        }
-        const screen = Screens.TRANSCRIPTION;
-        const title = intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'});
-        const closeButtonId = 'close-user-profile';
-        const props = {transcriptDatas};
-
-        Keyboard.dismiss();
-
-        openAsBottomSheet({screen, title, theme, closeButtonId, props});
-    };
-
-    const transcriptReady = (
-        <View style={styles.loadingMessage}>
-            <Text style={styles.loadingTranscript}>
-                <FormattedText
-                    id='mobile.vocals.transcript_title'
-                    defaultMessage='Audio Transcript (auto-generated)'
-                    style={{fontSize: 12}}
-                />
-            </Text>
-        </View>
-
-    );
-
-    const loadingMessage = (
-        <View style={styles.loadingMessage}>
-            <LoadingTranscript/>
-            <Text style={styles.loadingTranscript}>
-                <FormattedText
-                    style={{fontSize: 10}}
-                    id='mobile.vocals.transcript_loading'
-                    defaultMessage='Audio transcription in progress...'
-                />
-            </Text>
-        </View>
-    );
-
-    const renderTranscriptMessage = () => {
-        if (isLoadingTranscript) {
-            return loadingMessage;
-        }
-        return transcriptReady;
-    };
-
     return (
         <View>
-            <View style={styles.playBackContainer}>
-                <TouchableOpacity
-                    style={styles.mic}
-                    onPress={preventDoubleTap(async () => {
-                        setStatus('stopped');
-                        setError('');
-
-                        if (isPlaying) {
-                            pauseAudio();
-                            return;
-                        }
-
-                        loadAudio(id, listener, handleLoadError);
-                    })}
-                >
-                    <CompassIcon
-                        color={theme.buttonBg}
-                        name={isPlaying ? 'pause' : 'play'}
-                        size={24}
-                    />
-                </TouchableOpacity>
-                <Slider
-                    value={(progress && width) ? (progress / width) * 100 : 0}
-                    width='60%'
-                />
-                <TimeElapsed time={timing}/>
-                {isLoadingTranscript ? (
-                    <TranscriptIcon theme={theme}/>
-                ) : (
-                    <TranscriptIcon
-                        theme={theme}
-                        color='#0098FF'
-                    />
-                )}
-            </View>
-            <View style={styles.centeredView}>
-                {transcript && (
-                    <View>
-                        <Text style={styles.transcriptText}>
-                            {renderTranscriptMessage()}
-                        </Text>
-                    </View>
-                )}
-                {transcript && (
-                    <View>
-                        <Text
-                            style={styles.transcriptText}
-                            onPress={renderContent}
-                        >
-                            {transcript.length > 200 ? transcript.substring(0, 200) + '...' : transcript + ' '}
+            <View style={[styles.centeredView, {alignItems: 'center'}]}>
+                {isLoadingTranscript &&
+                    <View style={styles.transcriptContainer}>
+                        <Loading
+                            color='#0098FF'
+                            containerStyle={{marginRight: 8}}
+                            size='small'
+                        />
+                        <Text style={styles.openVoiceMessageButtonText}>
                             <FormattedText
                                 style={{...textStyles.link, fontSize: 13}}
-                                id={'mobile.vocals.loading_transcript'}
-                                defaultMessage=' View transcript...'
+                                id={'mobile.vocals.transcript_loading'}
+                                defaultMessage='Audio transcription in progress...'
                             />
                         </Text>
                     </View>
-                )}
+                }
+                {!isLoadingTranscript && transcript.length > 0 &&
+                    <Text style={styles.transcriptText}>{transcript}</Text>
+                }
             </View>
+            <TouchableOpacity
+                onPress={() => setIsOpen((prev) => !prev)}
+                style={styles.openVoiceMessageButton}
+            >
+                <CompassIcon
+                    name={isOpen ? 'chevron-down' : 'chevron-right'}
+                    size={15}
+                    color={'#636780'}
+                    style={{marginTop: 1}}
+                />
+                <FormattedText
+                    style={styles.openVoiceMessageButtonText}
+                    id={'mobile.vocals.transcript.show'}
+                    defaultMessage='Listen to the message'
+                />
+            </TouchableOpacity>
+
+            {isOpen && (
+                <View style={styles.playBackContainer}>
+                    <TouchableOpacity
+                        style={styles.mic}
+                        onPress={preventDoubleTap(async () => {
+                            setStatus('stopped');
+                            setError('');
+
+                            if (isPlaying) {
+                                pauseAudio();
+                                return;
+                            }
+
+                            loadAudio(id, listener, handleLoadError);
+                        })}
+                    >
+                        <CompassIcon
+                            color={theme.buttonBg}
+                            name={isPlaying ? 'pause' : 'play'}
+                            size={24}
+                        />
+                    </TouchableOpacity>
+                    <Slider
+                        value={(progress && width) ? (progress / width) * 100 : 0}
+                        width='60%'
+                    />
+                    <TimeElapsed time={timing}/>
+                </View>
+            )}
+            {/*  */}
             {error && <Text style={styles.error}>{error}</Text>}
         </View>
     );
