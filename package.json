@@ -261,7 +261,9 @@
     "@react-native/eslint-config": {
       "@typescript-eslint/eslint-plugin": "7.13.1",
       "@typescript-eslint/parser": "7.13.1"
-    },
+    }
+  },
+  "resolutions": {
     "lib-jitsi-meet": "https://github.com/jitsi/lib-jitsi-meet/releases/download/v1811.0.0+86e2fb2b/lib-jitsi-meet.tgz"
   },
   "expo": {
