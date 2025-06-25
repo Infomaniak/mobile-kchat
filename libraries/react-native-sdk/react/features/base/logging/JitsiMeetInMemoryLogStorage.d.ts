@@ -1,0 +1,35 @@
+/**
+ * Implements in memory logs storage, used for testing/debugging.
+ *
+ */
+export default class JitsiMeetInMemoryLogStorage {
+    logs: string[];
+    /**
+     * Creates new <tt>JitsiMeetInMemoryLogStorage</tt>.
+     */
+    constructor();
+    /**
+     * Checks if this storage instance is ready.
+     *
+     * @returns {boolean} <tt>true</tt> when this storage is ready or
+     * <tt>false</tt> otherwise.
+     */
+    isReady(): boolean;
+    /**
+     * Called by the <tt>LogCollector</tt> to store a series of log lines into
+     * batch.
+     *
+     * @param {string|Object[]} logEntries - An array containing strings
+     * representing log lines or aggregated lines objects.
+     * @returns {void}
+     */
+    storeLogs(logEntries: (string | {
+        text: string;
+    })[]): void;
+    /**
+     * Returns the logs stored in the memory.
+     *
+     * @returns {Array<string>} The collected log entries.
+     */
+    getLogs(): string[];
+}

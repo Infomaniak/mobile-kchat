@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+require("../mobile/audio-mode/reducer");
+require("../mobile/background/reducer");
+require("../mobile/call-integration/reducer");
+require("../mobile/external-api/reducer");
+require("../mobile/full-screen/reducer");
+require("../mobile/watchos/reducer");
+require("../share-room/reducer");
+require("./reducer.native");
+require("./reducers.any");

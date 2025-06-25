@@ -1,0 +1,243 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.WELCOME_PAGE_ENABLED = exports.VIDEO_SHARE_BUTTON_ENABLED = exports.VIDEO_MUTE_BUTTON_ENABLED = exports.UNSAFE_ROOM_WARNING = exports.TOOLBOX_ENABLED = exports.TOOLBOX_ALWAYS_VISIBLE = exports.TILE_VIEW_ENABLED = exports.SETTINGS_ENABLED = exports.SERVER_URL_CHANGE_ENABLED = exports.SECURITY_OPTIONS_ENABLED = exports.RESOLUTION = exports.REPLACE_PARTICIPANT = exports.RECORDING_ENABLED = exports.REACTIONS_ENABLED = exports.RAISE_HAND_ENABLED = exports.PREJOIN_PAGE_HIDE_DISPLAY_NAME = exports.PREJOIN_PAGE_ENABLED = exports.PIP_WHILE_SCREEN_SHARING_ENABLED = exports.PIP_ENABLED = exports.PARTICIPANTS_ENABLED = exports.OVERFLOW_MENU_ENABLED = exports.NOTIFICATIONS_ENABLED = exports.MEETING_PASSWORD_ENABLED = exports.MEETING_NAME_ENABLED = exports.LOBBY_MODE_ENABLED = exports.LIVE_STREAMING_ENABLED = exports.KICK_OUT_ENABLED = exports.SPEAKERSTATS_ENABLED = exports.ANDROID_SCREENSHARING_ENABLED = exports.IOS_SCREENSHARING_ENABLED = exports.IOS_RECORDING_ENABLED = exports.INVITE_DIAL_IN_ENABLED = exports.INVITE_ENABLED = exports.HELP_BUTTON_ENABLED = exports.FULLSCREEN_ENABLED = exports.FILMSTRIP_ENABLED = exports.CHAT_ENABLED = exports.CONFERENCE_TIMER_ENABLED = exports.CLOSE_CAPTIONS_ENABLED = exports.CAR_MODE_ENABLED = exports.CALL_INTEGRATION_ENABLED = exports.CALENDAR_ENABLED = exports.BREAKOUT_ROOMS_BUTTON_ENABLED = exports.AUDIO_ONLY_BUTTON_ENABLED = exports.AUDIO_MUTE_BUTTON_ENABLED = exports.AUDIO_FOCUS_DISABLED = exports.ADD_PEOPLE_ENABLED = void 0;
+/**
+ * Flag indicating if add-people functionality should be enabled.
+ * Default: enabled (true).
+ */
+exports.ADD_PEOPLE_ENABLED = 'add-people.enabled';
+/**
+ * Flag indicating if the SDK should not require the audio focus.
+ * Used by apps that do not use Jitsi audio.
+ * Default: disabled (false).
+ */
+exports.AUDIO_FOCUS_DISABLED = 'audio-focus.disabled';
+/**
+ * Flag indicating if the audio mute button should be displayed.
+ * Default: enabled (true).
+ */
+exports.AUDIO_MUTE_BUTTON_ENABLED = 'audio-mute.enabled';
+/**
+ * Flag indicating that the Audio only button in the overflow menu is enabled.
+ * Default: enabled (true).
+ */
+exports.AUDIO_ONLY_BUTTON_ENABLED = 'audio-only.enabled';
+/**
+ * Flag indicating that the Breakout Rooms button in the overflow menu is enabled.
+ * Default: enabled (true).
+ */
+exports.BREAKOUT_ROOMS_BUTTON_ENABLED = 'breakout-rooms.enabled';
+/**
+ * Flag indicating if calendar integration should be enabled.
+ * Default: enabled (true) on Android, auto-detected on iOS.
+ */
+exports.CALENDAR_ENABLED = 'calendar.enabled';
+/**
+ * Flag indicating if call integration (CallKit on iOS, ConnectionService on Android)
+ * should be enabled.
+ * Default: enabled (true).
+ */
+exports.CALL_INTEGRATION_ENABLED = 'call-integration.enabled';
+/**
+ * Flag indicating if car mode should be enabled.
+ * Default: enabled (true).
+ */
+exports.CAR_MODE_ENABLED = 'car-mode.enabled';
+/**
+ * Flag indicating if close captions should be enabled.
+ * Default: enabled (true).
+ */
+exports.CLOSE_CAPTIONS_ENABLED = 'close-captions.enabled';
+/**
+ * Flag indicating if conference timer should be enabled.
+ * Default: enabled (true).
+ */
+exports.CONFERENCE_TIMER_ENABLED = 'conference-timer.enabled';
+/**
+ * Flag indicating if chat should be enabled.
+ * Default: enabled (true).
+ */
+exports.CHAT_ENABLED = 'chat.enabled';
+/**
+ * Flag indicating if the filmstrip should be enabled.
+ * Default: enabled (true).
+ */
+exports.FILMSTRIP_ENABLED = 'filmstrip.enabled';
+/**
+ * Flag indicating if fullscreen (immersive) mode should be enabled.
+ * Default: enabled (true).
+ */
+exports.FULLSCREEN_ENABLED = 'fullscreen.enabled';
+/**
+ * Flag indicating if the Help button should be enabled.
+ * Default: enabled (true).
+ */
+exports.HELP_BUTTON_ENABLED = 'help.enabled';
+/**
+ * Flag indicating if invite functionality should be enabled.
+ * Default: enabled (true).
+ */
+exports.INVITE_ENABLED = 'invite.enabled';
+/**
+ * Flag indicating if dial-in invite functionality should be enabled.
+ * Default: enabled (true).
+ */
+exports.INVITE_DIAL_IN_ENABLED = 'invite-dial-in.enabled';
+/**
+ * Flag indicating if recording should be enabled in iOS.
+ * Default: disabled (false).
+ */
+exports.IOS_RECORDING_ENABLED = 'ios.recording.enabled';
+/**
+ * Flag indicating if screen sharing should be enabled in iOS.
+ * Default: disabled (false).
+ */
+exports.IOS_SCREENSHARING_ENABLED = 'ios.screensharing.enabled';
+/**
+ * Flag indicating if screen sharing should be enabled in android.
+ * Default: enabled (true).
+ */
+exports.ANDROID_SCREENSHARING_ENABLED = 'android.screensharing.enabled';
+/**
+ * Flag indicating if speaker statistics should be enabled.
+ * Default: enabled (true).
+ */
+exports.SPEAKERSTATS_ENABLED = 'speakerstats.enabled';
+/**
+ * Flag indicating if kickout is enabled.
+ * Default: enabled (true).
+ */
+exports.KICK_OUT_ENABLED = 'kick-out.enabled';
+/**
+ * Flag indicating if live-streaming should be enabled.
+ * Default: auto-detected.
+ */
+exports.LIVE_STREAMING_ENABLED = 'live-streaming.enabled';
+/**
+ * Flag indicating if lobby mode button should be enabled.
+ * Default: enabled.
+ */
+exports.LOBBY_MODE_ENABLED = 'lobby-mode.enabled';
+/**
+ * Flag indicating if displaying the meeting name should be enabled.
+ * Default: enabled (true).
+ */
+exports.MEETING_NAME_ENABLED = 'meeting-name.enabled';
+/**
+ * Flag indicating if the meeting password button should be enabled.
+ * Note that this flag just decides on the button, if a meeting has a password
+ * set, the password dialog will still show up.
+ * Default: enabled (true).
+ */
+exports.MEETING_PASSWORD_ENABLED = 'meeting-password.enabled';
+/**
+ * Flag indicating if the notifications should be enabled.
+ * Default: enabled (true).
+ */
+exports.NOTIFICATIONS_ENABLED = 'notifications.enabled';
+/**
+ * Flag indicating if the audio overflow menu button should be displayed.
+ * Default: enabled (true).
+ */
+exports.OVERFLOW_MENU_ENABLED = 'overflow-menu.enabled';
+/**
+ * Flag indicating if participants should be enabled.
+ * Default: enabled (true).
+ */
+exports.PARTICIPANTS_ENABLED = 'participants.enabled';
+/**
+ * Flag indicating if Picture-in-Picture should be enabled.
+ * Default: auto-detected.
+ */
+exports.PIP_ENABLED = 'pip.enabled';
+/**
+ * Flag indicating if Picture-in-Picture button should be shown while screen sharing.
+ * Default: disabled (false).
+ */
+exports.PIP_WHILE_SCREEN_SHARING_ENABLED = 'pip-while-screen-sharing.enabled';
+/**
+ * Flag indicating if the prejoin page should be enabled.
+ * Default: enabled (true).
+ */
+exports.PREJOIN_PAGE_ENABLED = 'prejoinpage.enabled';
+/**
+ * Flag indicating if the participant name editing field should be displayed on the prejoin page.
+ * Default: disabled (false).
+ */
+exports.PREJOIN_PAGE_HIDE_DISPLAY_NAME = 'prejoinpage.hideDisplayName';
+/**
+ * Flag indicating if raise hand feature should be enabled.
+ * Default: enabled.
+ */
+exports.RAISE_HAND_ENABLED = 'raise-hand.enabled';
+/**
+ * Flag indicating if the reactions feature should be enabled.
+ * Default: enabled (true).
+ */
+exports.REACTIONS_ENABLED = 'reactions.enabled';
+/**
+ * Flag indicating if recording should be enabled.
+ * Default: auto-detected.
+ */
+exports.RECORDING_ENABLED = 'recording.enabled';
+/**
+ * Flag indicating if the user should join the conference with the replaceParticipant functionality.
+ * Default: (false).
+ */
+exports.REPLACE_PARTICIPANT = 'replace.participant';
+/**
+ * Flag indicating the local and (maximum) remote video resolution. Overrides
+ * the server configuration.
+ * Default: (unset).
+ */
+exports.RESOLUTION = 'resolution';
+/**
+ * Flag indicating if the security options button should be enabled.
+ * Default: enabled (true).
+ */
+exports.SECURITY_OPTIONS_ENABLED = 'security-options.enabled';
+/**
+ * Flag indicating if server URL change is enabled.
+ * Default: enabled (true).
+ */
+exports.SERVER_URL_CHANGE_ENABLED = 'server-url-change.enabled';
+/**
+ * Flag indicating if settings should be enabled.
+ * Default: enabled (true).
+ */
+exports.SETTINGS_ENABLED = 'settings.enabled';
+/**
+ * Flag indicating if tile view feature should be enabled.
+ * Default: enabled.
+ */
+exports.TILE_VIEW_ENABLED = 'tile-view.enabled';
+/**
+ * Flag indicating if the toolbox should be always be visible
+ * Default: disabled (false).
+ */
+exports.TOOLBOX_ALWAYS_VISIBLE = 'toolbox.alwaysVisible';
+/**
+ * Flag indicating if the toolbox should be enabled
+ * Default: enabled.
+ */
+exports.TOOLBOX_ENABLED = 'toolbox.enabled';
+/**
+ * Flag indicating if the unsafe room warning should be enabled.
+ * Default: disabled (false).
+ */
+exports.UNSAFE_ROOM_WARNING = 'unsaferoomwarning.enabled';
+/**
+ * Flag indicating if the video mute button should be displayed.
+ * Default: enabled (true).
+ */
+exports.VIDEO_MUTE_BUTTON_ENABLED = 'video-mute.enabled';
+/**
+ * Flag indicating if the video share button should be enabled
+ * Default: enabled (true).
+ */
+exports.VIDEO_SHARE_BUTTON_ENABLED = 'video-share.enabled';
+/**
+ * Flag indicating if the welcome page should be enabled.
+ * Default: disabled (false).
+ */
+exports.WELCOME_PAGE_ENABLED = 'welcomepage.enabled';

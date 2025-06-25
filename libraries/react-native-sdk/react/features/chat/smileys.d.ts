@@ -1,0 +1,22 @@
+export declare const smileys: {
+    smiley1: string;
+    smiley2: string;
+    smiley3: string;
+    smiley4: string;
+    smiley5: string;
+    smiley6: string;
+    smiley7: string;
+    smiley8: string;
+    smiley9: string;
+    smiley10: string;
+    smiley11: string;
+    smiley12: string;
+    smiley13: string;
+    smiley14: string;
+    smiley15: string;
+    smiley16: string;
+    smiley17: string;
+    smiley18: string;
+    smiley19: string;
+    smiley20: string;
+};

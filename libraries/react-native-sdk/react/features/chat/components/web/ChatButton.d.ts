@@ -1,0 +1,65 @@
+import React from 'react';
+import AbstractButton, { IProps as AbstractButtonProps } from '../../../base/toolbox/components/AbstractButton';
+/**
+ * The type of the React {@code Component} props of {@link ChatButton}.
+ */
+export interface IProps extends AbstractButtonProps {
+    /**
+     * Whether or not the chat feature is currently displayed.
+     */
+    _chatOpen: boolean;
+}
+/**
+ * Implementation of a button for accessing chat pane.
+ */
+declare class ChatButton extends AbstractButton<IProps> {
+    accessibilityLabel: string;
+    toggledAccessibilityLabel: string;
+    icon: any;
+    label: string;
+    toggledLabel: string;
+    tooltip: string;
+    toggledTooltip: string;
+    /**
+     * Indicates whether this button is in toggled state or not.
+     *
+     * @override
+     * @protected
+     * @returns {boolean}
+     */
+    _isToggled(): boolean;
+    /**
+     * Overrides AbstractButton's {@link Component#render()}.
+     *
+     * @override
+     * @protected
+     * @returns {boReact$Nodeolean}
+     */
+    render(): JSX.Element;
+    /**
+     * Handles clicking the button, and toggles the chat.
+     *
+     * @private
+     * @returns {void}
+     */
+    _handleClick(): void;
+}
+declare const _default: React.ComponentType<import("react-i18next").Omit<import("react-redux").Omit<Pick<React.ClassAttributes<ChatButton> & IProps, "dispatch" | "t" | "contextMenu" | "i18n" | "tReady" | "backgroundColor" | "customClass" | "isMenuButton" | "buttonKey" | "handleClick" | "notifyMode" | "_chatOpen" | keyof React.ClassAttributes<ChatButton>> & Partial<Pick<React.ClassAttributes<ChatButton> & IProps, "visible" | "showLabel" | "styles" | "tooltipPosition" | "disabledStyles" | "afterClick" | "toggledStyles">> & Partial<Pick<{
+    afterClick: undefined;
+    disabledStyles: {
+        iconStyle: {
+            opacity: number;
+        };
+        labelStyle: {
+            opacity: number;
+        };
+        style: undefined;
+        underlayColor: undefined;
+    };
+    showLabel: boolean;
+    styles: undefined;
+    toggledStyles: undefined;
+    tooltipPosition: string;
+    visible: boolean;
+}, never>>, "dispatch" | "_chatOpen">, keyof import("react-i18next").WithTranslation>>;
+export default _default;

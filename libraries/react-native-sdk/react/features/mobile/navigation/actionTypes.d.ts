@@ -1,0 +1,1 @@
+export declare const _ROOT_NAVIGATION_READY = "_ROOT_NAVIGATION_READY";

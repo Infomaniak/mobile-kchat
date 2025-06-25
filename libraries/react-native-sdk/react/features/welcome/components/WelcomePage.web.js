@@ -1,0 +1,377 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ROOM_NAME_VALIDATE_PATTERN_STR = void 0;
+const react_1 = __importDefault(require("react"));
+const react_redux_1 = require("react-redux");
+const utils_1 = require("../../base/environment/utils");
+const functions_1 = require("../../base/i18n/functions");
+const Icon_1 = __importDefault(require("../../base/icons/components/Icon"));
+const svg_1 = require("../../base/icons/svg");
+const Watermarks_1 = __importDefault(require("../../base/react/components/web/Watermarks"));
+const getUnsafeRoomText_web_1 = __importDefault(require("../../base/util/getUnsafeRoomText.web"));
+const CalendarList_web_1 = __importDefault(require("../../calendar-sync/components/CalendarList.web"));
+const RecentList_web_1 = __importDefault(require("../../recent-list/components/RecentList.web"));
+const SettingsButton_1 = __importDefault(require("../../settings/components/web/SettingsButton"));
+const constants_1 = require("../../settings/constants");
+const AbstractWelcomePage_1 = require("./AbstractWelcomePage");
+const Tabs_1 = __importDefault(require("./Tabs"));
+/**
+ * The pattern used to validate room name.
+ *
+ * @type {string}
+ */
+exports.ROOM_NAME_VALIDATE_PATTERN_STR = '^[^?&:\u0022\u0027%#]+$';
+/**
+ * The Web container rendering the welcome page.
+ *
+ * @augments AbstractWelcomePage
+ */
+class WelcomePage extends AbstractWelcomePage_1.AbstractWelcomePage {
+    /**
+     * Initializes a new WelcomePage instance.
+     *
+     * @param {Object} props - The read-only properties with which the new
+     * instance is to be initialized.
+     */
+    constructor(props) {
+        super(props);
+        this.state = {
+            ...this.state,
+            generateRoomNames: interfaceConfig.GENERATE_ROOMNAMES_ON_WELCOME_PAGE
+        };
+        /**
+      * Used To display a warning massage if the title input has no allow character.
+      *
+      * @private
+      * @type {boolean}
+      */
+        this._titleHasNotAllowCharacter = false;
+        /**
+         * The HTML Element used as the container for additional content. Used
+         * for directly appending the additional content template to the dom.
+         *
+         * @private
+         * @type {HTMLTemplateElement|null}
+         */
+        this._additionalContentRef = null;
+        this._roomInputRef = null;
+        /**
+         * The HTML Element used as the container for additional toolbar content. Used
+         * for directly appending the additional content template to the dom.
+         *
+         * @private
+         * @type {HTMLTemplateElement|null}
+         */
+        this._additionalToolbarContentRef = null;
+        this._additionalCardRef = null;
+        /**
+         * The template to use as the additional card displayed near the main one.
+         *
+         * @private
+         * @type {HTMLTemplateElement|null}
+         */
+        this._additionalCardTemplate = document.getElementById('welcome-page-additional-card-template');
+        /**
+         * The template to use as the main content for the welcome page. If
+         * not found then only the welcome page head will display.
+         *
+         * @private
+         * @type {HTMLTemplateElement|null}
+         */
+        this._additionalContentTemplate = document.getElementById('welcome-page-additional-content-template');
+        /**
+         * The template to use as the additional content for the welcome page header toolbar.
+         * If not found then only the settings icon will be displayed.
+         *
+         * @private
+         * @type {HTMLTemplateElement|null}
+         */
+        this._additionalToolbarContentTemplate = document.getElementById('settings-toolbar-additional-content-template');
+        // Bind event handlers so they are only bound once per instance.
+        this._onFormSubmit = this._onFormSubmit.bind(this);
+        this._onRoomChange = this._onRoomChange.bind(this);
+        this._setAdditionalCardRef = this._setAdditionalCardRef.bind(this);
+        this._setAdditionalContentRef
+            = this._setAdditionalContentRef.bind(this);
+        this._setRoomInputRef = this._setRoomInputRef.bind(this);
+        this._setAdditionalToolbarContentRef
+            = this._setAdditionalToolbarContentRef.bind(this);
+        this._renderFooter = this._renderFooter.bind(this);
+    }
+    /**
+     * Implements React's {@link Component#componentDidMount()}. Invoked
+     * immediately after this component is mounted.
+     *
+     * @inheritdoc
+     * @returns {void}
+     */
+    componentDidMount() {
+        super.componentDidMount();
+        document.body.classList.add('welcome-page');
+        document.title = interfaceConfig.APP_NAME;
+        if (this.state.generateRoomNames) {
+            this._updateRoomName();
+        }
+        if (this._shouldShowAdditionalContent()) {
+            this._additionalContentRef?.appendChild(this._additionalContentTemplate?.content.cloneNode(true));
+        }
+        if (this._shouldShowAdditionalToolbarContent()) {
+            this._additionalToolbarContentRef?.appendChild(this._additionalToolbarContentTemplate?.content.cloneNode(true));
+        }
+        if (this._shouldShowAdditionalCard()) {
+            this._additionalCardRef?.appendChild(this._additionalCardTemplate?.content.cloneNode(true));
+        }
+    }
+    /**
+     * Removes the classname used for custom styling of the welcome page.
+     *
+     * @inheritdoc
+     * @returns {void}
+     */
+    componentWillUnmount() {
+        super.componentWillUnmount();
+        document.body.classList.remove('welcome-page');
+    }
+    /**
+     * Implements React's {@link Component#render()}.
+     *
+     * @inheritdoc
+     * @returns {ReactElement|null}
+     */
+    render() {
+        const { _moderatedRoomServiceUrl, t } = this.props;
+        const { DEFAULT_WELCOME_PAGE_LOGO_URL, DISPLAY_WELCOME_FOOTER } = interfaceConfig;
+        const showAdditionalCard = this._shouldShowAdditionalCard();
+        const showAdditionalContent = this._shouldShowAdditionalContent();
+        const showAdditionalToolbarContent = this._shouldShowAdditionalToolbarContent();
+        const contentClassName = showAdditionalContent ? 'with-content' : 'without-content';
+        const footerClassName = DISPLAY_WELCOME_FOOTER ? 'with-footer' : 'without-footer';
+        return (react_1.default.createElement("div", { className: `welcome ${contentClassName} ${footerClassName}`, id: 'welcome_page' },
+            react_1.default.createElement("div", { className: 'header' },
+                react_1.default.createElement("div", { className: 'header-image' }),
+                react_1.default.createElement("div", { className: 'header-container' },
+                    react_1.default.createElement("div", { className: 'header-watermark-container' },
+                        react_1.default.createElement("div", { className: 'welcome-watermark' },
+                            react_1.default.createElement(Watermarks_1.default, { defaultJitsiLogoURL: DEFAULT_WELCOME_PAGE_LOGO_URL, noMargins: true }))),
+                    react_1.default.createElement("div", { className: 'welcome-page-settings' },
+                        react_1.default.createElement(SettingsButton_1.default, { defaultTab: constants_1.SETTINGS_TABS.CALENDAR, isDisplayedOnWelcomePage: true }),
+                        showAdditionalToolbarContent
+                            ? react_1.default.createElement("div", { className: 'settings-toolbar-content', ref: this._setAdditionalToolbarContentRef })
+                            : null),
+                    react_1.default.createElement("h1", { className: 'header-text-title' }, t('welcomepage.headerTitle')),
+                    react_1.default.createElement("span", { className: 'header-text-subtitle' }, t('welcomepage.headerSubtitle')),
+                    react_1.default.createElement("div", { id: 'enter_room' },
+                        react_1.default.createElement("div", { className: 'join-meeting-container' },
+                            react_1.default.createElement("div", { className: 'enter-room-input-container' },
+                                react_1.default.createElement("form", { onSubmit: this._onFormSubmit },
+                                    react_1.default.createElement("input", { "aria-disabled": 'false', "aria-label": 'Meeting name input', autoFocus: true, className: 'enter-room-input', id: 'enter_room_field', onChange: this._onRoomChange, pattern: exports.ROOM_NAME_VALIDATE_PATTERN_STR, placeholder: this.state.roomPlaceholder, ref: this._setRoomInputRef, type: 'text', value: this.state.room }))),
+                            react_1.default.createElement("button", { "aria-disabled": 'false', "aria-label": 'Start meeting', className: 'welcome-page-button', id: 'enter_room_button', onClick: this._onFormSubmit, tabIndex: 0, type: 'button' }, t('welcomepage.startMeeting')))),
+                    this._titleHasNotAllowCharacter && (react_1.default.createElement("div", { className: 'not-allow-title-character-div', role: 'alert' },
+                        react_1.default.createElement(Icon_1.default, { src: svg_1.IconWarning }),
+                        react_1.default.createElement("span", { className: 'not-allow-title-character-text' }, t('welcomepage.roomNameAllowedChars')))),
+                    this._renderInsecureRoomNameWarning(),
+                    _moderatedRoomServiceUrl && (react_1.default.createElement("div", { id: 'moderated-meetings' }, (0, functions_1.translateToHTML)(t, 'welcomepage.moderatedMessage', { url: _moderatedRoomServiceUrl }))))),
+            react_1.default.createElement("div", { className: 'welcome-cards-container' },
+                react_1.default.createElement("div", { className: 'welcome-card-column' },
+                    react_1.default.createElement("div", { className: 'welcome-tabs welcome-card welcome-card--blue' }, this._renderTabs()),
+                    showAdditionalCard
+                        ? react_1.default.createElement("div", { className: 'welcome-card welcome-card--dark', ref: this._setAdditionalCardRef })
+                        : null),
+                showAdditionalContent
+                    ? react_1.default.createElement("div", { className: 'welcome-page-content', ref: this._setAdditionalContentRef })
+                    : null),
+            DISPLAY_WELCOME_FOOTER && this._renderFooter()));
+    }
+    /**
+     * Renders the insecure room name warning.
+     *
+     * @inheritdoc
+     */
+    _doRenderInsecureRoomNameWarning() {
+        return (react_1.default.createElement("div", { className: 'insecure-room-name-warning' },
+            react_1.default.createElement(Icon_1.default, { src: svg_1.IconWarning }),
+            react_1.default.createElement("span", null, (0, getUnsafeRoomText_web_1.default)(this.props.t, 'welcome'))));
+    }
+    /**
+     * Prevents submission of the form and delegates join logic.
+     *
+     * @param {Event} event - The HTML Event which details the form submission.
+     * @private
+     * @returns {void}
+     */
+    _onFormSubmit(event) {
+        event.preventDefault();
+        if (!this._roomInputRef || this._roomInputRef.reportValidity()) {
+            this._onJoin();
+        }
+    }
+    /**
+     * Overrides the super to account for the differences in the argument types
+     * provided by HTML and React Native text inputs.
+     *
+     * @inheritdoc
+     * @override
+     * @param {Event} event - The (HTML) Event which details the change such as
+     * the EventTarget.
+     * @protected
+     */
+    // @ts-ignore
+    // eslint-disable-next-line require-jsdoc
+    _onRoomChange(event) {
+        const specialCharacters = ['?', '&', ':', '\'', '"', '%', '#', '.'];
+        this._titleHasNotAllowCharacter = specialCharacters.some(char => event.target.value.includes(char));
+        super._onRoomChange(event.target.value);
+    }
+    /**
+     * Renders the footer.
+     *
+     * @returns {ReactElement}
+     */
+    _renderFooter() {
+        const { t, _deeplinkingCfg: { ios = { downloadLink: undefined }, android = {
+            fDroidUrl: undefined,
+            downloadLink: undefined
+        } } } = this.props;
+        const { downloadLink: iosDownloadLink } = ios;
+        const { fDroidUrl, downloadLink: androidDownloadLink } = android;
+        return (react_1.default.createElement("footer", { className: 'welcome-footer' },
+            react_1.default.createElement("div", { className: 'welcome-footer-centered' },
+                react_1.default.createElement("div", { className: 'welcome-footer-padded' },
+                    react_1.default.createElement("div", { className: 'welcome-footer-row-block welcome-footer--row-1' },
+                        react_1.default.createElement("div", { className: 'welcome-footer-row-1-text' }, t('welcomepage.jitsiOnMobile')),
+                        react_1.default.createElement("a", { className: 'welcome-badge', href: iosDownloadLink },
+                            react_1.default.createElement("img", { alt: t('welcomepage.mobileDownLoadLinkIos'), src: './images/app-store-badge.png' })),
+                        react_1.default.createElement("a", { className: 'welcome-badge', href: androidDownloadLink },
+                            react_1.default.createElement("img", { alt: t('welcomepage.mobileDownLoadLinkAndroid'), src: './images/google-play-badge.png' })),
+                        react_1.default.createElement("a", { className: 'welcome-badge', href: fDroidUrl },
+                            react_1.default.createElement("img", { alt: t('welcomepage.mobileDownLoadLinkFDroid'), src: './images/f-droid-badge.png' })))))));
+    }
+    /**
+     * Renders tabs to show previous meetings and upcoming calendar events. The
+     * tabs are purposefully hidden on mobile browsers.
+     *
+     * @returns {ReactElement|null}
+     */
+    _renderTabs() {
+        if ((0, utils_1.isMobileBrowser)()) {
+            return null;
+        }
+        const { _calendarEnabled, _recentListEnabled, t } = this.props;
+        const tabs = [];
+        if (_calendarEnabled) {
+            tabs.push({
+                id: 'calendar',
+                label: t('welcomepage.upcomingMeetings'),
+                content: react_1.default.createElement(CalendarList_web_1.default, null)
+            });
+        }
+        if (_recentListEnabled) {
+            tabs.push({
+                id: 'recent',
+                label: t('welcomepage.recentMeetings'),
+                content: react_1.default.createElement(RecentList_web_1.default, null)
+            });
+        }
+        if (tabs.length === 0) {
+            return null;
+        }
+        return (react_1.default.createElement(Tabs_1.default, { accessibilityLabel: t('welcomepage.meetingsAccessibilityLabel'), tabs: tabs }));
+    }
+    /**
+     * Sets the internal reference to the HTMLDivElement used to hold the
+     * additional card shown near the tabs card.
+     *
+     * @param {HTMLDivElement} el - The HTMLElement for the div that is the root
+     * of the welcome page content.
+     * @private
+     * @returns {void}
+     */
+    _setAdditionalCardRef(el) {
+        this._additionalCardRef = el;
+    }
+    /**
+     * Sets the internal reference to the HTMLDivElement used to hold the
+     * welcome page content.
+     *
+     * @param {HTMLDivElement} el - The HTMLElement for the div that is the root
+     * of the welcome page content.
+     * @private
+     * @returns {void}
+     */
+    _setAdditionalContentRef(el) {
+        this._additionalContentRef = el;
+    }
+    /**
+     * Sets the internal reference to the HTMLDivElement used to hold the
+     * toolbar additional content.
+     *
+     * @param {HTMLDivElement} el - The HTMLElement for the div that is the root
+     * of the additional toolbar content.
+     * @private
+     * @returns {void}
+     */
+    _setAdditionalToolbarContentRef(el) {
+        this._additionalToolbarContentRef = el;
+    }
+    /**
+     * Sets the internal reference to the HTMLInputElement used to hold the
+     * welcome page input room element.
+     *
+     * @param {HTMLInputElement} el - The HTMLElement for the input of the room name on the welcome page.
+     * @private
+     * @returns {void}
+     */
+    _setRoomInputRef(el) {
+        this._roomInputRef = el;
+    }
+    /**
+     * Returns whether or not an additional card should be displayed near the tabs.
+     *
+     * @private
+     * @returns {boolean}
+     */
+    _shouldShowAdditionalCard() {
+        return interfaceConfig.DISPLAY_WELCOME_PAGE_ADDITIONAL_CARD
+            && this._additionalCardTemplate
+            && this._additionalCardTemplate.content
+            && this._additionalCardTemplate.innerHTML.trim();
+    }
+    /**
+     * Returns whether or not additional content should be displayed below
+     * the welcome page's header for entering a room name.
+     *
+     * @private
+     * @returns {boolean}
+     */
+    _shouldShowAdditionalContent() {
+        return interfaceConfig.DISPLAY_WELCOME_PAGE_CONTENT
+            && this._additionalContentTemplate
+            && this._additionalContentTemplate.content
+            && this._additionalContentTemplate.innerHTML.trim();
+    }
+    /**
+     * Returns whether or not additional content should be displayed inside
+     * the header toolbar.
+     *
+     * @private
+     * @returns {boolean}
+     */
+    _shouldShowAdditionalToolbarContent() {
+        return interfaceConfig.DISPLAY_WELCOME_PAGE_TOOLBAR_ADDITIONAL_CONTENT
+            && this._additionalToolbarContentTemplate
+            && this._additionalToolbarContentTemplate.content
+            && this._additionalToolbarContentTemplate.innerHTML.trim();
+    }
+}
+/**
+ * Default values for {@code WelcomePage} component's properties.
+ *
+ * @static
+ */
+WelcomePage.defaultProps = {
+    _room: ''
+};
+exports.default = (0, functions_1.translate)((0, react_redux_1.connect)(AbstractWelcomePage_1._mapStateToProps)(WelcomePage));
