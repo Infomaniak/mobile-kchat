@@ -20,7 +20,6 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {observeFilesForPost} from '@queries/servers/file';
 import {mmssss} from '@utils/datetime';
-import {getMarkdownTextStyles} from '@utils/markdown';
 import {preventDoubleTap} from '@utils/tap';
 import {blendColors, changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
@@ -72,18 +71,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             alignItems: 'flex-start',
             justifyContent: 'center',
         },
-        loadingTranscript: {
-            color: '#666666',
-            fontWeight: '400',
-            textAlign: 'center',
-        },
-        loadingMessage: {
-            paddingTop: 10,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 5,
-        },
         transcriptContainer: {
             flexDirection: 'row',
             alignItems: 'center',
@@ -121,7 +108,6 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
     const theme = useTheme();
     const intl = useIntl();
     const styles = getStyleSheet(theme);
-    const textStyles = getMarkdownTextStyles(theme);
     const [timing, setTiming] = useState(mmssss(width));
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState('');
@@ -187,7 +173,7 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
 
     return (
         <View>
-            <View style={[styles.centeredView, {alignItems: 'center'}]}>
+            <View style={styles.centeredView}>
                 {isLoadingTranscript &&
                     <View style={styles.transcriptContainer}>
                         <Loading
@@ -197,7 +183,6 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
                         />
                         <Text style={styles.openVoiceMessageButtonText}>
                             <FormattedText
-                                style={{...textStyles.link, fontSize: 13}}
                                 id={'mobile.vocals.transcript_loading'}
                                 defaultMessage='Audio transcription in progress...'
                             />
@@ -254,7 +239,6 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
                     <TimeElapsed time={timing}/>
                 </View>
             )}
-            {/*  */}
             {error && <Text style={styles.error}>{error}</Text>}
         </View>
     );

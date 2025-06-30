@@ -291,9 +291,6 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.THREAD_OPTIONS:
             screen = withServerDatabase(require('@screens/thread_options').default);
             break;
-        case Screens.TRANSCRIPTION:
-            screen = withServerDatabase(require('@screens/transcription').default);
-            break;
         case Screens.USER_PROFILE:
             screen = withServerDatabase(require('@screens/user_profile').default);
             break;
