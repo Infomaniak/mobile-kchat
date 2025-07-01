@@ -4,9 +4,11 @@
 import React, {useEffect, useState} from 'react';
 import {View} from 'react-native';
 
+import {extractTranscript} from '@components/files/voice_recording_file/utils';
 import FormattedText from '@components/formatted_text';
 import FormattedTime from '@components/formatted_time';
 import PostPriorityLabel from '@components/post_priority/post_priority_label';
+import {PostPriorityType} from '@constants/post';
 import {CHANNEL, THREAD} from '@constants/screens';
 import {useTheme} from '@context/theme';
 import {DEFAULT_LOCALE} from '@i18n';
@@ -101,20 +103,10 @@ const Header = (props: HeaderProps) => {
 
     useEffect(() => {
         if (files && files[0]?.transcript) {
-            try {
-                const transcriptObj = JSON.parse(files[0].transcript);
-                if (transcriptObj.text) {
-                    setIsTranscriptAvailable(true);
-                } else {
-                    setIsTranscriptAvailable(false);
-                }
-            } catch (err) {
-                setIsTranscriptAvailable(false);
-
-                /* empty */
-            }
+            const text = extractTranscript(files[0]);
+            setIsTranscriptAvailable(Boolean(text));
         }
-    }, [files]);
+    }, [files && files[0]?.transcript]);
 
     return (
         <>

@@ -839,6 +839,7 @@
   "mobile.vocals.load_error": "Votre fichier audio n'a pas pu être chargé.",
   "mobile.vocals.transcript.show": "Écouter le message",
   "mobile.vocals.transcript_title": "Transcription audio (générée automatiquement)",
+  "mobile.vocals.transcript_loading": "Transcription de l'audio en cours...",
   "modal.manual_status.auto_responder.message_": "Voulez-vous changer votre statut sur « {status} » et désactiver les Réponses Automatiques ?",
   "modal.manual_status.auto_responder.message_away": "Voulez-vous changer votre statut sur « Absent » et désactiver les Réponses Automatiques ?",
   "modal.manual_status.auto_responder.message_dnd": "Voulez-vous changer votre statut sur « Ne pas déranger » et désactiver les Réponses Automatiques ?",

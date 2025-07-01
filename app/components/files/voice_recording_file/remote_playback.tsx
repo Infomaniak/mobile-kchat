@@ -23,6 +23,8 @@ import {mmssss} from '@utils/datetime';
 import {preventDoubleTap} from '@utils/tap';
 import {blendColors, changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
+import {extractTranscript} from './utils';
+
 import type {WithDatabaseArgs} from '@typings/database/database';
 import type PostModel from '@typings/database/models/servers/post';
 import type {PlayBackType} from 'react-native-audio-recorder-player';
@@ -132,22 +134,9 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
             }
         };
         handlePosts();
-
-        if (files[0]?.transcript) {
-            try {
-                const transcriptObj = JSON.parse(files[0].transcript);
-                if (transcriptObj.text) {
-                    setIsLoadingTranscript(false);
-                    setTranscript(transcriptObj.text.trim());
-                } else {
-                    setIsLoadingTranscript(false);
-                }
-            } catch (err) {
-                setIsLoadingTranscript(false);
-
-                /* empty */
-            }
-        }
+        const text = extractTranscript(files[0]);
+        setTranscript(text);
+        setIsLoadingTranscript(false);
     }, [files[0]?.transcript]);
 
     const listener = (e: PlayBackType) => {
