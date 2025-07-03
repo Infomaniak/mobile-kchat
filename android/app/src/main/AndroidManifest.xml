@@ -79,6 +79,7 @@
           <category android:name="android.intent.category.DEFAULT" />
           <category android:name="android.intent.category.BROWSABLE" />
           <data android:scheme="kChat" />
+          <data android:scheme="kchat" />
         </intent-filter>
         <!-- <intent-filter>
           <action android:name="android.intent.action.VIEW" />
