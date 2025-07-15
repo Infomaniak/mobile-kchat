@@ -10,6 +10,8 @@ import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {refetchCurrentUser} from '@actions/remote/user';
+import AlmostFullStorageAnnouncementBar from '@app/components/almost_full_storage_announcement_bar';
+import FullStorageAnnouncementBar from '@app/components/ik_full_annoucement_banner';
 import AnnouncementBanner from '@components/announcement_banner';
 import TeamSidebar from '@components/team_sidebar';
 import {Navigation as NavigationConstants, Screens} from '@constants';
@@ -179,6 +181,8 @@ const ChannelListScreen = (props: ChannelProps) => {
                 {props.isLicensed &&
                     <AnnouncementBanner/>
                 }
+                <FullStorageAnnouncementBar/>
+                <AlmostFullStorageAnnouncementBar/>
                 <View style={styles.content}>
                     {canAddOtherServers && <Servers/>}
                     <Animated.View

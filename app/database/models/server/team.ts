@@ -71,6 +71,9 @@ export default class TeamModel extends Model implements TeamModelInterface {
         [PLAYBOOK_RUN]: {type: 'has_many', foreignKey: 'team_id'},
     };
 
+    /** pack_name : The kSuite pack name for the team */
+    @field('pack_name') pack_name!: string;
+
     /** is_allow_open_invite : Boolean flag indicating if this team is open to the public */
     @field('is_allow_open_invite') isAllowOpenInvite!: boolean;
 

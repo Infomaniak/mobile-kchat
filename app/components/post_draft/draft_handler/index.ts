@@ -4,6 +4,8 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import React from 'react';
 
+import {observeCurrentPackName} from '@app/queries/servers/team';
+import {observeIsCurrentUserAdmin} from '@app/queries/servers/user';
 import {DEFAULT_SERVER_MAX_FILE_SIZE} from '@constants/post_draft';
 import {observeCanUploadFiles} from '@queries/servers/security';
 import {observeConfigIntValue, observeMaxFileCount} from '@queries/servers/system';
@@ -16,11 +18,15 @@ const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
     const canUploadFiles = observeCanUploadFiles(database);
     const maxFileSize = observeConfigIntValue(database, 'MaxFileSize', DEFAULT_SERVER_MAX_FILE_SIZE);
     const maxFileCount = observeMaxFileCount(database);
+    const currentPackName = observeCurrentPackName(database);
+    const isCurrentUserAdmin = observeIsCurrentUserAdmin(database);
 
     return {
+        currentPackName,
         maxFileSize,
         canUploadFiles,
         maxFileCount,
+        isCurrentUserAdmin,
     };
 });
 

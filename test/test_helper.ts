@@ -442,6 +442,7 @@ class TestHelperSingleton {
             create_at: 0,
             delete_at: 0,
             update_at: 0,
+            pack_name: '',
             ...overwrite,
         };
     };

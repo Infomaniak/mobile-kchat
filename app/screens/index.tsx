@@ -330,6 +330,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.SCHEDULED_POST_OPTIONS:
             screen = withServerDatabase(require('@screens/scheduled_post_options').default);
             break;
+        case Screens.INFOMANIAK_EVOLVE:
+            screen = withServerDatabase(require('@screens/ik_evolve').default);
+            break;
     }
 
     if (screen) {

@@ -130,7 +130,10 @@ const TeamHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
                 return res;
             }
 
-            if (e && e.updateAt !== t.update_at) {
+            if (e && (
+                e.updateAt !== t.update_at ||
+                e.pack_name !== t.pack_name
+            )) {
                 res.push(t);
             }
 

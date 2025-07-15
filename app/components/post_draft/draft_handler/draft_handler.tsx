@@ -12,6 +12,7 @@ import {fileMaxWarning, fileSizeWarning, uploadDisabledWarning} from '@utils/fil
 
 import SendHandler from '../send_handler';
 
+import type {PackName} from '@hooks/plans';
 import type {ErrorHandlers} from '@typings/components/upload_error_handlers';
 
 type Props = {
@@ -29,6 +30,8 @@ type Props = {
     updateValue: React.Dispatch<React.SetStateAction<string>>;
     value: string;
     setIsFocused: (isFocused: boolean) => void;
+    isCurrentUserAdmin: boolean;
+    currentPackName: PackName;
 }
 
 const emptyFileList: FileInfo[] = [];
@@ -49,13 +52,14 @@ export default function DraftHandler(props: Props) {
         updateValue,
         value,
         setIsFocused,
+        currentPackName,
+        isCurrentUserAdmin,
     } = props;
-
     const serverUrl = useServerUrl();
     const intl = useIntl();
 
     const uploadErrorHandlers = useRef<ErrorHandlers>({});
-    const {uploadError, newUploadError} = useFileUploadError();
+    const {uploadError, newUploadError} = useFileUploadError(currentPackName, isCurrentUserAdmin);
 
     const clearDraft = useCallback(() => {
         removeDraft(serverUrl, channelId, rootId);

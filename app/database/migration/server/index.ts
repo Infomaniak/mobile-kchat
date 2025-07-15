@@ -28,12 +28,63 @@ const {
     CUSTOM_PROFILE_ATTRIBUTE,
     CUSTOM_PROFILE_FIELD,
     SCHEDULED_POST,
+    USAGE,
+    LIMIT,
+    TEAM,
 } = MM_TABLES.SERVER;
 
 const {PLAYBOOK_RUN, PLAYBOOK_CHECKLIST, PLAYBOOK_CHECKLIST_ITEM} = PLAYBOOK_TABLES;
 
 export default schemaMigrations({
     migrations: [
+        {
+            toVersion: 8,
+            steps: [
+                createTable({
+                    name: LIMIT,
+                    columns: [
+                        {name: 'boards', type: 'string'},
+                        {name: 'bots', type: 'number'},
+                        {name: 'custom_emojis', type: 'number'},
+                        {name: 'files', type: 'string'},
+                        {name: 'guests', type: 'number'},
+                        {name: 'incoming_webhooks', type: 'number'},
+                        {name: 'integrations', type: 'string'},
+                        {name: 'members', type: 'number'},
+                        {name: 'messages', type: 'string'},
+                        {name: 'outgoing_webhooks', type: 'number'},
+                        {name: 'private_channels', type: 'number'},
+                        {name: 'public_channels', type: 'number'},
+                        {name: 'reminder_custom_date', type: 'boolean'},
+                        {name: 'scheduled_draft_custom_date', type: 'boolean'},
+                        {name: 'sidebar_categories', type: 'number'},
+                        {name: 'storage', type: 'number'},
+                        {name: 'teams', type: 'string'},
+                    ],
+                }),
+                createTable({
+                    name: USAGE,
+                    columns: [
+                        {name: 'custom_emojis', type: 'number'},
+                        {name: 'guests', type: 'number'},
+                        {name: 'incoming_webhooks', type: 'number'},
+                        {name: 'members', type: 'number'},
+                        {name: 'outgoing_webhooks', type: 'number'},
+                        {name: 'pending_guests', type: 'number'},
+                        {name: 'private_channels', type: 'number'},
+                        {name: 'public_channels', type: 'number'},
+                        {name: 'sidebar_categories', type: 'number'},
+                        {name: 'storage', type: 'number'},
+                    ],
+                }),
+                addColumns({
+                    table: TEAM,
+                    columns: [
+                        {name: 'pack_name', type: 'string'},
+                    ],
+                }),
+            ],
+        },
         {
             toVersion: 7, // Ik: equivalent of version 12 of MM
             steps: [

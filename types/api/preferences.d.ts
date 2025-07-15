@@ -43,6 +43,7 @@ type Theme = {
     bgSecondary: string;
     transcriptText?: string;
     transcriptBackground?: string;
+    textDescription: string;
 };
 
 type ExtendedTheme = Theme & {[key: string]: string | undefined};

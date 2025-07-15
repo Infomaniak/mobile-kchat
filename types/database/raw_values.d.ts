@@ -146,3 +146,4 @@ type RawValue =
   | PlaybookRun
   | PlaybookChecklist
   | PlaybookChecklistItem
+  | Limits

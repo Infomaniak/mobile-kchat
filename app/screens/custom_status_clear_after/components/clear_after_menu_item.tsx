@@ -23,15 +23,16 @@ type Props = {
     duration: CustomStatusDuration;
     expiryTime?: string;
     handleItemClick: (duration: CustomStatusDuration, expiresAt: string) => void;
-
     isSelected: boolean;
     separator: boolean;
     showDateTimePicker?: boolean;
     showExpiryTime?: boolean;
-
+    showDate?: boolean;
+    showCustomStatus?: boolean;
+    showDateTimePickerButton?: boolean;
 };
 
-const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
+export const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
         container: {
             backgroundColor: theme.centerChannelBg,
@@ -50,7 +51,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
         },
         rightPosition: {
             position: 'absolute',
-            right: 14,
+            right: 0,
         },
         divider: {
             backgroundColor: changeOpacity(theme.centerChannelColor, 0.2),
@@ -67,7 +68,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemClick, isSelected, separator, showDateTimePicker = false, showExpiryTime = false}: Props) => {
+const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemClick, isSelected, separator, showDateTimePicker = false, showExpiryTime = false, showDate = false, showCustomStatus = true, showDateTimePickerButton}: Props) => {
     const theme = useTheme();
     const intl = useIntl();
     const style = getStyleSheet(theme);
@@ -100,12 +101,13 @@ const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemC
             >
                 <View style={style.container}>
                     <View style={style.textContainer}>
-                        <CustomStatusText
-                            text={expiryMenuItems[duration]}
-                            theme={theme}
-                            textStyle={{color: theme.centerChannelColor}}
-                            testID={`${clearAfterMenuItemTestId}.custom_status_text`}
-                        />
+                        {showCustomStatus && (
+                            <CustomStatusText
+                                text={expiryMenuItems[duration]}
+                                theme={theme}
+                                textStyle={{color: theme.centerChannelColor}}
+                                testID={`${clearAfterMenuItemTestId}.custom_status_text`}
+                            />)}
                         {isSelected && (
                             <View style={style.rightPosition}>
                                 <CompassIcon
@@ -133,6 +135,8 @@ const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemC
             </TouchableOpacity>
             {showDateTimePicker && (
                 <DateTimePicker
+                    showDate={showDate}
+                    showDateTimePickerButton={showDateTimePickerButton}
                     handleChange={handleCustomExpiresAtChange}
                     theme={theme}
                     timezone={getTimezone(currentUser?.timezone)}
