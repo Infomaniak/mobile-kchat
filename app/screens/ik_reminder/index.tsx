@@ -2,11 +2,13 @@
 // See LICENSE.txt for license information.
 
 import {BottomSheetScrollView} from '@gorhom/bottom-sheet';
-import React, {useMemo} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {ScrollView} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {useTheme} from '@app/context/theme';
+import DateTimeSelector from '@app/screens/custom_status_clear_after/components/date_time_selector';
+import {getTimezone} from '@app/utils/user';
 import {BaseOption} from '@components/common_post_options';
 import FormattedText from '@components/formatted_text';
 import {ITEM_HEIGHT} from '@components/option_item';
@@ -30,15 +32,17 @@ type Props = {
     componentId: string;
     postId: string;
     postpone: boolean;
+    currentUser?: any;
 };
 
-const IKReminder = ({post, postId, postpone, componentId}: Props) => {
+const IKReminder = ({post, postId, postpone, componentId, currentUser}: Props) => {
     const serverUrl = useServerUrl();
     const {bottom} = useSafeAreaInsets();
     const isTablet = useIsTablet();
     const theme = useTheme();
     const showCustom = false;
     const Scroll = useMemo(() => (isTablet ? ScrollView : BottomSheetScrollView), [isTablet]);
+    const [showCustomPicker, setShowCustomPicker] = useState<boolean>(false);
 
     const postReminderTimes = [
         {
@@ -50,6 +54,7 @@ const IKReminder = ({post, postId, postpone, componentId}: Props) => {
         {id: 'two_hours', label: 'infomaniak.post_info.post_reminder.sub_menu.two_hours', labelDefault: '2 hours'},
         {id: 'tomorrow', label: 'infomaniak.post_info.post_reminder.sub_menu.tomorrow', labelDefault: 'Tomorrow'},
         {id: 'monday', label: 'infomaniak.post_info.post_reminder.sub_menu.monday', labelDefault: 'Monday'},
+        {id: 'custom', label: 'infomaniak.post_info.post_reminder.sub_menu.custom', labelDefault: 'Custom'},
     ];
 
     const close = () => {
@@ -63,11 +68,16 @@ const IKReminder = ({post, postId, postpone, componentId}: Props) => {
         isSystemPost = isSystemMessage(post);
     }
 
+    const handleCustomExpiresAtChange = useCallback((expiresAt: Moment) => {
+        // handleItemClick(duration, expiresAt.toISOString());
+    }, []);
+
     const snapPoints = useMemo(() => {
         const items: Array<string | number> = [1];
-        const optionsCount = postReminderTimes.length + (showCustom ? 1 : 0);
+        console.log('🚀 ~ snapPoints ~ showCustomPicker:', showCustomPicker);
+        const optionsCount = postReminderTimes.length + (showCustomPicker ? 1 : 0);
 
-        items.push(bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT, bottom) + 50);
+        items.push(bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT, bottom) + 110);
         return items;
     }, [isSystemPost, bottom]);
 
@@ -76,7 +86,7 @@ const IKReminder = ({post, postId, postpone, componentId}: Props) => {
         let endTime = currentDate;
         switch (itemId) {
             case 'thirty_minutes':
-                endTime = currentDate.add(30, 'minutes');
+                endTime = currentDate.add(1, 'seconds');
                 break;
             case 'one_hour':
                 endTime = currentDate.add(1, 'hour');
@@ -90,6 +100,9 @@ const IKReminder = ({post, postId, postpone, componentId}: Props) => {
             case 'monday':
                 endTime = currentDate.startOf('isoWeek').add(1, 'week').hours(9).minutes(0).seconds(0);
                 break;
+            case 'custom':
+                setShowCustomPicker(true);
+                return;
         }
         if (postpone) {
             addPostponeReminder(endTime.unix());
@@ -141,6 +154,13 @@ const IKReminder = ({post, postId, postpone, componentId}: Props) => {
                         testID={item.id}
                     />))
                 }
+                {showCustomPicker && (
+                    <DateTimeSelector
+                        handleChange={handleCustomExpiresAtChange}
+                        theme={theme}
+                        timezone={getTimezone(currentUser?.timezone)}
+                    />
+                )}
             </Scroll>
         );
     };
