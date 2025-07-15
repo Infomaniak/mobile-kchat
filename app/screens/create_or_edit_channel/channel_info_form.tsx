@@ -35,6 +35,8 @@ import {
 } from '@utils/theme';
 import {typography} from '@utils/typography';
 
+import UpgradeChannelBanner from './ik_upgrade_channel';
+
 const FIELD_MARGIN_BOTTOM = 24;
 const MAKE_PRIVATE_MARGIN_BOTTOM = 32;
 const BOTTOM_AUTOCOMPLETE_SEPARATION = Platform.select({ios: 10, default: 10});
@@ -231,9 +233,7 @@ export default function ChannelInfoForm({
     const spaceOnTop = otherElementsSize - scrollPosition - AUTOCOMPLETE_ADJUST;
     const spaceOnBottom = (workingSpace + scrollPosition) - (otherElementsSize + headerFieldHeight + BOTTOM_AUTOCOMPLETE_SEPARATION);
 
-    const autocompletePosition = spaceOnBottom > spaceOnTop ?
-        (otherElementsSize + headerFieldHeight) - scrollPosition :
-        (workingSpace + scrollPosition + AUTOCOMPLETE_ADJUST + keyboardOverlap) - otherElementsSize;
+    const autocompletePosition = spaceOnBottom > spaceOnTop ? (otherElementsSize + headerFieldHeight) - scrollPosition : (workingSpace + scrollPosition + AUTOCOMPLETE_ADJUST + keyboardOverlap) - otherElementsSize;
     const autocompleteAvailableSpace = spaceOnBottom > spaceOnTop ? spaceOnBottom : spaceOnTop;
     const growDown = spaceOnBottom > spaceOnTop;
 
@@ -270,6 +270,8 @@ export default function ChannelInfoForm({
         );
     }
 
+    console.log('🚀 ~ channelTypeff:', channelType);
+    console.log('🚀 ~ isPrivate:', isPrivate);
     return (
         <SafeAreaView
             edges={['bottom', 'left', 'right']}
@@ -291,6 +293,7 @@ export default function ChannelInfoForm({
                     onPress={blur}
                 >
                     <View>
+                        <UpgradeChannelBanner isPrivate={isPrivate}/>
                         {showSelector && (
                             <OptionItem
                                 testID='channel_info_form.make_private'

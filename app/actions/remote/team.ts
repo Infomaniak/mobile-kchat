@@ -193,6 +193,7 @@ export async function fetchMyTeams(serverUrl: string, fetchOnly = false): Promis
             }
         }
 
+        console.log('🚀 ~ fetchMyTeams ~ {teams, memberships}:', {teams, memberships});
         return {teams, memberships};
     } catch (error) {
         logDebug('error on fetchMyTeams', getFullErrorMessage(error));

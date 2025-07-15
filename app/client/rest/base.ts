@@ -232,6 +232,14 @@ export default class ClientBase {
         return `${this.urlVersion}/client_perf`;
     }
 
+    getCloudRoute() {
+        return `${this.urlVersion}/cloud`;
+    }
+
+    getUsageRoute() {
+        return `${this.urlVersion}/usage`;
+    }
+
     doFetch = async (url: string, options: ClientOptions, returnDataOnly = true) => {
         let request;
         const method = options.method?.toLowerCase();

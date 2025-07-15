@@ -43,6 +43,7 @@ type Team = {
     scheme_id: string;
     group_constrained: boolean|null;
     last_team_icon_update: number;
+    pack_name: string;
 };
 
 type TeamsState = {

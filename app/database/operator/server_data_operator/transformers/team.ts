@@ -59,9 +59,13 @@ export const transformTeamRecord = ({action, database, value}: TransformerArgs):
     const raw = value.raw as Team;
     const record = value.record as TeamModel;
     const isCreateAction = action === OperationType.CREATE;
+    console.log('raw', raw);
 
     // If isCreateAction is true, we will use the id (API response) from the RAW, else we shall use the existing record id from the database
     const fieldsMapper = (team: TeamModel) => {
+        console.log('team', team);
+        console.log('🚀 ~ fieldsMapper ~ aw.pack_name:', raw.pack_name);
+
         team._raw.id = isCreateAction ? (raw?.id ?? team.id) : record.id;
         team.isAllowOpenInvite = raw.allow_open_invite;
         team.description = raw.description;
@@ -73,7 +77,10 @@ export const transformTeamRecord = ({action, database, value}: TransformerArgs):
         team.isGroupConstrained = Boolean(raw.group_constrained);
         team.lastTeamIconUpdatedAt = raw.last_team_icon_update;
         team.inviteId = raw.invite_id;
+        team.pack_name = raw.pack_name;
+        console.log('team2', team);
     };
+    console.log('🚀 ~ fieldsMapper ~ fieldsMapper:', fieldsMapper);
 
     return prepareBaseRecord({
         action,
@@ -153,6 +160,7 @@ export const transformMyTeamRecord = ({action, database, value}: TransformerArgs
 
     const fieldsMapper = (myTeam: MyTeamModel) => {
         myTeam._raw.id = isCreateAction ? (raw.id || myTeam.id) : record.id;
+
         myTeam.roles = raw.roles;
     };
 

@@ -193,6 +193,7 @@ export const getDefaultTeamId = async (database: Database, ignoreId?: string) =>
 
 export function prepareMyTeams(operator: ServerDataOperator, teams: Team[], memberships: TeamMembership[]): Array<Promise<Model[]>> {
     try {
+        console.log('je prepare');
         const teamRecords = operator.handleTeam({prepareRecordsOnly: true, teams});
         const teamIds = new Set(teams.map((t) => t.id));
         const teamMemberships = memberships.filter((m) => teamIds.has(m.team_id) && m.delete_at === 0);
@@ -399,6 +400,13 @@ export const getAvailableTeamIds = async (database: Database, excludeTeamId: str
     }
 
     return availableTeamIds.filter((id) => id !== excludeTeamId);
+};
+
+export const observeCurrentPackName = (database: Database) => {
+    return observeCurrentTeam(database).pipe(
+        switchMap((team) => of$(team?.pack_name)),
+        distinctUntilChanged(),
+    );
 };
 
 export const observeCurrentTeam = (database: Database) => {

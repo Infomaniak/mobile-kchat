@@ -67,6 +67,8 @@ declare class TeamModel extends Model {
 
     /** teamSearchHistories : All the searches performed on this team */
     teamSearchHistories: Query<TeamSearchHistoryModel>;
+
+    pack_name: string;
 }
 
 export default TeamModel;

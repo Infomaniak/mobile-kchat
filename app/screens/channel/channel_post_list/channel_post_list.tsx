@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {type StyleProp, StyleSheet, type ViewStyle, DeviceEventEmitter} from 'react-native';
+import {type StyleProp, StyleSheet, type ViewStyle, DeviceEventEmitter, Text} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {markChannelAsRead, unsetActiveChannelOnServer} from '@actions/remote/channel';
@@ -16,6 +16,7 @@ import {useAppState, useIsTablet} from '@hooks/device';
 import useDidUpdate from '@hooks/did_update';
 import EphemeralStore from '@store/ephemeral_store';
 
+import UpgradeKsuiteBanner from './ik_upgrade_ksuite_banner';
 import Intro from './intro';
 
 import type PostModel from '@typings/database/models/servers/post';
@@ -106,7 +107,7 @@ const ChannelPostList = ({
         };
     }, []);
 
-    const intro = (<Intro channelId={channelId}/>);
+    const intro = (<><Intro channelId={channelId}/><UpgradeKsuiteBanner/></>);
 
     const postList = (
         <PostList

@@ -245,6 +245,7 @@ const Post = ({
                 post,
                 postId,
                 postpone: true,
+                currentUser,
             },
         });
     }, [post]);
