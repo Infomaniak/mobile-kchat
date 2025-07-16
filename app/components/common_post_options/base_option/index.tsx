@@ -14,6 +14,7 @@ type BaseOptionType = {
     onPress: () => void;
     testID: string;
     customIcon?: React.ReactNode;
+    rightComponent?: React.ReactNode;
 }
 
 const BaseOption = ({
@@ -24,6 +25,7 @@ const BaseOption = ({
     isDestructive = false,
     onPress,
     testID,
+    rightComponent,
 }: BaseOptionType) => {
     const intl = useIntl();
 
@@ -36,6 +38,7 @@ const BaseOption = ({
             label={intl.formatMessage({id: i18nId, defaultMessage})}
             testID={testID}
             type='default'
+            rightComponent={rightComponent}
         />
     );
 };

@@ -2,40 +2,49 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import {useIntl} from 'react-intl';
 
 import FormattedText from '@app/components/formatted_text';
 import {useTheme} from '@app/context/theme';
 import {useGetLimits} from '@app/hooks/limits';
 import {useNextPlan} from '@app/hooks/plans';
+import {formatYMDDurationHuman} from '@app/utils/duration';
 
 import BannerBase, {bannerBaseStyles} from './ik_banner_base';
 
 const UpgradeKsuiteBanner = () => {
     const theme = useTheme();
     const styles = bannerBaseStyles(theme);
-    const limits = useGetLimits();
+    const [limits] = useGetLimits();
     const nextPlan = useNextPlan();
+    console.log('🚀 ~ UpgradeKsuiteBanner ~ nextPlan:', nextPlan);
     const historyDurationLimit = limits?.messages ? sanitizeHistoryDuration(limits.messages.history) : null;
+    const intl = useIntl();
+
     if (historyDurationLimit === null) {
         return null;
     }
+
+    const historyDurationLimitHuman = formatYMDDurationHuman(historyDurationLimit ?? '', intl);
+    console.log('🚀 ~ UpgradeKsuiteBanner ~ historyDurationLimit:', historyDurationLimit);
+    console.log('🚀 ~ UpgradeKsuiteBanner ~ historyDurationLimitHuman:', historyDurationLimitHuman);
 
     return (
         <BannerBase
             title={
                 <FormattedText
                     defaultMessage={'Unlock the full power of kChat!'}
-                    id='ksuite_free_banner_1'
+                    id='ksuite_free.banner.title'
                     style={styles.textTitle}
                 />
             }
             description={
                 <FormattedText
                     defaultMessage='Messages and files older than {duration} are no longer available. Upgrade to the {plan} plan to enjoy unlimited conversation history.'
-                    id='ksuite_free_banner_2'
+                    id='ksuite_free.banner.description'
                     style={styles.textDescription}
                     values={{
-                        duration: historyDurationLimit,
+                        duration: historyDurationLimitHuman,
                         plan: nextPlan,
                     }}
                 />
@@ -43,7 +52,7 @@ const UpgradeKsuiteBanner = () => {
             link={
                 <FormattedText
                     defaultMessage={'To upgrade your plan, use the web interface.'}
-                    id='ksuite_free_banner_3'
+                    id='ksuite_free.banner.link'
                     style={styles.textLink}
                 />
             }

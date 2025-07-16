@@ -27,7 +27,7 @@ export const fetchUsage = async (serverUrl: string, fetchOnly = false) => {
     try {
         const client = NetworkManager.getClient(serverUrl);
 
-        const limits = await client.getCloudLimits();
+        const limits = await client.getUsage();
 
         // if (!fetchOnly && limits.length) {
         //     await operator.handleUsers({

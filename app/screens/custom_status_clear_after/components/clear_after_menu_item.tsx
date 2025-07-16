@@ -29,10 +29,11 @@ type Props = {
     separator: boolean;
     showDateTimePicker?: boolean;
     showExpiryTime?: boolean;
+    showDate?: boolean;
 
 };
 
-const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
+export const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
         container: {
             backgroundColor: theme.centerChannelBg,
@@ -51,7 +52,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
         },
         rightPosition: {
             position: 'absolute',
-            right: 14,
+            right: 0,
         },
         divider: {
             backgroundColor: changeOpacity(theme.centerChannelColor, 0.2),
@@ -68,7 +69,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemClick, isSelected, separator, showDateTimePicker = false, showExpiryTime = false}: Props) => {
+const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemClick, isSelected, separator, showDateTimePicker = false, showExpiryTime = false, showDate = false}: Props) => {
     const theme = useTheme();
     const intl = useIntl();
     const style = getStyleSheet(theme);
@@ -81,6 +82,8 @@ const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemC
         [CustomStatusDurationEnum.TODAY]: intl.formatMessage(CST[CustomStatusDurationEnum.TODAY]),
         [CustomStatusDurationEnum.THIS_WEEK]: intl.formatMessage(CST[CustomStatusDurationEnum.THIS_WEEK]),
         [CustomStatusDurationEnum.DATE_AND_TIME]: intl.formatMessage({id: 'custom_status.expiry_dropdown.custom', defaultMessage: 'Custom'}),
+        [CustomStatusDurationEnum.SELECT_DATE]: intl.formatMessage({id: 'custom_status.expiry_dropdowntom', defaultMessage: 'Sélectionnez la date'}),
+
     };
 
     const handleClick = preventDoubleTap(() => {
@@ -93,6 +96,8 @@ const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemC
 
     const clearAfterMenuItemTestId = `custom_status_clear_after.menu_item.${duration}`;
 
+    console.log('🚀 ~ ClearAfterMenuItem ~ expiryMenuItems[duration]:', expiryMenuItems[duration]);
+    console.log('🚀 ~ ClearAfterMenuItem ~ duration:', duration);
     return (
         <View>
             <TouchableOpacity
@@ -134,6 +139,7 @@ const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemC
             </TouchableOpacity>
             {showDateTimePicker && (
                 <DateTimePicker
+                    showDate={showDate}
                     handleChange={handleCustomExpiresAtChange}
                     theme={theme}
                     timezone={getTimezone(currentUser?.timezone)}

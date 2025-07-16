@@ -1090,7 +1090,7 @@
   "video.failed_description": "An error occurred while trying to play the video.",
   "your.servers": "Your teams",
   "your.teams": "Your teams",
-  "ksuite_free_banner_1": "Unlock the full power of kChat!",
-  "ksuite_free_banner_2": "Messages and files older than {duration} are not available. Upgrade to the kSuite Pro Standard plan to enjoy unlimited history for up to 1 year.",
-  "ksuite_free_banner_3": "To upgrade your plan, use the web interface."
+  "ksuite_free.banner.title": "Unlock the full power of kChat!",
+  "ksuite_free.banner.description": "Messages and files older than {duration} are not available. Upgrade to the kSuite Pro Standard plan to enjoy unlimited history for up to 1 year.",
+  "ksuite_free.banner.link": "To upgrade your plan, use the web interface."
 }

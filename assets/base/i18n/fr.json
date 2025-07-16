@@ -1146,5 +1146,8 @@
   "guest_banner.text": "Il y a {count} {count, plural, one {utilisateur externe} other {utilisateurs externes}} dans cette conversation.",
   "ksuite_free_banner_1": "Débloquez toute la puissance de kChat !",
   "ksuite_free_banner_2": "Les messages et fichiers datant de plus de 90 jours ne sont pas disponibles. Passez à l’offre Standard de kSuite Pro pour profiter d’un historique illimité jusqu’à 1 an.",
-  "ksuite_free_banner_3": "Pour faire évoluer votre offre, utilisez l’interface web."
+  "ksuite_free_banner_3": "Pour faire évoluer votre offre, utilisez l’interface web.",
+  "duration.year": "{count, plural, one {an} other {ans}}",
+  "duration.month": "{count, plural, one {mois} other {mois}}",
+  "duration.day": "{count, plural, one {jour} other {jours}}"
 }

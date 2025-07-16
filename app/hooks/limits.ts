@@ -27,7 +27,7 @@ export function useGetLimits(): any {
         };
     }, [serverUrl]);
     console.log('🚀 ~ useGetLimits ~ limits:', limits);
-    return limits;
+    return [limits, true];
 
     // const result: [Limits, boolean] = useMemo(() => {
     //     return [cloudLimits, cloudLimitsReceived];

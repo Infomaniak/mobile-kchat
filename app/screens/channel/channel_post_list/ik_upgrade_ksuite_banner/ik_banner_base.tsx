@@ -45,29 +45,29 @@ type Props = {
     title?: React.ReactNode;
     description?: React.ReactNode;
     link?: React.ReactNode;
+    style?: any;
 };
 
 const BannerBase = ({
     title,
     description,
     link,
+    style,
 }: Props) => {
     const theme = useTheme();
     const styles = bannerBaseStyles(theme);
 
     return (
-        <>
-            <View style={styles.container}>
-                <View style={styles.leftIcon}>
-                    <UpgradeIcon/>
-                </View>
-                <View style={styles.textContainer}>
-                    {title}
-                    {description}
-                    {link}
-                </View>
+        <View style={[styles.container, style]}>
+            <View style={styles.leftIcon}>
+                <UpgradeIcon/>
             </View>
-        </>
+            <View style={styles.textContainer}>
+                {title}
+                {description}
+                {link}
+            </View>
+        </View>
     );
 };
 

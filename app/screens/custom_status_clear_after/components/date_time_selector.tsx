@@ -19,6 +19,7 @@ import {makeStyleSheetFromTheme} from '@utils/theme';
 import type {WithDatabaseArgs} from '@typings/database/database';
 
 type Props = {
+    showDate: boolean;
     timezone: string | null;
     isMilitaryTime: boolean;
     theme: Theme;
@@ -44,7 +45,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const DateTimeSelector = ({timezone, handleChange, isMilitaryTime, theme}: Props) => {
+const DateTimeSelector = ({timezone, handleChange, isMilitaryTime, theme, showDate}: Props) => {
     const styles = getStyleSheet(theme);
     const currentTime = getCurrentMomentForTimezone(timezone);
     const timezoneOffSetInMinutes = timezone ? getUtcOffsetForTimeZone(timezone) : undefined;
@@ -93,7 +94,7 @@ const DateTimeSelector = ({timezone, handleChange, isMilitaryTime, theme}: Props
                     color={theme.buttonBg}
                 />
             </View>
-            {show && (
+            {(showDate || show) && (
                 <DateTimePicker
                     testID='custom_status_clear_after.date_time_picker'
                     value={date.toDate()}

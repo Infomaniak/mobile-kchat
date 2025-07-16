@@ -14,6 +14,12 @@ import BannerBase, {bannerBaseStyles} from '../channel/channel_post_list/ik_upgr
 type Props = {
     isPrivate?: boolean;
     isAdmin?: boolean;
+    publicChannelsUsage?: number;
+    privateChannelsUsage?: number;
+    publicChannelsLimit?: number;
+    privateChannelsLimit?: number;
+    publicChannelLimitReached?: boolean;
+    privateChannelLimitReached?: boolean;
 };
 
 // isAdmin: observeCurrentUser(database).pipe(
@@ -21,34 +27,32 @@ type Props = {
 //             distinctUntilChanged(),
 //         ),
 
-const UpgradeChannelBanner = ({isPrivate, isAdmin}: Props) => {
-    console.log('🚀 ~ UpgradeChannelBanner ~ isPrivate:', isPrivate);
+const UpgradeChannelBanner = ({
+    isPrivate,
+    isAdmin,
+    publicChannelsUsage,
+    privateChannelsUsage,
+    publicChannelsLimit,
+    privateChannelsLimit,
+    publicChannelLimitReached,
+    privateChannelLimitReached,
+}: Props) => {
     const theme = useTheme();
     const styles = bannerBaseStyles(theme);
     const channelType = isPrivate ? 'P' : 'O';
-    const {public_channels: publicChannelsUsage, private_channels: privateChannelsUsage} = useGetUsage() || {};
-    const {public_channels: publicChannelsLimit, private_channels: privateChannelsLimit} = useGetLimits() || {};
-    const {public_channels: publicChannelsUsageDelta, private_channels: privateChannelsUsageDelta} = useGetUsageDeltas() || {};
-
-    const publicChannelLimitReached = publicChannelsUsageDelta >= 0;
-    const privateChannelLimitReached = privateChannelsUsageDelta >= 0;
-    console.log('🚀 ~ UpgradeChannelBanner ~ privateChannelLimitReached:', privateChannelLimitReached);
-    console.log('🚀 ~ UpgradeChannelBanner ~ publicChannelsUsageDelta:', publicChannelsUsageDelta);
 
     if ((channelType === General.OPEN_CHANNEL && !publicChannelLimitReached) || (channelType === General.PRIVATE_CHANNEL && !privateChannelLimitReached)) {
         return null;
     }
 
-    console.log('🚀 ~ UpgradeChannelBanner ~ channelType:', channelType, isPrivate);
-    console.log('🚀 ~ UpgradeChannelBanner ~ isAdmin:', isAdmin);
-    console.log('🚀 ~ UpgradeChannelBanner ~ usage:', channelType === General.OPEN_CHANNEL ? publicChannelsUsage : privateChannelsUsage);
-    console.log('🚀 ~ UpgradeChannelBanner ~ limit:', channelType === General.OPEN_CHANNEL ? publicChannelsLimit : privateChannelsLimit);
+    console.log('🚀 ~ UpgradeChannelBanner ~ publicChannelsUsage:', publicChannelsUsage);
+    console.log('🚀 ~ UpgradeChannelBanner ~ publicChannelsLimit:', publicChannelsLimit);
     return (
         <BannerBase
             title={
                 <FormattedText
                     defaultMessage={'You have reached the limit of {type, select, O {public channels} P {private channels} other {}} ({usage, number}/{limit, number}) on your kSuite offer.'}
-                    id='ksuite_free_banner_1'
+                    id='ksuite_free_banner'
                     style={styles.textTitle}
                     values={{
                         type: channelType,
@@ -65,6 +69,7 @@ const UpgradeChannelBanner = ({isPrivate, isAdmin}: Props) => {
                     style={styles.textDescription}
                 />
             }
+            style={{width: '100%', marginBottom: 10}}
         />
     );
 };

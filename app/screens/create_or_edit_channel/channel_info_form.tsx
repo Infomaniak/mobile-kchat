@@ -16,6 +16,8 @@ import {
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {useGetLimits} from '@app/hooks/limits';
+import {useGetUsage, useGetUsageDeltas} from '@app/hooks/usage';
 import Autocomplete from '@components/autocomplete';
 import ErrorText from '@components/error_text';
 import FloatingTextInput from '@components/floating_text_input_label';
@@ -90,6 +92,7 @@ type Props = {
     onPurposeChange: (text: string) => void;
     saving: boolean;
     type?: string;
+    onChannelLimitReached?: any;
 }
 
 export default function ChannelInfoForm({
@@ -106,6 +109,8 @@ export default function ChannelInfoForm({
     onPurposeChange,
     saving,
     type,
+    onChannelLimitReached,
+
 }: Props) {
     const intl = useIntl();
     const {formatMessage} = intl;
@@ -154,6 +159,20 @@ export default function ChannelInfoForm({
     const showSelector = !displayHeaderOnly && !editing;
 
     const isPrivate = type === General.PRIVATE_CHANNEL;
+
+    const {public_channels: publicChannelsUsage, private_channels: privateChannelsUsage} = useGetUsage() || {};
+    const {public_channels: publicChannelsLimit, private_channels: privateChannelsLimit} = useGetLimits()[0] || {};
+    const {public_channels: publicChannelsUsageDelta, private_channels: privateChannelsUsageDelta} = useGetUsageDeltas() || {};
+
+    const publicChannelLimitReached = publicChannelsUsageDelta >= 0;
+    const privateChannelLimitReached = privateChannelsUsageDelta >= 0;
+    const channelLimitReached = (isPrivate && privateChannelLimitReached) || (!isPrivate && publicChannelLimitReached);
+
+    useEffect(() => {
+        if (onChannelLimitReached) {
+            onChannelLimitReached(channelLimitReached);
+        }
+    }, [channelLimitReached, onChannelLimitReached]);
 
     const handlePress = () => {
         const chtype = isPrivate ? General.OPEN_CHANNEL : General.PRIVATE_CHANNEL;
@@ -293,7 +312,15 @@ export default function ChannelInfoForm({
                     onPress={blur}
                 >
                     <View>
-                        <UpgradeChannelBanner isPrivate={isPrivate}/>
+                        <UpgradeChannelBanner
+                            isPrivate={isPrivate}
+                            publicChannelsUsage={publicChannelsUsage}
+                            privateChannelsUsage={privateChannelsUsage}
+                            publicChannelsLimit={publicChannelsLimit}
+                            privateChannelsLimit={privateChannelsLimit}
+                            publicChannelLimitReached={publicChannelLimitReached}
+                            privateChannelLimitReached={privateChannelLimitReached}
+                        />
                         {showSelector && (
                             <OptionItem
                                 testID='channel_info_form.make_private'

@@ -89,6 +89,7 @@ const CreateOrEditChannel = ({
     const [purpose, setPurpose] = useState<string>(channelInfo?.purpose || '');
     const [header, setHeader] = useState<string>(channelInfo?.header || '');
 
+    const [channelLimitReached, setChannelLimitReached] = useState(false);
     const [appState, dispatch] = useReducer((state: RequestState, action: RequestAction) => {
         switch (action.type) {
             case RequestActions.START:
@@ -145,6 +146,7 @@ const CreateOrEditChannel = ({
 
     useEffect(() => {
         setCanSave(
+            !channelLimitReached &&
             displayName.length >= MIN_CHANNEL_NAME_LENGTH && (
                 displayName !== channel?.displayName ||
                 purpose !== channelInfo?.purpose ||
@@ -152,6 +154,7 @@ const CreateOrEditChannel = ({
                 type !== channel.type
             ),
         );
+        console.log('🚀 ~ useEffect ~ channelLimitReached:', channelLimitReached);
     }, [channel, displayName, purpose, header, type]);
 
     const isValidDisplayName = useCallback((): boolean => {
@@ -234,6 +237,7 @@ const CreateOrEditChannel = ({
 
     return (
         <ChannelInfoForm
+            onChannelLimitReached={setChannelLimitReached}
             error={appState.error}
             saving={appState.saving}
             channelType={channel?.type}

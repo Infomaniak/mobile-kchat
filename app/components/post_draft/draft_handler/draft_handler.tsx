@@ -73,6 +73,12 @@ export default function DraftHandler(props: Props) {
 
     const newUploadError = useCallback((error: React.ReactNode) => {
         if (error === 'Quota exceeded') {
+            // if (isAdmin) {
+            //     if (isPaidPlan) {
+            //         errorMessage = 'file_upload.quota.exceeded.paidPlan.admin';
+            //     } else {
+            //         errorMessage = 'file_upload.quota.exceeded.admin';
+            //     }
             openAsBottomSheet({
                 closeButtonId: 'close-quota-exceeded',
                 screen: Screens.INFOMANIAK_QUOTA_EXCEEDED,

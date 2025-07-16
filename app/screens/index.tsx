@@ -286,6 +286,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.INFOMANIAK_REMINDER:
             screen = withServerDatabase(require('@screens/ik_reminder').default);
             break;
+        case Screens.INFOMANIAK_EVOLVE:
+            screen = withServerDatabase(require('@screens/ik_evolve').default);
+            break;
     }
 
     if (screen) {
