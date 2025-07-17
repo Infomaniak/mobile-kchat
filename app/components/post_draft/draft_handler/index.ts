@@ -2,8 +2,12 @@
 // See LICENSE.txt for license information.
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
+import {distinctUntilChanged, map} from '@nozbe/watermelondb/utils/rx';
 import React from 'react';
 
+import {observeCurrentPackName} from '@app/queries/servers/team';
+import {observeCurrentUser} from '@app/queries/servers/user';
+import {isSystemAdmin} from '@app/utils/user';
 import {DEFAULT_SERVER_MAX_FILE_SIZE} from '@constants/post_draft';
 import {observeCanUploadFiles, observeConfigIntValue, observeMaxFileCount} from '@queries/servers/system';
 
@@ -15,11 +19,18 @@ const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
     const canUploadFiles = observeCanUploadFiles(database);
     const maxFileSize = observeConfigIntValue(database, 'MaxFileSize', DEFAULT_SERVER_MAX_FILE_SIZE);
     const maxFileCount = observeMaxFileCount(database);
+    const currentPackName = observeCurrentPackName(database);
+    const isAdmin = observeCurrentUser(database).pipe(
+        map((user) => isSystemAdmin(user?.roles || '')),
+        distinctUntilChanged(),
+    );
 
     return {
+        currentPackName,
         maxFileSize,
         canUploadFiles,
         maxFileCount,
+        isAdmin,
     };
 });
 

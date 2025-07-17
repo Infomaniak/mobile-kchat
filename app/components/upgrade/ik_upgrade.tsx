@@ -25,24 +25,15 @@ export const getThemedStyles = makeStyleSheetFromTheme(() => ({
         paddingHorizontal: 8,
         gap: 8,
     },
-    leftIcon: {
-
-        // marginRight: 12,
-    },
     textContainer: {
         color: '#333333',
         fontWeight: '500',
         textTransform: 'uppercase',
         fontSize: 10,
     },
-
 }));
 
-type Props = {
-
-};
-
-const UpgradeButton = ({}: Props) => {
+const UpgradeButton = () => {
     const theme = useTheme();
     const styles = getThemedStyles(theme);
 
@@ -61,7 +52,7 @@ const UpgradeButton = ({}: Props) => {
                         style={styles.textContainer}
                     />
                 </View>
-                <View style={styles.leftIcon}>
+                <View>
                     <UpgradeIcon/>
                 </View>
             </View>

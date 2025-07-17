@@ -5,32 +5,30 @@ import {useEffect, useState} from 'react';
 
 import {fetchCloudLimits} from '@actions/remote/cloud';
 import {useServerUrl} from '@app/context/server';
+import {logError} from '@app/utils/log';
 
-export function useGetLimits(): any {
-    // const isLoggedIn = useIsLoggedIn();
-    // const cloudLimits = useSelector(getCloudLimits);
+import type {Limits} from '@typings/components/cloud';
 
-    // const cloudLimitsReceived = useSelector(getCloudLimitsLoaded);
-    // const dispatch = useDispatch();
-    const [limits, setLimits] = useState(undefined);
+export function useGetLimits(): [Limits, boolean] {
+    const [limits, setLimits] = useState<Limits>();
     const serverUrl = useServerUrl();
     useEffect(() => {
         let isMounted = true;
         (async () => {
-            const result = await fetchCloudLimits(serverUrl);
-            if (isMounted) {
-                setLimits(result);
+            try {
+                const result = await fetchCloudLimits(serverUrl);
+                if (isMounted && result && typeof result === 'object') {
+                    setLimits(result);
+                }
+                throw new Error('Invalid limits response');
+            } catch (e) {
+                logError('searchGroupsByName - ERROR', e);
             }
         })();
         return () => {
             isMounted = false;
         };
     }, [serverUrl]);
-    console.log('🚀 ~ useGetLimits ~ limits:', limits);
-    return [limits, true];
 
-    // const result: [Limits, boolean] = useMemo(() => {
-    //     return [cloudLimits, cloudLimitsReceived];
-    // }, [cloudLimits, cloudLimitsReceived]);
-    // return result;
+    return [limits, true];
 }

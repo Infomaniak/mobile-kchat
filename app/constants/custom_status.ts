@@ -11,7 +11,7 @@ export enum CustomStatusDurationEnum {
     TODAY = 'today',
     THIS_WEEK = 'this_week',
     DATE_AND_TIME = 'date_and_time',
-    SELECT_DATE = 'po'
+    SELECT_DATE = 'select_date',
 }
 
 const {

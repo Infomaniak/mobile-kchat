@@ -8,13 +8,10 @@ import {useServerUrl} from '@app/context/server';
 
 import {useGetLimits} from './limits';
 
-export function useGetUsage(): any {
-    // const isLoggedIn = useIsLoggedIn();
-    // const cloudLimits = useSelector(getCloudLimits);
+import type {CloudUsage} from '@typings/components/cloud';
 
-    // const cloudLimitsReceived = useSelector(getCloudLimitsLoaded);
-    // const dispatch = useDispatch();
-    const [usage, setUsage] = useState(undefined);
+export function useGetUsage(): CloudUsage | { error: unknown } {
+    const [usage, setUsage] = useState<CloudUsage | { error: unknown }>({error: new Error('Usage not loaded')});
     const serverUrl = useServerUrl();
     useEffect(() => {
         let isMounted = true;
@@ -28,14 +25,8 @@ export function useGetUsage(): any {
             isMounted = false;
         };
     }, [serverUrl]);
-    console.log('🚀 ~ uudage', usage);
 
     return usage;
-
-    // const result: [Limits, boolean] = useMemo(() => {
-    //     return [cloudLimits, cloudLimitsReceived];
-    // }, [cloudLimits, cloudLimitsReceived]);
-    // return result;
 }
 
 // Returns an object of type CloudUsage with the values being the delta between the limit, and the actual usage of this installation.
@@ -56,16 +47,15 @@ export const withBackupValue = (maybeLimit: number | undefined, limitsLoaded: bo
     return maybeLimit;
 };
 
-export function useGetUsageDeltas(): any {
+export function useGetUsageDeltas(): CloudUsage {
     const usage = useGetUsage();
     const [limits, limitsLoaded] = useGetLimits();
-
-    console.log('je passe');
 
     const usageDelta = useMemo(() => {
         if (!usage) {
             return {usageLoaded: false};
         }
+
         return (
             {
                 storage: usage.storage - withBackupValue(limits.storage, limitsLoaded),
