@@ -183,7 +183,6 @@ class ClearAfterModal extends NavigationComponent<Props, State> {
         const {currentUser, theme} = this.props;
         const style = getStyleSheet(theme);
         const {duration, expiresAt, showExpiryTime} = this.state;
-        console.log('🚀 ~ ClearAfterModal ~ render ~ expiresAt:', expiresAt);
         return (
             <SafeAreaView
                 style={style.container}

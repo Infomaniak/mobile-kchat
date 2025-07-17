@@ -174,16 +174,16 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser}: Props) =
             },
         });
     }, [Screens.INFOMANIAK_REMINDER, post]);
-    console.log('🚀 ~ renderContent ~ expiresAt:', expiresAt);
+
     const styles = {
         customButton: {
-            backgroundColor: '#2563eb', // bleu (ex: blue-600 Tailwind)
+            backgroundColor: '#2563eb',
             borderRadius: 8,
             paddingVertical: 12,
             paddingHorizontal: 24,
             alignItems: 'center',
             justifyContent: 'center',
-            alignSelf: 'center', // centre horizontalement
+            alignSelf: 'center',
             marginTop: 16,
         },
         customButtonText: {

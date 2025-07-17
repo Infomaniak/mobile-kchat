@@ -45,8 +45,6 @@ const UpgradeChannelBanner = ({
         return null;
     }
 
-    console.log('🚀 ~ UpgradeChannelBanner ~ publicChannelsUsage:', publicChannelsUsage);
-    console.log('🚀 ~ UpgradeChannelBanner ~ publicChannelsLimit:', publicChannelsLimit);
     return (
         <BannerBase
             title={

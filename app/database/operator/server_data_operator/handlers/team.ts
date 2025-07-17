@@ -110,7 +110,6 @@ const TeamHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
      */
     handleTeam = async ({teams, prepareRecordsOnly = true}: HandleTeamArgs): Promise<TeamModel[]> => {
         if (!teams?.length) {
-            console.log('empty');
             logWarning(
                 'An empty or undefined "teams" array has been passed to the handleTeam method',
             );
@@ -119,7 +118,6 @@ const TeamHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
         const uniqueRaws = getUniqueRawsBy({raws: teams, key: 'id'}) as Team[];
         const ids = uniqueRaws.map((t) => t.id);
-        console.log('🚀 ~ extends ~ handleTeam= ~ uniqueRaws:', uniqueRaws);
         const db: Database = this.database;
         const existing = await db.get<TeamModel>(TEAM).query(
             Q.where('id', Q.oneOf(ids)),
@@ -143,7 +141,6 @@ const TeamHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         }, []);
 
         if (!createOrUpdateRawValues.length) {
-            console.log('🚀 ~ extends ~ handleTeam= ~ createOrUpdateRawValues:', createOrUpdateRawValues);
             return [];
         }
 

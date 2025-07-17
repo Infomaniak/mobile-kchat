@@ -17,9 +17,7 @@ export function formatYMDDurationHuman(
     intl: IntlShape,
 ): string {
     const dur = Duration.fromISO(iso);
-    console.log('🚀 ~ dur:', dur.days);
     const nf = new Intl.NumberFormat(intl.locale);
-    console.log('🚀 ~ nf:', nf);
 
     return units.
         map(([key, id]) => {
@@ -32,7 +30,6 @@ export function formatYMDDurationHuman(
                 {id, defaultMessage: '{count, plural, one {#} other {#s}}'},
                 {count: val},
             );
-            console.log('label', `${nf.format(val)} ${label}`);
 
             return `${nf.format(val)} ${label}`;
         }).

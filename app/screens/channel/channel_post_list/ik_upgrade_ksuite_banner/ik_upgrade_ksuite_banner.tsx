@@ -17,7 +17,6 @@ const UpgradeKsuiteBanner = () => {
     const styles = bannerBaseStyles(theme);
     const [limits] = useGetLimits();
     const nextPlan = useNextPlan();
-    console.log('🚀 ~ UpgradeKsuiteBanner ~ nextPlan:', nextPlan);
     const historyDurationLimit = limits?.messages ? sanitizeHistoryDuration(limits.messages.history) : null;
     const intl = useIntl();
 
@@ -26,8 +25,6 @@ const UpgradeKsuiteBanner = () => {
     }
 
     const historyDurationLimitHuman = formatYMDDurationHuman(historyDurationLimit ?? '', intl);
-    console.log('🚀 ~ UpgradeKsuiteBanner ~ historyDurationLimit:', historyDurationLimit);
-    console.log('🚀 ~ UpgradeKsuiteBanner ~ historyDurationLimitHuman:', historyDurationLimitHuman);
 
     return (
         <BannerBase

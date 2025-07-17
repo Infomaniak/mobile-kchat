@@ -96,8 +96,6 @@ const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemC
 
     const clearAfterMenuItemTestId = `custom_status_clear_after.menu_item.${duration}`;
 
-    console.log('🚀 ~ ClearAfterMenuItem ~ expiryMenuItems[duration]:', expiryMenuItems[duration]);
-    console.log('🚀 ~ ClearAfterMenuItem ~ duration:', duration);
     return (
         <View>
             <TouchableOpacity

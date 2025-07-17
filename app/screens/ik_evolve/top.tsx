@@ -14,7 +14,6 @@ import Svg, {
 } from 'react-native-svg';
 const {width: screenWidth} = Dimensions.get('window');
 function SvgComponent(props) {
-    console.log('🚀 ~ SvgComponent ~ screenWidth:', screenWidth);
     return (
         <Svg
             width='100%' // 👈 full width of screen

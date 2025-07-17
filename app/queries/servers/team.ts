@@ -193,7 +193,6 @@ export const getDefaultTeamId = async (database: Database, ignoreId?: string) =>
 
 export function prepareMyTeams(operator: ServerDataOperator, teams: Team[], memberships: TeamMembership[]): Array<Promise<Model[]>> {
     try {
-        console.log('je prepare');
         const teamRecords = operator.handleTeam({prepareRecordsOnly: true, teams});
         const teamIds = new Set(teams.map((t) => t.id));
         const teamMemberships = memberships.filter((m) => teamIds.has(m.team_id) && m.delete_at === 0);

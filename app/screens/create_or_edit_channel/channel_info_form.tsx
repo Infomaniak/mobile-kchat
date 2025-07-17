@@ -289,8 +289,6 @@ export default function ChannelInfoForm({
         );
     }
 
-    console.log('🚀 ~ channelTypeff:', channelType);
-    console.log('🚀 ~ isPrivate:', isPrivate);
     return (
         <SafeAreaView
             edges={['bottom', 'left', 'right']}

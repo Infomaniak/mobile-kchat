@@ -154,7 +154,6 @@ const CreateOrEditChannel = ({
                 type !== channel.type
             ),
         );
-        console.log('🚀 ~ useEffect ~ channelLimitReached:', channelLimitReached);
     }, [channel, displayName, purpose, header, type]);
 
     const isValidDisplayName = useCallback((): boolean => {
