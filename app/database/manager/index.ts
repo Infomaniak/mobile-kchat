@@ -29,6 +29,8 @@ import {deleteIOSDatabase, getIOSAppGroupDetails, renameIOSDatabase} from '@util
 import {urlSafeBase64Encode} from '@utils/security';
 import {removeProtocol} from '@utils/url';
 
+import LimitsModel from '../models/server/limits';
+
 import type {AppDatabase, CreateServerDatabaseArgs, RegisterServerDatabaseArgs, Models, ServerDatabase, ServerDatabases} from '@typings/database/database';
 
 const {SERVERS} = MM_TABLES.APP;
@@ -48,7 +50,7 @@ class DatabaseManager {
             ConferenceModel, ConferenceParticipantModel, DraftModel, FileModel, GroupModel, GroupChannelModel, GroupTeamModel,
             GroupMembershipModel, MyChannelModel, MyChannelSettingsModel, MyTeamModel, PostModel, PostsInChannelModel, PostsInThreadModel,
             PreferenceModel, ReactionModel, RoleModel, SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
-            ThreadModel, ThreadParticipantModel, ThreadInTeamModel, TeamThreadsSyncModel, UserModel,
+            ThreadModel, ThreadParticipantModel, ThreadInTeamModel, TeamThreadsSyncModel, UserModel, LimitsModel,
         ];
 
         this.databaseDirectory = Platform.OS === 'ios' ? getIOSAppGroupDetails().appGroupDatabase : `${documentDirectory}/databases/`;

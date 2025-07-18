@@ -12,15 +12,25 @@ import {formatYMDDurationHuman} from '@app/utils/duration';
 
 import BannerBase, {bannerBaseStyles} from './ik_banner_base';
 
-const UpgradeKsuiteBanner = () => {
+import type LimitsModel from '@app/database/models/server/limits';
+
+type Props = {
+    limits: LimitsModel;
+}
+
+const UpgradeKsuiteBanner = ({
+    limits,
+}: Props) => {
     const theme = useTheme();
     const styles = bannerBaseStyles(theme);
-    const [limits] = useGetLimits();
+
+    const [limitsFetch, limitsLoaded] = useGetLimits(limits);
+
     const nextPlan = useNextPlan();
-    const historyDurationLimit = limits?.messages ? sanitizeHistoryDuration(limits.messages.history) : null;
+    const historyDurationLimit = limitsFetch?.messages ? sanitizeHistoryDuration(limitsFetch.messages.history) : null;
     const intl = useIntl();
 
-    if (historyDurationLimit === null) {
+    if (!limitsLoaded) {
         return null;
     }
 

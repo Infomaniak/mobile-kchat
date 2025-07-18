@@ -4,18 +4,18 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import React from 'react';
 
-import {observeCurrentPackName, observeCurrentTeam} from '@app/queries/servers/team';
+import {observeLimits} from '@app/queries/servers/limit';
 
 import UpgradeKsuiteBanner from './ik_upgrade_ksuite_banner';
 
 import type {WithDatabaseArgs} from '@typings/database/database';
 
 const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
-    const currentPackName = observeCurrentPackName(database);
-    const currentTeam = observeCurrentTeam(database);
+    const limits = observeLimits(database);
+
     return {
-        currentPackName,
-        currentTeam,
+        limits,
+
     };
 });
 

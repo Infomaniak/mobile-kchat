@@ -6,8 +6,6 @@ import React from 'react';
 import FormattedText from '@app/components/formatted_text';
 import {General} from '@app/constants';
 import {useTheme} from '@app/context/theme';
-import {useGetLimits} from '@app/hooks/limits';
-import {useGetUsage, useGetUsageDeltas} from '@app/hooks/usage';
 
 import BannerBase, {bannerBaseStyles} from '../channel/channel_post_list/ik_upgrade_ksuite_banner/ik_banner_base';
 
@@ -21,11 +19,6 @@ type Props = {
     publicChannelLimitReached?: boolean;
     privateChannelLimitReached?: boolean;
 };
-
-// isAdmin: observeCurrentUser(database).pipe(
-//             map((user) => isSystemAdmin(user?.roles || '')),
-//             distinctUntilChanged(),
-//         ),
 
 const UpgradeChannelBanner = ({
     isPrivate,

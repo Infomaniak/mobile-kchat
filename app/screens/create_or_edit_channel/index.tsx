@@ -17,6 +17,7 @@ type OwnProps = {
 const enhanced = withObservables([], ({database, channelId}: WithDatabaseArgs & OwnProps) => {
     const channel = channelId ? observeChannel(database, channelId) : of$(undefined);
     const channelInfo = channelId ? observeChannelInfo(database, channelId) : of$(undefined);
+
     return {
         channel,
         channelInfo,

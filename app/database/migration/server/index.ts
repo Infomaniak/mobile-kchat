@@ -8,9 +8,36 @@ import {addColumns, createTable, schemaMigrations} from '@nozbe/watermelondb/Sch
 
 import {MM_TABLES} from '@constants/database';
 
-const {CONFERENCE, CONFERENCE_PARTICIPANT, FILE, CHANNEL_INFO, DRAFT, POST, CHANNEL_MEMBERSHIP} = MM_TABLES.SERVER;
+const {LIMIT, CONFERENCE, CONFERENCE_PARTICIPANT, FILE, CHANNEL_INFO, DRAFT, POST, CHANNEL_MEMBERSHIP} = MM_TABLES.SERVER;
 
 export default schemaMigrations({migrations: [
+    {
+        toVersion: 7,
+        steps: [
+            createTable({
+                name: LIMIT,
+                columns: [
+                    {name: 'boards', type: 'string'},
+                    {name: 'bots', type: 'number'},
+                    {name: 'custom_emojis', type: 'number'},
+                    {name: 'files', type: 'string'},
+                    {name: 'guests', type: 'number'},
+                    {name: 'incoming_webhooks', type: 'number'},
+                    {name: 'integrations', type: 'string'},
+                    {name: 'members', type: 'number'},
+                    {name: 'messages', type: 'string'},
+                    {name: 'outgoing_webhooks', type: 'number'},
+                    {name: 'private_channels', type: 'number'},
+                    {name: 'public_channels', type: 'number'},
+                    {name: 'reminder_custom_date', type: 'boolean'},
+                    {name: 'scheduled_draft_custom_date', type: 'boolean'},
+                    {name: 'sidebar_categories', type: 'number'},
+                    {name: 'storage', type: 'number'},
+                    {name: 'teams', type: 'string'},
+                ],
+            }),
+        ],
+    },
     {
         toVersion: 6,
         steps: [

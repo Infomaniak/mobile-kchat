@@ -8,14 +8,15 @@ export interface CloudUsage {
     pending_guests: number;
     members: number;
     usageLoaded: boolean;
-    files: {
-        totalStorage: number;
-        totalStorageLoaded: boolean;
-    };
-    messages: {
-        history: number;
-        historyLoaded: boolean;
-    };
+
+    // files: {
+    //     totalStorage: number;
+    //     totalStorageLoaded: boolean;
+    // };
+    // messages: {
+    //     history: number;
+    //     historyLoaded: boolean;
+    // };
 
     // teams: TeamsUsage;
 
@@ -29,19 +30,22 @@ export interface CloudUsage {
 }
 
 export type Limits = {
+    boards: any;
+    bots: any;
+    integrations: any;
     storage: number;
     public_channels: number;
     private_channels: number;
     guests: number;
     members: number;
-    messages?: {
-        history?: number;
+    messages: {
+        history: number;
     };
-    files?: {
-        total_storage?: number;
+    files: {
+        total_storage: number;
     };
-    teams?: {
-        active?: number;
+    teams: {
+        active: number;
     };
 
     //Ik plan limitation:
@@ -52,3 +56,24 @@ export type Limits = {
     reminder_custom_date: boolean;
     scheduled_draft_custom_date: boolean;
 }
+
+export type BoardsLimitProps = {
+    cards: number;
+    views: number;
+};
+
+export type FilesLimitProps = {
+    total_storage: number;
+};
+
+export type IntegrationsLimitProps = {
+    enabled: number;
+};
+
+export type MessagesLimitProps = {
+    history: number;
+};
+
+export type TeamsLimitProps = {
+    history?: string;
+};
