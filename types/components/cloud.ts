@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 export interface CloudUsage {
+    id: string;
     storage: number;
     public_channels: number;
     private_channels: number;
@@ -31,6 +32,7 @@ export interface CloudUsage {
 }
 
 export type Limits = {
+    id: string;
     boards: any;
     bots: any;
     integrations: any;

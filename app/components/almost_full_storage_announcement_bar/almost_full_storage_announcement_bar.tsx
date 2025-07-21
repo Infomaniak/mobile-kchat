@@ -51,8 +51,7 @@ const AlmostFullStorageAnnouncementBar = ({
 
     const isFull = storage >= 0;
     const isAlmostFull = !isFull && storage >= TRESHOLD_ALMOST_FULL;
-    const shouldShow = isAlmostFull && visibility === 'visible';
-
+    const shouldShow = isAlmostFull && visibility?.[0]?.value !== 'dismissed';
     const handlePress = useCallback(() => {
         const isPaid = isPaidPlan(currentPackName);
 

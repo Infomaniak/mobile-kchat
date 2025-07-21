@@ -82,7 +82,6 @@ const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemC
         [CustomStatusDurationEnum.THIS_WEEK]: intl.formatMessage(CST[CustomStatusDurationEnum.THIS_WEEK]),
         [CustomStatusDurationEnum.DATE_AND_TIME]: intl.formatMessage({id: 'custom_status.expiry_dropdown.custom', defaultMessage: 'Custom'}),
         [CustomStatusDurationEnum.SELECT_DATE]: intl.formatMessage({id: 'custom_status.expiry_dropdowntom', defaultMessage: 'Sélectionnez la date'}),
-
     };
 
     const handleClick = preventDoubleTap(() => {

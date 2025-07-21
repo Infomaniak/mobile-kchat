@@ -13,18 +13,15 @@ import Svg, {
     ClipPath,
 } from 'react-native-svg';
 const {width: screenWidth} = Dimensions.get('window');
-function SvgComponent(props) {
+function SvgComponent() {
     return (
         <Svg
-            width='100%' // 👈 full width of screen
-            height={(screenWidth * 92) / 375} // 👈 conserve le ratio
+            width='100%'
+            height={(screenWidth * 92) / 375}
             viewBox='0 0 375 92'
             fill='none'
-            xmlns='http://www.w3.org/2000/svg'
             style={{alignSelf: 'stretch'}}
             preserveAspectRatio='none'
-
-            {...props}
         >
             <G clipPath='url(#clip0_10109_42517)'>
                 <Path

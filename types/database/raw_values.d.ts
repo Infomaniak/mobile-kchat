@@ -137,3 +137,4 @@ type RawValue =
   | TeamThreadsSync
   | UserProfile
   | Pick<ChannelMembership, 'channel_id' | 'user_id'>
+  | Limits

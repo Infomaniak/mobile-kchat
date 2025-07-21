@@ -19,5 +19,6 @@ type BoardsLimitProps = {
 };
 
  type TeamsLimitProps = {
+    active?: number;
     history?: string;
 };

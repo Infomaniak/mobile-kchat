@@ -5,15 +5,13 @@ import Svg, {G, Rect, Ellipse, Circle, Defs, ClipPath} from 'react-native-svg';
 
 /* SVGR has dropped some elements not supported by react-native-svg: filter */
 
-function SvgComponent(props) {
+function SvgComponent() {
     return (
         <Svg
             width={24}
             height={24}
             viewBox='0 0 24 24'
             fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-            {...props}
         >
             <G filter='url(#filter0_i_10109_42546)'>
                 <G clipPath='url(#clip0_10109_42546)'>

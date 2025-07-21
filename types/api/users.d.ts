@@ -105,7 +105,7 @@ type UserCustomStatus = {
     duration?: CustomStatusDuration;
 };
 
-type CustomStatusDuration = '' | 'thirty_minutes' | 'one_hour' | 'four_hours' | 'today' | 'this_week' | 'date_and_time';
+type CustomStatusDuration = '' | 'thirty_minutes' | 'one_hour' | 'four_hours' | 'today' | 'this_week' | 'date_and_time' | 'select_date';
 
 type SearchUserOptions = {
 	team_id?: string;

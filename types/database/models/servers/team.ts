@@ -7,7 +7,6 @@ import type MyTeamModel from './my_team';
 import type TeamChannelHistoryModel from './team_channel_history';
 import type TeamMembershipModel from './team_membership';
 import type TeamSearchHistoryModel from './team_search_history';
-import type {PackName} from '@app/hooks/plans';
 import type {Query, Relation, Model} from '@nozbe/watermelondb';
 import type {Associations} from '@nozbe/watermelondb/Model';
 
@@ -69,7 +68,7 @@ declare class TeamModel extends Model {
     /** teamSearchHistories : All the searches performed on this team */
     teamSearchHistories: Query<TeamSearchHistoryModel>;
 
-    pack_name: PackName | undefined;
+    pack_name: string;
 }
 
 export default TeamModel;
