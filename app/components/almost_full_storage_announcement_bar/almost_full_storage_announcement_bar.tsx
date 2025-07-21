@@ -1,0 +1,96 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+import {
+
+} from 'react-native';
+
+import React, {useCallback} from 'react';
+import {useIntl} from 'react-intl';
+
+import {Screens} from '@app/constants';
+import {useTheme} from '@app/context/theme';
+import {isPaidPlan, type PackName} from '@app/hooks/plans';
+import {useGetUsageDeltas} from '@app/hooks/usage';
+import {makeStyleSheetFromTheme} from '@app/utils/theme';
+import {openAsBottomSheet} from '@screens/navigation';
+
+import AnnouncementBanner from '../announcement_banner/announcement_banner';
+
+import WarningIcon from './icon';
+type Props = {
+  visibility?: string;
+  currentPackName: PackName |undefined;
+  isAdmin: string;
+}
+
+const getStyle = makeStyleSheetFromTheme((theme: Theme) => ({
+
+}));
+
+const TRESHOLD_ALMOST_FULL = -1073741824;
+const quotaMessages = new Map<string, string>([
+    ['admin|paid', 'file_upload.quota.exceeded.paidPlan.admin'],
+    ['admin|free', 'file_upload.quota.exceeded.admin'],
+    ['user|_', 'file_upload.quota.exceeded'],
+]);
+const AlmostFullStorageAnnouncementBar = ({
+    visibility,
+    currentPackName,
+    isAdmin,
+}: Props) => {
+    const intl = useIntl();
+    const bannerText = intl.formatMessage({
+        id: 'ik_announcement_banner.storage_limit_reached',
+        defaultMessage: 'Limite de stockage atteinte',
+    });
+    const theme = useTheme();
+
+    const {storage} = useGetUsageDeltas();
+    const isFull = storage >= 0;
+    const isAlmostFull = !isFull && storage >= TRESHOLD_ALMOST_FULL;
+    const shouldShow = isAlmostFull && visibility === 'visible';
+
+    const handlePress = useCallback(() => {
+        const isPaid = isPaidPlan(currentPackName);
+
+        let role = 'user';
+        let plan = '_';
+
+        if (isAdmin) {
+            role = 'admin';
+            plan = isPaid ? 'paid' : 'free';
+        }
+        openAsBottomSheet({
+            closeButtonId: 'close-quota-exceeded',
+            screen: Screens.INFOMANIAK_QUOTA_EXCEEDED,
+            theme,
+            title: '',
+            props: {
+                quotaType: {
+                    title: 'infomaniak.size_quota_exceeded.title',
+                    description: quotaMessages.get(`${role}|${plan}`) ?? '',
+                    image: 'storage',
+                },
+            },
+        });
+    }, []);
+
+    if (!shouldShow) {
+        return null;
+    }
+
+    return (
+        <AnnouncementBanner
+            bannerColor={'##FFE7A5'}
+            bannerDismissed={false}
+            bannerEnabled={true}
+            allowDismissal={false}
+            bannerText={bannerText}
+            icon={<WarningIcon/>}
+            onHandlePress={handlePress}
+        />
+
+    );
+};
+
+export default AlmostFullStorageAnnouncementBar;

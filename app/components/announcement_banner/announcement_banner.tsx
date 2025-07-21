@@ -32,6 +32,8 @@ type Props = {
     bannerText?: string;
     bannerTextColor?: string;
     allowDismissal: boolean;
+    icon?: any;
+    onHandlePress?: any;
 }
 
 const getStyle = makeStyleSheetFromTheme((theme: Theme) => ({
@@ -81,6 +83,8 @@ const AnnouncementBanner = ({
     bannerText = '',
     bannerTextColor = '#000',
     allowDismissal,
+    icon,
+    onHandlePress,
 }: Props) => {
     const intl = useIntl();
     const serverUrl = useServerUrl();
@@ -141,7 +145,7 @@ const AnnouncementBanner = ({
     const bannerTextContainerStyle = useMemo(() => [style.bannerTextContainer, {
         color: bannerTextColor,
     }], [style, bannerTextColor]);
-
+    console.log('icon', icon);
     return (
         <Animated.View
             style={[style.background, bannerStyle]}
@@ -149,10 +153,10 @@ const AnnouncementBanner = ({
             <View
                 style={[style.bannerContainer, {backgroundColor: bannerColor}]}
             >
-                {visible &&
+                {true &&
                     <>
                         <TouchableOpacity
-                            onPress={handlePress}
+                            onPress={onHandlePress || handlePress}
                             style={style.wrapper}
                         >
                             <Text
@@ -160,11 +164,12 @@ const AnnouncementBanner = ({
                                 ellipsizeMode='tail'
                                 numberOfLines={1}
                             >
-                                <CompassIcon
+                                {icon || <CompassIcon
                                     color={bannerTextColor}
                                     name='information-outline'
                                     size={18}
                                 />
+                                }
                                 {'  '}
                                 <RemoveMarkdown
                                     value={bannerText}
