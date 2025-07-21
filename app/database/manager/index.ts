@@ -30,6 +30,7 @@ import {urlSafeBase64Encode} from '@utils/security';
 import {removeProtocol} from '@utils/url';
 
 import LimitsModel from '../models/server/limits';
+import CloudUsageModel from '../models/server/usage';
 
 import type {AppDatabase, CreateServerDatabaseArgs, RegisterServerDatabaseArgs, Models, ServerDatabase, ServerDatabases} from '@typings/database/database';
 
@@ -50,7 +51,7 @@ class DatabaseManager {
             ConferenceModel, ConferenceParticipantModel, DraftModel, FileModel, GroupModel, GroupChannelModel, GroupTeamModel,
             GroupMembershipModel, MyChannelModel, MyChannelSettingsModel, MyTeamModel, PostModel, PostsInChannelModel, PostsInThreadModel,
             PreferenceModel, ReactionModel, RoleModel, SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
-            ThreadModel, ThreadParticipantModel, ThreadInTeamModel, TeamThreadsSyncModel, UserModel, LimitsModel,
+            ThreadModel, ThreadParticipantModel, ThreadInTeamModel, TeamThreadsSyncModel, UserModel, LimitsModel, CloudUsageModel,
         ];
 
         this.databaseDirectory = Platform.OS === 'ios' ? getIOSAppGroupDetails().appGroupDatabase : `${documentDirectory}/databases/`;

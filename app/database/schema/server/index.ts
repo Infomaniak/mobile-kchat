@@ -39,6 +39,7 @@ import {
     TeamThreadsSyncSchema,
     UserSchema,
     LimitSchema,
+    CloudUsageSchema,
 } from './table_schemas';
 
 export const serverSchema: AppSchema = appSchema({
@@ -58,6 +59,7 @@ export const serverSchema: AppSchema = appSchema({
         GroupSchema,
         GroupChannelSchema,
         LimitSchema,
+        CloudUsageSchema,
         GroupMembershipSchema,
         GroupTeamSchema,
         MyChannelSchema,

@@ -40,19 +40,26 @@ export const fetchUsage = async (serverUrl: string, fetchOnly = false) => {
     try {
         const client = NetworkManager.getClient(serverUrl);
 
-        const limits = await client.getUsage();
+        const usage = await client.getUsage();
+        const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        if (!operator) {
+            return;
+        }
+        if (!fetchOnly && usage) {
+            const usageWithId = {
+                id: 'guests',
+                ...usage,
+            };
+            await operator.handleUsage({
+                usage: [usageWithId],
+                prepareRecordsOnly: false,
+            });
+        }
 
-        // if (!fetchOnly && limits.length) {
-        //     await operator.handleUsers({
-        //         limits,
-        //         prepareRecordsOnly: false,
-        //     });
-        // }
-
-        return limits;
+        return usage;
     } catch (error) {
-        // logDebug('error on fetchUsersByIds', getFullErrorMessage(error));
-        // forceLogoutIfNecessary(serverUrl, error);
+        logDebug('error on fetchUsage', getFullErrorMessage(error));
+        forceLogoutIfNecessary(serverUrl, error);
         return {error};
     }
 };
