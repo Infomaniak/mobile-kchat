@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback} from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 
 import FormattedText from '@app/components/formatted_text';
@@ -18,16 +18,6 @@ import KchatIcon from './kchat';
 import MailIcon from './mail';
 import PlusIcon from './plus';
 import Header from './top';
-
-import type PostModel from '@typings/database/models/servers/post';
-
-type Props = {
-  post: PostModel;
-  componentId: string;
-  postId: string;
-  postpone: boolean;
-  currentUser?: any;
-};
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     headerTop: {
@@ -110,7 +100,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 
 }));
 
-const IKEvolve = ({post, postId, postpone, componentId, currentUser}: Props) => {
+const IKEvolve = () => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const handleClose = useCallback(() => {

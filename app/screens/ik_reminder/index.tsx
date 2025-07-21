@@ -4,17 +4,13 @@
 import {BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import moment from 'moment';
 import React, {useCallback, useMemo, useState} from 'react';
-import {ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {ScrollView, TouchableOpacity, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-import CompassIcon from '@app/components/compass_icon';
 import {useTheme} from '@app/context/theme';
-import {quotaGate, useNextPlan} from '@app/hooks/plans';
+import {quotaGate} from '@app/hooks/plans';
 import {useGetUsageDeltas} from '@app/hooks/usage';
-import DateTimeSelector from '@app/screens/custom_status_clear_after/components/date_time_selector';
-import {getTimezone} from '@app/utils/user';
 import {BaseOption} from '@components/common_post_options';
-import CustomStatusExpiry from '@components/custom_status/custom_status_expiry';
 import FormattedText from '@components/formatted_text';
 import {ITEM_HEIGHT} from '@components/option_item';
 import UpgradeButton from '@components/upgrade/ik_upgrade';
@@ -29,8 +25,9 @@ import {bottomSheetSnapPoint, getCurrentMomentForTimezone} from '@utils/helpers'
 import {isSystemMessage} from '@utils/post';
 import {typography} from '@utils/typography';
 
-import ClearAfterMenuItem, {getStyleSheet} from '../custom_status_clear_after/components/clear_after_menu_item';
+import ClearAfterMenuItem from '../custom_status_clear_after/components/clear_after_menu_item';
 
+import type {CloudUsageModel, LimitModel} from '@app/database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 
 const POST_OPTIONS_BUTTON = 'close-post-options';
@@ -41,9 +38,11 @@ type Props = {
     postId: string;
     postpone: boolean;
     currentUser?: any;
+    limits: LimitModel;
+    usage: CloudUsageModel;
 };
 
-const IKReminder = ({post, postId, postpone, componentId, currentUser}: Props) => {
+const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, usage}: Props) => {
     const serverUrl = useServerUrl();
     const {bottom} = useSafeAreaInsets();
     const isTablet = useIsTablet();
@@ -51,7 +50,6 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser}: Props) =
     const Scroll = useMemo(() => (isTablet ? ScrollView : BottomSheetScrollView), [isTablet]);
     const [showCustomPicker, setShowCustomPicker] = useState<boolean>(false);
     const [expiresAt, setExpiresAt] = useState<string>('');
-    const [customDate, setCustomDate] = useState(new Date());
 
     const showExpiryTime = Boolean(expiresAt);
 
@@ -72,8 +70,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser}: Props) =
         await dismissBottomSheet(Screens.INFOMANIAK_REMINDER);
     };
 
-    const currentPack = useNextPlan();
-    const {reminder_custom_date: reminderCustomDate} = useGetUsageDeltas() || {};
+    const {reminder_custom_date: reminderCustomDate} = useGetUsageDeltas(usage, limits);
 
     useNavButtonPressed(POST_OPTIONS_BUTTON, componentId, close, []);
 
@@ -82,7 +79,8 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser}: Props) =
         isSystemPost = isSystemMessage(post);
     }
 
-    const handleItemClick = useCallback((duration, expiresAt) => {
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    const handleItemClick = useCallback((expiresAt: React.SetStateAction<string>) => {
         setExpiresAt(expiresAt);
     }, []);
 
@@ -194,7 +192,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser}: Props) =
         },
     };
     const renderContent = () => {
-        const {isQuotaExceeded, withQuotaCheck} = quotaGate(reminderCustomDate, currentPack);
+        const {isQuotaExceeded} = quotaGate(reminderCustomDate);
 
         return (
             <Scroll bounces={false}>
@@ -208,21 +206,23 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser}: Props) =
                         key={item.id}
                         i18nId={item.label}
                         defaultMessage={item.labelDefault}
-                        onPress={(false) ? () => onPressT() : () => onPress(item.id)}
 
-                        // onPress={(item.id === 'custom' && isQuotaExceeded) ? () => onPressT() : () => onPress(item.id)}
+                        // onPress={(false) ? () => onPressT() : () => onPress(item.id)}
+
+                        onPress={(item.id === 'custom' && isQuotaExceeded) ? () => onPressT() : () => onPress(item.id)}
                         iconName=''
                         testID={item.id}
-                        rightComponent={(false) ? <UpgradeButton/> : undefined}
 
-                        // rightComponent={(item.id === 'custom' && isQuotaExceeded) ? <UpgradeButton/> : undefined}
+                        // rightComponent={(false) ? <UpgradeButton/> : undefined}
+
+                        rightComponent={(item.id === 'custom' && isQuotaExceeded) ? <UpgradeButton/> : undefined}
                     />))
                 }
                 {showCustomPicker && (
                     <View>
                         <ClearAfterMenuItem
                             currentUser={currentUser}
-                            duration={'po'}
+                            duration={''}
                             expiryTime={expiresAt}
                             handleItemClick={handleItemClick}
                             isSelected={false}

@@ -24,7 +24,6 @@ type Props = {
     duration: CustomStatusDuration;
     expiryTime?: string;
     handleItemClick: (duration: CustomStatusDuration, expiresAt: string) => void;
-
     isSelected: boolean;
     separator: boolean;
     showDateTimePicker?: boolean;

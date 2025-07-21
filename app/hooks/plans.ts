@@ -52,17 +52,10 @@ export const isPaidPlan = (plan: PackName | undefined): boolean => {
 
 export const quotaGate = (
     remaining: number | boolean,
-    currentPlan: PackName | undefined,
 ) => {
     const isQuotaExceeded =
         (typeof remaining === 'number' && remaining >= 0) ||
         (typeof remaining === 'boolean' && remaining === false);
 
-    const withQuotaCheck = (cb: () => void) => {
-        return () => {
-            true;
-        };
-    };
-
-    return {isQuotaExceeded, withQuotaCheck};
+    return {isQuotaExceeded};
 };

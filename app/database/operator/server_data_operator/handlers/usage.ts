@@ -22,7 +22,6 @@ export interface UsageHandlerMix {
 
 const UsageHandler = <TBase extends Constructor<ServerDataOperatorBase>>(superclass: TBase) => class extends superclass {
     handleUsage = async ({usage, prepareRecordsOnly = true}: HandleUsageArgs): Promise<CloudUsageModel[]> => {
-        console.log('🚀 ~ extends ~ handleUsage= ~ usage:', usage);
         if (!usage?.length) {
             logWarning(
                 'An empty or undefined "usage" array has been passed to the handleUsage method',

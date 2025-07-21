@@ -22,7 +22,6 @@ export interface LimitHandlerMix {
 
 const LimitHandler = <TBase extends Constructor<ServerDataOperatorBase>>(superclass: TBase) => class extends superclass {
     handleLimit = async ({limits, prepareRecordsOnly = true}: HandleLimitsArgs): Promise<LimitsModel[]> => {
-        console.log('sended ?', limits);
         if (!limits?.length) {
             logWarning(
                 'An empty or undefined "limits" array has been passed to the handleLimit method',

@@ -27,12 +27,9 @@ export const fetchCloudLimits = async (serverUrl: string, fetchOnly = false) => 
                 prepareRecordsOnly: false,
             });
         }
-
-        return limits;
     } catch (error) {
         logDebug('error on fetchCloudLimits', getFullErrorMessage(error));
         forceLogoutIfNecessary(serverUrl, error);
-        return {error};
     }
 };
 
@@ -55,11 +52,8 @@ export const fetchUsage = async (serverUrl: string, fetchOnly = false) => {
                 prepareRecordsOnly: false,
             });
         }
-
-        return usage;
     } catch (error) {
         logDebug('error on fetchUsage', getFullErrorMessage(error));
         forceLogoutIfNecessary(serverUrl, error);
-        return {error};
     }
 };
