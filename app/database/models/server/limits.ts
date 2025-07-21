@@ -6,8 +6,6 @@ import {field, json} from '@nozbe/watermelondb/decorators';
 import {MM_TABLES} from '@app/constants/database';
 import {safeParseJSON} from '@app/utils/helpers';
 
-import type {BoardsLimitProps, FilesLimitProps, IntegrationsLimitProps, MessagesLimitProps, TeamsLimitProps} from '@typings/components/cloud';
-
 export default class LimitsModel extends Model {
     static table = MM_TABLES.SERVER.LIMIT;
 

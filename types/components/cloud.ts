@@ -7,7 +7,8 @@ export interface CloudUsage {
     guests: number;
     pending_guests: number;
     members: number;
-    usageLoaded: boolean;
+
+    // usageLoaded: boolean;
 
     // files: {
     //     totalStorage: number;
@@ -57,23 +58,3 @@ export type Limits = {
     scheduled_draft_custom_date: boolean;
 }
 
-export type BoardsLimitProps = {
-    cards: number;
-    views: number;
-};
-
-export type FilesLimitProps = {
-    total_storage: number;
-};
-
-export type IntegrationsLimitProps = {
-    enabled: number;
-};
-
-export type MessagesLimitProps = {
-    history: number;
-};
-
-export type TeamsLimitProps = {
-    history?: string;
-};

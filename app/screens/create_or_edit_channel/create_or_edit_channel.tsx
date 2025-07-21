@@ -18,6 +18,8 @@ import {validateDisplayName} from '@utils/channel';
 
 import ChannelInfoForm from './channel_info_form';
 
+import type {LimitModel} from '@app/database/models/server';
+import type CloudUsageModel from '@app/database/models/server/usage';
 import type ChannelModel from '@typings/database/models/servers/channel';
 import type ChannelInfoModel from '@typings/database/models/servers/channel_info';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -27,6 +29,8 @@ type Props = {
     componentId: AvailableScreens;
     channel?: ChannelModel;
     channelInfo?: ChannelInfoModel;
+    limits: LimitModel;
+    usage: CloudUsageModel;
     headerOnly?: boolean;
     isModal: boolean;
 }
@@ -74,6 +78,8 @@ const CreateOrEditChannel = ({
     channelInfo,
     headerOnly,
     isModal,
+    limits,
+    usage,
 }: Props) => {
     const intl = useIntl();
     const {formatMessage} = intl;
@@ -236,6 +242,8 @@ const CreateOrEditChannel = ({
 
     return (
         <ChannelInfoForm
+            limits={limits}
+            usage={usage}
             onChannelLimitReached={setChannelLimitReached}
             error={appState.error}
             saving={appState.saving}

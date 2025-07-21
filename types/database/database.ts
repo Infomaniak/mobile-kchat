@@ -10,7 +10,7 @@ import type {Database, Q} from '@nozbe/watermelondb';
 import type Model from '@nozbe/watermelondb/Model';
 import type {Clause} from '@nozbe/watermelondb/QueryDescription';
 import type {Class} from '@nozbe/watermelondb/types';
-import type {Limits} from '@typings/components/cloud';
+import type {CloudUsage, Limits} from '@typings/components/cloud';
 import type System from '@typings/database/models/servers/system';
 
 export type WithDatabaseArgs = { database: Database }
@@ -295,6 +295,10 @@ export type HandleDraftArgs = PrepareOnly & {
 
 export type HandleLimitsArgs = PrepareOnly & {
   limits?: Limits[];
+};
+
+export type HandleUsageArgs = PrepareOnly & {
+  usage?: CloudUsage[];
 };
 
 export type HandleConferencesArgs = PrepareOnly & {

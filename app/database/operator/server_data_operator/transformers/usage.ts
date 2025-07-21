@@ -3,16 +3,16 @@
 import {MM_TABLES} from '@constants/database';
 import {prepareBaseRecord} from '@database/operator/server_data_operator/transformers/index';
 
-import type LimitsModel from '@app/database/models/server/limits';
-import type {CloudUsage, Limits} from '@typings/components/cloud';
+import type {CloudUsageModel} from '@app/database/models/server';
+import type {CloudUsage} from '@typings/components/cloud';
 import type {TransformerArgs} from '@typings/database/database';
 
 const {USAGE} = MM_TABLES.SERVER;
 
-export const transformUsageRecord = ({action, database, value}: TransformerArgs): Promise<LimitsModel> => {
+export const transformUsageRecord = ({action, database, value}: TransformerArgs): Promise<CloudUsageModel> => {
     const raw = value.raw as CloudUsage;
 
-    const fieldsMapper = (usage: CloudUsage) => {
+    const fieldsMapper = (usage: CloudUsageModel) => {
         usage.custom_emojis = raw.custom_emojis;
         usage.guests = raw.guests;
         usage.incoming_webhooks = raw.incoming_webhooks;
@@ -31,5 +31,5 @@ export const transformUsageRecord = ({action, database, value}: TransformerArgs)
         tableName: USAGE,
         value,
         fieldsMapper,
-    }) as Promise<LimitsModel>;
+    }) as Promise<CloudUsageModel>;
 };

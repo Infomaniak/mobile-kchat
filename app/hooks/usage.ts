@@ -1,33 +1,10 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useEffect, useMemo, useState} from 'react';
+import {useMemo} from 'react';
 
-import {fetchCloudLimits, fetchUsage} from '@actions/remote/cloud';
-import {useServerUrl} from '@app/context/server';
-
-import {useGetLimits} from './limits';
-
+import type {CloudUsageModel, LimitModel} from '@app/database/models/server';
 import type {CloudUsage} from '@typings/components/cloud';
-
-export function useGetUsage(): CloudUsage | { error: unknown } {
-    const [usage, setUsage] = useState<CloudUsage | { error: unknown }>({error: new Error('Usage not loaded')});
-    const serverUrl = useServerUrl();
-    useEffect(() => {
-        let isMounted = true;
-        (async () => {
-            const result = await fetchUsage(serverUrl);
-            if (isMounted) {
-                setUsage(result);
-            }
-        })();
-        return () => {
-            isMounted = false;
-        };
-    }, [serverUrl]);
-
-    return usage;
-}
 
 // Returns an object of type CloudUsage with the values being the delta between the limit, and the actual usage of this installation.
 // A value < 0 means that they are NOT over the limit. A value > 0 means they've exceeded that limit
@@ -47,14 +24,9 @@ export const withBackupValue = (maybeLimit: number | undefined, limitsLoaded: bo
     return maybeLimit;
 };
 
-export function useGetUsageDeltas(): CloudUsage {
-    const usage = useGetUsage();
-    const [limits, limitsLoaded] = useGetLimits();
-
+export function useGetUsageDeltas(usage: CloudUsageModel, limits: LimitModel): CloudUsage {
     const usageDelta = useMemo(() => {
-        if (!usage) {
-            return {usageLoaded: false};
-        }
+        const limitsLoaded = true;
 
         return (
             {
@@ -64,7 +36,8 @@ export function useGetUsageDeltas(): CloudUsage {
                 guests: usage.guests - withBackupValue(limits.guests, limitsLoaded),
                 pending_guests: -usage.pending_guests,
                 members: usage.members - withBackupValue(limits.members, limitsLoaded),
-                usageLoaded: usage.usageLoaded,
+
+                // usageLoaded: usage.usageLoaded,
 
                 // files: {
                 //     totalStorage: usage.files.totalStorage - withBackupValue(limits.files?.total_storage, limitsLoaded),
@@ -89,7 +62,7 @@ export function useGetUsageDeltas(): CloudUsage {
                 reminder_custom_date: limits.reminder_custom_date === true ? -1 : 0, // to simplify usage, we threat those are enable or disabled
             }
         );
-    }, [usage, limits, limitsLoaded]);
+    }, [usage, limits]);
 
     return usageDelta;
 }

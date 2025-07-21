@@ -6,7 +6,6 @@ import {useIntl} from 'react-intl';
 
 import FormattedText from '@app/components/formatted_text';
 import {useTheme} from '@app/context/theme';
-import {useGetLimits} from '@app/hooks/limits';
 import {useNextPlan} from '@app/hooks/plans';
 import {formatYMDDurationHuman} from '@app/utils/duration';
 
@@ -23,14 +22,11 @@ const UpgradeKsuiteBanner = ({
 }: Props) => {
     const theme = useTheme();
     const styles = bannerBaseStyles(theme);
-
-    const [limitsFetch, limitsLoaded] = useGetLimits(limits);
-
     const nextPlan = useNextPlan();
-    const historyDurationLimit = limitsFetch?.messages ? sanitizeHistoryDuration(limitsFetch.messages.history) : null;
+    const historyDurationLimit = limits?.messages ? sanitizeHistoryDuration(limits.messages.history) : null;
     const intl = useIntl();
 
-    if (!limitsLoaded) {
+    if (!limits) {
         return null;
     }
 

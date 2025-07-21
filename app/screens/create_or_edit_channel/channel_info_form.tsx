@@ -16,8 +16,7 @@ import {
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
-import {useGetLimits} from '@app/hooks/limits';
-import {useGetUsage, useGetUsageDeltas} from '@app/hooks/usage';
+import {useGetUsageDeltas} from '@app/hooks/usage';
 import Autocomplete from '@components/autocomplete';
 import ErrorText from '@components/error_text';
 import FloatingTextInput from '@components/floating_text_input_label';
@@ -38,6 +37,8 @@ import {
 import {typography} from '@utils/typography';
 
 import UpgradeChannelBanner from './ik_upgrade_channel';
+
+import type {CloudUsageModel, LimitModel} from '@app/database/models/server';
 
 const FIELD_MARGIN_BOTTOM = 24;
 const MAKE_PRIVATE_MARGIN_BOTTOM = 32;
@@ -93,6 +94,8 @@ type Props = {
     saving: boolean;
     type?: string;
     onChannelLimitReached?: any;
+    limits?: LimitModel;
+    usage?: CloudUsageModel;
 }
 
 export default function ChannelInfoForm({
@@ -110,7 +113,8 @@ export default function ChannelInfoForm({
     saving,
     type,
     onChannelLimitReached,
-
+    limits,
+    usage,
 }: Props) {
     const intl = useIntl();
     const {formatMessage} = intl;
@@ -160,9 +164,12 @@ export default function ChannelInfoForm({
 
     const isPrivate = type === General.PRIVATE_CHANNEL;
 
-    const {public_channels: publicChannelsUsage, private_channels: privateChannelsUsage} = useGetUsage() || {};
-    const {public_channels: publicChannelsLimit, private_channels: privateChannelsLimit} = useGetLimits()[0] || {};
-    const {public_channels: publicChannelsUsageDelta, private_channels: privateChannelsUsageDelta} = useGetUsageDeltas() || {};
+    const publicChannelsLimit = limits?.public_channels;
+    const privateChannelsLimit = limits?.private_channels;
+    const publicChannelsUsage = usage?.public_channels;
+    const privateChannelsUsage = usage?.private_channels;
+
+    const {public_channels: publicChannelsUsageDelta, private_channels: privateChannelsUsageDelta} = useGetUsageDeltas(usage, limits);
 
     const publicChannelLimitReached = publicChannelsUsageDelta >= 0;
     const privateChannelLimitReached = privateChannelsUsageDelta >= 0;
