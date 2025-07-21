@@ -5,26 +5,26 @@ import {
 
 } from 'react-native';
 import React, {useCallback} from 'react';
-import {FormattedMessage, useIntl} from 'react-intl';
+import {useIntl} from 'react-intl';
 
 import {Screens} from '@app/constants';
 import {useTheme} from '@app/context/theme';
-import {isPaidPlan} from '@app/hooks/plans';
+import {isPaidPlan, type PackName} from '@app/hooks/plans';
 import {useGetUsageDeltas} from '@app/hooks/usage';
 import {openAsBottomSheet} from '@app/screens/navigation';
-import {makeStyleSheetFromTheme} from '@app/utils/theme';
 
 import AnnouncementBanner from '../announcement_banner/announcement_banner';
 
+import WarningIcon from './alert';
+
+import type {CloudUsageModel, LimitModel} from '@app/database/models/server';
+
 type Props = {
-  visibility?: string;
-  currentPackName?: any;
-  isAdmin?: string;
+    currentPackName?: PackName;
+    isAdmin?: boolean;
+    limits: LimitModel;
+    usage: CloudUsageModel;
 }
-
-const getStyle = makeStyleSheetFromTheme((theme: Theme) => ({
-
-}));
 
 const quotaMessages = new Map<string, string>([
     ['admin|paid', 'file_upload.quota.exceeded.paidPlan.admin'],
@@ -33,18 +33,20 @@ const quotaMessages = new Map<string, string>([
 ]);
 
 const FullStorageAnnouncementBar = ({
-    visibility,
     currentPackName,
     isAdmin,
+    limits,
+    usage,
 }: Props) => {
     const intl = useIntl();
     const bannerText = intl.formatMessage({
         id: 'ik_announcement_banner.storage_limit_reached',
         defaultMessage: 'Limite de stockage atteinte',
     });
+
     const theme = useTheme();
 
-    const {storage} = useGetUsageDeltas();
+    const {storage} = useGetUsageDeltas(usage, limits);
 
     const isFull = storage >= 0;
 
@@ -78,14 +80,14 @@ const FullStorageAnnouncementBar = ({
     }
 
     return (
+
         <AnnouncementBanner
             bannerColor={'#FFCCC8'} // #FFE7A5
             bannerDismissed={false}
             bannerEnabled={true}
             allowDismissal={false}
             bannerText={bannerText}
-
-            // icon={}
+            icon={<WarningIcon/>}
             onHandlePress={handlePress}
         />
 

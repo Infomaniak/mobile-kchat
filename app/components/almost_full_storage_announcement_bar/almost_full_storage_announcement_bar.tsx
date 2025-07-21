@@ -11,21 +11,21 @@ import {Screens} from '@app/constants';
 import {useTheme} from '@app/context/theme';
 import {isPaidPlan, type PackName} from '@app/hooks/plans';
 import {useGetUsageDeltas} from '@app/hooks/usage';
-import {makeStyleSheetFromTheme} from '@app/utils/theme';
 import {openAsBottomSheet} from '@screens/navigation';
 
 import AnnouncementBanner from '../announcement_banner/announcement_banner';
 
-import WarningIcon from './icon';
+import WarningIcon from './warning';
+
+import type {CloudUsageModel, LimitModel, PreferenceModel} from '@app/database/models/server';
+
 type Props = {
-  visibility?: string;
-  currentPackName: PackName |undefined;
-  isAdmin: string;
+    visibility?: PreferenceModel[];
+    currentPackName: PackName |undefined;
+    isAdmin: boolean;
+    limits: LimitModel;
+    usage: CloudUsageModel;
 }
-
-const getStyle = makeStyleSheetFromTheme((theme: Theme) => ({
-
-}));
 
 const TRESHOLD_ALMOST_FULL = -1073741824;
 const quotaMessages = new Map<string, string>([
@@ -37,6 +37,8 @@ const AlmostFullStorageAnnouncementBar = ({
     visibility,
     currentPackName,
     isAdmin,
+    limits,
+    usage,
 }: Props) => {
     const intl = useIntl();
     const bannerText = intl.formatMessage({
@@ -45,7 +47,8 @@ const AlmostFullStorageAnnouncementBar = ({
     });
     const theme = useTheme();
 
-    const {storage} = useGetUsageDeltas();
+    const {storage} = useGetUsageDeltas(usage, limits);
+
     const isFull = storage >= 0;
     const isAlmostFull = !isFull && storage >= TRESHOLD_ALMOST_FULL;
     const shouldShow = isAlmostFull && visibility === 'visible';
@@ -60,6 +63,7 @@ const AlmostFullStorageAnnouncementBar = ({
             role = 'admin';
             plan = isPaid ? 'paid' : 'free';
         }
+
         openAsBottomSheet({
             closeButtonId: 'close-quota-exceeded',
             screen: Screens.INFOMANIAK_QUOTA_EXCEEDED,
@@ -81,7 +85,7 @@ const AlmostFullStorageAnnouncementBar = ({
 
     return (
         <AnnouncementBanner
-            bannerColor={'##FFE7A5'}
+            bannerColor={'#FFE7A5'}
             bannerDismissed={false}
             bannerEnabled={true}
             allowDismissal={false}

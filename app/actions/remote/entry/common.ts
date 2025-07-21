@@ -32,6 +32,8 @@ import {isTablet} from '@utils/helpers';
 import {logDebug} from '@utils/log';
 import {processIsCRTEnabled} from '@utils/thread';
 
+import {fetchCloudLimits, fetchUsage} from '../cloud';
+
 import type {Database, Model} from '@nozbe/watermelondb';
 
 const {CallManagerModule} = NativeModules;
@@ -72,6 +74,8 @@ export const FETCH_UNREADS_TIMEOUT = 2500;
 export const entry = async (serverUrl: string, teamId?: string, channelId?: string, since = 0): Promise<EntryResponse> => {
     const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
     const result = entryRest(serverUrl, teamId, channelId, since);
+    await fetchCloudLimits(serverUrl);
+    await fetchUsage(serverUrl);
 
     // Fetch data retention policies
     const isDataRetentionEnabled = await getIsDataRetentionEnabled(database);

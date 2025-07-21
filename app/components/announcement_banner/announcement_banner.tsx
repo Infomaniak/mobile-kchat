@@ -32,8 +32,8 @@ type Props = {
     bannerText?: string;
     bannerTextColor?: string;
     allowDismissal: boolean;
-    icon?: any;
-    onHandlePress?: any;
+    icon?: React.ReactNode;
+    onHandlePress?: () => void;
 }
 
 const getStyle = makeStyleSheetFromTheme((theme: Theme) => ({
@@ -145,7 +145,7 @@ const AnnouncementBanner = ({
     const bannerTextContainerStyle = useMemo(() => [style.bannerTextContainer, {
         color: bannerTextColor,
     }], [style, bannerTextColor]);
-    console.log('icon', icon);
+
     return (
         <Animated.View
             style={[style.background, bannerStyle]}
@@ -164,12 +164,13 @@ const AnnouncementBanner = ({
                                 ellipsizeMode='tail'
                                 numberOfLines={1}
                             >
-                                {icon || <CompassIcon
-                                    color={bannerTextColor}
-                                    name='information-outline'
-                                    size={18}
-                                />
-                                }
+                                {icon || (
+                                    <CompassIcon
+                                        color={bannerTextColor}
+                                        name='information-outline'
+                                        size={18}
+                                    />
+                                )}
                                 {'  '}
                                 <RemoveMarkdown
                                     value={bannerText}
