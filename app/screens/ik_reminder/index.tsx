@@ -10,6 +10,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTheme} from '@app/context/theme';
 import {quotaGate} from '@app/hooks/plans';
 import {useGetUsageDeltas} from '@app/hooks/usage';
+import {makeStyleSheetFromTheme} from '@app/utils/theme';
 import {BaseOption} from '@components/common_post_options';
 import FormattedText from '@components/formatted_text';
 import {ITEM_HEIGHT} from '@components/option_item';
@@ -42,11 +43,33 @@ type Props = {
     usage: CloudUsageModel;
 };
 
+const getStyleFromTheme = makeStyleSheetFromTheme(() => {
+    return {
+        customButton: {
+            backgroundColor: '#2563eb',
+            borderRadius: 8,
+            paddingVertical: 12,
+            paddingHorizontal: 24,
+            alignItems: 'center',
+            justifyContent: 'center',
+            alignSelf: 'center',
+            marginTop: 16,
+        },
+        customButtonText: {
+            color: '#fff',
+            fontWeight: '600',
+            fontSize: 16,
+            textAlign: 'center',
+        },
+    };
+});
+
 const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, usage}: Props) => {
     const serverUrl = useServerUrl();
     const {bottom} = useSafeAreaInsets();
     const isTablet = useIsTablet();
     const theme = useTheme();
+    const styles = getStyleFromTheme(theme);
     const Scroll = useMemo(() => (isTablet ? ScrollView : BottomSheetScrollView), [isTablet]);
     const [showCustomPicker, setShowCustomPicker] = useState<boolean>(false);
     const [expiresAt, setExpiresAt] = useState<string>('');
@@ -79,8 +102,8 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         isSystemPost = isSystemMessage(post);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    const handleItemClick = useCallback((expiresAt: React.SetStateAction<string>) => {
+    const handleItemClick = useCallback((duration, expiresAt) => {
+        // eslint-disable-next-line @typescript-eslint/no-shadow
         setExpiresAt(expiresAt);
     }, []);
 
@@ -89,7 +112,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         const optionsCount = postReminderTimes.length;
         let space = 50;
         if (showCustomPicker) {
-            space = 400;
+            space = 100;
         }
         items.push(bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT, bottom) + space);
         return items;
@@ -102,6 +125,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         const unixTimestamp = moment(expiresAt).unix();
         addPostReminder(unixTimestamp);
         setShowCustomPicker(false);
+        close();
     };
 
     const onPress = async (itemId: String) => {
@@ -159,7 +183,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         return {};
     };
 
-    const onPressT = useCallback(async () => {
+    const onPressEvolve = useCallback(async () => {
         await dismissBottomSheet(Screens.INFOMANIAK_REMINDER);
 
         openAsBottomSheet({
@@ -173,24 +197,6 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         });
     }, [Screens.INFOMANIAK_REMINDER, post]);
 
-    const styles = {
-        customButton: {
-            backgroundColor: '#2563eb',
-            borderRadius: 8,
-            paddingVertical: 12,
-            paddingHorizontal: 24,
-            alignItems: 'center',
-            justifyContent: 'center',
-            alignSelf: 'center',
-            marginTop: 16,
-        },
-        customButtonText: {
-            color: '#fff',
-            fontWeight: '600',
-            fontSize: 16,
-            textAlign: 'center',
-        },
-    };
     const renderContent = () => {
         const {isQuotaExceeded} = quotaGate(reminderCustomDate);
 
@@ -201,7 +207,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
                     id='infomaniak.post_info.post_reminder.menu'
                     defaultMessage='Remind'
                 />
-                {postReminderTimes.map((item) => (
+                {!showCustomPicker && postReminderTimes.map((item) => (
                     <BaseOption
                         key={item.id}
                         i18nId={item.label}
@@ -209,12 +215,11 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
 
                         // onPress={(false) ? () => onPressT() : () => onPress(item.id)}
 
-                        onPress={(item.id === 'custom' && isQuotaExceeded) ? () => onPressT() : () => onPress(item.id)}
+                        onPress={(item.id === 'custom' && isQuotaExceeded) ? () => onPressEvolve() : () => onPress(item.id)}
                         iconName=''
                         testID={item.id}
 
                         // rightComponent={(false) ? <UpgradeButton/> : undefined}
-
                         rightComponent={(item.id === 'custom' && isQuotaExceeded) ? <UpgradeButton/> : undefined}
                     />))
                 }
@@ -230,6 +235,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
                             showDateTimePicker={true}
                             showExpiryTime={showExpiryTime}
                             showDate={true}
+                            showCustomStatus={false}
                         />
                         <TouchableOpacity
                             style={styles.customButton}

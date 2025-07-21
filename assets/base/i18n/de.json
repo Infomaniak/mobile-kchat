@@ -1232,5 +1232,18 @@
     "video.failed_description": "Beim Abspielen des Videos ist ein Fehler aufgetreten.",
     "your.servers": "Deine Server",
     "your.teams": "Deine Teams",
-    "guest_banner.text": "Es gibt {count} externe Benutzer in diesem Gespräch."
+    "guest_banner.text": "Es gibt {count} externe Benutzer in diesem Gespräch.",
+    "upgrade_banner_ksuite_close": "Schließen",
+    "upgrade_banner_ksuite_evolve": "Um Ihr Angebot zu erweitern, nutzen Sie die Weboberfläche.",
+    "upgrade_banner_ksuite_plus": "Und vieles mehr!",
+    "upgrade_banner_ksuite_euria": "Euria: Videotranskription, Bilderstellung usw.",
+    "upgrade_banner_ksuite_mail": "Mail: unbegrenzter Speicherplatz, geplantes Senden usw.",
+    "upgrade_banner_ksuite_kchat": "kChat: unbegrenzter Nachrichtenverlauf, mehr Kanäle usw.",
+    "upgrade_banner_ksuite_benefit": "50 GB Cloud-Speicher pro Nutzer für kDrive und kChat",
+    "upgrade_banner_ksuite_title": "Steigen Sie mit dem Standard-Angebot auf die nächste Stufe",
+    "upgrade_banner_ksuite_subtitle": "Geben Sie Ihrem Team die wichtigsten Tools für die tägliche, effiziente Zusammenarbeit.",
+    "upgrade_banner_channel.description": "Sie haben das Limit von {type, select, O {öffentliche Kanäle} P {private Kanäle} other {}} ({usage, number}/{limit, number}) auf Ihrem kSuite-Angebot erreicht. {isAdmin, select, true {Bearbeiten Sie Ihr Angebot, um zusätzliche Kanäle zu erstellen.} other {Bitte wenden Sie sich an einen Administrator, damit er das Angebot ändert.}}",
+    "upgrade_banner.link": "Um Ihren Plan zu aktualisieren, verwenden Sie die Weboberfläche.",
+    "upgrade_banner.title": "Entfesseln Sie die volle Power von kChat!",
+    "upgrade_banner.description": "Nachrichten und Dateien, die älter als {duration} sind, sind nicht mehr verfügbar. Wechsle zum {plan} von kSuite Pro, um unbegrenzten Gesprächsverlauf zu erhalten."
 }

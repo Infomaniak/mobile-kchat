@@ -31,6 +31,7 @@ type Props = {
     renderContent: () => ReactNode;
     snapPoints?: Array<string | number>;
     testID?: string;
+    headerStyle?: StyleProp<ViewStyle>;
 }
 
 const PADDING_TOP_MOBILE = 20;
@@ -90,6 +91,7 @@ const BottomSheet = ({
     renderContent,
     snapPoints = [1, '50%', '80%'],
     testID,
+    headerStyle,
 }: Props) => {
     const sheetRef = useRef<BottomSheetM>(null);
     const isTablet = useIsTablet();
@@ -105,6 +107,7 @@ const BottomSheet = ({
     const bottomSheetBackgroundStyle = useMemo(() => [
         styles.bottomSheetBackground,
         {borderWidth: isTablet ? 0 : 1},
+        headerStyle,
     ], [isTablet, styles]);
 
     const close = useCallback(() => {

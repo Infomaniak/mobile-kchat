@@ -1092,5 +1092,18 @@
   "your.teams": "Your teams",
   "ksuite_free.banner.title": "Unlock the full power of kChat!",
   "ksuite_free.banner.description": "Messages and files older than {duration} are not available. Upgrade to the kSuite Pro Standard plan to enjoy unlimited history for up to 1 year.",
-  "ksuite_free.banner.link": "To upgrade your plan, use the web interface."
+  "ksuite_free.banner.link": "To upgrade your plan, use the web interface.",
+  "upgrade_banner_ksuite_close": "Close",
+  "upgrade_banner_ksuite_evolve": "To upgrade your plan, use the web interface.",
+  "upgrade_banner_ksuite_plus": "And much more!",
+  "upgrade_banner_ksuite_euria": "Euria: video transcription, image creation, etc.",
+  "upgrade_banner_ksuite_mail": "Mail: unlimited mailbox storage, scheduled sending, etc.",
+  "upgrade_banner_ksuite_kchat": "kChat: unlimited message history, more channels, etc.",
+  "upgrade_banner_ksuite_benefit": "50 GB per user of kDrive and kChat cloud storage",
+  "upgrade_banner_ksuite_title": "Take it to the next level with the Standard plan",
+  "upgrade_banner_ksuite_subtitle": "Give your team the essential tools to collaborate efficiently every day.",
+  "upgrade_banner_channel.description": "You have reached the limit of {type, select, O {public channels} P {private channels} other {}} ({usage, number}/{limit, number}) on your kSuite offer. {isAdmin, select, true {Modify your offer to create additional channels.} other {Please contact an administrator to modify the offer.}}",
+  "upgrade_banner.link": "To upgrade your plan, use the web interface.",
+  "upgrade_banner.title": "Unlock the full power of kChat!",
+  "upgrade_banner.description": "Messages and files older than {duration} are no longer available. Upgrade to the {plan} kSuite Pro plan to enjoy unlimited conversation history."
 }

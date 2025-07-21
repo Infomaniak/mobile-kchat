@@ -1006,5 +1006,18 @@
   "display_theme.tile.auto": "Automático",
   "display_theme.tile.dark": "Oscuro",
   "display_theme.tile.light": "Claro",
-  "guest_banner.text": "Hay {count} {count, plural, one {usuario externo} other {usuarios externos}} en esta conversación."
+  "guest_banner.text": "Hay {count} {count, plural, one {usuario externo} other {usuarios externos}} en esta conversación.",
+  "upgrade_banner_ksuite_close": "Cerrar",
+  "upgrade_banner_ksuite_evolve": "Para mejorar tu plan, utiliza la interfaz web.",
+  "upgrade_banner_ksuite_plus": "¡Y mucho más!",
+  "upgrade_banner_ksuite_euria": "Euria: transcripción de vídeos, creación de imágenes, etc.",
+  "upgrade_banner_ksuite_mail": "Mail: almacenamiento ilimitado, envío programado, etc.",
+  "upgrade_banner_ksuite_kchat": "kChat: historial de mensajes ilimitado, más canales, etc.",
+  "upgrade_banner_ksuite_benefit": "50 GB por usuario de almacenamiento en la nube kDrive y kChat",
+  "upgrade_banner_ksuite_title": "Lleva tu experiencia al siguiente nivel con el plan Estándar",
+  "upgrade_banner_ksuite_subtitle": "Brinda a tu equipo las herramientas esenciales para colaborar eficazmente cada día.",
+  "upgrade_banner_channel.description": "Has alcanzado el límite de {type, select, O {canales públicos} P {canales privados} other {}} ({usage, number}/{limit, number}) en tu oferta kSuite. {isAdmin, select, true {Modifica tu oferta para crear canales adicionales.} other {Póngase en contacto con un administrador para modificar la oferta.}}",
+  "upgrade_banner.link": "Para actualizar tu plan, utiliza la interfaz web.",
+  "upgrade_banner.title": "¡Desbloquea todo el potencial de kChat!",
+  "upgrade_banner.description": "Los mensajes y archivos de más de {duration} ya no están disponibles. Pásate al plan {plan} de kSuite Pro para disfrutar de un historial ilimitado de tus conversaciones."
 }

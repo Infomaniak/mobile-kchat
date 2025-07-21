@@ -37,14 +37,14 @@ const UpgradeKsuiteBanner = ({
             title={
                 <FormattedText
                     defaultMessage={'Unlock the full power of kChat!'}
-                    id='ksuite_free.banner.title'
+                    id='upgrade_banner.title'
                     style={styles.textTitle}
                 />
             }
             description={
                 <FormattedText
                     defaultMessage='Messages and files older than {duration} are no longer available. Upgrade to the {plan} plan to enjoy unlimited conversation history.'
-                    id='ksuite_free.banner.description'
+                    id='upgrade_banner.description'
                     style={styles.textDescription}
                     values={{
                         duration: historyDurationLimitHuman,
@@ -55,7 +55,7 @@ const UpgradeKsuiteBanner = ({
             link={
                 <FormattedText
                     defaultMessage={'To upgrade your plan, use the web interface.'}
-                    id='ksuite_free.banner.link'
+                    id='upgrade_banner.link'
                     style={styles.textLink}
                 />
             }

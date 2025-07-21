@@ -11,9 +11,10 @@ import Svg, {
     Stop,
     LinearGradient,
     ClipPath,
+    type SvgProps,
 } from 'react-native-svg';
 const {width: screenWidth} = Dimensions.get('window');
-function SvgComponent() {
+function SvgComponent(props: SvgProps) {
     return (
         <Svg
             width='100%'
@@ -22,6 +23,7 @@ function SvgComponent() {
             fill='none'
             style={{alignSelf: 'stretch'}}
             preserveAspectRatio='none'
+            {...props}
         >
             <G clipPath='url(#clip0_10109_42517)'>
                 <Path

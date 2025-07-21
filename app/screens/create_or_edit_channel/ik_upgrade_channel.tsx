@@ -43,7 +43,7 @@ const UpgradeChannelBanner = ({
             title={
                 <FormattedText
                     defaultMessage={'You have reached the limit of {type, select, O {public channels} P {private channels} other {}} ({usage, number}/{limit, number}) on your kSuite offer.'}
-                    id='ksuite_free_banner'
+                    id='upgrade_banner_channel.description'
                     style={styles.textTitle}
                     values={{
                         type: channelType,
@@ -56,7 +56,7 @@ const UpgradeChannelBanner = ({
             description={
                 <FormattedText
                     defaultMessage={'To upgrade your plan, use the web interface.'}
-                    id='ksuite_free_banner_3'
+                    id='upgrade_banner.link'
                     style={styles.textDescription}
                 />
             }

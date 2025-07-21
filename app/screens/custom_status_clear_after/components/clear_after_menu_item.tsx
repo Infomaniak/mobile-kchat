@@ -29,7 +29,7 @@ type Props = {
     showDateTimePicker?: boolean;
     showExpiryTime?: boolean;
     showDate?: boolean;
-
+    showCustomStatus?: boolean;
 };
 
 export const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -68,7 +68,7 @@ export const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemClick, isSelected, separator, showDateTimePicker = false, showExpiryTime = false, showDate = false}: Props) => {
+const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemClick, isSelected, separator, showDateTimePicker = false, showExpiryTime = false, showDate = false, showCustomStatus = true}: Props) => {
     const theme = useTheme();
     const intl = useIntl();
     const style = getStyleSheet(theme);
@@ -102,12 +102,13 @@ const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemC
             >
                 <View style={style.container}>
                     <View style={style.textContainer}>
-                        <CustomStatusText
-                            text={expiryMenuItems[duration]}
-                            theme={theme}
-                            textStyle={{color: theme.centerChannelColor}}
-                            testID={`${clearAfterMenuItemTestId}.custom_status_text`}
-                        />
+                        {showCustomStatus && (
+                            <CustomStatusText
+                                text={expiryMenuItems[duration]}
+                                theme={theme}
+                                textStyle={{color: theme.centerChannelColor}}
+                                testID={`${clearAfterMenuItemTestId}.custom_status_text`}
+                            />)}
                         {isSelected && (
                             <View style={style.rightPosition}>
                                 <CompassIcon
