@@ -4,19 +4,17 @@
 import {useManagedConfig} from '@mattermost/react-native-emm';
 import Clipboard from '@react-native-clipboard/clipboard';
 import React, {Children, type ReactElement, useCallback} from 'react';
-import {useIntl} from 'react-intl';
-import {Alert, StyleSheet, Text, View} from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useIntl, defineMessages} from 'react-intl';
+import {StyleSheet, Text, View} from 'react-native';
 import urlParse from 'url-parse';
 
 import SlideUpPanelItem, {ITEM_HEIGHT} from '@components/slide_up_panel_item';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import {usePreventDoubleTap} from '@hooks/utils';
 import {bottomSheet, dismissBottomSheet} from '@screens/navigation';
-import {handleDeepLink, matchDeepLink} from '@utils/deep_link';
-import {bottomSheetSnapPoint} from '@utils/helpers';
-import {preventDoubleTap} from '@utils/tap';
-import {normalizeProtocol, tryOpenURL} from '@utils/url';
+import {bottomSheetSnapPoint, isEmail} from '@utils/helpers';
+import {openLink} from '@utils/url/links';
 
 type MarkdownLinkProps = {
     children: ReactElement;
@@ -25,6 +23,17 @@ type MarkdownLinkProps = {
     siteURL: string;
     onLinkLongPress?: (url?: string) => void;
 }
+
+const messages = defineMessages({
+    copyEmail: {
+        id: 'mobile.markdown.link.copy_email',
+        defaultMessage: 'Copy Email Address',
+    },
+    copyURL: {
+        id: 'mobile.markdown.link.copy_url',
+        defaultMessage: 'Copy URL',
+    },
+});
 
 const style = StyleSheet.create({
     bottomSheet: {
@@ -47,44 +56,13 @@ const parseLinkLiteral = (literal: string) => {
 
 const MarkdownLink = ({children, experimentalNormalizeMarkdownLinks, href, siteURL, onLinkLongPress}: MarkdownLinkProps) => {
     const intl = useIntl();
-    const {bottom} = useSafeAreaInsets();
     const managedConfig = useManagedConfig<ManagedConfig>();
     const serverUrl = useServerUrl();
     const theme = useTheme();
 
-    const {formatMessage} = intl;
-
-    const handlePress = useCallback(preventDoubleTap(async () => {
-        const url = normalizeProtocol(href);
-
-        if (!url) {
-            return;
-        }
-
-        const onError = () => {
-            Alert.alert(
-                formatMessage({
-                    id: 'mobile.link.error.title',
-                    defaultMessage: 'Error',
-                }),
-                formatMessage({
-                    id: 'mobile.link.error.text',
-                    defaultMessage: 'Unable to open the link.',
-                }),
-            );
-        };
-
-        const match = matchDeepLink(url, serverUrl, siteURL);
-
-        if (match) {
-            const {error} = await handleDeepLink(match.url, intl);
-            if (error) {
-                tryOpenURL(match.url, onError);
-            }
-        } else {
-            tryOpenURL(url, onError);
-        }
-    }), [href, intl.locale, serverUrl, siteURL]);
+    const handlePress = usePreventDoubleTap(useCallback(() => {
+        openLink(href, serverUrl, siteURL, intl);
+    }, [href, intl, serverUrl, siteURL]));
 
     const parseChildren = useCallback(() => {
         return Children.map(children, (child: ReactElement) => {
@@ -93,7 +71,7 @@ const MarkdownLink = ({children, experimentalNormalizeMarkdownLinks, href, siteU
             }
 
             const {props, ...otherChildProps} = child;
-            // eslint-disable-next-line react/prop-types
+
             const {literal, ...otherProps} = props;
 
             const nextProps = {
@@ -115,6 +93,9 @@ const MarkdownLink = ({children, experimentalNormalizeMarkdownLinks, href, siteU
                 return;
             }
 
+            const cleanHref = href.replace(/^mailto:/, '');
+            const isEmailLink = isEmail(cleanHref);
+
             const renderContent = () => {
                 return (
                     <View
@@ -125,10 +106,10 @@ const MarkdownLink = ({children, experimentalNormalizeMarkdownLinks, href, siteU
                             leftIcon='content-copy'
                             onPress={() => {
                                 dismissBottomSheet();
-                                Clipboard.setString(href);
+                                Clipboard.setString(cleanHref);
                             }}
                             testID='at_mention.bottom_sheet.copy_url'
-                            text={intl.formatMessage({id: 'mobile.markdown.link.copy_url', defaultMessage: 'Copy URL'})}
+                            text={intl.formatMessage(isEmailLink ? messages.copyEmail : messages.copyURL)}
                         />
                         <SlideUpPanelItem
                             destructive={true}
@@ -146,12 +127,12 @@ const MarkdownLink = ({children, experimentalNormalizeMarkdownLinks, href, siteU
             bottomSheet({
                 closeButtonId: 'close-mardown-link',
                 renderContent,
-                snapPoints: [1, bottomSheetSnapPoint(2, ITEM_HEIGHT, bottom)],
+                snapPoints: [1, bottomSheetSnapPoint(2, ITEM_HEIGHT)],
                 title: intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}),
                 theme,
             });
         }
-    }, [managedConfig, intl, bottom, theme, onLinkLongPress]);
+    }, [managedConfig?.copyAndPasteProtection, onLinkLongPress, intl, theme, href]);
 
     const renderChildren = experimentalNormalizeMarkdownLinks ? parseChildren() : children;
 

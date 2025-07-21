@@ -9,15 +9,17 @@ import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
 import {getConfigValue} from '@queries/servers/system';
 import {toMilliseconds} from '@utils/datetime';
-import {logError, logInfo, logWarning} from '@utils/log';
+import {logDebug, logError, logInfo, logWarning} from '@utils/log';
 
 const MAX_WEBSOCKET_FAILS = 7;
 const WEBSOCKET_TIMEOUT = toMilliseconds({seconds: 30});
 const MIN_WEBSOCKET_RETRY_TIME = toMilliseconds({seconds: 3});
 const MAX_WEBSOCKET_RETRY_TIME = toMilliseconds({minutes: 5});
+const PING_INTERVAL = toMilliseconds({seconds: 30});
 const DEFAULT_OPTIONS = {
     forceConnection: true,
 };
+const TLS_HANDSHARE_ERROR = 1015;
 
 Pusher.logToConsole = false;
 
@@ -32,6 +34,9 @@ export default class WebSocketClient {
     private url = '';
     private serverUrl: string;
     private connectFailCount = 0;
+
+    private pingInterval: NodeJS.Timeout | undefined;
+    private waitingForPong: boolean = false;
 
     // The first time we connect to a server (on init or login)
     // we do the sync out of the websocket lifecycle.
@@ -374,6 +379,7 @@ export default class WebSocketClient {
         this.connectFailCount = 0;
         this.responseSequence = 1;
         clearTimeout(this.connectionTimeout);
+        clearInterval(this.pingInterval);
         this.conn?.disconnect();
     }
 
@@ -441,5 +447,13 @@ export default class WebSocketClient {
 
     public isConnected(): boolean {
         return this.connState === WebSocketReadyState.OPEN;
+    }
+
+    public getConnectionId(): string {
+        return this.connectionId;
+    }
+
+    public getServerSequence(): number {
+        return this.serverSequence;
     }
 }

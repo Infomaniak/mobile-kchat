@@ -3,7 +3,7 @@
 
 import RNUtils from '@mattermost/rnutils';
 import React from 'react';
-import {DeviceEventEmitter, Keyboard, Platform} from 'react-native';
+import {DeviceEventEmitter, Image, Keyboard, Platform} from 'react-native';
 import {Navigation, type Options, type OptionsLayout} from 'react-native-navigation';
 import {measure, type AnimatedRef} from 'react-native-reanimated';
 
@@ -29,7 +29,7 @@ export const clampVelocity = (velocity: number, minVelocity: number, maxVelocity
     return Math.max(Math.min(velocity, -minVelocity), -maxVelocity);
 };
 
-export const fileToGalleryItem = (file: FileInfo, authorId?: string, postProps?: Record<string, any>, lastPictureUpdate = 0): GalleryItemType => {
+export const fileToGalleryItem = (file: FileInfo, authorId?: string, postProps?: Record<string, unknown>, lastPictureUpdate = 0): GalleryItemType => {
     let type: GalleryItemType['type'] = 'file';
     if (isVideo(file)) {
         type = 'video';
@@ -177,4 +177,10 @@ export const workletNoopTrue = () => {
     'worklet';
 
     return true;
+};
+
+export const getImageSize = (uri: string) => {
+    return new Promise<{width: number; height: number}>((resolve, reject) => {
+        Image.getSize(uri, (width, height) => resolve({width, height}), reject);
+    });
 };

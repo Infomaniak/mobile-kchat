@@ -4,6 +4,8 @@
 // NOTE : To implement migration, please follow this document
 // https://nozbe.github.io/WatermelonDB/Advanced/Migrations.html
 
+// TODO UPSTREAM : double check this part
+
 import {addColumns, createTable, schemaMigrations} from '@nozbe/watermelondb/Schema/migrations';
 
 import {MM_TABLES} from '@constants/database';

@@ -1,35 +1,24 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useState} from 'react';
-import {useIntl} from 'react-intl';
-import {DeviceEventEmitter} from 'react-native';
+import React, {useCallback} from 'react';
 
 import {updateDraftPriority} from '@actions/local/draft';
-import {getChannelTimezones} from '@actions/remote/channel';
-import {executeCommand, handleGotoLocation} from '@actions/remote/command';
-import {createPost} from '@actions/remote/post';
-import {handleReactionToLatestPost} from '@actions/remote/reactions';
-import {setStatus} from '@actions/remote/user';
-import {deleteDeviceFile} from '@app/utils/file';
-import {Events, Screens} from '@constants';
-import {PostPriorityType, PostTypes} from '@constants/post';
-import {NOTIFY_ALL_MEMBERS} from '@constants/post_draft';
+import SendDraft from '@components/draft_scheduled_post/draft_scheduled_post_actions/send_draft';
+import DraftInput from '@components/post_draft/draft_input/';
+import {PostPriorityType} from '@constants/post';
 import {useServerUrl} from '@context/server';
-import DraftUploadManager from '@managers/draft_upload_manager';
-import * as DraftUtils from '@utils/draft';
-import {isReactionMatch} from '@utils/emoji/helpers';
-import {getFullErrorMessage} from '@utils/errors';
-import {preventDoubleTap} from '@utils/tap';
-import {confirmOutOfOfficeDisabled} from '@utils/user';
+import {useHandleSendMessage} from '@hooks/handle_send_message';
 
-import DraftInput from '../draft_input';
-
+import type {DraftType} from '@constants/draft';
 import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
     testID?: string;
     channelId: string;
+    channelType?: ChannelType;
+    channelName?: string;
     rootId: string;
     canShowPostPriority?: boolean;
     setIsFocused: (isFocused: boolean) => void;
@@ -56,6 +45,13 @@ type Props = {
     persistentNotificationInterval: number;
     persistentNotificationMaxRecipients: number;
     postPriority: PostPriority;
+
+    draftType?: DraftType;
+    postId?: string;
+    bottomSheetId?: AvailableScreens;
+    channelDisplayName?: string;
+    isFromDraftView?: boolean;
+    draftReceiverUserName?: string;
 }
 
 export const INITIAL_PRIORITY = {
@@ -67,6 +63,9 @@ export const INITIAL_PRIORITY = {
 export default function SendHandler({
     testID,
     channelId,
+    channelType,
+    channelName,
+    channelDisplayName,
     currentUserId,
     enableConfirmNotificationsToChannel,
     files,
@@ -86,171 +85,65 @@ export default function SendHandler({
     updateCursorPosition,
     updatePostInputTop,
     setIsFocused,
+    persistentNotificationInterval,
+    persistentNotificationMaxRecipients,
     postPriority,
+    bottomSheetId,
+    draftReceiverUserName,
+    isFromDraftView,
+    draftType,
+    postId,
 }: Props) {
-    const intl = useIntl();
     const serverUrl = useServerUrl();
-
-    const [channelTimezoneCount, setChannelTimezoneCount] = useState(0);
-    const [sendingMessage, setSendingMessage] = useState(false);
-
-    const canSend = useCallback(() => {
-        if (sendingMessage) {
-            return false;
-        }
-
-        const messageLength = value.trim().length;
-
-        if (messageLength > maxMessageLength) {
-            return false;
-        }
-
-        if (files.length) {
-            const loadingComplete = !files.some((file) => DraftUploadManager.isUploading(file.clientId!));
-            return loadingComplete;
-        }
-
-        return messageLength > 0;
-    }, [sendingMessage, value, files, maxMessageLength]);
-
-    const handleReaction = useCallback((emoji: string, add: boolean) => {
-        handleReactionToLatestPost(serverUrl, emoji, add, rootId);
-        clearDraft();
-        setSendingMessage(false);
-    }, [serverUrl, rootId, clearDraft]);
 
     const handlePostPriority = useCallback((priority: PostPriority) => {
         updateDraftPriority(serverUrl, channelId, rootId, priority);
-    }, [serverUrl, rootId]);
+    }, [serverUrl, channelId, rootId]);
 
-    const doSubmitMessage = useCallback(async () => {
-        const postFiles = files.filter((f) => !f.failed);
-        const post = {
-            user_id: currentUserId,
-            channel_id: channelId,
-            root_id: rootId,
-            message: value,
-            type: (files[0]?.is_voice_recording ? PostTypes.VOICE_MESSAGE : '') as PostType,
-        } as Post;
-
-        if (!rootId && (
-            postPriority.priority ||
-            postPriority.requested_ack ||
-            postPriority.persistent_notifications)
-        ) {
-            post.metadata = {
-                priority: postPriority,
-            };
-        }
-
-        createPost(serverUrl, post, postFiles);
-
-        if (files[0]?.is_voice_recording && files[0]?.localPath) {
-            await deleteDeviceFile(files[0]?.localPath);
-        }
-
-        clearDraft();
-        setSendingMessage(false);
-        DeviceEventEmitter.emit(Events.POST_LIST_SCROLL_TO_BOTTOM, rootId ? Screens.THREAD : Screens.CHANNEL);
-    }, [files, currentUserId, channelId, rootId, value, clearDraft, postPriority]);
-
-    const showSendToAllOrChannelOrHereAlert = useCallback((calculatedMembersCount: number, atHere: boolean) => {
-        const notifyAllMessage = DraftUtils.buildChannelWideMentionMessage(intl, calculatedMembersCount, channelTimezoneCount, atHere);
-        const cancel = () => {
-            setSendingMessage(false);
-        };
-
-        DraftUtils.alertChannelWideMention(intl, notifyAllMessage, doSubmitMessage, cancel);
-    }, [intl, channelTimezoneCount, doSubmitMessage]);
-
-    const sendCommand = useCallback(async () => {
-        const status = DraftUtils.getStatusFromSlashCommand(value);
-        if (userIsOutOfOffice && status) {
-            const updateStatus = (newStatus: string) => {
-                setStatus(serverUrl, {
-                    status: newStatus,
-                    last_activity_at: Date.now(),
-                    manual: true,
-                    user_id: currentUserId,
-                });
-            };
-            confirmOutOfOfficeDisabled(intl, status, updateStatus);
-            setSendingMessage(false);
-            return;
-        }
-
-        const {data, error} = await executeCommand(serverUrl, intl, value, channelId, rootId);
-        setSendingMessage(false);
-
-        if (error) {
-            const errorMessage = getFullErrorMessage(error);
-            DraftUtils.alertSlashCommandFailed(intl, errorMessage);
-            return;
-        }
-
-        clearDraft();
-
-        if (data?.goto_location && !value.startsWith('/leave')) {
-            handleGotoLocation(serverUrl, intl, data.goto_location);
-        }
-    }, [userIsOutOfOffice, currentUserId, intl, value, serverUrl, channelId, rootId]);
-
-    const sendMessage = useCallback(() => {
-        const notificationsToChannel = enableConfirmNotificationsToChannel && useChannelMentions;
-        const toAllOrChannel = DraftUtils.textContainsAtAllAtChannel(value);
-        const toHere = DraftUtils.textContainsAtHere(value);
-
-        if (value.indexOf('/') === 0) {
-            sendCommand();
-        } else if (notificationsToChannel && membersCount > NOTIFY_ALL_MEMBERS && (toAllOrChannel || toHere)) {
-            showSendToAllOrChannelOrHereAlert(membersCount, toHere && !toAllOrChannel);
-        } else {
-            doSubmitMessage();
-        }
-    }, [
+    const {handleSendMessage, canSend} = useHandleSendMessage({
+        value,
+        channelId,
+        rootId,
+        files,
+        maxMessageLength,
+        customEmojis,
         enableConfirmNotificationsToChannel,
         useChannelMentions,
-        value,
-        channelTimezoneCount,
-        sendCommand,
-        showSendToAllOrChannelOrHereAlert,
-        doSubmitMessage,
-    ]);
+        membersCount,
+        userIsOutOfOffice,
+        currentUserId,
+        channelType,
+        postPriority,
+        clearDraft,
+    });
 
-    const handleSendMessage = useCallback(preventDoubleTap(() => {
-        if (!canSend()) {
-            return;
-        }
-
-        setSendingMessage(true);
-
-        const match = isReactionMatch(value, customEmojis);
-        if (match && !files.length) {
-            handleReaction(match.emoji, match.add);
-            return;
-        }
-
-        const hasFailedAttachments = files.some((f) => f.failed);
-        if (hasFailedAttachments) {
-            const cancel = () => {
-                setSendingMessage(false);
-            };
-            const accept = () => {
-                // Files are filtered on doSubmitMessage
-                sendMessage();
-            };
-
-            DraftUtils.alertAttachmentFail(intl, accept, cancel);
-        } else {
-            sendMessage();
-        }
-    }), [canSend, value, handleReaction, files, sendMessage, customEmojis]);
-
-    useEffect(() => {
-        getChannelTimezones(serverUrl, channelId).then(({channelTimezones}) => {
-            setChannelTimezoneCount(channelTimezones?.length || 0);
-        });
-    }, [serverUrl, channelId]);
+    if (isFromDraftView) {
+        return (
+            <SendDraft
+                channelId={channelId}
+                rootId={rootId}
+                channelType={channelType}
+                currentUserId={currentUserId}
+                channelName={channelName}
+                channelDisplayName={channelDisplayName}
+                enableConfirmNotificationsToChannel={enableConfirmNotificationsToChannel}
+                maxMessageLength={maxMessageLength}
+                membersCount={membersCount}
+                useChannelMentions={useChannelMentions}
+                userIsOutOfOffice={userIsOutOfOffice}
+                customEmojis={customEmojis}
+                bottomSheetId={bottomSheetId}
+                value={value}
+                files={files}
+                postPriority={postPriority}
+                persistentNotificationInterval={persistentNotificationInterval}
+                persistentNotificationMaxRecipients={persistentNotificationMaxRecipients}
+                draftReceiverUserName={draftReceiverUserName}
+                draftType={draftType}
+                postId={postId}
+            />
+        );
+    }
 
     return (
         <DraftInput
@@ -267,13 +160,15 @@ export default function SendHandler({
             addFiles={addFiles}
             uploadFileError={uploadFileError}
             sendMessage={handleSendMessage}
-            canSend={canSend()}
+            canSend={canSend}
             maxMessageLength={maxMessageLength}
             updatePostInputTop={updatePostInputTop}
             postPriority={postPriority}
             updatePostPriority={handlePostPriority}
             setIsFocused={setIsFocused}
-            serverUrl={serverUrl}
+            persistentNotificationInterval={persistentNotificationInterval}
+            persistentNotificationMaxRecipients={persistentNotificationMaxRecipients}
+            // serverUrl={serverUrl} TODO UPSTREAM : https://gitlab.infomaniak.ch/kchat/mobile/-/merge_requests/74
         />
     );
 }

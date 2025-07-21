@@ -33,17 +33,20 @@ export function toMilliseconds({days, hours, minutes, seconds}: {days?: number; 
     return totalSeconds * 1000;
 }
 
-function pad(num: number) {
-    return ('0' + num).slice(-2);
-}
+export function getReadableTimestamp(timestamp: number, timeZone: string, isMilitaryTime: boolean, currentUserLocale: string): string {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isCurrentYear = date.getFullYear() === now.getFullYear();
 
-export function mmssss(milisecs: number) {
-    const secs = Math.floor(milisecs / 1000);
-    const minutes = Math.floor(secs / 60);
-    const seconds = secs % 60;
+    const options: Intl.DateTimeFormatOptions = {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: !isMilitaryTime,
+        timeZone: timeZone as string,
+        ...(isCurrentYear ? {} : {year: 'numeric'}),
+    };
 
-    // const miliseconds = Math.floor((milisecs % 1000) / 10);
-    // return pad(minutes) + ':' + pad(seconds) + ':' + pad(miliseconds);
-
-    return pad(minutes) + ':' + pad(seconds);
+    return date.toLocaleString(currentUserLocale, options);
 }

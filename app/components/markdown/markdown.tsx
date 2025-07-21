@@ -1,21 +1,25 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
+/* eslint-disable max-lines */
 
 import {useManagedConfig} from '@mattermost/react-native-emm';
 import {Parser, Node} from 'commonmark';
 import Renderer from 'commonmark-react-renderer';
 import React, {type ReactElement, useMemo, useRef} from 'react';
-import {Dimensions, type GestureResponderEvent, Platform, type StyleProp, StyleSheet, Text, type TextStyle, View, type ViewStyle} from 'react-native';
+import {Dimensions, type GestureResponderEvent, type StyleProp, StyleSheet, Text, type TextStyle, View, type ViewStyle} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
+import EditedIndicator from '@components/EditedIndicator';
 import Emoji from '@components/emoji';
 import FormattedText from '@components/formatted_text';
+import {logError} from '@utils/log';
 import {computeTextStyle} from '@utils/markdown';
-import {blendColors, changeOpacity, concatStyles, makeStyleSheetFromTheme} from '@utils/theme';
+import {changeOpacity, concatStyles, makeStyleSheetFromTheme} from '@utils/theme';
+import {typography} from '@utils/typography';
 import {getScheme} from '@utils/url';
 
 import AtMention from './at_mention';
-import ChannelMention, {type ChannelMentions} from './channel_mention';
+import ChannelMention from './channel_mention';
 import Hashtag from './hashtag';
 import MarkdownBlockQuote from './markdown_block_quote';
 import MarkdownCodeBlock from './markdown_code_block';
@@ -31,10 +35,12 @@ import MarkdownTableImage from './markdown_table_image';
 import MarkdownTableRow, {type MarkdownTableRowProps} from './markdown_table_row';
 import {addListItemIndices, combineTextNodes, highlightMentions, highlightWithoutNotification, highlightSearchPatterns, parseTaskLists, pullOutImages} from './transform';
 
+import type {ChannelMentions} from './channel_mention/channel_mention';
 import type {
     MarkdownAtMentionRenderer, MarkdownBaseRenderer, MarkdownBlockStyles, MarkdownChannelMentionRenderer,
     MarkdownEmojiRenderer, MarkdownImageRenderer, MarkdownLatexRenderer, MarkdownTextStyles, SearchPattern, UserMentionKey, HighlightWithoutNotificationKey,
 } from '@typings/global/markdown';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
 type MarkdownProps = {
     autolinkedUrlSchemes?: string[];
@@ -62,7 +68,7 @@ type MarkdownProps = {
     isSearchResult?: boolean;
     layoutHeight?: number;
     layoutWidth?: number;
-    location: string;
+    location: AvailableScreens;
     maxNodes: number;
     mentionKeys?: UserMentionKey[];
     minimumHashtagLength?: number;
@@ -77,26 +83,15 @@ type MarkdownProps = {
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
-    // Android has trouble giving text transparency depending on how it's nested,
-    // so we calculate the resulting colour manually
-    const editedOpacity = Platform.select({
-        ios: 0.3,
-        android: 1.0,
-    });
-    const editedColor = Platform.select({
-        ios: theme.centerChannelColor,
-        android: blendColors(theme.centerChannelBg, theme.centerChannelColor, 0.3),
-    });
-
     return {
         block: {
             alignItems: 'flex-start',
             flexDirection: 'row',
             flexWrap: 'wrap',
         },
-        editedIndicatorText: {
-            color: editedColor,
-            opacity: editedOpacity,
+        errorMessage: {
+            color: theme.errorTextColor,
+            ...typography('Body', 100),
         },
         maxNodesWarning: {
             color: theme.errorTextColor,
@@ -254,24 +249,15 @@ const Markdown = ({
     };
 
     const renderEditedIndicator = ({context}: {context: string[]}) => {
-        let spacer = '';
-        const styles = [baseTextStyle, style.editedIndicatorText];
-
-        if (context[0] === 'paragraph') {
-            spacer = ' ';
-        }
-
         return (
-            <Text
-                style={styles}
+            <EditedIndicator
+                baseTextStyle={baseTextStyle}
+                theme={theme}
+                context={context}
+                iconSize={14}
+                checkHeadings={true}
                 testID='edited_indicator'
-            >
-                {spacer}
-                <FormattedText
-                    id='post_message_view.edited'
-                    defaultMessage='(edited)'
-                />
-            </Text>
+            />
         );
     };
 
@@ -325,7 +311,7 @@ const Markdown = ({
 
         return (
             <View
-                style={containerStyle}
+                style={containerStyle as StyleProp<ViewStyle>}
                 testID='markdown_heading'
             >
                 <Text style={textStyle}>
@@ -357,11 +343,15 @@ const Markdown = ({
             return null;
         }
 
+        const isInsideLink = context.indexOf('link') !== -1;
+
+        const disableInteraction = (disableGallery ?? Boolean(!location)) || isInsideLink;
+
         if (context.indexOf('table') !== -1) {
             // We have enough problems rendering images as is, so just render a link inside of a table
             return (
                 <MarkdownTableImage
-                    disabled={disableGallery ?? Boolean(!location)}
+                    disabled={disableInteraction}
                     imagesMetadata={imagesMetadata}
                     location={location}
                     postId={postId!}
@@ -372,7 +362,7 @@ const Markdown = ({
 
         return (
             <MarkdownImage
-                disabled={disableGallery ?? Boolean(!location)}
+                disabled={disableInteraction}
                 errorTextStyle={[computeTextStyle(textStyles, baseTextStyle, context), textStyles.error]}
                 layoutHeight={layoutHeight}
                 layoutWidth={layoutWidth}
@@ -407,6 +397,7 @@ const Markdown = ({
         if (isUnsafeLinksPost) {
             return renderText({context: [], literal: href});
         }
+
         return (
             <MarkdownLink
                 href={href}
@@ -618,34 +609,74 @@ const Markdown = ({
 
     const parser = useRef(new Parser({urlFilter, minimumHashtagLength})).current;
     const renderer = useMemo(createRenderer, [theme, textStyles, imagesMetadata]);
-    let ast = parser.parse(value.toString());
 
-    ast = combineTextNodes(ast);
-    ast = addListItemIndices(ast);
-    ast = pullOutImages(ast);
-    ast = parseTaskLists(ast);
-    if (mentionKeys) {
-        ast = highlightMentions(ast, mentionKeys);
-    }
-    if (highlightKeys) {
-        ast = highlightWithoutNotification(ast, highlightKeys);
-    }
-    if (searchPatterns) {
-        ast = highlightSearchPatterns(ast, searchPatterns);
-    }
-    if (isEdited) {
-        const editIndicatorNode = new Node('edited_indicator');
-        if (ast.lastChild && ['heading', 'paragraph'].includes(ast.lastChild.type)) {
-            ast.appendChild(editIndicatorNode);
-        } else {
-            const node = new Node('paragraph');
-            node.appendChild(editIndicatorNode);
+    const errorLogged = useRef(false);
 
-            ast.appendChild(node);
+    let ast;
+    try {
+        ast = parser.parse(value.toString());
+
+        ast = combineTextNodes(ast);
+        ast = addListItemIndices(ast);
+        ast = pullOutImages(ast);
+        ast = parseTaskLists(ast);
+        if (mentionKeys) {
+            ast = highlightMentions(ast, mentionKeys);
         }
+        if (highlightKeys) {
+            ast = highlightWithoutNotification(ast, highlightKeys);
+        }
+        if (searchPatterns) {
+            ast = highlightSearchPatterns(ast, searchPatterns);
+        }
+
+        if (isEdited) {
+            const editIndicatorNode = new Node('edited_indicator');
+            if (ast.lastChild && ['heading', 'paragraph'].includes(ast.lastChild.type)) {
+                ast.lastChild.appendChild(editIndicatorNode);
+            } else {
+                const node = new Node('paragraph');
+                node.appendChild(editIndicatorNode);
+
+                ast.appendChild(node);
+            }
+        }
+    } catch (e) {
+        if (!errorLogged.current) {
+            logError('An error occurred while parsing Markdown', e);
+
+            errorLogged.current = true;
+        }
+
+        return (
+            <FormattedText
+                id='markdown.parse_error'
+                defaultMessage='An error occurred while parsing this text'
+                style={style.errorMessage}
+            />
+        );
     }
 
-    return renderer.render(ast) as JSX.Element;
+    let output;
+    try {
+        output = renderer.render(ast);
+    } catch (e) {
+        if (!errorLogged.current) {
+            logError('An error occurred while rendering Markdown', e);
+
+            errorLogged.current = true;
+        }
+
+        return (
+            <FormattedText
+                id='markdown.render_error'
+                defaultMessage='An error occurred while rendering this text'
+                style={style.errorMessage}
+            />
+        );
+    }
+
+    return output;
 };
 
 export default Markdown;

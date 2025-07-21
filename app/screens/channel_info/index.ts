@@ -8,6 +8,7 @@ import {distinctUntilChanged, switchMap, combineLatestWith} from 'rxjs/operators
 import {observeIsCallsEnabledInChannel} from '@calls/observers';
 import {withServerUrl} from '@context/server';
 import {observeCurrentChannel} from '@queries/servers/channel';
+import {observeCanAddBookmarks} from '@queries/servers/channel_bookmark';
 import {observeCanManageChannelMembers, observeCanManageChannelSettings} from '@queries/servers/role';
 import {observeConfigValue, observeCurrentUserId} from '@queries/servers/system';
 import {observeIsCRTEnabled} from '@queries/servers/thread';
@@ -51,12 +52,23 @@ const enhanced = withObservables([], ({database}: Props) => {
         switchMap(() => of$(true)),
     );
 
+    const isBookmarksEnabled = false;
+
+    const canAddBookmarks = channelId.pipe(
+        switchMap((cId) => {
+            return observeCanAddBookmarks(database, cId);
+        }),
+    );
+
     return {
         type,
         isCallsEnabledInChannel,
+        groupCallsAllowed: false,
+        canAddBookmarks,
         canManageMembers,
-        isCRTEnabled: observeIsCRTEnabled(database),
         canManageSettings,
+        isBookmarksEnabled,
+        isCRTEnabled: observeIsCRTEnabled(database),
         isGuestUser,
         isConvertGMFeatureAvailable,
     };

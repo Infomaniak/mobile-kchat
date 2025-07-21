@@ -52,7 +52,7 @@ const EditProfile = ({
                 leftButtons: [leftButton!],
             });
         }
-    }, []);
+    }, [isTablet, componentId, leftButton]);
 
     const close = useCallback(() => {
         if (isModal) {
@@ -62,7 +62,7 @@ const EditProfile = ({
         } else {
             popTopScreen(componentId);
         }
-    }, []);
+    }, [componentId, isModal, isTablet]);
 
     useAndroidHardwareBackHandler(componentId, close);
     useNavButtonPressed(CLOSE_BUTTON_ID, componentId, close, []);

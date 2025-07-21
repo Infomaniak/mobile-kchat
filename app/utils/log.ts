@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import Config from '@assets/config.json';
 import keyMirror from '@utils/key_mirror';
 
 const SentryLevels = keyMirror({debug: null, info: null, warning: null, error: null});
@@ -41,10 +42,12 @@ export function logTimestamp(label: string, timestamp: number | undefined) {
 }
 
 const addBreadcrumb = (logLevel: keyof typeof SentryLevels, ...args: any[]) => {
-    const Sentry = require('@sentry/react-native');
-    Sentry.addBreadcrumb({
-        level: logLevel,
-        message: args.join(','),
-        type: 'console-log',
-    });
+    if (Config.SentryEnabled) {
+        const Sentry = require('@sentry/react-native');
+        Sentry.addBreadcrumb({
+            level: logLevel,
+            message: args.join(','),
+            type: 'console-log',
+        });
+    }
 };

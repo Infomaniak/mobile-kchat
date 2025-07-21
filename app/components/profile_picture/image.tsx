@@ -3,22 +3,22 @@
 
 import {Image as ExpoImage, type ImageSource} from 'expo-image';
 import React, {useMemo} from 'react';
-import {Grayscale} from 'react-native-color-matrix-image-filters';
 import Animated from 'react-native-reanimated';
 
+import {buildAbsoluteUrl} from '@actions/remote/file';
+import {buildProfileImageUrlFromUser} from '@actions/remote/user';
 import CompassIcon from '@components/compass_icon';
 import {ACCOUNT_OUTLINE_IMAGE} from '@constants/profile';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
-import NetworkManager from '@managers/network_manager';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {getLastPictureUpdate} from '@utils/user';
 
 import type UserModel from '@typings/database/models/servers/user';
 
 type Props = {
     author?: UserModel | UserProfile;
     forwardRef?: React.RefObject<any>;
-    grayscale?: boolean;
     iconSize?: number;
     size: number;
     source?: ImageSource | string;
@@ -35,18 +35,33 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Props) => {
+const Image = ({author, forwardRef, iconSize, size, source, url}: Props) => {
     const theme = useTheme();
     let serverUrl = useServerUrl();
     serverUrl = url || serverUrl;
 
     const style = getStyleSheet(theme);
+    const lastPictureUpdateAt = author ? getLastPictureUpdate(author) : 0;
     const fIStyle = useMemo(() => ({
         borderRadius: size / 2,
         backgroundColor: theme.centerChannelBg,
         height: size,
         width: size,
-    }), [size]);
+    }), [size, theme.centerChannelBg]);
+
+    const imgSource = useMemo(() => {
+        if (!author || typeof source === 'string') {
+            return undefined;
+        }
+
+        const pictureUrl = buildProfileImageUrlFromUser(serverUrl, author);
+        return source ?? {uri: buildAbsoluteUrl(serverUrl, pictureUrl)};
+
+    // We need to pass the lastPictureUpdateAt, because changes in this
+    // value are used internally, and may not be followed by a change
+    // in the containing object (author).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [author, serverUrl, source, lastPictureUpdateAt]);
 
     if (typeof source === 'string') {
         return (
@@ -58,53 +73,35 @@ const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Pro
         );
     }
 
-    const image = (() => {
-        const client = NetworkManager.getClient(serverUrl);
-        if (author && client) {
-            let lastPictureUpdate = 0;
-            const isBot = ('isBot' in author) ? author.isBot : author.is_bot;
-            if (isBot) {
-                lastPictureUpdate = ('isBot' in author) ? author.props?.bot_last_icon_update : author.bot_last_icon_update || 0;
-            } else {
-                lastPictureUpdate = ('lastPictureUpdate' in author) ? author.lastPictureUpdate : author.last_picture_update || 0;
-            }
-
-            const pictureUrl = client.getProfilePictureUrl(author.id, lastPictureUpdate);
-            const imgSource = source ?? {
-                uri: `${serverUrl}${pictureUrl}`,
-                headers: {
-                    Authorization: client.getCurrentBearerToken(),
-                },
-            };
-            if (imgSource.uri?.startsWith('file://')) {
-                return (
-                    <AnimatedImage
-                        key={pictureUrl}
-                        ref={forwardRef}
-                        style={fIStyle}
-                        source={{uri: imgSource.uri}}
-                    />
-                );
-            }
-            return (
-                <AnimatedImage
-                    key={pictureUrl}
-                    ref={forwardRef}
-                    style={fIStyle}
-                    source={imgSource}
-                />
-            );
-        }
+    if (imgSource?.uri?.startsWith('file://')) {
         return (
-            <CompassIcon
-                name={ACCOUNT_OUTLINE_IMAGE}
-                size={iconSize || size}
-                style={style.icon}
+            <AnimatedImage
+                key={imgSource.uri}
+                ref={forwardRef}
+                style={fIStyle}
+                source={{uri: imgSource.uri}}
             />
         );
-    })();
+    }
 
-    return grayscale ? <Grayscale>{image}</Grayscale> : image;
+    if (imgSource) {
+        return (
+            <AnimatedImage
+                key={imgSource.uri}
+                ref={forwardRef}
+                style={fIStyle}
+                source={imgSource}
+            />
+        );
+    }
+
+    return (
+        <CompassIcon
+            name={ACCOUNT_OUTLINE_IMAGE}
+            size={iconSize || size}
+            style={style.icon}
+        />
+    );
 };
 
 export default Image;

@@ -16,6 +16,7 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useBackNavigation from '@hooks/navigate_back';
+import SecurityManager from '@managers/security_manager';
 import {dismissOverlay, showShareFeedbackOverlay} from '@screens/navigation';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -63,6 +64,14 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         flexDirection: 'row',
         width: '100%',
     },
+    leftButton: {
+        flex: 1,
+        marginRight: 5,
+    },
+    rightButton: {
+        flex: 1,
+        marginLeft: 5,
+    },
     close: {
         justifyContent: 'center',
         height: 44,
@@ -73,7 +82,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     title: {
         ...typography('Heading', 600, 'SemiBold'),
         color: theme.centerChannelColor,
-        marginTop: 0,
+        marginTop: 24,
         marginBottom: 8,
         textAlign: 'center',
     },
@@ -82,14 +91,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         color: changeOpacity(theme.centerChannelColor, 0.72),
         marginBottom: 24,
         textAlign: 'center',
-    },
-    leftButton: {
-        flex: 1,
-        marginRight: 5,
-    },
-    rightButton: {
-        flex: 1,
-        marginLeft: 5,
     },
     dontAsk: {
         ...typography('Body', 75, 'SemiBold'),
@@ -168,7 +169,10 @@ const ReviewApp = ({
     }), []);
 
     return (
-        <View style={styles.root}>
+        <View
+            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            style={styles.root}
+        >
             <View
                 style={styles.container}
                 testID='rate_app.screen'
@@ -204,14 +208,14 @@ const ReviewApp = ({
                                     emphasis={'tertiary'}
                                     onPress={onPressNeedsWork}
                                     text={intl.formatMessage({id: 'rate.button.needs_work', defaultMessage: 'Needs work'})}
-                                    backgroundStyle={styles.leftButton}
+                                    buttonContainerStyle={styles.leftButton}
                                 />
                                 <Button
                                     theme={theme}
                                     size={'lg'}
                                     onPress={onPressYes}
                                     text={intl.formatMessage({id: 'rate.button.yes', defaultMessage: 'Love it!'})}
-                                    backgroundStyle={styles.rightButton}
+                                    buttonContainerStyle={styles.rightButton}
                                 />
                             </View>
                             {hasAskedBefore && (

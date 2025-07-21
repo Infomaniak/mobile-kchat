@@ -8,6 +8,7 @@ import {searchCustomEmojis} from '@actions/remote/custom_emoji';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {debounce} from '@helpers/api/general';
+import SecurityManager from '@managers/security_manager';
 import {getKeyboardAppearanceFromTheme} from '@utils/theme';
 
 import EmojiFiltered from './filtered';
@@ -15,6 +16,7 @@ import PickerHeader from './header';
 import EmojiSections from './sections';
 
 import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
 export const SCROLLVIEW_NATIVE_ID = 'emojiSelector';
 
@@ -31,11 +33,13 @@ type Props = {
     customEmojis: CustomEmojiModel[];
     customEmojisEnabled: boolean;
     onEmojiPress: (emoji: string) => void;
+    imageUrl?: string;
+    file?: ExtractedFileInfo;
     recentEmojis: string[];
     testID?: string;
 }
 
-const Picker = ({customEmojis, customEmojisEnabled, onEmojiPress, recentEmojis, testID = ''}: Props) => {
+const Picker = ({customEmojis, customEmojisEnabled, file, imageUrl, onEmojiPress, recentEmojis, testID = ''}: Props) => {
     const theme = useTheme();
     const serverUrl = useServerUrl();
     const [searchTerm, setSearchTerm] = useState<string|undefined>();
@@ -68,6 +72,8 @@ const Picker = ({customEmojis, customEmojisEnabled, onEmojiPress, recentEmojis, 
             <EmojiSections
                 customEmojis={customEmojis}
                 customEmojisEnabled={customEmojisEnabled}
+                imageUrl={imageUrl}
+                file={file}
                 onEmojiPress={onEmojiPress}
                 recentEmojis={recentEmojis}
             />
@@ -78,6 +84,7 @@ const Picker = ({customEmojis, customEmojisEnabled, onEmojiPress, recentEmojis, 
         <View
             style={styles.flex}
             testID={`${testID}.screen`}
+            nativeID={SecurityManager.getShieldScreenId(testID as AvailableScreens)}
         >
             <View style={styles.searchBar}>
                 <PickerHeader

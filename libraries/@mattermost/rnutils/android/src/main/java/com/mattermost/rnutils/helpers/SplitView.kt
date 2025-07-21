@@ -33,7 +33,6 @@ class SplitView {
             return isLargeScreen || isSmallestWidthLarge || isNotPhone
         }
 
-
         fun setDeviceFolded() {
             val map = getSplitViewResults(FoldableObserver.getInstance()?.isDeviceFolded == true)
             RNUtilsModuleImpl.sendJSEvent(Events.SPLIT_VIEW_CHANGED.event, map)
@@ -42,7 +41,7 @@ class SplitView {
         private fun getSplitViewResults(folded: Boolean): WritableMap? {
             if (context?.currentActivity != null) {
                 val map = Arguments.createMap()
-                var isSplitView = folded;
+                var isSplitView = folded
                 if (context?.currentActivity?.isInMultiWindowMode == true) {
                     isSplitView = FoldableObserver.getInstance()?.isCompactView() == true
                 }
@@ -56,6 +55,29 @@ class SplitView {
 
         fun isRunningInSplitView(): WritableMap? {
             return getSplitViewResults(FoldableObserver.getInstance()?.isDeviceFolded == true)
+        }
+
+        fun getWindowDimensions(): WritableMap? {
+            if (context?.currentActivity != null) {
+                val map = Arguments.createMap()
+                val bounds = FoldableObserver.getInstance()?.getWindowDimensions()
+                if (bounds != null) {
+                    map.putInt("width", bounds.width())
+                    map.putInt("height", bounds.height())
+                } else {
+                    map.putInt("width", 0)
+                    map.putInt("height", 0)
+                }
+
+                return map
+            }
+
+            return null
+        }
+
+        fun emitDimensionsChanged() {
+            val map = getWindowDimensions()
+            RNUtilsModuleImpl.sendJSEvent(Events.DIMENSIONS_CHANGED.event, map)
         }
     }
 }

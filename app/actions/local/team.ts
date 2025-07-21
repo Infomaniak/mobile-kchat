@@ -7,6 +7,8 @@ import {logError} from '@utils/log';
 
 import type Model from '@nozbe/watermelondb/Model';
 
+export const MAX_TEAM_SEARCHES = 15;
+
 export async function removeUserFromTeam(serverUrl: string, teamId: string) {
     try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
@@ -16,7 +18,7 @@ export async function removeUserFromTeam(serverUrl: string, teamId: string) {
             if (!team) {
                 throw new Error('Team not found');
             }
-            const models = await prepareDeleteTeam(team);
+            const models = await prepareDeleteTeam(serverUrl, team);
             const system = await removeTeamFromTeamHistory(operator, team.id, true);
             if (system) {
                 models.push(...system);
@@ -34,7 +36,6 @@ export async function removeUserFromTeam(serverUrl: string, teamId: string) {
 }
 
 export async function addSearchToTeamSearchHistory(serverUrl: string, teamId: string, terms: string) {
-    const MAX_TEAM_SEARCHES = 15;
     try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const newSearch: TeamSearchHistory = {

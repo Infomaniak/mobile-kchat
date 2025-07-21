@@ -9,6 +9,8 @@ import {useServerUrl} from '@context/server';
 import {debounce} from '@helpers/api/general';
 import {filterProfilesMatchingTerm} from '@utils/user';
 
+import type {AvailableScreens} from '@typings/screens/navigation';
+
 type Props = {
     currentUserId: string;
     tutorialWatched: boolean;
@@ -20,6 +22,7 @@ type Props = {
     createFilter: (exactMatches: UserProfile[], term: string) => ((p: UserProfile) => boolean);
     testID: string;
     loadUsers?: boolean;
+    location: AvailableScreens;
 }
 
 export default function ServerUserList({
@@ -33,6 +36,7 @@ export default function ServerUserList({
     createFilter,
     loadUsers,
     testID,
+    location,
 }: Props) {
     const serverUrl = useServerUrl();
 
@@ -131,6 +135,7 @@ export default function ServerUserList({
             testID={testID}
             tutorialWatched={tutorialWatched}
             includeUserMargin={true}
+            location={location}
         />
     );
 }

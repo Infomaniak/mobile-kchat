@@ -1,27 +1,25 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Button} from '@rneui/base';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {Keyboard, Platform, useWindowDimensions, View} from 'react-native';
+import {Keyboard, Platform, View} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {Navigation} from 'react-native-navigation';
-import Animated, {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {login} from '@actions/remote/session';
+import Button from '@components/button';
 import FloatingTextInput from '@components/floating_text_input_label';
 import FormattedText from '@components/formatted_text';
-import Loading from '@components/loading';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import {useIsTablet} from '@hooks/device';
-import {t} from '@i18n';
+import {useAvoidKeyboard} from '@hooks/device';
+import {useScreenTransitionAnimation} from '@hooks/screen_transition_animation';
+import {usePreventDoubleTap} from '@hooks/utils';
+import SecurityManager from '@managers/security_manager';
 import Background from '@screens/background';
 import {popTopScreen} from '@screens/navigation';
-import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {getErrorMessage} from '@utils/errors';
-import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
@@ -51,9 +49,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         justifyContent: 'center',
         marginTop: Platform.select({android: 56}),
     },
-    error: {
-        marginTop: 64,
-    },
     flex: {
         flex: 1,
     },
@@ -71,16 +66,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         paddingHorizontal: 24,
         height: '100%',
     },
-    loading: {
-        height: 20,
-        width: 20,
-    },
-    loadingContainerStyle: {
-        marginRight: 10,
-        padding: 0,
-        top: -2,
-    },
-    proceedButton: {
+    proceedButtonContainer: {
         marginTop: 32,
     },
     shield: {
@@ -97,9 +83,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 const AnimatedSafeArea = Animated.createAnimatedComponent(SafeAreaView);
 
 const MFA = ({componentId, config, goToHome, license, loginId, password, serverDisplayName, serverUrl, theme}: MFAProps) => {
-    const dimensions = useWindowDimensions();
-    const translateX = useSharedValue(dimensions.width);
-    const isTablet = useIsTablet();
     const keyboardAwareRef = useRef<KeyboardAwareScrollView>(null);
     const intl = useIntl();
     const [token, setToken] = useState<string>('');
@@ -109,31 +92,17 @@ const MFA = ({componentId, config, goToHome, license, loginId, password, serverD
 
     const styles = getStyleSheet(theme);
 
-    const onFocus = useCallback(() => {
-        if (Platform.OS === 'ios') {
-            let offsetY = 150;
-            if (isTablet) {
-                const {width, height} = dimensions;
-                const isLandscape = width > height;
-                offsetY = (isLandscape ? 270 : 150);
-            }
-            requestAnimationFrame(() => {
-                keyboardAwareRef.current?.scrollToPosition(0, offsetY);
-            });
-        }
-    }, [dimensions]);
-
     const handleInput = useCallback((userToken: string) => {
         setToken(userToken);
         setError('');
     }, []);
 
-    const submit = useCallback(preventDoubleTap(async () => {
+    const submit = usePreventDoubleTap(useCallback(async () => {
         Keyboard.dismiss();
         if (!token) {
             setError(
                 formatMessage({
-                    id: t('login_mfa.tokenReq'),
+                    id: 'login_mfa.tokenReq',
                     defaultMessage: 'Please enter an MFA token',
                 }),
             );
@@ -147,32 +116,11 @@ const MFA = ({componentId, config, goToHome, license, loginId, password, serverD
             return;
         }
         goToHome(result.error);
-    }), [token]);
+    }, [config, formatMessage, goToHome, intl, license, loginId, password, serverDisplayName, serverUrl, token]));
 
-    const transform = useAnimatedStyle(() => {
-        const duration = Platform.OS === 'android' ? 250 : 350;
-        return {
-            transform: [{translateX: withTiming(translateX.value, {duration})}],
-        };
-    }, []);
+    const animatedStyles = useScreenTransitionAnimation(componentId);
 
-    useEffect(() => {
-        const listener = {
-            componentDidAppear: () => {
-                translateX.value = 0;
-            },
-            componentDidDisappear: () => {
-                translateX.value = -dimensions.width;
-            },
-        };
-        const unsubscribe = Navigation.events().registerComponentListener(listener, componentId);
-
-        return () => unsubscribe.remove();
-    }, [dimensions]);
-
-    useEffect(() => {
-        translateX.value = 0;
-    }, []);
+    useAvoidKeyboard(keyboardAwareRef, 2);
 
     const close = useCallback(() => {
         popTopScreen(componentId);
@@ -181,16 +129,19 @@ const MFA = ({componentId, config, goToHome, license, loginId, password, serverD
     useAndroidHardwareBackHandler(componentId, close);
 
     return (
-        <View style={styles.flex}>
+        <View
+            nativeID={SecurityManager.getShieldScreenId(componentId, false, true)}
+            style={styles.flex}
+        >
             <Background theme={theme}/>
             <AnimatedSafeArea
                 testID='mfa.screen'
-                style={[styles.container, transform]}
+                style={[styles.container, animatedStyles]}
             >
                 <KeyboardAwareScrollView
                     bounces={false}
                     contentContainerStyle={styles.innerContainer}
-                    enableAutomaticScroll={Platform.OS === 'android'}
+                    enableAutomaticScroll={false}
                     enableOnAndroid={false}
                     enableResetScrollToCoords={true}
                     extraScrollHeight={0}
@@ -226,7 +177,6 @@ const MFA = ({componentId, config, goToHome, license, loginId, password, serverD
                                 keyboardType='numeric'
                                 label={formatMessage({id: 'login_mfa.token', defaultMessage: 'Enter MFA Token'})}
                                 onChangeText={handleInput}
-                                onFocus={onFocus}
                                 onSubmitEditing={submit}
                                 returnKeyType='go'
                                 spellCheck={false}
@@ -234,25 +184,18 @@ const MFA = ({componentId, config, goToHome, license, loginId, password, serverD
                                 theme={theme}
                                 value={token}
                             />
-                            <Button
-                                testID='login_mfa.submit'
-                                buttonStyle={[styles.proceedButton, buttonBackgroundStyle(theme, 'lg', 'primary', 'default'), error ? styles.error : undefined]}
-                                disabledStyle={[styles.proceedButton, buttonBackgroundStyle(theme, 'lg', 'primary', 'disabled'), error ? styles.error : undefined]}
-                                disabled={!token}
-                                onPress={submit}
-                            >
-                                {isLoading &&
-                                <Loading
-                                    containerStyle={styles.loadingContainerStyle}
-                                    color={theme.buttonColor}
+                            <View style={styles.proceedButtonContainer}>
+                                <Button
+                                    testID='login_mfa.submit'
+                                    size='lg'
+                                    disabled={!token}
+                                    onPress={submit}
+                                    theme={theme}
+                                    showLoader={isLoading}
+                                    text={formatMessage({id: 'mobile.components.select_server_view.proceed', defaultMessage: 'Proceed'})}
+                                    isDestructive={Boolean(error)}
                                 />
-                                }
-                                <FormattedText
-                                    id='mobile.components.select_server_view.proceed'
-                                    defaultMessage='Proceed'
-                                    style={buttonTextStyle(theme, 'lg', 'primary', token ? 'default' : 'disabled')}
-                                />
-                            </Button>
+                            </View>
                         </View>
                     </View>
                 </KeyboardAwareScrollView>

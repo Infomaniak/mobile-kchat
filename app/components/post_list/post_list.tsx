@@ -6,6 +6,7 @@ import React, {type ReactElement, useCallback, useEffect, useMemo, useRef, useSt
 import {DeviceEventEmitter, type ListRenderItemInfo, Platform, type StyleProp, StyleSheet, type ViewStyle, type NativeSyntheticEvent, type NativeScrollEvent} from 'react-native';
 import Animated, {type AnimatedStyle} from 'react-native-reanimated';
 
+import {removePost} from '@actions/local/post';
 import {fetchPosts, fetchPostThread} from '@actions/remote/post';
 import CombinedUserActivity from '@components/post_list/combined_user_activity';
 import DateSeparator from '@components/post_list/date_separator';
@@ -14,6 +15,7 @@ import NewMessagesLine from '@components/post_list/new_message_line';
 import Post from '@components/post_list/post';
 import ThreadOverview from '@components/post_list/thread_overview';
 import {Events, Screens} from '@constants';
+import {PostTypes} from '@constants/post';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import EphemeralStore from '@store/ephemeral_store';
@@ -25,6 +27,7 @@ import ScrollToEndView from './scroll_to_end_view';
 
 import type {PostListItem, PostListOtherItem, ViewableItemsChanged, ViewableItemsChangedListenerEvent} from '@typings/components/post_list';
 import type PostModel from '@typings/database/models/servers/post';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
     appsEnabled: boolean;
@@ -40,7 +43,7 @@ type Props = {
     isCRTEnabled?: boolean;
     isPostAcknowledgementEnabled?: boolean;
     lastViewedAt: number;
-    location: string;
+    location: AvailableScreens;
     nativeID: string;
     onEndReached?: () => void;
     posts: PostModel[];
@@ -71,8 +74,8 @@ export type PostListHandle = {
 export const postListRef = React.createRef<PostListHandle>();
 
 const CONTENT_OFFSET_THRESHOLD = 160;
+const SCROLL_EVENT_THROTTLE = Platform.select({android: 17, default: 60});
 
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 const keyExtractor = (item: PostListItem | PostListOtherItem) => (item.type === 'post' ? item.value.currentPost.id : item.value);
 
 const styles = StyleSheet.create({
@@ -112,6 +115,8 @@ const PostList = ({
     testID,
     savedPostIds,
 }: Props) => {
+    const firstIdInPosts = posts[0]?.id;
+
     const listRef = useRef<FlatList<string | PostModel>>(null);
     const onScrollEndIndexListener = useRef<onScrollEndIndexListenerEvent>();
     const onViewableItemsChangedListener = useRef<ViewableItemsChangedListenerEvent>();
@@ -119,39 +124,36 @@ const PostList = ({
     const [refreshing, setRefreshing] = useState(false);
     const [limit, setLimit] = useState<KSuiteLimit | undefined>(undefined);
     const [showScrollToEndBtn, setShowScrollToEndBtn] = useState(false);
-    const [lastPostId, setLastPostId] = useState<string | undefined>(posts[0]?.id);
+    const [lastPostId, setLastPostId] = useState<string | undefined>(firstIdInPosts);
     const theme = useTheme();
     const serverUrl = useServerUrl();
     const orderedPosts = useMemo(() => {
         return preparePostList(posts, lastViewedAt, showNewMessageLine, currentUserId, currentUsername, shouldShowJoinLeaveMessages, currentTimezone, location === Screens.THREAD, savedPostIds);
-    }, [posts, lastViewedAt, showNewMessageLine, currentTimezone, currentUsername, shouldShowJoinLeaveMessages, location, savedPostIds]);
+    }, [posts, lastViewedAt, showNewMessageLine, currentUserId, currentUsername, shouldShowJoinLeaveMessages, currentTimezone, location, savedPostIds]);
 
     const initialIndex = useMemo(() => {
         return orderedPosts.findIndex((i) => i.type === 'start-of-new-messages');
     }, [orderedPosts]);
 
-    const isNewMessage = useMemo(() => {
-        if (!lastPostId) {
-            // Avoid flash when the channel loads without posts
-            // e.g. The first time we navigate to a channel
-            return false;
-        }
-        return posts[0]?.id !== lastPostId;
-    }, [posts[0]?.id, lastPostId]);
+    const isNewMessage = lastPostId ? firstIdInPosts !== lastPostId : false;
+
+    const scrollToEnd = useCallback(() => {
+        listRef.current?.scrollToOffset({offset: 0, animated: true});
+    }, []);
 
     useEffect(() => {
         const t = setTimeout(() => {
-            listRef.current?.scrollToOffset({offset: 0, animated: true});
+            scrollToEnd();
         }, 300);
 
         return () => clearTimeout(t);
-    }, [channelId, rootId]);
+    }, [channelId, rootId, scrollToEnd]);
 
     useEffect(() => {
         const scrollToBottom = (screen: string) => {
             if (screen === location) {
                 const scrollToBottomTimer = setTimeout(() => {
-                    listRef.current?.scrollToOffset({offset: 0, animated: true});
+                    scrollToEnd();
                     clearTimeout(scrollToBottomTimer);
                 }, 400);
             }
@@ -163,7 +165,7 @@ const PostList = ({
         return () => {
             scrollBottomListener.remove();
         };
-    }, []);
+    }, [location, scrollToEnd]);
 
     const onRefresh = useCallback(async () => {
         if (disablePullToRefresh) {
@@ -182,17 +184,35 @@ const PostList = ({
             }
             await fetchPostThread(serverUrl, rootId, options);
         }
+        const removalPromises = posts.
+            filter((post) => post.type === PostTypes.EPHEMERAL).
+            map((post) => removePost(serverUrl, post));
+        await Promise.all(removalPromises);
         setRefreshing(false);
-        setLimit(EphemeralStore.serverHasLimit(serverUrl));
-    }, [channelId, location, posts, rootId]);
+        setLimit(EphemeralStore.serverHasLimit(serverUrl));   
+}, [disablePullToRefresh, location, channelId, rootId, posts, serverUrl]);
+
+    const scrollToIndex = useCallback((index: number, animated = true, applyOffset = true) => {
+        listRef.current?.scrollToIndex({
+            animated,
+            index,
+            viewOffset: applyOffset ? Platform.select({ios: -45, default: 0}) : 0,
+            viewPosition: 1, // 0 is at bottom
+        });
+    }, []);
 
     const onScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const {y} = event.nativeEvent.contentOffset;
-        if (y === 0) {
-            setLastPostId(posts[0]?.id);
+        const isThresholdReached = y > CONTENT_OFFSET_THRESHOLD;
+
+        if (isThresholdReached !== showScrollToEndBtn) {
+            setShowScrollToEndBtn(isThresholdReached);
         }
-        setShowScrollToEndBtn(y > CONTENT_OFFSET_THRESHOLD);
-    }, [posts[0]?.id]);
+
+        if (!y && lastPostId !== firstIdInPosts) {
+            setLastPostId(firstIdInPosts);
+        }
+    }, [firstIdInPosts, lastPostId, showScrollToEndBtn]);
 
     const onScrollToIndexFailed = useCallback((info: ScrollIndexFailed) => {
         const index = Math.min(info.highestMeasuredFrameIndex, info.index);
@@ -203,7 +223,7 @@ const PostList = ({
             }
             scrollToIndex(index);
         }
-    }, [highlightedId]);
+    }, [highlightedId, scrollToIndex]);
 
     const onViewableItemsChanged = useCallback(({viewableItems}: ViewableItemsChanged) => {
         if (!viewableItems.length) {
@@ -289,10 +309,9 @@ const PostList = ({
 
                 return (
                     <CombinedUserActivity
-                        key={item.value}
                         {...postProps}
-                    />
-                );
+                        key={item.value}
+                    />);
             }
             default: {
                 const post = item.value.currentPost;
@@ -318,28 +337,15 @@ const PostList = ({
 
                 return (
                     <Post
-                        key={post.id}
                         {...postProps}
+                        key={post.id}
                     />
                 );
             }
         }
-    }, [appsEnabled, currentTimezone, customEmojiNames, highlightPinnedOrSaved, isCRTEnabled, isPostAcknowledgementEnabled, shouldRenderReplyButton, theme]);
+    }, [appsEnabled, currentTimezone, currentUsername, customEmojiNames, highlightPinnedOrSaved, highlightedId, isCRTEnabled, isPostAcknowledgementEnabled, location, rootId, shouldRenderReplyButton, shouldShowJoinLeaveMessages, testID, theme]);
 
-    const scrollToIndex = useCallback((index: number, animated = true, applyOffset = true) => {
-        listRef.current?.scrollToIndex({
-            animated,
-            index,
-            viewOffset: applyOffset ? Platform.select({ios: -45, default: 0}) : 0,
-            viewPosition: 1, // 0 is at bottom
-        });
-    }, []);
-
-    const onScrollToEnd = useCallback(() => {
-        listRef.current?.scrollToOffset({offset: 0, animated: true});
-    }, []);
-
-    useImperativeHandle(postListRef, () => ({scrollToEnd: onScrollToEnd}));
+    // TODO UPSTREAM : scroll is ok ?
 
     useEffect(() => {
         const t = setTimeout(() => {
@@ -363,7 +369,7 @@ const PostList = ({
 
     return (
         <>
-            <AnimatedFlatList
+            <Animated.FlatList
                 contentContainerStyle={contentContainerStyle}
                 data={orderedPosts}
                 keyboardDismissMode='interactive'
@@ -383,7 +389,7 @@ const PostList = ({
                 ref={listRef}
                 removeClippedSubviews={true}
                 renderItem={renderItem}
-                scrollEventThrottle={60}
+                scrollEventThrottle={SCROLL_EVENT_THROTTLE}
                 style={styles.flex}
                 viewabilityConfig={VIEWABILITY_CONFIG}
                 testID={`${testID}.flat_list`}
@@ -393,10 +399,11 @@ const PostList = ({
             />
             {location !== Screens.PERMALINK &&
             <ScrollToEndView
-                onPress={onScrollToEnd}
+                onPress={scrollToEnd}
                 isNewMessage={isNewMessage}
                 showScrollToEndBtn={showScrollToEndBtn}
                 location={location}
+                testID={'scroll-to-end-view'}
             />
             }
             {showMoreMessages &&

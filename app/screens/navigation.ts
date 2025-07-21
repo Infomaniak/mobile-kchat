@@ -4,7 +4,7 @@
 /* eslint-disable max-lines */
 
 import merge from 'deepmerge';
-import {Appearance, DeviceEventEmitter, StatusBar, Platform, Alert, type EmitterSubscription} from 'react-native';
+import {Appearance, DeviceEventEmitter, StatusBar, Platform, Alert, type EmitterSubscription, Keyboard} from 'react-native';
 import {type ComponentWillAppearEvent, type ImageResource, type LayoutOrientation, Navigation, type Options, OptionsModalPresentationStyle, type OptionsTopBarButton, type ScreenPoppedEvent, type EventSubscription} from 'react-native-navigation';
 import tinyColor from 'tinycolor2';
 
@@ -20,8 +20,11 @@ import {appearanceControlledScreens, mergeNavigationOptions} from '@utils/naviga
 import {changeOpacity, setNavigatorStyles} from '@utils/theme';
 
 import type {BottomSheetFooterProps} from '@gorhom/bottom-sheet';
+import type {default as UserProfileScreen} from '@screens/user_profile';
 import type {LaunchProps} from '@typings/launch';
 import type {AvailableScreens, NavButtons} from '@typings/screens/navigation';
+import type {ComponentProps} from 'react';
+import type {IntlShape} from 'react-intl';
 
 const alpha = {
     from: 0,
@@ -39,6 +42,15 @@ export function registerNavigationListeners() {
         Navigation.events().registerScreenPoppedListener(onPoppedListener),
         Navigation.events().registerCommandListener(onCommandListener),
         Navigation.events().registerComponentWillAppearListener(onScreenWillAppear),
+
+        /**
+         * For the time being and until we add the emoji picker in the keyboard area
+         * will keep Android as adjustResize cause useAnimatedKeyboard from reanimated
+         * is reporting the wrong values when the keyboard was opened but we switch
+         * to a different channel or thread.
+         */
+        // Navigation.events().registerComponentDidAppearListener(onScreenDidAppear),
+        // Navigation.events().registerComponentDidDisappearListener(onScreenDidDisappear),
     ];
 }
 
@@ -167,7 +179,7 @@ export const bottomSheetModalOptions = (theme: Theme, closeButtonId?: string): O
             default: OptionsModalPresentationStyle.overCurrentContext,
         }),
         statusBar: {
-            backgroundColor: null,
+            backgroundColor: theme.sidebarBg,
             drawBehind: true,
             translucent: true,
         },
@@ -267,7 +279,7 @@ export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}
     const isDark = tinyColor(theme.sidebarBg).isDark();
     StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
 
-    if (passProps.launchType === Launch.AddServer || passProps.launchType === Launch.AddServerFromDeepLink) {
+    if (!passProps.coldStart && (passProps.launchType === Launch.AddServer || passProps.launchType === Launch.AddServerFromDeepLink)) {
         dismissModal({componentId: Screens.SERVER});
         dismissModal({componentId: Screens.LOGIN});
         dismissModal({componentId: Screens.SSO});
@@ -559,6 +571,7 @@ export function goToScreen(name: AvailableScreens, title: string, passProps = {}
         },
         statusBar: {
             style: isDark ? 'light' : 'dark',
+            backgroundColor: theme.sidebarBg,
         },
         topBar: {
             animate: true,
@@ -580,6 +593,11 @@ export function goToScreen(name: AvailableScreens, title: string, passProps = {}
 
     DeviceEventEmitter.emit(Events.TAB_BAR_VISIBLE, false);
 
+    if (NavigationStore.getScreensInStack().includes(name)) {
+        Navigation.updateProps(name, passProps);
+        return Navigation.popTo(name, merge(defaultOptions, options));
+    }
+
     return Navigation.push(componentId, {
         component: {
             id: name,
@@ -598,6 +616,15 @@ export async function popTopScreen(screenId?: AvailableScreens) {
             const componentId = NavigationStore.getVisibleScreen();
             await Navigation.pop(componentId);
         }
+    } catch (error) {
+        // RNN returns a promise rejection if there are no screens
+        // atop the root screen to pop. We'll do nothing in this case.
+    }
+}
+
+export async function popTo(screenId: AvailableScreens) {
+    try {
+        await Navigation.popTo(screenId);
     } catch (error) {
         // RNN returns a promise rejection if there are no screens
         // atop the root screen to pop. We'll do nothing in this case.
@@ -670,6 +697,7 @@ export function showModal(name: AvailableScreens, title: string, passProps = {},
         },
         statusBar: {
             visible: true,
+            backgroundColor: theme.sidebarBg,
         },
         topBar: {
             animate: true,
@@ -820,7 +848,7 @@ export function setButtons(componentId: AvailableScreens, buttons: NavButtons = 
     mergeNavigationOptions(componentId, options);
 }
 
-export function showOverlay(name: AvailableScreens, passProps = {}, options: Options = {}) {
+export function showOverlay(name: AvailableScreens, passProps = {}, options: Options = {}, id?: string) {
     if (!isScreenRegistered(name)) {
         return;
     }
@@ -837,6 +865,7 @@ export function showOverlay(name: AvailableScreens, passProps = {}, options: Opt
 
     Navigation.showOverlay({
         component: {
+            id,
             name,
             passProps,
             options: merge(defaultOptions, options),
@@ -844,7 +873,7 @@ export function showOverlay(name: AvailableScreens, passProps = {}, options: Opt
     });
 }
 
-export async function dismissOverlay(componentId: AvailableScreens) {
+export async function dismissOverlay(componentId: string) {
     try {
         await Navigation.dismissOverlay(componentId);
     } catch (error) {
@@ -865,7 +894,7 @@ type BottomSheetArgs = {
     closeButtonId: string;
     initialSnapIndex?: number;
     footerComponent?: React.FC<BottomSheetFooterProps>;
-    renderContent: () => Element;
+    renderContent: () => React.ReactNode;
     snapPoints: Array<number | string>;
     theme: Theme;
     title: string;
@@ -953,4 +982,21 @@ export async function findChannels(title: string, theme: Theme) {
         {closeButtonId},
         options,
     );
+}
+
+export async function openUserProfileModal(
+    intl: IntlShape,
+    theme: Theme,
+    props: Omit<ComponentProps<typeof UserProfileScreen>, 'closeButtonId'>,
+    screenToDismiss?: AvailableScreens,
+) {
+    if (screenToDismiss) {
+        await dismissBottomSheet(screenToDismiss);
+    }
+    const screen = Screens.USER_PROFILE;
+    const title = intl.formatMessage({id: 'mobile.routes.user_profile', defaultMessage: 'Profile'});
+    const closeButtonId = 'close-user-profile';
+
+    Keyboard.dismiss();
+    openAsBottomSheet({screen, title, theme, closeButtonId, props: {...props}});
 }

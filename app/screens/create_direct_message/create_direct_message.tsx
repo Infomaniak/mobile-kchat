@@ -13,12 +13,13 @@ import Loading from '@components/loading';
 import Search from '@components/search';
 import SelectedUsers from '@components/selected_users';
 import ServerUserList from '@components/server_user_list';
-import {General} from '@constants';
+import {General, Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useKeyboardOverlap} from '@hooks/device';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import SecurityManager from '@managers/security_manager';
 import {dismissModal, setButtons} from '@screens/navigation';
 import {alertErrorWithFallback} from '@utils/draft';
 import {changeOpacity, getKeyboardAppearanceFromTheme, makeStyleSheetFromTheme} from '@utils/theme';
@@ -143,7 +144,7 @@ export default function CreateDirectMessage({
         }
 
         return !result.error;
-    }, [selectedIds, intl.locale, teammateNameDisplay, serverUrl]);
+    }, [selectedIds, intl, teammateNameDisplay, serverUrl]);
 
     const createGroupChannel = useCallback(async (ids: string[]): Promise<boolean> => {
         const result = await makeGroupChannel(serverUrl, ids);
@@ -153,7 +154,7 @@ export default function CreateDirectMessage({
         }
 
         return !result.error;
-    }, [serverUrl]);
+    }, [intl, serverUrl]);
 
     const startConversation = useCallback(async (selectedId?: {[id: string]: boolean}, selectedUser?: UserProfile) => {
         if (startingConversation) {
@@ -208,7 +209,7 @@ export default function CreateDirectMessage({
                 return newSelectedIds;
             });
         }
-    }, [currentUserId, clearSearch]);
+    }, [currentUserId, startConversation, clearSearch, selectedCount]);
 
     const onLayout = useCallback((e: LayoutChangeEvent) => {
         setContainerHeight(e.nativeEvent.layout.height);
@@ -223,7 +224,7 @@ export default function CreateDirectMessage({
                 testID: 'close.create_direct_message.button',
             }],
         });
-    }, [intl.locale, theme]);
+    }, [componentId, theme.sidebarHeaderTextColor]);
 
     const onChangeText = useCallback((searchTerm: string) => {
         setTerm(searchTerm);
@@ -232,9 +233,9 @@ export default function CreateDirectMessage({
     const userFetchFunction = useCallback(async (page: number) => {
         let results;
         if (restrictDirectMessage) {
-            results = await fetchProfilesInTeam(serverUrl, currentTeamId, page, General.PROFILE_CHUNK_SIZE);
+            results = await fetchProfilesInTeam(serverUrl, currentTeamId, page, General.PROFILE_CHUNK_SIZE, '', {active: true});
         } else {
-            results = await fetchProfiles(serverUrl, page, General.PROFILE_CHUNK_SIZE);
+            results = await fetchProfiles(serverUrl, page, General.PROFILE_CHUNK_SIZE, {active: true});
         }
 
         if (results.users?.length) {
@@ -248,9 +249,9 @@ export default function CreateDirectMessage({
         const lowerCasedTerm = searchTerm.toLowerCase();
         let results;
         if (restrictDirectMessage) {
-            results = await searchProfiles(serverUrl, lowerCasedTerm, {team_id: currentTeamId, allow_inactive: true});
+            results = await searchProfiles(serverUrl, lowerCasedTerm, {team_id: currentTeamId, allow_inactive: false});
         } else {
-            results = await searchProfiles(serverUrl, lowerCasedTerm, {allow_inactive: true});
+            results = await searchProfiles(serverUrl, lowerCasedTerm, {allow_inactive: false});
         }
 
         if (results.data) {
@@ -273,7 +274,7 @@ export default function CreateDirectMessage({
 
             return true;
         };
-    }, [selectedCount > 0, currentUserId]);
+    }, [currentUserId, selectedCount]);
 
     useNavButtonPressed(CLOSE_BUTTON, componentId, close, [close]);
     useAndroidHardwareBackHandler(componentId, close);
@@ -284,7 +285,7 @@ export default function CreateDirectMessage({
 
     useEffect(() => {
         setShowToast(selectedCount >= General.MAX_USERS_IN_GM);
-    }, [selectedCount >= General.MAX_USERS_IN_GM]);
+    }, [selectedCount]);
 
     if (startingConversation) {
         return (
@@ -298,9 +299,9 @@ export default function CreateDirectMessage({
         <SafeAreaView
             style={style.container}
             testID='create_direct_message.screen'
+            nativeID={SecurityManager.getShieldScreenId(componentId)}
             onLayout={onLayout}
             ref={mainView}
-            edges={['top', 'left', 'right']}
         >
             <View style={style.searchBar}>
                 <Search
@@ -325,6 +326,7 @@ export default function CreateDirectMessage({
                 fetchFunction={userFetchFunction}
                 searchFunction={userSearchFunction}
                 createFilter={createUserFilter}
+                location={Screens.CREATE_DIRECT_MESSAGE}
             />
             <SelectedUsers
                 keyboardOverlap={keyboardOverlap}

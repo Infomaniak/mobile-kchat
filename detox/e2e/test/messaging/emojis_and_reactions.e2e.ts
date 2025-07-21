@@ -152,7 +152,7 @@ describe('Messaging - Emojis and Reactions', () => {
         await EmojiPickerScreen.open();
 
         // * Verify emojis exist in recently used section
-        await expect(element(by.text('RECENTLY USED'))).toExist();
+        await expect(element(by.text('RECENTLY USED')).atIndex(0)).toBeVisible();
         await expect(element(by.text('🦊')).atIndex(0)).toExist();
         await expect(element(by.text('🐶')).atIndex(0)).toExist();
 

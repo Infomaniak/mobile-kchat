@@ -8,15 +8,18 @@ import {
     deferredAppEntryActions,
     entry,
     handleEntryAfterLoadNavigation,
-    registerDeviceToken,
+    setExtraSessionProps,
 } from '@actions/remote/entry/common';
 import {fetchPostsForChannel, fetchPostThread} from '@actions/remote/post';
 import {openAllUnreadChannels} from '@actions/remote/preference';
 import {autoUpdateTimezone} from '@actions/remote/user';
 import {handleTeamSyncEvent} from '@actions/websocket/ikTeams';
 import {Screens, WebsocketEvents} from '@constants';
+import {loadConfigAndCalls} from '@calls/actions/calls';
+import {isSupportedServerCalls} from '@calls/utils'; // TODO UPSTREAM : ?
 import DatabaseManager from '@database/manager';
 import AppsManager from '@managers/apps_manager';
+import {updatePlaybooksVersion} from '@playbooks/actions/remote/version';
 import {getActiveServerUrl} from '@queries/app/servers';
 import {getLastPostInThread} from '@queries/servers/post';
 import {
@@ -94,17 +97,17 @@ import {
 import {handleThreadUpdatedEvent, handleThreadReadChangedEvent, handleThreadFollowChangedEvent} from './threads';
 import {handleUserUpdatedEvent, handleUserTypingEvent, handleStatusChangedEvent, handleUserRecordingEvent} from './users';
 
-export async function handleFirstConnect(serverUrl: string) {
-    registerDeviceToken(serverUrl);
-    autoUpdateTimezone(serverUrl);
-    return doReconnect(serverUrl);
+export async function handleFirstConnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel) {
+    setExtraSessionProps(serverUrl, groupLabel);
+    autoUpdateTimezone(serverUrl, groupLabel);
+    return doReconnect(serverUrl, groupLabel);
 }
 
-export async function handleReconnect(serverUrl: string) {
-    return doReconnect(serverUrl);
+export async function handleReconnect(serverUrl: string, groupLabel: BaseRequestGroupLabel = 'WebSocket Reconnect') {
+    return doReconnect(serverUrl, groupLabel);
 }
 
-async function doReconnect(serverUrl: string) {
+async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel) {
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
         return new Error('cannot find server database');
@@ -124,7 +127,7 @@ async function doReconnect(serverUrl: string) {
     const currentChannelId = await getCurrentChannelId(database);
 
     setTeamLoading(serverUrl, true);
-    const entryData = await entry(serverUrl, currentTeamId, currentChannelId, lastFullSync);
+    const entryData = await entry(serverUrl, currentTeamId, currentChannelId, lastFullSync, groupLabel);
     if ('error' in entryData) {
         setTeamLoading(serverUrl, false);
         return entryData.error;
@@ -140,29 +143,29 @@ async function doReconnect(serverUrl: string) {
 
     await setLastFullSync(operator, now);
 
-    const tabletDevice = isTablet();
-    const isActiveServer = (await getActiveServerUrl()) === serverUrl;
-    if (isActiveServer && tabletDevice && initialChannelId === currentChannelId) {
-        await markChannelAsRead(serverUrl, initialChannelId);
-        markChannelAsViewed(serverUrl, initialChannelId);
-    }
-
     logInfo('WEBSOCKET RECONNECT MODELS BATCHING TOOK', `${Date.now() - dt}ms`);
     setTeamLoading(serverUrl, false);
 
-    await fetchPostDataIfNeeded(serverUrl);
+    await fetchPostDataIfNeeded(serverUrl, groupLabel);
 
     const {id: currentUserId, locale: currentUserLocale} = (await getCurrentUser(database))!;
     const license = await getLicense(database);
     const config = await getConfig(database);
 
-    await deferredAppEntryActions(serverUrl, lastFullSync, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, initialTeamId);
+    // Set the version of the playbooks plugin to the systems table
+    updatePlaybooksVersion(serverUrl);
 
-    openAllUnreadChannels(serverUrl);
+    if (isSupportedServerCalls(config?.Version)) {
+        loadConfigAndCalls(serverUrl, currentUserId, groupLabel);
+    }
+
+    await deferredAppEntryActions(serverUrl, lastFullSync, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, initialTeamId, undefined, groupLabel);
+
+    openAllUnreadChannels(serverUrl, groupLabel);
 
     dataRetentionCleanup(serverUrl);
 
-    AppsManager.refreshAppBindings(serverUrl);
+    AppsManager.refreshAppBindings(serverUrl, groupLabel);
     return undefined;
 }
 
@@ -399,7 +402,7 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
     }
 }
 
-async function fetchPostDataIfNeeded(serverUrl: string) {
+async function fetchPostDataIfNeeded(serverUrl: string, groupLabel?: RequestGroupLabel) {
     try {
         const isActiveServer = (await getActiveServerUrl()) === serverUrl;
         if (!isActiveServer) {
@@ -426,15 +429,15 @@ async function fetchPostDataIfNeeded(serverUrl: string) {
                         options.fromCreateAt = lastPost.createAt;
                         options.fromPost = lastPost.id;
                         options.direction = 'down';
-                        await fetchPostThread(serverUrl, rootId, options);
+                        await fetchPostThread(serverUrl, rootId, options, false, groupLabel);
                     }
                 }
             }
         }
 
         if (currentChannelId && (isChannelScreenMounted || tabletDevice)) {
-            await fetchPostsForChannel(serverUrl, currentChannelId);
-            markChannelAsRead(serverUrl, currentChannelId);
+            await fetchPostsForChannel(serverUrl, currentChannelId, false, false, groupLabel);
+            markChannelAsRead(serverUrl, currentChannelId, false, groupLabel);
             if (!EphemeralStore.wasNotificationTapped()) {
                 markChannelAsViewed(serverUrl, currentChannelId, true);
             }

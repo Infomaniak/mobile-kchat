@@ -17,6 +17,7 @@ type Props = {
     fileCount: number;
     isPostPriorityEnabled: boolean;
     canShowPostPriority?: boolean;
+    canShowSlashCommands?: boolean;
     maxFileCount: number;
     channelId: string;
 
@@ -29,11 +30,13 @@ type Props = {
     focus: () => void;
 }
 
+export const QUICK_ACTIONS_HEIGHT = 44;
+
 const style = StyleSheet.create({
     quickActionsContainer: {
         display: 'flex',
         flexDirection: 'row',
-        height: 44,
+        height: QUICK_ACTIONS_HEIGHT,
     },
 });
 
@@ -43,6 +46,7 @@ export default function QuickActions({
     value,
     fileCount,
     isPostPriorityEnabled,
+    canShowSlashCommands = true,
     canShowPostPriority,
     maxFileCount,
     updateValue,
@@ -83,13 +87,15 @@ export default function QuickActions({
                 updateValue={updateValue}
                 focus={focus}
             />
-            <InputAction
-                testID={slashInputActionTestID}
-                disabled={slashDisabled}
-                inputType='slash'
-                updateValue={updateValue}
-                focus={focus}
-            />
+            {canShowSlashCommands && (
+                <InputAction
+                    testID={slashInputActionTestID}
+                    disabled={slashDisabled}
+                    inputType='slash'
+                    updateValue={updateValue}
+                    focus={focus}
+                />
+            )}
             <FileAction
                 testID={fileActionTestID}
                 {...uploadProps}

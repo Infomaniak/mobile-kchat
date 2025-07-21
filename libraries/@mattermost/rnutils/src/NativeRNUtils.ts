@@ -3,7 +3,7 @@
 
 import {type TurboModule, TurboModuleRegistry} from 'react-native';
 
-import type {Int32, UnsafeObject} from 'react-native/Libraries/Types/CodegenTypes';
+import type {Double, Int32, UnsafeObject} from 'react-native/Libraries/Types/CodegenTypes';
 
 export type SplitView = Readonly<{
   isSplit: boolean;
@@ -36,6 +36,15 @@ type Constants = Readonly<{
   }>;
 }>
 
+export type WindowDimensionsChanged = Readonly<{
+  width: Double;
+  height: Double;
+}>
+
+type HasRegisteredLoadResponse = {
+  hasRegisteredLoad: boolean;
+}
+
 export interface Spec extends TurboModule {
     readonly getConstants: () => Constants;
 
@@ -45,9 +54,13 @@ export interface Spec extends TurboModule {
     getRealFilePath: (filePath: string) => Promise<string>;
     saveFile: (filePath: string) => Promise<string>;
 
+    getWindowDimensions: () => WindowDimensionsChanged;
     isRunningInSplitView: () => SplitView;
     unlockOrientation: () => void;
     lockPortrait: () => void;
+
+    getHasRegisteredLoad: () => HasRegisteredLoadResponse;
+    setHasRegisteredLoad: () => void;
 
     deleteDatabaseDirectory: (databaseName: string, shouldRemoveDirectory: boolean) => DatabaseOperationResult;
     renameDatabase: (databaseName: string, newDatabaseName: string) => DatabaseOperationResult;
@@ -57,6 +70,11 @@ export interface Spec extends TurboModule {
     removeChannelNotifications(serverUrl: string, channelId: string): void;
     removeThreadNotifications(serverUrl: string, threadId: string): void;
     removeServerNotifications(serverUrl: string): void;
+
+    setSoftKeyboardToAdjustResize(): void;
+    setSoftKeyboardToAdjustNothing(): void;
+
+    createZipFile: (paths: string[]) => Promise<string>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('RNUtils');

@@ -5,9 +5,9 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$} from 'rxjs';
 import {combineLatestWith, switchMap, distinctUntilChanged} from 'rxjs/operators';
 
-import {General} from '@constants';
 import {observeChannel, observeIsLastAdminInChannel} from '@queries/servers/channel';
 import {observeCurrentUser} from '@queries/servers/user';
+import {isDefaultChannel} from '@utils/channel';
 
 import LeaveChannelLabel from './leave_channel_label';
 
@@ -30,8 +30,8 @@ const enhanced = withObservables(['channelId'], ({channelId, database}: OwnProps
     const canLeave = channel.pipe(
         combineLatestWith(currentUser),
         switchMap(([ch, u]) => {
-            const isDefaultChannel = ch?.name === General.DEFAULT_CHANNEL;
-            return of$(!isDefaultChannel || (isDefaultChannel && u?.isGuest));
+            const isDC = isDefaultChannel(ch);
+            return of$(!isDC || (isDC && u?.isGuest));
         }),
     );
 

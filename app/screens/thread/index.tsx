@@ -6,6 +6,7 @@ import {of as of$} from 'rxjs';
 
 import {withServerUrl} from '@context/server';
 import {observePost} from '@queries/servers/post';
+import {observeScheduledPostCountForThread} from '@queries/servers/scheduled_post';
 import {observeIsCRTEnabled} from '@queries/servers/thread';
 import EphemeralStore from '@store/ephemeral_store';
 
@@ -22,10 +23,13 @@ const enhanced = withObservables(['rootId'], ({database, rootId}: EnhanceProps) 
     const rId = rootId || EphemeralStore.getCurrentThreadId();
     const rootPost = observePost(database, rId);
 
+    const scheduledPostCount = observeScheduledPostCountForThread(database, rootId);
+
     return {
         isCRTEnabled: observeIsCRTEnabled(database),
         rootId: of$(rId),
         rootPost,
+        scheduledPostCount,
     };
 });
 

@@ -3,13 +3,15 @@
 
 import RNUtils from '@mattermost/rnutils';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {useWindowDimensions, Platform} from 'react-native';
+import {DeviceEventEmitter, Platform, StyleSheet, View} from 'react-native';
 
 import {CaptionsEnabledContext} from '@calls/context';
 import {hasCaptions} from '@calls/utils';
+import {Events} from '@constants';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import {useIsTablet} from '@hooks/device';
+import {useIsTablet, useWindowDimensions} from '@hooks/device';
 import {useGalleryControls} from '@hooks/gallery';
+import SecurityManager from '@managers/security_manager';
 import {dismissOverlay, setScreensOrientation} from '@screens/navigation';
 import {freezeOtherScreens} from '@utils/gallery';
 
@@ -28,6 +30,10 @@ type Props = {
     items: GalleryItemType[];
 }
 
+const styles = StyleSheet.create({
+    flex: {flex: 1},
+});
+
 const GalleryScreen = ({componentId, galleryIdentifier, hideActions, initialIndex, items}: Props) => {
     const dim = useWindowDimensions();
     const isTablet = useIsTablet();
@@ -35,7 +41,7 @@ const GalleryScreen = ({componentId, galleryIdentifier, hideActions, initialInde
     const [captionsEnabled, setCaptionsEnabled] = useState<boolean[]>(new Array(items.length).fill(true));
     const [captionsAvailable, setCaptionsAvailable] = useState<boolean[]>([]);
     const {setControlsHidden, headerStyles, footerStyles} = useGalleryControls();
-    const dimensions = useMemo(() => ({width: dim.width, height: dim.height}), [dim.width]);
+    const dimensions = useMemo(() => ({width: dim.width, height: dim.height}), [dim]);
     const galleryRef = useRef<GalleryRef>(null);
 
     useEffect(() => {
@@ -74,40 +80,55 @@ const GalleryScreen = ({componentId, galleryIdentifier, hideActions, initialInde
         requestAnimationFrame(async () => {
             dismissOverlay(componentId);
         });
-    }, [isTablet]);
+    }, [componentId, isTablet]);
 
     const onIndexChange = useCallback((index: number) => {
         setLocalIndex(index);
     }, []);
 
+    useEffect(() => {
+        const listener = DeviceEventEmitter.addListener(Events.CLOSE_GALLERY, () => {
+            onClose();
+        });
+
+        return () => {
+            listener.remove();
+        };
+    }, [onClose]);
+
     useAndroidHardwareBackHandler(componentId, close);
 
     return (
         <CaptionsEnabledContext.Provider value={captionsEnabled}>
-            <Header
-                index={localIndex}
-                onClose={onClose}
-                style={headerStyles}
-                total={items.length}
-            />
-            <Gallery
-                galleryIdentifier={galleryIdentifier}
-                initialIndex={initialIndex}
-                items={items}
-                onHide={close}
-                onIndexChange={onIndexChange}
-                onShouldHideControls={setControlsHidden}
-                ref={galleryRef}
-                targetDimensions={dimensions}
-            />
-            <Footer
-                hideActions={hideActions}
-                item={items[localIndex]}
-                style={footerStyles}
-                hasCaptions={captionsAvailable[localIndex]}
-                captionEnabled={captionsEnabled[localIndex]}
-                onCaptionsPress={onCaptionsPress}
-            />
+            <View
+                style={styles.flex}
+                nativeID={SecurityManager.getShieldScreenId(componentId)}
+            >
+                <Header
+                    index={localIndex}
+                    onClose={onClose}
+                    style={headerStyles}
+                    total={items.length}
+                />
+                <Gallery
+                    galleryIdentifier={galleryIdentifier}
+                    initialIndex={initialIndex}
+                    items={items}
+                    onHide={close}
+                    onIndexChange={onIndexChange}
+                    onShouldHideControls={setControlsHidden}
+                    ref={galleryRef}
+                    targetDimensions={dimensions}
+                />
+                <Footer
+                    hideActions={hideActions}
+                    item={items[localIndex]}
+                    style={footerStyles}
+                    hasCaptions={captionsAvailable[localIndex]}
+                    captionEnabled={captionsEnabled[localIndex]}
+                    onCaptionsPress={onCaptionsPress}
+                />
+            </View>
         </CaptionsEnabledContext.Provider>
     );
 };

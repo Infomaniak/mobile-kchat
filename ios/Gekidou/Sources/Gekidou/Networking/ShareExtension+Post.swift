@@ -124,6 +124,9 @@ extension ShareExtension {
             return
         }
         
+        self.removeUploadSessionData(id: id)
+        self.deleteUploadedFiles(files: data.files)
+        
         if let serverUrl = data.serverUrl,
            let channelId = data.channelId {
             Network.default.createPost(
@@ -131,9 +134,16 @@ extension ShareExtension {
                 channelId: channelId,
                 message: data.message,
                 fileIds: data.fileIds,
-                completionHandler: { _, _, _ in
-                    self.removeUploadSessionData(id: id)
-                    self.deleteUploadedFiles(files: data.files)
+                completionHandler: {info, reponse, error in
+                    if let err = error {
+                        os_log(
+                            "Mattermost BackgroundSession: error to create post for session identifier=%{public}@ -- %{public}@",
+                            log: .default,
+                            type: .error,
+                            id,
+                            err.localizedDescription
+                        )
+                    }
                     
                     if let handler = completionHandler {
                         os_log(

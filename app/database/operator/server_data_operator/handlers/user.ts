@@ -127,7 +127,7 @@ const UserHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
         const createOrUpdateRawValues = getUniqueRawsBy({raws: users, key: 'id'});
 
-        return this.handleRecords({
+        const userModels = await this.handleRecords({
             fieldName: 'id',
             transformer: transformUserRecord,
             createOrUpdateRawValues,
@@ -135,6 +135,8 @@ const UserHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             prepareRecordsOnly,
             shouldUpdate: shouldUpdateUserRecord,
         }, 'handleUsers');
+
+        return userModels;
     };
 };
 

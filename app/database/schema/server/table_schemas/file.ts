@@ -20,5 +20,6 @@ export default tableSchema({
         {name: 'size', type: 'number'},
         {name: 'width', type: 'number'},
         {name: 'transcript', type: 'string'},
+        {name: 'is_blocked', type: 'boolean'},
     ],
 });

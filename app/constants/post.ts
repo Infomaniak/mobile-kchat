@@ -3,7 +3,7 @@
 
 import {toMilliseconds} from '@utils/datetime';
 
-export const PostTypes: Record<string, string> = {
+export const PostTypes = {
     USER_MENTIONED_IN_CHANNEL: 'system_mentioned_channel',
     CHANNEL_DELETED: 'system_channel_deleted',
     CHANNEL_UNARCHIVED: 'system_channel_restored',
@@ -43,7 +43,7 @@ export const PostTypes: Record<string, string> = {
 
     IK_SYSTEM_POST_REMINDER: 'system_post_reminder',
     IK_SYSTEM_WELCOME_MESSAGE: 'system_welcome_message',
-};
+} as const;
 
 export const PostPriorityColors = {
     URGENT: '#D24B4E',
@@ -85,4 +85,5 @@ export default {
         PostTypes.ADD_TO_TEAM,
         PostTypes.REMOVE_FROM_TEAM,
     ],
+    POST_TIME_TO_FAIL,
 };

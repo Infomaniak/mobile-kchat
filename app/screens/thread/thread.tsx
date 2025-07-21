@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {uniqueId} from 'lodash';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {type LayoutChangeEvent, StyleSheet, View} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
@@ -10,18 +10,18 @@ import {storeLastViewedThreadIdAndServer, removeLastViewedThreadIdAndServer} fro
 import FreezeScreen from '@components/freeze_screen';
 import PostDraft from '@components/post_draft';
 import RoundedHeaderContext from '@components/rounded_header_context';
+import ScheduledPostIndicator from '@components/scheduled_post_indicator';
 import {Screens} from '@constants';
-import {THREAD_ACCESSORIES_CONTAINER_NATIVE_ID} from '@constants/post_draft';
+import {ExtraKeyboardProvider} from '@context/extra_keyboard';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useDidUpdate from '@hooks/did_update';
-import {useKeyboardTrackingPaused} from '@hooks/keyboard_tracking';
+import SecurityManager from '@managers/security_manager';
 import {popTopScreen, setButtons} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 
 import ThreadPostList from './thread_post_list';
 
-import type {KeyboardTrackingViewRef} from '@mattermost/keyboard-tracker';
 import type PostModel from '@typings/database/models/servers/post';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
@@ -30,10 +30,10 @@ type ThreadProps = {
     isCRTEnabled: boolean;
     rootId: string;
     rootPost?: PostModel;
+    scheduledPostCount: number;
 };
 
 const edges: Edge[] = ['left', 'right'];
-const trackKeyboardForScreens = [Screens.THREAD];
 
 const styles = StyleSheet.create({
     flex: {flex: 1},
@@ -44,15 +44,14 @@ const Thread = ({
     isCRTEnabled,
     rootId,
     rootPost,
+    scheduledPostCount,
 }: ThreadProps) => {
-    const postDraftRef = useRef<KeyboardTrackingViewRef>(null);
     const [containerHeight, setContainerHeight] = useState(0);
 
     const close = useCallback(() => {
         popTopScreen(componentId);
     }, [componentId]);
 
-    useKeyboardTrackingPaused(postDraftRef, rootId, trackKeyboardForScreens);
     useAndroidHardwareBackHandler(componentId, close);
 
     useEffect(() => {
@@ -110,27 +109,34 @@ const Thread = ({
                 edges={edges}
                 testID='thread.screen'
                 onLayout={onLayout}
+                nativeID={SecurityManager.getShieldScreenId(componentId)}
             >
                 <RoundedHeaderContext/>
                 {Boolean(rootPost) &&
-                <>
+                <ExtraKeyboardProvider>
                     <View style={styles.flex}>
                         <ThreadPostList
                             nativeID={rootId}
                             rootPost={rootPost!}
                         />
                     </View>
+                    <>
+                        {scheduledPostCount > 0 &&
+                            <ScheduledPostIndicator
+                                isThread={true}
+                                scheduledPostCount={scheduledPostCount}
+                            />
+                        }
+                    </>
                     <PostDraft
                         channelId={rootPost!.channelId}
-                        scrollViewNativeID={rootId}
-                        accessoriesContainerID={THREAD_ACCESSORIES_CONTAINER_NATIVE_ID}
                         rootId={rootId}
-                        keyboardTracker={postDraftRef}
                         testID='thread.post_draft'
                         containerHeight={containerHeight}
                         isChannelScreen={false}
+                        location={Screens.THREAD}
                     />
-                </>
+                </ExtraKeyboardProvider>
                 }
             </SafeAreaView>
         </FreezeScreen>

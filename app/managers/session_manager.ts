@@ -7,7 +7,7 @@ import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react
 
 import {storeOnboardingViewedValue} from '@actions/app/global';
 import {syncMultiTeam, syncServerData} from '@actions/remote/entry/ikcommon';
-import {cancelSessionNotification, logout} from '@actions/remote/session';
+import {cancelSessionNotification, logout, scheduleSessionNotification} from '@actions/remote/session';
 import {Events, Launch} from '@constants';
 import DatabaseManager from '@database/manager';
 import {resetMomentLocale} from '@i18n';
@@ -15,6 +15,7 @@ import {getAllServerCredentials, removeServerCredentials} from '@init/credential
 import {relaunchApp} from '@init/launch';
 import PushNotifications from '@init/push_notifications';
 import NetworkManager from '@managers/network_manager';
+import SecurityManager from '@managers/security_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {getAllServers, getServerDisplayName} from '@queries/app/servers';
 import {getCurrentUser} from '@queries/servers/user';
@@ -31,10 +32,10 @@ type LogoutCallbackArg = {
     removeServer: boolean;
 }
 
-class SessionManager {
+export class SessionManagerSingleton {
     private previousAppState: AppStateStatus;
     private scheduling = false;
-    private terminatingSessionUrl: undefined|string;
+    private terminatingSessionUrl = new Set<string>();
 
     constructor() {
         AppState.addEventListener('change', this.onAppStateChange);
@@ -80,7 +81,12 @@ class SessionManager {
     private scheduleAllSessionNotifications = async () => {
         if (!this.scheduling) {
             this.scheduling = true;
-            const promises: Array<Promise<void>> = [];
+            const serverCredentials = await getAllServerCredentials();
+            const promises: Array<Promise<{error: unknown} | {error?: undefined}>> = [];
+            for (const {serverUrl} of serverCredentials) {
+                promises.push(scheduleSessionNotification(serverUrl));
+            }
+
             await Promise.all(promises);
             this.scheduling = false;
         }
@@ -100,6 +106,7 @@ class SessionManager {
         cancelSessionNotification(serverUrl);
         await removeServerCredentials(serverUrl);
         PushNotifications.removeServerNotifications(serverUrl);
+        SecurityManager.removeServer(serverUrl);
 
         NetworkManager.invalidateClient(serverUrl);
         WebsocketManager.invalidateClient(serverUrl);
@@ -161,7 +168,7 @@ class SessionManager {
     };
 
     private onLogout = async ({serverUrl, removeServer}: LogoutCallbackArg) => {
-        if (this.terminatingSessionUrl === serverUrl) {
+        if (this.terminatingSessionUrl.has(serverUrl)) {
             return;
         }
         const activeServerUrl = await DatabaseManager.getActiveServerUrl();
@@ -191,8 +198,12 @@ class SessionManager {
     };
 
     private onSessionExpired = async (serverUrl: string) => {
-        this.terminatingSessionUrl = serverUrl;
-        await logout(serverUrl, false, false, true);
+        this.terminatingSessionUrl.add(serverUrl);
+
+        // logout is not doing anything in this scenario, but we keep it
+        // to keep the same flow as other logout scenarios.
+        await logout(serverUrl, undefined, {skipServerLogout: true, skipEvents: true});
+
         await this.terminateSession(serverUrl, false);
 
         const activeServerUrl = await DatabaseManager.getActiveServerUrl();
@@ -204,8 +215,9 @@ class SessionManager {
         } else {
             EphemeralStore.theme = undefined;
         }
-        this.terminatingSessionUrl = undefined;
+        this.terminatingSessionUrl.delete(serverUrl);
     };
 }
 
-export default new SessionManager();
+const SessionManager = new SessionManagerSingleton();
+export default SessionManager;

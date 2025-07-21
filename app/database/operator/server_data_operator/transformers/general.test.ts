@@ -4,6 +4,7 @@
 import {OperationType} from '@constants/database';
 import {
     transformCustomEmojiRecord,
+    transformFileRecord,
     transformRoleRecord,
     transformSystemRecord,
 } from '@database/operator/server_data_operator/transformers/general';
@@ -46,7 +47,7 @@ describe('*** System Prepare Records Test ***', () => {
             database: database!,
             value: {
                 record: undefined,
-                raw: {id: 'system-1', name: 'system-name-1', value: 'system'},
+                raw: {id: 'system-1', value: 'system'},
             },
         });
 
@@ -83,3 +84,37 @@ describe('*** CustomEmoj Prepare Records Test ***', () => {
     });
 });
 
+describe('*** Files Prepare Records Test ***', () => {
+    it('=> transformFileRecord: should return an array of type File', async () => {
+        expect.assertions(3);
+
+        const database = await createTestConnection({databaseName: 'post_prepare_records', setActive: true});
+        expect(database).toBeTruthy();
+
+        const preparedRecords = await transformFileRecord({
+            action: OperationType.CREATE,
+            database: database!,
+            value: {
+                record: undefined,
+                raw: {
+                    id: 'file-id',
+                    post_id: 'ps81iqbddesfby8jayz7owg4yypoo',
+                    name: 'test_file',
+                    extension: '.jpg',
+                    has_preview_image: true,
+                    mime_type: 'image/jpeg',
+                    size: 1000,
+                    create_at: 1609253011321,
+                    delete_at: 1609253011321,
+                    height: 20,
+                    width: 20,
+                    update_at: 1609253011321,
+                    user_id: 'wqyby5r5pinxxdqhoaomtacdhc',
+                },
+            },
+        });
+
+        expect(preparedRecords).toBeTruthy();
+        expect(preparedRecords!.collection.table).toBe('File');
+    });
+});

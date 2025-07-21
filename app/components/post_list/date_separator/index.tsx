@@ -2,18 +2,18 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-import {type StyleProp, View, type ViewStyle} from 'react-native';
+import {type StyleProp, type TextStyle, View, type ViewStyle} from 'react-native';
 
-import FormattedDate from '@components/formatted_date';
+import FormattedDate, {type FormattedDateFormat} from '@components/formatted_date';
 import FormattedText from '@components/formatted_text';
 import {useTheme} from '@context/theme';
-import {isToday, isYesterday} from '@utils/datetime';
+import {isSameYear, isToday, isYesterday} from '@utils/datetime';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 type DateSeparatorProps = {
     date: number | Date;
-    style?: StyleProp<ViewStyle>;
+    style?: StyleProp<Intersection<TextStyle, ViewStyle>>;
     timezone?: string | null;
 };
 
@@ -38,6 +38,11 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
+const DATE_FORMATS = {
+    withinYear: {month: 'short', day: 'numeric'},
+    afterYear: {dateStyle: 'medium'},
+} satisfies Record<string, FormattedDateFormat>;
+
 const RecentDate = (props: DateSeparatorProps) => {
     const {date, ...otherProps} = props;
     const when = new Date(date);
@@ -60,6 +65,8 @@ const RecentDate = (props: DateSeparatorProps) => {
         );
     }
 
+    const format: FormattedDateFormat = isSameYear(when, new Date()) ? DATE_FORMATS.withinYear : DATE_FORMATS.afterYear;
+
     return (
         <FormattedDate
             {...otherProps}
@@ -73,7 +80,7 @@ const DateSeparator = (props: DateSeparatorProps) => {
     const styles = getStyleSheet(theme);
 
     return (
-        <View style={[styles.container, props.style]}>
+        <View style={[styles.container, props.style as StyleProp<ViewStyle>]}>
             <View style={styles.line}/>
             <RecentDate
                 {...props}

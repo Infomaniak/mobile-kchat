@@ -10,7 +10,7 @@ import {toMilliseconds} from '@utils/datetime';
 const TIME_TO_CLEAR_WEBSOCKET_ACTIONS = toMilliseconds({seconds: 30});
 import type {KSuiteLimit} from '@components/post_list/limited_messages/limited_messages';
 
-class EphemeralStore {
+class EphemeralStoreSingleton {
     theme: Theme | undefined;
     creatingChannel = false;
     creatingDMorGMTeammates: string[] = [];
@@ -46,6 +46,11 @@ class EphemeralStore {
     // launch will be called) but the notification callbacks are registered. This is used
     // so the notification is processed only once (preferably on launch).
     private processingNotification = '';
+
+    // This is used to track the channels that have their playbooks synced with the server.
+    // This is used to avoid fetching the playbooks for the same channel multiple times.
+    // It is cleared any time the connection with the server is lost.
+    private channelPlaybooksSynced: {[serverUrl: string]: Set<string>} = {};
 
     setProcessingNotification = (v: string) => {
         this.processingNotification = v;
@@ -304,4 +309,5 @@ class EphemeralStore {
     };
 }
 
-export default new EphemeralStore();
+const EphemeralStore = new EphemeralStoreSingleton();
+export default EphemeralStore;

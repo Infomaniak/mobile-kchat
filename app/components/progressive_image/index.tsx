@@ -11,7 +11,9 @@ import {useTheme} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
-const AnimatedImageBackground = Animated.createAnimatedComponent(ImageBackground);
+
+// TODO UPSTREAM : check loading state ??
+
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 type Props = ProgressiveImageProps & {
@@ -69,15 +71,14 @@ const ProgressiveImage = ({
     if (isBackgroundImage && imageUri) {
         return (
             <View style={[styles.defaultImageContainer, style]}>
-                <AnimatedImageBackground
+                <ImageBackground
                     key={id}
                     source={imgSource}
                     contentFit='cover'
-                    style={[StyleSheet.absoluteFill, imageStyle]}
-                    onLoad={handleLoad}
+                    style={[StyleSheet.absoluteFill, imageStyle as StyleProp<ViewStyle>]}
                 >
                     {children}
-                </AnimatedImageBackground>
+                </ImageBackground>
             </View>
         );
     }
@@ -118,9 +119,8 @@ const ProgressiveImage = ({
                 testID='progressive_image.highResImage'
                 transition={300}
                 style={[StyleSheet.absoluteFill, imageStyle]}
-                source={showImage ? imgSource : undefined}
-                autoplay={false}
-                onLoad={handleLoad}
+                source={(showImage) ? {uri: imageUri} : undefined}
+                autoplay={true}
             />
         </Animated.View>
     );

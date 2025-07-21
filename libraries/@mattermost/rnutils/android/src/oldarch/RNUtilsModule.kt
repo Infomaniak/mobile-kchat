@@ -5,6 +5,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.WritableMap
+import com.facebook.react.bridge.ReadableArray
 
 class RNUtilsModule(context: ReactApplicationContext) :
   ReactContextBaseJavaModule(context) {
@@ -39,6 +40,21 @@ class RNUtilsModule(context: ReactApplicationContext) :
         return implementation.isRunningInSplitView()
     }
 
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun getWindowDimensions(): WritableMap? {
+        return implementation.getWindowDimensions()
+    }
+
+    @ReactMethod
+    fun setHasRegisteredLoad() {
+        implementation.setHasRegisteredLoad()
+    }
+
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun getHasRegisteredLoad(): WritableMap {
+        return implementation.getHasRegisteredLoad()
+    }
+
     @ReactMethod
     fun unlockOrientation() {
         implementation.unlockOrientation()
@@ -51,7 +67,7 @@ class RNUtilsModule(context: ReactApplicationContext) :
 
     @ReactMethod(isBlockingSynchronousMethod = true)
     fun deleteDatabaseDirectory(databaseName: String?, shouldRemoveDirectory: Boolean): WritableMap {
-        return implementation.deleteDatabaseDirectory(databaseName, shouldRemoveDirectory)
+        return implementation.deleteDatabaseDirectory()
     }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
@@ -82,5 +98,21 @@ class RNUtilsModule(context: ReactApplicationContext) :
     @ReactMethod
     fun removeServerNotifications(serverUrl: String?) {
         implementation.removeServerNotifications(serverUrl)
+    }
+
+    @ReactMethod
+    fun setSoftKeyboardToAdjustResize() {
+        implementation.setSoftKeyboardToAdjustResize()
+    }
+
+    @ReactMethod
+    fun setSoftKeyboardToAdjustNothing() {
+        implementation.setSoftKeyboardToAdjustNothing()
+    }
+
+    @ReactMethod
+    fun createZipFile(paths: ReadableArray, promise: Promise?) {
+        val pathList = paths.toArrayList().map { it.toString() }
+        implementation.createZipFile(pathList, promise)
     }
 }

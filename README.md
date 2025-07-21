@@ -2,8 +2,8 @@
 
 kChat is a fork of Mattermost mobile adapted for use within the Infomaniak ecosystem.
 
-- **Minimum Server versions:** Current ESR version (9.5.0+)
-- **Supported iOS versions:** 13.4+
+- **Minimum Server versions:** Current ESR version (10.5.0+)
+- **Supported iOS versions:** 15.1+
 - **Supported Android versions:** 7.0+
 
 While the mobile app is a fork of Mattermost, the back-end is custom made and entierely developped by Infomaniak.

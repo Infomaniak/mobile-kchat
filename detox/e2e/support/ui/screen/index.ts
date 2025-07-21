@@ -15,6 +15,7 @@ import CreateDirectMessageScreen from './create_direct_message';
 import CreateOrEditChannelScreen from './create_or_edit_channel';
 import CustomStatusScreen from './custom_status';
 import DisplaySettingsScreen from './display_settings';
+import DraftScreen from './draft_screen';
 import EditPostScreen from './edit_post';
 import EditProfileScreen from './edit_profile';
 import EditServerScreen from './edit_server';
@@ -34,6 +35,7 @@ import PushNotificationSettingsScreen from './push_notification_settings';
 import ReactionsScreen from './reactions';
 import RecentMentionsScreen from './recent_mentions';
 import SavedMessagesScreen from './saved_messages';
+import ScheduleMessageScreen from './scheduled_message_screen';
 import SearchMessagesScreen from './search_messages';
 import SelectTimezoneScreen from './select_timezone';
 import ServerScreen from './server';
@@ -93,4 +95,6 @@ export {
     ThreadOptionsScreen,
     TimezoneDisplaySettingsScreen,
     UserProfileScreen,
+    DraftScreen,
+    ScheduleMessageScreen,
 };

@@ -26,7 +26,7 @@ const {
  * @param {RecordPair} operator.value
  * @returns {Promise<PostModel>}
  */
-export const transformPostRecord = ({action, database, value}: TransformerArgs): Promise<PostModel> => {
+export const transformPostRecord = ({action, database, value}: TransformerArgs<PostModel, Post>): Promise<PostModel> => {
     const raw = value.raw as Post;
     const record = value.record as PostModel;
     const isCreateAction = action === OperationType.CREATE;
@@ -73,7 +73,7 @@ export const transformPostRecord = ({action, database, value}: TransformerArgs):
  * @param {RecordPair} operator.value
  * @returns {Promise<PostsInThreadModel>}
  */
-export const transformPostInThreadRecord = ({action, database, value}: TransformerArgs): Promise<PostsInThreadModel> => {
+export const transformPostInThreadRecord = ({action, database, value}: TransformerArgs<PostsInThreadModel, PostsInThread>): Promise<PostsInThreadModel> => {
     const raw = value.raw as PostsInThread;
     const record = value.record as PostsInThreadModel;
     const isCreateAction = action === OperationType.CREATE;
@@ -101,7 +101,7 @@ export const transformPostInThreadRecord = ({action, database, value}: Transform
  * @param {RecordPair} operator.value
  * @returns {Promise<FileModel>}
  */
-export const transformFileRecord = ({action, database, value}: TransformerArgs): Promise<FileModel> => {
+export const transformFileRecord = ({action, database, value}: TransformerArgs<FileModel, FileInfo>): Promise<FileModel> => {
     const raw = value.raw as FileInfo;
     const record = value.record as FileModel;
     const isCreateAction = action === OperationType.CREATE;
@@ -140,7 +140,7 @@ export const transformFileRecord = ({action, database, value}: TransformerArgs):
  * @param {RecordPair} operator.value
  * @returns {Promise<DraftModel>}
  */
-export const transformDraftRecord = ({action, database, value}: TransformerArgs): Promise<DraftModel> => {
+export const transformDraftRecord = ({action, database, value}: TransformerArgs<DraftModel, Draft>): Promise<DraftModel> => {
     const emptyFileInfo: FileInfo[] = [];
     const emptyPostMetadata: PostMetadata = {};
     const raw = value.raw as Draft;
@@ -171,7 +171,7 @@ export const transformDraftRecord = ({action, database, value}: TransformerArgs)
  * @param {RecordPair} operator.value
  * @returns {Promise<PostsInChannelModel>}
  */
-export const transformPostsInChannelRecord = ({action, database, value}: TransformerArgs): Promise<PostsInChannelModel> => {
+export const transformPostsInChannelRecord = ({action, database, value}: TransformerArgs<PostsInChannelModel, PostsInChannel>): Promise<PostsInChannelModel> => {
     const raw = value.raw as PostsInChannel;
     const record = value.record as PostsInChannelModel;
     const isCreateAction = action === OperationType.CREATE;

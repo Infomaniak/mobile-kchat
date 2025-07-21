@@ -7,7 +7,6 @@ import {Text, View} from 'react-native';
 
 import {convertGroupMessageToPrivateChannel, switchToChannelById} from '@actions/remote/channel';
 import Button from '@components/button';
-import Loading from '@components/loading';
 import {ServerErrors} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
@@ -16,7 +15,7 @@ import {getCurrentTeamId} from '@queries/servers/system';
 import {isErrorWithMessage, isServerError} from '@utils/errors';
 import {logError} from '@utils/log';
 import {preventDoubleTap} from '@utils/tap';
-import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {makeStyleSheetFromTheme} from '@utils/theme';
 import {displayUsername} from '@utils/user';
 
 import {ChannelNameInput} from '../channel_name_input';
@@ -35,7 +34,6 @@ const getStyleFromTheme = makeStyleSheetFromTheme((theme: Theme) => {
             color: theme.dndIndicator,
         },
         loadingContainerStyle: {
-            marginRight: 10,
             padding: 0,
             top: -2,
         },
@@ -129,13 +127,6 @@ export const ConvertGMToChannelForm = ({
         memberNames,
     });
 
-    const buttonIcon = conversionInProgress ? (
-        <Loading
-            containerStyle={styles.loadingContainerStyle}
-            color={changeOpacity(theme.centerChannelColor, 0.32)}
-        />
-    ) : null;
-
     return (
         <View style={styles.container}>
             <MessageBox
@@ -150,9 +141,10 @@ export const ConvertGMToChannelForm = ({
                 onPress={handleOnPress}
                 text={confirmButtonText}
                 theme={theme}
-                buttonType={submitButtonEnabled ? 'destructive' : 'disabled'}
                 size='lg'
-                iconComponent={buttonIcon}
+                disabled={!submitButtonEnabled}
+                isDestructive={true}
+                showLoader={conversionInProgress}
             />
             {
                 errorMessage &&

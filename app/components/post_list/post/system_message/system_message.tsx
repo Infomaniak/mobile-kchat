@@ -15,15 +15,17 @@ import {useTheme} from '@context/theme';
 import {t} from '@i18n';
 import {getMarkdownTextStyles} from '@utils/markdown';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {secureGetFromRecord, ensureString} from '@utils/types';
 import {typography} from '@utils/typography';
 
 import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
+import type {AvailableScreens} from '@typings/screens/navigation';
 import type {PrimitiveType} from 'intl-messageformat';
 
 type SystemMessageProps = {
     author?: UserModel;
-    location: string;
+    location: AvailableScreens;
     post: PostModel;
     currentUser?: UserModel;
 }
@@ -144,8 +146,8 @@ const renderHeaderChangeMessage = ({post, author, location, styles, intl, theme}
     }
 
     const username = renderUsername(author.username);
-    const oldHeader = post.props?.old_header;
-    const newHeader = post.props?.new_header;
+    const oldHeader = ensureString(post.props?.old_header);
+    const newHeader = ensureString(post.props?.new_header);
     let localeHolder;
 
     if (post.props?.new_header) {
@@ -187,12 +189,12 @@ const renderPurposeChangeMessage = ({post, author, location, styles, intl, theme
     }
 
     const username = renderUsername(author.username);
-    const oldPurpose = post.props?.old_purpose;
-    const newPurpose = post.props?.new_purpose;
+    const oldPurpose = ensureString(post.props?.old_purpose);
+    const newPurpose = ensureString(post.props?.new_purpose);
     let localeHolder;
 
-    if (post.props?.new_purpose) {
-        if (post.props?.old_purpose) {
+    if (newPurpose) {
+        if (oldPurpose) {
             localeHolder = {
                 id: t('mobile.system_message.update_channel_purpose_message.updated_from'),
                 defaultMessage: '{username} updated the channel purpose from: {oldPurpose} to: {newPurpose}',
@@ -209,7 +211,7 @@ const renderPurposeChangeMessage = ({post, author, location, styles, intl, theme
 
         values = {username, oldPurpose, newPurpose};
         return renderMessage({post, styles, intl, location, localeHolder, values, skipMarkdown: true, theme});
-    } else if (post.props?.old_purpose) {
+    } else if (oldPurpose) {
         localeHolder = {
             id: t('mobile.system_message.update_channel_purpose_message.removed'),
             defaultMessage: '{username} removed the channel purpose (was: {oldPurpose})',
@@ -229,8 +231,8 @@ const renderPurposeChangeMessage = ({post, author, location, styles, intl, theme
 };
 
 const renderDisplayNameChangeMessage = ({post, author, location, styles, intl, theme}: RenderersProps) => {
-    const oldDisplayName = post.props?.old_displayname;
-    const newDisplayName = post.props?.new_displayname;
+    const oldDisplayName = ensureString(post.props?.old_displayname);
+    const newDisplayName = ensureString(post.props?.new_displayname);
 
     if (!(author?.username)) {
         return null;
@@ -273,12 +275,12 @@ const renderUnarchivedMessage = ({post, author, location, styles, intl, theme}: 
 };
 
 const renderAddGuestToChannelMessage = ({post, location, styles, intl, theme}: RenderersProps, hideGuestTags: boolean) => {
-    if (!post.props.username || !post.props.addedUsername) {
+    const username = renderUsername(ensureString(post.props?.username));
+    const addedUsername = renderUsername(ensureString(post.props?.addedUsername));
+
+    if (!username || !addedUsername) {
         return null;
     }
-
-    const username = renderUsername(post.props.username);
-    const addedUsername = renderUsername(post.props.addedUsername);
 
     const localeHolder = hideGuestTags ? postTypeMessages[Post.POST_TYPES.ADD_TO_CHANNEL].one : {
         id: t('api.channel.add_guest.added'),
@@ -305,11 +307,11 @@ const renderUserMentionedInChannelMessage = ({post, styles, intl, theme, locatio
 };
 
 const renderGuestJoinChannelMessage = ({post, styles, location, intl, theme}: RenderersProps, hideGuestTags: boolean) => {
-    if (!post.props.username) {
+    const username = renderUsername(ensureString(post.props?.username));
+    if (!username) {
         return null;
     }
 
-    const username = renderUsername(post.props.username);
     const localeHolder = hideGuestTags ? postTypeMessages[Post.POST_TYPES.JOIN_CHANNEL].one : {
         id: t('api.channel.guest_join_channel.post_and_forget'),
         defaultMessage: '{username} joined the channel as a guest.',
@@ -404,7 +406,7 @@ export const SystemMessage = ({post, location, author, hideGuestTags, currentUse
         return renderUserMentionedInChannelMessage({post, styles, intl, location, theme});
     }
 
-    const renderer = systemMessageRenderers[post.type];
+    const renderer = secureGetFromRecord(systemMessageRenderers, post.type);
     if (!renderer) {
         return (
             <Markdown

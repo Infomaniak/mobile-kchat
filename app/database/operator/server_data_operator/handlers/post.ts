@@ -6,24 +6,29 @@ import {Q} from '@nozbe/watermelondb';
 import {ActionType} from '@constants';
 import {MM_TABLES} from '@constants/database';
 import {buildDraftKey} from '@database/operator/server_data_operator/comparators';
-import {shouldUpdateFileRecord} from '@database/operator/server_data_operator/comparators/files';
 import {
     transformDraftRecord,
-    transformFileRecord,
     transformPostInThreadRecord,
     transformPostRecord,
     transformPostsInChannelRecord,
+    transformSchedulePostsRecord,
 } from '@database/operator/server_data_operator/transformers/post';
 import {getRawRecordPairs, getUniqueRawsBy, getValidRecordsForUpdate} from '@database/operator/utils/general';
 import {createPostsChain, getPostListEdges} from '@database/operator/utils/post';
+import {queryScheduledPostsForTeam} from '@queries/servers/scheduled_post';
+import {getCurrentTeamId} from '@queries/servers/system';
+import FileModel from '@typings/database/models/servers/file';
+import ScheduledPostModel from '@typings/database/models/servers/scheduled_post';
+import {safeParseJSON} from '@utils/helpers';
 import {logWarning} from '@utils/log';
+
+import {shouldUpdateScheduledPostRecord} from '../comparators/scheduled_post';
 
 import type ServerDataOperatorBase from '.';
 import type Database from '@nozbe/watermelondb/Database';
 import type Model from '@nozbe/watermelondb/Model';
-import type {HandleDraftArgs, HandleFilesArgs, HandlePostsArgs, RecordPair} from '@typings/database/database';
+import type {HandleDraftArgs, HandleFilesArgs, HandlePostsArgs, HandleScheduledPostErrorCodeArgs, HandleScheduledPostsArgs, RecordPair} from '@typings/database/database';
 import type DraftModel from '@typings/database/models/servers/draft';
-import type FileModel from '@typings/database/models/servers/file';
 import type PostModel from '@typings/database/models/servers/post';
 import type PostsInChannelModel from '@typings/database/models/servers/posts_in_channel';
 import type PostsInThreadModel from '@typings/database/models/servers/posts_in_thread';
@@ -31,15 +36,17 @@ import type ReactionModel from '@typings/database/models/servers/reaction';
 
 const {
     DRAFT,
-    FILE,
     POST,
     POSTS_IN_CHANNEL,
     POSTS_IN_THREAD,
+    SCHEDULED_POST,
 } = MM_TABLES.SERVER;
 
 type PostActionType = keyof typeof ActionType.POSTS;
 
 export interface PostHandlerMix {
+    handleScheduledPosts: ({actionType, scheduledPosts, includeDirectChannelPosts, prepareRecordsOnly}: HandleScheduledPostsArgs) => Promise<ScheduledPostModel[]>;
+    handleUpdateScheduledPostErrorCode: ({scheduledPostId, errorCode, prepareRecordsOnly}: HandleScheduledPostErrorCodeArgs) => Promise<ScheduledPostModel>;
     handleDraft: ({drafts, prepareRecordsOnly}: HandleDraftArgs) => Promise<DraftModel[]>;
     handleFiles: ({files, prepareRecordsOnly}: HandleFilesArgs) => Promise<FileModel[]>;
     handlePosts: ({actionType, order, posts, previousPostId, prepareRecordsOnly}: HandlePostsArgs) => Promise<Model[]>;
@@ -107,6 +114,124 @@ export const exportedForTest = {
 
 const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(superclass: TBase) => class extends superclass {
     /**
+     * handleScheduledPosts: Handler responsible for the Create/Update operations occurring the SchedulePost table from the 'Server' schema
+     * @param {HandleScheduledPostsArgs} ScheduledPostsArgs
+     * @returns {Promise<ScheduledPostModel[]>}
+     */
+    handleScheduledPosts = async ({actionType, scheduledPosts, includeDirectChannelPosts, prepareRecordsOnly}: HandleScheduledPostsArgs): Promise<ScheduledPostModel[]> => {
+        const database: Database = this.database;
+        const scheduledPostsToDelete: ScheduledPostModel[] = [];
+        const scheduledPostsToCreateAndUpdate: ScheduledPostModel[] = [];
+
+        const currentTeamId = await getCurrentTeamId(database);
+
+        switch (actionType) {
+            case ActionType.SCHEDULED_POSTS.DELETE_SCHEDULED_POST: {
+                const toDeleteIds = scheduledPosts?.map((post) => post.id) || [];
+                if (toDeleteIds.length > 0) {
+                    scheduledPostsToDelete.push(...await this._deleteScheduledPostByIds(toDeleteIds, prepareRecordsOnly));
+                }
+                break;
+            }
+
+            case ActionType.SCHEDULED_POSTS.CREATE_OR_UPDATED_SCHEDULED_POST: {
+                const createOrUpdateRawValues = getUniqueRawsBy({raws: scheduledPosts ?? [], key: 'id'}) as ScheduledPost[];
+                scheduledPostsToCreateAndUpdate.push(...await this._createOrUpdateScheduledPost(createOrUpdateRawValues, prepareRecordsOnly));
+                break;
+            }
+
+            case ActionType.SCHEDULED_POSTS.RECEIVED_ALL_SCHEDULED_POSTS: {
+                const idsFromServer = new Set(scheduledPosts?.map((post) => post.id) || []);
+                const existingScheduledPosts = await queryScheduledPostsForTeam(database, currentTeamId, includeDirectChannelPosts).fetch();
+                const deletedScheduledPostIds = existingScheduledPosts.
+                    filter((post) => !idsFromServer.has(post.id)).
+                    map((post) => post.id);
+
+                if (deletedScheduledPostIds.length > 0) {
+                    scheduledPostsToDelete.push(...await this._deleteScheduledPostByIds(deletedScheduledPostIds, prepareRecordsOnly));
+                }
+
+                if (scheduledPosts?.length) {
+                    const createOrUpdateRawValues = getUniqueRawsBy({raws: scheduledPosts ?? [], key: 'id'}) as ScheduledPost[];
+                    scheduledPostsToCreateAndUpdate.push(...await this._createOrUpdateScheduledPost(createOrUpdateRawValues, prepareRecordsOnly));
+                }
+                break;
+            }
+        }
+
+        const batch: ScheduledPostModel[] = [...scheduledPostsToDelete, ...scheduledPostsToCreateAndUpdate];
+        if (!prepareRecordsOnly && batch.length) {
+            await this.batchRecords(batch, 'handleScheduledPosts');
+        }
+
+        return batch;
+    };
+
+    handleUpdateScheduledPostErrorCode = async ({scheduledPostId, errorCode, prepareRecordsOnly}: HandleScheduledPostErrorCodeArgs) => {
+        const database: Database = this.database;
+        const scheduledPost = await database.get<ScheduledPostModel>(SCHEDULED_POST).find(scheduledPostId);
+
+        if (!scheduledPost) {
+            logWarning(
+                `Scheduled Post with id ${scheduledPostId} not found in the database`,
+            );
+            return null;
+        }
+
+        const updatedScheduledPost = scheduledPost.prepareUpdate((record) => {
+            record.errorCode = errorCode;
+            record.updateAt = scheduledPost.updateAt; // We don't want to update the updateAt field as prepareUpdate will do it if it is not set
+        });
+
+        if (!prepareRecordsOnly) {
+            await this.batchRecords([updatedScheduledPost], 'handleScheduledPostErrorCode');
+        }
+
+        return updatedScheduledPost;
+    };
+
+    _createOrUpdateScheduledPost = async (scheduledPosts: ScheduledPost[], prepareRecordsOnly = false): Promise<ScheduledPostModel[]> => {
+        const processedScheduledPosts = await this.processRecords({
+            createOrUpdateRawValues: scheduledPosts,
+            deleteRawValues: [],
+            tableName: SCHEDULED_POST,
+            fieldName: 'id',
+            shouldUpdate: shouldUpdateScheduledPostRecord,
+        });
+
+        const preparedScheduledPosts = await this.prepareRecords({
+            createRaws: processedScheduledPosts.createRaws,
+            updateRaws: processedScheduledPosts.updateRaws,
+            deleteRaws: processedScheduledPosts.deleteRaws,
+            transformer: transformSchedulePostsRecord,
+            tableName: SCHEDULED_POST,
+        }) as ScheduledPostModel[];
+
+        if (preparedScheduledPosts.length && !prepareRecordsOnly) {
+            await this.batchRecords(preparedScheduledPosts, 'handleScheduledPosts');
+        }
+
+        return preparedScheduledPosts;
+    };
+
+    _deleteScheduledPostByIds = async (scheduledPostIds: string[], prepareRecordsOnly = false): Promise<ScheduledPostModel[]> => {
+        const database: Database = this.database;
+        const scheduledPostsToDelete = await database.get<ScheduledPostModel>(SCHEDULED_POST).query(Q.where('id', Q.oneOf(scheduledPostIds))).fetch();
+
+        const preparedScheduledPosts = await this.prepareRecords({
+            deleteRaws: scheduledPostsToDelete,
+            transformer: transformSchedulePostsRecord,
+            tableName: SCHEDULED_POST,
+        }) as ScheduledPostModel[];
+
+        if (preparedScheduledPosts.length && !prepareRecordsOnly) {
+            await this.batchRecords(preparedScheduledPosts, '_deleteScheduledPostByIds');
+        }
+
+        return preparedScheduledPosts;
+    };
+
+    /**
      * handleDraft: Handler responsible for the Create/Update operations occurring the Draft table from the 'Server' schema
      * @param {HandleDraftArgs} draftsArgs
      * @param {RawDraft[]} draftsArgs.drafts
@@ -159,6 +284,7 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         const postsReactions: ReactionsPerPost[] = [];
         const pendingPostsToDelete: Post[] = [];
         const postsInThread: Record<string, Post[]> = {};
+        const receivedFilesSet = new Set<string>();
 
         // Let's process the post data
         for (const post of posts) {
@@ -180,7 +306,8 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
             // Process the metadata of each post
             if (post?.metadata && Object.keys(post?.metadata).length > 0) {
-                const data = post.metadata;
+                // parsing into json since notifications are sending metadata as a string
+                const data = safeParseJSON(post.metadata) as PostMetadata;
 
                 // Extracts reaction from post's metadata
                 if (data.reactions) {
@@ -202,6 +329,8 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
                 post.metadata = data;
             }
+
+            post.file_ids?.forEach((fileId) => receivedFilesSet.add(fileId));
         }
 
         // Get unique posts in case they are duplicated
@@ -218,8 +347,8 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             return result;
         }, new Set<string>());
 
+        const database: Database = this.database;
         if (deletedPostIds.size) {
-            const database: Database = this.database;
             const postsToDelete = await database.get<PostModel>(POST).query(Q.where('id', Q.oneOf(Array.from(deletedPostIds)))).fetch();
             if (postsToDelete.length) {
                 await database.write(async () => {
@@ -261,6 +390,13 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             batch.push(...postFiles);
         }
 
+        const allFiles = await database.get<FileModel>(MM_TABLES.SERVER.FILE).query(Q.where('post_id', Q.oneOf(uniquePosts.map((p) => p.id)))).fetch();
+        allFiles.forEach((f) => {
+            if (!receivedFilesSet.has(f.id)) {
+                batch.push(f.prepareDestroyPermanently());
+            }
+        });
+
         if (emojis.length) {
             const postEmojis = await this.handleCustomEmojis({emojis, prepareRecordsOnly: true});
             batch.push(...postEmojis);
@@ -289,47 +425,6 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         }
 
         return batch;
-    };
-
-    /**
-     * handleFiles: Handler responsible for the Create/Update operations occurring on the File table from the 'Server' schema
-     * @param {HandleFilesArgs} handleFiles
-     * @param {RawFile[]} handleFiles.files
-     * @param {boolean} handleFiles.prepareRecordsOnly
-     * @returns {Promise<FileModel[]>}
-     */
-    handleFiles = async ({files, prepareRecordsOnly}: HandleFilesArgs): Promise<FileModel[]> => {
-        if (!files?.length) {
-            logWarning(
-                'An empty or undefined "files" array has been passed to the handleFiles method',
-            );
-            return [];
-        }
-
-        const processedFiles = (await this.processRecords({
-            createOrUpdateRawValues: files,
-            tableName: FILE,
-            fieldName: 'id',
-            deleteRawValues: [],
-            shouldUpdate: shouldUpdateFileRecord,
-        }));
-
-        const postFiles = await this.prepareRecords({
-            createRaws: processedFiles.createRaws,
-            updateRaws: processedFiles.updateRaws,
-            transformer: transformFileRecord,
-            tableName: FILE,
-        });
-
-        if (prepareRecordsOnly) {
-            return postFiles;
-        }
-
-        if (postFiles?.length) {
-            await this.batchRecords(postFiles, 'handleFiles');
-        }
-
-        return postFiles;
     };
 
     /**
@@ -633,15 +728,15 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             return [];
         }
 
-        const update: RecordPair[] = [];
+        const update: Array<RecordPair<PostsInThreadModel, PostsInThread>> = [];
         const create: PostsInThread[] = [];
         const ids = Object.keys(postsMap);
         for await (const rootId of ids) {
             const {firstPost, lastPost} = getPostListEdges(postsMap[rootId]);
-            const chunks = (await this.database.get(POSTS_IN_THREAD).query(
+            const chunks = (await this.database.get<PostsInThreadModel>(POSTS_IN_THREAD).query(
                 Q.where('root_id', rootId),
                 Q.sortBy('latest', Q.desc),
-            ).fetch()) as PostsInThreadModel[];
+            ).fetch());
 
             if (chunks.length) {
                 const chunk = chunks[0];
@@ -665,12 +760,12 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             }
         }
 
-        const postInThreadRecords = (await this.prepareRecords({
+        const postInThreadRecords = await this.prepareRecords<PostsInThreadModel, PostsInThread>({
             createRaws: getRawRecordPairs(create),
             updateRaws: update,
             transformer: transformPostInThreadRecord,
             tableName: POSTS_IN_THREAD,
-        })) as PostsInThreadModel[];
+        });
 
         if (postInThreadRecords?.length && !prepareRecordsOnly) {
             await this.batchRecords(postInThreadRecords, 'handleReceivedPostsInThread');

@@ -4,19 +4,25 @@
 import React from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 
-import FormattedDate from '@components/formatted_date';
+import FormattedDate, {type FormattedDateFormat} from '@components/formatted_date';
 import {useTheme} from '@context/theme';
 import {getFormattedFileSize} from '@utils/file';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 type FileInfoProps = {
+    disabled?: boolean;
     file: FileInfo;
     showDate: boolean;
-    channelName?: string ;
+    channelName?: string;
     onPress: () => void;
-}
-const FORMAT = ' • MMM DD HH:MM A';
+};
+const FORMAT: FormattedDateFormat = {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+};
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
@@ -58,12 +64,16 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const FileInfo = ({file, channelName, showDate, onPress}: FileInfoProps) => {
+const FileInfo = ({disabled, file, channelName, showDate, onPress}: FileInfoProps) => {
     const theme = useTheme();
     const style = getStyleSheet(theme);
+
     return (
         <View style={style.attachmentContainer}>
-            <TouchableOpacity onPress={onPress}>
+            <TouchableOpacity
+                disabled={disabled}
+                onPress={onPress}
+            >
                 <Text
                     numberOfLines={1}
                     ellipsizeMode='tail'
@@ -86,13 +96,18 @@ const FileInfo = ({file, channelName, showDate, onPress}: FileInfoProps) => {
                         <Text style={style.infoText}>
                             {`${getFormattedFileSize(file.size)}${showDate ? ' • ' : ''}`}
                         </Text>
-                        {showDate &&
-                            <FormattedDate
-                                style={style.infoText}
-                                format={FORMAT}
-                                value={file.create_at as number}
-                            />
-                        }
+                        {showDate && file.create_at != null && (
+                            <>
+                                <Text style={style.infoText}>
+                                    {' • '}
+                                </Text>
+                                <FormattedDate
+                                    style={style.infoText}
+                                    format={FORMAT}
+                                    value={file.create_at}
+                                />
+                            </>
+                        )}
                     </View>
                 </View>
             </TouchableOpacity>

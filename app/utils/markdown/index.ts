@@ -2,11 +2,13 @@
 // See LICENSE.txt for license information.
 
 import {Platform, type StyleProp, StyleSheet, type TextStyle} from 'react-native';
+import parseUrl from 'url-parse';
 
 import {getViewPortWidth} from '@utils/images';
 import {logError} from '@utils/log';
 import {changeOpacity, concatStyles, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
+import {safeDecodeURIComponent} from '@utils/url';
 
 import type {MarkdownTextStyles, SearchPattern} from '@typings/global/markdown';
 
@@ -18,9 +20,9 @@ type LanguageObject = {
     };
 }
 
-// pattern to detect the existence of a Chinese, Japanese, or Korean character in a string
+// pattern to detect the existence of a Chinese, Japanese, Korean, or Thai character in a string
 // http://stackoverflow.com/questions/15033196/using-javascript-to-check-whether-a-string-contains-japanese-characters-includi
-const cjkPattern = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf\uac00-\ud7a3]/;
+const cjkPattern = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf\uac00-\ud7a3\u0e00-\u0e7f]/;
 
 const puncStart = /^[^\p{L}\d\s#]+/u;
 const puncEnd = /[^\p{L}\d\s]+$/u;
@@ -331,10 +333,11 @@ export function parseSearchTerms(searchTerm: string): string[] | undefined {
     }
 
     // remove punctuation from each term
-    terms = terms.map((term) => {
-        term.replace(puncStart, '');
+    terms = terms.map((t) => {
+        let term = t;
+        term = term.replace(puncStart, '');
         if (term.charAt(term.length - 1) !== '*') {
-            term.replace(puncEnd, '');
+            term = term.replace(puncEnd, '');
         }
         return term;
     });
@@ -346,7 +349,7 @@ export function convertSearchTermToRegex(term: string): SearchPattern {
     let pattern;
 
     if (cjkPattern.test(term)) {
-        // term contains Chinese, Japanese, or Korean characters so don't mark word boundaries
+        // term contains Chinese, Japanese, Korean or Thai characters so don't mark word boundaries
         pattern = '()(' + escapeRegex(term.replace(/\*/g, '')) + ')';
     } else if ((/[^\s][*]$/).test(term)) {
         pattern = '\\b()(' + escapeRegex(term.substring(0, term.length - 1)) + ')';
@@ -362,3 +365,12 @@ export function convertSearchTermToRegex(term: string): SearchPattern {
         term,
     };
 }
+
+export const removeImageProxyForKey = (key: string) => {
+    const parseKey = parseUrl(key, true);
+    if (parseKey.query.url) {
+        return safeDecodeURIComponent(parseKey.query.url);
+    }
+
+    return key;
+};
