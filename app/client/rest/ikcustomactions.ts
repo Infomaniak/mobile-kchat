@@ -9,13 +9,13 @@ export type TeamServer = {
 }
 
 export interface IKClientCustomActionsMix {
-    addPostReminder: (postId: string, timestamp: number, reschedule?: boolean, reminderPostId?: string) => Promise<Boolean>;
+    addPostReminder: (postId: string, timestamp: number |string, reschedule?: boolean, reminderPostId?: string) => Promise<Boolean>;
     markPostReminderAsDone: (postId: string) => Promise<Boolean>;
     translatePost: (postId: string) => Promise<Boolean>;
 }
 
 const IKClientCustomActions = (superclass: any) => class extends superclass {
-    addPostReminder = async (postId: string, timestamp: number, reschedule?: boolean, reminderPostId?: string) => {
+    addPostReminder = async (postId: string, timestamp: number |string, reschedule?: boolean, reminderPostId?: string) => {
         return this.doFetch(
             `${this.getUserRoute('me')}/posts/${postId}/reminder`,
             {method: 'post', body: {target_time: timestamp, reschedule, post_id: reminderPostId}},

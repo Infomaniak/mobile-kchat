@@ -10,7 +10,7 @@ import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
 import {Preferences} from '@constants';
-import {CUSTOM_STATUS_TIME_PICKER_INTERVALS, CUSTOM_STATUS_TIME_PICKER_INTERVALS_IN_MINUTES} from '@constants/custom_status';
+import {CUSTOM_STATUS_TIME_PICKER_INTERVALS} from '@constants/custom_status';
 import {getDisplayNamePreferenceAsBool} from '@helpers/api/preference';
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
 import {getCurrentMomentForTimezone, getRoundedTime, getUtcOffsetForTimeZone} from '@utils/helpers';
@@ -98,15 +98,14 @@ const DateTimeSelector = ({timezone, handleChange, isMilitaryTime, theme, showDa
                 <DateTimePicker
                     testID='custom_status_clear_after.date_time_picker'
                     value={date.toDate()}
-                    mode={'datetime'}
+                    mode={mode}
                     is24Hour={isMilitaryTime}
-                    display={'spinner'}
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                     onChange={onChange}
                     textColor={theme.centerChannelColor}
                     minimumDate={minimumDate.toDate()}
                     minuteInterval={CUSTOM_STATUS_TIME_PICKER_INTERVALS}
                     timeZoneOffsetInMinutes={timezoneOffSetInMinutes}
-
                 />
             )}
         </View>

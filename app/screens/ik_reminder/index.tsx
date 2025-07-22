@@ -4,7 +4,7 @@
 import {BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import moment from 'moment';
 import React, {useCallback, useMemo, useState} from 'react';
-import {ScrollView, TouchableOpacity, View} from 'react-native';
+import {Platform, ScrollView, TouchableOpacity, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {useTheme} from '@app/context/theme';
@@ -64,6 +64,14 @@ const getStyleFromTheme = makeStyleSheetFromTheme(() => {
     };
 });
 
+const IkPostReminder = {
+    THIRTY_MINUTES: '30 minutes',
+    ONE_HOUR: '1 hour',
+    TWO_HOURS: '2 hours',
+    TOMORROW: 'tomorrow',
+    MONDAY: 'monday',
+};
+
 const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, usage}: Props) => {
     const serverUrl = useServerUrl();
     const {bottom} = useSafeAreaInsets();
@@ -73,7 +81,8 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
     const Scroll = useMemo(() => (isTablet ? ScrollView : BottomSheetScrollView), [isTablet]);
     const [showCustomPicker, setShowCustomPicker] = useState<boolean>(false);
     const [expiresAt, setExpiresAt] = useState<string>('');
-
+    const [duration, setDuration] = useState<string>('');
+    const isAndroid = Platform.OS === 'android';
     const showExpiryTime = Boolean(expiresAt);
 
     const postReminderTimes = [
@@ -102,9 +111,9 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         isSystemPost = isSystemMessage(post);
     }
 
-    const handleItemClick = useCallback((duration, expiresAt) => {
-        // eslint-disable-next-line @typescript-eslint/no-shadow
-        setExpiresAt(expiresAt);
+    const handleItemClick = useCallback((dur: string, expires: string) => {
+        setExpiresAt(expires);
+        setDuration(dur);
     }, []);
 
     const snapPoints = useMemo(() => {
@@ -112,7 +121,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         const optionsCount = postReminderTimes.length;
         let space = 50;
         if (showCustomPicker) {
-            space = 100;
+            space = isAndroid ? -70 : 100;
         }
         items.push(bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT, bottom) + space);
         return items;
@@ -122,45 +131,44 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         if (!expiresAt) {
             return;
         }
-        const unixTimestamp = moment(expiresAt).unix();
+        const unixTimestamp = moment.utc(expiresAt).unix();
         addPostReminder(unixTimestamp);
         setShowCustomPicker(false);
         close();
     };
 
     const onPress = async (itemId: String) => {
-        const currentDate = getCurrentMomentForTimezone(null);
-        let endTime = currentDate;
+        let endTime: string = '';
         switch (itemId) {
             case 'thirty_minutes':
-                endTime = currentDate.add(1, 'seconds');
+                endTime = IkPostReminder.THIRTY_MINUTES;
                 break;
             case 'one_hour':
-                endTime = currentDate.add(1, 'hour');
+                endTime = IkPostReminder.ONE_HOUR;
                 break;
             case 'two_hours':
-                endTime = currentDate.add(2, 'hours');
+                endTime = IkPostReminder.TWO_HOURS;
                 break;
             case 'tomorrow':
-                endTime = currentDate.add(1, 'day').hours(9).minutes(0).seconds(0);
+                endTime = IkPostReminder.TOMORROW;
                 break;
             case 'monday':
-                endTime = currentDate.startOf('isoWeek').add(1, 'week').hours(9).minutes(0).seconds(0);
+                endTime = IkPostReminder.MONDAY;
                 break;
             case 'custom':
                 setShowCustomPicker(true);
                 return;
         }
         if (postpone) {
-            addPostponeReminder(endTime.unix());
+            addPostponeReminder(endTime);
         } else {
-            addPostReminder(endTime.unix());
+            addPostReminder(endTime);
         }
 
         close();
     };
 
-    const addPostReminder = async (timestamp: number) => {
+    const addPostReminder = async (timestamp: string | number) => {
         try {
             const client = NetworkManager.getClient(serverUrl);
             await client.addPostReminder(post.id, timestamp);
@@ -170,7 +178,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         return {};
     };
 
-    const addPostponeReminder = async (timestamp: number) => {
+    const addPostponeReminder = async (timestamp: number | string) => {
         try {
             const client = NetworkManager.getClient(serverUrl);
             const reschedule = true;
@@ -212,14 +220,9 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
                         key={item.id}
                         i18nId={item.label}
                         defaultMessage={item.labelDefault}
-
-                        // onPress={(false) ? () => onPressT() : () => onPress(item.id)}
-
                         onPress={(item.id === 'custom' && isQuotaExceeded) ? () => onPressEvolve() : () => onPress(item.id)}
                         iconName=''
                         testID={item.id}
-
-                        // rightComponent={(false) ? <UpgradeButton/> : undefined}
                         rightComponent={(item.id === 'custom' && isQuotaExceeded) ? <UpgradeButton/> : undefined}
                     />))
                 }
@@ -234,7 +237,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
                             separator={false}
                             showDateTimePicker={true}
                             showExpiryTime={showExpiryTime}
-                            showDate={true}
+                            showDate={!isAndroid}
                             showCustomStatus={false}
                         />
                         <TouchableOpacity
@@ -242,8 +245,8 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
                             onPress={handleCustomValidate}
                         >
                             <FormattedText
-                                defaultMessage={'Sauvegarder le rappel'}
-                                id='ksuite_free_baer'
+                                defaultMessage={'Set the reminder'}
+                                id='infomaniak.post_info.custom_reminder'
                                 style={styles.customButtonText}
                             />
                         </TouchableOpacity>
