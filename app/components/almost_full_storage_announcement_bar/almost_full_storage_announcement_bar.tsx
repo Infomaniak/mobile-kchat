@@ -78,9 +78,9 @@ const AlmostFullStorageAnnouncementBar = ({
         });
     }, []);
 
-    // if (!shouldShow) {
-    //     return null;
-    // }
+    if (!shouldShow) {
+        return null;
+    }
 
     return (
         <AnnouncementBanner

@@ -75,9 +75,9 @@ const FullStorageAnnouncementBar = ({
         });
     }, []);
 
-    // if (!isFull) {
-    //     return null;
-    // }
+    if (!isFull) {
+        return null;
+    }
 
     return (
 
