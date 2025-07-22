@@ -8,7 +8,7 @@ import {addColumns, createTable, schemaMigrations} from '@nozbe/watermelondb/Sch
 
 import {MM_TABLES} from '@constants/database';
 
-const {USAGE, LIMIT, CONFERENCE, CONFERENCE_PARTICIPANT, FILE, CHANNEL_INFO, DRAFT, POST, CHANNEL_MEMBERSHIP} = MM_TABLES.SERVER;
+const {TEAM, USAGE, LIMIT, CONFERENCE, CONFERENCE_PARTICIPANT, FILE, CHANNEL_INFO, DRAFT, POST, CHANNEL_MEMBERSHIP} = MM_TABLES.SERVER;
 
 export default schemaMigrations({migrations: [
     {
@@ -49,6 +49,12 @@ export default schemaMigrations({migrations: [
                     {name: 'public_channels', type: 'number'},
                     {name: 'sidebar_categories', type: 'number'},
                     {name: 'storage', type: 'number'},
+                ],
+            }),
+            addColumns({
+                table: TEAM,
+                columns: [
+                    {name: 'pack_name', type: 'string'},
                 ],
             }),
         ],
