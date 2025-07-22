@@ -19,8 +19,8 @@ export const fetchCloudLimits = async (serverUrl: string, fetchOnly = false) => 
 
         if (!fetchOnly && limits) {
             const limitsWithId = {
-                id: 'boards',
                 ...limits,
+                id: 'boards',
             };
             await operator.handleLimit({
                 limits: [limitsWithId],
@@ -44,8 +44,8 @@ export const fetchUsage = async (serverUrl: string, fetchOnly = false) => {
         }
         if (!fetchOnly && usage) {
             const usageWithId = {
-                id: 'guests',
                 ...usage,
+                id: 'guests',
             };
             await operator.handleUsage({
                 usage: [usageWithId],

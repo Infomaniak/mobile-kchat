@@ -81,6 +81,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
     const Scroll = useMemo(() => (isTablet ? ScrollView : BottomSheetScrollView), [isTablet]);
     const [showCustomPicker, setShowCustomPicker] = useState<boolean>(false);
     const [expiresAt, setExpiresAt] = useState<string>('');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [duration, setDuration] = useState<string>('');
     const isAndroid = Platform.OS === 'android';
     const showExpiryTime = Boolean(expiresAt);

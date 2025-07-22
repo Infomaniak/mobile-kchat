@@ -6,7 +6,7 @@ import {useIntl} from 'react-intl';
 
 import FormattedText from '@app/components/formatted_text';
 import {useTheme} from '@app/context/theme';
-import {useNextPlan} from '@app/hooks/plans';
+import {getNextWcPack, type PackName} from '@app/hooks/plans';
 import {formatYMDDurationHuman} from '@app/utils/duration';
 
 import BannerBase, {bannerBaseStyles} from './ik_banner_base';
@@ -15,14 +15,16 @@ import type LimitsModel from '@app/database/models/server/limits';
 
 type Props = {
     limits: LimitsModel;
+    currentPackName: string;
 }
 
 const UpgradeKsuiteBanner = ({
     limits,
+    currentPackName,
 }: Props) => {
     const theme = useTheme();
     const styles = bannerBaseStyles(theme);
-    const nextPlan = useNextPlan();
+    const nextPlan = getNextWcPack(currentPackName as PackName);
     const historyDurationLimit = limits?.messages ? sanitizeHistoryDuration(limits.messages.history) : null;
     const intl = useIntl();
 

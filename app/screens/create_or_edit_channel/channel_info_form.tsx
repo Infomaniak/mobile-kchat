@@ -94,8 +94,8 @@ type Props = {
     saving: boolean;
     type?: string;
     onChannelLimitReached?: any;
-    limits?: LimitModel;
-    usage?: CloudUsageModel;
+    limits: LimitModel;
+    usage: CloudUsageModel;
 }
 
 export default function ChannelInfoForm({
@@ -164,10 +164,10 @@ export default function ChannelInfoForm({
 
     const isPrivate = type === General.PRIVATE_CHANNEL;
 
-    const publicChannelsLimit = limits?.public_channels;
-    const privateChannelsLimit = limits?.private_channels;
-    const publicChannelsUsage = usage?.public_channels;
-    const privateChannelsUsage = usage?.private_channels;
+    const publicChannelsLimit = limits.public_channels;
+    const privateChannelsLimit = limits.private_channels;
+    const publicChannelsUsage = usage.public_channels;
+    const privateChannelsUsage = usage.private_channels;
 
     const {public_channels: publicChannelsUsageDelta, private_channels: privateChannelsUsageDelta} = useGetUsageDeltas(usage, limits);
 

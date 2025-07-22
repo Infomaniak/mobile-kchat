@@ -30,6 +30,7 @@ export function useGetUsageDeltas(usage: CloudUsageModel, limits: LimitModel): C
 
         return (
             {
+                id: '',
                 storage: usage.storage - withBackupValue(limits.storage, limitsLoaded),
                 public_channels: usage.public_channels - withBackupValue(limits.public_channels, limitsLoaded),
                 private_channels: usage.private_channels - withBackupValue(limits.private_channels, limitsLoaded),
