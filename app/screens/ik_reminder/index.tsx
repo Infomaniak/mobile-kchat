@@ -30,6 +30,7 @@ import ClearAfterMenuItem from '../custom_status_clear_after/components/clear_af
 
 import type {CloudUsageModel, LimitModel} from '@app/database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
+import type UserModel from '@typings/database/models/servers/user';
 
 const POST_OPTIONS_BUTTON = 'close-post-options';
 
@@ -38,7 +39,7 @@ type Props = {
     componentId: string;
     postId: string;
     postpone: boolean;
-    currentUser?: any;
+    currentUser?: UserModel;
     limits: LimitModel;
     usage: CloudUsageModel;
 };
@@ -240,6 +241,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
                             showExpiryTime={showExpiryTime}
                             showDate={!isAndroid}
                             showCustomStatus={false}
+                            showDateTimePickerButton={Boolean(isAndroid)}
                         />
                         <TouchableOpacity
                             style={styles.customButton}

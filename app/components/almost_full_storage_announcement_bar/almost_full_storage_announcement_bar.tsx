@@ -70,7 +70,7 @@ const AlmostFullStorageAnnouncementBar = ({
             title: '',
             props: {
                 quotaType: {
-                    title: 'infomaniak.size_quota_exceeded.title',
+                    title: 'infomaniak.size_quota_almost_exceeded.title',
                     description: quotaMessages.get(`${role}|${plan}`) ?? '',
                     image: 'storage',
                 },

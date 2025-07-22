@@ -30,6 +30,7 @@ type Props = {
     showExpiryTime?: boolean;
     showDate?: boolean;
     showCustomStatus?: boolean;
+    showDateTimePickerButton?: boolean;
 };
 
 export const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -68,7 +69,7 @@ export const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemClick, isSelected, separator, showDateTimePicker = false, showExpiryTime = false, showDate = false, showCustomStatus = true}: Props) => {
+const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemClick, isSelected, separator, showDateTimePicker = false, showExpiryTime = false, showDate = false, showCustomStatus = true, showDateTimePickerButton}: Props) => {
     const theme = useTheme();
     const intl = useIntl();
     const style = getStyleSheet(theme);
@@ -137,6 +138,7 @@ const ClearAfterMenuItem = ({currentUser, duration, expiryTime = '', handleItemC
             {showDateTimePicker && (
                 <DateTimePicker
                     showDate={showDate}
+                    showDateTimePickerButton={showDateTimePickerButton}
                     handleChange={handleCustomExpiresAtChange}
                     theme={theme}
                     timezone={getTimezone(currentUser?.timezone)}

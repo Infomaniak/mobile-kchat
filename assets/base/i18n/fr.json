@@ -1103,7 +1103,7 @@
   "infomaniak.channel_quota_exceeded.title": "Créez de nouveaux canaux pour mieux communiquer avec les membres de votre organisation",
   "infomaniak.channel_quota_exceeded.description": "Vous avez atteint la limite de canaux publics et de canaux privés sur votre kChat. Pour en créer des supplémentaires, vous devez souscrire à une offre supérieure.",
   "infomaniak.size_quota_exceeded.title": "Vous avez atteint la limite de votre espace de stockage",
-  "infomaniak.size_quota_almost_exceeded.title": "Vous avez atteint la limite de votre espace de stockage",
+  "infomaniak.size_quota_almost_exceeded.title": "Vous avez bientôt atteint la limite de votre espace de stockage",
   "infomaniak.size_quota_exceeded.description": "Modifiez votre offre depuis l’interface web afin de bénéficier de plus de stockage.",
   "infomaniak.messages_quota_exceeded.description": "Les messages et fichiers datant de plus de 3 mois sont masqués. Pour afficher plus de messages, souscrivez à une offre supérieure.",
   "infomaniak.feedback.title": "Feedback",
