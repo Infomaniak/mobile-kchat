@@ -1,11 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
-// See LICENSE.txt for license information.
-
-// TODO UPSTREAM : check ce file
-
 import React, {useCallback, useState} from 'react';
 import {type LayoutChangeEvent, type StyleProp, View, type ViewStyle} from 'react-native';
 
@@ -24,16 +19,6 @@ import Failed from './failed';
 import Message from './message';
 import Reactions from './reactions';
 
-
-import { withObservables} from '@nozbe/watermelondb/react';
-
-import {observeVoiceMessagesEnabled} from '@queries/servers/system';
-
-import Body from './body';
-
-import type {WithDatabaseArgs} from '@typings/database/database';
-
-const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
 import type PostModel from '@typings/database/models/servers/post';
 import type {SearchPattern} from '@typings/global/markdown';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -61,10 +46,43 @@ type BodyProps = {
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
-        voiceMessageEnabled: observeVoiceMessagesEnabled(database),
+        ackAndReactionsContainer: {
+            flex: 1,
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            alignContent: 'flex-start',
+            marginTop: 12,
+        },
+        messageBody: {
+            paddingVertical: 2,
+            flex: 1,
+        },
+        messageContainer: {width: '100%'},
+        replyBar: {
+            backgroundColor: theme.centerChannelColor,
+            opacity: 0.1,
+            marginLeft: 1,
+            marginRight: 7,
+            width: 3,
+            flexBasis: 3,
+        },
+        replyBarFirst: {paddingTop: 10},
+        replyBarLast: {paddingBottom: 10},
+        replyMention: {
+            backgroundColor: theme.mentionHighlightBg,
+            opacity: 1,
+        },
+        message: {
+            color: theme.centerChannelColor,
+            fontSize: 15,
+            lineHeight: 20,
+        },
+        messageContainerWithReplyBar: {
+            flexDirection: 'row',
+            width: '100%',
+        },
     };
 });
-
 
 const Body = ({
     appsEnabled, hasFiles, hasReactions, highlight, highlightReplyBar,
@@ -217,4 +235,4 @@ const Body = ({
     );
 };
 
-export default withDatabase(enhanced(Body));
+export default Body;

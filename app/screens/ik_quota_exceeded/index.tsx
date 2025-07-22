@@ -171,7 +171,7 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
             backgroundStyle={styles.bottomSheetBackground}
             onClose={close}
         >
-            {renderContent}
+            {renderContent()}
         </BottomSheetM>
     );
 };
