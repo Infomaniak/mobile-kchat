@@ -2,12 +2,11 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback} from 'react';
-import {Text, TouchableOpacity, View} from 'react-native';
+import {Text, TouchableOpacity, View, Image} from 'react-native';
 
 import FormattedText from '@app/components/formatted_text';
 import {useTheme} from '@app/context/theme';
 import {makeStyleSheetFromTheme} from '@app/utils/theme';
-import Emoji from '@components/emoji';
 import {Screens} from '@constants';
 import BottomSheet from '@screens/bottom_sheet';
 
@@ -88,6 +87,12 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         color: '#000',
         textAlign: 'center',
     },
+    imagePlaceholder: {
+
+        // width: undefined,
+
+        // height: 96,
+    },
 
 }));
 
@@ -97,6 +102,10 @@ const IKEvolve = () => {
     const handleClose = useCallback(() => {
         dismissBottomSheet(Screens.INFOMANIAK_EVOLVE);
     }, []);
+
+    const allImages = {
+        euria: {path: require('@assets/images/euria.png')},
+    };
 
     const renderContent = () => {
         return (
@@ -141,9 +150,9 @@ const IKEvolve = () => {
                             />
                         </View>
                         <View style={styles.choiceItem}>
-                            <Emoji
-                                size={100}
-                                emojiName={'euria'}
+                            <Image
+                                style={styles.choiceIcon}
+                                source={allImages.euria.path}
                             />
                             <FormattedText
                                 defaultMessage={'Euria: video transcription, image creation, etc.'}
