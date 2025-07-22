@@ -15,19 +15,15 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.react.modules.network.OkHttpClientProvider
-import com.facebook.react.PackageList
-import com.facebook.react.ReactHost
 import com.facebook.react.ReactInstanceManager
-import com.facebook.react.ReactNativeHost
-import com.facebook.react.ReactPackage
 import com.facebook.soloader.SoLoader
+import com.oney.WebRTCModule.WebRTCModuleOptions
 
 import com.mattermost.networkclient.RCTOkHttpClientFactory
 import com.mattermost.notification.NotificationUtils.createCallNotificationChannel
 import com.mattermost.rnshare.helpers.RealPathUtil
 import com.mattermost.turbolog.TurboLog
 import com.mattermost.turbolog.ConfigureOptions
-import com.nozbe.watermelondb.jsi.JSIInstaller
 import com.nozbe.watermelondb.jsi.WatermelonDBJSIPackage
 import com.reactnativenavigation.NavigationApplication
 

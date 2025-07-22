@@ -1,6 +1,5 @@
 package com.mattermost.rnshare
 
-import android.content.pm.ServiceInfo
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
@@ -198,7 +197,7 @@ class ShareWorker(private val context: Context, workerParameters: WorkerParamete
                 .setContentTitle("Uploading Files")
                 .setTicker("Uploading Files")
                 .setContentText("File upload in progress")
-                .setSmallIcon(applicationContext.resources.getIdentifier("ic_kchat_notification", "drawable", applicationContext.packageName))
+                .setSmallIcon(applicationContext.resources.getIdentifier("ic_notification", "mipmap", applicationContext.packageName))
                 .setOngoing(true)
                 .build()
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
