@@ -7,8 +7,8 @@ import semver from 'semver';
 
 import {switchToChannelById} from '@actions/remote/channel';
 import {switchToConferenceByChannelId} from '@actions/remote/conference';
-import CallManager, {CallAnsweredEvent, CallEndedEvent, CallMutedEvent, CallVideoMutedEvent} from '@app/store/CallManager';
-import {logError} from '@app/utils/log';
+import CallManager, {CallAnsweredEvent, CallEndedEvent, CallMutedEvent, CallVideoMutedEvent} from '@store/CallManager';
+import {logError} from '@utils/log';
 import {Device, Events, Sso} from '@constants';
 import {MIN_REQUIRED_VERSION} from '@constants/supported_server';
 import DatabaseManager from '@database/manager';

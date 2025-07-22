@@ -4,14 +4,14 @@
 import {Platform} from 'react-native';
 
 import {handleConferenceReceived, handleConferenceUpdatedById} from '@actions/websocket/conference';
-import {Screens} from '@app/constants';
-import {getChannelById} from '@app/queries/servers/channel';
-import {getConferenceById} from '@app/queries/servers/conference';
-import {getCurrentUserId} from '@app/queries/servers/system';
-import CallManager from '@app/store/CallManager';
-import {getFullErrorMessage} from '@app/utils/errors';
-import {logDebug, logError} from '@app/utils/log';
-import {getFullName} from '@app/utils/user';
+import {Screens} from '@constants';
+import {getChannelById} from '@queries/servers/channel';
+import {getConferenceById} from '@queries/servers/conference';
+import {getCurrentUserId} from '@queries/servers/system';
+import CallManager from '@store/CallManager';
+import {getFullErrorMessage} from '@utils/errors';
+import {logDebug, logError} from '@utils/log';
+import {getFullName} from '@utils/user';
 import {type PassedProps} from '@calls/screens/call_screen/call_screen';
 import DatabaseManager from '@database/manager';
 import {getTranslations, t} from '@i18n';

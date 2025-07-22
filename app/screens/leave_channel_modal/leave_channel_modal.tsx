@@ -8,7 +8,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {leaveChannel, updateChannelMemberSchemeRoles} from '@actions/remote/channel';
 import {fetchProfilesInChannel} from '@actions/remote/user';
-import {showLeaveChannelMembersSnackbar} from '@app/utils/snack_bar';
+import {showLeaveChannelMembersSnackbar} from '@utils/snack_bar';
 import CompassIcon from '@components/compass_icon';
 import Loading from '@components/loading';
 import Search from '@components/search';
@@ -24,7 +24,7 @@ import {mergeNavigationOptions} from '@utils/navigation';
 import {changeOpacity, getKeyboardAppearanceFromTheme, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import type {UserModel} from '@app/database/models/server';
+import type {UserModel} from '@database/models/server';
 import type ChannelModel from '@typings/database/models/servers/channel';
 import type {AvailableScreens} from '@typings/screens/navigation';
 

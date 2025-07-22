@@ -5,7 +5,7 @@ import React, {useCallback, useEffect, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {Alert, Platform, View} from 'react-native';
 
-import {getUserTimezoneProps} from '@app/utils/user';
+import {getUserTimezoneProps} from '@utils/user';
 import CompassIcon from '@components/compass_icon';
 import SettingContainer from '@components/settings/container';
 import SettingItem from '@components/settings/item';

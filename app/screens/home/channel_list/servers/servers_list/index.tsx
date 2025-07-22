@@ -6,7 +6,7 @@ import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {FlatList, StyleSheet, View, type ListRenderItemInfo} from 'react-native';
 
-import {BASE_SERVER_URL} from '@app/client/rest/constants';
+import {BASE_SERVER_URL} from '@client/rest/constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useBottomSheetListsFix} from '@hooks/bottom_sheet_lists_fix';

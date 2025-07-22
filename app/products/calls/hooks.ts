@@ -9,7 +9,7 @@ import Permissions from 'react-native-permissions';
 
 import {setMicPermissionsGranted} from '@calls/state';
 import {useAppState} from '@hooks/device';
-import { initializeVoiceTrack } from './actions';
+// import { initializeVoiceTrack } from './actions';
 
 const micPermission = Platform.select({
     ios: Permissions.PERMISSIONS.IOS.MICROPHONE,
@@ -21,19 +21,19 @@ export const usePermissionsChecker = (micPermissionsGranted: boolean) => {
     const [hasPermission, setHasPermission] = useState(micPermissionsGranted);
 
     useEffect(() => {
-        const asyncFn = async () => {
-            if (appState === 'active') {
-                const result = (await Permissions.check(micPermission)) === Permissions.RESULTS.GRANTED;
-                setHasPermission(result);
-                if (result) {
-                    initializeVoiceTrack();
-                    setMicPermissionsGranted(result);
-                }
-            }
-        };
-        if (!micPermissionsGranted) {
-            asyncFn();
-        }
+        // const asyncFn = async () => {
+        //     if (appState === 'active') {
+        //         const result = (await Permissions.check(micPermission)) === Permissions.RESULTS.GRANTED;
+        //         setHasPermission(result);
+        //         if (result) {
+        //             initializeVoiceTrack();
+        //             setMicPermissionsGranted(result);
+        //         }
+        //     }
+        // };
+        // if (!micPermissionsGranted) {
+        //     asyncFn();
+        // }
     }, [appState]);
 
     return hasPermission;

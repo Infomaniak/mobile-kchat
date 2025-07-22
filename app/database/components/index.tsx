@@ -4,7 +4,7 @@
 import {DatabaseProvider} from '@nozbe/watermelondb/react';
 import React, {type ComponentType, useEffect, useState, type ComponentProps} from 'react';
 
-import {AudioPlayerProvider} from '@app/context/audio_player';
+import {AudioPlayerProvider} from '@context/audio_player';
 import DeviceInfoProvider from '@context/device';
 import ServerUrlProvider from '@context/server';
 import ThemeProvider from '@context/theme';

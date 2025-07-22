@@ -6,7 +6,7 @@ import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, type ListRenderItemInfo} from 'react-native';
 
-import GestureResponsiveFlatList from '@app/components/user_avatars_stack/users_list/gesture_responsive_flat_list';
+import GestureResponsiveFlatList from '@components/user_avatars_stack/users_list/gesture_responsive_flat_list';
 import UserItem from '@components/user_item';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';

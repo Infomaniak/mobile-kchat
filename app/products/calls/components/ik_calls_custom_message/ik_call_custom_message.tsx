@@ -7,10 +7,10 @@ import {Text, TouchableOpacity, View} from 'react-native';
 import {z} from 'zod';
 
 import {fetchConference, switchToConferenceByChannelId} from '@actions/remote/conference';
-import FormattedRelativeTime from '@app/components/formatted_relative_time';
-import {useServerUrl} from '@app/context/server';
-import {useMountedRef} from '@app/hooks/utils';
-import {isDarkTheme} from '@app/utils/theme';
+import FormattedRelativeTime from '@components/formatted_relative_time';
+import {useServerUrl} from '@context/server';
+import {useMountedRef} from '@hooks/utils';
+import {isDarkTheme} from '@utils/theme';
 import IkCallsParticipantStack from '@calls/components/ik_calls_participant_stack';
 import FormattedText from '@components/formatted_text';
 import FormattedTime from '@components/formatted_time';

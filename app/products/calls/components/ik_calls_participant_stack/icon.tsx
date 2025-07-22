@@ -12,7 +12,7 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
-import type ConferenceParticipantModel from '@app/database/models/server/conference_participant';
+import type ConferenceParticipantModel from '@database/models/server/conference_participant';
 import type UserModel from '@typings/database/models/servers/user';
 
 type IkCallsParticipantStackIconProps = {

@@ -65,7 +65,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-export default withDatabase(enhanced(Body));
+
 const Body = ({
     appsEnabled, hasFiles, hasReactions, highlight, highlightReplyBar,
     isCRTEnabled, isEphemeral, isFirstReply, isJumboEmoji, isLastReply, isPendingOrFailed, isPostAcknowledgementEnabled, isPostAddChannelMember,
@@ -217,4 +217,4 @@ const Body = ({
     );
 };
 
-export default Body;
+export default withDatabase(enhanced(Body));

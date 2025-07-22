@@ -7,7 +7,7 @@ import {FlatList} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {getAllSupportedTimezones} from '@actions/remote/user';
-import {useServerUrl} from '@app/context/server';
+import {useServerUrl} from '@context/server';
 import Search from '@components/search';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';

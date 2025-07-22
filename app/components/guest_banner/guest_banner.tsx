@@ -5,7 +5,7 @@ import React, {type FC} from 'react';
 import {useIntl} from 'react-intl';
 import {Platform, Text, View} from 'react-native';
 
-import {useTheme} from '@app/context/theme';
+import {useTheme} from '@context/theme';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import InfoSvgComponent from '../illustrations/info';

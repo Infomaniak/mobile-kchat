@@ -3,10 +3,10 @@
 
 import {switchMap, combineLatest, Observable, of as of$} from 'rxjs';
 
-import {getUserIdFromChannelName} from '@app/utils/user';
+import {getUserIdFromChannelName} from '@utils/user';
 import {General} from '@constants';
 
-import type {ChannelModel} from '@app/database/models/server';
+import type {ChannelModel} from '@database/models/server';
 
 export const observeIsCallsEnabledInChannel = (userId: Observable<string>, channel: Observable<ChannelModel | undefined>) => {
     return combineLatest([userId, channel]).pipe(switchMap(([id, c]) => {

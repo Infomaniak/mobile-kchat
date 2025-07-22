@@ -17,8 +17,8 @@ import {removePost} from '@actions/local/post';
 import {showPermalink} from '@actions/remote/permalink';
 import {markPostReminderAsDone} from '@actions/remote/post';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
-import FormattedText from '@app/components/formatted_text';
-import {getMarkdownTextStyles} from '@app/utils/markdown';
+import FormattedText from '@components/formatted_text';
+import {getMarkdownTextStyles} from '@utils/markdown';
 import IkCallsCustomMessage from '@calls/components/ik_calls_custom_message';
 import {
     IkMailAttachmentCustomMessage, type MailAttachmentProps,

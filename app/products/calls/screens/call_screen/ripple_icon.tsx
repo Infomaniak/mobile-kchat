@@ -11,8 +11,8 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 
-import {useTheme} from '@app/context/theme';
-import {makeStyleSheetFromTheme} from '@app/utils/theme';
+import {useTheme} from '@context/theme';
+import {makeStyleSheetFromTheme} from '@utils/theme';
 
 /**
  * Ripple animation values

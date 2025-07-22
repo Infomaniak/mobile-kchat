@@ -7,8 +7,8 @@ import {Alert} from 'react-native';
 
 import {archiveChannel, leaveChannel} from '@actions/remote/channel';
 import {setDirectChannelVisible} from '@actions/remote/preference';
-import {t} from '@app/i18n';
-import {alertErrorWithFallback} from '@app/utils/draft';
+import {t} from '@i18n';
+import {alertErrorWithFallback} from '@utils/draft';
 import OptionItem from '@components/option_item';
 import SlideUpPanelItem from '@components/slide_up_panel_item';
 import {General, Screens} from '@constants';

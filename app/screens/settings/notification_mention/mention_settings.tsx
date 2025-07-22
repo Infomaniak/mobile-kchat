@@ -6,7 +6,7 @@ import {useIntl} from 'react-intl';
 import {Text} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
-// import SettingOption from '@app/components/settings/option';
+// import SettingOption from '@components/settings/option';
 // import SettingSeparator from '@components/settings/separator';
 // import ReplySettings from '@screens/settings/notification_mention/reply_settings';
 

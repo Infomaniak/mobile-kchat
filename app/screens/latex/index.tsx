@@ -6,7 +6,7 @@ import {useIntl} from 'react-intl';
 import {Platform, ScrollView, Text, View} from 'react-native';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 
-import ErrorBoundary from '@components/markdown/error_boundary';
+import ErrorBoundary from '@components/error_boundary';
 import MathView from '@components/math_view';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
