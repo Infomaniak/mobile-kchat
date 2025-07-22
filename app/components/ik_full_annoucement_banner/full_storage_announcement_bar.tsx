@@ -82,7 +82,7 @@ const FullStorageAnnouncementBar = ({
     return (
 
         <AnnouncementBanner
-            bannerColor={'#FFCCC8'} // #FFE7A5
+            bannerColor={'#FFCCC8'}
             bannerDismissed={false}
             bannerEnabled={true}
             allowDismissal={false}

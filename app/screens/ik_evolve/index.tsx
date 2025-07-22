@@ -27,53 +27,52 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
     container: {
         flex: 1,
-    },
-    space: {
-        backgroundColor: '#222633',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     content: {
         flex: 1,
+        justifyContent: 'space-evenly',
         width: '90%',
-        justifyContent: 'center',
         alignItems: 'center',
-        alignSelf: 'center',
     },
     title: {
-        fontFamily: 'SuisseIntl',
         fontWeight: '600',
         fontSize: 18,
         lineHeight: 18,
         letterSpacing: 0,
         textAlign: 'center',
         color: theme.centerChannelColor,
-        paddingBottom: 10,
+        paddingBottom: 20,
         marginTop: 0,
     },
+    subtitle: {
+        color: '#666666',
+    },
     choices: {
-        paddingTop: 32,
-        maxWidth: '100%',
+        width: '100%',
+        paddingTop: 12,
     },
     choiceItem: {
         flexDirection: 'row',
-        alignItems: 'center',
         marginBottom: 16,
     },
     choiceIcon: {
         marginRight: 12,
-        flex: 1,
     },
     choiceText: {
         flex: 1,
-        flexWrap: 'wrap',
+        color: '#666666',
     },
     evolve: {
         paddingTop: 32,
+        color: '#666666',
     },
     flowButtonContainer: {
         width: 343,
         height: 56,
         backgroundColor: '#F1F1F1',
-        borderRadius: 8,
+        borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
@@ -102,10 +101,7 @@ const IKEvolve = () => {
     const renderContent = () => {
         return (
             <View style={styles.container}>
-                <View>
-                    <View style={styles.headerTop}/>
-                    <Header/>
-                </View>
+                <Header/>
                 <View style={styles.content}>
                     <View>
                         <FormattedText
@@ -116,6 +112,7 @@ const IKEvolve = () => {
                         <FormattedText
                             defaultMessage={'Give your team the essential tools to collaborate efficiently every day.'}
                             id='upgrade_banner_ksuite_subtitle'
+                            style={styles.subtitle}
                         />
                     </View>
                     <View style={styles.choices}>
@@ -151,6 +148,8 @@ const IKEvolve = () => {
                             <FormattedText
                                 defaultMessage={'Euria: video transcription, image creation, etc.'}
                                 id='upgrade_banner_ksuite_euria'
+                                style={styles.choiceText}
+
                             />
                         </View>
                         <View style={styles.choiceItem}>
@@ -158,6 +157,7 @@ const IKEvolve = () => {
                             <FormattedText
                                 defaultMessage={'And much more!'}
                                 id='upgrade_banner_ksuite_plus'
+                                style={styles.choiceText}
                             />
                         </View>
                     </View>
@@ -165,6 +165,7 @@ const IKEvolve = () => {
                         <FormattedText
                             defaultMessage={'To upgrade your plan, use the web interface.'}
                             id='upgrade_banner_ksuite_evolve'
+                            style={styles.subtitle}
                         />
                     </View>
                     <TouchableOpacity
@@ -192,7 +193,7 @@ const IKEvolve = () => {
             contentStyle={{paddingHorizontal: 0}}
             headerStyle={{
                 borderTopWidth: 50,
-                borderTopColor: '#222633',
+                borderColor: '#222633',
             }}
         />
     );

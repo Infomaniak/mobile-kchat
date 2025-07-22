@@ -22,7 +22,7 @@ import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import NetworkManager from '@managers/network_manager';
 import BottomSheet from '@screens/bottom_sheet';
 import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
-import {bottomSheetSnapPoint, getCurrentMomentForTimezone} from '@utils/helpers';
+import {bottomSheetSnapPoint} from '@utils/helpers';
 import {isSystemMessage} from '@utils/post';
 import {typography} from '@utils/typography';
 

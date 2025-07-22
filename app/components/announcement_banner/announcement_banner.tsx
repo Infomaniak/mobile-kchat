@@ -1,10 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {
-    Text,
     TouchableOpacity,
     View,
 } from 'react-native';
@@ -50,10 +49,17 @@ const getStyle = makeStyleSheetFromTheme((theme: Theme) => ({
         marginHorizontal: 8,
         borderRadius: 7,
     },
+    contentContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flex: 1,
+    },
     wrapper: {
         flexDirection: 'row',
         flex: 1,
         overflow: 'hidden',
+
     },
     bannerTextContainer: {
         flex: 1,
@@ -142,10 +148,6 @@ const AnnouncementBanner = ({
         height: height.value,
     }));
 
-    const bannerTextContainerStyle = useMemo(() => [style.bannerTextContainer, {
-        color: bannerTextColor,
-    }], [style, bannerTextColor]);
-
     return (
         <Animated.View
             style={[style.background, bannerStyle]}
@@ -159,25 +161,15 @@ const AnnouncementBanner = ({
                             onPress={onHandlePress || handlePress}
                             style={style.wrapper}
                         >
-                            <Text
-                                style={bannerTextContainerStyle}
-                                ellipsizeMode='tail'
-                                numberOfLines={1}
-                            >
-                                {icon || (
-                                    <CompassIcon
-                                        color={bannerTextColor}
-                                        name='information-outline'
-                                        size={18}
-                                    />
-                                )}
-                                {'  '}
+                            <View style={style.contentContainer}>
+
+                                {icon && <View style={{marginRight: 6}}>{icon}</View>}
                                 <RemoveMarkdown
                                     value={bannerText}
                                     textStyle={markdownTextStyles}
                                     baseStyle={style.bannerText}
                                 />
-                            </Text>
+                            </View>
                         </TouchableOpacity>
                         {allowDismissal && (
                             <TouchableOpacity
