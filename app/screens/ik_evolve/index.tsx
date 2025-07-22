@@ -13,11 +13,11 @@ import BottomSheet from '@screens/bottom_sheet';
 
 import {dismissBottomSheet} from '../navigation';
 
-import BenefitIcon from './benefit';
-import KchatIcon from './kchat';
-import MailIcon from './mail';
-import PlusIcon from './plus';
-import Header from './top';
+import BenefitIcon from './icons/benefit';
+import KchatIcon from './icons/kchat';
+import MailIcon from './icons/mail';
+import PlusIcon from './icons/plus';
+import Header from './icons/top';
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     headerTop: {

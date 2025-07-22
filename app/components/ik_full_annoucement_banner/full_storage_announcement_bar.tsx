@@ -28,7 +28,7 @@ type Props = {
 
 const quotaMessages = new Map<string, string>([
     ['admin|paid', 'file_upload.quota.exceeded.paidPlan.admin'],
-    ['admin|free', 'file_upload.quota.exceeded.admin'],
+    ['admin|free', 'file_upload.quota.exceeded.freePlan.admin'],
     ['user|_', 'file_upload.quota.exceeded'],
 ]);
 
@@ -40,8 +40,8 @@ const FullStorageAnnouncementBar = ({
 }: Props) => {
     const intl = useIntl();
     const bannerText = intl.formatMessage({
-        id: 'ik_announcement_banner.storage_limit_reached',
-        defaultMessage: 'Limite de stockage atteinte',
+        id: 'full_storage_announcement_bar.message',
+        defaultMessage: 'Storage limit reached',
     });
 
     const theme = useTheme();
@@ -75,9 +75,9 @@ const FullStorageAnnouncementBar = ({
         });
     }, []);
 
-    if (!isFull) {
-        return null;
-    }
+    // if (!isFull) {
+    //     return null;
+    // }
 
     return (
 

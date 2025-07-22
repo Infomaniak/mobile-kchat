@@ -127,10 +127,10 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
                     />
                 </View>
                 <Text style={styles.title}>
-                    {intl.formatMessage({id: quotaType.title, defaultMessage: 'You have no kChat, discover it with kSuite'})}
+                    {intl.formatMessage({id: quotaType.title})}
                 </Text>
                 <Text style={styles.description}>
-                    {intl.formatMessage({id: quotaType.description, defaultMessage: 'You have no kChat, discover it with kSuite'})}
+                    {intl.formatMessage({id: quotaType.description})}
                 </Text>
                 <Button
                     title={intl.formatMessage({

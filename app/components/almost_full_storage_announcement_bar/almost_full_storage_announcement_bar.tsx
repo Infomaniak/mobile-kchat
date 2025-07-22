@@ -29,8 +29,8 @@ type Props = {
 
 const TRESHOLD_ALMOST_FULL = -1073741824;
 const quotaMessages = new Map<string, string>([
-    ['admin|paid', 'file_upload.quota.exceeded.paidPlan.admin'],
-    ['admin|free', 'file_upload.quota.exceeded.admin'],
+    ['admin|paid', 'file_upload.quota.almost.exceeded.paidPlan.admin'],
+    ['admin|free', 'file_upload.quota.almost.exceeded.freePlan.admin'],
     ['user|_', 'file_upload.quota.exceeded'],
 ]);
 const AlmostFullStorageAnnouncementBar = ({
@@ -42,8 +42,8 @@ const AlmostFullStorageAnnouncementBar = ({
 }: Props) => {
     const intl = useIntl();
     const bannerText = intl.formatMessage({
-        id: 'ik_announcement_banner.storage_limit_reached',
-        defaultMessage: 'Limite de stockage atteinte',
+        id: 'almost_full_storage_announcement_bar.message',
+        defaultMessage: 'Storage limit almost reached',
     });
     const theme = useTheme();
 
@@ -78,9 +78,9 @@ const AlmostFullStorageAnnouncementBar = ({
         });
     }, []);
 
-    if (!shouldShow) {
-        return null;
-    }
+    // if (!shouldShow) {
+    //     return null;
+    // }
 
     return (
         <AnnouncementBanner
