@@ -92,6 +92,7 @@ import {
     handleTeamRestored,
 } from './teams';
 import {handleThreadUpdatedEvent, handleThreadReadChangedEvent, handleThreadFollowChangedEvent} from './threads';
+import {handleLimitationChanged} from './usage';
 import {handleUserUpdatedEvent, handleUserTypingEvent, handleStatusChangedEvent, handleUserRecordingEvent} from './users';
 
 export async function handleFirstConnect(serverUrl: string) {
@@ -388,6 +389,9 @@ export async function handleEvent(serverUrl: string, msg: WebSocketMessage) {
             break;
         case WebsocketEvents.CONFERENCE_USER_DISCONNECTED:
             handleConferenceUserDisconnected(serverUrl, msg);
+            break;
+        case WebsocketEvents.QUOTA_CHANGED:
+            handleLimitationChanged(serverUrl);
             break;
 
         // Plugins

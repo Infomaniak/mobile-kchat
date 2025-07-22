@@ -3,7 +3,10 @@
 
 import {DeviceEventEmitter} from 'react-native';
 
-import {Events, Calls} from '@constants';
+import {fetchUsage} from '@actions/remote/cloud';
+import {getDefaultThemeByAppearance} from '@app/context/theme';
+import {openAsBottomSheet} from '@app/screens/navigation';
+import {Events, Calls, Screens} from '@constants';
 import {t} from '@i18n';
 import {setServerCredentials} from '@init/credentials';
 import {semverFromServerVersion} from '@utils/server';
@@ -306,6 +309,16 @@ export default class ClientBase {
                 },
                 url,
                 details: error,
+            });
+        }
+
+        if (response.code === 409) {
+            fetchUsage(this.apiClient.baseUrl);
+            openAsBottomSheet({
+                closeButtonId: 'close-quota-exceeded',
+                screen: Screens.INFOMANIAK_EVOLVE,
+                title: '',
+                theme: getDefaultThemeByAppearance(),
             });
         }
 
