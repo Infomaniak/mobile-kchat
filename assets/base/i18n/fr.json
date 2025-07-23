@@ -1238,5 +1238,12 @@
   "display_theme.tile.light": "Clair",
   "guest_banner.text": "Il y a {count} {count, plural, one {utilisateur externe} other {utilisateurs externes}} dans cette conversation.",
   "drafts": "Brouillons",
-  "scheduled_post.feature_tooltip": "Tapez un message et maintenez le bouton d’envoi pour le programmer à un moment ultérieur."
+  "scheduled_post.feature_tooltip": "Écrivez un message et maintenez le bouton d’envoi pour le programmer à un moment ultérieur.",
+  "scheduled_post_options.confirm_button.text": "Planifier le brouillon",
+  "scheduled_post.picker.custom": "Heure personnalisée",
+  "scheduled_post.picker.next_monday": "Lundi prochain à {9amTime}",
+  "scheduled_post.picker.tomorrow": "Demain à {9amTime}",
+  "scheduled_post.picker.monday": "Lundi à {9amTime}",
+  "scheduled_post.picker.title": "Planifier le brouillon"
+
 }

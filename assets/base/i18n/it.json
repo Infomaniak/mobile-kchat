@@ -1103,5 +1103,11 @@
   "mobile.calls_host_end_confirm": "Termina la chiamata per tutti",
   "mobile.calls_host_leave_confirm": "Lascia la chiamata",
   "drafts": "Bozze",
-  "scheduled_post.feature_tooltip": "Digita un messaggio e tieni premuto il pulsante di invio per programmarlo per un secondo momento."
+  "scheduled_post.feature_tooltip": "Digita un messaggio e tieni premuto il pulsante di invio per programmarlo per un secondo momento.",
+  "scheduled_post_options.confirm_button.text": "Programma Bozza",
+  "scheduled_post.picker.custom": "Orario Personalizzato",
+  "scheduled_post.picker.next_monday": "Lunedì prossimo alle {9amTime}",
+  "scheduled_post.picker.tomorrow": "Domani alle {9amTime}",
+  "scheduled_post.picker.monday": "Lunedì alle {9amTime}",
+  "scheduled_post.picker.title": "Programma bozza"
 }
