@@ -5,7 +5,6 @@ import React, {useCallback, useEffect, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, Platform, Text, View} from 'react-native';
 
-import {getCallsConfig} from '@calls/state';
 import {CHANNEL_ACTIONS_OPTIONS_HEIGHT} from '@components/channel_actions/channel_actions';
 import CompassIcon from '@components/compass_icon';
 import CustomStatusEmoji from '@components/custom_status/custom_status_emoji';
@@ -119,11 +118,9 @@ const ChannelHeader = ({
     const defaultHeight = useDefaultHeaderHeight();
     const serverUrl = useServerUrl();
 
-    const callsConfig = getCallsConfig(serverUrl);
-
     // NOTE: callsEnabledInChannel will be true/false (not undefined) based on explicit state + the DefaultEnabled system setting
     //   which ultimately comes from channel/index.tsx, and observeIsCallsEnabledInChannel
-    let callsAvailable = callsConfig.pluginEnabled && callsEnabledInChannel;
+    let callsAvailable = false;
     if (!groupCallsAllowed && channelType !== General.DM_CHANNEL) {
         callsAvailable = false;
     }
