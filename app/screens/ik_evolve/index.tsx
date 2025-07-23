@@ -17,84 +17,77 @@ import KchatIcon from './icons/kchat';
 import MailIcon from './icons/mail';
 import PlusIcon from './icons/plus';
 import Header from './icons/top';
+const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
+    const secondaryTextColor = '#666666';
 
-const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
-    headerTop: {
-        width: '100%',
-        height: 16,
-        backgroundColor: '#222633',
-    },
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    content: {
-        flex: 1,
-        justifyContent: 'space-evenly',
-        width: '90%',
-        alignItems: 'center',
-    },
-    title: {
-        fontWeight: '600',
-        fontSize: 18,
-        lineHeight: 18,
-        letterSpacing: 0,
-        textAlign: 'center',
-        color: theme.centerChannelColor,
-        paddingBottom: 20,
-        marginTop: 0,
-    },
-    subtitle: {
-        color: '#666666',
-    },
-    choices: {
-        width: '100%',
-        paddingTop: 12,
-    },
-    choiceItem: {
-        flexDirection: 'row',
-        marginBottom: 16,
-    },
-    choiceIcon: {
-        marginRight: 12,
-    },
-    choiceText: {
-        flex: 1,
-        color: '#666666',
-    },
-    evolve: {
-        paddingTop: 32,
-        color: '#666666',
-    },
-    flowButtonContainer: {
-        width: 343,
-        height: 56,
-        backgroundColor: '#F1F1F1',
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        alignSelf: 'center',
-        flexDirection: 'row',
-        marginTop: 16,
-    },
-    flowButtonText: {
-        fontFamily: 'SuisseIntl',
-        fontWeight: '500',
-        fontSize: 16,
-        lineHeight: 20,
-        letterSpacing: 0,
-        color: '#000',
-        textAlign: 'center',
-    },
-    imagePlaceholder: {
-
-        // width: undefined,
-
-        // height: 96,
-    },
-
-}));
+    return {
+        headerTop: {
+            width: '100%',
+            height: 16,
+            backgroundColor: '#222633',
+        },
+        container: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        content: {
+            flex: 1,
+            justifyContent: 'space-evenly',
+            alignItems: 'center',
+            width: '90%',
+        },
+        title: {
+            fontWeight: '600',
+            fontSize: 18,
+            lineHeight: 18,
+            textAlign: 'center',
+            color: theme.centerChannelColor,
+            paddingBottom: 20,
+        },
+        subtitle: {
+            color: secondaryTextColor,
+            textAlign: 'center',
+        },
+        choices: {
+            width: '100%',
+            paddingTop: 12,
+        },
+        choiceItem: {
+            flexDirection: 'row',
+            marginBottom: 16,
+        },
+        choiceIcon: {
+            marginRight: 12,
+        },
+        choiceText: {
+            flex: 1,
+            color: secondaryTextColor,
+        },
+        evolve: {
+            paddingTop: 32,
+        },
+        flowButtonContainer: {
+            width: 343,
+            height: 56,
+            backgroundColor: '#F1F1F1',
+            borderRadius: 16,
+            justifyContent: 'center',
+            alignItems: 'center',
+            alignSelf: 'center',
+            flexDirection: 'row',
+            marginTop: 16,
+        },
+        flowButtonText: {
+            fontFamily: 'SuisseIntl',
+            fontWeight: '500',
+            fontSize: 16,
+            lineHeight: 20,
+            color: '#000',
+            textAlign: 'center',
+        },
+    };
+});
 
 const IKEvolve = () => {
     const theme = useTheme();

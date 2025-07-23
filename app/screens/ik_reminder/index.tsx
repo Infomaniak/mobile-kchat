@@ -217,17 +217,22 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
                     id='infomaniak.post_info.post_reminder.menu'
                     defaultMessage='Remind'
                 />
-                {!showCustomPicker && postReminderTimes.map((item) => (
-                    <BaseOption
-                        key={item.id}
-                        i18nId={item.label}
-                        defaultMessage={item.labelDefault}
-                        onPress={(item.id === 'custom' && isQuotaExceeded) ? () => onPressEvolve() : () => onPress(item.id)}
-                        iconName=''
-                        testID={item.id}
-                        rightComponent={(item.id === 'custom' && isQuotaExceeded) ? <UpgradeButton/> : undefined}
-                    />))
-                }
+                {!showCustomPicker && postReminderTimes.map((item) => {
+                    const isCustom = item.id === 'custom';
+                    const shouldUpgrade = isCustom && isQuotaExceeded;
+
+                    return (
+                        <BaseOption
+                            key={item.id}
+                            i18nId={item.label}
+                            defaultMessage={item.labelDefault}
+                            onPress={shouldUpgrade ? onPressEvolve : () => onPress(item.id)}
+                            iconName=''
+                            testID={item.id}
+                            rightComponent={shouldUpgrade ? <UpgradeButton/> : undefined}
+                        />
+                    );
+                })}
                 {showCustomPicker && (
                     <View>
                         <ClearAfterMenuItem
