@@ -103,6 +103,10 @@ const messages = defineMessages({
         id: 'snack.bar.playbook.error',
         defaultMessage: 'Unable to perform action. Please try again later.',
     },
+    LEAVE_PRIVATE_CHANNEL: {
+        id: 'snack.bar.leave.private.channel',
+        defaultMessage: 'You left the channel {displayName}',
+    }
 });
 
 export const SNACK_BAR_CONFIG: Record<string, SnackBarConfig> = {
@@ -132,8 +136,7 @@ export const SNACK_BAR_CONFIG: Record<string, SnackBarConfig> = {
         canUndo: false,
     },
     LEAVE_PRIVATE_CHANNEL: {
-        id: t('snack.bar.leave.private.channel'),
-        defaultMessage: 'You left the channel {displayName}',
+        message : messages.LEAVE_PRIVATE_CHANNEL,
         iconName: 'exit-to-app',
         canUndo: true,
     },
