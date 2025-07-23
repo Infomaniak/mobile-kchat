@@ -11,7 +11,6 @@ import NetworkManager from '@managers/network_manager';
 
 const useAudioPlayer = () => {
     const [playing, setPlaying] = useState<string | null>(null);
-    const [player, setPlayer] = useState<AudioRecorderPlayer>(new AudioRecorderPlayer());
     const [localAudioURI, storeLocalAudioURI] = useState<string | undefined>();
     const serverUrl = useServerUrl();
     const client = NetworkManager.getClient(serverUrl);
@@ -32,13 +31,12 @@ const useAudioPlayer = () => {
                 }
             }
 
-            await player.startPlayer(uri, headers);
+            await AudioRecorderPlayer.startPlayer(uri, headers);
 
-            player.addPlayBackListener((status) => {
+            AudioRecorderPlayer.addPlayBackListener((status) => {
                 playBackListener?.(status);
             });
 
-            setPlayer(player);
             setPlaying(audioId || 'draft');
         } catch (error) {
             // eslint-disable-next-line no-console
@@ -49,8 +47,8 @@ const useAudioPlayer = () => {
 
     const pauseAudio = async () => {
         try {
-            await player?.stopPlayer();
-            await player?.removePlayBackListener();
+            await AudioRecorderPlayer.stopPlayer();
+            AudioRecorderPlayer.removePlayBackListener();
         } catch (error) {
             logError(error);
         }
