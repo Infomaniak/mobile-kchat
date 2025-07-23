@@ -8,7 +8,6 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {resetMessageCount} from '@actions/local/channel';
 import CompassIcon from '@components/compass_icon';
-import {useCallsAdjustment} from '@calls/hooks';
 import FormattedText from '@components/formatted_text';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {Events} from '@constants';
@@ -126,10 +125,9 @@ const MoreMessages = ({
     const underlayColor = useMemo(() => `hsl(${hexToHue(theme.buttonBg)}, 50%, 38%)`, [theme]);
     const styles = getStyleSheet(theme);
     const top = useSharedValue(0);
-    const callsAdjustment = useCallsAdjustment(serverUrl, channelId);
 
     // The final top:
-    const adjustedTop = (isTablet ? 0 : insets.top) + callsAdjustment;
+    const adjustedTop = (isTablet ? 0 : insets.top) ;
 
     const BARS_FACTOR = Math.abs((1) / (HIDDEN_TOP - SHOWN_TOP));
 
