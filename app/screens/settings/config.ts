@@ -44,8 +44,7 @@ const messages = defineMessages({
     },
     feedback: {
         defaultMessage: 'Feedback',
-        i18nId: t('infomaniak.feedback.title'),
-        testID: 'infomaniak.feedback.option',
+        id: 'infomaniak.feedback.title',
     },
     report_problem: {
         defaultMessage: 'Report a Problem',
@@ -203,6 +202,11 @@ export const DisplayOptionConfig: Record<string, SettingConfigDetails> = {
         icon: 'globe',
         testID: messages.timezone.id,
     },
+    feedback: {
+         defaultMessage: messages.feedback.defaultMessage,
+        i18nId: messages.feedback.id,
+        testID: messages.feedback.id,
+    }
 };
 
 export default {
