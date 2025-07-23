@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {nativeApplicationVersion} from 'expo-application';
-import {Platform} from 'react-native';
+import {NativeModules, Platform} from 'react-native';
 import {RESULTS, checkNotifications} from 'react-native-permissions';
 
 import {fetchAllMyChannelsForAllTeams, fetchMissingDirectChannelsInfo, handleKickFromChannel, type MyChannelsRequest} from '@actions/remote/channel';
