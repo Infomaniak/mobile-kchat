@@ -1236,5 +1236,7 @@
   "display_theme.tile.auto": "Automatique",
   "display_theme.tile.dark": "Sombre",
   "display_theme.tile.light": "Clair",
-  "guest_banner.text": "Il y a {count} {count, plural, one {utilisateur externe} other {utilisateurs externes}} dans cette conversation."
+  "guest_banner.text": "Il y a {count} {count, plural, one {utilisateur externe} other {utilisateurs externes}} dans cette conversation.",
+  "drafts": "Brouillons",
+  "scheduled_post.feature_tooltip": "Tapez un message et maintenez le bouton d’envoi pour le programmer à un moment ultérieur."
 }

@@ -1064,5 +1064,6 @@
   "display_theme.tile.auto": "Automático",
   "display_theme.tile.dark": "Oscuro",
   "display_theme.tile.light": "Claro",
-  "guest_banner.text": "Hay {count} {count, plural, one {usuario externo} other {usuarios externos}} en esta conversación."
+  "guest_banner.text": "Hay {count} {count, plural, one {usuario externo} other {usuarios externos}} en esta conversación.",
+  "scheduled_post.feature_tooltip": "Escribe un mensaje y mantén presionado el botón de envío para programarlo para más tarde."
 }
