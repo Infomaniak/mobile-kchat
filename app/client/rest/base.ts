@@ -2,12 +2,12 @@
 // See LICENSE.txt for license information.
 
 import {Calls} from '@constants';
+import {setServerCredentials} from '@init/credentials';
 
 import * as ClientConstants from './constants';
 import ClientTracking from './tracking';
 
 import type {APIClientInterface} from '@mattermost/react-native-network-client';
-import { setServerCredentials } from '@init/credentials';
 
 export default class ClientBase extends ClientTracking {
     constructor(apiClient: APIClientInterface, serverUrl: string, bearerToken?: string, csrfToken?: string) {

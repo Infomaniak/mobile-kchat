@@ -4,10 +4,10 @@
 import {Q} from '@nozbe/watermelondb';
 import {z} from 'zod';
 
-import {queryConference} from '@queries/servers/conference';
-import {logError} from '@utils/log';
 import {MM_TABLES} from '@constants/database';
 import DatabaseManager from '@database/manager';
+import {queryConference} from '@queries/servers/conference';
+import {logError} from '@utils/log';
 
 import type {default as ConferenceModel, ConferenceModelFields} from '@database/models/server/conference';
 import type {default as ConferenceParticipantModel, ConferenceParticipantModelFields} from '@database/models/server/conference_participant';

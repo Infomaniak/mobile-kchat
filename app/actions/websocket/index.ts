@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+// import {loadConfigAndCalls} from '@calls/actions/calls';
+// import {isSupportedServerCalls} from '@calls/utils'; // TODO UPSTREAM : ?
 import {markChannelAsViewed} from '@actions/local/channel';
 import {dataRetentionCleanup} from '@actions/local/systems';
 import {markChannelAsRead} from '@actions/remote/channel';
@@ -15,8 +17,6 @@ import {openAllUnreadChannels} from '@actions/remote/preference';
 import {autoUpdateTimezone} from '@actions/remote/user';
 import {handleTeamSyncEvent} from '@actions/websocket/ikTeams';
 import {Screens, WebsocketEvents} from '@constants';
-// import {loadConfigAndCalls} from '@calls/actions/calls';
-// import {isSupportedServerCalls} from '@calls/utils'; // TODO UPSTREAM : ?
 import DatabaseManager from '@database/manager';
 import AppsManager from '@managers/apps_manager';
 import {updatePlaybooksVersion} from '@playbooks/actions/remote/version';

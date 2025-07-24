@@ -14,9 +14,9 @@ import {getCurrentChannel, queryChannelMembers, queryChannelsByTypes, queryUserC
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
 import {getConfig, getLicense} from '@queries/servers/system';
 import {getCurrentUser, getUserById} from '@queries/servers/user';
-import {displayUsername, isGuest} from '@utils/user';
 import {customProfileAttributeId} from '@utils/custom_profile_attribute';
 import {logError} from '@utils/log';
+import {displayUsername, isGuest} from '@utils/user';
 
 import type {Model} from '@nozbe/watermelondb';
 import type {CustomProfileField} from '@typings/api/custom_profile_attributes';

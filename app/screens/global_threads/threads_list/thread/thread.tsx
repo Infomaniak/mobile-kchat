@@ -9,6 +9,7 @@ import {switchToChannelById} from '@actions/remote/channel';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
 import FormattedText from '@components/formatted_text';
 import FriendlyDate from '@components/friendly_date';
+import RemoveMarkdown from '@components/remove_markdown';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
@@ -28,7 +29,6 @@ import type PostModel from '@typings/database/models/servers/post';
 import type ThreadModel from '@typings/database/models/servers/thread';
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
-import RemoveMarkdown from '@components/remove_markdown';
 
 type Props = {
     author?: UserModel;

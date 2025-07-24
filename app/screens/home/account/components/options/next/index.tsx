@@ -5,8 +5,8 @@ import React, {useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {StyleSheet} from 'react-native';
 
-import {useNextState} from '@hooks/network';
 import OptionItem from '@components/option_item';
+import {useNextState} from '@hooks/network';
 
 const COLOR = '#7974B4';
 

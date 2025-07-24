@@ -168,6 +168,7 @@ export default function SendHandler({
             setIsFocused={setIsFocused}
             persistentNotificationInterval={persistentNotificationInterval}
             persistentNotificationMaxRecipients={persistentNotificationMaxRecipients}
+
             // serverUrl={serverUrl} TODO UPSTREAM : https://gitlab.infomaniak.ch/kchat/mobile/-/merge_requests/74
         />
     );

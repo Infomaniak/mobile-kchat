@@ -9,6 +9,7 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 import {Navigation} from 'react-native-navigation';
 
 import {storeMultiServerTutorial} from '@actions/app/global';
+import {switchToServer} from '@actions/app/server';
 import {doPing} from '@actions/remote/general';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
 import CompassIcon from '@components/compass_icon';
@@ -33,7 +34,6 @@ import WebSocket from './websocket';
 
 import type ServersModel from '@typings/database/models/app/servers';
 import type {Subscription} from 'rxjs';
-import { switchToServer } from '@actions/app/server';
 
 type Props = {
     highlight: boolean;

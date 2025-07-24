@@ -352,7 +352,7 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
                     </>
                 )}
             </SettingBlock>
-            </KeyboardAwareScrollView>
+        </KeyboardAwareScrollView>
     );
 };
 

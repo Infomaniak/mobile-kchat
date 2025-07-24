@@ -345,7 +345,7 @@ const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
                     device_id: deviceId,
                     device_notification_disabled: deviceNotificationDisabled ? 'true' : 'false',
                     mobile_version: version || '',
-                    pushkit_id: pushKitId
+                    pushkit_id: pushKitId,
                 },
                 groupLabel,
             },

@@ -6,7 +6,6 @@ import React from 'react';
 import {type IntlShape, useIntl} from 'react-intl';
 import {type StyleProp, Text, type TextStyle, View, type ViewStyle} from 'react-native';
 
-import {getUserTimezone} from '@utils/user';
 import Markdown from '@components/markdown';
 import {postTypeMessages} from '@components/post_list/combined_user_activity/messages';
 import PreviewMessage from '@components/post_list/post/preview_message';
@@ -17,6 +16,7 @@ import {getMarkdownTextStyles} from '@utils/markdown';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {secureGetFromRecord, ensureString} from '@utils/types';
 import {typography} from '@utils/typography';
+import {getUserTimezone} from '@utils/user';
 
 import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';

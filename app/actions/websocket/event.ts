@@ -1,15 +1,15 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+// import * as calls from '@calls/connection/websocket_event_handlers';
+// import * as group from './group';
 import * as bookmark from '@actions/local/channel_bookmark';
 import * as scheduledPost from '@actions/websocket/scheduled_post';
-// import * as calls from '@calls/connection/websocket_event_handlers';
 import {WebsocketEvents} from '@constants';
 import {handlePlaybookEvents} from '@playbooks/actions/websocket/events';
 
 import * as category from './category';
 import * as channel from './channel';
-import * as group from './group';
 import {handleOpenDialogEvent} from './integrations';
 import * as posts from './posts';
 import * as preferences from './preferences';
@@ -172,95 +172,95 @@ export async function handleWebSocketEvent(serverUrl: string, msg: WebSocketMess
             handleThreadFollowChangedEvent(serverUrl, msg);
             break;
 
-        // Calls ws events:
-        // case WebsocketEvents.CALLS_CHANNEL_ENABLED:
-        //     calls.handleCallChannelEnabled(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_CHANNEL_DISABLED:
-        //     calls.handleCallChannelDisabled(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_USER_JOINED:
-        //     calls.handleCallUserJoined(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_USER_LEFT:
-        //     calls.handleCallUserLeft(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_USER_MUTED:
-        //     calls.handleCallUserMuted(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_USER_UNMUTED:
-        //     calls.handleCallUserUnmuted(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_USER_VOICE_ON:
-        //     calls.handleCallUserVoiceOn(msg);
-        //     break;
-        // case WebsocketEvents.CALLS_USER_VOICE_OFF:
-        //     calls.handleCallUserVoiceOff(msg);
-        //     break;
-        // case WebsocketEvents.CALLS_CALL_START:
-        //     calls.handleCallStarted(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_SCREEN_ON:
-        //     calls.handleCallScreenOn(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_SCREEN_OFF:
-        //     calls.handleCallScreenOff(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_USER_RAISE_HAND:
-        //     calls.handleCallUserRaiseHand(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_USER_UNRAISE_HAND:
-        //     calls.handleCallUserUnraiseHand(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_CALL_END:
-        //     calls.handleCallEnded(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_USER_REACTED:
-        //     calls.handleCallUserReacted(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_JOB_STATE:
-        //     calls.handleCallJobState(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_HOST_CHANGED:
-        //     calls.handleCallHostChanged(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_USER_DISMISSED_NOTIFICATION:
-        //     calls.handleUserDismissedNotification(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_CAPTION:
-        //     calls.handleCallCaption(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_HOST_MUTE:
-        //     calls.handleHostMute(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_HOST_LOWER_HAND:
-        //     calls.handleHostLowerHand(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_HOST_REMOVED:
-        //     calls.handleHostRemoved(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.CALLS_CALL_STATE:
-        //     calls.handleCallState(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.GROUP_RECEIVED:
-        //     group.handleGroupReceivedEvent(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.GROUP_MEMBER_ADD:
-        //     group.handleGroupMemberAddEvent(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.GROUP_MEMBER_DELETE:
-        //     group.handleGroupMemberDeleteEvent(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.GROUP_ASSOCIATED_TO_TEAM:
-        //     group.handleGroupTeamAssociatedEvent(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.GROUP_DISSOCIATED_TO_TEAM:
-        //     group.handleGroupTeamDissociateEvent(serverUrl, msg);
-        //     break;
-        // case WebsocketEvents.GROUP_ASSOCIATED_TO_CHANNEL:
-        //     break;
-        // case WebsocketEvents.GROUP_DISSOCIATED_TO_CHANNEL:
-        //     break;
+            // Calls ws events:
+            // case WebsocketEvents.CALLS_CHANNEL_ENABLED:
+            //     calls.handleCallChannelEnabled(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_CHANNEL_DISABLED:
+            //     calls.handleCallChannelDisabled(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_USER_JOINED:
+            //     calls.handleCallUserJoined(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_USER_LEFT:
+            //     calls.handleCallUserLeft(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_USER_MUTED:
+            //     calls.handleCallUserMuted(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_USER_UNMUTED:
+            //     calls.handleCallUserUnmuted(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_USER_VOICE_ON:
+            //     calls.handleCallUserVoiceOn(msg);
+            //     break;
+            // case WebsocketEvents.CALLS_USER_VOICE_OFF:
+            //     calls.handleCallUserVoiceOff(msg);
+            //     break;
+            // case WebsocketEvents.CALLS_CALL_START:
+            //     calls.handleCallStarted(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_SCREEN_ON:
+            //     calls.handleCallScreenOn(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_SCREEN_OFF:
+            //     calls.handleCallScreenOff(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_USER_RAISE_HAND:
+            //     calls.handleCallUserRaiseHand(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_USER_UNRAISE_HAND:
+            //     calls.handleCallUserUnraiseHand(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_CALL_END:
+            //     calls.handleCallEnded(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_USER_REACTED:
+            //     calls.handleCallUserReacted(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_JOB_STATE:
+            //     calls.handleCallJobState(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_HOST_CHANGED:
+            //     calls.handleCallHostChanged(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_USER_DISMISSED_NOTIFICATION:
+            //     calls.handleUserDismissedNotification(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_CAPTION:
+            //     calls.handleCallCaption(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_HOST_MUTE:
+            //     calls.handleHostMute(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_HOST_LOWER_HAND:
+            //     calls.handleHostLowerHand(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_HOST_REMOVED:
+            //     calls.handleHostRemoved(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.CALLS_CALL_STATE:
+            //     calls.handleCallState(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.GROUP_RECEIVED:
+            //     group.handleGroupReceivedEvent(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.GROUP_MEMBER_ADD:
+            //     group.handleGroupMemberAddEvent(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.GROUP_MEMBER_DELETE:
+            //     group.handleGroupMemberDeleteEvent(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.GROUP_ASSOCIATED_TO_TEAM:
+            //     group.handleGroupTeamAssociatedEvent(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.GROUP_DISSOCIATED_TO_TEAM:
+            //     group.handleGroupTeamDissociateEvent(serverUrl, msg);
+            //     break;
+            // case WebsocketEvents.GROUP_ASSOCIATED_TO_CHANNEL:
+            //     break;
+            // case WebsocketEvents.GROUP_DISSOCIATED_TO_CHANNEL:
+            //     break;
 
         // Plugins
         case WebsocketEvents.PLUGIN_STATUSES_CHANGED:

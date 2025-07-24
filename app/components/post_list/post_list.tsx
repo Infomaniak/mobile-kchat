@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {FlatList} from '@stream-io/flat-list-mvcp';
-import React, {type ReactElement, useCallback, useEffect, useMemo, useRef, useState, useImperativeHandle} from 'react';
+import React, {type ReactElement, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {DeviceEventEmitter, type ListRenderItemInfo, Platform, type StyleProp, StyleSheet, type ViewStyle, type NativeSyntheticEvent, type NativeScrollEvent} from 'react-native';
 import Animated, {type AnimatedStyle} from 'react-native-reanimated';
 
@@ -189,8 +189,8 @@ const PostList = ({
             map((post) => removePost(serverUrl, post));
         await Promise.all(removalPromises);
         setRefreshing(false);
-        setLimit(EphemeralStore.serverHasLimit(serverUrl));   
-}, [disablePullToRefresh, location, channelId, rootId, posts, serverUrl]);
+        setLimit(EphemeralStore.serverHasLimit(serverUrl));
+    }, [disablePullToRefresh, location, channelId, rootId, posts, serverUrl]);
 
     const scrollToIndex = useCallback((index: number, animated = true, applyOffset = true) => {
         listRef.current?.scrollToIndex({

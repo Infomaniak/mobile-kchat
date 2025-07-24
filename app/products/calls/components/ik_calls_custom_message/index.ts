@@ -5,13 +5,13 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
-import {observeChannel} from '@queries/servers/channel';
-import {isTypeDMorGM} from '@utils/channel';
 import {IkCallsCustomMessage} from '@calls/components/ik_calls_custom_message/ik_call_custom_message';
 import {Preferences} from '@constants';
 import {getDisplayNamePreferenceAsBool} from '@helpers/api/preference';
+import {observeChannel} from '@queries/servers/channel';
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
 import {observeCurrentUser} from '@queries/servers/user';
+import {isTypeDMorGM} from '@utils/channel';
 
 import type {WithDatabaseArgs} from '@typings/database/database';
 import type PostModel from '@typings/database/models/servers/post';

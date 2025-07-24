@@ -8,7 +8,6 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {leaveChannel, updateChannelMemberSchemeRoles} from '@actions/remote/channel';
 import {fetchProfilesInChannel} from '@actions/remote/user';
-import {showLeaveChannelMembersSnackbar} from '@utils/snack_bar';
 import CompassIcon from '@components/compass_icon';
 import Loading from '@components/loading';
 import Search from '@components/search';
@@ -21,6 +20,7 @@ import {useKeyboardOverlap} from '@hooks/device';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {dismissAllModalsAndPopToRoot, dismissModal} from '@screens/navigation';
 import {mergeNavigationOptions} from '@utils/navigation';
+import {showLeaveChannelMembersSnackbar} from '@utils/snack_bar';
 import {changeOpacity, getKeyboardAppearanceFromTheme, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 

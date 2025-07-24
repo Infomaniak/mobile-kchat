@@ -127,7 +127,7 @@ const MoreMessages = ({
     const top = useSharedValue(0);
 
     // The final top:
-    const adjustedTop = (isTablet ? 0 : insets.top) ;
+    const adjustedTop = (isTablet ? 0 : insets.top);
 
     const BARS_FACTOR = Math.abs((1) / (HIDDEN_TOP - SHOWN_TOP));
 

@@ -2,8 +2,8 @@
 // See LICENSE.txt for license information.
 
 import {Preferences} from '@constants';
-import {getCurrentTeamId, getCurrentUserId} from '@queries/servers/system';
 import DatabaseManager from '@database/manager';
+import {getCurrentTeamId, getCurrentUserId} from '@queries/servers/system';
 
 export const saveThemePreference = async (theme: Theme) => {
     if (!theme) {

@@ -102,6 +102,7 @@ const ImageFile = ({
             } else if (file.has_preview_image) {
                 props.thumbnailUri = buildFileThumbnailUrl(serverUrl, file.id);
             }
+
             // TODO UPSTREAM : Gif handle ?
             if (file.has_preview_image) {
                 props.imageUri = buildFilePreviewUrl(serverUrl, file.id);

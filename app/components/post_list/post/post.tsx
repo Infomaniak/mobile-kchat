@@ -17,13 +17,12 @@ import {removePost} from '@actions/local/post';
 import {showPermalink} from '@actions/remote/permalink';
 import {markPostReminderAsDone} from '@actions/remote/post';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
-import FormattedText from '@components/formatted_text';
-import {getMarkdownTextStyles} from '@utils/markdown';
 import IkCallsCustomMessage from '@calls/components/ik_calls_custom_message';
 import {
     IkMailAttachmentCustomMessage, type MailAttachmentProps,
 } from '@calls/components/ik_mail_attachment_custom_message/ik_mail_attachment_custom_message';
 import {isCallsCustomMessage} from '@calls/utils';
+import FormattedText from '@components/formatted_text';
 import IkWelcomeMessage from '@components/post_list/post/ik_welcome_message';
 import PreviewMessage from '@components/post_list/post/preview_message';
 import SystemAvatar from '@components/system_avatar';
@@ -38,6 +37,7 @@ import PerformanceMetricsManager from '@managers/performance_metrics_manager';
 import {openAsBottomSheet} from '@screens/navigation';
 import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {hasJumboEmojiOnly} from '@utils/emoji/helpers';
+import {getMarkdownTextStyles} from '@utils/markdown';
 import {
     fromAutoResponder,
     isFromWebhook,
@@ -46,7 +46,6 @@ import {
     isPostPendingOrFailed,
     isSystemMessage,
 } from '@utils/post';
-import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import Avatar from './avatar';

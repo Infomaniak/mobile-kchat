@@ -5,10 +5,7 @@ import React, {useCallback, useEffect, useRef} from 'react';
 import {useIntl} from 'react-intl';
 
 import {addFilesToDraft, removeDraft} from '@actions/local/draft';
-import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
-import {useTheme} from '@context/theme';
-import {openAsBottomSheet} from '@screens/navigation';
 import useFileUploadError from '@hooks/file_upload_error';
 import DraftEditPostUploadManager from '@managers/draft_upload_manager';
 import {fileMaxWarning, fileSizeWarning, uploadDisabledWarning} from '@utils/file';
