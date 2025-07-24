@@ -11,6 +11,11 @@ buildscript {
         RNNKotlinVersion = kotlinVersion
         firebaseVersion = "24.1.0"
         ndkVersion = "26.1.10909125"
+
+        // for react-native-audio-recorder-player compatibility
+        androidXVersion = '1.8.0'
+        androidXAnnotation = '1.7.1'
+        androidXBrowser = '1.8.0'
     }
     repositories {
         mavenCentral()

@@ -1,0 +1,7 @@
+diff --git a/package.json b/package.json
+index abcdef0..1234567 100644
+--- a/package.json
++++ b/package.json
+@@ -1,7 +1,7 @@
+-  "main": "index.ts",
++  "main": "index.js",
