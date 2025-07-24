@@ -9,6 +9,7 @@ import Permissions from 'react-native-permissions';
 
 import {setMicPermissionsGranted} from '@calls/state';
 import {useAppState} from '@hooks/device';
+
 // import { initializeVoiceTrack } from './actions';
 
 const micPermission = Platform.select({

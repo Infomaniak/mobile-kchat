@@ -106,7 +106,7 @@ const messages = defineMessages({
     LEAVE_PRIVATE_CHANNEL: {
         id: 'snack.bar.leave.private.channel',
         defaultMessage: 'You left the channel {displayName}',
-    }
+    },
 });
 
 export const SNACK_BAR_CONFIG: Record<string, SnackBarConfig> = {
@@ -136,7 +136,7 @@ export const SNACK_BAR_CONFIG: Record<string, SnackBarConfig> = {
         canUndo: false,
     },
     LEAVE_PRIVATE_CHANNEL: {
-        message : messages.LEAVE_PRIVATE_CHANNEL,
+        message: messages.LEAVE_PRIVATE_CHANNEL,
         iconName: 'exit-to-app',
         canUndo: true,
     },

@@ -25,7 +25,6 @@ import KMeetIcon from './kmeet_icon';
 import type PostModel from '@typings/database/models/servers/post';
 
 const CallStatus = z.enum(['calling', 'joined', 'ended', 'missed', 'declined']);
-type CallStatus = z.infer<typeof CallStatus>
 
 const CallPropsSchema = (() => {
     const baseSchema = {
@@ -41,7 +40,8 @@ const CallPropsSchema = (() => {
         transform((x) => (typeof x.status === 'undefined' ? {...x, status: typeof x.end_at === 'number' ? 'ended' : 'calling'} : x)).
         pipe(z.object({...baseSchema, status: CallStatus}));
 })();
-type CallPropsSchema = z.infer<typeof CallPropsSchema>
+
+type CallProps = z.infer<typeof CallPropsSchema>
 
 type Props = {
     currentUser?: UserModel;
@@ -51,7 +51,7 @@ type Props = {
 };
 
 type PropsInner = Omit<Props, 'post'> & {
-    callProps: CallPropsSchema;
+    callProps: CallProps;
     channelId: string;
 };
 

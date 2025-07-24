@@ -171,7 +171,7 @@ export type ProcessRecordsArgs<T extends Model, R extends RawValue> = {
 
 export type HandleRecordsArgs<T extends Model, R extends RawValue> = ProcessRecordsArgs<T, R> & {
   prepareRecordsOnly: boolean;
-  transformer: (args: TransformerArgs<T,R>) => Promise<T>;
+  transformer: (args: TransformerArgs<T, R>) => Promise<T>;
 };
 
 export type RangeOfValueArgs<R extends RawValue> = {

@@ -40,7 +40,6 @@ type Props = {
     isConvertGMFeatureAvailable: boolean;
     isCRTEnabled: boolean;
     isGuestUser: boolean;
-    type?: ChannelType;
 }
 
 const edges: Edge[] = ['bottom', 'left', 'right'];
@@ -149,10 +148,10 @@ const ChannelInfo = ({
                     }
                     {canEnableDisableCalls &&
                         <>
-                            <ChannelInfoEnableCalls
+                            {/* <ChannelInfoEnableCalls
                                 channelId={channelId}
                                 enabled={isCallsEnabledInChannel}
-                            />
+                            /> */}
                             <View style={styles.separator}/>
                         </>
                     }

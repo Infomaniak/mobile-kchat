@@ -103,7 +103,6 @@ function ChannelFiles({
         if (!operator) {
             return;
         }
-        const {database} = operator;
         const t = Date.now();
         lastSearchRequest.current = t;
         const searchParams = getSearchParams(channel.id, searchTerm, ftr);
