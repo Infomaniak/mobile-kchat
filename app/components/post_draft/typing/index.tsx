@@ -147,7 +147,6 @@ function Typing({
         height.value = (typing.current.length + recording.current.length) ? TYPING_HEIGHT : 0;
     }, [refresh]);
 
-
     // TODO UPSTREAM : check
     useEffect(() => {
         typing.current = [];

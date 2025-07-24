@@ -18,7 +18,6 @@ import {getCurrentUserId, setCurrentUserId} from '@queries/servers/system';
 import {getCurrentUser, prepareUsers, queryAllUsers, queryUsersById, queryUsersByIdsOrUsernames, queryUsersByUsername} from '@queries/servers/user';
 import {getFullErrorMessage} from '@utils/errors';
 import {logDebug} from '@utils/log';
-import {allSettled} from '@utils/promise';
 import {getDeviceTimezone} from '@utils/timezone';
 import {getLastPictureUpdate, getUserTimezoneProps, removeUserFromList} from '@utils/user';
 

@@ -203,10 +203,10 @@ export const DisplayOptionConfig: Record<string, SettingConfigDetails> = {
         testID: messages.timezone.id,
     },
     feedback: {
-         defaultMessage: messages.feedback.defaultMessage,
+        defaultMessage: messages.feedback.defaultMessage,
         i18nId: messages.feedback.id,
         testID: messages.feedback.id,
-    }
+    },
 };
 
 export default {

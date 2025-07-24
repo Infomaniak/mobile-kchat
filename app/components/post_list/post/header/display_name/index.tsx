@@ -78,8 +78,9 @@ const HeaderDisplayName = ({
             channelId,
             userIconOverride,
             usernameOverride,
+            isWebHook,
         });
-    }, [intl, userId, channelId, location, userIconOverride, usernameOverride, theme]));
+    }, [intl, userId, channelId, location, userIconOverride, usernameOverride, theme, isWebHook]));
 
     const calcNameWidth = () => {
         const isLandscape = dimensions.width > dimensions.height;

@@ -29,7 +29,7 @@ import {calculateDimensions, getViewPortWidth, isGifTooLarge} from '@utils/image
 import {getMarkdownImageSize, removeImageProxyForKey} from '@utils/markdown';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {secureGetFromRecord} from '@utils/types';
-import {normalizeProtocol, safeDecodeURIComponent, tryOpenURL} from '@utils/url';
+import {normalizeProtocol, tryOpenURL} from '@utils/url';
 import {onOpenLinkError} from '@utils/url/links';
 
 import type {GalleryItemType} from '@typings/screens/gallery';

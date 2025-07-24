@@ -10,15 +10,15 @@ import FreezeScreen from '@components/freeze_screen';
 import PostDraft from '@components/post_draft';
 import ScheduledPostIndicator from '@components/scheduled_post_indicator';
 import {Screens} from '@constants';
-import {useServerUrl} from '@context/server';
 import {ExtraKeyboardProvider} from '@context/extra_keyboard';
+import {useServerUrl} from '@context/server';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useChannelSwitch} from '@hooks/channel_switch';
 import {useIsTablet} from '@hooks/device';
 import {useDefaultHeaderHeight} from '@hooks/header';
 import {useTeamSwitch} from '@hooks/team_switch';
-import WebsocketManager from '@managers/websocket_manager';
 import SecurityManager from '@managers/security_manager';
+import WebsocketManager from '@managers/websocket_manager';
 import {popTopScreen} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 
@@ -62,7 +62,8 @@ const Channel = ({
     channelType,
     currentUserId,
     hasGMasDMFeature,
-    includeBookmarkBar,
+
+    // includeBookmarkBar,
     includeChannelBanner,
     scheduledPostCount,
 }: ChannelProps) => {

@@ -9,17 +9,15 @@ import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
 import {getConfigValue} from '@queries/servers/system';
 import {toMilliseconds} from '@utils/datetime';
-import {logDebug, logError, logInfo, logWarning} from '@utils/log';
+import {logError, logInfo, logWarning} from '@utils/log';
 
 const MAX_WEBSOCKET_FAILS = 7;
 const WEBSOCKET_TIMEOUT = toMilliseconds({seconds: 30});
 const MIN_WEBSOCKET_RETRY_TIME = toMilliseconds({seconds: 3});
 const MAX_WEBSOCKET_RETRY_TIME = toMilliseconds({minutes: 5});
-const PING_INTERVAL = toMilliseconds({seconds: 30});
 const DEFAULT_OPTIONS = {
     forceConnection: true,
 };
-const TLS_HANDSHARE_ERROR = 1015;
 
 Pusher.logToConsole = false;
 

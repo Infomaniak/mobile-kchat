@@ -9,21 +9,21 @@ import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
 import {fetchPostById} from '@actions/remote/post';
+import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
 import TranscriptIcon from '@components/illustrations/icon_transcript';
+import LoadingTranscript from '@components/illustrations/load_transcript';
+import TimeElapsed from '@components/post_draft/draft_input/voice_input/time_elapsed';
 import Slider from '@components/slider';
 import {Screens} from '@constants';
+import {MIC_SIZE} from '@constants/view';
 import {useAudioPlayerContext} from '@context/audio_player';
 import {useServerUrl} from '@context/server';
+import {useTheme} from '@context/theme';
 import {observeFilesForPost} from '@queries/servers/file';
 import {openAsBottomSheet} from '@screens/navigation';
 import {mmssss} from '@utils/datetime';
 import {getMarkdownTextStyles} from '@utils/markdown';
-import CompassIcon from '@components/compass_icon';
-import LoadingTranscript from '@components/illustrations/load_transcript';
-import TimeElapsed from '@components/post_draft/draft_input/voice_input/time_elapsed';
-import {MIC_SIZE} from '@constants/view';
-import {useTheme} from '@context/theme';
 import {preventDoubleTap} from '@utils/tap';
 import {blendColors, changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 

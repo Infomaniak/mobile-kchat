@@ -249,7 +249,7 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     sendTestNotification = async () => {
         return this.doFetch(
             `${this.urlVersion}/notifications/test`,
-             {method: 'post'},
+            {method: 'post'},
         );
     };
 };

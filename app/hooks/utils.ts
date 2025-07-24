@@ -13,7 +13,6 @@ export const useRerender = () => {
     }, []);
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
 export const useTransientRef = <T extends unknown>(value: T): RefObject<T> => {
     const ref = useRef<T>(value);
     ref.current = value;
@@ -30,7 +29,7 @@ export const useMountedRef = () => {
     }, []);
 
     return mountedRef;
-}
+};
 
 const DELAY = 750;
 

@@ -269,7 +269,7 @@ const OptionItem = ({
                     <View style={styles.iconContainer}>
                         {customIcon}
                     </View>
-                     {type === OptionTypeConst.RADIO && radioComponent}
+                    {type === OptionTypeConst.RADIO && radioComponent}
                     <View style={labelStyle}>
                         <Text
                             style={[labelTextStyle, optionLabelTextStyle]}

@@ -8,8 +8,8 @@ import {StyleSheet, View} from 'react-native';
 import {buildAbsoluteUrl} from '@actions/remote/file';
 import {buildProfileImageUrlFromUser} from '@actions/remote/user';
 import CompassIcon from '@components/compass_icon';
-import NetworkManager from '@managers/network_manager';
 import {useServerUrl} from '@context/server';
+import NetworkManager from '@managers/network_manager';
 import {changeOpacity} from '@utils/theme';
 
 import type UserModel from '@typings/database/models/servers/user';

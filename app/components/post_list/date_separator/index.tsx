@@ -70,6 +70,7 @@ const RecentDate = (props: DateSeparatorProps) => {
     return (
         <FormattedDate
             {...otherProps}
+            format={format}
             value={date}
         />
     );

@@ -7,17 +7,16 @@ import {Text, TouchableOpacity, View} from 'react-native';
 import {z} from 'zod';
 
 import {fetchConference, switchToConferenceByChannelId} from '@actions/remote/conference';
-import FormattedRelativeTime from '@components/formatted_relative_time';
-import {useServerUrl} from '@context/server';
-import {useMountedRef} from '@hooks/utils';
-import {isDarkTheme} from '@utils/theme';
 import IkCallsParticipantStack from '@calls/components/ik_calls_participant_stack';
+import FormattedRelativeTime from '@components/formatted_relative_time';
 import FormattedText from '@components/formatted_text';
 import FormattedTime from '@components/formatted_time';
+import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import {useMountedRef} from '@hooks/utils';
 import UserModel from '@typings/database/models/servers/user';
 import {isTablet} from '@utils/helpers';
-import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {isDarkTheme, changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {getUserTimezone} from '@utils/user';
 
@@ -26,7 +25,6 @@ import KMeetIcon from './kmeet_icon';
 import type PostModel from '@typings/database/models/servers/post';
 
 const CallStatus = z.enum(['calling', 'joined', 'ended', 'missed', 'declined']);
-type CallStatus = z.infer<typeof CallStatus>
 
 const CallPropsSchema = (() => {
     const baseSchema = {
@@ -42,7 +40,8 @@ const CallPropsSchema = (() => {
         transform((x) => (typeof x.status === 'undefined' ? {...x, status: typeof x.end_at === 'number' ? 'ended' : 'calling'} : x)).
         pipe(z.object({...baseSchema, status: CallStatus}));
 })();
-type CallPropsSchema = z.infer<typeof CallPropsSchema>
+
+type CallProps = z.infer<typeof CallPropsSchema>
 
 type Props = {
     currentUser?: UserModel;
@@ -52,7 +51,7 @@ type Props = {
 };
 
 type PropsInner = Omit<Props, 'post'> & {
-    callProps: CallPropsSchema;
+    callProps: CallProps;
     channelId: string;
 };
 

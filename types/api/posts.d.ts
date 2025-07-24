@@ -32,8 +32,6 @@ type PostType =
     | 'custom_calls_recording'
     | PostTypes.VOICE_MESSAGE;
 
-    
-
 type PostEmbedType = 'image' | 'message_attachment' | 'opengraph' | 'permalink';
 
 type PostAcknowledgement = {

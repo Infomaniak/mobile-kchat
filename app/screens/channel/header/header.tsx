@@ -101,7 +101,8 @@ const ChannelHeader = ({
     isOwnDirectMessage,
     memberCount,
     teamId,
-    callsEnabledInChannel,
+
+    // callsEnabledInChannel,
     groupCallsAllowed,
     isTabletView,
     shouldRenderBookmarks,

@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {TouchableWithoutFeedback, useWindowDimensions, View,Text} from 'react-native';
+import {TouchableWithoutFeedback, useWindowDimensions, View, Text} from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import {updateDraftFile} from '@actions/local/draft';

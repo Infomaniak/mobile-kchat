@@ -26,7 +26,7 @@ import {getIntlShape} from '@utils/general';
 import {logError} from '@utils/log';
 import {escapeRegex} from '@utils/markdown';
 import {addNewServer} from '@utils/server';
-import {removeProtocol, stripTrailingSlashes} from '@utils/url';
+import {removeProtocol} from '@utils/url';
 import {
     TEAM_NAME_PATH_PATTERN,
     IDENTIFIER_PATH_PATTERN,

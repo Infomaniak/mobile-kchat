@@ -55,7 +55,7 @@ const enhanced = withObservables([], ({database}: EnhanceProps) => {
     const license = observeLicense(database);
     const bannerInfo = channelId.pipe(
         switchMap((cId) => observeChannel(database, cId)),
-        switchMap((channel) => of$(channel?.bannerInfo)),
+        switchMap((chan) => of$(chan?.bannerInfo)),
     );
 
     const includeChannelBanner = channelType.pipe(

@@ -3,10 +3,10 @@
 
 import React from 'react';
 
-import {changeOpacity} from '@utils/theme';
 import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {useTheme} from '@context/theme';
+import {changeOpacity} from '@utils/theme';
 
 type Props = {
     onPress: () => void;

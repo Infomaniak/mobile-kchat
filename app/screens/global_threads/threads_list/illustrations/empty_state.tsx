@@ -1,16 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import { isDarkTheme } from '@utils/theme';
 import React from 'react';
 import Svg, {
     Circle,
-    ClipPath,
-    Defs,
-    G,
     Path,
-    Rect,
 } from 'react-native-svg';
+
+import {isDarkTheme} from '@utils/theme';
 
 type Props = {
     theme: Theme;

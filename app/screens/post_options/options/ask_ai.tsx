@@ -3,11 +3,11 @@
 
 import React, {useCallback} from 'react';
 
-import {Screens} from '@constants';
-import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
 import {BaseOption} from '@components/common_post_options';
+import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {t} from '@i18n';
+import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
 
 import IconAI from '../../../components/illustrations/icon_ai';
 

@@ -6,9 +6,9 @@ import merge from 'deepmerge';
 import {Appearance, StatusBar, StyleSheet} from 'react-native';
 import tinyColor from 'tinycolor2';
 
-import {getDefaultThemeByAppearance} from '@context/theme';
 import {Preferences} from '@constants';
 import {MODAL_SCREENS_WITHOUT_BACK, SCREENS_AS_BOTTOM_SHEET, SCREENS_WITH_TRANSPARENT_BACKGROUND} from '@constants/screens';
+import {getDefaultThemeByAppearance} from '@context/theme';
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {appearanceControlledScreens, mergeNavigationOptions} from '@utils/navigation';

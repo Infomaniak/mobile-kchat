@@ -3,6 +3,8 @@
 
 import {type AppSchema, appSchema} from '@nozbe/watermelondb';
 
+import {PlaybookRunSchema, PlaybookChecklistSchema, PlaybookChecklistItemSchema} from '@playbooks/database/schema';
+
 import {
     CategorySchema,
     CategoryChannelSchema,
@@ -43,7 +45,6 @@ import {
     CustomProfileAttributeSchema,
     CustomProfileFieldSchema,
 } from './table_schemas';
-import { PlaybookRunSchema, PlaybookChecklistSchema, PlaybookChecklistItemSchema } from '@playbooks/database/schema';
 
 export const serverSchema: AppSchema = appSchema({
     version: 7,
