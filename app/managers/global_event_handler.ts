@@ -7,8 +7,6 @@ import semver from 'semver';
 
 import {switchToChannelById} from '@actions/remote/channel';
 import {switchToConferenceByChannelId} from '@actions/remote/conference';
-import CallManager, {CallAnsweredEvent, CallEndedEvent, CallMutedEvent, CallVideoMutedEvent} from '@store/CallManager';
-import {logError} from '@utils/log';
 import {Device, Events, Sso} from '@constants';
 import {MIN_REQUIRED_VERSION} from '@constants/supported_server';
 import DatabaseManager from '@database/manager';
@@ -19,8 +17,10 @@ import {queryTeamDefaultChannel} from '@queries/servers/channel';
 import {getCommonSystemValues} from '@queries/servers/system';
 import {getTeamChannelHistory} from '@queries/servers/team';
 import {setScreensOrientation} from '@screens/navigation';
+import CallManager, {CallAnsweredEvent, CallEndedEvent, CallMutedEvent, CallVideoMutedEvent} from '@store/CallManager';
 import {alertInvalidDeepLink, handleDeepLink} from '@utils/deep_link';
 import {getIntlShape} from '@utils/general';
+import {logError} from '@utils/log';
 
 type LinkingCallbackArg = {url: string};
 

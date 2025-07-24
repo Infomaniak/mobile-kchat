@@ -11,10 +11,10 @@ import {
     createTable,
     schemaMigrations,
     unsafeExecuteSql,
-} from "@nozbe/watermelondb/Schema/migrations";
+} from '@nozbe/watermelondb/Schema/migrations';
 
-import { MM_TABLES } from "@constants/database";
-import { PLAYBOOK_TABLES } from "@playbooks/constants/database";
+import {MM_TABLES} from '@constants/database';
+import {PLAYBOOK_TABLES} from '@playbooks/constants/database';
 
 const {
     CHANNEL,
@@ -33,139 +33,138 @@ const {
 
 const {PLAYBOOK_RUN, PLAYBOOK_CHECKLIST, PLAYBOOK_CHECKLIST_ITEM} = PLAYBOOK_TABLES;
 
-
 export default schemaMigrations({
     migrations: [
         {
             toVersion: 7, // Ik: equivalent of version 12 of MM
             steps: [
                 createTable({
-                name: PLAYBOOK_RUN,
-                columns: [
-                    {name: 'playbook_id', type: 'string'},
-                    {name: 'name', type: 'string'},
-                    {name: 'description', type: 'string'},
-                    {name: 'is_active', type: 'boolean', isIndexed: true},
-                    {name: 'owner_user_id', type: 'string'},
-                    {name: 'team_id', type: 'string'},
-                    {name: 'channel_id', type: 'string', isIndexed: true},
-                    {name: 'post_id', type: 'string', isOptional: true},
-                    {name: 'create_at', type: 'number'},
-                    {name: 'end_at', type: 'number'},
-                    {name: 'active_stage', type: 'number'},
-                    {name: 'active_stage_title', type: 'string'},
-                    {name: 'participant_ids', type: 'string'}, // JSON string
-                    {name: 'summary', type: 'string'},
-                    {name: 'current_status', type: 'string', isIndexed: true},
-                    {name: 'last_status_update_at', type: 'number'},
-                    {name: 'previous_reminder', type: 'number'},
-                    {name: 'items_order', type: 'string'},
-                    {name: 'retrospective_enabled', type: 'boolean'},
-                    {name: 'retrospective', type: 'string'},
-                    {name: 'retrospective_published_at', type: 'number'},
-                    {name: 'update_at', type: 'number'},
-                ],
-            }),
-            createTable({
-                name: PLAYBOOK_CHECKLIST,
-                columns: [
-                    {name: 'run_id', type: 'string', isIndexed: true},
-                    {name: 'items_order', type: 'string'},
-                    {name: 'title', type: 'string'},
-                    {name: 'update_at', type: 'number'},
-                ],
-            }),
-            createTable({
-                name: PLAYBOOK_CHECKLIST_ITEM,
-                columns: [
-                    {name: 'checklist_id', type: 'string', isIndexed: true},
-                    {name: 'title', type: 'string'},
-                    {name: 'state', type: 'string', isIndexed: true},
-                    {name: 'state_modified', type: 'number'},
-                    {name: 'assignee_id', type: 'string', isOptional: true},
-                    {name: 'assignee_modified', type: 'number'},
-                    {name: 'command', type: 'string', isOptional: true},
-                    {name: 'command_last_run', type: 'number'},
-                    {name: 'description', type: 'string'},
-                    {name: 'due_date', type: 'number'},
-                    {name: 'completed_at', type: 'number'},
-                    {name: 'task_actions', type: 'string', isOptional: true}, // JSON string
-                    {name: 'update_at', type: 'number'},
-                ],
-            }),
-            addColumns({
-                table: MY_CHANNEL,
-                columns: [
-                    {name: 'last_playbook_runs_fetch_at', type: 'number'},
-                ],
-            }),
-            createTable({
-                name: CUSTOM_PROFILE_ATTRIBUTE,
-                columns: [
-                    {name: 'field_id', type: 'string', isIndexed: true},
-                    {name: 'user_id', type: 'string', isIndexed: true},
-                    {name: 'value', type: 'string'},
-                ],
-            }),
-            createTable({
-                name: CUSTOM_PROFILE_FIELD,
-                columns: [
-                    {name: 'group_id', type: 'string', isIndexed: true},
-                    {name: 'name', type: 'string'},
-                    {name: 'type', type: 'string'},
-                    {name: 'target_id', type: 'string'},
-                    {name: 'target_type', type: 'string'},
-                    {name: 'create_at', type: 'number'},
-                    {name: 'update_at', type: 'number'},
-                    {name: 'delete_at', type: 'number', isOptional: true},
-                    {name: 'attrs', type: 'string', isOptional: true},
-                ],
-            }),
+                    name: PLAYBOOK_RUN,
+                    columns: [
+                        {name: 'playbook_id', type: 'string'},
+                        {name: 'name', type: 'string'},
+                        {name: 'description', type: 'string'},
+                        {name: 'is_active', type: 'boolean', isIndexed: true},
+                        {name: 'owner_user_id', type: 'string'},
+                        {name: 'team_id', type: 'string'},
+                        {name: 'channel_id', type: 'string', isIndexed: true},
+                        {name: 'post_id', type: 'string', isOptional: true},
+                        {name: 'create_at', type: 'number'},
+                        {name: 'end_at', type: 'number'},
+                        {name: 'active_stage', type: 'number'},
+                        {name: 'active_stage_title', type: 'string'},
+                        {name: 'participant_ids', type: 'string'}, // JSON string
+                        {name: 'summary', type: 'string'},
+                        {name: 'current_status', type: 'string', isIndexed: true},
+                        {name: 'last_status_update_at', type: 'number'},
+                        {name: 'previous_reminder', type: 'number'},
+                        {name: 'items_order', type: 'string'},
+                        {name: 'retrospective_enabled', type: 'boolean'},
+                        {name: 'retrospective', type: 'string'},
+                        {name: 'retrospective_published_at', type: 'number'},
+                        {name: 'update_at', type: 'number'},
+                    ],
+                }),
+                createTable({
+                    name: PLAYBOOK_CHECKLIST,
+                    columns: [
+                        {name: 'run_id', type: 'string', isIndexed: true},
+                        {name: 'items_order', type: 'string'},
+                        {name: 'title', type: 'string'},
+                        {name: 'update_at', type: 'number'},
+                    ],
+                }),
+                createTable({
+                    name: PLAYBOOK_CHECKLIST_ITEM,
+                    columns: [
+                        {name: 'checklist_id', type: 'string', isIndexed: true},
+                        {name: 'title', type: 'string'},
+                        {name: 'state', type: 'string', isIndexed: true},
+                        {name: 'state_modified', type: 'number'},
+                        {name: 'assignee_id', type: 'string', isOptional: true},
+                        {name: 'assignee_modified', type: 'number'},
+                        {name: 'command', type: 'string', isOptional: true},
+                        {name: 'command_last_run', type: 'number'},
+                        {name: 'description', type: 'string'},
+                        {name: 'due_date', type: 'number'},
+                        {name: 'completed_at', type: 'number'},
+                        {name: 'task_actions', type: 'string', isOptional: true}, // JSON string
+                        {name: 'update_at', type: 'number'},
+                    ],
+                }),
+                addColumns({
+                    table: MY_CHANNEL,
+                    columns: [
+                        {name: 'last_playbook_runs_fetch_at', type: 'number'},
+                    ],
+                }),
+                createTable({
+                    name: CUSTOM_PROFILE_ATTRIBUTE,
+                    columns: [
+                        {name: 'field_id', type: 'string', isIndexed: true},
+                        {name: 'user_id', type: 'string', isIndexed: true},
+                        {name: 'value', type: 'string'},
+                    ],
+                }),
+                createTable({
+                    name: CUSTOM_PROFILE_FIELD,
+                    columns: [
+                        {name: 'group_id', type: 'string', isIndexed: true},
+                        {name: 'name', type: 'string'},
+                        {name: 'type', type: 'string'},
+                        {name: 'target_id', type: 'string'},
+                        {name: 'target_type', type: 'string'},
+                        {name: 'create_at', type: 'number'},
+                        {name: 'update_at', type: 'number'},
+                        {name: 'delete_at', type: 'number', isOptional: true},
+                        {name: 'attrs', type: 'string', isOptional: true},
+                    ],
+                }),
                 addColumns({
                     table: CHANNEL,
                     columns: [
                         {
-                            name: "abac_policy_enforced",
-                            type: "boolean",
+                            name: 'abac_policy_enforced',
+                            type: 'boolean',
                             isOptional: true,
                         },
                     ],
                 }),
                 addColumns({
                     table: FILE,
-                    columns: [{ name: "is_blocked", type: "boolean" }],
+                    columns: [{name: 'is_blocked', type: 'boolean'}],
                 }),
                 createTable({
                     name: SCHEDULED_POST,
                     columns: [
-                        { name: "channel_id", type: "string", isIndexed: true },
-                        { name: "message", type: "string" },
-                        { name: "files", type: "string" },
-                        { name: "root_id", type: "string", isIndexed: true },
-                        { name: "metadata", type: "string", isOptional: true },
-                        { name: "create_at", type: "number" },
-                        { name: "update_at", type: "number" },
-                        { name: "scheduled_at", type: "number" },
-                        { name: "processed_at", type: "number" },
-                        { name: "error_code", type: "string" },
+                        {name: 'channel_id', type: 'string', isIndexed: true},
+                        {name: 'message', type: 'string'},
+                        {name: 'files', type: 'string'},
+                        {name: 'root_id', type: 'string', isIndexed: true},
+                        {name: 'metadata', type: 'string', isOptional: true},
+                        {name: 'create_at', type: 'number'},
+                        {name: 'update_at', type: 'number'},
+                        {name: 'scheduled_at', type: 'number'},
+                        {name: 'processed_at', type: 'number'},
+                        {name: 'error_code', type: 'string'},
                     ],
                 }),
                 addColumns({
                     table: CHANNEL,
                     columns: [
                         {
-                            name: "banner_info",
-                            type: "string",
+                            name: 'banner_info',
+                            type: 'string',
                             isOptional: true,
                         },
                     ],
                 }),
                 unsafeExecuteSql(
-                    "CREATE INDEX IF NOT EXISTS Post_type ON Post (type);",
+                    'CREATE INDEX IF NOT EXISTS Post_type ON Post (type);',
                 ),
                 addColumns({
                     table: DRAFT,
-                    columns: [{ name: "update_at", type: "number" }],
+                    columns: [{name: 'update_at', type: 'number'}],
                 }),
             ],
         },
@@ -174,7 +173,7 @@ export default schemaMigrations({
             steps: [
                 addColumns({
                     table: FILE,
-                    columns: [{ name: "transcript", type: "string" }],
+                    columns: [{name: 'transcript', type: 'string'}],
                 }),
             ],
         },
@@ -184,7 +183,7 @@ export default schemaMigrations({
                 addColumns({
                     table: CHANNEL_MEMBERSHIP,
                     columns: [
-                        { name: "roles", type: "string", isOptional: true },
+                        {name: 'roles', type: 'string', isOptional: true},
                     ],
                 }),
             ],
@@ -195,26 +194,26 @@ export default schemaMigrations({
                 createTable({
                     name: CONFERENCE,
                     columns: [
-                        { name: "url", type: "string" },
-                        { name: "channel_id", type: "string", isIndexed: true },
-                        { name: "team_id", type: "string", isIndexed: true },
-                        { name: "user_id", type: "string", isIndexed: true },
-                        { name: "create_at", type: "number" },
-                        { name: "delete_at", type: "number", isOptional: true },
+                        {name: 'url', type: 'string'},
+                        {name: 'channel_id', type: 'string', isIndexed: true},
+                        {name: 'team_id', type: 'string', isIndexed: true},
+                        {name: 'user_id', type: 'string', isIndexed: true},
+                        {name: 'create_at', type: 'number'},
+                        {name: 'delete_at', type: 'number', isOptional: true},
                     ],
                 }),
                 createTable({
                     name: CONFERENCE_PARTICIPANT,
                     columns: [
-                        { name: "channel_id", type: "string", isIndexed: true },
+                        {name: 'channel_id', type: 'string', isIndexed: true},
                         {
-                            name: "conference_id",
-                            type: "string",
+                            name: 'conference_id',
+                            type: 'string',
                             isIndexed: true,
                         },
-                        { name: "user_id", type: "string", isIndexed: true },
-                        { name: "present", type: "boolean" },
-                        { name: "status", type: "string" },
+                        {name: 'user_id', type: 'string', isIndexed: true},
+                        {name: 'present', type: 'boolean'},
+                        {name: 'status', type: 'string'},
                     ],
                 }),
             ],
@@ -224,7 +223,7 @@ export default schemaMigrations({
             steps: [
                 addColumns({
                     table: POST,
-                    columns: [{ name: "message_source", type: "string" }],
+                    columns: [{name: 'message_source', type: 'string'}],
                 }),
             ],
         },
@@ -233,12 +232,12 @@ export default schemaMigrations({
             steps: [
                 addColumns({
                     table: CHANNEL_INFO,
-                    columns: [{ name: "files_count", type: "number" }],
+                    columns: [{name: 'files_count', type: 'number'}],
                 }),
                 addColumns({
                     table: DRAFT,
                     columns: [
-                        { name: "metadata", type: "string", isOptional: true },
+                        {name: 'metadata', type: 'string', isOptional: true},
                     ],
                 }),
             ],
