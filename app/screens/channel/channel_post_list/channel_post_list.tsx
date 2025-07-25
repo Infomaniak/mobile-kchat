@@ -16,7 +16,6 @@ import {useAppState, useIsTablet} from '@hooks/device';
 import useDidUpdate from '@hooks/did_update';
 import EphemeralStore from '@store/ephemeral_store';
 
-import UpgradeKsuiteBanner from './ik_upgrade_ksuite_banner';
 import Intro from './intro';
 
 import type PostModel from '@typings/database/models/servers/post';
@@ -107,7 +106,7 @@ const ChannelPostList = ({
         };
     }, []);
 
-    const intro = (<><Intro channelId={channelId}/><UpgradeKsuiteBanner/></>);
+    const intro = (<Intro channelId={channelId}/>);
 
     const postList = (
         <PostList

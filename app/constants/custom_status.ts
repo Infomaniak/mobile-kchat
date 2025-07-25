@@ -11,7 +11,6 @@ export enum CustomStatusDurationEnum {
     TODAY = 'today',
     THIS_WEEK = 'this_week',
     DATE_AND_TIME = 'date_and_time',
-    SELECT_DATE = 'select_date',
 }
 
 const {
@@ -22,7 +21,6 @@ const {
     TODAY,
     THIS_WEEK,
     DATE_AND_TIME,
-    SELECT_DATE,
 } = CustomStatusDurationEnum;
 
 export const CST: {[key in CustomStatusDuration]: {id: string; defaultMessage: string}} = {
@@ -53,10 +51,6 @@ export const CST: {[key in CustomStatusDuration]: {id: string; defaultMessage: s
     [DATE_AND_TIME]: {
         id: t('custom_status.expiry_dropdown.date_and_time'),
         defaultMessage: 'Date and Time',
-    },
-    [SELECT_DATE]: {
-        id: t(''),
-        defaultMessage: '',
     },
 };
 

@@ -9,7 +9,7 @@ import {useIntl} from 'react-intl';
 
 import {Screens} from '@app/constants';
 import {useTheme} from '@app/context/theme';
-import {isPaidPlan, type PackName} from '@app/hooks/plans';
+import {isPaidPlan, quotaMessages, type PackName} from '@app/hooks/plans';
 import {useGetUsageDeltas} from '@app/hooks/usage';
 import {openAsBottomSheet} from '@screens/navigation';
 
@@ -28,11 +28,7 @@ type Props = {
 }
 
 const TRESHOLD_ALMOST_FULL = -1073741824;
-const quotaMessages = new Map<string, string>([
-    ['admin|paid', 'file_upload.quota.almost.exceeded.paidPlan.admin'],
-    ['admin|free', 'file_upload.quota.almost.exceeded.freePlan.admin'],
-    ['user|_', 'file_upload.quota.exceeded'],
-]);
+
 const AlmostFullStorageAnnouncementBar = ({
     visibility,
     currentPackName,
@@ -86,11 +82,10 @@ const AlmostFullStorageAnnouncementBar = ({
         <AnnouncementBanner
             bannerColor={'#FFE7A5'}
             bannerDismissed={false}
-            bannerEnabled={true}
             allowDismissal={false}
             bannerText={bannerText}
             icon={<WarningIcon/>}
-            onHandlePress={handlePress}
+            onCustomBannerAction={handlePress}
         />
 
     );

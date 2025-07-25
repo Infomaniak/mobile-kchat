@@ -9,7 +9,7 @@ import {useIntl} from 'react-intl';
 
 import {Screens} from '@app/constants';
 import {useTheme} from '@app/context/theme';
-import {isPaidPlan, type PackName} from '@app/hooks/plans';
+import {isPaidPlan, quotaMessages, type PackName} from '@app/hooks/plans';
 import {useGetUsageDeltas} from '@app/hooks/usage';
 import {openAsBottomSheet} from '@app/screens/navigation';
 
@@ -25,12 +25,6 @@ type Props = {
     limits: LimitModel;
     usage: CloudUsageModel;
 }
-
-const quotaMessages = new Map<string, string>([
-    ['admin|paid', 'file_upload.quota.exceeded.paidPlan.admin'],
-    ['admin|free', 'file_upload.quota.exceeded.freePlan.admin'],
-    ['user|_', 'file_upload.quota.exceeded'],
-]);
 
 const FullStorageAnnouncementBar = ({
     currentPackName,
@@ -84,11 +78,10 @@ const FullStorageAnnouncementBar = ({
         <AnnouncementBanner
             bannerColor={'#FFCCC8'}
             bannerDismissed={false}
-            bannerEnabled={true}
             allowDismissal={false}
             bannerText={bannerText}
             icon={<WarningIcon/>}
-            onHandlePress={handlePress}
+            onCustomBannerAction={handlePress}
         />
 
     );

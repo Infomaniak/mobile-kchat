@@ -5,7 +5,7 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$, combineLatest} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
-import {observeConfigBooleanValue, observeConfigValue, observeLastDismissedAnnouncement, observeLicense} from '@queries/servers/system';
+import {observeConfigBooleanValue, observeConfigValue, observeLastDismissedAnnouncement} from '@queries/servers/system';
 
 import AnnouncementBanner from './announcement_banner';
 
@@ -20,14 +20,8 @@ const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
         switchMap(([ld, bt, abd]) => of$(abd && (ld === bt))),
     );
 
-    const license = observeLicense(database);
-    const enableBannerConfig = observeConfigBooleanValue(database, 'EnableBanner');
-    const bannerEnabled = combineLatest([license, enableBannerConfig]).pipe(
-        switchMap(([lcs, cfg]) => of$(cfg && lcs?.IsLicensed === 'true')),
-    );
     return {
         bannerColor: observeConfigValue(database, 'BannerColor'),
-        bannerEnabled,
         bannerText,
         bannerTextColor: observeConfigValue(database, 'BannerTextColor'),
         bannerDismissed,

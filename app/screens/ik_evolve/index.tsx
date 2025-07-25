@@ -17,15 +17,9 @@ import KchatIcon from './icons/kchat';
 import MailIcon from './icons/mail';
 import PlusIcon from './icons/plus';
 import Header from './icons/top';
-const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
-    const secondaryTextColor = '#666666';
 
+const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
-        headerTop: {
-            width: '100%',
-            height: 16,
-            backgroundColor: '#222633',
-        },
         container: {
             flex: 1,
             justifyContent: 'center',
@@ -46,7 +40,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             paddingBottom: 20,
         },
         subtitle: {
-            color: secondaryTextColor,
+            color: theme.textDescription,
             textAlign: 'center',
         },
         choices: {
@@ -54,6 +48,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             paddingTop: 12,
         },
         choiceItem: {
+            color: theme.textDescription,
             flexDirection: 'row',
             marginBottom: 16,
         },
@@ -61,8 +56,8 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             marginRight: 12,
         },
         choiceText: {
+            color: theme.textDescription,
             flex: 1,
-            color: secondaryTextColor,
         },
         evolve: {
             paddingTop: 32,

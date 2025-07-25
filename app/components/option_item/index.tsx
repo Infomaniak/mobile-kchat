@@ -292,7 +292,7 @@ const OptionItem = ({
                     </View>
                 </View>
             </View>
-            {(Boolean(actionComponent || info) || rightComponent) &&
+            {(Boolean(actionComponent || info || rightComponent)) &&
             <View style={styles.actionContainer}>
                 {
                     Boolean(info) &&

@@ -25,7 +25,7 @@ const UpgradeKsuiteBanner = ({
     const theme = useTheme();
     const styles = bannerBaseStyles(theme);
     const nextPlan = getNextWcPack(currentPackName as PackName);
-    const historyDurationLimit = limits?.messages ? sanitizeHistoryDuration(limits.messages.history) : null;
+    const historyDurationLimit = sanitizeHistoryDuration(limits?.messages?.history);
     const intl = useIntl();
 
     if (!limits) {

@@ -4,9 +4,5 @@
 import {fetchUsage} from '@actions/remote/cloud';
 
 export async function handleLimitationChanged(serverUrl: string) {
-    try {
-        await fetchUsage(serverUrl);
-    } catch (e) {
-    // Do nothing
-    }
+    await fetchUsage(serverUrl);
 }

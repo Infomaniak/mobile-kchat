@@ -1,5 +1,4 @@
 {
-  "": "",
   "about.date": "Build Date:",
   "about.enterpriseEditione1": "Enterprise Edition",
   "about.enterpriseEditionLearn": "Learn more about Enterprise Edition at ",
@@ -1075,6 +1074,7 @@
   "unsupported_server.title": "Unsupported server version",
   "upgrade_banner_channel.description": "You have reached the limit of {type, select, O {public channels} P {private channels} other {}} ({usage, number}/{limit, number}) on your kSuite offer. {isAdmin, select, true {Modify your offer to create additional channels.} other {Please contact an administrator to modify the offer.}}",
   "upgrade_banner_ksuite_benefit": "<b>50 GB</b> per user of kDrive and kChat cloud storage",
+  "upgrade_banner_ksuite_button": "UPGRADE",
   "upgrade_banner_ksuite_close": "Close",
   "upgrade_banner_ksuite_euria": "<b>Euria</b>: video transcription, image creation, etc.",
   "upgrade_banner_ksuite_evolve": "To upgrade your plan, use the web interface.",
@@ -1086,6 +1086,9 @@
   "upgrade_banner.description": "Messages and files older than {duration} are no longer available. Upgrade to the {plan} kSuite Pro plan to enjoy unlimited conversation history.",
   "upgrade_banner.link": "To upgrade your plan, use the web interface.",
   "upgrade_banner.title": "Unlock the full power of kChat!",
+  "duration.year": "{count, plural, one {year} other {years}}",
+  "duration.month": "{count, plural, one {month} other {months}}",
+  "duration.day": "{count, plural, one {day} other {days}}",
   "user_profile.custom_status": "Custom Status",
   "user_status.away": "Away",
   "user_status.dnd": "Do Not Disturb",

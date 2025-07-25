@@ -9,7 +9,9 @@ export type TeamServer = {
 }
 
 export interface IKClientCustomActionsMix {
-    addPostReminder: (postId: string, timestamp: number |string, reschedule?: boolean, reminderPostId?: string) => Promise<Boolean>;
+
+    // Ik change : timestamp can be either a number (in milliseconds) or a string of type IkPostReminder
+    addPostReminder: (postId: string, timestamp: number | string, reschedule?: boolean, reminderPostId?: string) => Promise<Boolean>;
     markPostReminderAsDone: (postId: string) => Promise<Boolean>;
     translatePost: (postId: string) => Promise<Boolean>;
 }

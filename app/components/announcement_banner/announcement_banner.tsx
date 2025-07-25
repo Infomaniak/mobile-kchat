@@ -27,12 +27,11 @@ import ExpandedAnnouncementBanner from './expanded_announcement_banner';
 type Props = {
     bannerColor: string;
     bannerDismissed: boolean;
-    bannerEnabled: boolean;
     bannerText?: string;
     bannerTextColor?: string;
     allowDismissal: boolean;
     icon?: React.ReactNode;
-    onHandlePress?: () => void;
+    onCustomBannerAction?: () => void;
 }
 
 const getStyle = makeStyleSheetFromTheme((theme: Theme) => ({
@@ -85,12 +84,11 @@ const SNAP_POINT_WITHOUT_DISMISS = TITLE_HEIGHT + BUTTON_HEIGHT + MARGINS + TEXT
 const AnnouncementBanner = ({
     bannerColor,
     bannerDismissed,
-    bannerEnabled,
     bannerText = '',
     bannerTextColor = '#000',
     allowDismissal,
     icon,
-    onHandlePress,
+    onCustomBannerAction,
 }: Props) => {
     const intl = useIntl();
     const serverUrl = useServerUrl();
@@ -134,9 +132,9 @@ const AnnouncementBanner = ({
     }, [serverUrl, bannerText]);
 
     useEffect(() => {
-        const showBanner = bannerEnabled && !bannerDismissed && Boolean(bannerText);
+        const showBanner = !bannerDismissed && Boolean(bannerText);
         setVisible(showBanner);
-    }, [bannerDismissed, bannerEnabled, bannerText]);
+    }, [bannerDismissed, bannerText]);
 
     useEffect(() => {
         height.value = withTiming(visible ? ANNOUNCEMENT_BAR_HEIGHT : 0, {
@@ -155,10 +153,10 @@ const AnnouncementBanner = ({
             <View
                 style={[style.bannerContainer, {backgroundColor: bannerColor}]}
             >
-                {true &&
+                {visible &&
                     <>
                         <TouchableOpacity
-                            onPress={onHandlePress || handlePress}
+                            onPress={onCustomBannerAction || handlePress}
                             style={style.wrapper}
                         >
                             <View style={style.contentContainer}>

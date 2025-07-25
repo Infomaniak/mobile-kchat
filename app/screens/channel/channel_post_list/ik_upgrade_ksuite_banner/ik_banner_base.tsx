@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-import {View} from 'react-native';
+import {View, type StyleProp, type ViewStyle} from 'react-native';
 
 import {useTheme} from '@app/context/theme';
 import {makeStyleSheetFromTheme} from '@app/utils/theme';
@@ -29,15 +29,18 @@ export const bannerBaseStyles = makeStyleSheetFromTheme((theme) => ({
         fontSize: 14,
         fontWeight: '600',
         marginBottom: 4,
+        color: theme.centerChannelColor,
     },
     textDescription: {
         fontSize: 14,
         fontWeight: '400',
         marginBottom: 4,
+        color: theme.centerChannelColor,
     },
     textLink: {
         fontSize: 12,
         fontWeight: '400',
+        color: theme.textDescription,
     },
 }));
 
@@ -45,7 +48,7 @@ type Props = {
     title?: React.ReactNode;
     description?: React.ReactNode;
     link?: React.ReactNode;
-    style?: any;
+    style?: StyleProp<ViewStyle>;
 };
 
 const BannerBase = ({
@@ -55,6 +58,7 @@ const BannerBase = ({
     style,
 }: Props) => {
     const theme = useTheme();
+
     const styles = bannerBaseStyles(theme);
 
     return (

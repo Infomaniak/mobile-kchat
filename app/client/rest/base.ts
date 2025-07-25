@@ -312,7 +312,7 @@ export default class ClientBase {
             });
         }
 
-        if (response.code === 409) {
+        if (response.code === 409 && response.data?.id === 'quota-exceeded') {
             fetchUsage(this.apiClient.baseUrl);
             openAsBottomSheet({
                 closeButtonId: 'close-quota-exceeded',

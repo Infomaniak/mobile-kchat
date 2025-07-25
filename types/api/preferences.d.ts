@@ -41,6 +41,7 @@ type Theme = {
     codeTheme: string;
     guestBannerBackground: string;
     bgSecondary: string;
+    textDescription: string;
 };
 
 type ExtendedTheme = Theme & {[key: string]: string | undefined};

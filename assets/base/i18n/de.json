@@ -1241,6 +1241,7 @@
     "file_upload.quota.almost.exceeded.paidPlan.admin": "Um ohne Unterbrechung weiterarbeiten zu können, aktualisieren Sie Ihren Plan über die Weboberfläche, um mehr Speicherplatz zu erhalten.",
     "full_storage_announcement_bar.message": "Speicherlimit erreicht",
     "almost_full_storage_announcement_bar.message": "Speicherlimit ist fast erreicht",
+    "upgrade_banner_ksuite_button": "AKTUALISIEREN",
     "upgrade_banner_ksuite_close": "Schließen",
     "upgrade_banner_ksuite_evolve": "Um Ihr Angebot zu erweitern, nutzen Sie die Weboberfläche.",
     "upgrade_banner_ksuite_plus": "Und vieles mehr!",
@@ -1253,5 +1254,8 @@
     "upgrade_banner_channel.description": "Sie haben das Limit von {type, select, O {öffentliche Kanäle} P {private Kanäle} other {}} ({usage, number}/{limit, number}) auf Ihrem kSuite-Angebot erreicht. {isAdmin, select, true {Bearbeiten Sie Ihr Angebot, um zusätzliche Kanäle zu erstellen.} other {Bitte wenden Sie sich an einen Administrator, damit er das Angebot ändert.}}",
     "upgrade_banner.link": "Um Ihren Plan zu aktualisieren, verwenden Sie die Weboberfläche.",
     "upgrade_banner.title": "Entfesseln Sie die volle Power von kChat!",
-    "upgrade_banner.description": "Nachrichten und Dateien, die älter als {duration} sind, sind nicht mehr verfügbar. Wechsle zum {plan} von kSuite Pro, um unbegrenzten Gesprächsverlauf zu erhalten."
+    "upgrade_banner.description": "Nachrichten und Dateien, die älter als {duration} sind, sind nicht mehr verfügbar. Wechsle zum {plan} von kSuite Pro, um unbegrenzten Gesprächsverlauf zu erhalten.",
+    "duration.year": "{count, plural, one {Jahr} other {Jahre}}",
+    "duration.month": "{count, plural, one {Monat} other {Monate}}",
+    "duration.day": "{count, plural, one {Tag} other {Tage}}"
 }

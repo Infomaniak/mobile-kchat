@@ -151,15 +151,15 @@ const CreateOrEditChannel = ({
     }, [theme, isModal]);
 
     useEffect(() => {
-        setCanSave(
-            !channelLimitReached &&
-            displayName.length >= MIN_CHANNEL_NAME_LENGTH && (
-                displayName !== channel?.displayName ||
-                purpose !== channelInfo?.purpose ||
-                header !== channelInfo?.header ||
-                type !== channel.type
-            ),
+        const hasValidName = displayName.length >= MIN_CHANNEL_NAME_LENGTH;
+        const hasChanges = (
+            displayName !== channel?.displayName ||
+            purpose !== channelInfo?.purpose ||
+            header !== channelInfo?.header ||
+            type !== channel.type
         );
+
+        setCanSave(!channelLimitReached && hasValidName && hasChanges);
     }, [channel, displayName, purpose, header, type]);
 
     const isValidDisplayName = useCallback((): boolean => {

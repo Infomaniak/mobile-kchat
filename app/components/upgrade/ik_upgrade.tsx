@@ -11,7 +11,7 @@ import UpgradeIcon from '@screens/channel/channel_post_list/upgrade_icon';
 
 import FormattedText from '../formatted_text';
 
-export const getThemedStyles = makeStyleSheetFromTheme(() => ({
+export const getThemedStyles = makeStyleSheetFromTheme((theme) => ({
     gradientBorder: {
         padding: 1,
         borderRadius: 30,
@@ -26,7 +26,7 @@ export const getThemedStyles = makeStyleSheetFromTheme(() => ({
         gap: 8,
     },
     textContainer: {
-        color: '#333333',
+        color: theme.centerChannelColor,
         fontWeight: '500',
         textTransform: 'uppercase',
         fontSize: 10,
@@ -45,20 +45,15 @@ const UpgradeButton = () => {
             style={[styles.gradientBorder]}
         >
             <View style={[styles.innerContainer, {backgroundColor: theme.centerChannelBg}]}>
-                <View>
-                    <FormattedText
-                        defaultMessage={'évoluer'}
-                        id='ksuite_free_banner'
-                        style={styles.textContainer}
-                    />
-                </View>
-                <View>
-                    <UpgradeIcon/>
-                </View>
+                <FormattedText
+                    defaultMessage={'UPGRADE'}
+                    id='upgrade_banner_ksuite_button'
+                    style={styles.textContainer}
+                />
+                <UpgradeIcon/>
             </View>
         </LinearGradient>
     );
 };
 
 export default UpgradeButton;
-

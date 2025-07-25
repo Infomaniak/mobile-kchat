@@ -5,7 +5,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 
 import {addFilesToDraft, removeDraft} from '@actions/local/draft';
-import {isPaidPlan, type PackName} from '@app/hooks/plans';
+import {isPaidPlan, quotaMessages, type PackName} from '@app/hooks/plans';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
@@ -30,7 +30,7 @@ type Props = {
     updateValue: React.Dispatch<React.SetStateAction<string>>;
     value: string;
     setIsFocused: (isFocused: boolean) => void;
-    isAdmin?: boolean;
+    isCurrentUserAdmin?: boolean;
     currentPackName?: PackName | undefined;
 }
 
@@ -40,12 +40,6 @@ const UPLOAD_ERROR_SHOW_INTERVAL = 5000;
 type ErrorHandlers = {
     [clientId: string]: (() => void) | null;
 }
-
-const quotaMessages = new Map<string, string>([
-    ['admin|paid', 'file_upload.quota.exceeded.paidPlan.admin'],
-    ['admin|free', 'file_upload.quota.exceeded.admin'],
-    ['user|_', 'file_upload.quota.exceeded'],
-]);
 
 export default function DraftHandler(props: Props) {
     const {
@@ -63,10 +57,9 @@ export default function DraftHandler(props: Props) {
         updateValue,
         value,
         setIsFocused,
-        isAdmin,
         currentPackName,
+        isCurrentUserAdmin,
     } = props;
-
     const serverUrl = useServerUrl();
     const intl = useIntl();
 
@@ -89,7 +82,7 @@ export default function DraftHandler(props: Props) {
             let role = 'user';
             let plan = '_';
 
-            if (isAdmin) {
+            if (isCurrentUserAdmin) {
                 role = 'admin';
                 plan = isPaid ? 'paid' : 'free';
             }

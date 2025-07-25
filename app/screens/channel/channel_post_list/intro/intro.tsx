@@ -10,6 +10,8 @@ import {useTheme} from '@context/theme';
 import useDidUpdate from '@hooks/did_update';
 import EphemeralStore from '@store/ephemeral_store';
 
+import UpgradeKsuiteBanner from '../ik_upgrade_ksuite_banner';
+
 import DirectChannel from './direct_channel';
 import PublicOrPrivateChannel from './public_or_private_channel';
 import TownSquare from './townsquare';
@@ -100,6 +102,7 @@ const Intro = ({channel, roles}: Props) => {
     return (
         <View style={styles.container}>
             {element}
+            <UpgradeKsuiteBanner/>
         </View>
     );
 };

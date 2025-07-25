@@ -18,6 +18,12 @@ const planOrder: PackName[] = [
     'ksuite_entreprise',
 ];
 
+export const quotaMessages = new Map<string, string>([
+    ['admin|paid', 'file_upload.quota.exceeded.paidPlan.admin'],
+    ['admin|free', 'file_upload.quota.exceeded.admin'],
+    ['user|_', 'file_upload.quota.exceeded'],
+]);
+
 const paidPlans = ['ksuite_standard', 'ksuite_entreprise', 'ksuite_pro'];
 
 export const getNextWcPack = (current: PackName | undefined) => {
