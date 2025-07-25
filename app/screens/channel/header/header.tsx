@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useMemo} from 'react';
+import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, Platform, Text, View} from 'react-native';
 
@@ -13,17 +13,13 @@ import {ITEM_HEIGHT} from '@components/option_item';
 import OtherMentionsBadge from '@components/other_mentions_badge';
 import RoundedHeaderContext from '@components/rounded_header_context';
 import {General, Screens} from '@constants';
-import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import {useDefaultHeaderHeight} from '@hooks/header';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {fetchPlaybookRunsForChannel} from '@playbooks/actions/remote/runs';
-import {goToPlaybookRun, goToPlaybookRuns} from '@playbooks/screens/navigation';
 import {BOTTOM_SHEET_ANDROID_OFFSET} from '@screens/bottom_sheet';
 import ChannelBanner from '@screens/channel/header/channel_banner';
 import {bottomSheet, popTopScreen, showModal} from '@screens/navigation';
-import EphemeralStore from '@store/ephemeral_store';
 import {isTypeDMorGM} from '@utils/channel';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -50,14 +46,10 @@ type ChannelProps = {
     memberCount?: number;
     teamId: string;
     callsEnabledInChannel: boolean;
-    groupCallsAllowed: boolean;
     isTabletView?: boolean;
     shouldRenderBookmarks: boolean;
     shouldRenderChannelBanner: boolean;
     hasPlaybookRuns: boolean;
-    playbooksActiveRuns: number;
-    isPlaybooksEnabled: boolean;
-    activeRunId?: string;
 
     // searchTerm: string;
 };
@@ -101,30 +93,21 @@ const ChannelHeader = ({
     isOwnDirectMessage,
     memberCount,
     teamId,
-
-    // callsEnabledInChannel,
-    groupCallsAllowed,
+    callsEnabledInChannel,
     isTabletView,
     shouldRenderBookmarks,
     shouldRenderChannelBanner,
-    playbooksActiveRuns,
     hasPlaybookRuns,
-    isPlaybooksEnabled,
-    activeRunId,
 }: ChannelProps) => {
     const intl = useIntl();
     const isTablet = useIsTablet();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const defaultHeight = useDefaultHeaderHeight();
-    const serverUrl = useServerUrl();
 
     // NOTE: callsEnabledInChannel will be true/false (not undefined) based on explicit state + the DefaultEnabled system setting
     //   which ultimately comes from channel/index.tsx, and observeIsCallsEnabledInChannel
-    let callsAvailable = false;
-    if (!groupCallsAllowed && channelType !== General.DM_CHANNEL) {
-        callsAvailable = false;
-    }
+    const callsAvailable = callsEnabledInChannel;
 
     const isDMorGM = isTypeDMorGM(channelType);
     const contextStyle = useMemo(() => ({
@@ -212,34 +195,9 @@ const ChannelHeader = ({
         });
     }, [isTablet, callsAvailable, isDMorGM, hasPlaybookRuns, theme, onTitlePress, channelId]);
 
-    const openPlaybooksRuns = useCallback(() => {
-        if (activeRunId) {
-            goToPlaybookRun(intl, activeRunId);
-            return;
-        }
-        goToPlaybookRuns(intl, channelId, displayName);
-    }, [activeRunId, channelId, displayName, intl]);
-
     const rightButtons = useMemo(() => {
         const buttons: HeaderRightButton[] = [];
-        if (playbooksActiveRuns) {
-            buttons.push({
-                iconName: 'product-playbooks',
-                onPress: openPlaybooksRuns,
-                buttonType: 'opacity',
-                count: playbooksActiveRuns,
-            });
-        }
 
-        // {
-        //     iconName: 'magnify',
-        //     onPress: () => {
-        //         DeviceEventEmitter.emit(Navigation.NAVIGATE_TO_TAB, {screen: 'Search', params: {searchTerm: `in: ${searchTerm}`}});
-        //         if (!isTablet) {
-        //             popTopScreen(componentId);
-        //         }
-        //     },
-        // },
         buttons.push({
             iconName: Platform.select({android: 'dots-vertical', default: 'dots-horizontal'}),
             onPress: onChannelQuickAction,
@@ -248,7 +206,7 @@ const ChannelHeader = ({
         });
 
         return buttons;
-    }, [playbooksActiveRuns, onChannelQuickAction, openPlaybooksRuns]);
+    }, [onChannelQuickAction]);
 
     let title = displayName;
     if (isOwnDirectMessage) {
@@ -297,18 +255,6 @@ const ChannelHeader = ({
 
         return undefined;
     }, [memberCount, customStatus, isCustomStatusExpired, theme.sidebarHeaderTextColor, styles.customStatusContainer, styles.customStatusEmoji, styles.customStatusText, styles.subtitle, isCustomStatusEnabled]);
-
-    useEffect(() => {
-        const asyncEffect = async () => {
-            if (isPlaybooksEnabled && !EphemeralStore.getChannelPlaybooksSynced(serverUrl, channelId)) {
-                const res = await fetchPlaybookRunsForChannel(serverUrl, channelId);
-                if (!('error' in res)) {
-                    EphemeralStore.setChannelPlaybooksSynced(serverUrl, channelId);
-                }
-            }
-        };
-        asyncEffect();
-    }, [channelId, serverUrl, isPlaybooksEnabled]);
 
     const showBookmarkBar = isBookmarksEnabled && hasBookmarks && shouldRenderBookmarks;
 
