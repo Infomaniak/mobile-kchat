@@ -35,7 +35,6 @@ type Props = {
     type?: ChannelType;
     isBookmarksEnabled: boolean;
     isCallsEnabledInChannel: boolean;
-    groupCallsAllowed: boolean;
     canManageMembers: boolean;
     isConvertGMFeatureAvailable: boolean;
     isCRTEnabled: boolean;
@@ -69,7 +68,6 @@ const ChannelInfo = ({
     componentId,
     isBookmarksEnabled,
     isCallsEnabledInChannel,
-    groupCallsAllowed,
     isConvertGMFeatureAvailable,
     isCRTEnabled,
     isGuestUser,
@@ -81,10 +79,7 @@ const ChannelInfo = ({
 
     // NOTE: isCallsEnabledInChannel will be true/false (not undefined) based on explicit state + the DefaultEnabled system setting
     //   which comes from observeIsCallsEnabledInChannel
-    let callsAvailable = isCallsEnabledInChannel;
-    if (!groupCallsAllowed && type !== General.DM_CHANNEL) {
-        callsAvailable = false;
-    }
+    const callsAvailable = isCallsEnabledInChannel;
 
     const onPressed = useCallback(() => {
         return dismissModal({componentId});

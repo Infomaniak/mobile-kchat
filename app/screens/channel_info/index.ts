@@ -63,7 +63,6 @@ const enhanced = withObservables([], ({database}: Props) => {
     return {
         type,
         isCallsEnabledInChannel,
-        groupCallsAllowed: false,
         canAddBookmarks,
         canManageMembers,
         canManageSettings,
