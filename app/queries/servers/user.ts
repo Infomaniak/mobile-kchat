@@ -5,6 +5,7 @@ import {Database, Q} from '@nozbe/watermelondb';
 import {combineLatest, of as of$} from 'rxjs';
 import {distinctUntilChanged, map, switchMap} from 'rxjs/operators';
 
+import {isSystemAdmin} from '@app/utils/user';
 import {General} from '@constants';
 import {MM_TABLES} from '@constants/database';
 import {getTeammateNameDisplaySetting} from '@helpers/api/preference';
@@ -17,7 +18,6 @@ import type ServerDataOperator from '@database/operator/server_data_operator';
 import type ChannelMembershipModel from '@typings/database/models/servers/channel_membership';
 import type TeamMembershipModel from '@typings/database/models/servers/team_membership';
 import type UserModel from '@typings/database/models/servers/user';
-import { isSystemAdmin } from '@app/utils/user';
 
 const {SERVER: {CHANNEL_MEMBERSHIP, USER, TEAM_MEMBERSHIP, CHANNEL, MY_CHANNEL}} = MM_TABLES;
 export const getUserById = async (database: Database, userId: string) => {
