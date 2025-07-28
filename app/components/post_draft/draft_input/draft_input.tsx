@@ -3,27 +3,32 @@
 
 // TODO UPSTREAM : all incoming picked, check !
 
-import React, {useCallback, useRef} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, type LayoutChangeEvent, Platform, ScrollView, View} from 'react-native';
+import Permissions, {openSettings} from 'react-native-permissions';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
+import {userTyping} from '@actions/websocket/users';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import {usePersistentNotificationProps} from '@hooks/persistent_notification_props';
 import {openAsBottomSheet} from '@screens/navigation';
+import {logInfo} from '@utils/log';
 import {persistentNotificationsConfirmation} from '@utils/post';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import PostInput from '../post_input';
 import QuickActions from '../quick_actions';
+import RecordAction from '../record_action';
 import SendAction from '../send_button';
 import Typing from '../typing';
 import Uploads from '../uploads';
 
 import Header from './header';
+import VoiceInput from './voice_input';
 
 import type {PasteInputRef} from '@mattermost/react-native-paste-input';
 
@@ -35,6 +40,7 @@ export type Props = {
     rootId?: string;
     currentUserId: string;
     canShowPostPriority?: boolean;
+    voiceMessageEnabled: boolean;
 
     // Post Props
     postPriority: PostPriority;
@@ -101,6 +107,11 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             borderTopLeftRadius: 12,
             borderTopRightRadius: 12,
         },
+        sendVoiceMessage: {
+            position: 'absolute',
+            right: -5,
+            top: 16,
+        },
         postPriorityLabel: {
             marginLeft: 12,
             marginTop: Platform.select({
@@ -132,11 +143,13 @@ function DraftInput({
     updatePostInputTop,
     postPriority,
     updatePostPriority,
+    voiceMessageEnabled,
     persistentNotificationInterval,
     persistentNotificationMaxRecipients,
     setIsFocused,
     scheduledPostsEnabled,
 }: Props) {
+    const [recording, setRecording] = useState(false);
     const intl = useIntl();
     const serverUrl = useServerUrl();
     const theme = useTheme();
@@ -145,6 +158,51 @@ function DraftInput({
     const handleLayout = useCallback((e: LayoutChangeEvent) => {
         updatePostInputTop(e.nativeEvent.layout.height);
     }, []);
+
+    const onPresRecording = useCallback(async () => {
+        const permission = Platform.select({
+            ios: Permissions.PERMISSIONS.IOS.MICROPHONE,
+            android: Permissions.PERMISSIONS.ANDROID.RECORD_AUDIO,
+        });
+
+        if (!permission) {
+            logInfo('Could not select a platform');
+            return;
+        }
+
+        const check = await Permissions.check(permission);
+
+        if (check === 'blocked') {
+            openSettings();
+        }
+
+        if (check === 'granted') {
+            setRecording(true);
+            userTyping('recording', serverUrl, channelId, rootId);
+        }
+
+        if (check === 'denied') {
+            const result = await Permissions.request(permission);
+
+            if (result === 'granted') {
+                await new Promise((resolve) => setTimeout(resolve, 500));
+                setRecording(true);
+                userTyping('recording', serverUrl, channelId, rootId);
+            }
+
+            if (Platform.OS === 'android' && result === 'blocked') {
+                openSettings();
+            }
+        }
+    }, []);
+
+    const onCloseRecording = useCallback(() => {
+        setRecording(false);
+        userTyping('stop', serverUrl, channelId, rootId);
+    }, []);
+
+    const isHandlingVoice = recording;
+    const isHandlingVoiceAttachement = files[0]?.is_voice_recording;
 
     const inputRef = useRef<PasteInputRef>();
     const focus = useCallback(() => {
@@ -155,6 +213,8 @@ function DraftInput({
     const postInputTestID = `${testID}.post.input`;
     const quickActionsTestID = `${testID}.quick_actions`;
     const sendActionTestID = `${testID}.send_action`;
+    const recordActionTestID = `${testID}.record_action`;
+
     const style = getStyleSheet(theme);
 
     const {persistentNotificationsEnabled, noMentionsError, mentionsList} = usePersistentNotificationProps({
@@ -194,13 +254,44 @@ function DraftInput({
         });
     }, [handleSendMessage, intl, isTablet, scheduledPostsEnabled, theme]);
 
-    const sendActionDisabled = !canSend || noMentionsError;
+    const getActionButton = useCallback(() => {
+        if (value.length === 0 && files.length === 0 && voiceMessageEnabled) {
+            return (
+                <RecordAction
+                    onPress={onPresRecording}
+                    testID={recordActionTestID}
+                />
+            );
+        }
+
+        return (
+            <SendAction
+                disabled={!canSend}
+                sendMessage={() => sendMessage(undefined)}
+                testID={sendActionTestID}
+                containerStyle={isHandlingVoice && style.sendVoiceMessage}
+                showScheduledPostOptions={handleShowScheduledPostOptions}
+                scheduledPostEnabled={scheduledPostsEnabled}
+            />
+        );
+    }, [
+        canSend,
+        files.length,
+        onCloseRecording,
+        onPresRecording,
+        sendMessage,
+        testID,
+        value.length,
+        voiceMessageEnabled,
+        isHandlingVoice,
+    ]);
 
     return (
         <>
             <Typing
                 channelId={channelId}
                 rootId={rootId}
+                currentUserId={currentUserId}
             />
             <SafeAreaView
                 edges={SAFE_AREA_VIEW_EDGES}
@@ -224,20 +315,31 @@ function DraftInput({
                         noMentionsError={noMentionsError}
                         postPriority={postPriority}
                     />
-                    <PostInput
-                        testID={postInputTestID}
-                        channelId={channelId}
-                        maxMessageLength={maxMessageLength}
-                        rootId={rootId}
-                        cursorPosition={cursorPosition}
-                        updateCursorPosition={updateCursorPosition}
-                        updateValue={updateValue}
-                        value={value}
-                        addFiles={addFiles}
-                        sendMessage={handleSendMessage}
-                        inputRef={inputRef}
-                        setIsFocused={setIsFocused}
-                    />
+
+                    {recording && (
+                        <VoiceInput
+                            addFiles={addFiles}
+                            onClose={onCloseRecording}
+                            setRecording={setRecording}
+                        />
+                    )}
+
+                    {!recording && !isHandlingVoiceAttachement && (
+                        <PostInput
+                            testID={postInputTestID}
+                            channelId={channelId}
+                            maxMessageLength={maxMessageLength}
+                            rootId={rootId}
+                            cursorPosition={cursorPosition}
+                            updateCursorPosition={updateCursorPosition}
+                            updateValue={updateValue}
+                            value={value}
+                            addFiles={addFiles}
+                            sendMessage={handleSendMessage}
+                            inputRef={inputRef}
+                            setIsFocused={setIsFocused}
+                        />
+                    )}
                     <Uploads
                         currentUserId={currentUserId}
                         files={files}
@@ -246,24 +348,21 @@ function DraftInput({
                         rootId={rootId}
                     />
                     <View style={style.actionsContainer}>
-                        <QuickActions
-                            testID={quickActionsTestID}
-                            fileCount={files.length}
-                            addFiles={addFiles}
-                            updateValue={updateValue}
-                            value={value}
-                            postPriority={postPriority}
-                            updatePostPriority={updatePostPriority}
-                            canShowPostPriority={canShowPostPriority}
-                            focus={focus}
-                        />
-                        <SendAction
-                            testID={sendActionTestID}
-                            disabled={sendActionDisabled}
-                            sendMessage={handleSendMessage}
-                            showScheduledPostOptions={handleShowScheduledPostOptions}
-                            scheduledPostEnabled={scheduledPostsEnabled}
-                        />
+                        {!isHandlingVoice &&
+                            <QuickActions
+                                testID={quickActionsTestID}
+                                fileCount={files.length}
+                                addFiles={addFiles}
+                                updateValue={updateValue}
+                                value={value}
+                                postPriority={postPriority}
+                                updatePostPriority={updatePostPriority}
+                                canShowPostPriority={canShowPostPriority}
+                                focus={focus}
+                                channelId={channelId}
+                            />
+                        }
+                        {!isHandlingVoice && getActionButton()}
                     </View>
                 </ScrollView>
             </SafeAreaView>

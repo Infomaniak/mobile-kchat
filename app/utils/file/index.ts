@@ -483,6 +483,9 @@ export async function extractFileInfo(files: Array<Asset | DocumentPickerRespons
             const localPath = file.uri || '';
             try {
                 const fileInfo = await getInfoAsync(localPath, {size: true});
+
+                outFile.name = localPath.substring(localPath.lastIndexOf('/') + 1);
+
                 if ('size' in fileInfo) {
                     outFile.size = fileInfo.size || 0;
                 }

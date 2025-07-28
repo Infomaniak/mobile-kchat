@@ -49,8 +49,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         },
         previewContainer: {
             borderRadius: 4,
-            borderWidth: 1,
-            borderColor: changeOpacity(theme.centerChannelColor, 0.16),
             backgroundColor: theme.centerChannelBg,
             alignItems: 'center',
             position: 'relative',
@@ -61,7 +59,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             padding: 0,
         },
         fileWithInfoContainer: {
-            width: DIMENSIONS.FILE_CONTAINER_WIDTH,
             height: DIMENSIONS.FILE_CONTAINER_HEIGHT,
             flexDirection: 'row',
             alignItems: 'center',
@@ -257,6 +254,8 @@ export default function UploadItem({
     const voiceStyle = useMemo(() => {
         return {
             width: dimensions.width * VOICE_MESSAGE_CARD_RATIO,
+            borderWidth: 1,
+            borderColor: changeOpacity(theme.centerChannelColor, 0.16),
         };
     }, [dimensions.width]);
 

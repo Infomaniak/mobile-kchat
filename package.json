@@ -265,13 +265,11 @@
       "react-native-svg": "$react-native-svg",
       "react-native-video": "$react-native-video",
       "react-native-webview": "$react-native-webview"
-
     }
   },
   "expo": {
     "autolinking": {
       "exclude": [
-        "expo-keep-awake",
         "expo-asset",
         "expo-font"
       ]

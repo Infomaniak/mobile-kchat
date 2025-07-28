@@ -6,9 +6,6 @@ import {type LayoutChangeEvent, type StyleProp, View, type ViewStyle, StyleSheet
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import Animated, {clamp, runOnJS, useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 
-import {useTheme} from '@context/theme';
-import {changeOpacity} from '@utils/theme';
-
 type ProgressBarProps = {
     color: string;
     containerStyle?: StyleProp<ViewStyle>;
@@ -45,8 +42,7 @@ const styles = StyleSheet.create({
 const START_CURSOR_VALUE = 0;
 const END_CURSOR_VALUE = 1;
 
-const ProgressBar = ({color, containerStyle, progress, withCursor, style, onSeek}: ProgressBarProps) => {
-    const theme = useTheme();
+const ProgressBar = ({color, containerStyle, progress, withCursor, style, onSeek, bgColor}: ProgressBarProps) => {
     const widthValue = useSharedValue(0);
     const progressValue = useSharedValue(progress);
     const isGestureActive = useSharedValue(false);
@@ -129,7 +125,7 @@ const ProgressBar = ({color, containerStyle, progress, withCursor, style, onSeek
                     style={[
                         styles.progressBarContainer,
                         {
-                            backgroundColor: withCursor ? changeOpacity(theme.centerChannelColor, 0.2) : 'rgba(255, 255, 255, 0.16)',
+                            backgroundColor: bgColor,
                         },
                         style,
                     ]}

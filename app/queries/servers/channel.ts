@@ -208,8 +208,6 @@ export const prepareDeleteChannel = async (serverUrl: string, channel: ChannelMo
         }
     }
 
-    EphemeralStore.unsetChannelPlaybooksSynced(serverUrl, channel.id);
-
     return preparedModels;
 };
 

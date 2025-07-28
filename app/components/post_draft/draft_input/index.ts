@@ -4,6 +4,7 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 
 import {observeScheduledPostEnabled} from '@queries/servers/scheduled_post';
+import {observeVoiceMessagesEnabled} from '@queries/servers/system';
 
 import DraftInput from './draft_input';
 
@@ -13,6 +14,7 @@ const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
     const scheduledPostsEnabled = observeScheduledPostEnabled(database);
     return {
         scheduledPostsEnabled,
+        voiceMessageEnabled: observeVoiceMessagesEnabled(database),
     };
 });
 

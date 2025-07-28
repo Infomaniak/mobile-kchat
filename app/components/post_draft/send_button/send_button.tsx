@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {InteractionManager, View} from 'react-native';
+import {InteractionManager, View, type StyleProp, type ViewStyle} from 'react-native';
 import Tooltip from 'react-native-walkthrough-tooltip';
 
 import {storeScheduledPostTutorial} from '@actions/app/global';
@@ -20,6 +20,7 @@ type Props = {
     showScheduledPostOptions: () => void;
     scheduledPostFeatureTooltipWatched: boolean;
     scheduledPostEnabled: boolean;
+    containerStyle?: StyleProp<ViewStyle>;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
