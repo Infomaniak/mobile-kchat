@@ -1,12 +1,15 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import {Model} from '@nozbe/watermelondb';
 import {field} from '@nozbe/watermelondb/decorators';
+import Model from '@nozbe/watermelondb/Model';
 
 import {MM_TABLES} from '@app/constants/database';
+const {
+    USAGE,
+} = MM_TABLES.SERVER;
 
 export default class CloudUsageModel extends Model {
-    static table = MM_TABLES.SERVER.USAGE;
+    static table = USAGE;
 
     @field('custom_emojis') custom_emojis!: number;
     @field('guests') guests!: number;

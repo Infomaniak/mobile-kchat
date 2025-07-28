@@ -24,7 +24,7 @@ export const fetchCloudLimits = async (serverUrl: string, fetchOnly = false) => 
             };
             await operator.handleLimit({
                 limits: [limitsWithId],
-                prepareRecordsOnly: false,
+                prepareRecordsOnly: true,
             });
         }
     } catch (error) {
@@ -36,20 +36,19 @@ export const fetchCloudLimits = async (serverUrl: string, fetchOnly = false) => 
 export const fetchUsage = async (serverUrl: string, fetchOnly = false) => {
     try {
         const client = NetworkManager.getClient(serverUrl);
-
         const usage = await client.getUsage();
         const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         if (!operator) {
             return;
         }
         if (!fetchOnly && usage) {
-            const usageWithId = {
+            const raw = {
                 ...usage,
-                id: 'guests',
+                id: 'usage',
             };
             await operator.handleUsage({
-                usage: [usageWithId],
-                prepareRecordsOnly: false,
+                usage: [raw],
+                prepareRecordsOnly: true,
             });
         }
     } catch (error) {

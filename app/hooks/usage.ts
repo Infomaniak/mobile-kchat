@@ -1,8 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useMemo} from 'react';
-
 import type {CloudUsageModel, LimitModel} from '@app/database/models/server';
 import type {CloudUsage} from '@typings/components/cloud';
 
@@ -25,7 +23,7 @@ export const withBackupValue = (maybeLimit: number | undefined, limitsLoaded: bo
 };
 
 export function useGetUsageDeltas(usage: CloudUsageModel, limits: LimitModel): CloudUsage {
-    const usageDelta = useMemo(() => {
+    const usageDelta = () => {
         const limitsLoaded = true;
 
         return (
@@ -63,7 +61,7 @@ export function useGetUsageDeltas(usage: CloudUsageModel, limits: LimitModel): C
                 reminder_custom_date: limits.reminder_custom_date === true ? -1 : 0, // to simplify usage, we threat those are enable or disabled
             }
         );
-    }, [usage, limits]);
+    };
 
-    return usageDelta;
+    return usageDelta();
 }
