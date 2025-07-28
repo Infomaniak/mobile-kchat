@@ -16,7 +16,7 @@ import {dismissAllModals, dismissAllModalsAndPopToRoot, dismissAllOverlays, goTo
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {isTablet} from '@utils/helpers';
-import {logError} from '@utils/log';
+import {logDebug, logError} from '@utils/log';
 import {changeOpacity} from '@utils/theme';
 
 import type Model from '@nozbe/watermelondb/Model';
@@ -311,7 +311,13 @@ export async function updateThread(serverUrl: string, threadId: string, updatedT
         }
         return {model};
     } catch (error) {
-        logError('Failed updateThread', error);
+        let logger = logError;
+
+        // TODO upstream Que faire de cette erreur qui pop tout le temps ?
+        if (__DEV__) {
+            logger = logDebug;
+        }
+        logger('Failed updateThread', error);
         return {error};
     }
 }
