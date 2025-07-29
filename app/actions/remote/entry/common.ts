@@ -75,9 +75,9 @@ export const entry = async (serverUrl: string, teamId?: string, channelId?: stri
     const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
     const result = entryRest(serverUrl, teamId, channelId, since);
 
-    Promise.all([
-        await fetchCloudLimits(serverUrl),
-        await fetchUsage(serverUrl),
+    await Promise.all([
+        fetchCloudLimits(serverUrl),
+        fetchUsage(serverUrl),
     ]);
 
     // Fetch data retention policies

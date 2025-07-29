@@ -28,6 +28,7 @@ import {typography} from '@utils/typography';
 
 import ClearAfterMenuItem from '../custom_status_clear_after/components/clear_after_menu_item';
 
+import type {PostReminderTimestamp} from '@app/client/rest/ikcustomactions';
 import type {CloudUsageModel, LimitModel} from '@app/database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
@@ -72,6 +73,8 @@ const IkPostReminder = {
     TOMORROW: 'tomorrow',
     MONDAY: 'monday',
 };
+
+export type PredefinedTimestamp = typeof IkPostReminder[keyof typeof IkPostReminder];
 
 const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, usage}: Props) => {
     const serverUrl = useServerUrl();
@@ -170,7 +173,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         close();
     };
 
-    const addPostReminder = async (timestamp: string | number) => {
+    const addPostReminder = async (timestamp: PostReminderTimestamp) => {
         try {
             const client = NetworkManager.getClient(serverUrl);
             await client.addPostReminder(post.id, timestamp);
@@ -180,7 +183,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         return {};
     };
 
-    const addPostponeReminder = async (timestamp: number | string) => {
+    const addPostponeReminder = async (timestamp: PostReminderTimestamp) => {
         try {
             const client = NetworkManager.getClient(serverUrl);
             const reschedule = true;

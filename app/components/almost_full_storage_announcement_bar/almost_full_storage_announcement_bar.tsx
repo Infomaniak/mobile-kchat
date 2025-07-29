@@ -9,7 +9,7 @@ import {useIntl} from 'react-intl';
 
 import {Screens} from '@app/constants';
 import {useTheme} from '@app/context/theme';
-import {isPaidPlan, quotaMessages, type PackName} from '@app/hooks/plans';
+import {getQuotaDescription, type PackName} from '@app/hooks/plans';
 import {useGetUsageDeltas} from '@app/hooks/usage';
 import {openAsBottomSheet} from '@screens/navigation';
 
@@ -49,15 +49,7 @@ const AlmostFullStorageAnnouncementBar = ({
     const isAlmostFull = !isFull && storage >= TRESHOLD_ALMOST_FULL;
     const shouldShow = isAlmostFull && visibility?.[0]?.value !== 'dismissed';
     const handlePress = useCallback(() => {
-        const isPaid = isPaidPlan(currentPackName);
-
-        let role = 'user';
-        let plan = '_';
-
-        if (isAdmin) {
-            role = 'admin';
-            plan = isPaid ? 'paid' : 'free';
-        }
+        const quotaDescription = getQuotaDescription(currentPackName, isAdmin);
 
         openAsBottomSheet({
             closeButtonId: 'close-quota-exceeded',
@@ -67,7 +59,7 @@ const AlmostFullStorageAnnouncementBar = ({
             props: {
                 quotaType: {
                     title: 'infomaniak.size_quota_almost_exceeded.title',
-                    description: quotaMessages.get(`${role}|${plan}`) ?? '',
+                    description: quotaDescription,
                     image: 'storage',
                 },
             },

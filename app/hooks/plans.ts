@@ -18,11 +18,25 @@ const planOrder: PackName[] = [
     'ksuite_entreprise',
 ];
 
-export const quotaMessages = new Map<string, string>([
+const quotaMessages = new Map<string, string>([
     ['admin|paid', 'file_upload.quota.exceeded.paidPlan.admin'],
     ['admin|free', 'file_upload.quota.exceeded.admin'],
     ['user|_', 'file_upload.quota.exceeded'],
 ]);
+
+export const getQuotaDescription = (currentPackName: PackName | undefined, isAdmin: boolean) => {
+    const isPaid = isPaidPlan(currentPackName);
+
+    let role = 'user';
+    let plan = '_';
+
+    if (isAdmin) {
+        role = 'admin';
+        plan = isPaid ? 'paid' : 'free';
+    }
+
+    return quotaMessages.get(`${role}|${plan}`) ?? '';
+};
 
 const paidPlans = ['ksuite_standard', 'ksuite_entreprise', 'ksuite_pro'];
 
@@ -33,7 +47,7 @@ export const getNextWcPack = (current: PackName | undefined) => {
     return wcPlanMap[next];
 };
 
-export const isPaidPlan = (plan: PackName | undefined): boolean => {
+const isPaidPlan = (plan: PackName | undefined): boolean => {
     if (!plan) {
         return false;
     }

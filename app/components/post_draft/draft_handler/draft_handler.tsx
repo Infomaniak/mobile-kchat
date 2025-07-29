@@ -5,7 +5,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 
 import {addFilesToDraft, removeDraft} from '@actions/local/draft';
-import {isPaidPlan, quotaMessages, type PackName} from '@app/hooks/plans';
+import {getQuotaDescription, type PackName} from '@app/hooks/plans';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
@@ -30,7 +30,7 @@ type Props = {
     updateValue: React.Dispatch<React.SetStateAction<string>>;
     value: string;
     setIsFocused: (isFocused: boolean) => void;
-    isCurrentUserAdmin?: boolean;
+    isCurrentUserAdmin: boolean;
     currentPackName?: PackName | undefined;
 }
 
@@ -76,17 +76,9 @@ export default function DraftHandler(props: Props) {
     const theme = useTheme();
 
     const newUploadError = useCallback((error: React.ReactNode) => {
-        const isPaid = isPaidPlan(currentPackName);
+        const quotaDescription = getQuotaDescription(currentPackName, isCurrentUserAdmin);
 
         if (error === 'Quota exceeded') {
-            let role = 'user';
-            let plan = '_';
-
-            if (isCurrentUserAdmin) {
-                role = 'admin';
-                plan = isPaid ? 'paid' : 'free';
-            }
-
             openAsBottomSheet({
                 closeButtonId: 'close-quota-exceeded',
                 screen: Screens.INFOMANIAK_QUOTA_EXCEEDED,
@@ -95,7 +87,7 @@ export default function DraftHandler(props: Props) {
                 props: {
                     quotaType: {
                         title: 'infomaniak.size_quota_exceeded.title',
-                        description: quotaMessages.get(`${role}|${plan}`) ?? '',
+                        description: quotaDescription,
                         image: 'storage',
                     },
                 },
