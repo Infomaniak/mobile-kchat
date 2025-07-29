@@ -26,24 +26,6 @@ export default class CloudUsageModel extends Model {
         });
     }
 
-    // @writer async createUsage(usage: Partial<CloudUsageModel>) {
-    //     const usageRecord = await this.collections.get<CloudUsageModel>(MM_TABLES.SERVER.USAGE).create((record) => {
-    //         record._raw.id = 'usage'; // or dynamic id by team
-    //         record.custom_emojis = usage.custom_emojis ?? 0;
-    //         record.guests = usage.guests ?? 0;
-    //         record.incoming_webhooks = usage.incoming_webhooks ?? 0;
-    //         record.members = usage.members ?? 0;
-    //         record.outgoing_webhooks = usage.outgoing_webhooks ?? 0;
-    //         record.pending_guests = usage.pending_guests ?? 0;
-    //         record.private_channels = usage.private_channels ?? 0;
-    //         record.public_channels = usage.public_channels ?? 0;
-    //         record.sidebar_categories = usage.sidebar_categories ?? 0;
-    //         record.storage = usage.storage ?? 0;
-    //     });
-    //     return usageRecord;
-    //     console.log('CloudUsageModel.createUsage done');
-    // }
-
     @field('custom_emojis') custom_emojis!: number;
     @field('guests') guests!: number;
     @field('incoming_webhooks') incoming_webhooks!: number;
