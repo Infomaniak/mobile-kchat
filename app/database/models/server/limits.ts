@@ -1,13 +1,33 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 import {Model} from '@nozbe/watermelondb';
-import {field, json} from '@nozbe/watermelondb/decorators';
+import {field, json, writer} from '@nozbe/watermelondb/decorators';
 
 import {MM_TABLES} from '@app/constants/database';
 import {safeParseJSON} from '@app/utils/helpers';
 
 export default class LimitsModel extends Model {
     static table = MM_TABLES.SERVER.LIMIT;
+
+    @writer async updateLimits(usage: Partial<LimitsModel>) {
+        await this.update((record) => {
+            record.boards = usage.boards ?? this.boards;
+            record.bots = usage.bots ?? this.bots;
+            record.custom_emojis = usage.custom_emojis ?? this.custom_emojis;
+            record.guests = usage.guests ?? this.guests;
+            record.incoming_webhooks = usage.incoming_webhooks ?? this.incoming_webhooks;
+            record.integrations = usage.integrations ?? this.integrations;
+            record.members = usage.members ?? this.members;
+            record.messages = usage.messages ?? this.messages;
+            record.outgoing_webhooks = usage.outgoing_webhooks ?? this.outgoing_webhooks;
+            record.private_channels = usage.private_channels ?? this.private_channels;
+            record.public_channels = usage.public_channels ?? this.public_channels;
+            record.reminder_custom_date = usage.reminder_custom_date ?? this.reminder_custom_date;
+            record.scheduled_draft_custom_date = usage.scheduled_draft_custom_date ?? this.scheduled_draft_custom_date;
+            record.sidebar_categories = usage.sidebar_categories ?? this.sidebar_categories;
+            record.storage = usage.storage ?? this.storage;
+        });
+    }
 
     @json('boards', safeParseJSON) boards!: BoardsLimitProps;
     @field('bots') bots!: number;

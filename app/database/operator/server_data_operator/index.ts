@@ -13,9 +13,6 @@ import ThreadHandler, {type ThreadHandlerMix} from '@database/operator/server_da
 import UserHandler, {type UserHandlerMix} from '@database/operator/server_data_operator/handlers/user';
 import mix from '@utils/mix';
 
-import LimitHandler, {type LimitHandlerMix} from './handlers/limit';
-import UsageHandler, {type UsageHandlerMix} from './handlers/usage';
-
 import type {Database} from '@nozbe/watermelondb';
 
 interface ServerDataOperator extends
@@ -28,9 +25,7 @@ interface ServerDataOperator extends
     TeamHandlerMix,
     ThreadHandlerMix,
     TeamThreadsSyncHandlerMix,
-    UserHandlerMix,
-    LimitHandlerMix,
-    UsageHandlerMix
+    UserHandlerMix
 {}
 
 class ServerDataOperator extends mix(ServerDataOperatorBase).with(
@@ -43,8 +38,6 @@ class ServerDataOperator extends mix(ServerDataOperatorBase).with(
     ThreadHandler,
     TeamThreadsSyncHandler,
     UserHandler,
-    LimitHandler,
-    UsageHandler,
 ) {
     // eslint-disable-next-line no-useless-constructor
     constructor(database: Database) {
