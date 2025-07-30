@@ -103,3 +103,27 @@ Before you begin, ensure you have:
 5. After applying your changes, push them to the remote fork to create a PR on Mattermost using `git push fork {name of the branch}`.
 
 6. Follow the PR instructions to provide Mattermost with the necessary information to review your code thoroughly.
+
+
+## Dev
+
+### Get the Android database file
+
+In the android/ folder, you can use something like that to pull the db from the android simulator
+and then use any sqlite viewer.
+Note: Android App inspector seems to not be able to open the db directly, even if the documentation says so
+
+```bash
+# recup l'id de la db, par exemple en log ce path ou en cherchant dans le device
+# app/database/manager/index.ts#L172
+# ou 
+# /files/databases
+
+# Variables
+APP_ID="com.infomaniak.chat"
+FILENAME="aHR0cHM6Ly9pbmZvbWFuaWFrLmtjaGF0LmluZm9tYW5pYWsuY29t.db"
+DEST="./extracted.db"
+
+# Extraction via run-as
+adb exec-out run-as $APP_ID cat files/databases/$FILENAME > $DEST
+```
