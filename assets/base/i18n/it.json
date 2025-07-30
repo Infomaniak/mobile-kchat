@@ -815,6 +815,7 @@
   "post_body.check_for_out_of_channel_mentions.message": "{count, plural, one {? Avrà quindi accesso a tutta la cronologia dei messaggi per questo canale.} other {? Avranno quindi accesso a tutta la cronologia dei messaggi per questo canale.}}",
   "post_body.commentedOn": "Ha commentato il messaggio di {name}: ",
   "post_body.deleted": "(messaggio cancellato)",
+  "post_header.visible_message": "(Visibile solo a te)",
   "post_info.auto_responder": "Risposta automatica",
   "post_info.bot": "Bot",
   "post_info.del": "Cancella",

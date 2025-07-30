@@ -822,6 +822,7 @@
   "post_body.check_for_out_of_channel_mentions.message": "{count, plural, one {? Tendrá acceso a todo el historial de mensajes de este canal.} other {? Tendrán acceso a todo el historial de mensajes de este canal.}}",
   "post_body.commentedOn": "Comentado en el mensaje de {name}{apostrophe}: ",
   "post_body.deleted": "(mensaje eliminado)",
+  "post_header.visible_message": "(Solo visible para ti)",
   "post_info.auto_responder": "Respuesta automática",
   "post_info.bot": "Bot",
   "post_info.del": "Eliminar",

@@ -958,6 +958,7 @@
   "post_body.check_for_out_of_channel_mentions.message": "{count, plural, one {? Il aura alors accès à tout l'historique de messages pour ce canal.} other {? Ils auront alors accès à tout l'historique de messages pour ce canal.}}",
   "post_body.commentedOn": "a commenté le message de {name} : ",
   "post_body.deleted": "(message supprimé)",
+  "post_header.visible_message": "(Visible uniquement par vous)",
   "post_info.auto_responder": "Réponse automatique",
   "post_info.bot": "Bot",
   "post_info.del": "Supprimer",
