@@ -17,6 +17,7 @@
 		49AE370126D4455D00EF4E52 /* Gekidou in Frameworks */ = {isa = PBXBuildFile; productRef = 49AE370026D4455D00EF4E52 /* Gekidou */; };
 		536CC6C323E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.m in Sources */ = {isa = PBXBuildFile; fileRef = 536CC6C123E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.m */; };
 		58495E36BF1A4EAB93609E57 /* Metropolis-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 54956DEFEBB74EF78C3A6AE5 /* Metropolis-SemiBold.ttf */; };
+		642258AA8257A398E2DBF04B /* libPods-kChatShareExtension.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DC3891CFAE5D20A5182C62F /* libPods-kChatShareExtension.a */; };
 		672D988829F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D984629F1927E004228D6 /* InfoPlist.strings */; };
 		672D989D29F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D986729F1927F004228D6 /* InfoPlist.strings */; };
 		672D989E29F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D986729F1927F004228D6 /* InfoPlist.strings */; };
@@ -120,8 +121,16 @@
 		83ABFD132C1C90D90029685B /* calls_cheerful.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 83ABFD0F2C1C90D90029685B /* calls_cheerful.mp3 */; };
 		83ABFD142C1C90D90029685B /* calls_calm.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 83ABFD102C1C90D90029685B /* calls_calm.mp3 */; };
 		83ABFD152C1C90D90029685B /* calls_urgent.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 83ABFD112C1C90D90029685B /* calls_urgent.mp3 */; };
+		89F39C169798913D3B11FE6F /* libPods-kChatNotificationService.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF411FDB2155B680B2E2EE6A /* libPods-kChatNotificationService.a */; };
 		9D28B54F45884190C64C695D /* libPods-kChat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1623746E1AB26BD8335911D6 /* libPods-kChat.a */; };
 		A94508A396424B2DB778AFE9 /* OpenSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E5C16B14E1CE4868886A1A00 /* OpenSans-SemiBold.ttf */; };
+		374A99042BFCDC23005517A1 /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A99032BFCDC23005517A1 /* CallManager.swift */; };
+		37407E422C32BD87005FB5D3 /* CallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37407E412C32BD87005FB5D3 /* CallViewController.swift */; };
+		37981AE12C33CB4D00205B36 /* Network+Calls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE02C33CB4D00205B36 /* Network+Calls.swift */; };
+		37981AE32C33D52800205B36 /* LegacyLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE22C33D52800205B36 /* LegacyLogger.swift */; };
+		37981AE52C33D86A00205B36 /* MeUserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE42C33D86A00205B36 /* MeUserProfile.swift */; };
+		37981AE72C33F0CA00205B36 /* Conference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE62C33F0CA00205B36 /* Conference.swift */; };
+		3751BAE22BFF55E200CE4D6D /* CallManagerModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 3751BAE12BFF55E200CE4D6D /* CallManagerModule.m */; };
 		C9A107102BBD7C8700753CDC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C9A1070F2BBD7C8700753CDC /* PrivacyInfo.xcprivacy */; };
 		C9A107122BBDA00200753CDC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C9A107112BBDA00200753CDC /* PrivacyInfo.xcprivacy */; };
 		C9A107142BBDBC8F00753CDC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C9A107132BBDBC8F00753CDC /* PrivacyInfo.xcprivacy */; };
@@ -172,6 +181,7 @@
 /* Begin PBXFileReference section */
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* MattermostTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MattermostTests.m; sourceTree = "<group>"; };
+		06794E6A80EED2E0CAFEE871 /* Pods-kChatNotificationService.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChatNotificationService.release.xcconfig"; path = "Target Support Files/Pods-kChatNotificationService/Pods-kChatNotificationService.release.xcconfig"; sourceTree = "<group>"; };
 		0DB14DFDF6E04FA69FE769DC /* OpenSans-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-SemiBoldItalic.ttf"; path = "../assets/fonts/OpenSans-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* kChat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = kChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Mattermost/AppDelegate.h; sourceTree = "<group>"; };
@@ -204,6 +214,7 @@
 		536CC6C123E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RNNotificationEventHandler+HandleReplyAction.m"; sourceTree = "<group>"; };
 		536CC6C223E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RNNotificationEventHandler+HandleReplyAction.h"; sourceTree = "<group>"; };
 		54956DEFEBB74EF78C3A6AE5 /* Metropolis-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Metropolis-SemiBold.ttf"; path = "../assets/fonts/Metropolis-SemiBold.ttf"; sourceTree = "<group>"; };
+		5DC3891CFAE5D20A5182C62F /* libPods-kChatShareExtension.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-kChatShareExtension.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6561AEAC21CC40B8A72ABB93 /* OpenSans-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-Light.ttf"; path = "../assets/fonts/OpenSans-Light.ttf"; sourceTree = "<group>"; };
 		672D984729F1927E004228D6 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = InfoPlist.strings; sourceTree = "<group>"; };
 		672D986829F1927F004228D6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = InfoPlist.strings; sourceTree = "<group>"; };
@@ -298,9 +309,13 @@
 		83ABFD0F2C1C90D90029685B /* calls_cheerful.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = calls_cheerful.mp3; path = ../assets/sounds/calls_cheerful.mp3; sourceTree = "<group>"; };
 		83ABFD102C1C90D90029685B /* calls_calm.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = calls_calm.mp3; path = ../assets/sounds/calls_calm.mp3; sourceTree = "<group>"; };
 		83ABFD112C1C90D90029685B /* calls_urgent.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = calls_urgent.mp3; path = ../assets/sounds/calls_urgent.mp3; sourceTree = "<group>"; };
+		86CC1D0677F81276B5D27A3C /* Pods-kChatShareExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChatShareExtension.release.xcconfig"; path = "Target Support Files/Pods-kChatShareExtension/Pods-kChatShareExtension.release.xcconfig"; sourceTree = "<group>"; };
+		9EB3044C9E4352BCBCB94179 /* Pods-kChatNotificationService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChatNotificationService.debug.xcconfig"; path = "Target Support Files/Pods-kChatNotificationService/Pods-kChatNotificationService.debug.xcconfig"; sourceTree = "<group>"; };
+		A66656554C339757628D5D66 /* Pods-kChatShareExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChatShareExtension.debug.xcconfig"; path = "Target Support Files/Pods-kChatShareExtension/Pods-kChatShareExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		AB22941EB6C9E39BAB9B4783 /* Pods-kChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChat.release.xcconfig"; path = "Target Support Files/Pods-kChat/Pods-kChat.release.xcconfig"; sourceTree = "<group>"; };
 		BC977883E2624E05975CA65B /* OpenSans-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-Regular.ttf"; path = "../assets/fonts/OpenSans-Regular.ttf"; sourceTree = "<group>"; };
 		BE17F630DB5D41FD93F32D22 /* OpenSans-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-LightItalic.ttf"; path = "../assets/fonts/OpenSans-LightItalic.ttf"; sourceTree = "<group>"; };
+		BF411FDB2155B680B2E2EE6A /* libPods-kChatNotificationService.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-kChatNotificationService.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9A1070F2BBD7C8700753CDC /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		C9A107112BBDA00200753CDC /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		C9A107132BBDBC8F00753CDC /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -325,6 +340,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				49AE370126D4455D00EF4E52 /* Gekidou in Frameworks */,
+				89F39C169798913D3B11FE6F /* libPods-kChatNotificationService.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,6 +350,7 @@
 			files = (
 				7FD4822C2864D73300A5B18B /* OpenGraph in Frameworks */,
 				7F4288042865D340006B48E1 /* Gekidou in Frameworks */,
+				642258AA8257A398E2DBF04B /* libPods-kChatShareExtension.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -430,6 +447,10 @@
 			children = (
 				ECFAA3716FC33EB5E8D76FA8 /* Pods-kChat.debug.xcconfig */,
 				AB22941EB6C9E39BAB9B4783 /* Pods-kChat.release.xcconfig */,
+				9EB3044C9E4352BCBCB94179 /* Pods-kChatNotificationService.debug.xcconfig */,
+				06794E6A80EED2E0CAFEE871 /* Pods-kChatNotificationService.release.xcconfig */,
+				A66656554C339757628D5D66 /* Pods-kChatShareExtension.debug.xcconfig */,
+				86CC1D0677F81276B5D27A3C /* Pods-kChatShareExtension.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -479,6 +500,8 @@
 				7FFE32BF1FD9CCAA0038C7A0 /* Sentry.framework */,
 				81061F4CBB31484A94D5A8EE /* libz.tbd */,
 				1623746E1AB26BD8335911D6 /* libPods-kChat.a */,
+				BF411FDB2155B680B2E2EE6A /* libPods-kChatNotificationService.a */,
+				5DC3891CFAE5D20A5182C62F /* libPods-kChatShareExtension.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -829,9 +852,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7F581D82221ED5C60099E66B /* Build configuration list for PBXNativeTarget "kChatNotificationService" */;
 			buildPhases = (
+				1689E8E2F9B4476342255A2E /* [CP] Check Pods Manifest.lock */,
 				7F581D2E221ED5C60099E66B /* Sources */,
 				7F581D2F221ED5C60099E66B /* Frameworks */,
 				7F581D30221ED5C60099E66B /* Resources */,
+				00EC5DEBE905C8947414A883 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -849,9 +874,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7FC5699328563FDB000B0905 /* Build configuration list for PBXNativeTarget "kChatShareExtension" */;
 			buildPhases = (
+				DEF2A8572CB1565BD1749EE9 /* [CP] Check Pods Manifest.lock */,
 				7FC5698228563FDB000B0905 /* Sources */,
 				7FC5698328563FDB000B0905 /* Frameworks */,
 				7FC5698428563FDB000B0905 /* Resources */,
+				76819D453E2B2812A043B778 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -1050,6 +1077,48 @@
 			shellPath = /bin/sh;
 			shellScript = "./bundleReactNative.sh\n";
 		};
+		00EC5DEBE905C8947414A883 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-kChatNotificationService/Pods-kChatNotificationService-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/CocoaLumberjack/CocoaLumberjackPrivacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/Sentry/Sentry.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/CocoaLumberjackPrivacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Sentry.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-kChatNotificationService/Pods-kChatNotificationService-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		1689E8E2F9B4476342255A2E /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-kChatNotificationService-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		225823B02C00F01300541725 /* Copy Jitsi Sound Files */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1086,6 +1155,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-kChat/expo-configure-project.sh\"\n";
+		};
+		76819D453E2B2812A043B778 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-kChatShareExtension/Pods-kChatShareExtension-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/Sentry/Sentry.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Sentry.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-kChatShareExtension/Pods-kChatShareExtension-resources.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 		7AECB8A845B35E07C2497D81 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1251,6 +1338,28 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-kChat/Pods-kChat-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		DEF2A8572CB1565BD1749EE9 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-kChatShareExtension-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -1265,6 +1374,13 @@
 				7F537B2928A517580086D6B3 /* NotificationHelper.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				536CC6C323E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.m in Sources */,
+				374A99042BFCDC23005517A1 /* CallManager.swift in Sources */,
+				37407E422C32BD87005FB5D3 /* CallViewController.swift in Sources */,
+				37981AE12C33CB4D00205B36 /* Network+Calls.swift in Sources */,
+				37981AE32C33D52800205B36 /* LegacyLogger.swift in Sources */,
+				37981AE52C33D86A00205B36 /* MeUserProfile.swift in Sources */,
+				37981AE72C33F0CA00205B36 /* Conference.swift in Sources */,
+				3751BAE22BFF55E200CE4D6D /* CallManagerModule.m in Sources */,
 				1AC06461F0B9867B11829943 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1523,6 +1639,7 @@
 		};
 		7F581D3A221ED5C60099E66B /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9EB3044C9E4352BCBCB94179 /* Pods-kChatNotificationService.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1573,6 +1690,7 @@
 		};
 		7F581D3B221ED5C60099E66B /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 06794E6A80EED2E0CAFEE871 /* Pods-kChatNotificationService.release.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1622,6 +1740,7 @@
 		};
 		7FC5699128563FDB000B0905 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A66656554C339757628D5D66 /* Pods-kChatShareExtension.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1671,6 +1790,7 @@
 		};
 		7FC5699228563FDB000B0905 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 86CC1D0677F81276B5D27A3C /* Pods-kChatShareExtension.release.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;

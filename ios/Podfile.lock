@@ -2441,6 +2441,7 @@ DEPENDENCIES:
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - RNWatch (from `../node_modules/react-native-watch-connectivity`)
   - "secure-pdf-viewer (from `../node_modules/@mattermost/secure-pdf-viewer`)"
+  - Sentry/HybridSDK (= 8.48.0)
   - "simdjson (from `../node_modules/@nozbe/simdjson`)"
   - SplashView (from `../node_modules/react-native-splash-view`)
   - TurboLogIOSNative (from `https://github.com/larkox/react-native-turbo-log-ios-native.git`)
@@ -2903,6 +2904,6 @@ SPEC CHECKSUMS:
   WatermelonDB: 75e467adbaf2cb2809780fb3eda7ce4964e11778
   Yoga: feb4910aba9742cfedc059e2b2902e22ffe9954a
 
-PODFILE CHECKSUM: d7aa428a175ba89963edce0211c64fb307c90b23
+PODFILE CHECKSUM: 0d5d7f7078c5b4cbbe95d4d166023b60ba844e01
 
 COCOAPODS: 1.16.1

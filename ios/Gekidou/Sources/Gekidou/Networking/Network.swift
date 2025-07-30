@@ -1,4 +1,4 @@
-//
+    //
 //  Network.swift
 //  Gekidou
 //
@@ -20,8 +20,6 @@ public class Network: NSObject {
     
     override private init() {
         super.init()
-        
-        loadPinnedCertificates()
         
         queue.maxConcurrentOperationCount = 1
         
