@@ -286,6 +286,26 @@ class EphemeralStoreSingleton {
     isUnacknowledgingPost = (postId: string) => {
         return this.unacknowledgingPost.has(postId);
     };
+
+    getChannelPlaybooksSynced = (serverUrl: string, channelId: string) => {
+        return this.channelPlaybooksSynced[serverUrl]?.has(channelId) ?? false;
+    };
+
+    setChannelPlaybooksSynced = (serverUrl: string, channelId: string) => {
+        if (!this.channelPlaybooksSynced[serverUrl]) {
+            this.channelPlaybooksSynced[serverUrl] = new Set();
+        }
+        this.channelPlaybooksSynced[serverUrl]?.add(channelId);
+    };
+
+    unsetChannelPlaybooksSynced = (serverUrl: string, channelId: string) => {
+        this.channelPlaybooksSynced[serverUrl]?.delete(channelId);
+    };
+
+    clearChannelPlaybooksSynced = (serverUrl: string) => {
+        delete this.channelPlaybooksSynced[serverUrl];
+    };
+
     setServerHasLimit = (serverUrl: string, limitUntil: string | undefined) => {
         if (limitUntil) {
             if (this.serverLimit[serverUrl]?.limit !== limitUntil) {
