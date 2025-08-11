@@ -1936,7 +1936,7 @@ PODS:
   - RNAudioRecorderPlayer (3.6.14):
     - React-Core
   - RNCalendarEvents (2.2.0):
-    - React-Core
+    - React
   - RNCAsyncStorage (1.23.1):
     - React-Core
   - RNCClipboard (1.14.3):
@@ -2868,7 +2868,7 @@ SPEC CHECKSUMS:
   ReactNativeIncallManager: ef7b845e166f04cf8ddf433d8a23227b01cef87a
   ReactNativeNavigation: 6cef83673a08a51d426ff041c015da7c2a178a77
   RNAudioRecorderPlayer: b5ed41ccfe72a211a870bfe09ab36c046eb27d2a
-  RNCalendarEvents: 62e1ac89d3afbfa77cf2dafa8727af93fa70825f
+  RNCalendarEvents: f90f73666b6bcbb3cc8a491ffbb5e48c0db3de37
   RNCAsyncStorage: aa75595c1aefa18f868452091fa0c411a516ce11
   RNCClipboard: 7c3e3b5f71d84ef61690ad377b6c50cf27864ff5
   RNDateTimePicker: 29264364ea7b8cc0fb355b3843cf276a4ff78966

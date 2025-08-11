@@ -14,6 +14,13 @@
 		1AC06461F0B9867B11829943 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24C9C33C1C823BB8E1B3E161 /* ExpoModulesProvider.swift */; };
 		27C667A9295241B600E590D5 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C667A8295241B600E590D5 /* Sentry.swift */; };
 		27C667AA295241B600E590D5 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C667A8295241B600E590D5 /* Sentry.swift */; };
+		37407E422C32BD87005FB5D3 /* CallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37407E412C32BD87005FB5D3 /* CallViewController.swift */; };
+		374A99042BFCDC23005517A1 /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A99032BFCDC23005517A1 /* CallManager.swift */; };
+		3751BAE22BFF55E200CE4D6D /* CallManagerModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 3751BAE12BFF55E200CE4D6D /* CallManagerModule.m */; };
+		37981AE12C33CB4D00205B36 /* Network+Calls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE02C33CB4D00205B36 /* Network+Calls.swift */; };
+		37981AE32C33D52800205B36 /* LegacyLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE22C33D52800205B36 /* LegacyLogger.swift */; };
+		37981AE52C33D86A00205B36 /* MeUserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE42C33D86A00205B36 /* MeUserProfile.swift */; };
+		37981AE72C33F0CA00205B36 /* Conference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE62C33F0CA00205B36 /* Conference.swift */; };
 		49AE370126D4455D00EF4E52 /* Gekidou in Frameworks */ = {isa = PBXBuildFile; productRef = 49AE370026D4455D00EF4E52 /* Gekidou */; };
 		536CC6C323E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.m in Sources */ = {isa = PBXBuildFile; fileRef = 536CC6C123E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.m */; };
 		58495E36BF1A4EAB93609E57 /* Metropolis-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 54956DEFEBB74EF78C3A6AE5 /* Metropolis-SemiBold.ttf */; };
@@ -124,13 +131,6 @@
 		89F39C169798913D3B11FE6F /* libPods-kChatNotificationService.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF411FDB2155B680B2E2EE6A /* libPods-kChatNotificationService.a */; };
 		9D28B54F45884190C64C695D /* libPods-kChat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1623746E1AB26BD8335911D6 /* libPods-kChat.a */; };
 		A94508A396424B2DB778AFE9 /* OpenSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E5C16B14E1CE4868886A1A00 /* OpenSans-SemiBold.ttf */; };
-		374A99042BFCDC23005517A1 /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A99032BFCDC23005517A1 /* CallManager.swift */; };
-		37407E422C32BD87005FB5D3 /* CallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37407E412C32BD87005FB5D3 /* CallViewController.swift */; };
-		37981AE12C33CB4D00205B36 /* Network+Calls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE02C33CB4D00205B36 /* Network+Calls.swift */; };
-		37981AE32C33D52800205B36 /* LegacyLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE22C33D52800205B36 /* LegacyLogger.swift */; };
-		37981AE52C33D86A00205B36 /* MeUserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE42C33D86A00205B36 /* MeUserProfile.swift */; };
-		37981AE72C33F0CA00205B36 /* Conference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37981AE62C33F0CA00205B36 /* Conference.swift */; };
-		3751BAE22BFF55E200CE4D6D /* CallManagerModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 3751BAE12BFF55E200CE4D6D /* CallManagerModule.m */; };
 		C9A107102BBD7C8700753CDC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C9A1070F2BBD7C8700753CDC /* PrivacyInfo.xcprivacy */; };
 		C9A107122BBDA00200753CDC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C9A107112BBDA00200753CDC /* PrivacyInfo.xcprivacy */; };
 		C9A107142BBDBC8F00753CDC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C9A107132BBDBC8F00753CDC /* PrivacyInfo.xcprivacy */; };
