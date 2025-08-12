@@ -217,7 +217,7 @@
     "mmjstool": "mmjstool",
     "pod-install": "cd ios && RCT_NEW_ARCH_ENABLED=0 pod install",
     "pod-install-m1": "cd ios && RCT_NEW_ARCH_ENABLED=0 arch -x86_64 pod install",
-    "postinstall": "patch-package && ./scripts/postinstall.sh",
+    "postinstall": "patch-package && ./scripts/postinstall.sh && node ./scripts/jitsi-ts-nocheck.js",
     "prepare": "husky",
     "preinstall": "./scripts/preinstall.sh && npx solidarity",
     "start": "react-native start",
