@@ -10,7 +10,7 @@ import {withServerUrl} from '@context/server';
 import {observeCurrentChannel} from '@queries/servers/channel';
 import {observeCanAddBookmarks} from '@queries/servers/channel_bookmark';
 import {observeCanManageChannelMembers, observeCanManageChannelSettings} from '@queries/servers/role';
-import {observeConfigValue, observeCurrentUserId} from '@queries/servers/system';
+import {observeConfigBooleanValue, observeConfigValue, observeCurrentUserId} from '@queries/servers/system';
 import {observeIsCRTEnabled} from '@queries/servers/thread';
 import {observeCurrentUser} from '@queries/servers/user';
 
@@ -52,7 +52,7 @@ const enhanced = withObservables([], ({database}: Props) => {
         switchMap(() => of$(true)),
     );
 
-    const isBookmarksEnabled = false;
+    const isBookmarksEnabled = observeConfigBooleanValue(database, 'FeatureFlagChannelBookmarks');
 
     const canAddBookmarks = channelId.pipe(
         switchMap((cId) => {
