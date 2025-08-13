@@ -396,6 +396,7 @@ describe('WebSocket Post Actions', () => {
 
     describe('handlePostUnread', () => {
         const msg = {
+            event: 'post_unread',
             broadcast: {
                 channel_id: 'channel1',
                 team_id: 'team1',

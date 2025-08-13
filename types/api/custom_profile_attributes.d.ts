@@ -46,7 +46,7 @@ type CustomProfileAttribute = {
     id: string;
 
     /** ID of the custom profile field this attribute is for */
-    field_id: string;
+    field_id: string | number;
 
     /** ID of the user this attribute belongs to */
     user_id: string;

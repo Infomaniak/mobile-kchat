@@ -11,7 +11,6 @@ import {map as map$, switchMap, distinctUntilChanged, combineLatestWith} from 'r
 import {General, Permissions} from '@constants';
 import {MM_TABLES} from '@constants/database';
 import {sanitizeLikeString} from '@helpers/database';
-import EphemeralStore from '@store/ephemeral_store';
 import {isDefaultChannel} from '@utils/channel';
 import {hasPermission} from '@utils/role';
 import {isSystemAdmin} from '@utils/user';

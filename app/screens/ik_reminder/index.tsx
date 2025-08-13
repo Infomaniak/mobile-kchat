@@ -67,7 +67,7 @@ const IKReminder = ({post, postId, postpone, componentId}: Props) => {
         const items: Array<string | number> = [1];
         const optionsCount = postReminderTimes.length + (showCustom ? 1 : 0);
 
-        items.push(bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT, bottom) + 50);
+        items.push(bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT) + 50);
         return items;
     }, [isSystemPost, bottom]);
 

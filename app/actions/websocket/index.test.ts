@@ -9,8 +9,6 @@ import {markChannelAsRead} from '@actions/remote/channel';
 import {deferredAppEntryActions, entry, handleEntryAfterLoadNavigation} from '@actions/remote/entry/common';
 import {fetchPostsForChannel, fetchPostThread} from '@actions/remote/post';
 import {openAllUnreadChannels} from '@actions/remote/preference';
-import {loadConfigAndCalls} from '@calls/actions/calls';
-import {isSupportedServerCalls} from '@calls/utils';
 import DatabaseManager from '@database/manager';
 import AppsManager from '@managers/apps_manager';
 import {updatePlaybooksVersion} from '@playbooks/actions/remote/version';
@@ -94,7 +92,6 @@ describe('WebSocket Index Actions', () => {
                 locale: 'en',
             }));
             jest.mocked(getConfig).mockResolvedValue({Version: '9.0.0'} as ClientConfig);
-            jest.mocked(isSupportedServerCalls).mockReturnValue(true);
 
             const error = await handleFirstConnect(serverUrl, groupLabel);
 
@@ -102,7 +99,6 @@ describe('WebSocket Index Actions', () => {
             expect(entry).toHaveBeenCalled();
             expect(handleEntryAfterLoadNavigation).toHaveBeenCalled();
             expect(setLastFullSync).toHaveBeenCalled();
-            expect(loadConfigAndCalls).toHaveBeenCalled();
             expect(deferredAppEntryActions).toHaveBeenCalled();
             expect(updatePlaybooksVersion).toHaveBeenCalledWith(serverUrl);
         });
@@ -145,7 +141,6 @@ describe('WebSocket Index Actions', () => {
                 locale: 'en',
             }));
             jest.mocked(getConfig).mockResolvedValue({Version: '9.0.0'} as ClientConfig);
-            jest.mocked(isSupportedServerCalls).mockReturnValue(true);
             jest.mocked(getActiveServerUrl).mockResolvedValue(serverUrl);
 
             const error = await handleReconnect(serverUrl);
@@ -154,7 +149,6 @@ describe('WebSocket Index Actions', () => {
             expect(entry).toHaveBeenCalled();
             expect(handleEntryAfterLoadNavigation).toHaveBeenCalled();
             expect(setLastFullSync).toHaveBeenCalled();
-            expect(loadConfigAndCalls).toHaveBeenCalled();
             expect(deferredAppEntryActions).toHaveBeenCalled();
             expect(openAllUnreadChannels).toHaveBeenCalled();
             expect(dataRetentionCleanup).toHaveBeenCalled();

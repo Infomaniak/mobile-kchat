@@ -90,7 +90,7 @@ export const IkCallsParticipantStack = ({
             </>
         );
 
-        const snapPoints: Array<string | number> = [1, bottomSheetSnapPoint(Math.min(participantCount, 5), ROW_HEIGHT, bottom) + TITLE_HEIGHT];
+        const snapPoints: Array<string | number> = [1, bottomSheetSnapPoint(Math.min(participantCount, 5), ROW_HEIGHT) + TITLE_HEIGHT];
         if (participantCount > 5) {
             snapPoints.push('80%');
         }

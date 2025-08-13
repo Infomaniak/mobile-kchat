@@ -128,7 +128,7 @@ const renderMessage = ({location, post, styles, intl, localeHolder, theme, value
                         post={post}
                         previewUserId={previewUserId}
                         theme={theme}
-                        postLink={post.type === Post.POST_TYPES.IK_SYSTEM_POST_REMINDER ? post.props.link : post.props.post_link}
+                        postLink={post.type === Post.POST_TYPES.IK_SYSTEM_POST_REMINDER ? post.props?.link as string : post.props?.post_link as string}
                         location={location}
                         textStyles={textStyles}
                     />
@@ -292,9 +292,9 @@ const renderAddGuestToChannelMessage = ({post, location, styles, intl, theme}: R
 };
 
 const renderUserMentionedInChannelMessage = ({post, styles, intl, theme, location}: RenderersProps) => {
-    const username = renderUsername(post.props.username);
-    const channelDisplayName = post.props.channel_name;
-    const postLink = post.props.post_link;
+    const username = renderUsername(post.props?.username as string);
+    const channelDisplayName: string = post.props?.channel_name as string;
+    const postLink = post.props?.post_link as string;
 
     const localeHolder = {
         id: t('api.channel.mention.user_mentioned_in_channel'),
@@ -322,11 +322,11 @@ const renderGuestJoinChannelMessage = ({post, styles, location, intl, theme}: Re
 };
 
 const renderReminderSystemBotMessage = ({post, styles, location, intl, theme, currentUser}: RenderersProps) => {
-    if (!post.props.username) {
+    if (!post.props?.username) {
         return null;
     }
 
-    const username = renderUsername(post.props.username);
+    const username = renderUsername(post.props.username as string);
     const permaLink = `[${post.props.link}](${post.props.link})`;
     const link = `[this message](${post.props.link})`;
 

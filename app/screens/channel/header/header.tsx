@@ -50,7 +50,10 @@ type ChannelProps = {
     shouldRenderBookmarks: boolean;
     shouldRenderChannelBanner: boolean;
     hasPlaybookRuns: boolean;
-
+    playbooksActiveRuns?: number;
+    groupCallsAllowed?: boolean;
+    isPlaybooksEnabled?: boolean;
+    activeRunId?: string;
     // searchTerm: string;
 };
 

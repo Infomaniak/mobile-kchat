@@ -248,30 +248,6 @@ export default function SelectedUsers({
 
     const isDisabled = Boolean(maxUsers && (numberSelectedIds > maxUsers));
 
-    const button = typeof buttonIcon === 'string' ? (
-        <Button
-            onPress={handlePress}
-            iconName={buttonIcon}
-            text={buttonText}
-            iconSize={20}
-            theme={theme}
-            buttonType={isDisabled ? 'disabled' : 'default'}
-            emphasis={'primary'}
-            size={'lg'}
-            testID={`${testID}.start.button`}
-        />
-    ) : (
-        <Button
-            onPress={handlePress}
-            text={buttonText}
-            theme={theme}
-            buttonType={isDisabled ? 'disabled' : 'default'}
-            emphasis={'primary'}
-            size={'lg'}
-            testID={`${testID}.start.button`}
-        />
-    );
-
     return (
         <Animated.View style={animatedContainerStyle}>
             {showToast &&
@@ -292,7 +268,16 @@ export default function SelectedUsers({
                     </View>
                 </ScrollView>
                 <Animated.View style={animatedButtonStyle}>
-                    {button}
+                    <Button
+                        onPress={handlePress}
+                        iconName={buttonIcon}
+                        text={buttonText}
+                        theme={theme}
+                        emphasis={'primary'}
+                        size={'lg'}
+                        testID={`${testID}.start.button`}
+                        disabled={isDisabled}
+                    />
                 </Animated.View>
             </Animated.View>
         </Animated.View>

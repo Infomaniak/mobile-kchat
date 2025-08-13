@@ -5,10 +5,10 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$} from 'rxjs';
 import {distinctUntilChanged, switchMap} from 'rxjs/operators';
 
-import {observeChannel} from '@queries/servers/channel';
-import {observeConference, observeConferenceParticipantCount, observeConferenceHasAtLeastOneParticipantPresent, observeConferenceHasParticipantPresent} from '@queries/servers/conference';
 import CallScreen, {type PassedProps} from '@calls/screens/call_screen/call_screen';
 import {observeGlobalCallsState} from '@calls/state';
+import {observeChannel} from '@queries/servers/channel';
+import {observeConference, observeConferenceParticipantCount, observeConferenceHasAtLeastOneParticipantPresent, observeConferenceHasParticipantPresent} from '@queries/servers/conference';
 import {observeCurrentUserId} from '@queries/servers/system';
 
 import type {WithDatabaseArgs} from '@typings/database/database';
