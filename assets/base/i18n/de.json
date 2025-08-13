@@ -1367,6 +1367,7 @@
   "scheduled_post.options.delete.confirm": "Entfernen",
   "scheduled_post.options.delete.confirmation": "Bist du sicher, dass du diesen geplanten Beitrag löschen willst?",
   "scheduled_post.options.delete.title": "Entfernen",
+  "channel_info.draft_to_user": "An:",
   "scheduled_post.options.send.title": "Senden",
   "scheduled_post.options.title": "Nachrichten-Aktionen",
   "scheduled_post.picker.custom": "Benutzerdefinierte Zeit",
