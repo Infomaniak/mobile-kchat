@@ -437,6 +437,7 @@
   "mobile.calls_end_permission_msg": "Non si ha il permesso di terminare la chiamata. Chiedere all'operatore di terminare la chiamata.",
   "mobile.calls_end_permission_title": "Errore",
   "mobile.calls_ended_at": "Terminato a",
+  "mobile.calls_join_call_short": "Partecipa",
   "mobile.calls_error_message": "Errore: {error}",
   "mobile.calls_error_title": "Errore",
   "mobile.calls_host": "ospite",

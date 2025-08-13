@@ -502,6 +502,7 @@
   "mobile.calls_end_permission_msg": "Vous n'êtes pas autorisé à terminer l'appel. Veuillez demander au créateur de l'appel de le terminer.",
   "mobile.calls_end_permission_title": "Erreur",
   "mobile.calls_ended_at": "Terminé à",
+  "mobile.calls_join_call_short": "Rejoindre",
   "mobile.calls_declined_at": "Décliné à",
   "mobile.calls_missed_at": "Manqué à",
   "mobile.calls_started_at": "Démarré à",
