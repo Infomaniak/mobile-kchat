@@ -127,3 +127,22 @@ DEST="./extracted.db"
 # Extraction via run-as
 adb exec-out run-as $APP_ID cat files/databases/$FILENAME > $DEST
 ```
+
+## Known Issues with Dependencies
+### ⚠️ Jitsi SDK: TypeScript Type Errors
+
+The Jitsi SDK is included as raw `.ts`/`.tsx` files in `node_modules`, not pre-compiled. It contains **TypeScript errors** — harmless at runtime but blocking during build.
+
+#### ✅ Automatic Fix via Postinstall Script
+
+We add a script that automatically adds `// @ts-nocheck` to all Jitsi SDK files to disable type checking **only for these files**.
+
+This is executed via:
+
+```json
+"postinstall": "patch-package && ./scripts/postinstall.sh && node ./scripts/jitsi-ts-nocheck.js"
+```
+
+➡️ Runs **automatically** on `npm install`.  
+
+This workaround stays until Jitsi provides a properly compiled SDK.

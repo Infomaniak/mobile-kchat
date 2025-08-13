@@ -2,7 +2,7 @@ stages:
   - test
 
 variables:
-  NODE_VERSION: 20.11.0 # Sould respect /.nvmrc
+  NODE_VERSION: 22.14.0 # Sould respect /.nvmrc
 
 # REFERENCES
 # Triggered on Merge Requests
