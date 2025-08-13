@@ -4,7 +4,7 @@
 import {useKeepAwake} from 'expo-keep-awake';
 import React, {useCallback, useEffect, useState} from 'react';
 import {TouchableOpacity, View} from 'react-native';
-import AudioRecorderPlayer, {AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption, AudioEncoderAndroidType, AudioSourceAndroidType, type AudioSet} from 'react-native-audio-recorder-player';
+import AudioRecorderPlayer, {AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption, AudioEncoderAndroidType, AudioSourceAndroidType, OutputFormatAndroidType, type AudioSet} from 'react-native-audio-recorder-player';
 
 import CompassIcon from '@components/compass_icon';
 import {MIC_SIZE} from '@constants/view';
@@ -83,6 +83,11 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
 
             const audioSet: AudioSet = {
                 AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
+
+                // Ik: Use AAC_ADTS to generate a pure .aac audio file instead of a .mp4 container,
+                // ensuring the backend correctly detects it as audio (not video) via first bytes.
+                OutputFormatAndroid: OutputFormatAndroidType.AAC_ADTS,
+
                 AudioSourceAndroid: AudioSourceAndroidType.MIC,
                 AVModeIOS: AVModeIOSOption.measurement,
                 AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
@@ -130,7 +135,7 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
         onClose();
         if (recorder && url) {
             storeLocalAudioURI?.(url);
-            const fi = await extractFileInfo([{uri: url}]);
+            const fi = await extractFileInfo([{uri: url, type: 'audio/mp4'}]);
 
             fi[0].is_voice_recording = true;
             fi[0].uri = url;
