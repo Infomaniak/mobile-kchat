@@ -22,6 +22,7 @@ describe('Quick Actions', () => {
         },
         updatePostPriority: jest.fn(),
         focus: jest.fn(),
+        channelId: 'channel-id',
     };
 
     it('Should render slash command if canShowSlashCommands is true', () => {

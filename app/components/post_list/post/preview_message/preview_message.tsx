@@ -24,6 +24,7 @@ import {getStyleSheet} from './styles';
 import type {UserModel} from '@database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 import type {MarkdownTextStyles} from '@typings/global/markdown';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
 type PreviewMessageProps = {
     channelDisplayName: string;
@@ -31,7 +32,7 @@ type PreviewMessageProps = {
     theme: Theme;
     user?: UserModel;
     postLink: string;
-    location: string;
+    location: AvailableScreens;
     textStyles?: MarkdownTextStyles;
     siteURL: string;
     metadata: PostPreviewMetadata;
@@ -65,14 +66,17 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
     }, []);
 
     const displayName = useMemo(() => {
+        const postMetadata = metadata.post;
+        const props = postMetadata?.props;
+
         if (user) {
-            if (metadata.post?.props.from_webhook === 'true') {
-                return metadata.post.props.override_username;
+            if (props?.from_webhook === 'true' && typeof props.override_username === 'string') {
+                return props.override_username;
             }
             return displayUsername(user, undefined, 'full_name', true);
         }
         return '';
-    }, [user, metadata?.post?.props.from_webhook, metadata?.post?.props.override_username]);
+    }, [metadata.post, user]);
 
     const handlePress = async () => {
         const url = normalizeProtocol(postLink);
@@ -170,9 +174,9 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
                                     isEdited={messageEdit}
                                 />
 
-                                {metadata?.post?.props?.attachments?.[0] && (
+                                {Array.isArray(metadata?.post?.props?.attachments) && metadata.post.props.attachments[0] && (
                                     <MessageAttachment
-                                        attachment={metadata?.post?.props?.attachments?.[0]}
+                                        attachment={metadata.post.props.attachments[0]}
                                         channelId={post.channelId}
                                         layoutWidth={layoutWidth}
                                         location={location}

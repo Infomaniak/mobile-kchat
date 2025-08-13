@@ -69,7 +69,7 @@ describe('WebsocketManager', () => {
             close: jest.fn(),
             invalidate: jest.fn(),
         };
-        (WebSocketClient as jest.Mock).mockImplementation(() => mockWebSocketClient);
+        (WebSocketClient as unknown as jest.Mock).mockImplementation(() => mockWebSocketClient);
 
         // Reset DatabaseManager mock
         jest.spyOn(DatabaseManager, 'getServerDatabaseAndOperator').mockImplementation(() => ({

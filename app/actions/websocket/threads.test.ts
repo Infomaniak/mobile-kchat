@@ -40,6 +40,7 @@ describe('WebSocket Threads Actions', () => {
             };
 
             const msg = {
+                event: 'thread_updated',
                 data: {
                     thread: JSON.stringify(mockThread),
                 },
@@ -67,6 +68,7 @@ describe('WebSocket Threads Actions', () => {
             };
 
             const msg = {
+                event: 'thread_updated',
                 data: {
                     thread: JSON.stringify(mockThread),
                 },
@@ -86,6 +88,7 @@ describe('WebSocket Threads Actions', () => {
 
         it('should handle error gracefully', async () => {
             const msg = {
+                event: 'thread_updated',
                 data: {
                     thread: 'invalid-json',
                 },
@@ -102,13 +105,12 @@ describe('WebSocket Threads Actions', () => {
         it('should update thread when thread_id is present', async () => {
             const timestamp = 1234567890;
             const msg = {
+                event: 'thread_read_changed',
                 data: {
                     thread_id: threadId,
                     timestamp,
                     unread_mentions: 2,
                     unread_replies: 5,
-                },
-                broadcast: {
                     team_id: teamId,
                 },
             } as WebSocketMessage<ThreadReadChangedData>;
@@ -133,8 +135,6 @@ describe('WebSocket Threads Actions', () => {
                     timestamp,
                     unread_mentions: 2,
                     unread_replies: 5,
-                },
-                broadcast: {
                     team_id: teamId,
                 },
             } as WebSocketMessage<ThreadReadChangedData>;
@@ -154,8 +154,6 @@ describe('WebSocket Threads Actions', () => {
             const msg = {
                 data: {
                     timestamp: 1234567890,
-                },
-                broadcast: {
                     team_id: teamId,
                 },
             } as WebSocketMessage<ThreadReadChangedData>;
@@ -172,8 +170,6 @@ describe('WebSocket Threads Actions', () => {
                 data: {
                     thread_id: threadId,
                     timestamp: 1234567890,
-                },
-                broadcast: {
                     team_id: teamId,
                 },
             } as WebSocketMessage<ThreadReadChangedData>;

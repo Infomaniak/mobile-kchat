@@ -12,24 +12,24 @@ import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 
 import {fetchChannelById, switchToChannelById} from '@actions/remote/channel';
 import {fetchConference} from '@actions/remote/conference';
-import {postListRef} from '@components/post_list/post_list';
-import {useServerId} from '@context/server';
-import {useTheme} from '@context/theme';
-import {useCollapsibleHeader} from '@hooks/header';
-import {useMountedRef, useRerender, useTransientRef} from '@hooks/utils';
-import {getCommonSystemValues} from '@queries/servers/system';
-import {logError} from '@utils/log';
-import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
-import {typography} from '@utils/typography';
 import {usePermissionsChecker} from '@calls/hooks';
 import {AudioMuteButton, ContentContainer, HangupButton, Sound, ToolboxContainer, VideoMuteButton} from '@calls/screens/call_screen/jitsi_components';
 import RippleIcon from '@calls/screens/call_screen/ripple_icon';
 import NavigationHeader from '@components/navigation_header';
+import {postListRef} from '@components/post_list/post_list';
 import Image from '@components/profile_picture/image';
 import {Screens} from '@constants';
+import {useServerId} from '@context/server';
+import {useTheme} from '@context/theme';
 import DatabaseManager from '@database/manager';
+import {useCollapsibleHeader} from '@hooks/header';
+import {useMountedRef, useRerender, useTransientRef} from '@hooks/utils';
+import {getCommonSystemValues} from '@queries/servers/system';
 import CallManager from '@store/CallManager';
 import {isDMorGM as isChannelDMorGM} from '@utils/channel';
+import {logError} from '@utils/log';
+import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {typography} from '@utils/typography';
 
 import type ChannelModel from '@typings/database/models/servers/channel';
 import type ConferenceModel from '@typings/database/models/servers/conference';
@@ -128,7 +128,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
  * Test if setting a new value to a ref would change it
  * returns true if it does, false otherwise
  */
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
+
 const hasUpdatedRef = <T extends unknown>(ref: MutableRefObject<T>, newValue: T): boolean => {
     if (ref.current !== newValue) {
         ref.current = newValue;

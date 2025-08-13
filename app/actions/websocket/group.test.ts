@@ -198,6 +198,7 @@ describe('WebSocket Group Actions', () => {
     describe('error handling', () => {
         it('should handle errors and fetch groups on failure', async () => {
             const msg = {
+                event: '',
                 broadcast: {
                     team_id: teamId,
                     channel_id: channelId,
@@ -217,6 +218,7 @@ describe('WebSocket Group Actions', () => {
 
         it('should handle invalid json on all events', async () => {
             const msg = {
+                event: '',
                 broadcast: {
                     team_id: teamId,
                 },
@@ -242,6 +244,7 @@ describe('WebSocket Group Actions', () => {
 
         it('should handle missing data', async () => {
             const msg = {
+                event: '',
                 broadcast: {
                     team_id: teamId,
                 },

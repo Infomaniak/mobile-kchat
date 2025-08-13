@@ -13,17 +13,18 @@ import {useTheme} from '@context/theme';
 import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
 
 import type UserModel from '@typings/database/models/servers/user';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
-    channelId: string;
-    location: string;
+    channelId?: string;
+    location: AvailableScreens;
     type?: BottomSheetList;
     users: UserModel[];
 };
 
 type ItemProps = {
-    channelId: string;
-    location: string;
+    channelId?: string;
+    location: AvailableScreens;
     user: UserModel;
 }
 
@@ -43,12 +44,17 @@ export const useOpenUserProfile = (channelId: string, location: string) => {
     }, [location, channelId, theme, intl]);
 };
 
-const Item = ({channelId, location, user}: ItemProps) => (
-    <UserItem
-        user={user}
-        onUserPress={useOpenUserProfile(channelId, location)}
-    />
-);
+const Item = ({channelId, location, user}: ItemProps) => {
+    if (!channelId) {
+        return null;
+    }
+    return (
+        <UserItem
+            user={user}
+            onUserPress={useOpenUserProfile(channelId, location)}
+        />
+    );
+};
 
 const UsersList = ({channelId, location, type = 'FlatList', users}: Props) => {
     const renderItem = useCallback(({item}: ListRenderItemInfo<UserModel>) => (

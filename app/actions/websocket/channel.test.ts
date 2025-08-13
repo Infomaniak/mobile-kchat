@@ -8,8 +8,6 @@ import {fetchMyChannel, fetchChannelById, fetchMissingDirectChannelsInfo} from '
 import {fetchPostsForChannel} from '@actions/remote/post';
 import {fetchRolesIfNeeded} from '@actions/remote/role';
 import {fetchUsersByIds, updateUsersNoLongerVisible} from '@actions/remote/user';
-import {leaveCall} from '@calls/actions/calls';
-import {getCurrentCall} from '@calls/state';
 import {General} from '@constants';
 import DatabaseManager from '@database/manager';
 import {deleteChannelMembership, getChannelById, getCurrentChannel, prepareMyChannelsForTeam} from '@queries/servers/channel';
@@ -497,27 +495,6 @@ describe('WebSocket Channel Actions', () => {
             expect(getCurrentChannelId).not.toHaveBeenCalled();
         });
 
-        it('should handle user removed from channel event - already leaving', async () => {
-            (EphemeralStore.isLeavingChannel as jest.Mock).mockReturnValueOnce(true);
-            (getCurrentCall as jest.Mock).mockReturnValueOnce({channelId});
-
-            await handleUserRemovedFromChannelEvent(serverUrl, msg);
-
-            expect(getCurrentCall).toHaveBeenCalled();
-            expect(leaveCall).toHaveBeenCalled();
-            expect(getCurrentUser).not.toHaveBeenCalled();
-        });
-
-        it('should handle user removed from channel event - already leaving, leave call', async () => {
-            (EphemeralStore.isLeavingChannel as jest.Mock).mockReturnValueOnce(true);
-
-            await handleUserRemovedFromChannelEvent(serverUrl, msg);
-
-            expect(getCurrentCall).toHaveBeenCalled();
-            expect(leaveCall).not.toHaveBeenCalled();
-            expect(getCurrentUser).not.toHaveBeenCalled();
-        });
-
         it('should handle user removed from channel event for another user', async () => {
             (getCurrentUser as jest.Mock).mockResolvedValue({id: 'other_user_id', isGuest: false});
             (deleteChannelMembership as jest.Mock).mockResolvedValue({models: []});
@@ -538,17 +515,6 @@ describe('WebSocket Channel Actions', () => {
             expect(updateUsersNoLongerVisible).toHaveBeenCalledWith(serverUrl, true);
         });
 
-        it('should handle user removed from channel event for guest user, leave call', async () => {
-            (getCurrentUser as jest.Mock).mockResolvedValue({id: userId, isGuest: true});
-            (updateUsersNoLongerVisible as jest.Mock).mockResolvedValue({models: []});
-            (getCurrentCall as jest.Mock).mockReturnValueOnce({channelId});
-
-            await handleUserRemovedFromChannelEvent(serverUrl, msg);
-
-            expect(getCurrentUser).toHaveBeenCalled();
-            expect(updateUsersNoLongerVisible).toHaveBeenCalledWith(serverUrl, true);
-            expect(leaveCall).toHaveBeenCalled();
-        });
     });
 
     describe('handleChannelDeletedEvent', () => {

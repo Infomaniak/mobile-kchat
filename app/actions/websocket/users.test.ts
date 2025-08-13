@@ -156,6 +156,7 @@ describe('WebSocket Users Actions', () => {
         it('should handle different active server', async () => {
             DatabaseManager.getActiveServerUrl = jest.fn().mockResolvedValue('different-server');
             const msg = {
+                event: 'client-user_typing',
                 data: {
                     user_id: otherUserId,
                 },
@@ -170,6 +171,7 @@ describe('WebSocket Users Actions', () => {
         it('should handle missing database', async () => {
             DatabaseManager.serverDatabases = {};
             const msg = {
+                event: 'client-user_typing',
                 data: {
                     user_id: otherUserId,
                 },
@@ -193,6 +195,7 @@ describe('WebSocket Users Actions', () => {
                 existingUsers: [],
             });
             const msg = {
+                event: 'client-user_typing',
                 data: {
                     user_id: otherUserId,
                 },
@@ -237,6 +240,7 @@ describe('WebSocket Users Actions', () => {
             jest.mocked(getLicense).mockResolvedValue({} as ClientLicense);
 
             const msg = {
+                event: 'client-user_typing',
                 data: {
                     user_id: otherUserId,
                     parent_id: 'root-id',
@@ -265,13 +269,13 @@ describe('WebSocket Users Actions', () => {
             };
             jest.mocked(WebsocketManager.getClient).mockReturnValue(mockClient as any);
 
-            await userTyping(serverUrl, 'channel-id', 'root-id');
+            await userTyping('typing', 'channel-id', 'root-id');
             expect(mockClient.sendUserTypingEvent).toHaveBeenCalledWith('channel-id', 'root-id');
         });
 
         it('should handle missing client', async () => {
             jest.mocked(WebsocketManager.getClient).mockReturnValue(undefined);
-            await userTyping(serverUrl, 'channel-id');
+            await userTyping('typing', 'channel-id', 'root-id');
 
             // Should not throw
         });

@@ -1183,7 +1183,7 @@ export async function deletePersistedPosts(serverUrl: string, channelId: string,
                 p.message = '';
                 p.messageSource = '';
                 p.metadata = null;
-                p.props = undefined;
+                p.props = null;
             });
 
             if (model) {

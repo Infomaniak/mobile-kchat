@@ -176,8 +176,8 @@ export async function handleCustomProfileAttributesValuesUpdatedEvent(serverUrl:
 
         const {user_id, values} = msg.data;
         const attributesForDatabase = Object.entries(values).map(([fieldId, value]) => ({
-            id: customProfileAttributeId(fieldId, user_id),
-            field_id: fieldId,
+            id: customProfileAttributeId(fieldId as string, user_id),
+            field_id: fieldId as string,
             user_id,
             value: value as string,
         }));

@@ -11,7 +11,6 @@ import {getChannelTimezones} from '@actions/remote/channel';
 import {executeCommand, handleGotoLocation} from '@actions/remote/command';
 import {createPost} from '@actions/remote/post';
 import {createScheduledPost} from '@actions/remote/scheduled_post';
-import {handleCallsSlashCommand} from '@calls/actions';
 import {Events, Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import DatabaseManager from '@database/manager';
@@ -266,55 +265,6 @@ describe('useHandleSendMessage', () => {
             'Command failed',
         );
         expect(defaultProps.clearDraft).not.toHaveBeenCalled();
-    });
-
-    it('should handle call command', async () => {
-        const mockHandleCallsSlashCommand = jest.mocked(handleCallsSlashCommand);
-        mockHandleCallsSlashCommand.mockResolvedValueOnce({handled: true});
-
-        const props = {
-            ...defaultProps,
-            value: '/call start',
-        };
-
-        const {result} = renderHook(() => useHandleSendMessage(props), {wrapper});
-
-        await act(async () => {
-            result.current.handleSendMessage();
-        });
-
-        expect(handleCallsSlashCommand).toHaveBeenCalledWith(
-            '/call start',
-            'https://server.com',
-            'channel-id',
-            'O',
-            '',
-            'current-user',
-            expect.anything(),
-        );
-        expect(defaultProps.clearDraft).toHaveBeenCalled();
-    });
-
-    it('should handle call command error', async () => {
-        const mockHandleCallsSlashCommand = jest.mocked(handleCallsSlashCommand);
-        mockHandleCallsSlashCommand.mockResolvedValueOnce({handled: false, error: 'Call error'});
-
-        const props = {
-            ...defaultProps,
-            value: '/call invalid',
-        };
-
-        const {result} = renderHook(() => useHandleSendMessage(props), {wrapper});
-
-        await act(async () => {
-            result.current.handleSendMessage();
-        });
-
-        expect(handleCallsSlashCommand).toHaveBeenCalled();
-        expect(DraftUtils.alertSlashCommandFailed).toHaveBeenCalledWith(
-            expect.anything(),
-            'Call error',
-        );
     });
 
     it('should handle status command for out-of-office user', async () => {

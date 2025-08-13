@@ -34,6 +34,7 @@ export type AddMemberPostProps = {
     not_in_channel_usernames?: string[];
     user_ids?: string[];
     usernames?: string[];
+    original_post_id?: string;
 }
 
 export function isAddMemberProps(v: unknown): v is AddMemberPostProps {
@@ -106,6 +107,7 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
     const noGroupsUsernames = post.props.add_channel_member.not_in_groups_usernames || [];
     const userIds = post.props.add_channel_member.not_in_channel_user_ids || post.props.add_channel_member.user_ids || [];
     const usernames = post.props.add_channel_member.not_in_channel_usernames || post.props.add_channel_member?.usernames || [];
+    const originalPostId = post.props.add_channel_member.original_post_id || '';
 
     if (!postId || !channelType) {
         return null;
@@ -136,7 +138,7 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
 
     const handleNotifyChannelMember = async () => {
         if (post && post.channelId && currentUser) {
-            notifyChannelMember(serverUrl, post.channelId, userIds, post.props.add_channel_member.original_post_id);
+            notifyChannelMember(serverUrl, post.channelId, userIds, originalPostId);
             removePost(serverUrl, post);
         }
     };

@@ -46,9 +46,7 @@ describe('WebSocket Category Actions', () => {
 
             const msg = {
                 data: {
-                    category: JSON.stringify(mockCategory),
-                },
-                broadcast: {
+                    category: mockCategory,
                     team_id: teamId,
                 },
             } as WebsocketCategoriesMessage;
@@ -61,9 +59,7 @@ describe('WebSocket Category Actions', () => {
         it('should handle invalid JSON in category data', async () => {
             const msg = {
                 data: {
-                    category: 'invalid-json',
-                },
-                broadcast: {
+                    category: {},
                     team_id: teamId,
                 },
             } as WebsocketCategoriesMessage;
@@ -76,9 +72,9 @@ describe('WebSocket Category Actions', () => {
         it('should handle invalid JSON in category data - no team id', async () => {
             const msg = {
                 data: {
-                    category: 'invalid-json',
+                    category: {},
+                    team_id: teamId,
                 },
-                broadcast: {},
             } as WebsocketCategoriesMessage;
 
             await handleCategoryCreatedEvent(serverUrl, msg);
@@ -88,8 +84,8 @@ describe('WebSocket Category Actions', () => {
 
         it('should handle missing category data', async () => {
             const msg = {
-                data: {},
-                broadcast: {
+                data: {
+                    category: {},
                     team_id: teamId,
                 },
             } as WebsocketCategoriesMessage;
@@ -110,9 +106,7 @@ describe('WebSocket Category Actions', () => {
 
             const msg = {
                 data: {
-                    updatedCategories: JSON.stringify(mockCategories),
-                },
-                broadcast: {
+                    updatedCategories: mockCategories,
                     team_id: teamId,
                 },
             } as WebsocketCategoriesMessage;
@@ -125,9 +119,7 @@ describe('WebSocket Category Actions', () => {
         it('should handle invalid JSON in updated categories', async () => {
             const msg = {
                 data: {
-                    updatedCategories: 'invalid-json',
-                },
-                broadcast: {
+                    updatedCategories: {},
                     team_id: teamId,
                 },
             } as WebsocketCategoriesMessage;
@@ -140,9 +132,8 @@ describe('WebSocket Category Actions', () => {
         it('should handle invalid JSON in updated categories - no team id', async () => {
             const msg = {
                 data: {
-                    updatedCategories: 'invalid-json',
+                    updatedCategories: {},
                 },
-                broadcast: {},
             } as WebsocketCategoriesMessage;
 
             await handleCategoryUpdatedEvent(serverUrl, msg);
@@ -152,8 +143,7 @@ describe('WebSocket Category Actions', () => {
 
         it('should handle missing updated categories data', async () => {
             const msg = {
-                data: {},
-                broadcast: {
+                data: {
                     team_id: teamId,
                 },
             } as WebsocketCategoriesMessage;
@@ -169,8 +159,6 @@ describe('WebSocket Category Actions', () => {
             const msg = {
                 data: {
                     category_id: categoryId,
-                },
-                broadcast: {
                     team_id: teamId,
                 },
             } as WebsocketCategoriesMessage;
@@ -183,8 +171,7 @@ describe('WebSocket Category Actions', () => {
 
         it('should handle missing category_id', async () => {
             const msg = {
-                data: {},
-                broadcast: {
+                data: {
                     team_id: teamId,
                 },
             } as WebsocketCategoriesMessage;
@@ -227,9 +214,6 @@ describe('WebSocket Category Actions', () => {
                     order: ['cat1', 'cat2'],
                     team_id: teamId,
                 },
-                broadcast: {
-                    team_id: teamId,
-                },
             } as WebsocketCategoriesMessage;
 
             await handleCategoryOrderUpdatedEvent(serverUrl, msg);
@@ -243,9 +227,6 @@ describe('WebSocket Category Actions', () => {
         it('should handle missing order data', async () => {
             const msg = {
                 data: {
-                    team_id: teamId,
-                },
-                broadcast: {
                     team_id: teamId,
                 },
             } as WebsocketCategoriesMessage;
@@ -265,9 +246,6 @@ describe('WebSocket Category Actions', () => {
                     order: ['cat1', 'cat2'],
                     team_id: teamId,
                 },
-                broadcast: {
-                    team_id: teamId,
-                },
             } as WebsocketCategoriesMessage;
 
             await handleCategoryOrderUpdatedEvent(serverUrl, msg);
@@ -285,7 +263,6 @@ describe('WebSocket Category Actions', () => {
                     order: ['cat1', 'cat2'],
                     team_id: teamId,
                 },
-                broadcast: {},
             } as WebsocketCategoriesMessage;
 
             await handleCategoryOrderUpdatedEvent(serverUrl, msg);
