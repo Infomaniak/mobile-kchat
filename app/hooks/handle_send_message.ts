@@ -13,6 +13,7 @@ import {handleReactionToLatestPost} from '@actions/remote/reactions';
 import {createScheduledPost} from '@actions/remote/scheduled_post';
 import {setStatus} from '@actions/remote/user';
 import {Events, Screens} from '@constants';
+import {PostTypes} from '@constants/post';
 import {NOTIFY_ALL_MEMBERS} from '@constants/post_draft';
 import {MESSAGE_TYPE, SNACK_BAR_TYPE} from '@constants/snack_bar';
 import {useServerUrl} from '@context/server';
@@ -113,6 +114,7 @@ export const useHandleSendMessage = ({
             channel_id: channelId,
             root_id: rootId,
             message: value,
+            type: (files[0]?.is_voice_recording ? PostTypes.VOICE_MESSAGE : '') as PostType,
         } as Post;
 
         if (!rootId && (
