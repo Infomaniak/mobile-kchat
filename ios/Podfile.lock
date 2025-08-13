@@ -1445,6 +1445,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - react-native-color-matrix-image-filters (6.0.9):
+    - React-Core
   - react-native-cookies (6.2.1):
     - React-Core
   - react-native-document-picker (9.3.1):
@@ -1936,7 +1938,7 @@ PODS:
   - RNAudioRecorderPlayer (3.6.14):
     - React-Core
   - RNCalendarEvents (2.2.0):
-    - React
+    - React-Core
   - RNCAsyncStorage (1.23.1):
     - React-Core
   - RNCClipboard (1.14.3):
@@ -2368,6 +2370,7 @@ DEPENDENCIES:
   - react-native-app-auth (from `../node_modules/react-native-app-auth`)
   - react-native-background-timer (from `../node_modules/react-native-background-timer`)
   - "react-native-cameraroll (from `../node_modules/@react-native-camera-roll/camera-roll`)"
+  - react-native-color-matrix-image-filters (from `../node_modules/react-native-color-matrix-image-filters`)
   - "react-native-cookies (from `../node_modules/@react-native-cookies/cookies`)"
   - react-native-document-picker (from `../node_modules/react-native-document-picker`)
   - "react-native-emm (from `../node_modules/@mattermost/react-native-emm`)"
@@ -2586,6 +2589,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-background-timer"
   react-native-cameraroll:
     :path: "../node_modules/@react-native-camera-roll/camera-roll"
+  react-native-color-matrix-image-filters:
+    :path: "../node_modules/react-native-color-matrix-image-filters"
   react-native-cookies:
     :path: "../node_modules/@react-native-cookies/cookies"
   react-native-document-picker:
@@ -2819,6 +2824,7 @@ SPEC CHECKSUMS:
   react-native-app-auth: 5bf64c0d0e7cbea8ff6ea0b90e4397c8dcfc656a
   react-native-background-timer: 4638ae3bee00320753647900b21260b10587b6f7
   react-native-cameraroll: f7d99b82c16a87733aa6a30ccffa77dc4dae8ce1
+  react-native-color-matrix-image-filters: ac6b7d1f964e4d158d183c1cf71b6a26e9a0c339
   react-native-cookies: d648ab7025833b977c0b19e142503034f5f29411
   react-native-document-picker: ada96d0eb08d8b537d12dd015aeb62809afd14a7
   react-native-emm: 85823a9301472aa1c66fa6b810391867a2ff53d3
@@ -2868,7 +2874,7 @@ SPEC CHECKSUMS:
   ReactNativeIncallManager: ef7b845e166f04cf8ddf433d8a23227b01cef87a
   ReactNativeNavigation: 6cef83673a08a51d426ff041c015da7c2a178a77
   RNAudioRecorderPlayer: b5ed41ccfe72a211a870bfe09ab36c046eb27d2a
-  RNCalendarEvents: f90f73666b6bcbb3cc8a491ffbb5e48c0db3de37
+  RNCalendarEvents: 62e1ac89d3afbfa77cf2dafa8727af93fa70825f
   RNCAsyncStorage: aa75595c1aefa18f868452091fa0c411a516ce11
   RNCClipboard: 7c3e3b5f71d84ef61690ad377b6c50cf27864ff5
   RNDateTimePicker: 29264364ea7b8cc0fb355b3843cf276a4ff78966
