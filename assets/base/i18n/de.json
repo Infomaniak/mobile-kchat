@@ -385,6 +385,7 @@
   "infomaniak.size_quota_exceeded.description": "Ihr Speicherplatz ist voll. Abonnieren Sie ein höheres Angebot, um weiterhin Dateien zu versenden.",
   "infomaniak.size_quota_exceeded.title": "Erhöhen Sie den Speicherplatz in Ihrer kSuite",
   "infomaniak.post.reminder.postpone": "Erinnerung verschieben",
+  "infomaniak.post.reminder.completed": "In Ordnung, ich habe die Erinnerung für {link} als abgeschlossen markiert!",
   "infomaniak.post.reminder.markAsCompleted": "Als erledigt markieren",
   "infomaniak.post.reminder.systemBot": "Hallo, hier ist Ihre Erinnerung an diese Nachricht von {username}:\n{permaLink}",
   "infomaniak.post.reminder.systemBot.today": "um {time}",

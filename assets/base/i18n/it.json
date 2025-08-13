@@ -1028,6 +1028,7 @@
   "infomaniak.post_info.post_reminder.sub_menu.monday": "Lunedì",
   "infomaniak.post_info.post_reminder.sub_menu.custom": "Personalizzato",
   "infomaniak.post.reminder.postpone": "Rimanda il promemoria",
+  "infomaniak.post.reminder.completed": "Bene, ho segnato il promemoria per {link} come completato!",
   "infomaniak.post.reminder.markAsCompleted": "Segna come completato",
   "infomaniak.post.reminder.systemBot.today": "alle {time}",
   "infomaniak.post.reminder.systemBot.tomorrow": "domani alle {time}",

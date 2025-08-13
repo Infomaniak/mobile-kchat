@@ -1211,6 +1211,7 @@
   "infomaniak.post_info.post_reminder.sub_menu.monday": "Lundi",
   "infomaniak.post_info.post_reminder.sub_menu.custom": "Personnalisé",
   "infomaniak.post.reminder.postpone": "Différer le rappel",
+  "infomaniak.post.reminder.completed": "Très bien, j'ai marqué le rappel pour {link} comme terminé !",
   "infomaniak.post.reminder.markAsCompleted": "Marquer comme terminé",
   "infomaniak.post.reminder.systemBot": "Bonjour, voici votre rappel concernant ce message de {username} :\n{permaLink}",
   "infomaniak.post.reminder.systemBot.today": "à {time}",

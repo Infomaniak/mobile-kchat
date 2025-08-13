@@ -1040,6 +1040,7 @@
   "infomaniak.post_info.post_reminder.sub_menu.monday": "Lunes",
   "infomaniak.post_info.post_reminder.sub_menu.custom": "Personalizar",
   "infomaniak.post.reminder.postpone": "Posponer el recordatorio",
+  "infomaniak.post.reminder.completed": "¡Muy bien, he marcado el recordatorio para {link} como completado!",
   "infomaniak.post.reminder.markAsCompleted": "Marcar como completado",
   "infomaniak.post.reminder.systemBot": "Hola, aquí tienes un recordatorio sobre este mensaje de {username}: {permaLink}",
   "infomaniak.post.reminder.systemBot.today": "a las {time}",
