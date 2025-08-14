@@ -39,7 +39,12 @@ type FileProps = {
     showDate?: boolean;
     updateFileForGallery: (idx: number, file: FileInfo) => void;
     asCard?: boolean;
+
+    // ik: to be able to bubble click up
     isPressDisabled?: boolean;
+
+    // ik: to be able to not show preview
+    disablePreview?: boolean;
 };
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -89,6 +94,7 @@ const File = ({
     updateFileForGallery,
     wrapperWidth = 300,
     isPressDisabled = false,
+    disablePreview = false,
 }: FileProps) => {
     const document = useRef<DocumentRef>(null);
     const theme = useTheme();
@@ -247,7 +253,9 @@ const File = ({
         );
 
         fileComponent = asCard ? renderCardWithImage(touchableWithPreview) : renderAudioFile;
-    } else {
+    }
+
+    if (disablePreview || !fileComponent) {
         fileComponent = renderCardWithImage(touchableWithPreview);
     }
     return fileComponent;

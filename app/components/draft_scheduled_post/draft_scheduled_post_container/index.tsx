@@ -66,6 +66,7 @@ const DraftAndScheduledPostContainer: React.FC<Props> = ({
                     location={location}
                     layoutWidth={layoutWidth}
                     isPressDisabled={true}
+                    disablePreview={true} // ik: we don't want to show preview in here
                 />
             }
         </View>

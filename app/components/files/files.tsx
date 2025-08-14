@@ -26,7 +26,12 @@ type FilesProps = {
     isReplyPost: boolean;
     postId?: string;
     postProps?: Record<string, unknown>;
+
+    // ik: to be able to bubble click up
     isPressDisabled?: boolean;
+
+    // ik: to be able to not show preview
+    disablePreview?: boolean;
 }
 
 const MAX_VISIBLE_ROW_IMAGES = 4;
@@ -61,6 +66,7 @@ const Files = ({
     postId,
     postProps,
     isPressDisabled,
+    disablePreview = false,
 }: FilesProps) => {
     const galleryIdentifier = `${postId}-fileAttachments-${location}`;
     const [inViewPort, setInViewPort] = useState(false);
@@ -114,12 +120,13 @@ const Files = ({
                         file={file}
                         index={attachmentIndex(file.id!)}
                         onPress={handlePreviewPress}
-                        isPressDisabled={isPressDisabled}
                         isSingleImage={isSingleImage}
                         nonVisibleImagesCount={nonVisibleImagesCount}
                         updateFileForGallery={updateFileForGallery}
                         wrapperWidth={layoutWidth || wrapperWidth}
                         inViewPort={inViewPort}
+                        isPressDisabled={isPressDisabled}
+                        disablePreview={disablePreview}
                     />
                 </View>
             );
@@ -169,8 +176,8 @@ const Files = ({
                 testID='files-container'
                 style={failed ? styles.failed : undefined}
             >
-                {renderImageRow()}
-                {renderItems(nonImageAttachments)}
+                {!disablePreview && renderImageRow()}
+                {renderItems(disablePreview ? filesInfo : nonImageAttachments)}
             </Animated.View>
         </GalleryInit>
     );
