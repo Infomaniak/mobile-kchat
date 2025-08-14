@@ -3,8 +3,9 @@
 
 import {useKeepAwake} from 'expo-keep-awake';
 import React, {useCallback, useEffect, useState} from 'react';
-import {TouchableOpacity, View} from 'react-native';
+import {Platform, TouchableOpacity, View} from 'react-native';
 import AudioRecorderPlayer, {AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption, AudioEncoderAndroidType, AudioSourceAndroidType, OutputFormatAndroidType, type AudioSet} from 'react-native-audio-recorder-player';
+import RNFS from 'react-native-fs';
 
 import CompassIcon from '@components/compass_icon';
 import {MIC_SIZE} from '@constants/view';
@@ -82,13 +83,13 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
             const audioRecorderPlayer = new AudioRecorderPlayer();
 
             const audioSet: AudioSet = {
+
+                // Android
                 AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
-
-                // Ik: Use AAC_ADTS to generate a pure .aac audio file instead of a .mp4 container,
-                // ensuring the backend correctly detects it as audio (not video) via first bytes.
-                OutputFormatAndroid: OutputFormatAndroidType.AAC_ADTS,
-
+                OutputFormatAndroid: OutputFormatAndroidType.MPEG_4,
                 AudioSourceAndroid: AudioSourceAndroidType.MIC,
+
+                // iOS
                 AVModeIOS: AVModeIOSOption.measurement,
                 AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
                 AVNumberOfChannelsKeyIOS: 2,

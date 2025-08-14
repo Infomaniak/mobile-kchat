@@ -65,6 +65,7 @@ const DraftAndScheduledPostContainer: React.FC<Props> = ({
                     isReplyPost={false}
                     location={location}
                     layoutWidth={layoutWidth}
+                    isPressDisabled={true}
                 />
             }
         </View>

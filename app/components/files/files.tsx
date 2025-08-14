@@ -26,6 +26,7 @@ type FilesProps = {
     isReplyPost: boolean;
     postId?: string;
     postProps?: Record<string, unknown>;
+    isPressDisabled?: boolean;
 }
 
 const MAX_VISIBLE_ROW_IMAGES = 4;
@@ -59,6 +60,7 @@ const Files = ({
     location,
     postId,
     postProps,
+    isPressDisabled,
 }: FilesProps) => {
     const galleryIdentifier = `${postId}-fileAttachments-${location}`;
     const [inViewPort, setInViewPort] = useState(false);
@@ -112,6 +114,7 @@ const Files = ({
                         file={file}
                         index={attachmentIndex(file.id!)}
                         onPress={handlePreviewPress}
+                        isPressDisabled={isPressDisabled}
                         isSingleImage={isSingleImage}
                         nonVisibleImagesCount={nonVisibleImagesCount}
                         updateFileForGallery={updateFileForGallery}
