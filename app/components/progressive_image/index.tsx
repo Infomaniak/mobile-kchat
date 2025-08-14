@@ -11,8 +11,6 @@ import {useTheme} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
-// TODO UPSTREAM : check loading state ??
-
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 type Props = ProgressiveImageProps & {

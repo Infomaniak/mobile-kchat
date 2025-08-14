@@ -345,8 +345,6 @@ const PostList = ({
         }
     }, [appsEnabled, currentTimezone, currentUsername, customEmojiNames, highlightPinnedOrSaved, highlightedId, isCRTEnabled, isPostAcknowledgementEnabled, location, rootId, shouldRenderReplyButton, shouldShowJoinLeaveMessages, testID, theme]);
 
-    // TODO UPSTREAM : scroll is ok ?
-
     useEffect(() => {
         const t = setTimeout(() => {
             if (highlightedId && orderedPosts && !scrolledToHighlighted.current) {

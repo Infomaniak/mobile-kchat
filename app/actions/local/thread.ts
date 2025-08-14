@@ -313,7 +313,6 @@ export async function updateThread(serverUrl: string, threadId: string, updatedT
     } catch (error) {
         let logger = logError;
 
-        // TODO upstream Que faire de cette erreur qui pop tout le temps ?
         if (__DEV__) {
             logger = logDebug;
         }

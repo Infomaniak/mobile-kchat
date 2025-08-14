@@ -1,8 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-// TODO UPSTREAM : all incoming picked, check !
-
 import React, {useCallback, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, type LayoutChangeEvent, Platform, ScrollView, View} from 'react-native';
