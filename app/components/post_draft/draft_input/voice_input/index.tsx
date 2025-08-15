@@ -3,9 +3,8 @@
 
 import {useKeepAwake} from 'expo-keep-awake';
 import React, {useCallback, useEffect, useState} from 'react';
-import {Platform, TouchableOpacity, View} from 'react-native';
+import {TouchableOpacity, View} from 'react-native';
 import AudioRecorderPlayer, {AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption, AudioEncoderAndroidType, AudioSourceAndroidType, OutputFormatAndroidType, type AudioSet} from 'react-native-audio-recorder-player';
-import RNFS from 'react-native-fs';
 
 import CompassIcon from '@components/compass_icon';
 import {MIC_SIZE} from '@constants/view';

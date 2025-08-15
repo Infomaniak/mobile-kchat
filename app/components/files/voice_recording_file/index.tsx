@@ -65,10 +65,11 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
     };
 });
 
-const VoiceRecordingFile = ({file, uploading}: Props) => {
+const VoiceRecordingFile = ({uploading}: Props) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
-    const isVoiceMessage = file.is_voice_recording;
+
+    // const isVoiceMessage = file.is_voice_recording;
 
     const getUploadingView = useCallback(() => {
         return (
