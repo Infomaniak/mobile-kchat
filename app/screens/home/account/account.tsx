@@ -29,6 +29,10 @@ const edges: Edge[] = ['left', 'right'];
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
+        container: {
+            flex: 1,
+            backgroundColor: theme.sidebarBg,
+        },
         flex: {
             flex: 1,
         },
@@ -112,27 +116,27 @@ const AccountScreen = ({currentUser, enableCustomUserStatuses, showFullName}: Ac
 
     return (
         <Freeze freeze={!isFocused}>
-            <SafeAreaView
-                edges={edges}
-                style={styles.flex}
-                testID='account.screen'
+        <SafeAreaView
+            edges={edges}
+            style={styles.container}
+            testID='account.screen'
+        >
+            <View style={[{height: insets.top, flexDirection: 'row'}]}>
+                <View style={[styles.container, tabletSidebarStyle]}/>
+                {isTablet && <View style={styles.tabletContainer}/>}
+            </View>
+            <Animated.View
+                onLayout={onLayout}
+                style={[styles.flexRow, animated]}
             >
-                <View style={[{height: insets.top, flexDirection: 'row'}]}>
-                    <View style={[styles.flex, tabletSidebarStyle]}/>
-                    {isTablet && <View style={styles.tabletContainer}/>}
+                {content}
+                {isTablet &&
+                <View style={[styles.tabletContainer, styles.tabletDivider]}>
+                    <AccountTabletView/>
                 </View>
-                <Animated.View
-                    onLayout={onLayout}
-                    style={[styles.flexRow, animated]}
-                >
-                    {content}
-                    {isTablet &&
-                    <View style={[styles.tabletContainer, styles.tabletDivider]}>
-                        <AccountTabletView/>
-                    </View>
-                    }
-                </Animated.View>
-            </SafeAreaView>
+                }
+            </Animated.View>
+        </SafeAreaView>
         </Freeze>
     );
 };

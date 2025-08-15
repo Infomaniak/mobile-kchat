@@ -2,9 +2,9 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useState} from 'react';
-import {type LayoutChangeEvent, StyleSheet, View} from 'react-native';
+import {type LayoutChangeEvent, StatusBar, StyleSheet, View} from 'react-native';
 import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
-
+import tinyColor from 'tinycolor2';
 import {storeLastViewedChannelIdAndServer, removeLastViewedChannelIdAndServer} from '@actions/app/global';
 import FreezeScreen from '@components/freeze_screen';
 import PostDraft from '@components/post_draft';
@@ -28,6 +28,8 @@ import useGMasDMNotice from './use_gm_as_dm_notice';
 
 import type PreferenceModel from '@typings/database/models/servers/preference';
 import type {AvailableScreens} from '@typings/screens/navigation';
+import { makeStyleSheetFromTheme } from '@utils/theme';
+import { useTheme } from '@context/theme';
 
 type ChannelProps = {
     channelId: string;
@@ -44,13 +46,15 @@ type ChannelProps = {
     scheduledPostCount: number;
 };
 
-const edges: Edge[] = ['left', 'right'];
+const edges: Edge[] = ['left', 'right', 'top'];
 
-const styles = StyleSheet.create({
-    flex: {
+const getStyleSheet =  makeStyleSheetFromTheme((theme: Theme) => {
+    return {
+    container: {
         flex: 1,
+        backgroundColor: theme.centerChannelBg,
     },
-});
+}});
 
 const Channel = ({
     channelId,
@@ -63,7 +67,6 @@ const Channel = ({
     currentUserId,
     hasGMasDMFeature,
 
-    // includeBookmarkBar,
     includeChannelBanner,
     scheduledPostCount,
 }: ChannelProps) => {
@@ -80,6 +83,11 @@ const Channel = ({
     const handleBack = useCallback(() => {
         popTopScreen(componentId);
     }, [componentId]);
+
+    const theme = useTheme();
+    const styles = getStyleSheet(theme);
+    const isDark = tinyColor(theme.centerChannelBg).isDark();
+    StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
 
     useAndroidHardwareBackHandler(componentId, handleBack);
 
@@ -117,7 +125,7 @@ const Channel = ({
     return (
         <FreezeScreen>
             <SafeAreaView
-                style={styles.flex}
+                style={styles.container}
                 mode='margin'
                 edges={edges}
                 testID='channel.screen'
@@ -135,7 +143,7 @@ const Channel = ({
                 />
                 {shouldRender &&
                 <ExtraKeyboardProvider>
-                    <View style={[styles.flex, {marginTop}]}>
+                    <View style={[styles.container, {marginTop}]}>
                         <ChannelPostList
                             channelId={channelId}
                             nativeID={channelId}

@@ -189,37 +189,40 @@ export const bottomSheetModalOptions = (theme: Theme, closeButtonId?: string): O
 // This locks phones to portrait for all screens while keeps
 // all orientations available for Tablets.
 Navigation.setDefaultOptions({
-    animations: {
-        setRoot: {
-            enter: {
-                waitForRender: true,
-                enabled: true,
+  animations: {
+    setRoot: {
+      enter: {
+        waitForRender: true,
+        enabled: true,
                 alpha: {
                     from: 0,
                     to: 1,
                     duration: 300,
                 },
-            },
-        },
+      },
     },
-    layout: {
-        orientation: isTablet() ? allOrientations : portraitOrientation,
+  },
+  layout: {
+    orientation: isTablet() ? allOrientations : portraitOrientation,
+  },
+  statusBar: {
+    drawBehind: true,
+  },
+  topBar: {
+    title: {
+      fontFamily: 'SuisseIntl-SemiBold',
+      fontSize: 18,
+      fontWeight: '600',
     },
-    topBar: {
-        title: {
-            fontFamily: 'SuisseIntl-SemiBold',
-            fontSize: 18,
-            fontWeight: '600',
-        },
-        backButton: {
-            enableMenu: false,
-        },
-        subtitle: {
-            fontFamily: 'SuisseIntl-Regular',
-            fontSize: 12,
-            fontWeight: '400',
-        },
+    backButton: {
+      enableMenu: false,
     },
+    subtitle: {
+      fontFamily: 'SuisseIntl-Regular',
+      fontSize: 12,
+      fontWeight: '400',
+    },
+  },
 });
 
 Appearance.addChangeListener(() => {
