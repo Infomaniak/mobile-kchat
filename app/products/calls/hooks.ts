@@ -3,23 +3,25 @@
 
 // Check if calls is enabled. If it is, then run fn; if it isn't, show an alert and set
 // msgPostfix to ' (Not Available)'.
-import {useEffect, useState} from 'react';
-import {Platform} from 'react-native';
-import Permissions from 'react-native-permissions';
+import {useEffect} from 'react';
 
-import {setMicPermissionsGranted} from '@calls/state';
+// import {Platform} from 'react-native';
+// import Permissions from 'react-native-permissions';
+
+// import {setMicPermissionsGranted} from '@calls/state';
 import {useAppState} from '@hooks/device';
 
 // import { initializeVoiceTrack } from './actions';
 
-const micPermission = Platform.select({
-    ios: Permissions.PERMISSIONS.IOS.MICROPHONE,
-    default: Permissions.PERMISSIONS.ANDROID.RECORD_AUDIO,
-});
+// const micPermission = Platform.select({
+//     ios: Permissions.PERMISSIONS.IOS.MICROPHONE,
+//     default: Permissions.PERMISSIONS.ANDROID.RECORD_AUDIO,
+// });
 
 export const usePermissionsChecker = (micPermissionsGranted: boolean) => {
     const appState = useAppState();
-    const [hasPermission, setHasPermission] = useState(micPermissionsGranted);
+
+    // const [hasPermission, setHasPermission] = useState(micPermissionsGranted);
 
     useEffect(() => {
         // const asyncFn = async () => {
@@ -37,5 +39,5 @@ export const usePermissionsChecker = (micPermissionsGranted: boolean) => {
         // }
     }, [appState]);
 
-    return hasPermission;
+    return micPermissionsGranted;
 };

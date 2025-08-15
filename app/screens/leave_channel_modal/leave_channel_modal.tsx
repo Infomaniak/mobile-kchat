@@ -13,6 +13,7 @@ import Loading from '@components/loading';
 import Search from '@components/search';
 import SelectedUsers from '@components/selected_users';
 import ServerUserList from '@components/server_user_list';
+import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
@@ -281,6 +282,7 @@ export default function LeaveChannelModal({
                 searchFunction={userSearchFunction}
                 createFilter={createUserFilter}
                 loadUsers={true}
+                location={Screens.LEAVE_CHANNEL_MEMBERS}
             />
             <SelectedUsers
                 keyboardOverlap={keyboardOverlap}

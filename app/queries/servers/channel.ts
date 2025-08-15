@@ -465,9 +465,9 @@ export async function deleteChannelMembership(operator: ServerDataOperator, user
     }
 }
 
-export const addChannelMembership = async (operator: ServerDataOperator, channelMembership: ChannelMembership) => {
+export const addChannelMembership = async (operator: ServerDataOperator, userId: string, channelId: string) => {
     try {
-        await operator.handleChannelMembership({channelMemberships: [channelMembership], prepareRecordsOnly: false});
+        await operator.handleChannelMembership({channelMemberships: [{channel_id: channelId, user_id: userId}], prepareRecordsOnly: false});
         return {};
     } catch (error) {
         return {error};

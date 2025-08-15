@@ -54,6 +54,7 @@ type ChannelProps = {
     groupCallsAllowed?: boolean;
     isPlaybooksEnabled?: boolean;
     activeRunId?: string;
+
     // searchTerm: string;
 };
 

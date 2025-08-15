@@ -243,6 +243,7 @@ describe('*** Operator: Post Handlers tests ***', () => {
                         height: 10,
                         has_preview_image: false,
                         clientId: 'clientId',
+                        transcript: '',
                     },
                 ],
                 message: 'test draft message for post',

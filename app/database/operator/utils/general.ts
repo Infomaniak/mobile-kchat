@@ -126,7 +126,7 @@ export const prepareDestroyPermanentlyChildrenAssociatedRecords = async (records
                 const child = associated as HasManyAssociation; // this is a guard as we know that we are in a has_many association
                 const relatedRecords = await retrieveRecords({
                     database: groupedRecords[0].database,
-                    tableName: associationName,
+                    tableName: String(associationName),
                     condition: Q.where(child.foreignKey, Q.oneOf(groupedRecords.map((r) => r.id))),
                 });
 

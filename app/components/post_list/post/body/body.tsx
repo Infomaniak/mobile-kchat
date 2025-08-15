@@ -23,6 +23,7 @@ import Reactions from './reactions';
 
 import type PostModel from '@typings/database/models/servers/post';
 import type {SearchPattern} from '@typings/global/markdown';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
 type BodyProps = {
     appsEnabled: boolean;
@@ -38,7 +39,7 @@ type BodyProps = {
     isPendingOrFailed: boolean;
     isPostAcknowledgementEnabled?: boolean;
     isPostAddChannelMember: boolean;
-    location: string;
+    location: AvailableScreens;
     post: PostModel;
     searchPatterns?: SearchPattern[];
     showAddReaction?: boolean;
@@ -116,7 +117,7 @@ const Body = ({
     let message;
 
     const isReplyPost = Boolean(post.rootId && (!isEphemeral || !hasBeenDeleted) && location !== THREAD);
-    const hasContent = (post.metadata?.embeds?.length || (appsEnabled && post.props?.app_bindings?.length)) || post.props?.attachments?.length;
+    const hasContent = (post.metadata?.embeds?.length || (appsEnabled && Array.isArray(post.props?.app_bindings) && post.props?.app_bindings?.length)) || (Array.isArray(post.props?.attachments) && post.props?.attachments?.length);
 
     const replyBarStyle = useCallback((): StyleProp<ViewStyle> | undefined => {
         if (!isReplyPost || (isCRTEnabled && location === Screens.PERMALINK)) {

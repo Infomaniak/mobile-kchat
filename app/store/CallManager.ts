@@ -22,19 +22,19 @@ export const CallAnsweredEvent = z.object({
     channelId: z.string().uuid(),
     conferenceJWT: z.string().min(1),
 });
-export type CallAnsweredEvent = z.infer<typeof CallAnsweredEvent>;
+export type CallAnsweredEventData = z.infer<typeof CallAnsweredEvent>;
 
 export const CallEndedEvent = z.object({
     serverId: z.string().uuid(),
     conferenceId: z.string().uuid(),
 });
-export type CallEndedEvent = z.infer<typeof CallEndedEvent>;
+export type CallEndedEventData = z.infer<typeof CallEndedEvent>;
 
 export const CallMutedEvent = z.object({isMuted: z.enum(['true', 'false'])});
-export type CallMutedEvent = z.infer<typeof CallMutedEvent>;
+export type CallMutedEventData = z.infer<typeof CallMutedEvent>;
 
 export const CallVideoMutedEvent = CallMutedEvent;
-export type CallVideoMutedEvent = z.infer<typeof CallVideoMutedEvent>;
+export type CallVideoMutedEventData = z.infer<typeof CallVideoMutedEvent>;
 
 class CallManager {
     /**
@@ -166,7 +166,7 @@ class CallManager {
      * if unavailable decline the call via API
      */
     leaveCallScreen = async (
-        {serverId, conferenceId}: CallEndedEvent,
+        {serverId, conferenceId}: CallEndedEventData,
         initiator: 'api' | 'internal' | 'native' = 'native',
     ): Promise<void> => {
         const leaveCall = callScreenRef.current?.leaveCall;
