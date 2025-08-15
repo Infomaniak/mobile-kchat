@@ -15,6 +15,7 @@ variables:
   - npm ci --ignore-scripts
   - npx patch-package
   - node scripts/generate-assets.js
+  - node scripts/jitsi-ts-nocheck.js
 
 # Node-specific test config
 .tests-node: &tests-node
