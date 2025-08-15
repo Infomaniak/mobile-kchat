@@ -86,8 +86,10 @@ export const fetchEmojisByName = async (serverUrl: string) => {
     }
 };
 
-const debouncedFetchEmojiByNames = debounce(fetchEmojisByName, 200, false, () => {
-    names.clear();
+const debouncedFetchEmojiByNames = debounce(fetchEmojisByName, 200, {
+    callback: () => {
+        names.clear();
+    },
 });
 
 export const fetchCustomEmojiInBatch = (serverUrl: string, emojiName: string) => {

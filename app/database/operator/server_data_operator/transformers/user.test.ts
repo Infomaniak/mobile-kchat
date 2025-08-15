@@ -39,6 +39,8 @@ describe('*** USER Prepare Records Test ***', () => {
                 record: undefined,
                 raw: {
                     id: '9ciscaqbrpd6d8s68k76xb9bte',
+                    user_id: 123,
+                    team_id: '',
                     is_bot: false,
                     create_at: 1599457495881,
                     update_at: 1607683720173,
@@ -52,6 +54,7 @@ describe('*** USER Prepare Records Test ***', () => {
                     position: 'Mobile Engineer',
                     roles: 'system_user',
                     props: {},
+                    public_picture_url: '',
                     notify_props: {
                         desktop: 'all',
                         desktop_sound: 'true',

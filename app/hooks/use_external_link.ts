@@ -47,8 +47,7 @@ export function useExternalLink(
             ...overwriteQueryParams,
             ...existingQueryParamsObj,
         };
-        parsedUrl.search = Object.entries(queryParams).map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`).join('&');
-
+        parsedUrl.search = Object.entries(queryParams).map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value || '')}`).join('&');
         return [parsedUrl.toString(), queryParams];
     }, [href, isCloud, location, overwriteQueryParams, telemetryId, userId]);
 }

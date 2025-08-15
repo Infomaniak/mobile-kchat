@@ -38,6 +38,7 @@ describe('EditPostInput', () => {
                 size: 100,
                 user_id: '1',
                 width: 100,
+                transcript: '',
             },
             {
                 id: 'file-2',
@@ -49,6 +50,7 @@ describe('EditPostInput', () => {
                 size: 100,
                 user_id: '1',
                 width: 100,
+                transcript: '',
             },
         ],
         version: '10.5.0',

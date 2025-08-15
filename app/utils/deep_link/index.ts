@@ -26,7 +26,7 @@ import {getIntlShape} from '@utils/general';
 import {logError} from '@utils/log';
 import {escapeRegex} from '@utils/markdown';
 import {addNewServer} from '@utils/server';
-import {removeProtocol} from '@utils/url';
+import {removeProtocol, stripTrailingSlashes} from '@utils/url';
 import {
     TEAM_NAME_PATH_PATTERN,
     IDENTIFIER_PATH_PATTERN,
@@ -153,6 +153,63 @@ type ConferencePathParams = {
 const CONFERENCE_PATH = `:serverUrl(.*)/channels/:channelId(${IDENTIFIER_PATH_PATTERN})/conference(\\?conference_jwt=.+)?`;
 export const matchConferenceDeeplink = match<ConferencePathParams>(CONFERENCE_PATH);
 
+type ServerPathParams = {
+    serverUrl: string;
+    path: string;
+    subpath?: string[];
+}
+
+export const matchServerDeepLink = match<ServerPathParams>(':serverUrl/{:path}{/*subpath}', {decode: decodeURIComponent});
+const reservedWords = ['login', 'signup', 'admin_console'];
+
+export function extractServerUrl(url: string) {
+    const deepLinkUrl = decodeURIComponent(url).replace(/\.{2,}/g, '').replace(/\/+/g, '/');
+
+    const pattern = new RegExp(
+
+        // Match the domain, IP address, or localhost
+        '^([a-zA-Z0-9.-]+|localhost|\\d{1,3}(?:\\.\\d{1,3}){3})' +
+
+        // Match optional port
+        '(?::(\\d+))?' +
+
+        // Match path segments
+        '(?:/([a-zA-Z0-9-/_]+))?/?$',
+    );
+
+    if (!pattern.test(deepLinkUrl)) {
+        return null;
+    }
+
+    const matched = matchServerDeepLink(deepLinkUrl);
+
+    if (matched) {
+        const {path, subpath} = matched.params;
+
+        let extra = '';
+
+        if (!path || reservedWords.includes(path)) {
+            return stripTrailingSlashes(matched.params.serverUrl);
+        }
+
+        if (subpath && subpath.length > 0) {
+            if (reservedWords.includes(subpath[subpath.length - 1])) {
+                subpath.pop();
+            }
+
+            extra = subpath.join('/');
+        }
+
+        if (extra) {
+            return stripTrailingSlashes(`${matched.params.serverUrl}/${path}/${extra}`);
+        }
+
+        return stripTrailingSlashes(`${matched.params.serverUrl}/${path}`);
+    }
+
+    return deepLinkUrl;
+}
+
 function isValidTeamName(teamName: string): boolean {
     const regex = new RegExp(`^${TEAM_NAME_PATH_PATTERN}$`);
     return regex.test(teamName);
@@ -168,7 +225,7 @@ function isValidPostId(id: string): boolean {
     return regex.test(id);
 }
 
-export function parseDeepLink(deepLinkUrl: string): DeepLinkWithData {
+export function parseDeepLink(deepLinkUrl: string, asServer = false): DeepLinkWithData {
     try {
         const url = removeProtocol(deepLinkUrl);
 
@@ -193,6 +250,13 @@ export function parseDeepLink(deepLinkUrl: string): DeepLinkWithData {
         if (permalinkMatch && isValidTeamName(permalinkMatch.params.teamName) && isValidPostId(permalinkMatch.params.postId)) {
             const {params: {serverUrl, teamName, postId}} = permalinkMatch;
             return {type: DeepLink.Permalink, url: deepLinkUrl, data: {serverUrl: serverUrl.join('/'), teamName, postId}};
+        }
+
+        if (asServer) {
+            const serverMatch = extractServerUrl(url);
+            if (serverMatch) {
+                return {type: DeepLink.Server, url: deepLinkUrl, data: {serverUrl: serverMatch}};
+            }
         }
 
         const conferenceMatch = matchConferenceDeeplink(url);

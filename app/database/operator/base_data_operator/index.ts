@@ -24,7 +24,7 @@ import type {
 export interface BaseDataOperatorType {
     database: Database;
     handleRecords: <T extends Model, R extends RawValue>({buildKeyRecordBy, fieldName, transformer, createOrUpdateRawValues, deleteRawValues, tableName, prepareRecordsOnly}: HandleRecordsArgs<T, R>, description: string) => Promise<Model[]>;
-    processRecords: <T extends Model, R extends RawValue>({createOrUpdateRawValues, deleteRawValues, tableName, buildKeyRecordBy, fieldName}: ProcessRecordsArgs<R>) => Promise<ProcessRecordResults<T, R>>;
+    processRecords: <T extends Model, R extends RawValue>({createOrUpdateRawValues, deleteRawValues, tableName, buildKeyRecordBy, fieldName}: ProcessRecordsArgs<T, R>) => Promise<ProcessRecordResults<T, R>>;
     batchRecords: (models: Model[], description: string) => Promise<void>;
     prepareRecords: <T extends Model, R extends RawValue>({tableName, createRaws, deleteRaws, updateRaws, transformer}: OperationArgs<T, R>) => Promise<Model[]>;
 }
@@ -47,14 +47,14 @@ export default class BaseDataOperator {
      * @param {(existing: Model, newElement: RawValue) => boolean} inputsArg.buildKeyRecordBy
      * @returns {Promise<{ProcessRecordResults<T>}>}
      */
-    processRecords = async <T extends Model, R extends RawValue>({createOrUpdateRawValues = [], deleteRawValues = [], tableName, buildKeyRecordBy, fieldName, shouldUpdate}: ProcessRecordsArgs<R>): Promise<ProcessRecordResults<T, R>> => {
+    processRecords = async <T extends Model, R extends RawValue>({createOrUpdateRawValues = [], deleteRawValues = [], tableName, buildKeyRecordBy, fieldName, shouldUpdate}: ProcessRecordsArgs<T, R>): Promise<ProcessRecordResults<T, R>> => {
         const getRecords = async (rawValues: R[]) => {
             // We will query a table where one of its fields can match a range of values.  Hence, here we are extracting all those potential values.
             const columnValues: string[] = getRangeOfValues({fieldName, raws: rawValues});
 
             if (!columnValues.length && rawValues.length) {
                 throw new Error(
-                    `Invalid "fieldName" or "tableName" has been passed to the processRecords method for tableName ${tableName} fieldName ${fieldName}`,
+                    `Invalid "fieldName" or "tableName" has been passed to the processRecords method for tableName ${tableName} fieldName ${String(fieldName)}`,
                 );
             }
 
@@ -65,7 +65,7 @@ export default class BaseDataOperator {
             const existingRecords = await retrieveRecords<T>({
                 database: this.database,
                 tableName,
-                condition: Q.where(fieldName, Q.oneOf(columnValues)),
+                condition: Q.where(String(fieldName), Q.oneOf(columnValues)),
             });
 
             return existingRecords;
@@ -89,7 +89,7 @@ export default class BaseDataOperator {
         if (createOrUpdateRawValues.length > 0) {
             for (const newElement of createOrUpdateRawValues) {
                 const key = buildKeyRecordBy?.(newElement) || newElement[fieldName];
-                const existingRecord = recordsByKeys[key];
+                const existingRecord = recordsByKeys[String(key)];
 
                 // We found a record in the database that matches this element; hence, we'll proceed for an UPDATE operation
                 if (existingRecord) {
@@ -223,7 +223,7 @@ export default class BaseDataOperator {
             deleteRawValues,
             tableName,
             buildKeyRecordBy,
-            fieldName,
+            fieldName: fieldName as keyof R & keyof T,
             shouldUpdate,
         });
 

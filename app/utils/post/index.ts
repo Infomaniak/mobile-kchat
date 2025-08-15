@@ -22,8 +22,8 @@ export function areConsecutivePosts(post: PostModel, previousPost: PostModel) {
     let consecutive = false;
 
     if (post && previousPost) {
-        const postFromWebhook = Boolean(post?.props?.from_webhook); // eslint-disable-line camelcase
-        const prevPostFromWebhook = Boolean(previousPost?.props?.from_webhook); // eslint-disable-line camelcase
+        const postFromWebhook = Boolean(post?.props?.from_webhook);
+        const prevPostFromWebhook = Boolean(previousPost?.props?.from_webhook);
         const isFromSameUser = previousPost.userId === post.userId;
         const isNotSystemMessage = !isSystemMessage(post) && !isSystemMessage(previousPost);
         const isInTimeframe = (post.createAt - previousPost.createAt) <= Post.POST_COLLAPSE_TIMEOUT;
@@ -61,7 +61,7 @@ export function isSystemMessage(post: PostModel | Post): boolean {
 }
 
 export function isMailAttachmentMessage(post: PostModel | Post): boolean {
-    return Boolean(post.type && post.type === (Post.POST_TYPES.MAIL_ATTACHMENT)) && 'mail_attachment' in post.props;
+    return Boolean(post.type && post.type === (Post.POST_TYPES.MAIL_ATTACHMENT) && post.props && 'mail_attachment' in post.props);
 }
 
 export function fromAutoResponder(post: PostModel): boolean {

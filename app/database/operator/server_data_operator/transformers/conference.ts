@@ -17,7 +17,7 @@ const {CONFERENCE, CONFERENCE_PARTICIPANT} = MM_TABLES.SERVER;
  * @param {RecordPair} operator.value
  * @returns {Promise<ConferenceModel>}
  */
-export const transformConferenceRecord = ({action, database, value}: TransformerArgs): Promise<ConferenceModel> => {
+export const transformConferenceRecord = ({action, database, value}: TransformerArgs<ConferenceModel, Conference>): Promise<ConferenceModel> => {
     const raw = value.raw as Conference;
     const record = value.record as ConferenceModel;
     const isCreateAction = action === OperationType.CREATE;
@@ -47,7 +47,7 @@ export const transformConferenceRecord = ({action, database, value}: Transformer
  * @param {RecordPair} operator.value
  * @returns {Promise<ConferenceParticipantModel>}
  */
-export const transformConferenceParticipantRecord = ({action, database, value}: TransformerArgs): Promise<ConferenceParticipantModel> => {
+export const transformConferenceParticipantRecord = ({action, database, value}: TransformerArgs<ConferenceParticipantModel, ConferenceParticipant>): Promise<ConferenceParticipantModel> => {
     const raw = value.raw as ConferenceParticipant;
 
     // id of participant comes from server response

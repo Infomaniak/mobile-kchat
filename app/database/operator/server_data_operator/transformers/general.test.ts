@@ -110,6 +110,7 @@ describe('*** Files Prepare Records Test ***', () => {
                     width: 20,
                     update_at: 1609253011321,
                     user_id: 'wqyby5r5pinxxdqhoaomtacdhc',
+                    transcript: '',
                 },
             },
         });

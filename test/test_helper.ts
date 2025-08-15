@@ -613,6 +613,7 @@ class TestHelperSingleton {
             ...this.fakeModel(),
             channelId: this.generateId(),
             userId: this.generateId(),
+            roles: 'system_user',
             schemeAdmin: false,
             memberChannel: this.fakeRelation(),
             memberUser: this.fakeRelation(),
@@ -695,6 +696,7 @@ class TestHelperSingleton {
             post: this.fakeRelation(),
             toFileInfo: jest.fn(),
             isBlocked: false,
+            transcript: '',
             ...overwrite,
         };
     };
@@ -1065,6 +1067,8 @@ class TestHelperSingleton {
             name: 'image1',
             size: 100,
             user_id: '1',
+            transcript: '',
+            post_id: '',
             ...overwrite,
         };
     };
@@ -1265,14 +1269,9 @@ class TestHelperSingleton {
     fakeWebsocketMessage = (overwrite: Partial<WebSocketMessage> = {}): WebSocketMessage => {
         return {
             event: 'test',
-            data: {},
-            broadcast: {
-                omit_users: {},
-                user_id: '',
-                channel_id: '',
+            data: {
                 team_id: '',
             },
-            seq: 0,
             ...overwrite,
         };
     };

@@ -63,10 +63,6 @@ describe('canSaveSettings', () => {
             comments: 'any',
             notifyProps: TestHelper.fakeUserNotifyProps(),
         },
-        channelMentionOn: true,
-        replyNotificationType: 'any',
-        firstNameMentionOn: true,
-        usernameMentionOn: true,
     });
 
     test('Should return true when mentionKeywords have changed', () => {
@@ -87,10 +83,6 @@ describe('canSaveSettings', () => {
 
     test('Should return true when only userName has changed', () => {
         const canSaveSettingParams = getBaseCanSaveSettingParams();
-        canSaveSettingParams.channelMentionOn = true;
-        canSaveSettingParams.replyNotificationType = 'any';
-        canSaveSettingParams.firstNameMentionOn = true;
-        canSaveSettingParams.usernameMentionOn = true;
         canSaveSettingParams.mentionKeywords = ['test1', 'test2'];
         canSaveSettingParams.mentionProps.channel = true;
         canSaveSettingParams.mentionProps.comments = 'any';

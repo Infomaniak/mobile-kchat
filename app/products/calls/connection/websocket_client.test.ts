@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 // At the moment it feels to much work to make this test pass all the typescript rules due to the heavy mocking involved (e.g., WebSocket global).
-// eslint-disable-next-line
+
 // @ts-nocheck
 
 import {encode} from '@msgpack/msgpack';

@@ -22,6 +22,8 @@ import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {displayUsername} from '@utils/user';
 
+import FileCard from '../file_card/file_card';
+
 import ThreadFooter from './thread_footer';
 
 import type ChannelModel from '@typings/database/models/servers/channel';
@@ -174,7 +176,7 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
     let threadStarterName = displayUsername(author, intl.locale, teammateNameDisplay);
     const threadItemTestId = `${testID}.thread_item.${thread.id}`;
 
-    if (post?.props?.override_username) {
+    if (post?.props?.override_username && typeof post.props.override_username === 'string') {
         threadStarterName = post.props.override_username;
     }
 
@@ -237,6 +239,13 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
                     />
                 </Text>
             );
+        } else {
+            postBody = (
+                <FileCard
+                    post={post}
+                    theme={theme}
+                />
+            );
         }
     }
 
@@ -288,7 +297,7 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
                         location={location}
                         testID={`${threadItemTestId}.footer`}
                         thread={thread}
-                        fromBot={post.props?.from_webhook}
+                        fromBot={Boolean(post.props?.from_webhook)}
                     />
                     }
                 </View>
