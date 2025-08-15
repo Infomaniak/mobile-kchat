@@ -1,8 +1,8 @@
 diff --git a/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift b/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift
-index 3731b25..2f01a05 100644
+index 1afb4b2..3a5de21 100644
 --- a/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift
 +++ b/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift
-@@ -20,7 +20,8 @@ extension GPHMedia {
+@@ -34,7 +34,8 @@ extension GPHMedia {
  
    private func toGPHJSON() -> GPHJSONObject {
      guard let data = try? JSONEncoder().encode(self),
