@@ -12,13 +12,10 @@ import PushNotifications from '@init/push_notifications';
 import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {getDeviceToken} from '@queries/app/global';
-import {getServerDisplayName} from '@queries/app/servers';
 import {getCurrentUserId, getExpiredSession} from '@queries/servers/system';
-import {getCurrentUser} from '@queries/servers/user';
 import EphemeralStore from '@store/ephemeral_store';
 import {getFullErrorMessage, isErrorWithStatusCode, isErrorWithUrl} from '@utils/errors';
 import {logWarning, logError, logDebug} from '@utils/log';
-import {scheduleExpiredNotification} from '@utils/notification';
 import {getCSRFFromCookie} from '@utils/security';
 
 import {loginEntry} from './entry';
@@ -90,24 +87,6 @@ export const forceLogoutIfNecessary = async (serverUrl: string, err: unknown) =>
     }
 
     return {error: null, logout: false};
-};
-
-export const fetchSessions = async (serverUrl: string, currentUserId: string) => {
-    let client;
-    try {
-        client = NetworkManager.getClient(serverUrl);
-    } catch {
-        return undefined;
-    }
-
-    try {
-        return await client.getSessions(currentUserId);
-    } catch (error) {
-        logDebug('error on fetchSessions', getFullErrorMessage(error));
-        await forceLogoutIfNecessary(serverUrl, error);
-    }
-
-    return undefined;
 };
 
 export const login = async (serverUrl: string, {ldapOnly = false, loginId, mfaToken, password, config, serverDisplayName}: LoginArgs): Promise<LoginActionResponse> => {
@@ -249,42 +228,6 @@ export const cancelSessionNotification = async (serverUrl: string) => {
         return {};
     } catch (e) {
         logError('cancelSessionNotification', e);
-        return {error: e};
-    }
-};
-
-export const scheduleSessionNotification = async (serverUrl: string) => {
-    try {
-        const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const sessions = await fetchSessions(serverUrl, 'me');
-        const user = await getCurrentUser(database);
-        const serverName = await getServerDisplayName(serverUrl);
-
-        await cancelSessionNotification(serverUrl);
-
-        if (sessions) {
-            const session = await findSession(serverUrl, sessions);
-
-            if (session) {
-                const sessionId = session.id;
-                const notificationId = scheduleExpiredNotification(serverUrl, session, serverName, user?.locale);
-                operator.handleSystem({
-                    systems: [{
-                        id: SYSTEM_IDENTIFIERS.SESSION_EXPIRATION,
-                        value: {
-                            id: sessionId,
-                            notificationId,
-                            expiresAt: session.expires_at,
-                        },
-                    }],
-                    prepareRecordsOnly: false,
-                });
-            }
-        }
-        return {};
-    } catch (e) {
-        logError('scheduleExpiredNotification', e);
-        await forceLogoutIfNecessary(serverUrl, e);
         return {error: e};
     }
 };

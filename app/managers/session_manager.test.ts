@@ -4,7 +4,7 @@
 import CookieManager from '@react-native-cookies/cookies';
 import {AppState, DeviceEventEmitter, Platform} from 'react-native';
 
-import {cancelSessionNotification, logout, scheduleSessionNotification} from '@actions/remote/session';
+import {cancelSessionNotification, logout} from '@actions/remote/session';
 import {Events} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials, removeServerCredentials} from '@init/credentials';
@@ -133,7 +133,6 @@ describe('SessionManager', () => {
                 jest.useFakeTimers();
                 appStateCallback('active');
                 jest.runAllTimers();
-                expect(cancelSessionNotification).toHaveBeenCalled();
                 jest.useRealTimers();
             }
         });
@@ -144,7 +143,6 @@ describe('SessionManager', () => {
                 jest.useFakeTimers();
                 appStateCallback('inactive');
                 jest.runAllTimers();
-                expect(scheduleSessionNotification).toHaveBeenCalled();
                 jest.useRealTimers();
             }
         });

@@ -7,7 +7,7 @@ import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react
 
 import {storeOnboardingViewedValue} from '@actions/app/global';
 import {syncMultiTeam, syncServerData} from '@actions/remote/entry/ikcommon';
-import {cancelSessionNotification, logout, scheduleSessionNotification} from '@actions/remote/session';
+import {cancelSessionNotification, logout} from '@actions/remote/session';
 import {Events, Launch} from '@constants';
 import DatabaseManager from '@database/manager';
 import {resetMomentLocale} from '@i18n';
@@ -78,20 +78,6 @@ export class SessionManagerSingleton {
         }
     };
 
-    private scheduleAllSessionNotifications = async () => {
-        if (!this.scheduling) {
-            this.scheduling = true;
-            const serverCredentials = await getAllServerCredentials();
-            const promises: Array<Promise<{error: unknown} | {error?: undefined}>> = [];
-            for (const {serverUrl} of serverCredentials) {
-                promises.push(scheduleSessionNotification(serverUrl));
-            }
-
-            await Promise.all(promises);
-            this.scheduling = false;
-        }
-    };
-
     private resetLocale = async () => {
         if (Object.keys(DatabaseManager.serverDatabases).length) {
             const serverDatabase = await DatabaseManager.getActiveServerDatabase();
@@ -142,7 +128,6 @@ export class SessionManagerSingleton {
                 break;
             case 'background':
             case 'inactive':
-                this.scheduleAllSessionNotifications();
                 break;
         }
     };

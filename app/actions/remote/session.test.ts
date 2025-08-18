@@ -14,11 +14,9 @@ import {logWarning} from '@utils/log';
 import {
     addPushProxyVerificationStateFromLogin,
     forceLogoutIfNecessary,
-    fetchSessions,
     login,
     logout,
     cancelSessionNotification,
-    scheduleSessionNotification,
     sendPasswordResetEmail,
     ssoLogin,
     findSession,
@@ -172,25 +170,6 @@ describe('sessions', () => {
         expect(result.logout).toBe(false);
     });
 
-    it('fetchSessions - handle error', async () => {
-        mockClient.getSessions.mockImplementationOnce(jest.fn(throwFunc));
-        const result = await fetchSessions('foo', '');
-        expect(result).toBeUndefined();
-    });
-
-    it('fetchSessions - handle client error', async () => {
-        jest.spyOn(NetworkManager, 'getClient').mockImplementationOnce(throwFunc);
-
-        const result = await fetchSessions(serverUrl, user1.id);
-        expect(result).toBeUndefined();
-    });
-
-    it('fetchSessions - base case', async () => {
-        const result = await fetchSessions(serverUrl, user1.id);
-        expect(result).toBeDefined();
-        expect(result?.length).toBe(1);
-    });
-
     it('login - base case', async () => {
         const result = await login(serverUrl, {config: {DiagnosticId: 'diagnosticid'}} as LoginArgs);
         expect(result).toBeDefined();
@@ -242,44 +221,6 @@ describe('sessions', () => {
 
     it('cancelSessionNotification - no expired session', async () => {
         const result = await cancelSessionNotification(serverUrl);
-        expect(result).toBeDefined();
-        expect(result.error).toBeUndefined();
-    });
-
-    it('scheduleSessionNotification - handle not found database', async () => {
-        const result = await scheduleSessionNotification('foo');
-        expect(result).toBeDefined();
-        expect(result.error).toBeDefined();
-    });
-
-    it('scheduleSessionNotification - base case', async () => {
-        await operator.handleSystem({
-            systems: [{
-                id: SYSTEM_IDENTIFIERS.SESSION_EXPIRATION,
-                value: {
-                    id: 'sessionid1',
-                    notificationId: 'notificationid',
-                    expiresAt: 123,
-                },
-            }],
-            prepareRecordsOnly: false,
-        });
-
-        const result = await scheduleSessionNotification(serverUrl);
-        expect(result).toBeDefined();
-        expect(result.error).toBeUndefined();
-    });
-
-    it('scheduleSessionNotification - no session', async () => {
-        mockClient.getSessions.mockImplementationOnce(() => []);
-        const result = await scheduleSessionNotification(serverUrl);
-        expect(result).toBeDefined();
-        expect(result.error).toBeUndefined();
-    });
-
-    it('scheduleSessionNotification - null sessions', async () => {
-        mockClient.getSessions.mockImplementationOnce(() => null as any);
-        const result = await scheduleSessionNotification(serverUrl);
         expect(result).toBeDefined();
         expect(result.error).toBeUndefined();
     });
