@@ -1,6 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import {Collection, Model} from '@nozbe/watermelondb';
+import {Model} from '@nozbe/watermelondb';
 import {field, writer} from '@nozbe/watermelondb/decorators';
 
 import {MM_TABLES} from '@app/constants/database';
@@ -34,22 +34,6 @@ export default class CloudUsageModel extends Model {
             record.public_channels = usage.public_channels ?? this.public_channels;
             record.sidebar_categories = usage.sidebar_categories ?? this.sidebar_categories;
             record.storage = usage.storage ?? this.storage;
-        });
-    }
-
-    @writer static async createUsage(collection: Collection<CloudUsageModel>, usage: Partial<CloudUsageModel>) {
-        await collection.create((record) => {
-            record._raw.id = 'usage';
-            record.custom_emojis = usage.custom_emojis ?? 0;
-            record.guests = usage.guests ?? 0;
-            record.incoming_webhooks = usage.incoming_webhooks ?? 0;
-            record.members = usage.members ?? 0;
-            record.outgoing_webhooks = usage.outgoing_webhooks ?? 0;
-            record.pending_guests = usage.pending_guests ?? 0;
-            record.private_channels = usage.private_channels ?? 0;
-            record.public_channels = usage.public_channels ?? 0;
-            record.sidebar_categories = usage.sidebar_categories ?? 0;
-            record.storage = usage.storage ?? 0;
         });
     }
 }

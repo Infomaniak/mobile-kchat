@@ -1,6 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import {Collection, Model} from '@nozbe/watermelondb';
+import {Model} from '@nozbe/watermelondb';
 import {field, json, writer} from '@nozbe/watermelondb/decorators';
 
 import {MM_TABLES} from '@app/constants/database';
@@ -8,7 +8,6 @@ import {safeParseJSON} from '@app/utils/helpers';
 
 export default class LimitsModel extends Model {
     static table = MM_TABLES.SERVER.LIMIT;
-
     @json('boards', safeParseJSON) boards!: BoardsLimitProps;
     @field('bots') bots!: number;
     @field('custom_emojis') custom_emojis!: number;
@@ -44,27 +43,6 @@ export default class LimitsModel extends Model {
             record.scheduled_draft_custom_date = usage.scheduled_draft_custom_date ?? this.scheduled_draft_custom_date;
             record.sidebar_categories = usage.sidebar_categories ?? this.sidebar_categories;
             record.storage = usage.storage ?? this.storage;
-        });
-    }
-
-    @writer static async createLimits(collection: Collection<LimitsModel>, limits: Partial<LimitsModel>) {
-        await collection.create((record) => {
-            record._raw.id = 'limits';
-            record.boards = limits.boards ?? {cards: 0, views: 0};
-            record.bots = limits.bots ?? 0;
-            record.custom_emojis = limits.custom_emojis ?? 0;
-            record.guests = limits.guests ?? 0;
-            record.incoming_webhooks = limits.incoming_webhooks ?? 0;
-            record.integrations = limits.integrations ?? {enabled: 0};
-            record.members = limits.members ?? 0;
-            record.messages = limits.messages ?? {history: 0};
-            record.outgoing_webhooks = limits.outgoing_webhooks ?? 0;
-            record.private_channels = limits.private_channels ?? 0;
-            record.public_channels = limits.public_channels ?? 0;
-            record.reminder_custom_date = limits.reminder_custom_date ?? false;
-            record.scheduled_draft_custom_date = limits.scheduled_draft_custom_date ?? false;
-            record.sidebar_categories = limits.sidebar_categories ?? 0;
-            record.storage = limits.storage ?? 0;
         });
     }
 }

@@ -76,8 +76,8 @@ export const entry = async (serverUrl: string, teamId?: string, channelId?: stri
     const result = entryRest(serverUrl, teamId, channelId, since);
 
     await Promise.all([
-        fetchCloudLimits(serverUrl),
-        fetchUsage(serverUrl),
+        fetchCloudLimits(serverUrl, teamId),
+        fetchUsage(serverUrl, teamId),
     ]);
 
     // Fetch data retention policies
