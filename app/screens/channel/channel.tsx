@@ -2,9 +2,10 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useState} from 'react';
-import {type LayoutChangeEvent, StatusBar, StyleSheet, View} from 'react-native';
+import {type LayoutChangeEvent, StatusBar, View} from 'react-native';
 import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import tinyColor from 'tinycolor2';
+
 import {storeLastViewedChannelIdAndServer, removeLastViewedChannelIdAndServer} from '@actions/app/global';
 import FreezeScreen from '@components/freeze_screen';
 import PostDraft from '@components/post_draft';
@@ -12,6 +13,7 @@ import ScheduledPostIndicator from '@components/scheduled_post_indicator';
 import {Screens} from '@constants';
 import {ExtraKeyboardProvider} from '@context/extra_keyboard';
 import {useServerUrl} from '@context/server';
+import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useChannelSwitch} from '@hooks/channel_switch';
 import {useIsTablet} from '@hooks/device';
@@ -21,6 +23,7 @@ import SecurityManager from '@managers/security_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {popTopScreen} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
+import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import ChannelPostList from './channel_post_list';
 import ChannelHeader from './header';
@@ -28,8 +31,6 @@ import useGMasDMNotice from './use_gm_as_dm_notice';
 
 import type PreferenceModel from '@typings/database/models/servers/preference';
 import type {AvailableScreens} from '@typings/screens/navigation';
-import { makeStyleSheetFromTheme } from '@utils/theme';
-import { useTheme } from '@context/theme';
 
 type ChannelProps = {
     channelId: string;
@@ -48,13 +49,14 @@ type ChannelProps = {
 
 const edges: Edge[] = ['left', 'right', 'top'];
 
-const getStyleSheet =  makeStyleSheetFromTheme((theme: Theme) => {
+const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
-    container: {
-        flex: 1,
-        backgroundColor: theme.centerChannelBg,
-    },
-}});
+        container: {
+            flex: 1,
+            backgroundColor: theme.centerChannelBg,
+        },
+    };
+});
 
 const Channel = ({
     channelId,

@@ -116,27 +116,27 @@ const AccountScreen = ({currentUser, enableCustomUserStatuses, showFullName}: Ac
 
     return (
         <Freeze freeze={!isFocused}>
-        <SafeAreaView
-            edges={edges}
-            style={styles.container}
-            testID='account.screen'
-        >
-            <View style={[{height: insets.top, flexDirection: 'row'}]}>
-                <View style={[styles.container, tabletSidebarStyle]}/>
-                {isTablet && <View style={styles.tabletContainer}/>}
-            </View>
-            <Animated.View
-                onLayout={onLayout}
-                style={[styles.flexRow, animated]}
+            <SafeAreaView
+                edges={edges}
+                style={styles.container}
+                testID='account.screen'
             >
-                {content}
-                {isTablet &&
-                <View style={[styles.tabletContainer, styles.tabletDivider]}>
-                    <AccountTabletView/>
+                <View style={[{height: insets.top, flexDirection: 'row'}]}>
+                    <View style={[styles.container, tabletSidebarStyle]}/>
+                    {isTablet && <View style={styles.tabletContainer}/>}
                 </View>
-                }
-            </Animated.View>
-        </SafeAreaView>
+                <Animated.View
+                    onLayout={onLayout}
+                    style={[styles.flexRow, animated]}
+                >
+                    {content}
+                    {isTablet &&
+                    <View style={[styles.tabletContainer, styles.tabletDivider]}>
+                        <AccountTabletView/>
+                    </View>
+                    }
+                </Animated.View>
+            </SafeAreaView>
         </Freeze>
     );
 };
