@@ -205,9 +205,6 @@ Navigation.setDefaultOptions({
     layout: {
         orientation: isTablet() ? allOrientations : portraitOrientation,
     },
-    statusBar: {
-        drawBehind: true,
-    },
     topBar: {
         title: {
             fontFamily: 'SuisseIntl-SemiBold',

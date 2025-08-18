@@ -2,9 +2,8 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useState} from 'react';
-import {type LayoutChangeEvent, StatusBar, View} from 'react-native';
+import {type LayoutChangeEvent, StyleSheet, View} from 'react-native';
 import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
-import tinyColor from 'tinycolor2';
 
 import {storeLastViewedChannelIdAndServer, removeLastViewedChannelIdAndServer} from '@actions/app/global';
 import FreezeScreen from '@components/freeze_screen';
@@ -13,7 +12,6 @@ import ScheduledPostIndicator from '@components/scheduled_post_indicator';
 import {Screens} from '@constants';
 import {ExtraKeyboardProvider} from '@context/extra_keyboard';
 import {useServerUrl} from '@context/server';
-import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useChannelSwitch} from '@hooks/channel_switch';
 import {useIsTablet} from '@hooks/device';
@@ -23,7 +21,6 @@ import SecurityManager from '@managers/security_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {popTopScreen} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
-import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import ChannelPostList from './channel_post_list';
 import ChannelHeader from './header';
@@ -47,15 +44,12 @@ type ChannelProps = {
     scheduledPostCount: number;
 };
 
-const edges: Edge[] = ['left', 'right', 'top'];
+const edges: Edge[] = ['left', 'right'];
 
-const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
-    return {
-        container: {
-            flex: 1,
-            backgroundColor: theme.centerChannelBg,
-        },
-    };
+const styles = StyleSheet.create({
+    flex: {
+        flex: 1,
+    },
 });
 
 const Channel = ({
@@ -69,6 +63,7 @@ const Channel = ({
     currentUserId,
     hasGMasDMFeature,
 
+    // includeBookmarkBar,
     includeChannelBanner,
     scheduledPostCount,
 }: ChannelProps) => {
@@ -85,11 +80,6 @@ const Channel = ({
     const handleBack = useCallback(() => {
         popTopScreen(componentId);
     }, [componentId]);
-
-    const theme = useTheme();
-    const styles = getStyleSheet(theme);
-    const isDark = tinyColor(theme.centerChannelBg).isDark();
-    StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
 
     useAndroidHardwareBackHandler(componentId, handleBack);
 
@@ -127,7 +117,7 @@ const Channel = ({
     return (
         <FreezeScreen>
             <SafeAreaView
-                style={styles.container}
+                style={styles.flex}
                 mode='margin'
                 edges={edges}
                 testID='channel.screen'
@@ -145,7 +135,7 @@ const Channel = ({
                 />
                 {shouldRender &&
                 <ExtraKeyboardProvider>
-                    <View style={[styles.container, {marginTop}]}>
+                    <View style={[styles.flex, {marginTop}]}>
                         <ChannelPostList
                             channelId={channelId}
                             nativeID={channelId}
