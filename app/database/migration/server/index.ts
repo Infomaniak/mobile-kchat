@@ -16,6 +16,7 @@ import {PLAYBOOK_TABLES} from '@playbooks/constants/database';
 
 const {
     CHANNEL,
+    CHANNEL_BOOKMARK,
     CONFERENCE,
     CONFERENCE_PARTICIPANT,
     FILE,
@@ -36,6 +37,25 @@ export default schemaMigrations({
         {
             toVersion: 7, // Ik: equivalent of version 12 of MM
             steps: [
+                createTable({
+                    name: CHANNEL_BOOKMARK,
+                    columns: [
+                        {name: 'create_at', type: 'number'},
+                        {name: 'update_at', type: 'number'},
+                        {name: 'delete_at', type: 'number'},
+                        {name: 'channel_id', type: 'string', isIndexed: true},
+                        {name: 'owner_id', type: 'string'},
+                        {name: 'file_id', type: 'string', isOptional: true},
+                        {name: 'display_name', type: 'string'},
+                        {name: 'sort_order', type: 'number'},
+                        {name: 'link_url', type: 'string', isOptional: true},
+                        {name: 'image_url', type: 'string', isOptional: true},
+                        {name: 'emoji', type: 'string', isOptional: true},
+                        {name: 'type', type: 'string'},
+                        {name: 'original_id', type: 'string', isOptional: true},
+                        {name: 'parent_id', type: 'string', isOptional: true},
+                    ],
+                }),
                 createTable({
                     name: PLAYBOOK_RUN,
                     columns: [
