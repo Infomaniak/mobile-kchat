@@ -35,6 +35,7 @@ import {isMinimumServerVersion, isTablet} from '@utils/helpers';
 import {logDebug, logError} from '@utils/log';
 import {processIsCRTEnabled} from '@utils/thread';
 
+import {fetchCloudLimits, fetchUsage} from '../cloud';
 import {fetchPostsForUnreadChannels} from '../post';
 
 import type {Database, Model} from '@nozbe/watermelondb';
@@ -74,6 +75,11 @@ export type EntryResponse = {
 export const entry = async (serverUrl: string, teamId?: string, channelId?: string, since = 0, groupLabel?: RequestGroupLabel): Promise<EntryResponse> => {
     const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
     const result = await entryRest(serverUrl, teamId, channelId, since, groupLabel);
+
+    await Promise.all([
+        fetchCloudLimits(serverUrl, teamId),
+        fetchUsage(serverUrl, teamId),
+    ]);
 
     // Fetch data retention policies
     if (!result.error) {

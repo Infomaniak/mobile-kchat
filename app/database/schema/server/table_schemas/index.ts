@@ -15,6 +15,8 @@ export {default as CustomProfileAttributeSchema} from './custom_profile_attribut
 export {default as DraftSchema} from './draft';
 export {default as FileSchema} from './file';
 export {default as GroupSchema} from './group';
+export {default as LimitSchema} from './limits';
+export {default as CloudUsageSchema} from './usage';
 export {default as GroupChannelSchema} from './group_channel';
 export {default as GroupTeamSchema} from './group_team';
 export {default as GroupMembershipSchema} from './group_membership';

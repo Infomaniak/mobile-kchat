@@ -97,6 +97,7 @@ export const INFOMANIAK_QUOTA_EXCEEDED = 'InfomaniakQuotaExceeded';
 
 export const INFOMANIAK_REMINDER = 'InfomaniakReminder';
 export const TRANSCRIPTION = 'Transcription';
+export const INFOMANIAK_EVOLVE = 'InfomaniakEvolve';
 
 export default {
     ABOUT,
@@ -192,6 +193,7 @@ export default {
     INFOMANIAK_NO_TEAMS,
     INFOMANIAK_QUOTA_EXCEEDED,
     INFOMANIAK_REMINDER,
+    INFOMANIAK_EVOLVE,
     TRANSCRIPTION,
 } as const;
 

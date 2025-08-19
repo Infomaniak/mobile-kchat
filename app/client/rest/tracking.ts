@@ -3,12 +3,15 @@
 
 import {DeviceEventEmitter, Platform} from 'react-native';
 
+import {fetchUsage} from '@actions/remote/cloud';
 import {CollectNetworkMetrics} from '@assets/config.json';
-import {Events} from '@constants';
+import {Events, Screens} from '@constants';
+import {getDefaultThemeByAppearance} from '@context/theme';
 import {t} from '@i18n';
 import {setServerCredentials} from '@init/credentials';
 import PerformanceMetricsManager from '@managers/performance_metrics_manager';
 import {NetworkRequestMetrics} from '@managers/performance_metrics_manager/constant';
+import {openAsBottomSheet} from '@screens/navigation';
 import {isErrorWithStatusCode} from '@utils/errors';
 import {getFormattedFileSize} from '@utils/file';
 import {logDebug, logInfo} from '@utils/log';
@@ -395,6 +398,17 @@ export default class ClientTracking {
                 this.decrementRequestCount(groupLabel);
             }
         }
+
+        if (response.code === 409 && response.data?.id === 'quota-exceeded') {
+            fetchUsage(this.apiClient.baseUrl);
+            openAsBottomSheet({
+                closeButtonId: 'close-quota-exceeded',
+                screen: Screens.INFOMANIAK_EVOLVE,
+                title: '',
+                theme: getDefaultThemeByAppearance(),
+            });
+        }
+
         const headers: ClientHeaders = response.headers || {};
         if (groupLabel && CollectNetworkMetrics) {
             this.trackRequest(groupLabel, url, response.metrics);

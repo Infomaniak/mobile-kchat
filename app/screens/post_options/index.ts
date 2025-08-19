@@ -5,7 +5,10 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {combineLatest, of as of$, Observable} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
+import {observeLimits} from '@app/queries/servers/limit';
+import {observeUsage} from '@app/queries/servers/usage';
 import {Permissions, Post, Screens} from '@constants';
+import {General, Permissions, Post, Screens} from '@constants';
 import {AppBindingLocations} from '@constants/apps';
 import {MAX_ALLOWED_REACTIONS} from '@constants/emoji';
 import AppsManager from '@managers/apps_manager';
@@ -151,6 +154,9 @@ const enhanced = withObservables([], ({combinedPost, post, showAddReaction, sour
         switchMap((enabled) => (enabled ? observeThreadById(database, post.id) : of$(undefined))),
     );
 
+    const usage = observeUsage(database);
+    const limits = observeLimits(database);
+
     return {
         canMarkAsUnread,
         canAddReaction,
@@ -163,6 +169,8 @@ const enhanced = withObservables([], ({combinedPost, post, showAddReaction, sour
         post,
         thread,
         bindings,
+        usage,
+        limits,
     };
 });
 

@@ -4,6 +4,8 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$} from 'rxjs';
 
+import {observeLimits} from '@app/queries/servers/limit';
+import {observeUsage} from '@app/queries/servers/usage';
 import {observeChannel, observeChannelInfo} from '@queries/servers/channel';
 
 import CreateOrEditChannel from './create_or_edit_channel';
@@ -17,9 +19,14 @@ type OwnProps = {
 const enhanced = withObservables([], ({database, channelId}: WithDatabaseArgs & OwnProps) => {
     const channel = channelId ? observeChannel(database, channelId) : of$(undefined);
     const channelInfo = channelId ? observeChannelInfo(database, channelId) : of$(undefined);
+    const limits = observeLimits(database);
+    const usage = observeUsage(database);
+
     return {
         channel,
         channelInfo,
+        limits,
+        usage,
     };
 });
 

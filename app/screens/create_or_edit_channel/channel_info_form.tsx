@@ -16,6 +16,7 @@ import {
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {useGetUsageDeltas} from '@app/hooks/usage';
 import Autocomplete from '@components/autocomplete';
 import ErrorText from '@components/error_text';
 import FloatingTextInput from '@components/floating_text_input_label';
@@ -34,6 +35,10 @@ import {
     getKeyboardAppearanceFromTheme,
 } from '@utils/theme';
 import {typography} from '@utils/typography';
+
+import UpgradeChannelBanner from './ik_upgrade_channel';
+
+import type {CloudUsageModel, LimitModel} from '@app/database/models/server';
 
 const FIELD_MARGIN_BOTTOM = 24;
 const MAKE_PRIVATE_MARGIN_BOTTOM = 32;
@@ -88,6 +93,9 @@ type Props = {
     onPurposeChange: (text: string) => void;
     saving: boolean;
     type?: string;
+    onChannelLimitReached?: any;
+    limits: LimitModel;
+    usage: CloudUsageModel;
 }
 
 export default function ChannelInfoForm({
@@ -104,6 +112,9 @@ export default function ChannelInfoForm({
     onPurposeChange,
     saving,
     type,
+    onChannelLimitReached,
+    limits,
+    usage,
 }: Props) {
     const intl = useIntl();
     const {formatMessage} = intl;
@@ -152,6 +163,31 @@ export default function ChannelInfoForm({
     const showSelector = !displayHeaderOnly && !editing;
 
     const isPrivate = type === General.PRIVATE_CHANNEL;
+
+    const {
+        public_channels: publicChannelsLimit,
+        private_channels: privateChannelsLimit,
+    } = limits;
+
+    const {
+        public_channels: publicChannelsUsage,
+        private_channels: privateChannelsUsage,
+    } = usage;
+
+    const {
+        public_channels: publicChannelsUsageDelta,
+        private_channels: privateChannelsUsageDelta,
+    } = useGetUsageDeltas(usage, limits);
+
+    const publicChannelLimitReached = publicChannelsUsageDelta >= 0;
+    const privateChannelLimitReached = privateChannelsUsageDelta >= 0;
+    const channelLimitReached = (isPrivate && privateChannelLimitReached) || (!isPrivate && publicChannelLimitReached);
+
+    useEffect(() => {
+        if (onChannelLimitReached) {
+            onChannelLimitReached(channelLimitReached);
+        }
+    }, [channelLimitReached, onChannelLimitReached]);
 
     const handlePress = () => {
         const chtype = isPrivate ? General.OPEN_CHANNEL : General.PRIVATE_CHANNEL;
@@ -231,9 +267,7 @@ export default function ChannelInfoForm({
     const spaceOnTop = otherElementsSize - scrollPosition - AUTOCOMPLETE_ADJUST;
     const spaceOnBottom = (workingSpace + scrollPosition) - (otherElementsSize + headerFieldHeight + BOTTOM_AUTOCOMPLETE_SEPARATION);
 
-    const autocompletePosition = spaceOnBottom > spaceOnTop ?
-        (otherElementsSize + headerFieldHeight) - scrollPosition :
-        (workingSpace + scrollPosition + AUTOCOMPLETE_ADJUST + keyboardOverlap) - otherElementsSize;
+    const autocompletePosition = spaceOnBottom > spaceOnTop ? (otherElementsSize + headerFieldHeight) - scrollPosition : (workingSpace + scrollPosition + AUTOCOMPLETE_ADJUST + keyboardOverlap) - otherElementsSize;
     const autocompleteAvailableSpace = spaceOnBottom > spaceOnTop ? spaceOnBottom : spaceOnTop;
     const growDown = spaceOnBottom > spaceOnTop;
 
@@ -291,6 +325,15 @@ export default function ChannelInfoForm({
                     onPress={blur}
                 >
                     <View>
+                        <UpgradeChannelBanner
+                            isPrivate={isPrivate}
+                            publicChannelsUsage={publicChannelsUsage}
+                            privateChannelsUsage={privateChannelsUsage}
+                            publicChannelsLimit={publicChannelsLimit}
+                            privateChannelsLimit={privateChannelsLimit}
+                            publicChannelLimitReached={publicChannelLimitReached}
+                            privateChannelLimitReached={privateChannelLimitReached}
+                        />
                         {showSelector && (
                             <OptionItem
                                 testID='channel_info_form.make_private'

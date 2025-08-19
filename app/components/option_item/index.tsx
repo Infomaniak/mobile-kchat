@@ -133,6 +133,7 @@ export type OptionItemProps = {
     onLayout?: (event: LayoutChangeEvent) => void;
     descriptionNumberOfLines?: number;
     customIcon?: React.ReactNode;
+    rightComponent?: React.ReactNode;
 }
 
 const OptionItem = ({
@@ -158,6 +159,7 @@ const OptionItem = ({
     value,
     onLayout,
     descriptionNumberOfLines,
+    rightComponent,
 }: OptionItemProps) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
@@ -290,7 +292,7 @@ const OptionItem = ({
                     </View>
                 </View>
             </View>
-            {Boolean(actionComponent || info) &&
+            {(Boolean(actionComponent || info || rightComponent)) &&
             <View style={styles.actionContainer}>
                 {
                     Boolean(info) &&
@@ -304,6 +306,7 @@ const OptionItem = ({
                 }
                 <View style={styles.actionSubContainer}>
                     {actionComponent}
+                    {rightComponent}
                 </View>
             </View>
             }

@@ -5,14 +5,15 @@ import BottomSheetM, {BottomSheetBackdrop, type BottomSheetBackdropProps} from '
 import {Button} from '@rneui/base';
 import React, {useCallback, useRef} from 'react';
 import {useIntl} from 'react-intl';
-import {Image, Text, View} from 'react-native';
+import {Text, View} from 'react-native';
 
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import Header from '@screens/ik_evolve/icons/top';
 import {dismissModal} from '@screens/navigation';
-import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
-import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {buttonBackgroundStyle} from '@utils/buttonStyles';
+import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -43,7 +44,8 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
     bottomSheetBackground: {
         backgroundColor: theme.centerChannelBg,
-        borderColor: changeOpacity(theme.centerChannelColor, 0.16),
+        borderTopWidth: 50,
+        borderColor: '#222633',
     },
     iconWrapper: {
         justifyContent: 'center',
@@ -58,6 +60,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         marginTop: 24,
         textAlign: 'center',
         ...typography('Heading', 500, 'SemiBold'),
+        maxWidth: '95%',
     },
     description: {
         color: theme.centerChannelColor,
@@ -69,12 +72,30 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         marginTop: 16,
     },
     ikButton: {
-        borderRadius: 8,
+        width: 343,
+        height: 56,
+        backgroundColor: '#F1F1F1',
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center',
+        flexDirection: 'row',
+        marginTop: 16,
+    },
+    ikTextButton: {
+        fontFamily: 'SuisseIntl',
+        fontWeight: '500',
+        fontSize: 16,
+        lineHeight: 20,
+        letterSpacing: 0,
+        color: '#000',
+        textAlign: 'center',
     },
     content: {
         flex: 1,
-        paddingHorizontal: 20,
-        paddingTop: 20,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 24,
     },
 }));
 
@@ -89,10 +110,6 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
     description: 'infomaniak.size_quota_exceeded.description',
     image: 'storage',
 }, componentId}: Props) => {
-    const allImages = {
-        channels: {path: require('@assets/images/channels.png'), ratio: 1780 / 690},
-        storage: {path: require('@assets/images/storage_full_light.png'), ratio: 632 / 651},
-    };
     const sheetRef = useRef<BottomSheetM>(null);
     const theme = useTheme();
     const styles = getStyleSheet(theme);
@@ -119,32 +136,33 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
 
     const renderContent = useCallback(() => {
         return (
-            <View style={styles.content}>
-                <View style={styles.iconWrapper}>
-                    <Image
-                        style={[styles.imagePlaceholder, {aspectRatio: allImages[quotaType.image].ratio}]}
-                        source={allImages[quotaType.image].path}
+            <View style={{flex: 1}}>
+                <View style={styles.content}>
+                    <Header/>
+
+                    <View>
+                        <Text style={styles.title}>
+                            {intl.formatMessage({id: quotaType.title})}
+                        </Text>
+                        <Text style={styles.description}>
+                            {intl.formatMessage({id: quotaType.description})}
+                        </Text>
+                    </View>
+
+                    <Button
+                        title={intl.formatMessage({
+                            id: 'channel_info.close',
+                            defaultMessage: 'Close',
+                        })}
+                        titleStyle={styles.ikTextButton}
+                        containerStyle={styles.discoverButton}
+                        buttonStyle={[
+                            buttonBackgroundStyle(theme, 'lg', 'primary', 'default'),
+                            styles.ikButton,
+                        ]}
+                        onPress={handleCloseButton}
                     />
                 </View>
-                <Text style={styles.title}>
-                    {intl.formatMessage({id: quotaType.title, defaultMessage: 'You have no kChat, discover it with kSuite'})}
-                </Text>
-                <Text style={styles.description}>
-                    {intl.formatMessage({id: quotaType.description, defaultMessage: 'You have no kChat, discover it with kSuite'})}
-                </Text>
-                <Button
-                    title={intl.formatMessage({
-                        id: 'channel_info.close',
-                        defaultMessage: 'Close',
-                    })}
-                    titleStyle={buttonTextStyle(theme, 'lg', 'primary', 'default')}
-                    containerStyle={styles.discoverButton}
-                    buttonStyle={[
-                        buttonBackgroundStyle(theme, 'lg', 'primary', 'default'),
-                        styles.ikButton,
-                    ]}
-                    onPress={handleCloseButton}
-                />
             </View>
         );
     }, []);

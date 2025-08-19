@@ -10,7 +10,7 @@ import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
 import {Preferences} from '@constants';
-import {CUSTOM_STATUS_TIME_PICKER_INTERVALS_IN_MINUTES} from '@constants/custom_status';
+import {CUSTOM_STATUS_TIME_PICKER_INTERVALS} from '@constants/custom_status';
 import {getDisplayNamePreferenceAsBool} from '@helpers/api/preference';
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
 import {getCurrentMomentForTimezone, getRoundedTime, getUtcOffsetForTimeZone} from '@utils/helpers';
@@ -19,11 +19,13 @@ import {makeStyleSheetFromTheme} from '@utils/theme';
 import type {WithDatabaseArgs} from '@typings/database/database';
 
 type Props = {
+    showDate: boolean;
     timezone: string | null;
     isMilitaryTime: boolean;
     theme: Theme;
     handleChange: (currentDate: Moment) => void;
     showInitially?: AndroidMode;
+    showDateTimePickerButton?: boolean;
 }
 
 type AndroidMode = 'date' | 'time';
@@ -43,7 +45,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const DateTimeSelector = ({timezone, handleChange, isMilitaryTime, theme, showInitially}: Props) => {
+const DateTimeSelector = ({timezone, handleChange, isMilitaryTime, theme, showInitially, showDate, showDateTimePickerButton = true}: Props) => {
     const styles = getStyleSheet(theme);
     const currentTime = getCurrentMomentForTimezone(timezone);
     const timezoneOffSetInMinutes = timezone ? getUtcOffsetForTimeZone(timezone) : undefined;
@@ -82,32 +84,49 @@ const DateTimeSelector = ({timezone, handleChange, isMilitaryTime, theme, showIn
             testID='custom_date_time_picker'
         >
             <View style={styles.buttonContainer}>
-                <Button
-                    testID={'custom_status_clear_after.menu_item.date_and_time.button.date'}
-                    onPress={showDatepicker}
-                    title='Select Date'
-                    color={theme.buttonBg}
-                />
-                <Button
-                    testID={'custom_status_clear_after.menu_item.date_and_time.button.time'}
-                    onPress={showTimepicker}
-                    title='Select Time'
-                    color={theme.buttonBg}
-                />
+                {showDateTimePickerButton && (
+                    <>
+                        <Button
+                            testID={'custom_status_clear_after.menu_item.date_and_time.button.date'}
+                            onPress={showDatepicker}
+                            title='Select Date'
+                            color={theme.buttonBg}
+                        />
+                        <Button
+                            testID={'custom_status_clear_after.menu_item.date_and_time.button.time'}
+                            onPress={showTimepicker}
+                            title='Select Time'
+                            color={theme.buttonBg}
+                        />
+                    </>)}
             </View>
-            {show && (
-                <DateTimePicker
-                    testID='custom_status_clear_after.date_time_picker'
-                    value={date.toDate()}
-                    mode={mode}
-                    is24Hour={isMilitaryTime}
-                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={onChange}
-                    textColor={theme.centerChannelColor}
-                    minimumDate={minimumDate.toDate()}
-                    minuteInterval={CUSTOM_STATUS_TIME_PICKER_INTERVALS_IN_MINUTES}
-                    timeZoneOffsetInMinutes={timezoneOffSetInMinutes}
-                />
+            {(showDate || show) && (
+                Platform.OS === 'android' ? (
+                    <DateTimePicker
+                        testID='custom_status_clear_after.date_time_picker'
+                        value={date.toDate()}
+                        mode={mode}
+                        is24Hour={isMilitaryTime}
+                        display='default'
+                        onChange={onChange}
+                        textColor={theme.centerChannelColor}
+                        minimumDate={minimumDate.toDate()}
+                        minuteInterval={CUSTOM_STATUS_TIME_PICKER_INTERVALS}
+                        timeZoneOffsetInMinutes={timezoneOffSetInMinutes}
+                    />
+                ) : (
+                    <DateTimePicker
+                        testID='custom_status_clear_after.date_time_picker'
+                        value={date.toDate()}
+                        mode='datetime'
+                        display='spinner'
+                        onChange={onChange}
+                        textColor={theme.centerChannelColor}
+                        minimumDate={minimumDate.toDate()}
+                        minuteInterval={CUSTOM_STATUS_TIME_PICKER_INTERVALS}
+                        timeZoneOffsetInMinutes={timezoneOffSetInMinutes}
+                    />
+                )
             )}
         </View>
     );

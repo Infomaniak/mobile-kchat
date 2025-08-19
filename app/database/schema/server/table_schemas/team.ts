@@ -20,5 +20,6 @@ export default tableSchema({
         {name: 'type', type: 'string'},
         {name: 'update_at', type: 'number'},
         {name: 'invite_id', type: 'string'},
+        {name: 'pack_name', type: 'string'},
     ],
 });

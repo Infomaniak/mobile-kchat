@@ -1,10 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {
-    Text,
     TouchableOpacity,
     View,
 } from 'react-native';
@@ -27,10 +26,11 @@ import ExpandedAnnouncementBanner from './expanded_announcement_banner';
 type Props = {
     bannerColor: string;
     bannerDismissed: boolean;
-    bannerEnabled: boolean;
     bannerText?: string;
     bannerTextColor?: string;
     allowDismissal: boolean;
+    icon?: React.ReactNode;
+    onCustomBannerAction?: () => void;
 }
 
 const getStyle = makeStyleSheetFromTheme((theme: Theme) => ({
@@ -47,10 +47,17 @@ const getStyle = makeStyleSheetFromTheme((theme: Theme) => ({
         marginHorizontal: 8,
         borderRadius: 7,
     },
+    contentContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flex: 1,
+    },
     wrapper: {
         flexDirection: 'row',
         flex: 1,
         overflow: 'hidden',
+
     },
     bannerTextContainer: {
         flex: 1,
@@ -76,10 +83,11 @@ const SNAP_POINT_WITHOUT_DISMISS = TITLE_HEIGHT + BUTTON_HEIGHT + MARGINS + TEXT
 const AnnouncementBanner = ({
     bannerColor,
     bannerDismissed,
-    bannerEnabled,
     bannerText = '',
     bannerTextColor = '#000',
     allowDismissal,
+    icon,
+    onCustomBannerAction,
 }: Props) => {
     const intl = useIntl();
     const serverUrl = useServerUrl();
@@ -121,9 +129,9 @@ const AnnouncementBanner = ({
     }, [serverUrl, bannerText]);
 
     useEffect(() => {
-        const showBanner = bannerEnabled && !bannerDismissed && Boolean(bannerText);
+        const showBanner = !bannerDismissed && Boolean(bannerText);
         setVisible(showBanner);
-    }, [bannerDismissed, bannerEnabled, bannerText]);
+    }, [bannerDismissed, bannerText]);
 
     useEffect(() => {
         height.value = withTiming(visible ? ANNOUNCEMENT_BAR_HEIGHT : 0, {
@@ -135,10 +143,6 @@ const AnnouncementBanner = ({
         height: height.value,
     }));
 
-    const bannerTextContainerStyle = useMemo(() => [style.bannerTextContainer, {
-        color: bannerTextColor,
-    }], [style, bannerTextColor]);
-
     return (
         <Animated.View
             style={[style.background, bannerStyle]}
@@ -149,26 +153,18 @@ const AnnouncementBanner = ({
                 {visible &&
                     <>
                         <TouchableOpacity
-                            onPress={handlePress}
+                            onPress={onCustomBannerAction || handlePress}
                             style={style.wrapper}
                         >
-                            <Text
-                                style={bannerTextContainerStyle}
-                                ellipsizeMode='tail'
-                                numberOfLines={1}
-                            >
-                                <CompassIcon
-                                    color={bannerTextColor}
-                                    name='information-outline'
-                                    size={18}
-                                />
-                                {'  '}
+                            <View style={style.contentContainer}>
+
+                                {icon && <View style={{marginRight: 6}}>{icon}</View>}
                                 <RemoveMarkdown
                                     value={bannerText}
                                     textStyle={markdownTextStyles}
                                     baseStyle={style.bannerText}
                                 />
-                            </Text>
+                            </View>
                         </TouchableOpacity>
                         {allowDismissal && (
                             <TouchableOpacity
