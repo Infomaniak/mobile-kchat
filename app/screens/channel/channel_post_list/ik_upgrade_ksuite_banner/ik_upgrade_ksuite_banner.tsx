@@ -4,14 +4,14 @@
 import React from 'react';
 import {useIntl} from 'react-intl';
 
-import FormattedText from '@app/components/formatted_text';
-import {useTheme} from '@app/context/theme';
-import {getNextWcPack, type PackName} from '@app/hooks/plans';
-import {formatYMDDurationHuman} from '@app/utils/duration';
+import FormattedText from '@components/formatted_text';
+import {useTheme} from '@context/theme';
+import {getNextWcPack, type PackName} from '@hooks/plans';
+import {formatYMDDurationHuman} from '@utils/duration';
 
 import BannerBase, {bannerBaseStyles} from './ik_banner_base';
 
-import type LimitsModel from '@app/database/models/server/limits';
+import type LimitsModel from '@database/models/server/limits';
 
 type Props = {
     limits: LimitsModel;

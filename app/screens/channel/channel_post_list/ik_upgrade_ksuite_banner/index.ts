@@ -4,8 +4,8 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import React from 'react';
 
-import {observeLimits} from '@app/queries/servers/limit';
-import {observeCurrentPackName} from '@app/queries/servers/team';
+import {observeLimits} from '@queries/servers/limit';
+import {observeCurrentPackName} from '@queries/servers/team';
 
 import UpgradeKsuiteBanner from './ik_upgrade_ksuite_banner';
 

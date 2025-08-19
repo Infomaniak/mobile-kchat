@@ -3,7 +3,8 @@
 import {Model} from '@nozbe/watermelondb';
 import {field, writer} from '@nozbe/watermelondb/decorators';
 
-import {MM_TABLES} from '@app/constants/database';
+import {MM_TABLES} from '@constants/database';
+
 const {
     USAGE,
 } = MM_TABLES.SERVER;

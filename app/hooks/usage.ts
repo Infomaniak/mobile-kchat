@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import type {CloudUsageModel, LimitModel} from '@app/database/models/server';
+import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type {CloudUsage} from '@typings/components/cloud';
 
 // Returns an object of type CloudUsage with the values being the delta between the limit, and the actual usage of this installation.

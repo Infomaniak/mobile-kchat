@@ -19,8 +19,7 @@ import {validateDisplayName} from '@utils/channel';
 
 import ChannelInfoForm from './channel_info_form';
 
-import type {LimitModel} from '@app/database/models/server';
-import type CloudUsageModel from '@app/database/models/server/usage';
+import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type ChannelModel from '@typings/database/models/servers/channel';
 import type ChannelInfoModel from '@typings/database/models/servers/channel_info';
 import type {AvailableScreens} from '@typings/screens/navigation';

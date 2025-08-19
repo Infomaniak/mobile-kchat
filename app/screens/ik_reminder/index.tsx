@@ -7,10 +7,6 @@ import React, {useCallback, useMemo, useState} from 'react';
 import {Platform, ScrollView, TouchableOpacity, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-import {useTheme} from '@app/context/theme';
-import {quotaGate} from '@app/hooks/plans';
-import {useGetUsageDeltas} from '@app/hooks/usage';
-import {makeStyleSheetFromTheme} from '@app/utils/theme';
 import {BaseOption} from '@components/common_post_options';
 import FormattedText from '@components/formatted_text';
 import {ITEM_HEIGHT} from '@components/option_item';
@@ -20,17 +16,20 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import {quotaGate} from '@hooks/plans';
+import {useGetUsageDeltas} from '@hooks/usage';
 import NetworkManager from '@managers/network_manager';
 import BottomSheet from '@screens/bottom_sheet';
 import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {isSystemMessage} from '@utils/post';
+import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 import ClearAfterMenuItem from '../custom_status_clear_after/components/clear_after_menu_item';
 
-import type {PostReminderTimestamp} from '@app/client/rest/ikcustomactions';
-import type {CloudUsageModel, LimitModel} from '@app/database/models/server';
+import type {PostReminderTimestamp} from '@client/rest/ikcustomactions';
+import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
 
@@ -129,7 +128,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         if (showCustomPicker) {
             space = isAndroid ? -70 : 100;
         }
-        items.push(bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT, bottom) + space);
+        items.push(bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT) + space);
         return items;
     }, [isSystemPost, bottom, showCustomPicker]);
 

@@ -49,7 +49,7 @@ import {
 } from './table_schemas';
 
 export const serverSchema: AppSchema = appSchema({
-    version: 7,
+    version: 8,
     tables: [
         PlaybookRunSchema,
         PlaybookChecklistSchema,

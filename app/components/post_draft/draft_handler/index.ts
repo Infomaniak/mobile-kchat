@@ -4,11 +4,11 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import React from 'react';
 
-import {observeCurrentPackName} from '@app/queries/servers/team';
-import {observeIsCurrentUserAdmin} from '@app/queries/servers/user';
 import {DEFAULT_SERVER_MAX_FILE_SIZE} from '@constants/post_draft';
 import {observeCanUploadFiles} from '@queries/servers/security';
 import {observeConfigIntValue, observeMaxFileCount} from '@queries/servers/system';
+import {observeCurrentPackName} from '@queries/servers/team';
+import {observeIsCurrentUserAdmin} from '@queries/servers/user';
 
 import DraftHandler from './draft_handler';
 

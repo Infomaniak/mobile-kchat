@@ -732,6 +732,7 @@ class TestHelperSingleton {
             members: this.fakeQuery([]),
             teamSearchHistories: this.fakeQuery([]),
             playbookRuns: this.fakeQuery([]),
+            pack_name: '',
             ...overwrite,
         };
     };

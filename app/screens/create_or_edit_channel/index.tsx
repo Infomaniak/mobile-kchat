@@ -4,9 +4,9 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$} from 'rxjs';
 
-import {observeLimits} from '@app/queries/servers/limit';
-import {observeUsage} from '@app/queries/servers/usage';
 import {observeChannel, observeChannelInfo} from '@queries/servers/channel';
+import {observeLimits} from '@queries/servers/limit';
+import {observeUsage} from '@queries/servers/usage';
 
 import CreateOrEditChannel from './create_or_edit_channel';
 

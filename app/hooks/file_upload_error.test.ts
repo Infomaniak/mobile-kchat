@@ -15,13 +15,13 @@ describe('useFileUploadError', () => {
     });
 
     it('should initialize with no upload error', () => {
-        const {result} = renderHook(() => useFileUploadError());
+        const {result} = renderHook(() => useFileUploadError('ksuite_essential', false));
         expect(result.current.uploadError).toBeNull();
         expect(typeof result.current.newUploadError).toBe('function');
     });
 
     it('should set upload error when newUploadError is called', () => {
-        const {result} = renderHook(() => useFileUploadError());
+        const {result} = renderHook(() => useFileUploadError('ksuite_essential', false));
         const errorMessage = 'Upload failed';
         act(() => {
             result.current.newUploadError(errorMessage);
@@ -30,7 +30,7 @@ describe('useFileUploadError', () => {
     });
 
     it('should clear upload error after timeout', () => {
-        const {result} = renderHook(() => useFileUploadError());
+        const {result} = renderHook(() => useFileUploadError('ksuite_essential', false));
         const errorMessage = 'Upload failed';
         act(() => {
             result.current.newUploadError(errorMessage);
@@ -43,7 +43,7 @@ describe('useFileUploadError', () => {
     });
 
     it('should handle different types of error messages', () => {
-        const {result} = renderHook(() => useFileUploadError());
+        const {result} = renderHook(() => useFileUploadError('ksuite_essential', false));
         const complexErrorMessage = 'Complex error: File size too large (5MB), maximum allowed is 2MB';
         act(() => {
             result.current.newUploadError(complexErrorMessage);
@@ -52,7 +52,7 @@ describe('useFileUploadError', () => {
     });
 
     it('should clear previous timeout when new error is set', () => {
-        const {result} = renderHook(() => useFileUploadError());
+        const {result} = renderHook(() => useFileUploadError('ksuite_essential', false));
         const firstError = 'First error';
         const secondError = 'Second error';
 
@@ -86,7 +86,7 @@ describe('useFileUploadError', () => {
     });
 
     it('should not clear error before timeout completes', () => {
-        const {result} = renderHook(() => useFileUploadError());
+        const {result} = renderHook(() => useFileUploadError('ksuite_essential', false));
         const errorMessage = 'Upload failed';
         act(() => {
             result.current.newUploadError(errorMessage);
@@ -104,7 +104,7 @@ describe('useFileUploadError', () => {
     });
 
     it('should handle multiple consecutive errors correctly', () => {
-        const {result} = renderHook(() => useFileUploadError());
+        const {result} = renderHook(() => useFileUploadError('ksuite_essential', false));
         const error1 = 'Error 1';
         const error2 = 'Error 2';
         const error3 = 'Error 3';

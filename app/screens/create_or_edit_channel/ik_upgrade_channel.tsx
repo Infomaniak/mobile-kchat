@@ -3,9 +3,9 @@
 
 import React from 'react';
 
-import FormattedText from '@app/components/formatted_text';
-import {General} from '@app/constants';
-import {useTheme} from '@app/context/theme';
+import FormattedText from '@components/formatted_text';
+import {General} from '@constants';
+import {useTheme} from '@context/theme';
 
 import BannerBase, {bannerBaseStyles} from '../channel/channel_post_list/ik_upgrade_ksuite_banner/ik_banner_base';
 

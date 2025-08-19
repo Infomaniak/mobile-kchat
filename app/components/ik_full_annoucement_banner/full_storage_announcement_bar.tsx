@@ -7,17 +7,17 @@ import {
 import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
 
-import {Screens} from '@app/constants';
-import {useTheme} from '@app/context/theme';
-import {getQuotaDescription, type PackName} from '@app/hooks/plans';
-import {useGetUsageDeltas} from '@app/hooks/usage';
-import {openAsBottomSheet} from '@app/screens/navigation';
+import {Screens} from '@constants';
+import {useTheme} from '@context/theme';
+import {getQuotaDescription, type PackName} from '@hooks/plans';
+import {useGetUsageDeltas} from '@hooks/usage';
+import {openAsBottomSheet} from '@screens/navigation';
 
 import AnnouncementBanner from '../announcement_banner/announcement_banner';
 
 import WarningIcon from './alert';
 
-import type {CloudUsageModel, LimitModel} from '@app/database/models/server';
+import type {CloudUsageModel, LimitModel} from '@database/models/server';
 
 type Props = {
     currentPackName?: PackName;

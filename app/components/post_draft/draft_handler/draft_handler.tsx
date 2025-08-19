@@ -5,10 +5,9 @@ import React, {useCallback, useEffect, useRef} from 'react';
 import {useIntl} from 'react-intl';
 
 import {addFilesToDraft, removeDraft} from '@actions/local/draft';
-import {getQuotaDescription, type PackName} from '@app/hooks/plans';
-import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import useFileUploadError from '@hooks/file_upload_error';
+import {type PackName} from '@hooks/plans';
 import DraftEditPostUploadManager from '@managers/draft_upload_manager';
 import {fileMaxWarning, fileSizeWarning, uploadDisabledWarning} from '@utils/file';
 
@@ -32,7 +31,7 @@ type Props = {
     value: string;
     setIsFocused: (isFocused: boolean) => void;
     isCurrentUserAdmin: boolean;
-    currentPackName?: PackName | undefined;
+    currentPackName: PackName;
 }
 
 const emptyFileList: FileInfo[] = [];
@@ -60,42 +59,12 @@ export default function DraftHandler(props: Props) {
     const intl = useIntl();
 
     const uploadErrorHandlers = useRef<ErrorHandlers>({});
-    const {uploadError, newUploadError} = useFileUploadError();
+    const {uploadError, newUploadError} = useFileUploadError(currentPackName, isCurrentUserAdmin);
 
     const clearDraft = useCallback(() => {
         removeDraft(serverUrl, channelId, rootId);
         updateValue('');
     }, [serverUrl, channelId, rootId]);
-
-    const theme = useTheme();
-
-    const newUploadError = useCallback((error: React.ReactNode) => {
-        const quotaDescription = getQuotaDescription(currentPackName, isCurrentUserAdmin);
-
-        if (error === 'Quota exceeded') {
-            openAsBottomSheet({
-                closeButtonId: 'close-quota-exceeded',
-                screen: Screens.INFOMANIAK_QUOTA_EXCEEDED,
-                theme,
-                title: '',
-                props: {
-                    quotaType: {
-                        title: 'infomaniak.size_quota_exceeded.title',
-                        description: quotaDescription,
-                        image: 'storage',
-                    },
-                },
-            });
-        }
-        if (uploadErrorTimeout.current) {
-            clearTimeout(uploadErrorTimeout.current);
-        }
-        setUploadError(error);
-
-        uploadErrorTimeout.current = setTimeout(() => {
-            setUploadError(null);
-        }, UPLOAD_ERROR_SHOW_INTERVAL);
-    }, []);
 
     const addFiles = useCallback((newFiles: FileInfo[]) => {
         if (!newFiles.length) {

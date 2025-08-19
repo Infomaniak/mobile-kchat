@@ -5,9 +5,9 @@ import {LinearGradient} from 'expo-linear-gradient';
 import React from 'react';
 import {View} from 'react-native';
 
-import {useTheme} from '@app/context/theme';
-import {makeStyleSheetFromTheme} from '@app/utils/theme';
+import {useTheme} from '@context/theme';
 import UpgradeIcon from '@screens/channel/channel_post_list/upgrade_icon';
+import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import FormattedText from '../formatted_text';
 

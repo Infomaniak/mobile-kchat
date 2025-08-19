@@ -8,12 +8,15 @@ import {UPLOAD_ERROR_SHOW_INTERVAL} from '@constants/files';
 import {useTheme} from '@context/theme';
 import {openAsBottomSheet} from '@screens/navigation';
 
-const useFileUploadError = () => {
+import {getQuotaDescription, type PackName} from './plans';
+
+const useFileUploadError = (currentPackName: PackName, isCurrentUserAdmin: boolean) => {
     const [uploadError, setUploadError] = useState<React.ReactNode>(null);
     const uploadErrorTimeout = useRef<NodeJS.Timeout>();
     const theme = useTheme();
 
     const newUploadError = useCallback((error: React.ReactNode) => {
+        const quotaDescription = getQuotaDescription(currentPackName, isCurrentUserAdmin);
         if (error === 'Quota exceeded') {
             openAsBottomSheet({
                 closeButtonId: 'close-quota-exceeded',
@@ -23,7 +26,7 @@ const useFileUploadError = () => {
                 props: {
                     quotaType: {
                         title: 'infomaniak.size_quota_exceeded.title',
-                        description: 'infomaniak.size_quota_exceeded.description',
+                        description: quotaDescription,
                         image: 'storage',
                     },
                 },
