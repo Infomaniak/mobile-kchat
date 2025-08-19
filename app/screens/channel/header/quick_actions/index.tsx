@@ -15,7 +15,6 @@ type Props = {
     channelId: string;
     callsEnabled: boolean;
     isDMorGM: boolean;
-    hasPlaybookRuns: boolean;
 }
 
 export const SEPARATOR_HEIGHT = 17;

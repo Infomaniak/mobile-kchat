@@ -185,7 +185,6 @@ const ChannelHeader = ({
                     channelId={channelId}
                     callsEnabled={callsAvailable}
                     isDMorGM={isDMorGM}
-                    hasPlaybookRuns={hasPlaybookRuns}
                 />
             );
         };
