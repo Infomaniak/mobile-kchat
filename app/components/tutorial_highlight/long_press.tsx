@@ -27,7 +27,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         alignItems: 'center',
         backgroundColor: theme.centerChannelBg,
         borderRadius: 8,
-        height: 161,
+        minHeight: 161,
         padding: 16,
         width: 247,
     },
