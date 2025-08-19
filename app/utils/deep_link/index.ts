@@ -150,7 +150,8 @@ type ConferencePathParams = {
     serverUrl: string;
     channelId: string;
 };
-const CONFERENCE_PATH = `:serverUrl(.*)/channels/:channelId(${IDENTIFIER_PATH_PATTERN})/conference(\\?conference_jwt=.+)?`;
+const CONFERENCE_PATH = ':serverUrl/channels/:channelId/conference';
+
 export const matchConferenceDeeplink = match<ConferencePathParams>(CONFERENCE_PATH);
 
 type ServerPathParams = {
