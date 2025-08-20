@@ -48,6 +48,9 @@ declare class FileModel extends Model {
     /** post : The related Post record for this file */
     post: Relation<PostModel>;
 
+    /** isBlocked : Whether the file is blocked and cannot be opened */
+    isBlocked: boolean;
+
     toFileInfo: (authorId: string) => FileInfo;
 }
 

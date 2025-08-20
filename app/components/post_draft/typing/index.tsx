@@ -137,6 +137,13 @@ function Typing({
     }, []);
 
     useEffect(() => {
+        const listener = DeviceEventEmitter.addListener(Events.USER_STOP_TYPING, onUserStopTyping);
+        return () => {
+            listener.remove();
+        };
+    }, [onUserStopTyping]);
+
+    useEffect(() => {
         height.value = (typing.current.length + recording.current.length) ? TYPING_HEIGHT : 0;
     }, [refresh]);
 
@@ -150,7 +157,7 @@ function Typing({
                 timeoutToDisappear.current[action] = undefined;
             }
         }
-    }, [channelId, rootId]);
+    }, [channelId, rootId, height]);
 
     const renderAction = (action: Action) => {
         const ref = action === 'typing' ? typing : recording;

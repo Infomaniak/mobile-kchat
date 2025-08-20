@@ -6,12 +6,12 @@ import {useIntl} from 'react-intl';
 import {StyleSheet, TouchableOpacity, View, type StyleProp, type ViewStyle} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-import Loading from '@app/components/loading';
 import IkCallsParticipantStackIcon from '@calls/components/ik_calls_participant_stack/icon';
 import IkCallsParticipantStackIconOverflow from '@calls/components/ik_calls_participant_stack/icon_overflow';
 import IkCallsParticipantStackList from '@calls/components/ik_calls_participant_stack/list';
 import {useFetchParticipantUsers} from '@calls/components/ik_calls_participant_stack/list/list';
 import FormattedText from '@components/formatted_text';
+import Loading from '@components/loading';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
@@ -22,7 +22,7 @@ import {preventDoubleTap} from '@utils/tap';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import type ConferenceParticipantModel from '@app/database/models/server/conference_participant';
+import type ConferenceParticipantModel from '@database/models/server/conference_participant';
 
 const ROW_HEIGHT = 40;
 
@@ -90,7 +90,7 @@ export const IkCallsParticipantStack = ({
             </>
         );
 
-        const snapPoints: Array<string | number> = [1, bottomSheetSnapPoint(Math.min(participantCount, 5), ROW_HEIGHT, bottom) + TITLE_HEIGHT];
+        const snapPoints: Array<string | number> = [1, bottomSheetSnapPoint(Math.min(participantCount, 5), ROW_HEIGHT) + TITLE_HEIGHT];
         if (participantCount > 5) {
             snapPoints.push('80%');
         }

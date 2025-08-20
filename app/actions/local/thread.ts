@@ -16,7 +16,7 @@ import {dismissAllModals, dismissAllModalsAndPopToRoot, dismissAllOverlays, goTo
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {isTablet} from '@utils/helpers';
-import {logError} from '@utils/log';
+import {logDebug, logError} from '@utils/log';
 import {changeOpacity} from '@utils/theme';
 
 import type Model from '@nozbe/watermelondb/Model';
@@ -249,7 +249,7 @@ export async function processReceivedThreads(serverUrl: string, threads: Thread[
 export async function markTeamThreadsAsRead(serverUrl: string, teamId: string, prepareRecordsOnly = false) {
     try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const threads = await queryThreadsInTeam(database, teamId, true, true, true).fetch();
+        const threads = await queryThreadsInTeam(database, teamId, {onlyUnreads: true, hasReplies: true, isFollowing: true}).fetch();
         const models = threads.map((thread) => thread.prepareUpdate((record) => {
             record.unreadMentions = 0;
             record.unreadReplies = 0;
@@ -311,7 +311,12 @@ export async function updateThread(serverUrl: string, threadId: string, updatedT
         }
         return {model};
     } catch (error) {
-        logError('Failed updateThread', error);
+        let logger = logError;
+
+        if (__DEV__) {
+            logger = logDebug;
+        }
+        logger('Failed updateThread', error);
         return {error};
     }
 }

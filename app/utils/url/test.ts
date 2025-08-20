@@ -135,7 +135,7 @@ describe('UrlUtils', () => {
         const SERVER_WITH_SUBPATH = `http://${URL_PATH_NO_PROTOCOL}`;
         const DEEPLINK_URL_ROOT = `mattermost://${URL_NO_PROTOCOL}`;
 
-        const DM_USER = TestHelper.fakeUserWithId();
+        const DM_USER = TestHelper.fakeUser();
         const GM_CHANNEL_NAME = '4862db64e76a321d167fe6677f16e96e9275dabe';
 
         const tests = [
@@ -437,7 +437,8 @@ describe('UrlUtils', () => {
             const onError = jest.fn();
             const onSuccess = jest.fn();
 
-            await UrlUtils.tryOpenURL(url, onError, onSuccess);
+            UrlUtils.tryOpenURL(url, onError, onSuccess);
+            await TestHelper.wait(100);
             expect(onError).not.toHaveBeenCalled();
             expect(onSuccess).toHaveBeenCalledTimes(1);
         });

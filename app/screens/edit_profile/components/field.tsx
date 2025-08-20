@@ -1,11 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {memo, type RefObject, useCallback} from 'react';
+import React, {type ComponentProps, memo, useCallback} from 'react';
 import {useIntl} from 'react-intl';
 import {Platform, type TextInputProps, View} from 'react-native';
 
-import FloatingTextInput, {type FloatingTextInputRef} from '@components/floating_text_input_label';
+import FloatingTextInput from '@components/floating_text_input_label';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import {changeOpacity, getKeyboardAppearanceFromTheme, makeStyleSheetFromTheme} from '@utils/theme';
@@ -20,7 +20,7 @@ export type FieldProps = TextInputProps & {
     testID: string;
     error?: string;
     value: string;
-    fieldRef: RefObject<FloatingTextInputRef>;
+    fieldRef: ComponentProps<typeof FloatingTextInput>['ref'];
     onFocusNextField: (fieldKey: string) => void;
 };
 
@@ -72,7 +72,6 @@ const Field = ({
 
     const formattedLabel = isOptional ? `${label} ${optionalText}` : label;
 
-    const textInputStyle = isDisabled ? style.disabledStyle : undefined;
     const subContainer = [style.viewContainer, {paddingHorizontal: isTablet ? 42 : 20}];
     const fieldInputTestId = isDisabled ? `${testID}.input.disabled` : `${testID}.input`;
 
@@ -97,7 +96,6 @@ const Field = ({
                 value={value}
                 ref={fieldRef}
                 onSubmitEditing={onSubmitEditing}
-                textInputStyle={textInputStyle}
                 {...props}
             />
         </View>

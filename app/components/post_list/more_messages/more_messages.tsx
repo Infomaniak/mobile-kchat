@@ -12,6 +12,7 @@ import FormattedText from '@components/formatted_text';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {Events} from '@constants';
 import {useServerUrl} from '@context/server';
+import {useIsTablet} from '@hooks/device';
 import useDidUpdate from '@hooks/did_update';
 import EphemeralStore from '@store/ephemeral_store';
 import {makeStyleSheetFromTheme, hexToHue, changeOpacity} from '@utils/theme';
@@ -115,6 +116,7 @@ const MoreMessages = ({
 }: Props) => {
     const serverUrl = useServerUrl();
     const insets = useSafeAreaInsets();
+    const isTablet = useIsTablet();
     const pressed = useRef(false);
     const resetting = useRef(false);
     const initialScroll = useRef(false);
@@ -125,7 +127,7 @@ const MoreMessages = ({
     const top = useSharedValue(0);
 
     // The final top:
-    const adjustedTop = insets.top;
+    const adjustedTop = (isTablet ? 0 : insets.top);
 
     const BARS_FACTOR = Math.abs((1) / (HIDDEN_TOP - SHOWN_TOP));
 
@@ -210,7 +212,7 @@ const MoreMessages = ({
         top.value = 0;
         resetMessageCount(serverUrl, channelId);
         pressed.current = false;
-    }, [serverUrl, channelId]);
+    }, [top, serverUrl, channelId]);
 
     const onPress = useCallback(() => {
         if (pressed.current || newMessageLineIndex <= 0) {
@@ -219,7 +221,7 @@ const MoreMessages = ({
 
         pressed.current = true;
         scrollToIndex(newMessageLineIndex, true);
-    }, [newMessageLineIndex]);
+    }, [newMessageLineIndex, scrollToIndex]);
 
     useDidUpdate(() => {
         setLoading(EphemeralStore.isLoadingMessagesForChannel(serverUrl, channelId));

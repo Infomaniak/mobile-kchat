@@ -61,8 +61,10 @@ describe('Channels - Channel Info', () => {
         await expect(ChannelInfoScreen.muteAction).toBeVisible();
         await expect(ChannelInfoScreen.joinStartCallAction).toBeVisible();
         await expect(ChannelInfoScreen.ignoreMentionsOptionToggledOff).toBeVisible();
+        await ChannelInfoScreen.scrollView.scrollTo('bottom');
         await expect(ChannelInfoScreen.pinnedMessagesOption).toBeVisible();
         await expect(ChannelInfoScreen.copyChannelLinkOption).toBeVisible();
+        await ChannelInfoScreen.scrollView.scrollTo('bottom');
         await expect(ChannelInfoScreen.editChannelOption).toBeVisible();
         await ChannelInfoScreen.scrollView.scrollTo('bottom');
         await expect(ChannelInfoScreen.leaveChannelOption).toBeVisible();

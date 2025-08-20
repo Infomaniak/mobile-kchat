@@ -10,13 +10,14 @@ import type FileModel from '@typings/database/models/servers/file';
 import type PostModel from '@typings/database/models/servers/post';
 import type PostsInChannelModel from '@typings/database/models/servers/posts_in_channel';
 import type PostsInThreadModel from '@typings/database/models/servers/posts_in_thread';
-
+import type ScheduledPostModel from '@typings/database/models/servers/scheduled_post';
 const {
     DRAFT,
     FILE,
     POST,
     POSTS_IN_CHANNEL,
     POSTS_IN_THREAD,
+    SCHEDULED_POST,
 } = MM_TABLES.SERVER;
 
 /**
@@ -26,7 +27,7 @@ const {
  * @param {RecordPair} operator.value
  * @returns {Promise<PostModel>}
  */
-export const transformPostRecord = ({action, database, value}: TransformerArgs): Promise<PostModel> => {
+export const transformPostRecord = ({action, database, value}: TransformerArgs<PostModel, Post>): Promise<PostModel> => {
     const raw = value.raw as Post;
     const record = value.record as PostModel;
     const isCreateAction = action === OperationType.CREATE;
@@ -73,7 +74,7 @@ export const transformPostRecord = ({action, database, value}: TransformerArgs):
  * @param {RecordPair} operator.value
  * @returns {Promise<PostsInThreadModel>}
  */
-export const transformPostInThreadRecord = ({action, database, value}: TransformerArgs): Promise<PostsInThreadModel> => {
+export const transformPostInThreadRecord = ({action, database, value}: TransformerArgs<PostsInThreadModel, PostsInThread>): Promise<PostsInThreadModel> => {
     const raw = value.raw as PostsInThread;
     const record = value.record as PostsInThreadModel;
     const isCreateAction = action === OperationType.CREATE;
@@ -101,7 +102,7 @@ export const transformPostInThreadRecord = ({action, database, value}: Transform
  * @param {RecordPair} operator.value
  * @returns {Promise<FileModel>}
  */
-export const transformFileRecord = ({action, database, value}: TransformerArgs): Promise<FileModel> => {
+export const transformFileRecord = ({action, database, value}: TransformerArgs<FileModel, FileInfo>): Promise<FileModel> => {
     const raw = value.raw as FileInfo;
     const record = value.record as FileModel;
     const isCreateAction = action === OperationType.CREATE;
@@ -140,7 +141,7 @@ export const transformFileRecord = ({action, database, value}: TransformerArgs):
  * @param {RecordPair} operator.value
  * @returns {Promise<DraftModel>}
  */
-export const transformDraftRecord = ({action, database, value}: TransformerArgs): Promise<DraftModel> => {
+export const transformDraftRecord = ({action, database, value}: TransformerArgs<DraftModel, Draft>): Promise<DraftModel> => {
     const emptyFileInfo: FileInfo[] = [];
     const emptyPostMetadata: PostMetadata = {};
     const raw = value.raw as Draft;
@@ -171,7 +172,7 @@ export const transformDraftRecord = ({action, database, value}: TransformerArgs)
  * @param {RecordPair} operator.value
  * @returns {Promise<PostsInChannelModel>}
  */
-export const transformPostsInChannelRecord = ({action, database, value}: TransformerArgs): Promise<PostsInChannelModel> => {
+export const transformPostsInChannelRecord = ({action, database, value}: TransformerArgs<PostsInChannelModel, PostsInChannel>): Promise<PostsInChannelModel> => {
     const raw = value.raw as PostsInChannel;
     const record = value.record as PostsInChannelModel;
     const isCreateAction = action === OperationType.CREATE;
@@ -190,4 +191,44 @@ export const transformPostsInChannelRecord = ({action, database, value}: Transfo
         value,
         fieldsMapper,
     }) as Promise<PostsInChannelModel>;
+};
+
+/**
+ * transformPostRecords: Prepares records of the SERVER database 'ScheduledPosts' table for update or create actions.
+ */
+export const transformSchedulePostsRecord = ({action, database, value}: TransformerArgs<ScheduledPostModel, ScheduledPost>): Promise<ScheduledPostModel> => {
+    const emptyFileInfo: FileInfo[] = [];
+    const raw = value.raw;
+
+    if (!raw.message && !raw.metadata?.files?.length) {
+        throw new Error('Scheduled post message and files are empty');
+    }
+
+    const fieldsMapper = (scheduledPost: ScheduledPostModel) => {
+        scheduledPost._raw.id = raw.id;
+        scheduledPost.rootId = raw?.root_id ?? '';
+        scheduledPost.message = raw?.message ?? '';
+        scheduledPost.channelId = raw?.channel_id ?? '';
+        scheduledPost.files = raw?.metadata?.files ?? emptyFileInfo;
+        scheduledPost.metadata = raw?.metadata ?? null;
+        if (raw.priority) {
+            scheduledPost.metadata = {
+                ...scheduledPost.metadata,
+                priority: raw.priority,
+            };
+        }
+        scheduledPost.updateAt = raw.update_at ?? Date.now();
+        scheduledPost.createAt = raw.create_at;
+        scheduledPost.scheduledAt = raw.scheduled_at;
+        scheduledPost.processedAt = raw.processed_at ?? 0;
+        scheduledPost.errorCode = raw.error_code || scheduledPost.errorCode;
+    };
+
+    return prepareBaseRecord({
+        action,
+        database,
+        tableName: SCHEDULED_POST,
+        value,
+        fieldsMapper,
+    }) as Promise<ScheduledPostModel>;
 };

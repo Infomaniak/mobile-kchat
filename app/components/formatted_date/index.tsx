@@ -5,35 +5,58 @@ import React from 'react';
 import {useIntl} from 'react-intl';
 import {Text, type TextProps} from 'react-native';
 
-import formatDateTime from '@utils/format_datetime';
+import {logDebug} from '@utils/log';
+
+export type FormattedDateFormat = Exclude<Intl.DateTimeFormatOptions, 'timeZone'>;
 
 type FormattedDateProps = TextProps & {
-    format?: string;
+    format?: FormattedDateFormat;
     timezone?: string | UserTimezone | null;
     value: number | string | Date;
 }
 
-const FormattedDate = ({timezone, value, ...props}: FormattedDateProps) => {
-    const {locale} = useIntl();
+const DEFAULT_FORMAT: FormattedDateFormat = {dateStyle: 'medium'};
 
-    let zone: string | undefined;
-    if (timezone) {
-        if (typeof timezone === 'object') {
-            zone = timezone.useAutomaticTimezone ? timezone.automaticTimezone : timezone.manualTimezone;
-        } else {
-            zone = timezone;
+const FormattedDate = ({
+    format = DEFAULT_FORMAT,
+    timezone,
+    value,
+    ...props
+}: FormattedDateProps) => {
+    const {locale, formatMessage} = useIntl();
+
+    let timeZone: string | undefined;
+    if (timezone && typeof timezone === 'object') {
+        timeZone = timezone.useAutomaticTimezone ? timezone.automaticTimezone : timezone.manualTimezone;
+    } else {
+        timeZone = timezone ?? undefined;
+    }
+
+    let formattedDate;
+    try {
+        formattedDate = new Intl.DateTimeFormat(locale, {
+            ...format,
+            timeZone,
+        }).format(new Date(value));
+    } catch (error) {
+        logDebug('Failed to format date', {locale, timezone}, error);
+    }
+
+    if (!formattedDate) {
+        try {
+            formattedDate = new Intl.DateTimeFormat(locale, {
+                ...format,
+            }).format(new Date(value));
+        } catch (error) {
+            logDebug('Failed to format default date', {locale}, error);
         }
     }
 
-    const dateTime = formatDateTime(value, {timeZone: zone, locale, capitalize: true});
+    if (!formattedDate) {
+        formattedDate = formatMessage({id: 'date.unknown', defaultMessage: 'Unknown'});
+    }
 
-    return (
-        <Text
-            {...props}
-        >
-            {dateTime}
-        </Text>
-    );
+    return <Text {...props}>{formattedDate}</Text>;
 };
 
 export default FormattedDate;

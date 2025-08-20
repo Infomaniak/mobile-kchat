@@ -46,7 +46,7 @@ const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Pro
         backgroundColor: theme.centerChannelBg,
         height: size,
         width: size,
-    }), [size]);
+    }), [size, theme.centerChannelBg]);
 
     if (typeof source === 'string') {
         return (

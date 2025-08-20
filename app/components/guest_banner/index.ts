@@ -4,7 +4,7 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$, switchMap} from '@nozbe/watermelondb/utils/rx';
 
-import {observeChannelInfo} from '@app/queries/servers/channel';
+import {observeChannelInfo} from '@queries/servers/channel';
 
 import GuestBanner from './guest_banner';
 

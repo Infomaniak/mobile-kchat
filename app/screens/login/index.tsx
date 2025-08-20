@@ -5,7 +5,7 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Platform, useWindowDimensions, View, type LayoutChangeEvent} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {Navigation} from 'react-native-navigation';
-import Animated, {ReduceMotion, useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import FormattedText from '@components/formatted_text';
@@ -14,7 +14,9 @@ import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useIsTablet} from '@hooks/device';
 import {useDefaultHeaderHeight} from '@hooks/header';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import {useScreenTransitionAnimation} from '@hooks/screen_transition_animation';
 import NetworkManager from '@managers/network_manager';
+import SecurityManager from '@managers/security_manager';
 import Background from '@screens/background';
 import {dismissModal, goToScreen, loginAnimationOptions, popTopScreen} from '@screens/navigation';
 import {preventDoubleTap} from '@utils/tap';
@@ -85,7 +87,6 @@ const LoginOptions = ({
     const dimensions = useWindowDimensions();
     const defaultHeaderHeight = useDefaultHeaderHeight();
     const isTablet = useIsTablet();
-    const translateX = useSharedValue(dimensions.width);
     const [contentFillScreen, setContentFillScreen] = useState(false);
     const numberSSOs = useMemo(() => {
         return Object.values(ssoOptions).filter((v) => v.enabled).length;
@@ -119,7 +120,7 @@ const LoginOptions = ({
                 defaultMessage="You can't log in to your account yet. At least one login option must be configured. Contact your System Admin for assistance."
             />
         );
-    }, [hasLoginForm, numberSSOs, theme]);
+    }, [hasLoginForm, numberSSOs, styles.subheader]);
 
     const goToSso = preventDoubleTap((ssoType: string) => {
         goToScreen(Screens.SSO, '', {config, extra, launchError, launchType, license, theme, ssoType, serverDisplayName, serverUrl}, loginAnimationOptions());
@@ -130,13 +131,6 @@ const LoginOptions = ({
             theme={theme}
         />
     );
-
-    const transform = useAnimatedStyle(() => {
-        const duration = Platform.OS === 'android' ? 250 : 350;
-        return {
-            transform: [{translateX: withTiming(translateX.value, {duration, reduceMotion: ReduceMotion.Never})}],
-        };
-    }, []);
 
     const dismiss = () => {
         dismissModal({componentId});
@@ -160,25 +154,9 @@ const LoginOptions = ({
         });
 
         return () => navigationEvents.remove();
-    }, []);
+    }, [closeButtonId, componentId, serverUrl]);
 
-    useEffect(() => {
-        translateX.value = 0;
-    }, []);
-
-    useEffect(() => {
-        const listener = {
-            componentDidAppear: () => {
-                translateX.value = 0;
-            },
-            componentDidDisappear: () => {
-                translateX.value = -dimensions.width;
-            },
-        };
-        const unsubscribe = Navigation.events().registerComponentListener(listener, Screens.LOGIN);
-
-        return () => unsubscribe.remove();
-    }, [dimensions]);
+    const animatedStyles = useScreenTransitionAnimation(Screens.LOGIN);
 
     useNavButtonPressed(closeButtonId || '', componentId, dismiss, []);
     useAndroidHardwareBackHandler(componentId, pop);
@@ -213,17 +191,18 @@ const LoginOptions = ({
         <View
             style={styles.flex}
             testID='login.screen'
+            nativeID={SecurityManager.getShieldScreenId(componentId, false, true)}
         >
             <Background theme={theme}/>
-            <AnimatedSafeArea style={[styles.container, transform]}>
+            <AnimatedSafeArea style={[styles.container, animatedStyles]}>
                 <KeyboardAwareScrollView
                     bounces={true}
                     contentContainerStyle={[styles.innerContainer, additionalContainerStyle]}
-                    enableAutomaticScroll={true}
+                    enableAutomaticScroll={false}
                     enableOnAndroid={false}
                     enableResetScrollToCoords={true}
-                    extraScrollHeight={0}
-                    keyboardDismissMode='interactive'
+                    extraScrollHeight={20}
+                    keyboardDismissMode='on-drag'
                     keyboardShouldPersistTaps='handled'
                     ref={keyboardAwareRef}
                     scrollToOverflowEnabled={true}
@@ -239,6 +218,7 @@ const LoginOptions = ({
                         <Form
                             config={config}
                             extra={extra}
+                            keyboardAwareRef={keyboardAwareRef}
                             license={license}
                             launchError={launchError}
                             launchType={launchType}

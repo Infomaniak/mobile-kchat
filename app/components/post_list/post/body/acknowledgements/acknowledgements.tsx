@@ -4,7 +4,6 @@
 import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {View, Text, TouchableOpacity, useWindowDimensions} from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {acknowledgePost, unacknowledgePost} from '@actions/remote/post';
 import {fetchMissingProfilesByIds} from '@actions/remote/user';
@@ -24,12 +23,13 @@ import {USER_ROW_HEIGHT} from './users_list/user_list_item';
 
 import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
     currentUserId: UserModel['id'];
     currentUserTimezone: UserModel['timezone'];
     hasReactions: boolean;
-    location: string;
+    location: AvailableScreens;
     post: PostModel;
     theme: Theme;
 };
@@ -75,7 +75,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 const Acknowledgements = ({currentUserId, currentUserTimezone, hasReactions, location, post, theme}: Props) => {
     const intl = useIntl();
     const isTablet = useIsTablet();
-    const {bottom} = useSafeAreaInsets();
     const serverUrl = useServerUrl();
     const {height} = useWindowDimensions();
 
@@ -143,7 +142,7 @@ const Acknowledgements = ({currentUserId, currentUserTimezone, hasReactions, loc
             </>
         );
 
-        const snapPoint1 = bottomSheetSnapPoint(Math.min(userIds.length, 5), USER_ROW_HEIGHT, bottom) + TITLE_HEIGHT;
+        const snapPoint1 = bottomSheetSnapPoint(Math.min(userIds.length, 5), USER_ROW_HEIGHT) + TITLE_HEIGHT;
         const snapPoint2 = height * 0.8;
         const snapPoints: number[] = [1, Math.min(snapPoint1, snapPoint2)];
         if (userIds.length > 5 && snapPoint1 < snapPoint2) {
@@ -158,7 +157,11 @@ const Acknowledgements = ({currentUserId, currentUserTimezone, hasReactions, loc
             title: intl.formatMessage({id: 'mobile.acknowledgements.header', defaultMessage: 'Acknowledgements'}),
             theme,
         });
-    }, [bottom, intl, isTablet, acknowledgements, theme, location, post.channelId, currentUserTimezone]);
+    }, [
+        acknowledgements, height, intl,
+        theme, serverUrl, isTablet, style.listHeaderText,
+        post.channelId, location, currentUserTimezone,
+    ]);
 
     return (
         <>

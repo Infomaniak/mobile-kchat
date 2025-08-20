@@ -5,29 +5,26 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
-
-import com.facebook.react.bridge.ReactContext
+import com.facebook.react.PackageList
+import com.facebook.react.ReactHost
+import com.facebook.react.ReactNativeHost
+import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.UiThreadUtil
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
+import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.react.modules.network.OkHttpClientProvider
-import com.facebook.react.PackageList
-import com.facebook.react.ReactHost
 import com.facebook.react.ReactInstanceManager
-import com.facebook.react.ReactNativeHost
-import com.facebook.react.ReactPackage
 import com.facebook.soloader.SoLoader
+import com.oney.WebRTCModule.WebRTCModuleOptions
 
 import com.mattermost.networkclient.RCTOkHttpClientFactory
 import com.mattermost.notification.NotificationUtils.createCallNotificationChannel
 import com.mattermost.rnshare.helpers.RealPathUtil
-
-import com.nozbe.watermelondb.jsi.JSIInstaller
-
-import com.oney.WebRTCModule.WebRTCModuleOptions;
-
+import com.mattermost.turbolog.TurboLog
+import com.mattermost.turbolog.ConfigureOptions
+import com.nozbe.watermelondb.jsi.WatermelonDBJSIPackage
 import com.reactnativenavigation.NavigationApplication
 
 import com.wix.reactnativenotifications.core.AppLaunchHelper
@@ -54,6 +51,7 @@ class MainApplication : NavigationApplication(), INotificationsApplication {
                         // Packages that cannot be autolinked yet can be added manually here, for example:
                         // add(MyReactNativePackage())
                         add(RNNotificationsPackage(this@MainApplication))
+                        add(WatermelonDBJSIPackage())
                     }
 
                 override fun getJSMainModuleName(): String = "index"
@@ -73,7 +71,9 @@ class MainApplication : NavigationApplication(), INotificationsApplication {
         // Delete any previous temp files created by the app
         val tempFolder = File(applicationContext.cacheDir, RealPathUtil.CACHE_DIR_NAME)
         RealPathUtil.deleteTempFiles(tempFolder)
-        Log.i("ReactNative", "Cleaning temp cache " + tempFolder.absolutePath)
+        TurboLog.configure(options = ConfigureOptions(logsDirectory = applicationContext.cacheDir.absolutePath + "/logs", logPrefix = applicationContext.packageName))
+
+        TurboLog.i("ReactNative", "Cleaning temp cache " + tempFolder.absolutePath)
 
         // Tells React Native to use our RCTOkHttpClientFactory which builds an OKHttpClient
         // with a cookie jar defined in APIClientModule and an interceptor to intercept all
@@ -81,7 +81,7 @@ class MainApplication : NavigationApplication(), INotificationsApplication {
         OkHttpClientProvider.setOkHttpClientFactory(RCTOkHttpClientFactory())
         ExpoImageOkHttpClientGlideModule.okHttpClient = RCTOkHttpClientFactory().createNewNetworkModuleClient()
 
-        SoLoader.init(this, false)
+        SoLoader.init(this, OpenSourceMergedSoMapping)
         if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
             // If you opted-in for the New Architecture, we load the native entry point for this app.
             load(bridgelessEnabled = false)
@@ -96,7 +96,6 @@ class MainApplication : NavigationApplication(), INotificationsApplication {
         }
 
         ApplicationLifecycleDispatcher.onApplicationCreate(this)
-        registerJSIModules()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -127,29 +126,6 @@ class MainApplication : NavigationApplication(), INotificationsApplication {
             reactNativeHost.reactInstanceManager.currentReactContext?.runOnJSQueueThread {
                 action()
             }
-        }
-    }
-
-    @Suppress("DEPRECATION")
-    private fun registerJSIModules() {
-        val reactInstanceManager = reactNativeHost.reactInstanceManager
-
-        if (!listenerAdded) {
-            listenerAdded = true
-            reactInstanceManager.addReactInstanceEventListener(object : ReactInstanceManager.ReactInstanceEventListener {
-                override fun onReactContextInitialized(context: ReactContext) {
-                    runOnJSQueueThread {
-                        registerWatermelonJSI(context)
-                    }
-                }
-            })
-        }
-    }
-
-    private fun registerWatermelonJSI(context: ReactContext) {
-        val holder = context.javaScriptContextHolder?.get()
-        if (holder != null) {
-            JSIInstaller.install(context, holder)
         }
     }
 }

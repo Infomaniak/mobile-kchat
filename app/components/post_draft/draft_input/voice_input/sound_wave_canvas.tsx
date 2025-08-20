@@ -42,12 +42,12 @@ const draw = (ctx: CanvasRenderingContext2D, data: number[], canvasBarColor: str
     ctx.translate(0, -canvasHeight / 2);
 };
 
-type SoundWaveCanvas = {
+type SoundWaveCanvasProps = {
     data: number[];
     isRecording: boolean;
 }
 
-const SoundWaveCanvas = ({data, isRecording}: SoundWaveCanvas) => {
+const SoundWaveCanvas = ({data, isRecording}: SoundWaveCanvasProps) => {
     const theme = useTheme();
     const canvasRef = useRef<Canvas | null>(null);
     const canvasContextRef = useRef<CanvasRenderingContext2D | null>(null);

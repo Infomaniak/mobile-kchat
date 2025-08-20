@@ -1,13 +1,16 @@
 package com.mattermost.rnshare
 
-import android.content.pm.ServiceInfo
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
+import android.util.Base64
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.ForegroundInfo
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.mattermost.rnshare.helpers.RealPathUtil
+import okhttp3.CertificatePinner
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -23,11 +26,60 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
+import java.security.MessageDigest
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 import java.util.Objects
 
-class ShareWorker(context: Context, workerParameters: WorkerParameters) : Worker(context, workerParameters) {
-    private val okHttpClient = OkHttpClient()
+class ShareWorker(private val context: Context, workerParameters: WorkerParameters) : Worker(context, workerParameters) {
     private val jsonType: MediaType? = "application/json; charset=utf-8".toMediaTypeOrNull()
+    private val okHttpClient: OkHttpClient
+        get() {
+            val builder = OkHttpClient.Builder()
+            val fingerprintsMap = getCertificatesFingerPrints()
+            if (fingerprintsMap.isNotEmpty()) {
+                val pinner = CertificatePinner.Builder()
+                for ((domain, fingerprints) in fingerprintsMap) {
+                    for (fingerprint in fingerprints) {
+                        pinner.add(domain, "sha256/$fingerprint")
+                    }
+                }
+                val certificatePinner = pinner.build()
+                builder.certificatePinner(certificatePinner)
+            }
+            return builder.build()
+        }
+
+    private fun getCertificateFingerPrint(certInputStream: InputStream): String {
+        val certFactory = CertificateFactory.getInstance("X.509")
+        val certificate = certFactory.generateCertificate(certInputStream) as X509Certificate
+        val sha256 = MessageDigest.getInstance("SHA-256")
+        Base64.encodeToString(sha256.digest(certificate.publicKey.encoded), Base64.NO_WRAP)
+        val fingerprintBytes = sha256.digest(certificate.publicKey.encoded)
+        return Base64.encodeToString(fingerprintBytes, Base64.NO_WRAP)
+    }
+
+    private fun getCertificatesFingerPrints(): Map<String, List<String>> {
+        val fingerprintsMap = mutableMapOf<String, MutableList<String>>()
+        val assetsManager = context.assets
+        val certFiles = assetsManager.list("certs")?.filter { it.endsWith(".cer") || it.endsWith(".crt") } ?: return emptyMap()
+
+        for (fileName in certFiles) {
+            val domain = fileName.substringBeforeLast(".")
+            val certInputStream = assetsManager.open("certs/$fileName")
+            certInputStream.use {
+                val fingerprint = getCertificateFingerPrint(it)
+                if (fingerprintsMap.containsKey(domain)) {
+                    fingerprintsMap[domain]?.add(fingerprint)
+                } else {
+                    fingerprintsMap[domain] = mutableListOf(fingerprint)
+                }
+            }
+        }
+
+        return fingerprintsMap
+    }
 
     override fun doWork(): Result {
         val jsonString = inputData.getString("json_data") ?: return Result.failure()
@@ -145,10 +197,14 @@ class ShareWorker(context: Context, workerParameters: WorkerParameters) : Worker
                 .setContentTitle("Uploading Files")
                 .setTicker("Uploading Files")
                 .setContentText("File upload in progress")
-                .setSmallIcon(applicationContext.resources.getIdentifier("ic_kchat_notification", "drawable", applicationContext.packageName))
+                .setSmallIcon(applicationContext.resources.getIdentifier("ic_notification", "mipmap", applicationContext.packageName))
                 .setOngoing(true)
                 .build()
-        return ForegroundInfo(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(1, notification)
+        }
 
     }
 }

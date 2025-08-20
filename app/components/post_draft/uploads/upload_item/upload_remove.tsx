@@ -1,15 +1,16 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React from 'react';
+import React, {useCallback} from 'react';
 import {View, Platform, type StyleProp, type ViewStyle} from 'react-native';
 
 import {removeDraftFile} from '@actions/local/draft';
 import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
+import {useEditPost} from '@context/edit_post';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
-import DraftUploadManager from '@managers/draft_upload_manager';
+import DraftEditPostUploadManager from '@managers/draft_upload_manager';
 import {makeStyleSheetFromTheme, changeOpacity} from '@utils/theme';
 
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
     rootId: string;
     clientId: string;
     containerStyle?: StyleProp<ViewStyle>;
+    fileId: string;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
@@ -24,8 +26,8 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         tappableContainer: {
             position: 'absolute',
             elevation: 11,
-            top: -7,
-            right: -8,
+            top: -12,
+            right: -10,
             width: 24,
             height: 24,
         },
@@ -47,21 +49,28 @@ export default function UploadRemove({
     containerStyle,
     rootId,
     clientId,
+    fileId,
 }: Props) {
     const theme = useTheme();
     const style = getStyleSheet(theme);
     const serverUrl = useServerUrl();
+    const {onFileRemove, isEditMode} = useEditPost();
 
-    const onPress = () => {
-        DraftUploadManager.cancel(clientId);
+    const onPress = useCallback(() => {
+        if (isEditMode) {
+            onFileRemove?.(fileId || clientId);
+            return;
+        }
+        DraftEditPostUploadManager.cancel(clientId);
         removeDraftFile(serverUrl, channelId, rootId, clientId);
-    };
+    }, [onFileRemove, isEditMode, fileId, clientId, serverUrl, channelId, rootId]);
 
     return (
         <TouchableWithFeedback
             style={[style.tappableContainer, containerStyle]}
             onPress={onPress}
             type={'opacity'}
+            testID={`remove-button-${fileId}`}
         >
             <View style={style.removeButton}>
                 <CompassIcon

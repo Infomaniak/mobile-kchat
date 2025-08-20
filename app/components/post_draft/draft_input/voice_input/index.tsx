@@ -4,13 +4,13 @@
 import {useKeepAwake} from 'expo-keep-awake';
 import React, {useCallback, useEffect, useState} from 'react';
 import {TouchableOpacity, View} from 'react-native';
-import AudioRecorderPlayer, {AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption, AudioEncoderAndroidType, AudioSourceAndroidType, type AudioSet} from 'react-native-audio-recorder-player';
+import AudioRecorderPlayer, {AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption, AudioEncoderAndroidType, AudioSourceAndroidType, OutputFormatAndroidType, type AudioSet} from 'react-native-audio-recorder-player';
 
-import {useAudioPlayerContext} from '@app/context/audio_player';
-import {mmssss} from '@app/utils/datetime';
 import CompassIcon from '@components/compass_icon';
 import {MIC_SIZE} from '@constants/view';
+import {useAudioPlayerContext} from '@context/audio_player';
 import {useTheme} from '@context/theme';
+import {mmssss} from '@utils/datetime';
 import {deleteDeviceFile, extractFileInfo} from '@utils/file';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
@@ -82,8 +82,13 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
             const audioRecorderPlayer = new AudioRecorderPlayer();
 
             const audioSet: AudioSet = {
+
+                // Android
                 AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
+                OutputFormatAndroid: OutputFormatAndroidType.MPEG_4,
                 AudioSourceAndroid: AudioSourceAndroidType.MIC,
+
+                // iOS
                 AVModeIOS: AVModeIOSOption.measurement,
                 AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
                 AVNumberOfChannelsKeyIOS: 2,
@@ -130,7 +135,7 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
         onClose();
         if (recorder && url) {
             storeLocalAudioURI?.(url);
-            const fi = await extractFileInfo([{uri: url}]);
+            const fi = await extractFileInfo([{uri: url, type: 'audio/mp4'}]);
 
             fi[0].is_voice_recording = true;
             fi[0].uri = url;

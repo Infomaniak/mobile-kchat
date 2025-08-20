@@ -20,6 +20,7 @@ import UserProfileOptions, {type OptionsType} from './options';
 import UserProfileTitle, {HEADER_TEXT_HEIGHT} from './title';
 import UserInfo from './user_info';
 
+import type {CustomAttributeSet} from '@typings/api/custom_profile_attributes';
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
@@ -39,7 +40,7 @@ type Props = {
     isSystemAdmin: boolean;
     isTeamAdmin: boolean;
     manageMode?: boolean;
-    location: AvailableScreens;
+    location?: AvailableScreens;
     teamId: string;
     teammateDisplayName: string;
     user: UserModel;
@@ -47,6 +48,8 @@ type Props = {
     usernameOverride?: string;
     hideGuestTags: boolean;
     isWebHook?: boolean;
+    enableCustomAttributes: boolean;
+    customAttributesSet?: CustomAttributeSet;
 }
 
 const TITLE_HEIGHT = 118;
@@ -88,13 +91,15 @@ const UserProfile = ({
     usernameOverride,
     hideGuestTags,
     isWebHook,
+    enableCustomAttributes,
+    customAttributesSet,
 }: Props) => {
     const {formatMessage, locale} = useIntl();
     const serverUrl = useServerUrl();
-    const {bottom} = useSafeAreaInsets();
-    const channelContext = channelContextScreens.includes(location);
+    const channelContext = location ? channelContextScreens.includes(location) : false;
     const showOptions: OptionsType = channelContext && !user.isBot ? 'all' : 'message';
     const override = Boolean(userIconOverride || usernameOverride);
+    const {bottom} = useSafeAreaInsets();
     const timezone = getUserTimezone(user);
     const customStatus = getUserCustomStatus(user);
     let localTime: string|undefined;
@@ -147,15 +152,25 @@ const UserProfile = ({
             }
         }
 
-        const extraHeight = manageMode ? 0 : EXTRA_HEIGHT;
+        const extraHeight = manageMode ? 0 : (EXTRA_HEIGHT - bottom);
 
         return [
             1,
-            bottomSheetSnapPoint(optionsCount, LABEL_HEIGHT, bottom) + title + extraHeight,
+            bottomSheetSnapPoint(optionsCount, LABEL_HEIGHT) + title + extraHeight,
+            '90%',
         ];
     }, [
-        showUserProfileOptions, showCustomStatus, showNickname,
-        showPosition, showLocalTime, bottom,
+        headerText,
+        showUserProfileOptions,
+        showCustomStatus,
+        showNickname,
+        showPosition,
+        showLocalTime,
+        manageMode,
+        bottom,
+        showOptions,
+        canChangeMemberRoles,
+        canManageAndRemoveMembers,
     ]);
 
     useEffect(() => {
@@ -190,7 +205,7 @@ const UserProfile = ({
                         userId={user.id}
                     />
                 }
-                {!manageMode &&
+                {!manageMode && (
                     <UserInfo
                         localTime={localTime}
                         showCustomStatus={showCustomStatus}
@@ -198,8 +213,10 @@ const UserProfile = ({
                         showPosition={showPosition}
                         showLocalTime={showLocalTime}
                         user={user}
+                        enableCustomAttributes={enableCustomAttributes}
+                        customAttributesSet={customAttributesSet}
                     />
-                }
+                )}
                 {manageMode && channelId && (canManageAndRemoveMembers || canChangeMemberRoles) &&
                     <ManageUserOptions
                         canChangeMemberRoles={canChangeMemberRoles}

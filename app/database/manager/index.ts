@@ -12,17 +12,20 @@ import {DatabaseType, MIGRATION_EVENTS, MM_TABLES} from '@constants/database';
 import AppDatabaseMigrations from '@database/migration/app';
 import ServerDatabaseMigrations from '@database/migration/server';
 import {InfoModel, GlobalModel, ServersModel} from '@database/models/app';
-import {CategoryModel, CategoryChannelModel, ChannelModel, ChannelInfoModel, ChannelMembershipModel, ConferenceModel, ConferenceParticipantModel,
-    CustomEmojiModel, DraftModel, FileModel, GroupModel, GroupChannelModel, GroupTeamModel, GroupMembershipModel, MyChannelModel,
-    MyChannelSettingsModel, MyTeamModel, PostModel, PostsInChannelModel, PostsInThreadModel, PreferenceModel, ReactionModel, RoleModel,
-    SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
+import {CategoryModel, CategoryChannelModel, ChannelModel, ChannelBookmarkModel, ChannelInfoModel, ChannelMembershipModel, CustomEmojiModel, CustomProfileFieldModel, CustomProfileAttributeModel, DraftModel, FileModel,
+    GroupModel, GroupChannelModel, GroupTeamModel, GroupMembershipModel, MyChannelModel, MyChannelSettingsModel, MyTeamModel,
+    PostModel, PostsInChannelModel, PostsInThreadModel, PreferenceModel, ReactionModel, RoleModel,
+    ScheduledPostModel, SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
     ThreadModel, ThreadParticipantModel, ThreadInTeamModel, TeamThreadsSyncModel, UserModel, ConfigModel,
+    ConferenceModel,
+    ConferenceParticipantModel,
 } from '@database/models/server';
 import AppDataOperator from '@database/operator/app_data_operator';
 import ServerDataOperator from '@database/operator/server_data_operator';
 import {schema as appSchema} from '@database/schema/app';
 import {serverSchema} from '@database/schema/server';
 import {beforeUpgrade} from '@helpers/database/upgrade';
+import {PlaybookRunModel, PlaybookChecklistModel, PlaybookChecklistItemModel} from '@playbooks/database/models';
 import {getActiveServer, getServer, getServerByIdentifier} from '@queries/app/servers';
 import {logDebug, logError} from '@utils/log';
 import {deleteIOSDatabase, getIOSAppGroupDetails, renameIOSDatabase} from '@utils/mattermost_managed';
@@ -34,7 +37,7 @@ import type {AppDatabase, CreateServerDatabaseArgs, RegisterServerDatabaseArgs, 
 const {SERVERS} = MM_TABLES.APP;
 const APP_DATABASE = 'app';
 
-class DatabaseManager {
+class DatabaseManagerSingleton {
     public appDatabase?: AppDatabase;
     public serverDatabases: ServerDatabases = {};
     private readonly appModels: Models;
@@ -44,11 +47,47 @@ class DatabaseManager {
     constructor() {
         this.appModels = [InfoModel, GlobalModel, ServersModel];
         this.serverModels = [
-            CategoryModel, CategoryChannelModel, ChannelModel, ChannelInfoModel, ChannelMembershipModel, ConfigModel, CustomEmojiModel,
-            ConferenceModel, ConferenceParticipantModel, DraftModel, FileModel, GroupModel, GroupChannelModel, GroupTeamModel,
-            GroupMembershipModel, MyChannelModel, MyChannelSettingsModel, MyTeamModel, PostModel, PostsInChannelModel, PostsInThreadModel,
-            PreferenceModel, ReactionModel, RoleModel, SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
-            ThreadModel, ThreadParticipantModel, ThreadInTeamModel, TeamThreadsSyncModel, UserModel,
+            CategoryModel,
+            CategoryChannelModel,
+            ChannelModel,
+            ChannelBookmarkModel,
+            ChannelInfoModel,
+            ChannelMembershipModel,
+            ConfigModel,
+            CustomEmojiModel,
+            ConferenceModel,
+            CustomProfileFieldModel,
+            ConferenceParticipantModel,
+            CustomProfileAttributeModel,
+            DraftModel,
+            FileModel,
+            GroupModel,
+            GroupChannelModel,
+            GroupTeamModel,
+            GroupMembershipModel,
+            MyChannelModel,
+            MyChannelSettingsModel,
+            MyTeamModel,
+            PostModel,
+            PostsInChannelModel,
+            PostsInThreadModel,
+            PreferenceModel,
+            ReactionModel,
+            RoleModel,
+            ScheduledPostModel,
+            SystemModel,
+            TeamModel,
+            TeamChannelHistoryModel,
+            TeamMembershipModel,
+            TeamSearchHistoryModel,
+            ThreadModel,
+            ThreadParticipantModel,
+            ThreadInTeamModel,
+            TeamThreadsSyncModel,
+            UserModel,
+            PlaybookRunModel,
+            PlaybookChecklistModel,
+            PlaybookChecklistItemModel,
         ];
 
         this.databaseDirectory = Platform.OS === 'ios' ? getIOSAppGroupDetails().appGroupDatabase : `${documentDirectory}/databases/`;
@@ -549,9 +588,10 @@ class DatabaseManager {
 }
 
 if (!__DEV__) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
     // @ts-ignore
     logger.silence();
 }
 
-export default new DatabaseManager();
+const DatabaseManager = new DatabaseManagerSingleton();
+export default DatabaseManager;

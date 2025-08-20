@@ -2,15 +2,38 @@
 // See LICENSE.txt for license information.
 
 import {getInfoAsync, deleteAsync} from 'expo-file-system';
-import {createIntl} from 'react-intl';
 import {Platform} from 'react-native';
 import Permissions from 'react-native-permissions';
 
-import {getTranslations} from '@i18n';
+import {getIntlShape} from '@utils/general';
 import {logError} from '@utils/log';
 import {urlSafeBase64Encode} from '@utils/security';
 
-import {deleteFileCache, deleteFileCacheByDir, deleteV1Data, extractFileInfo, fileExists, fileMaxWarning, fileSizeWarning, filterFileExtensions, getAllFilesInCachesDirectory, getAllowedServerMaxFileSize, getExtensionFromContentDisposition, getExtensionFromMime, getFileType, getFormattedFileSize, getLocalFilePathFromFile, hasWriteStoragePermission, isDocument, isGif, isImage, isVideo, lookupMimeType, uploadDisabledWarning} from '.';
+import {
+    deleteFileCache,
+    deleteFileCacheByDir,
+    deleteV1Data,
+    extractFileInfo,
+    fileExists,
+    fileMaxWarning,
+    fileSizeWarning,
+    filterFileExtensions,
+    getAllFilesInCachesDirectory,
+    getAllowedServerMaxFileSize,
+    getExtensionFromContentDisposition,
+    getExtensionFromMime,
+    getFileType,
+    getFormattedFileSize,
+    getLocalFilePathFromFile,
+    hasWriteStoragePermission,
+    isDocument,
+    isGif,
+    isImage,
+    isVideo,
+    lookupMimeType,
+    pathWithPrefix,
+    uploadDisabledWarning,
+} from '.';
 
 jest.mock('expo-file-system');
 jest.mock('react-native', () => {
@@ -62,7 +85,7 @@ jest.mock('@utils/mattermost_managed', () => ({
 jest.mock('@utils/security', () => ({urlSafeBase64Encode: (url: string) => btoa(url)}));
 
 describe('Image utils', () => {
-    const intl = createIntl({locale: 'en', messages: getTranslations('en')});
+    const intl = getIntlShape();
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -271,6 +294,13 @@ describe('Image utils', () => {
         it('should get all files in caches directory', async () => {
             const result = await getAllFilesInCachesDirectory('http://server.com');
             expect(result.files).toEqual(expect.any(Array));
+        });
+    });
+
+    describe('pathWithPrefix', () => {
+        it('should return correct path with prefix', () => {
+            expect(pathWithPrefix('file://', 'file://something')).toEqual('file://something');
+            expect(pathWithPrefix('file://', 'something')).toEqual('file://something');
         });
     });
 });

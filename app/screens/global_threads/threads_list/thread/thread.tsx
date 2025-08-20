@@ -7,9 +7,9 @@ import {Text, TouchableHighlight, View} from 'react-native';
 
 import {switchToChannelById} from '@actions/remote/channel';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
-import Markdown from '@app/components/markdown';
 import FormattedText from '@components/formatted_text';
 import FriendlyDate from '@components/friendly_date';
+import RemoveMarkdown from '@components/remove_markdown';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
@@ -22,7 +22,7 @@ import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {displayUsername} from '@utils/user';
 
-import {FileCard} from '../file_card/file_card';
+import FileCard from '../file_card/file_card';
 
 import ThreadFooter from './thread_footer';
 
@@ -30,11 +30,12 @@ import type ChannelModel from '@typings/database/models/servers/channel';
 import type PostModel from '@typings/database/models/servers/post';
 import type ThreadModel from '@typings/database/models/servers/thread';
 import type UserModel from '@typings/database/models/servers/user';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
     author?: UserModel;
     channel?: ChannelModel;
-    location: string;
+    location: AvailableScreens;
     post?: PostModel;
     teammateNameDisplay: string;
     testID: string;
@@ -175,7 +176,7 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
     let threadStarterName = displayUsername(author, intl.locale, teammateNameDisplay);
     const threadItemTestId = `${testID}.thread_item.${thread.id}`;
 
-    if (post?.props?.override_username) {
+    if (post?.props?.override_username && typeof post.props.override_username === 'string') {
         threadStarterName = post.props.override_username;
     }
 
@@ -225,18 +226,18 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
         );
         if (post.message) {
             postBody = (
-                <>
-                    <View style={styles.threadText}>
-                        <Markdown
-                            theme={theme}
-                            baseTextStyle={styles.message}
-                            textStyles={textStyles}
-                            value={post.message}
-                            location={location}
-                            imagesMetadata={post.metadata?.images}
-                        />
-                    </View>
-                </>
+                <Text numberOfLines={2}>
+                    <RemoveMarkdown
+                        enableCodeSpan={true}
+                        enableEmoji={true}
+                        enableChannelLink={true}
+                        enableHardBreak={true}
+                        enableSoftBreak={true}
+                        textStyle={textStyles}
+                        baseStyle={styles.message}
+                        value={post.message.substring(0, 100)} // This substring helps to avoid ANR's
+                    />
+                </Text>
             );
         } else {
             postBody = (
@@ -296,7 +297,7 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
                         location={location}
                         testID={`${threadItemTestId}.footer`}
                         thread={thread}
-                        fromBot={post.props?.from_webhook}
+                        fromBot={Boolean(post.props?.from_webhook)}
                     />
                     }
                 </View>

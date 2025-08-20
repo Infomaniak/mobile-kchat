@@ -1,7 +1,4 @@
 {
   "name": "kChat",
-  "displayName": "kChat",
-  "plugins": [
-    "patch-project"
-  ]
+  "displayName": "kChat"
 }

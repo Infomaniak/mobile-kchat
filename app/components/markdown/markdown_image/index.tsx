@@ -5,9 +5,8 @@ import {useManagedConfig} from '@mattermost/react-native-emm';
 import Clipboard from '@react-native-clipboard/clipboard';
 import React, {useCallback, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {Alert, Platform, type StyleProp, Text, type TextStyle, TouchableWithoutFeedback, View} from 'react-native';
+import {Platform, type StyleProp, Text, type TextStyle, TouchableWithoutFeedback, View} from 'react-native';
 import Animated from 'react-native-reanimated';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {SvgUri} from 'react-native-svg';
 import parseUrl from 'url-parse';
 
@@ -27,9 +26,11 @@ import {fileToGalleryItem, openGalleryAtIndex} from '@utils/gallery';
 import {generateId} from '@utils/general';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {calculateDimensions, getViewPortWidth, isGifTooLarge} from '@utils/images';
-import {getMarkdownImageSize} from '@utils/markdown';
+import {getMarkdownImageSize, removeImageProxyForKey} from '@utils/markdown';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {secureGetFromRecord} from '@utils/types';
 import {normalizeProtocol, tryOpenURL} from '@utils/url';
+import {onOpenLinkError} from '@utils/url/links';
 
 import type {GalleryItemType} from '@typings/screens/gallery';
 
@@ -75,12 +76,11 @@ const MarkdownImage = ({
 }: MarkdownImageProps) => {
     const intl = useIntl();
     const isTablet = useIsTablet();
-    const {bottom} = useSafeAreaInsets();
     const theme = useTheme();
     const style = getStyleSheet(theme);
     const managedConfig = useManagedConfig<ManagedConfig>();
     const genericFileId = useRef(generateId('uid')).current;
-    const metadata = imagesMetadata?.[source] || Object.values(imagesMetadata || {})[0];
+    const metadata = secureGetFromRecord(imagesMetadata, removeImageProxyForKey(source)) || Object.values(imagesMetadata || {})[0];
     const [failed, setFailed] = useState(isGifTooLarge(metadata));
     const originalSize = getMarkdownImageSize(isReplyPost, isTablet, sourceSize, metadata, layoutWidth, layoutHeight);
     const serverUrl = useServerUrl();
@@ -104,7 +104,7 @@ const MarkdownImage = ({
             has_preview_image: true,
             mime_type: lookupMimeType(filename),
             post_id: postId,
-            uri: link,
+            uri,
             width: originalSize.width,
             height: originalSize.height,
         } as FileInfo;
@@ -131,22 +131,9 @@ const MarkdownImage = ({
         if (linkDestination) {
             const url = normalizeProtocol(linkDestination);
 
-            const onError = () => {
-                Alert.alert(
-                    intl.formatMessage({
-                        id: 'mobile.link.error.title',
-                        defaultMessage: 'Error',
-                    }),
-                    intl.formatMessage({
-                        id: 'mobile.link.error.text',
-                        defaultMessage: 'Unable to open the link.',
-                    }),
-                );
-            };
-
-            tryOpenURL(url, onError);
+            tryOpenURL(url, () => onOpenLinkError(intl));
         }
-    }, [linkDestination]);
+    }, [intl, linkDestination]);
 
     const handleLinkLongPress = useCallback(() => {
         if (managedConfig?.copyAndPasteProtection !== 'true') {
@@ -181,12 +168,12 @@ const MarkdownImage = ({
             bottomSheet({
                 closeButtonId: 'close-mardown-image',
                 renderContent,
-                snapPoints: [1, bottomSheetSnapPoint(2, ITEM_HEIGHT, bottom)],
+                snapPoints: [1, bottomSheetSnapPoint(2, ITEM_HEIGHT)],
                 title: intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}),
                 theme,
             });
         }
-    }, [managedConfig, intl.locale, bottom, theme]);
+    }, [managedConfig?.copyAndPasteProtection, intl, theme, style.bottomSheet, linkDestination, source]);
 
     const handleOnError = useCallback(() => {
         setFailed(true);

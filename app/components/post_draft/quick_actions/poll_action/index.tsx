@@ -5,12 +5,12 @@ import {useIntl} from 'react-intl';
 import {StyleSheet} from 'react-native';
 
 import {executeCommand} from '@actions/remote/command';
-import CompassIcon from '@app/components/compass_icon';
-import TouchableWithFeedback from '@app/components/touchable_with_feedback';
-import {ICON_SIZE} from '@app/constants/post_draft';
-import {useServerUrl} from '@app/context/server';
-import {useTheme} from '@app/context/theme';
-import {changeOpacity} from '@app/utils/theme';
+import CompassIcon from '@components/compass_icon';
+import TouchableWithFeedback from '@components/touchable_with_feedback';
+import {ICON_SIZE} from '@constants/post_draft';
+import {useServerUrl} from '@context/server';
+import {useTheme} from '@context/theme';
+import {changeOpacity} from '@utils/theme';
 
 type Props = {
     testID?: string;

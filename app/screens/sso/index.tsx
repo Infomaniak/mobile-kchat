@@ -1,23 +1,25 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useState} from 'react';
-import {Platform, StyleSheet, useWindowDimensions, View} from 'react-native';
-import {Navigation} from 'react-native-navigation';
-import Animated, {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
+import React, {useCallback, useState} from 'react';
+import {StyleSheet, View} from 'react-native';
+import Animated from 'react-native-reanimated';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {ssoLogin} from '@actions/remote/session';
 import {Screens, Sso} from '@constants';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import {useScreenTransitionAnimation} from '@hooks/screen_transition_animation';
 import NetworkManager from '@managers/network_manager';
+import SecurityManager from '@managers/security_manager';
 import Background from '@screens/background';
 import {dismissModal, popTopScreen, resetToHome} from '@screens/navigation';
 import {getFullErrorMessage, isErrorWithUrl} from '@utils/errors';
 import {logWarning} from '@utils/log';
 
 import SSOAuthentication from './sso_authentication';
+import SSOAuthenticationWithExternalBrowser from './sso_authentication_with_external_browser';
 
 import type {LaunchProps} from '@typings/launch';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -45,9 +47,6 @@ const SSO = ({
     launchError, launchType, serverDisplayName,
     serverUrl, ssoType, theme,
 }: SSOProps) => {
-    const dimensions = useWindowDimensions();
-    const translateX = useSharedValue(dimensions.width);
-
     const [loginError, setLoginError] = useState<string>('');
     let loginUrl = '';
     switch (ssoType) {
@@ -110,30 +109,7 @@ const SSO = ({
         dismissModal({componentId});
     }, [componentId, serverUrl]);
 
-    const transform = useAnimatedStyle(() => {
-        const duration = Platform.OS === 'android' ? 250 : 350;
-        return {
-            transform: [{translateX: withTiming(translateX.value, {duration})}],
-        };
-    }, []);
-
-    useEffect(() => {
-        const listener = {
-            componentDidAppear: () => {
-                translateX.value = 0;
-            },
-            componentDidDisappear: () => {
-                translateX.value = -dimensions.width;
-            },
-        };
-        const unsubscribe = Navigation.events().registerComponentListener(listener, Screens.SSO);
-
-        return () => unsubscribe.remove();
-    }, [dimensions]);
-
-    useEffect(() => {
-        translateX.value = 0;
-    }, []);
+    const animatedStyles = useScreenTransitionAnimation(Screens.SSO);
 
     useNavButtonPressed(closeButtonId || '', componentId, dismiss, []);
 
@@ -155,14 +131,29 @@ const SSO = ({
         theme,
     };
 
+    let authentication;
+    if (config.MobileExternalBrowser === 'true') {
+        authentication = (
+            <SSOAuthenticationWithExternalBrowser
+                {...props}
+            />
+        );
+    } else {
+        authentication = (
+            <SSOAuthentication
+                {...props}
+            />
+        );
+    }
+
     return (
-        <View style={styles.flex}>
+        <View
+            nativeID={SecurityManager.getShieldScreenId(componentId, false, true)}
+            style={styles.flex}
+        >
             <Background theme={theme}/>
-            <AnimatedSafeArea style={[styles.flex, transform]}>
-                <SSOAuthentication
-                    {...props}
-                    serverUrl={serverUrl!}
-                />
+            <AnimatedSafeArea style={[styles.flex, animatedStyles]}>
+                {authentication}
             </AnimatedSafeArea>
         </View>
     );

@@ -14,6 +14,7 @@ import {logWarning} from '@utils/log';
 import {getMarkdownBlockStyles, getMarkdownTextStyles} from '@utils/markdown';
 import {concatStyles, changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
+import type {AvailableScreens} from '@typings/screens/navigation';
 import type {PrimitiveType} from 'intl-messageformat';
 
 type Props = {
@@ -21,7 +22,7 @@ type Props = {
     channelId?: string;
     defaultMessage: string;
     id: string;
-    location: string;
+    location: AvailableScreens;
     onPostPress?: (e: GestureResponderEvent) => void;
     style?: StyleProp<TextStyle>;
     values?: Record<string, PrimitiveType>;
@@ -114,7 +115,7 @@ const FormattedMarkdownText = ({baseTextStyle, channelId, defaultMessage, id, lo
     };
 
     const renderParagraph = ({children, first}: {children: ReactElement; first: boolean}) => {
-        const blockStyle: StyleProp<ViewStyle> = [styles.block];
+        const blockStyle: StyleProp<Intersection<TextStyle, ViewStyle>> = [styles.block];
         if (!first) {
             const blockS = getMarkdownBlockStyles(theme);
             blockStyle.push(blockS.adjacentParagraph);

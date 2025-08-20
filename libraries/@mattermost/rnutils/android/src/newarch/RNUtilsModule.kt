@@ -3,6 +3,7 @@ package com.mattermost.rnutils
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.WritableMap
+import com.facebook.react.bridge.ReadableArray
 
 class RNUtilsModule(val reactContext: ReactApplicationContext) : NativeRNUtilsSpec(reactContext) {
     private var implementation: RNUtilsModuleImpl = RNUtilsModuleImpl(reactContext)
@@ -27,6 +28,11 @@ class RNUtilsModule(val reactContext: ReactApplicationContext) : NativeRNUtilsSp
 
     override fun isRunningInSplitView(): WritableMap? = implementation.isRunningInSplitView()
 
+    override fun getWindowDimensions(): WritableMap? = implementation.getWindowDimensions()
+
+    override fun setHasRegisteredLoad() = implementation.setHasRegisteredLoad()
+    override fun getHasRegisteredLoad(): WritableMap = implementation.getHasRegisteredLoad()
+
     override fun unlockOrientation() {
         implementation.unlockOrientation()
     }
@@ -36,7 +42,7 @@ class RNUtilsModule(val reactContext: ReactApplicationContext) : NativeRNUtilsSp
     }
 
     override fun deleteDatabaseDirectory(databaseName: String?, shouldRemoveDirectory: Boolean): WritableMap {
-        return implementation.deleteDatabaseDirectory(databaseName, shouldRemoveDirectory)
+        return implementation.deleteDatabaseDirectory()
     }
 
     override fun renameDatabase(databaseName: String?, newDatabaseName: String?): WritableMap {
@@ -61,5 +67,18 @@ class RNUtilsModule(val reactContext: ReactApplicationContext) : NativeRNUtilsSp
 
     override fun removeServerNotifications(serverUrl: String?) {
         implementation.removeServerNotifications(serverUrl)
+    }
+
+    override fun setSoftKeyboardToAdjustResize() {
+        implementation.setSoftKeyboardToAdjustResize()
+    }
+
+    override fun setSoftKeyboardToAdjustNothing() {
+        implementation.setSoftKeyboardToAdjustNothing()
+    }
+
+    override fun createZipFile(paths: ReadableArray, promise: Promise?) {
+        val pathList = paths.toArrayList().map { it.toString() }
+        implementation.createZipFile(pathList, promise)
     }
 }

@@ -48,6 +48,7 @@ const Options = ({
             <NotificationPreference channelId={channelId}/>
             <PinnedMessages channelId={channelId}/>
             <ChannelFiles channelId={channelId}/>
+
             {type !== General.DM_CHANNEL &&
                 <Members channelId={channelId}/>
             }

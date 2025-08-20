@@ -1,8 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {ServerScreen} from '@support/ui/screen';
-import {timeouts, wait} from '@support/utils';
+import {ChannelListScreen, ServerScreen} from '@support/ui/screen';
+import {isAndroid, retryWithReload, timeouts, wait} from '@support/utils';
 import {expect} from 'detox';
 
 class LoginScreen {
@@ -21,8 +21,10 @@ class LoginScreen {
         forgotPasswordButton: 'login_form.forgot_password.button',
         signinButton: 'login_form.signin.button',
         signinButtonDisabled: 'login_form.signin.button.disabled',
+        loginFormInfoText: 'login_options.description.enter_credentials',
     };
 
+    loginFormInfoText = element(by.id(this.testID.loginFormInfoText));
     loginScreen = element(by.id(this.testID.loginScreen));
     backButton = element(by.id(this.testID.backButton));
     titleLoginToAccount = element(by.id(this.testID.titleLoginToAccount));
@@ -39,7 +41,7 @@ class LoginScreen {
     signinButtonDisabled = element(by.id(this.testID.signinButtonDisabled));
 
     toBeVisible = async () => {
-        await wait(timeouts.ONE_SEC);
+        await wait(timeouts.FOUR_SEC);
         await waitFor(this.loginScreen).toExist().withTimeout(timeouts.TEN_SEC);
         await waitFor(this.usernameInput).toBeVisible().withTimeout(timeouts.TEN_SEC);
 
@@ -58,20 +60,32 @@ class LoginScreen {
         await expect(this.loginScreen).not.toBeVisible();
     };
 
-    login = async (user: any = {}) => {
+    loginWithRetryIfStuck = async (user: any = {}) => {
         await this.toBeVisible();
-        await this.usernameInput.typeText(`${user.newUser.email}\n`);
-        await this.passwordInput.typeText(`${user.newUser.password}\n`);
+        await this.usernameInput.tap({x: 150, y: 10});
+        await this.usernameInput.replaceText(user.newUser.email);
+        await this.passwordInput.tap();
+        await this.passwordInput.replaceText(user.newUser.password);
+        await this.loginFormInfoText.tap();
+        await this.signinButton.tap();
 
-        await wait(timeouts.FOUR_SEC);
+        await waitFor(ChannelListScreen.channelListScreen).toBeVisible().withTimeout(isAndroid() ? timeouts.ONE_MIN : timeouts.HALF_MIN);
+    };
+
+    login = async (user: any = {}) => {
+        await retryWithReload(() => this.loginWithRetryIfStuck(user));
     };
 
     loginAsAdmin = async (user: any = {}) => {
         await this.toBeVisible();
-        await this.usernameInput.typeText(user.username);
-        await this.passwordInput.typeText(`${user.password}\n`);
+        await this.usernameInput.tap({x: 150, y: 10});
 
-        await wait(timeouts.ONE_SEC);
+        await this.usernameInput.replaceText(user.username);
+        await this.passwordInput.tap();
+        await this.passwordInput.replaceText(user.password);
+        await this.loginFormInfoText.tap();
+        await this.signinButton.tap();
+        await waitFor(ChannelListScreen.channelListScreen).toBeVisible().withTimeout(isAndroid() ? timeouts.ONE_MIN : timeouts.HALF_MIN);
     };
 }
 

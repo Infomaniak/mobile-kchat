@@ -4,7 +4,6 @@
 import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, Platform, Text, View} from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {CHANNEL_ACTIONS_OPTIONS_HEIGHT} from '@components/channel_actions/channel_actions';
 import CompassIcon from '@components/compass_icon';
@@ -17,32 +16,46 @@ import {General, Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import {useDefaultHeaderHeight} from '@hooks/header';
+import {usePreventDoubleTap} from '@hooks/utils';
+import {BOTTOM_SHEET_ANDROID_OFFSET} from '@screens/bottom_sheet';
+import ChannelBanner from '@screens/channel/header/channel_banner';
 import {bottomSheet, popTopScreen, showModal} from '@screens/navigation';
 import {isTypeDMorGM} from '@utils/channel';
 import {bottomSheetSnapPoint} from '@utils/helpers';
-import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
+import ChannelHeaderBookmarks from './bookmarks';
 import QuickActions, {MARGIN, SEPARATOR_HEIGHT} from './quick_actions';
 
 import type {HeaderRightButton} from '@components/navigation_header/header';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type ChannelProps = {
+    canAddBookmarks: boolean;
     channelId: string;
     channelType: ChannelType;
     customStatus?: UserCustomStatus;
+    isBookmarksEnabled: boolean;
     isCustomStatusEnabled: boolean;
     isCustomStatusExpired: boolean;
+    hasBookmarks: boolean;
     componentId?: AvailableScreens;
     displayName: string;
     isOwnDirectMessage: boolean;
     memberCount?: number;
-    searchTerm: string;
     teamId: string;
     callsEnabledInChannel: boolean;
     isTabletView?: boolean;
+    shouldRenderBookmarks: boolean;
+    shouldRenderChannelBanner: boolean;
+    hasPlaybookRuns: boolean;
+    playbooksActiveRuns?: number;
+    groupCallsAllowed?: boolean;
+    isPlaybooksEnabled?: boolean;
+    activeRunId?: string;
+
+    // searchTerm: string;
 };
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
@@ -71,13 +84,27 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 }));
 
 const ChannelHeader = ({
-    channelId, channelType, componentId, customStatus, displayName,
-    isCustomStatusEnabled, isCustomStatusExpired, isOwnDirectMessage, memberCount,
-    searchTerm, teamId, callsEnabledInChannel, isTabletView,
+    canAddBookmarks,
+    channelId,
+    channelType,
+    componentId,
+    customStatus,
+    displayName,
+    hasBookmarks,
+    isBookmarksEnabled,
+    isCustomStatusEnabled,
+    isCustomStatusExpired,
+    isOwnDirectMessage,
+    memberCount,
+    teamId,
+    callsEnabledInChannel,
+    isTabletView,
+    shouldRenderBookmarks,
+    shouldRenderChannelBanner,
+    hasPlaybookRuns,
 }: ChannelProps) => {
     const intl = useIntl();
     const isTablet = useIsTablet();
-    const {bottom} = useSafeAreaInsets();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const defaultHeight = useDefaultHeaderHeight();
@@ -104,7 +131,7 @@ const ChannelHeader = ({
         popTopScreen(componentId);
     }, [componentId]);
 
-    const onTitlePress = useCallback(preventDoubleTap(() => {
+    const onTitlePress = usePreventDoubleTap(useCallback((() => {
         let title;
         switch (channelType) {
             case General.DM_CHANNEL:
@@ -131,7 +158,7 @@ const ChannelHeader = ({
             },
         };
         showModal(Screens.CHANNEL_INFO, title, {channelId, closeButtonId}, options);
-    }), [channelId, channelType, intl, theme]);
+    }), [channelId, channelType, intl, theme]));
 
     const onChannelQuickAction = useCallback(() => {
         if (isTablet) {
@@ -140,8 +167,17 @@ const ChannelHeader = ({
         }
 
         // When calls is enabled, we need space to move the "Copy Link" from a button to an option
-        const items = callsAvailable && !isDMorGM ? 3 : 2;
-        const height = CHANNEL_ACTIONS_OPTIONS_HEIGHT + SEPARATOR_HEIGHT + MARGIN + (items * ITEM_HEIGHT);
+        let items = 2;
+        if (callsAvailable && !isDMorGM) {
+            items += 1;
+        }
+        if (hasPlaybookRuns) {
+            items += 1;
+        }
+        let height = CHANNEL_ACTIONS_OPTIONS_HEIGHT + SEPARATOR_HEIGHT + MARGIN + (items * ITEM_HEIGHT);
+        if (Platform.OS === 'android') {
+            height += BOTTOM_SHEET_ANDROID_OFFSET;
+        }
 
         const renderContent = () => {
             return (
@@ -156,29 +192,24 @@ const ChannelHeader = ({
         bottomSheet({
             title: '',
             renderContent,
-            snapPoints: [1, bottomSheetSnapPoint(1, height, bottom)],
+            snapPoints: [1, bottomSheetSnapPoint(1, height)],
             theme,
             closeButtonId: 'close-channel-quick-actions',
         });
-    }, [bottom, channelId, isDMorGM, isTablet, onTitlePress, theme, callsAvailable]);
+    }, [isTablet, callsAvailable, isDMorGM, hasPlaybookRuns, theme, onTitlePress, channelId]);
 
-    const rightButtons: HeaderRightButton[] = useMemo(() => ([
+    const rightButtons = useMemo(() => {
+        const buttons: HeaderRightButton[] = [];
 
-        // {
-        //     iconName: 'magnify',
-        //     onPress: () => {
-        //         DeviceEventEmitter.emit(Navigation.NAVIGATE_TO_TAB, {screen: 'Search', params: {searchTerm: `in: ${searchTerm}`}});
-        //         if (!isTablet) {
-        //             popTopScreen(componentId);
-        //         }
-        //     },
-        // },
-        {
+        buttons.push({
             iconName: Platform.select({android: 'dots-vertical', default: 'dots-horizontal'}),
             onPress: onChannelQuickAction,
             buttonType: 'opacity',
             testID: 'channel_header.channel_quick_actions.button',
-        }]), [isTablet, searchTerm, onChannelQuickAction]);
+        });
+
+        return buttons;
+    }, [onChannelQuickAction]);
 
     let title = displayName;
     if (isOwnDirectMessage) {
@@ -226,7 +257,9 @@ const ChannelHeader = ({
         }
 
         return undefined;
-    }, [memberCount, customStatus, isCustomStatusExpired]);
+    }, [memberCount, customStatus, isCustomStatusExpired, theme.sidebarHeaderTextColor, styles.customStatusContainer, styles.customStatusEmoji, styles.customStatusText, styles.subtitle, isCustomStatusEnabled]);
+
+    const showBookmarkBar = isBookmarksEnabled && hasBookmarks && shouldRenderBookmarks;
 
     return (
         <>
@@ -244,6 +277,19 @@ const ChannelHeader = ({
             <View style={contextStyle}>
                 <RoundedHeaderContext/>
             </View>
+            {showBookmarkBar &&
+            <ChannelHeaderBookmarks
+                canAddBookmarks={canAddBookmarks}
+                channelId={channelId}
+            />
+            }
+            {
+                shouldRenderChannelBanner &&
+                <ChannelBanner
+                    channelId={channelId}
+                    isTopItem={!showBookmarkBar}
+                />
+            }
         </>
     );
 };

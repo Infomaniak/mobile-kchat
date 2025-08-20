@@ -8,12 +8,12 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {leaveChannel, updateChannelMemberSchemeRoles} from '@actions/remote/channel';
 import {fetchProfilesInChannel} from '@actions/remote/user';
-import {showLeaveChannelMembersSnackbar} from '@app/utils/snack_bar';
 import CompassIcon from '@components/compass_icon';
 import Loading from '@components/loading';
 import Search from '@components/search';
 import SelectedUsers from '@components/selected_users';
 import ServerUserList from '@components/server_user_list';
+import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
@@ -21,10 +21,11 @@ import {useKeyboardOverlap} from '@hooks/device';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {dismissAllModalsAndPopToRoot, dismissModal} from '@screens/navigation';
 import {mergeNavigationOptions} from '@utils/navigation';
+import {showLeaveChannelMembersSnackbar} from '@utils/snack_bar';
 import {changeOpacity, getKeyboardAppearanceFromTheme, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import type {UserModel} from '@app/database/models/server';
+import type {UserModel} from '@database/models/server';
 import type ChannelModel from '@typings/database/models/servers/channel';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
@@ -281,6 +282,7 @@ export default function LeaveChannelModal({
                 searchFunction={userSearchFunction}
                 createFilter={createUserFilter}
                 loadUsers={true}
+                location={Screens.LEAVE_CHANNEL_MEMBERS}
             />
             <SelectedUsers
                 keyboardOverlap={keyboardOverlap}

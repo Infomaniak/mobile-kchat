@@ -6,27 +6,20 @@ import {useIntl} from 'react-intl';
 import {DeviceEventEmitter, InteractionManager, Platform, type StyleProp, Text, View, type ViewStyle} from 'react-native';
 import {RectButton} from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
-import {Navigation} from 'react-native-navigation';
 
 import {storeMultiServerTutorial} from '@actions/app/global';
-import {doPing} from '@actions/remote/general';
-import {fetchConfigAndLicense} from '@actions/remote/systems';
+import {switchToServer} from '@actions/app/server';
 import CompassIcon from '@components/compass_icon';
 import Loading from '@components/loading';
 import ServerIcon from '@components/server_icon';
 import TutorialHighlight from '@components/tutorial_highlight';
 import TutorialSwipeLeft from '@components/tutorial_highlight/swipe_left';
-import {Events, Screens} from '@constants';
+import {Events} from '@constants';
 import {PUSH_PROXY_STATUS_NOT_AVAILABLE, PUSH_PROXY_STATUS_VERIFIED} from '@constants/push_proxy';
 import {useTheme} from '@context/theme';
-import DatabaseManager from '@database/manager';
 import {subscribeServerUnreadAndMentions, type UnreadObserverArgs} from '@database/subscription/unreads';
 import {useIsTablet} from '@hooks/device';
-import WebsocketManager from '@managers/websocket_manager';
-import {getServerByIdentifier} from '@queries/app/servers';
 import {dismissBottomSheet} from '@screens/navigation';
-import {canReceiveNotifications} from '@utils/push_proxy';
-import {alertServerAlreadyConnected, alertServerError, loginToServer} from '@utils/server';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {removeProtocol, stripTrailingSlashes} from '@utils/url';
@@ -58,7 +51,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     badge: {
         left: 18,
         top: -5,
-        borderColor: theme.centerChannelBg,
     },
     button: {
         borderRadius: 8,
@@ -204,7 +196,7 @@ const ServerItem = ({
                 setShowTutorial(true);
             });
         }
-    }, [showTutorial]);
+    }, [highlight, isTablet, tutorialWatched]);
 
     useLayoutEffect(() => {
         if (showTutorial && !tutorialShown.current) {
@@ -221,7 +213,7 @@ const ServerItem = ({
         }
 
         return style;
-    }, [isActive]);
+    }, [isActive, styles.active, styles.container]);
 
     const serverStyle = useMemo(() => {
         const style: StyleProp<ViewStyle> = [styles.row];
@@ -230,34 +222,7 @@ const ServerItem = ({
         }
 
         return style;
-    }, [server.lastActiveAt]);
-
-    const handleLogin = useCallback(async () => {
-        swipeable.current?.close();
-        setSwitching(true);
-        const result = await doPing(server.url, true);
-        if (result.error) {
-            alertServerError(intl, result.error);
-            setSwitching(false);
-            return;
-        }
-
-        const data = await fetchConfigAndLicense(server.url, true);
-        if (data.error) {
-            alertServerError(intl, data.error);
-            setSwitching(false);
-            return;
-        }
-        const existingServer = await getServerByIdentifier(data.config!.DiagnosticId);
-        if (existingServer && existingServer.lastActiveAt > 0) {
-            alertServerAlreadyConnected(intl);
-            setSwitching(false);
-            return;
-        }
-
-        canReceiveNotifications(server.url, result.canReceiveNotifications as string, intl);
-        loginToServer(theme, server.url, displayName, data.config!, data.license!);
-    }, [server, theme, intl]);
+    }, [server.lastActiveAt, styles.offline, styles.row]);
 
     const handleDismissTutorial = useCallback(() => {
         swipeable.current?.close();
@@ -278,14 +243,9 @@ const ServerItem = ({
         if (server.lastActiveAt) {
             setSwitching(true);
             await dismissBottomSheet();
-            Navigation.updateProps(Screens.HOME, {extra: undefined});
-            DatabaseManager.setActiveServerDatabase(server.url);
-            WebsocketManager.initializeClient(server.url);
-            return;
         }
-
-        handleLogin();
-    }, [server, isActive, theme, intl]);
+        await switchToServer(server.url, theme, intl, () => setSwitching(false));
+    }, [isActive, server.lastActiveAt, server.url, theme, intl]);
 
     const onSwipeableWillOpen = useCallback(() => {
         DeviceEventEmitter.emit(Events.SWIPEABLE, server.url);
@@ -365,9 +325,9 @@ const ServerItem = ({
                         <View style={serverStyle}>
                             {!switching &&
                             <ServerIcon
-                                badgeBackgroundColor={theme.mentionColor}
-                                badgeBorderColor={theme.mentionBg}
-                                badgeColor={theme.mentionBg}
+                                badgeBackgroundColor={theme.buttonBg}
+                                badgeBorderColor={theme.centerChannelBg}
+                                badgeColor={theme.buttonColor}
                                 badgeStyle={styles.badge}
                                 iconColor={changeOpacity(theme.centerChannelColor, 0.56)}
                                 hasUnreads={badge.isUnread}

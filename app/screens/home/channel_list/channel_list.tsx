@@ -106,7 +106,7 @@ const ChannelListScreen = (props: ChannelProps) => {
             }
         }
         return false;
-    }, [intl]);
+    }, [intl, navigation]);
 
     const animated = useAnimatedStyle(() => {
         if (!isFocused) {
@@ -133,7 +133,7 @@ const ChannelListScreen = (props: ChannelProps) => {
         if (!props.hasTeams) {
             resetToTeams();
         }
-    }, [Boolean(props.hasTeams)]);
+    }, [props.hasTeams]);
 
     useEffect(() => {
         const back = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
@@ -169,6 +169,7 @@ const ChannelListScreen = (props: ChannelProps) => {
 
     useEffect(() => {
         PerformanceMetricsManager.finishLoad('HOME', serverUrl);
+        PerformanceMetricsManager.measureTimeToInteraction();
     }, []);
 
     return (
@@ -197,7 +198,7 @@ const ChannelListScreen = (props: ChannelProps) => {
                             moreThanOneTeam={props.hasMoreThanOneTeam}
                             hasChannels={props.hasChannels}
                         />
-                        {isTablet &&
+                        {isTablet && props.hasChannels &&
                             <AdditionalTabletView/>
                         }
                     </Animated.View>

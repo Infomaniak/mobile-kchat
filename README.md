@@ -2,8 +2,8 @@
 
 kChat is a fork of Mattermost mobile adapted for use within the Infomaniak ecosystem.
 
-- **Minimum Server versions:** Current ESR version (9.5.0+)
-- **Supported iOS versions:** 13.4+
+- **Minimum Server versions:** Current ESR version (10.5.0+)
+- **Supported iOS versions:** 15.1+
 - **Supported Android versions:** 7.0+
 
 While the mobile app is a fork of Mattermost, the back-end is custom made and entierely developped by Infomaniak.
@@ -103,3 +103,46 @@ Before you begin, ensure you have:
 5. After applying your changes, push them to the remote fork to create a PR on Mattermost using `git push fork {name of the branch}`.
 
 6. Follow the PR instructions to provide Mattermost with the necessary information to review your code thoroughly.
+
+
+## Dev
+
+### Get the Android database file
+
+In the android/ folder, you can use something like that to pull the db from the android simulator
+and then use any sqlite viewer.
+Note: Android App inspector seems to not be able to open the db directly, even if the documentation says so
+
+```bash
+# recup l'id de la db, par exemple en log ce path ou en cherchant dans le device
+# app/database/manager/index.ts#L172
+# ou 
+# /files/databases
+
+# Variables
+APP_ID="com.infomaniak.chat"
+FILENAME="aHR0cHM6Ly9pbmZvbWFuaWFrLmtjaGF0LmluZm9tYW5pYWsuY29t.db"
+DEST="./extracted.db"
+
+# Extraction via run-as
+adb exec-out run-as $APP_ID cat files/databases/$FILENAME > $DEST
+```
+
+## Known Issues with Dependencies
+### ⚠️ Jitsi SDK: TypeScript Type Errors
+
+The Jitsi SDK is included as raw `.ts`/`.tsx` files in `node_modules`, not pre-compiled. It contains **TypeScript errors** — harmless at runtime but blocking during build.
+
+#### ✅ Automatic Fix via Postinstall Script
+
+We add a script that automatically adds `// @ts-nocheck` to all Jitsi SDK files to disable type checking **only for these files**.
+
+This is executed via:
+
+```json
+"postinstall": "patch-package && ./scripts/postinstall.sh && node ./scripts/jitsi-ts-nocheck.js"
+```
+
+➡️ Runs **automatically** on `npm install`.  
+
+This workaround stays until Jitsi provides a properly compiled SDK.

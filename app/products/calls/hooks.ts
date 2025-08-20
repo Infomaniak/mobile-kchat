@@ -4,31 +4,40 @@
 // Check if calls is enabled. If it is, then run fn; if it isn't, show an alert and set
 // msgPostfix to ' (Not Available)'.
 import {useEffect} from 'react';
-import {Platform} from 'react-native';
-import Permissions from 'react-native-permissions';
 
-import {setMicPermissionsGranted} from '@calls/state';
+// import {Platform} from 'react-native';
+// import Permissions from 'react-native-permissions';
+
+// import {setMicPermissionsGranted} from '@calls/state';
 import {useAppState} from '@hooks/device';
 
-const micPermission = Platform.select({
-    ios: Permissions.PERMISSIONS.IOS.MICROPHONE,
-    default: Permissions.PERMISSIONS.ANDROID.RECORD_AUDIO,
-});
+// import { initializeVoiceTrack } from './actions';
+
+// const micPermission = Platform.select({
+//     ios: Permissions.PERMISSIONS.IOS.MICROPHONE,
+//     default: Permissions.PERMISSIONS.ANDROID.RECORD_AUDIO,
+// });
 
 export const usePermissionsChecker = (micPermissionsGranted: boolean) => {
     const appState = useAppState();
 
+    // const [hasPermission, setHasPermission] = useState(micPermissionsGranted);
+
     useEffect(() => {
-        const asyncFn = async () => {
-            if (appState === 'active') {
-                const hasPermission = (await Permissions.check(micPermission)) === Permissions.RESULTS.GRANTED;
-                if (hasPermission) {
-                    setMicPermissionsGranted(hasPermission);
-                }
-            }
-        };
-        if (!micPermissionsGranted) {
-            asyncFn();
-        }
+        // const asyncFn = async () => {
+        //     if (appState === 'active') {
+        //         const result = (await Permissions.check(micPermission)) === Permissions.RESULTS.GRANTED;
+        //         setHasPermission(result);
+        //         if (result) {
+        //             initializeVoiceTrack();
+        //             setMicPermissionsGranted(result);
+        //         }
+        //     }
+        // };
+        // if (!micPermissionsGranted) {
+        //     asyncFn();
+        // }
     }, [appState]);
+
+    return micPermissionsGranted;
 };

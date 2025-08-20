@@ -23,6 +23,7 @@ type Draft = {
     message?: string;
     root_id: string;
     metadata?: PostMetadata;
+    update_at: number;
 };
 
 type MyTeam = {
@@ -106,6 +107,7 @@ type RawValue =
   | Category
   | CategoryChannel
   | Channel
+  | ChannelBookmark
   | ChannelInfo
   | ChannelMember
   | ChannelMembership
@@ -135,5 +137,12 @@ type RawValue =
   | ThreadInTeam
   | ThreadParticipant
   | TeamThreadsSync
+  | ScheduledPost
   | UserProfile
+  | SlashCommand
+  | CustomProfileAttribute
+  | CustomProfileField
   | Pick<ChannelMembership, 'channel_id' | 'user_id'>
+  | PlaybookRun
+  | PlaybookChecklist
+  | PlaybookChecklistItem

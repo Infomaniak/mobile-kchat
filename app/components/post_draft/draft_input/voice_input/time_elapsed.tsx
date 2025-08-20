@@ -3,8 +3,8 @@
 import React from 'react';
 import {Text} from 'react-native';
 
-import {makeStyleSheetFromTheme} from '@app/utils/theme';
 import {useTheme} from '@context/theme';
+import {makeStyleSheetFromTheme} from '@utils/theme';
 
 type TimeElapsedProps = {
     time: string;

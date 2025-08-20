@@ -1,12 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useMemo} from 'react';
-import {StyleSheet, Text, useWindowDimensions, View} from 'react-native';
+import React, {useCallback} from 'react';
+import {Text, View} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
 import LocalPlayBack from '@components/files/voice_recording_file/local_playback';
-import {MIC_SIZE, VOICE_MESSAGE_CARD_RATIO} from '@constants/view';
+import {MIC_SIZE} from '@constants/view';
 import {useTheme} from '@context/theme';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -25,8 +25,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         container: {
             flex: 1,
             flexDirection: 'row',
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: changeOpacity(theme.centerChannelColor, 0.56),
             marginBottom: 1,
             shadowColor: '#000',
             shadowOpacity: 0.08,
@@ -67,17 +65,11 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
     };
 });
 
-const VoiceRecordingFile = ({file, uploading}: Props) => {
+const VoiceRecordingFile = ({uploading}: Props) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
-    const dimensions = useWindowDimensions();
-    const isVoiceMessage = file.is_voice_recording;
 
-    const voiceStyle = useMemo(() => {
-        return {
-            width: dimensions.width * VOICE_MESSAGE_CARD_RATIO,
-        };
-    }, [dimensions.width]);
+    // const isVoiceMessage = file.is_voice_recording;
 
     const getUploadingView = useCallback(() => {
         return (
@@ -103,7 +95,6 @@ const VoiceRecordingFile = ({file, uploading}: Props) => {
         <View
             style={[
                 styles.container,
-                isVoiceMessage && voiceStyle,
             ]}
         >
             {uploading ? getUploadingView() : <LocalPlayBack/>}

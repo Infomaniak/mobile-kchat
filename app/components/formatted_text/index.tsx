@@ -2,14 +2,14 @@
 // See LICENSE.txt for license information.
 
 import {createElement, isValidElement} from 'react';
-import {useIntl} from 'react-intl';
+import {useIntl, type MessageDescriptor} from 'react-intl';
 import {type StyleProp, Text, type TextProps, type TextStyle} from 'react-native';
 
 import {generateId} from '@utils/general';
 
 type FormattedTextProps = TextProps & {
-    id: string;
-    defaultMessage?: string;
+    id?: MessageDescriptor['id'];
+    defaultMessage?: MessageDescriptor['defaultMessage'];
     values?: Record<string, any>;
     testID?: string;
     style?: StyleProp<TextStyle>;
@@ -46,9 +46,7 @@ const FormattedText = (props: FormattedTextProps) => {
         // when the `message` is formatted. This allows the formatted
         // message to then be broken-up into parts with references to the
         // React Elements inserted back in.
-        Object.keys(values).forEach((name) => {
-            const value = values[name];
-
+        Object.entries(values).forEach(([name, value]) => {
             if (isValidElement(value)) {
                 const token = generateToken();
                 tokenizedValues[name] = tokenDelimiter + token + tokenDelimiter;

@@ -4,7 +4,7 @@ import {Image, type ImageProps} from 'expo-image';
 import React from 'react';
 import Animated from 'react-native-reanimated';
 
-import CompassIcon from '@app/components/compass_icon';
+import CompassIcon from '@components/compass_icon';
 import {useServerUrl} from '@context/server';
 import NetworkManager from '@managers/network_manager';
 

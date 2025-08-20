@@ -2,9 +2,9 @@
 // See LICENSE.txt for license information.
 
 export const MIN_REQUIRED_VERSION = '5.26.2';
-export const FULL_VERSION = '8.1.0';
-export const MAJOR_VERSION = 8;
-export const MIN_VERSION = 1;
+export const FULL_VERSION = '9.6.0'; // ik : server is currently at this version instead of MM 10.5.0
+export const MAJOR_VERSION = 9;
+export const MIN_VERSION = 6;
 export const PATCH_VERSION = 0;
 
 export default {

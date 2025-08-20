@@ -1,4 +1,4 @@
-//
+    //
 //  Network.swift
 //  Gekidou
 //
@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os.log
 
 public typealias ResponseHandler = (_ data: Data?, _ response: URLResponse?, _ error: Error?) -> Void
 
@@ -13,6 +14,7 @@ public class Network: NSObject {
     internal var session: URLSession?
     internal let queue = OperationQueue()
     internal let urlVersion = "/api/v4"
+    internal var certificates: [String: [SecCertificate]] = [:]
 
     @objc public static let `default` = Network()
     

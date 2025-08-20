@@ -4,13 +4,13 @@
 import React, {useState} from 'react';
 import {TouchableOpacity, View} from 'react-native';
 
-import Slider from '@app/components/slider';
-import {useAudioPlayerContext} from '@app/context/audio_player';
-import {mmssss} from '@app/utils/datetime';
 import CompassIcon from '@components/compass_icon';
 import TimeElapsed from '@components/post_draft/draft_input/voice_input/time_elapsed';
+import Slider from '@components/slider';
 import {MIC_SIZE} from '@constants/view';
+import {useAudioPlayerContext} from '@context/audio_player';
 import {useTheme} from '@context/theme';
+import {mmssss} from '@utils/datetime';
 import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 

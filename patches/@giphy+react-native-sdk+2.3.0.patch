@@ -1,0 +1,14 @@
+diff --git a/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift b/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift
+index 1afb4b2..3a5de21 100644
+--- a/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift
++++ b/node_modules/@giphy/react-native-sdk/ios/Utils/GPHMedia.swift
+@@ -34,7 +34,8 @@ extension GPHMedia {
+ 
+   private func toGPHJSON() -> GPHJSONObject {
+     guard let data = try? JSONEncoder().encode(self),
+-          let rep = try? JSONSerialization.jsonObject(with: data) as? GPHJSONObject else {
++          let optionalRep = try? JSONSerialization.jsonObject(with: data) as? GPHJSONObject,
++          let rep = optionalRep else {
+       return [:]
+     }
+     return rep

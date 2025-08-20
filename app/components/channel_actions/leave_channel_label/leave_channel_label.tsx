@@ -7,14 +7,14 @@ import {Alert} from 'react-native';
 
 import {archiveChannel, leaveChannel} from '@actions/remote/channel';
 import {setDirectChannelVisible} from '@actions/remote/preference';
-import {t} from '@app/i18n';
-import {alertErrorWithFallback} from '@app/utils/draft';
 import OptionItem from '@components/option_item';
 import SlideUpPanelItem from '@components/slide_up_panel_item';
 import {General, Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useIsTablet} from '@hooks/device';
+import {t} from '@i18n';
 import {dismissAllModalsAndPopToRoot, dismissBottomSheet, showModal} from '@screens/navigation';
+import {alertErrorWithFallback} from '@utils/draft';
 
 type Props = {
     isOptionItem?: boolean;

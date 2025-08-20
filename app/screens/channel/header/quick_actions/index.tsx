@@ -37,7 +37,11 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
 }));
 
-const ChannelQuickAction = ({channelId, callsEnabled, isDMorGM}: Props) => {
+const ChannelQuickAction = ({
+    channelId,
+    callsEnabled,
+    isDMorGM,
+}: Props) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
 

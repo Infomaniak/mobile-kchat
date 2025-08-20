@@ -1,0 +1,98 @@
+diff --git a/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts b/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts
+index 1cfd45e..c1dc838 100644
+--- a/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts
++++ b/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts
+@@ -1,6 +1,8 @@
+ import { type EmitterSubscription } from "react-native";
+ import type { WebSocketClientConfiguration, WebSocketClientErrorEventHandler, WebSocketClientInterface, WebSocketEventHandler } from "@mattermost/react-native-network-client";
+ import { WebSocketReadyState } from "./NativeWebSocketClient";
++import type Pusher from 'pusher-js/react-native';
++
+ /**
+  * Configurable WebSocket client
+  */
+@@ -24,8 +26,8 @@ declare class WebSocketClient implements WebSocketClientInterface {
+     onClientError: (callback: WebSocketClientErrorEventHandler) => void;
+     invalidate: () => Promise<void>;
+ }
+-declare function getOrCreateWebSocketClient(url: string, config?: WebSocketClientConfiguration, clientErrorEventHandler?: WebSocketClientErrorEventHandler): Promise<{
+-    client: WebSocketClient;
++declare function getOrCreateWebSocketClient(url: string, serverUrl?: string, config?: WebSocketClientConfiguration): Promise<{
++    client: Pusher;
+     created: boolean;
+ }>;
+ export { getOrCreateWebSocketClient };
+diff --git a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/NativeWebSocketClient.ts b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/NativeWebSocketClient.ts
+index e8f60de..da0f015 100644
+--- a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/NativeWebSocketClient.ts
++++ b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/NativeWebSocketClient.ts
+@@ -1,4 +1,6 @@
+ import { type TurboModule, TurboModuleRegistry } from "react-native";
++import Pusher from 'pusher-js/react-native';
++
+ import type {
+     Double,
+     Int32,
+diff --git a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
+index c4389f2..d4d997e 100644
+--- a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
++++ b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
+@@ -3,6 +3,7 @@
+ 
+ import { NativeEventEmitter, type EmitterSubscription } from "react-native";
+ import isURL from "validator/es/lib/isURL";
++import Pusher from 'pusher-js/react-native';
+ 
+ import type {
+     WebSocketClientConfiguration,
+@@ -19,7 +20,7 @@ import NativeWebSocketClient, {
+ 
+ const Emitter = new NativeEventEmitter(NativeWebSocketClient);
+ 
+-const CLIENTS: { [key: string]: WebSocketClient } = {};
++const CLIENTS: { [key: string]: Pusher } = {};
+ const CREATING_CLIENT: { [key: string]: boolean } = {};
+ 
+ /**
+@@ -146,13 +147,9 @@ class WebSocketClient implements WebSocketClientInterface {
+ 
+ async function getOrCreateWebSocketClient(
+     url: string,
++    serverUrl?: string,
+     config: WebSocketClientConfiguration = {},
+-    clientErrorEventHandler?: WebSocketClientErrorEventHandler,
+-): Promise<{ client: WebSocketClient; created: boolean }> {
+-    if (!isValidWebSocketURL(url)) {
+-        throw new Error(`"${url}" is not a valid WebSocket URL`);
+-    }
+-
++): Promise<{ client: Pusher; created: boolean }> {
+     let created = false;
+     let client = CLIENTS[url];
+     if (!client) {
+@@ -161,11 +158,20 @@ async function getOrCreateWebSocketClient(
+         }
+         CREATING_CLIENT[url] = true;
+         created = true;
+-        client = new WebSocketClient(url);
+-        if (clientErrorEventHandler) {
+-            client.onClientError(clientErrorEventHandler);
+-        }
+-        await NativeWebSocketClient.ensureClientFor(url, config);
++        client = new Pusher('kchat-key', {
++            wsHost: url,
++            httpHost: url,
++            authEndpoint: `${serverUrl}/broadcasting/auth`,
++            auth: { headers: config.headers },
++            enabledTransports: ['ws', 'wss'],
++            disabledTransports: ['xhr_streaming', 'xhr_polling', 'sockjs'],
++            activityTimeout: 10000,
++            pongTimeout: 5000,
++            unavailableTimeout: 3000,
++            cluster: 'eu',
++        });
++        await NativeWebSocketClient.ensureClientFor(`wss://${url}`, config);
++
+         CLIENTS[url] = client;
+         delete CREATING_CLIENT[url];
+     }

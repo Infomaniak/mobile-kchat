@@ -1,13 +1,10 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-/* Polyfills */
-import 'react-native-url-polyfill/auto';
-
+import {RUNNING_E2E} from '@env';
 import TurboLogger from '@mattermost/react-native-turbo-log';
 import {LogBox, Platform, UIManager} from 'react-native';
 import ViewReactNativeStyleAttributes from 'react-native/Libraries/Components/View/ReactNativeStyleAttributes';
-import {RUNNING_E2E} from 'react-native-dotenv';
 import 'react-native-gesture-handler';
 import {Navigation} from 'react-native-navigation';
 
@@ -49,7 +46,7 @@ if (global.HermesInternal) {
     require('@formatjs/intl-pluralrules/polyfill-force');
     require('@formatjs/intl-numberformat/polyfill-force');
     require('@formatjs/intl-datetimeformat/polyfill-force');
-    require('@formatjs/intl-datetimeformat/add-golden-tz');
+    require('@formatjs/intl-datetimeformat/add-all-tz');
     require('@formatjs/intl-listformat/polyfill-force');
 }
 

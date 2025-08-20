@@ -3,6 +3,8 @@
 
 import {type AppSchema, appSchema} from '@nozbe/watermelondb';
 
+import {PlaybookRunSchema, PlaybookChecklistSchema, PlaybookChecklistItemSchema} from '@playbooks/database/schema';
+
 import {
     CategorySchema,
     CategoryChannelSchema,
@@ -38,25 +40,35 @@ import {
     ThreadParticipantSchema,
     TeamThreadsSyncSchema,
     UserSchema,
+    ScheduledPostSchema,
+    ChannelBookmarkSchema,
+    CustomProfileAttributeSchema,
+    CustomProfileFieldSchema,
 } from './table_schemas';
 
 export const serverSchema: AppSchema = appSchema({
-    version: 6,
+    version: 7,
     tables: [
-        CategorySchema,
+        PlaybookRunSchema,
+        PlaybookChecklistSchema,
+        PlaybookChecklistItemSchema,
+        CustomProfileFieldSchema,
+        CustomProfileAttributeSchema,
+        ChannelBookmarkSchema,
         CategoryChannelSchema,
+        CategorySchema,
         ChannelInfoSchema,
         ChannelMembershipSchema,
         ChannelSchema,
-        ConferenceSchema,
         ConferenceParticipantSchema,
+        ConferenceSchema,
         ConfigSchema,
         CustomEmojiSchema,
         DraftSchema,
         FileSchema,
-        GroupSchema,
         GroupChannelSchema,
         GroupMembershipSchema,
+        GroupSchema,
         GroupTeamSchema,
         MyChannelSchema,
         MyChannelSettingsSchema,
@@ -67,15 +79,16 @@ export const serverSchema: AppSchema = appSchema({
         PreferenceSchema,
         ReactionSchema,
         RoleSchema,
+        ScheduledPostSchema,
         SystemSchema,
         TeamChannelHistorySchema,
         TeamMembershipSchema,
         TeamSchema,
         TeamSearchHistorySchema,
         TeamThreadsSyncSchema,
-        ThreadSchema,
         ThreadInTeamSchema,
         ThreadParticipantSchema,
+        ThreadSchema,
         UserSchema,
     ],
 });

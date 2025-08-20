@@ -4,13 +4,13 @@
 import {Q} from '@nozbe/watermelondb';
 import {z} from 'zod';
 
-import {queryConference} from '@app/queries/servers/conference';
-import {logError} from '@app/utils/log';
 import {MM_TABLES} from '@constants/database';
 import DatabaseManager from '@database/manager';
+import {queryConference} from '@queries/servers/conference';
+import {logError} from '@utils/log';
 
-import type {default as ConferenceModel, ConferenceModelFields} from '@app/database/models/server/conference';
-import type {default as ConferenceParticipantModel, ConferenceParticipantModelFields} from '@app/database/models/server/conference_participant';
+import type {default as ConferenceModel, ConferenceModelFields} from '@database/models/server/conference';
+import type {default as ConferenceParticipantModel, ConferenceParticipantModelFields} from '@database/models/server/conference_participant';
 
 type ConferenceModelChanges = Partial<Pick<ConferenceModel, ConferenceModelFields>>;
 type ConferenceParticipantModelChanges = Partial<Pick<ConferenceParticipantModel, ConferenceParticipantModelFields>>;

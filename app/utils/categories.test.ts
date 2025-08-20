@@ -5,6 +5,7 @@
 
 import {Preferences} from '@constants';
 import DatabaseManager from '@database/manager';
+import TestHelper from '@test/test_helper';
 
 import {
     makeCategoryChannelId,
@@ -18,8 +19,6 @@ import {
 } from './categories';
 
 import type {ServerDatabase} from '@typings/database/database';
-import type MyChannelModel from '@typings/database/models/servers/my_channel';
-import type PreferenceModel from '@typings/database/models/servers/preference';
 import type UserModel from '@typings/database/models/servers/user';
 
 describe('Categories utils', () => {
@@ -378,19 +377,22 @@ describe('Categories utils', () => {
         const now = Date.now();
         const dt_chan1 = now - (3 * 24 * 60 * 60 * 1000);
         const dt_chan2 = now - (2 * 24 * 60 * 60 * 1000);
-        const autoclosePrefs = [{
-            id: 'pref1',
-            userId: 'me',
-            category: Preferences.CATEGORIES.CHANNEL_APPROXIMATE_VIEW_TIME,
-            name: 'dm1',
-            value: `${dt_chan1}`,
-        }, {
-            id: 'pref2',
-            userId: 'me',
-            category: Preferences.CATEGORIES.CHANNEL_APPROXIMATE_VIEW_TIME,
-            name: 'dm2',
-            value: `${dt_chan2}`,
-        }] as PreferenceModel[];
+        const autoclosePrefs = [
+            TestHelper.fakePreferenceModel({
+                id: 'pref1',
+                userId: 'me',
+                category: Preferences.CATEGORIES.CHANNEL_APPROXIMATE_VIEW_TIME,
+                name: 'dm1',
+                value: `${dt_chan1}`,
+            }),
+            TestHelper.fakePreferenceModel({
+                id: 'pref2',
+                userId: 'me',
+                category: Preferences.CATEGORIES.CHANNEL_APPROXIMATE_VIEW_TIME,
+                name: 'dm2',
+                value: `${dt_chan2}`,
+            }),
+        ];
 
         const channels: Channel[] = [{
             id: 'dm1',
@@ -491,10 +493,10 @@ describe('Categories utils', () => {
 
         const lastViewedData: ChannelWithMyChannel[] = [{
             ...data[0],
-            myChannel: {
+            myChannel: TestHelper.fakeMyChannelModel({
                 ...data[0].myChannel,
                 lastViewedAt: 0,
-            } as MyChannelModel,
+            }),
         }, data[1]];
 
         const autoclosePrefsNotViewed = [autoclosePrefs[1]];
@@ -502,10 +504,10 @@ describe('Categories utils', () => {
         expect(result.length).toEqual(1);
 
         const deactivated = new Map<string, UserModel>();
-        deactivated.set('other1', {
+        deactivated.set('other1', TestHelper.fakeUserModel({
             id: 'other1',
             deleteAt: dt_chan1 + 1,
-        } as UserModel);
+        }));
 
         result = filterAutoclosedDMs('direct_messages', 3, 'me', '', data, autoclosePrefs, {}, deactivated);
         expect(result.length).toEqual(1);
@@ -515,29 +517,29 @@ describe('Categories utils', () => {
 
         const mockNotUnread: ChannelWithMyChannel[] = [data[0], {
             ...data[1],
-            myChannel: {
+            myChannel: TestHelper.fakeMyChannelModel({
                 id: data[1].myChannel.id,
                 lastViewedAt: 0,
                 isUnread: false,
-            } as MyChannelModel,
+            }),
         }];
         result = filterAutoclosedDMs('direct_messages', 3, 'me', '', mockNotUnread, autoclosePrefs, {}, undefined, 'dm1');
         expect(result[0].channel.id).toEqual('dm1');
 
         const mockRecent1: ChannelWithMyChannel[] = [{
             ...data[0],
-            myChannel: {
+            myChannel: TestHelper.fakeMyChannelModel({
                 id: data[0].myChannel.id,
                 lastViewedAt: 2,
                 isUnread: false,
-            } as MyChannelModel,
+            }),
         }, {
             ...data[1],
-            myChannel: {
+            myChannel: TestHelper.fakeMyChannelModel({
                 id: data[1].myChannel.id,
                 lastViewedAt: 1,
                 isUnread: false,
-            } as MyChannelModel,
+            }),
         }];
 
         result = filterAutoclosedDMs('direct_messages', 3, 'me', '', mockRecent1, [], {});
@@ -545,18 +547,18 @@ describe('Categories utils', () => {
 
         const mockRecent2: ChannelWithMyChannel[] = [{
             ...data[0],
-            myChannel: {
+            myChannel: TestHelper.fakeMyChannelModel({
                 id: data[0].myChannel.id,
                 lastViewedAt: 1,
                 isUnread: false,
-            } as MyChannelModel,
+            }),
         }, {
             ...data[1],
-            myChannel: {
+            myChannel: TestHelper.fakeMyChannelModel({
                 id: data[1].myChannel.id,
                 lastViewedAt: 2,
                 isUnread: false,
-            } as MyChannelModel,
+            }),
         }];
 
         result = filterAutoclosedDMs('direct_messages', 3, 'me', '', mockRecent2, [], {});
@@ -564,18 +566,18 @@ describe('Categories utils', () => {
 
         const mockSameLastViewed: ChannelWithMyChannel[] = [{
             ...data[0],
-            myChannel: {
+            myChannel: TestHelper.fakeMyChannelModel({
                 id: data[0].myChannel.id,
                 lastViewedAt: 1,
                 isUnread: false,
-            } as MyChannelModel,
+            }),
         }, {
             ...data[1],
-            myChannel: {
+            myChannel: TestHelper.fakeMyChannelModel({
                 id: data[1].myChannel.id,
                 lastViewedAt: 1,
                 isUnread: false,
-            } as MyChannelModel,
+            }),
         }];
 
         result = filterAutoclosedDMs('direct_messages', 3, 'me', '', mockSameLastViewed, [], {});
@@ -585,25 +587,29 @@ describe('Categories utils', () => {
     test('filterManuallyClosedDms', async () => {
         const db = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
 
-        const closedDMsPrefs = [{
-            id: 'pref1',
-            userId: 'me',
-            category: Preferences.CATEGORIES.DIRECT_CHANNEL_SHOW,
-            name: 'dm1',
-            value: 'true',
-        }, {
-            id: 'pref2',
-            userId: 'me',
-            category: Preferences.CATEGORIES.DIRECT_CHANNEL_SHOW,
-            name: 'dm2',
-            value: 'true',
-        }, {
-            id: 'pref3',
-            userId: 'me',
-            category: Preferences.CATEGORIES.GROUP_CHANNEL_SHOW,
-            name: 'gm1',
-            value: 'false',
-        }] as PreferenceModel[];
+        const closedDMsPrefs = [
+            TestHelper.fakePreferenceModel({
+                id: 'pref1',
+                userId: 'me',
+                category: Preferences.CATEGORIES.DIRECT_CHANNEL_SHOW,
+                name: 'dm1',
+                value: 'true',
+            }),
+            TestHelper.fakePreferenceModel({
+                id: 'pref2',
+                userId: 'me',
+                category: Preferences.CATEGORIES.DIRECT_CHANNEL_SHOW,
+                name: 'dm2',
+                value: 'true',
+            }),
+            TestHelper.fakePreferenceModel({
+                id: 'pref3',
+                userId: 'me',
+                category: Preferences.CATEGORIES.GROUP_CHANNEL_SHOW,
+                name: 'gm1',
+                value: 'false',
+            }),
+        ];
 
         const {channels, myChannels} = buildChannelsData();
         const data = await createChannelsDbRecords(db, channels, myChannels);

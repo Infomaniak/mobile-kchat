@@ -9,6 +9,7 @@ import {SafeAreaView, type Edge, useSafeAreaInsets} from 'react-native-safe-area
 import {Events} from '@constants';
 import {GALLERY_FOOTER_HEIGHT} from '@constants/gallery';
 import {changeOpacity} from '@utils/theme';
+import {ensureString} from '@utils/types';
 import {displayUsername} from '@utils/user';
 
 import Actions from './actions';
@@ -29,6 +30,7 @@ type Props = {
     enablePostIconOverride: boolean;
     enablePostUsernameOverride: boolean;
     enablePublicLink: boolean;
+    enableSecureFilePreview: boolean;
     hideActions: boolean;
     isDirectChannel: boolean;
     item: GalleryItemType;
@@ -59,7 +61,7 @@ const styles = StyleSheet.create({
 
 const Footer = ({
     author, canDownloadFiles, channelName, currentUserId,
-    enablePostIconOverride, enablePostUsernameOverride, enablePublicLink,
+    enablePostIconOverride, enablePostUsernameOverride, enablePublicLink, enableSecureFilePreview,
     hideActions, isDirectChannel, item, post, style, teammateNameDisplay,
     hasCaptions, captionEnabled, onCaptionsPress,
 }: Props) => {
@@ -71,14 +73,14 @@ const Footer = ({
 
     let overrideIconUrl;
     if (enablePostIconOverride && post?.props?.use_user_icon !== 'true' && post?.props?.override_icon_url) {
-        overrideIconUrl = post.props.override_icon_url;
+        overrideIconUrl = ensureString(post.props.override_icon_url);
     }
 
     let userDisplayName;
     if (item.type === 'avatar') {
         userDisplayName = item.name;
     } else if (enablePostUsernameOverride && post?.props?.override_username) {
-        userDisplayName = post.props.override_username as string;
+        userDisplayName = ensureString(post.props.override_username);
     } else {
         userDisplayName = displayUsername(author, undefined, teammateNameDisplay);
     }
@@ -109,14 +111,15 @@ const Footer = ({
             edges={edges}
             style={[style]}
         >
-            {['downloading', 'sharing'].includes(action) &&
+            {['downloading', 'sharing'].includes(action) && !enableSecureFilePreview && canDownloadFiles &&
                 <DownloadWithAction
                     action={action}
+                    enableSecureFilePreview={enableSecureFilePreview}
                     item={item}
                     setAction={setAction}
                 />
             }
-            {action === 'copying' &&
+            {action === 'copying' && !enableSecureFilePreview && enablePublicLink &&
             <CopyPublicLink
                 item={item}
                 setAction={setAction}
@@ -140,8 +143,8 @@ const Footer = ({
                 {showActions &&
                 <Actions
                     disabled={action !== 'none'}
-                    canDownloadFiles={canDownloadFiles}
-                    enablePublicLinks={enablePublicLink && item.type !== 'avatar'}
+                    canDownloadFiles={!enableSecureFilePreview && canDownloadFiles}
+                    enablePublicLinks={!enableSecureFilePreview && enablePublicLink && item.type !== 'avatar'}
                     fileId={item.id!}
                     onCopyPublicLink={handleCopyLink}
                     onDownload={handleDownload}

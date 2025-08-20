@@ -6,8 +6,6 @@ import {DeviceEventEmitter} from 'react-native';
 import {loginEntry} from '@actions/remote/entry/login';
 import {addPushProxyVerificationStateFromLogin} from '@actions/remote/session';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
-import {getCurrentChannelId, getCurrentTeamId, getLastFullSync} from '@app/queries/servers/system';
-import {setTeamLoading} from '@app/store/team_load_store';
 import {BASE_SERVER_URL} from '@client/rest/constants';
 import {Events} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
@@ -15,7 +13,9 @@ import {PUSH_PROXY_STATUS_VERIFIED} from '@constants/push_proxy';
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials, removeServerCredentials, setServerCredentials} from '@init/credentials';
 import NetworkManager from '@managers/network_manager';
+import {getCurrentChannelId, getCurrentTeamId, getLastFullSync} from '@queries/servers/system';
 import EphemeralStore from '@store/ephemeral_store';
+import {setTeamLoading} from '@store/team_load_store';
 
 import {entry} from './common';
 

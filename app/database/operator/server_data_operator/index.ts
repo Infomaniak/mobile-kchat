@@ -5,12 +5,14 @@ import ServerDataOperatorBase from '@database/operator/server_data_operator/hand
 import CategoryHandler, {type CategoryHandlerMix} from '@database/operator/server_data_operator/handlers/category';
 import ChannelHandler, {type ChannelHandlerMix} from '@database/operator/server_data_operator/handlers/channel';
 import ConferenceHandler, {type ConferenceHandlerMix} from '@database/operator/server_data_operator/handlers/conference';
+import CustomProfileHandler, {type CustomProfileHandlerMix} from '@database/operator/server_data_operator/handlers/custom_profile';
 import GroupHandler, {type GroupHandlerMix} from '@database/operator/server_data_operator/handlers/group';
 import PostHandler, {type PostHandlerMix} from '@database/operator/server_data_operator/handlers/post';
 import TeamHandler, {type TeamHandlerMix} from '@database/operator/server_data_operator/handlers/team';
 import TeamThreadsSyncHandler, {type TeamThreadsSyncHandlerMix} from '@database/operator/server_data_operator/handlers/team_threads_sync';
 import ThreadHandler, {type ThreadHandlerMix} from '@database/operator/server_data_operator/handlers/thread';
 import UserHandler, {type UserHandlerMix} from '@database/operator/server_data_operator/handlers/user';
+import PlaybookHandler, {type PlaybookHandlerMix} from '@playbooks/database/operators/handlers';
 import mix from '@utils/mix';
 
 import type {Database} from '@nozbe/watermelondb';
@@ -19,7 +21,9 @@ interface ServerDataOperator extends
     CategoryHandlerMix,
     ChannelHandlerMix,
     ConferenceHandlerMix,
+    CustomProfileHandlerMix,
     GroupHandlerMix,
+    PlaybookHandlerMix,
     PostHandlerMix,
     ServerDataOperatorBase,
     TeamHandlerMix,
@@ -32,7 +36,9 @@ class ServerDataOperator extends mix(ServerDataOperatorBase).with(
     CategoryHandler,
     ChannelHandler,
     ConferenceHandler,
+    CustomProfileHandler,
     GroupHandler,
+    PlaybookHandler,
     PostHandler,
     TeamHandler,
     ThreadHandler,

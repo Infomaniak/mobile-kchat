@@ -25,7 +25,7 @@ const getStyleFromTheme = makeStyleSheetFromTheme((theme) => {
         buttonStyle: {
             position: 'absolute',
             alignSelf: 'center',
-            bottom: -70,
+            bottom: -100,
             flexDirection: 'row',
         },
         shadow: {
@@ -62,6 +62,7 @@ type Props = {
     isNewMessage: boolean;
     showScrollToEndBtn: boolean;
     location: string;
+    testID?: string;
 };
 
 const ScrollToEndView = ({
@@ -69,6 +70,7 @@ const ScrollToEndView = ({
     isNewMessage,
     showScrollToEndBtn,
     location,
+    testID = 'scroll-to-end-view',
 }: Props) => {
     const intl = useIntl();
     const theme = useTheme();
@@ -95,10 +97,11 @@ const ScrollToEndView = ({
         () => ({
             transform: [
                 {
-                    translateY: withTiming(showScrollToEndBtn ? -80 - keyboardOverlap - bottomAdjustment : 0, {duration: 300}),
+                    translateY: withTiming(showScrollToEndBtn ? -100 - keyboardOverlap - bottomAdjustment : -15, {duration: 300}),
                 },
             ],
-            maxWidth: withTiming(isNewMessage ? dimensions.width * 0.75 : dimensions.width * 0.1, {duration: 300}),
+            maxWidth: withTiming(isNewMessage ? 169 : 40, {duration: 300}),
+            opacity: withTiming(showScrollToEndBtn ? 1 : 0),
         }),
         [showScrollToEndBtn, isNewMessage, keyboardOverlap, bottomAdjustment],
     );
@@ -106,7 +109,10 @@ const ScrollToEndView = ({
     const scrollButtonStyles = isNewMessage ? styles.scrollToEndBadge : styles.scrollToEndButton;
 
     return (
-        <View ref={guidingViewRef}>
+        <View
+            ref={guidingViewRef}
+            testID={testID}
+        >
             <Animated.View style={[animatedStyle, styles.buttonStyle]}>
                 <Pressable
                     onPress={onPress}

@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 import React, {createContext, useContext, type PropsWithChildren} from 'react';
 
-import useAudioPlayer from '@app/hooks/audio_player';
+import useAudioPlayer from '@hooks/audio_player';
 
 export const AudioPlayerContext = createContext<{
     loadAudio: Function;

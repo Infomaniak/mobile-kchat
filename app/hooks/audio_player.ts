@@ -5,9 +5,9 @@ import {useState} from 'react';
 import AudioRecorderPlayer, {type PlayBackType} from 'react-native-audio-recorder-player';
 
 import {buildFileUrl} from '@actions/remote/file';
-import {useServerUrl} from '@app/context/server';
-import {logError, logInfo} from '@app/utils/log';
+import {useServerUrl} from '@context/server';
 import NetworkManager from '@managers/network_manager';
+import {logError, logInfo} from '@utils/log';
 
 const useAudioPlayer = () => {
     const [playing, setPlaying] = useState<string | null>(null);
@@ -37,7 +37,6 @@ const useAudioPlayer = () => {
             player.addPlayBackListener((status) => {
                 playBackListener?.(status);
             });
-
             setPlayer(player);
             setPlaying(audioId || 'draft');
         } catch (error) {
@@ -50,7 +49,7 @@ const useAudioPlayer = () => {
     const pauseAudio = async () => {
         try {
             await player?.stopPlayer();
-            await player?.removePlayBackListener();
+            player?.removePlayBackListener();
         } catch (error) {
             logError(error);
         }

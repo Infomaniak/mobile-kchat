@@ -3,6 +3,7 @@
 
 import React from 'react';
 
+import {isMessageAttachmentArray} from '@utils/message_attachment';
 import {isYoutubeLink} from '@utils/url';
 
 import EmbeddedBindings from './embedded_bindings';
@@ -12,11 +13,12 @@ import Opengraph from './opengraph';
 import YouTube from './youtube';
 
 import type PostModel from '@typings/database/models/servers/post';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
 type ContentProps = {
     isReplyPost: boolean;
     layoutWidth?: number;
-    location: string;
+    location: AvailableScreens;
     post: PostModel;
     theme: Theme;
 }
@@ -31,13 +33,17 @@ const contentType: Record<string, string> = {
 
 const Content = ({isReplyPost, layoutWidth, location, post, theme}: ContentProps) => {
     let type: string | undefined = post.metadata?.embeds?.[0].type;
-    if (!type && post.props?.app_bindings?.length) {
+
+    const nAppBindings = Array.isArray(post.props?.app_bindings) ? post.props.app_bindings.length : 0;
+    if (!type && nAppBindings) {
         type = contentType.app_bindings;
     }
 
     if (!type) {
         return null;
     }
+
+    const attachments = isMessageAttachmentArray(post.props?.attachments) ? post.props.attachments : [];
 
     switch (contentType[type]) {
         case contentType.image:
@@ -74,10 +80,10 @@ const Content = ({isReplyPost, layoutWidth, location, post, theme}: ContentProps
                 />
             );
         case contentType.message_attachment:
-            if (post.props.attachments?.length) {
+            if (attachments.length) {
                 return (
                     <MessageAttachments
-                        attachments={post.props.attachments}
+                        attachments={attachments}
                         channelId={post.channelId}
                         layoutWidth={layoutWidth}
                         location={location}
@@ -89,7 +95,7 @@ const Content = ({isReplyPost, layoutWidth, location, post, theme}: ContentProps
             }
             break;
         case contentType.app_bindings:
-            if (post.props.app_bindings?.length) {
+            if (nAppBindings) {
                 return (
                     <EmbeddedBindings
                         location={location}

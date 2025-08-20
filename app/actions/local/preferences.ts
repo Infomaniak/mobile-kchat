@@ -1,9 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Preferences} from '@app/constants';
-import {getCurrentTeamId, getCurrentUserId} from '@app/queries/servers/system';
+import {Preferences} from '@constants';
 import DatabaseManager from '@database/manager';
+import {getCurrentTeamId, getCurrentUserId} from '@queries/servers/system';
 
 export const saveThemePreference = async (theme: Theme) => {
     if (!theme) {
