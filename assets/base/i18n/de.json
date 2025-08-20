@@ -1412,5 +1412,5 @@
   "user_settings.notifications.test_notification.send_button.send": "Testbenachrichtigung senden",
   "user_settings.notifications.test_notification.send_button.sending": "Versende eine Testbenachrichtigung",
   "user_settings.notifications.test_notification.send_button.sent": "Testbenachrichtigung gesendet",
-  "user_settings.notifications.test_notification.title": "Fehlersuche bei Benachrichtigungen",
+  "user_settings.notifications.test_notification.title": "Fehlersuche bei Benachrichtigungen"
 }
