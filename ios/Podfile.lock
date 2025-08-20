@@ -2332,7 +2332,7 @@ DEPENDENCIES:
   - "giphy-react-native-sdk (from `../node_modules/@giphy/react-native-sdk`)"
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - "jitsi-meet-rnsdk (from `../node_modules/@jitsi/react-native-sdk`)"
-  - JitsiMeetSDKLite (= 11.3.1-lite)
+  - JitsiMeetSDKLite (from `https://github.com/jitsi/jitsi-meet-ios-sdk-releases.git`, tag `11.3.1-lite`)
   - "mattermost-hardware-keyboard (from `../node_modules/@mattermost/hardware-keyboard`)"
   - "mattermost-react-native-turbo-log (from `../node_modules/@mattermost/react-native-turbo-log`)"
   - "mattermost-rnutils (from `../node_modules/@mattermost/rnutils`)"
@@ -2461,7 +2461,6 @@ SPEC REPOS:
     - GTMAppAuth
     - GTMSessionFetcher
     - HMSegmentedControl
-    - JitsiMeetSDKLite
     - JitsiWebRTC
     - libwebp
     - ObjectiveDropboxOfficial
@@ -2519,6 +2518,9 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
   jitsi-meet-rnsdk:
     :path: "../node_modules/@jitsi/react-native-sdk"
+  JitsiMeetSDKLite:
+    :git: https://github.com/jitsi/jitsi-meet-ios-sdk-releases.git
+    :tag: 11.3.1-lite
   mattermost-hardware-keyboard:
     :path: "../node_modules/@mattermost/hardware-keyboard"
   mattermost-react-native-turbo-log:
@@ -2749,6 +2751,9 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 CHECKOUT OPTIONS:
+  JitsiMeetSDKLite:
+    :git: https://github.com/jitsi/jitsi-meet-ios-sdk-releases.git
+    :tag: 11.3.1-lite
   TurboLogIOSNative:
     :commit: 44fa9abe32a74ce6206d6237c639e6382495d210
     :git: https://github.com/larkox/react-native-turbo-log-ios-native.git
@@ -2910,6 +2915,6 @@ SPEC CHECKSUMS:
   WatermelonDB: 75e467adbaf2cb2809780fb3eda7ce4964e11778
   Yoga: feb4910aba9742cfedc059e2b2902e22ffe9954a
 
-PODFILE CHECKSUM: 0d5d7f7078c5b4cbbe95d4d166023b60ba844e01
+PODFILE CHECKSUM: 60bf55c5b56dc87187fad852f2d176e4820cf8d2
 
 COCOAPODS: 1.16.1

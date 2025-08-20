@@ -46,8 +46,8 @@ target 'kChat' do
   pod 'simdjson', path: '../node_modules/@nozbe/simdjson', :modular_headers => true
   pod 'CocoaLumberjack', :modular_headers => true
   pod 'TurboLogIOSNative', :git => 'https://github.com/larkox/react-native-turbo-log-ios-native.git', :modular_headers => true
-
-  pod 'JitsiMeetSDKLite', '11.3.1-lite'
+  pod 'JitsiMeetSDKLite', :git => 'https://github.com/jitsi/jitsi-meet-ios-sdk-releases.git', :tag => '11.3.1-lite'
+  
   post_install do |installer|
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
