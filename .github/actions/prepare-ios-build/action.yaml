@@ -17,6 +17,13 @@ runs:
       run: |
         echo "::group::install-pods-dependencies"
         npm run ios-gems
+        echo "::endgroup::"
+        
+        echo "::group::debug-jitsi-pod-search"
+        pod search JitsiMeetSDKLite --verbose
+        echo "::endgroup::"
+        
+        echo "::group::pod-install"
         npm run pod-install
         echo "::endgroup::"
 
