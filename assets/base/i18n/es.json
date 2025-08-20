@@ -397,7 +397,6 @@
   "invite.summary.report.sent": "{count} exitosa {count, plural, one {invitation} other {invitations}}",
   "invite.summary.sent": "Tu {sentCount, plural, one {invitation has} other {invitations have}} sido enviada",
   "invite.summary.smtp_failure": "El SMTP no está configurado en la Consola del Sistema",
-  "invite.summary.some_not_sent": "",
   "invite.summary.try_again": "Intenta de nuevo",
   "invite.title": "Invitar",
   "invite.title.summary": "Resumen de invitación",
@@ -1118,5 +1117,4 @@
   "scheduled_post.picker.tomorrow": "Mañana a las {9amTime}",
   "scheduled_post.picker.monday": "Lunes a las {9amTime}",
   "scheduled_post.picker.title": "Programar borrador"
-
 }
