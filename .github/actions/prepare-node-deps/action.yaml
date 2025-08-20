@@ -43,6 +43,13 @@ runs:
         node ./scripts/generate-assets.js
         echo "::endgroup::"
 
+    - name: ci/jitsi-ts-nocheck
+      shell: bash
+      run: |
+        echo "::group::jitsi-ts-nocheck"
+        node scripts/jitsi-ts-nocheck.js
+        echo "::endgroup::"
+
     - name: ci/import-compass-icon
       shell: bash
       env:
