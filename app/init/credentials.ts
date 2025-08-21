@@ -1,12 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Platform} from 'react-native';
+import {Platform, NativeModules} from 'react-native';
 import * as KeyChain from 'react-native-keychain';
 
 import DatabaseManager from '@database/manager';
 import {logWarning} from '@utils/log';
 import {getIOSAppGroupDetails} from '@utils/mattermost_managed';
+const {IkStorage} = NativeModules;
 
 export const getAllServerCredentials = async (): Promise<ServerCredential[]> => {
     const serverCredentials: ServerCredential[] = [];
@@ -61,6 +62,9 @@ export const setServerCredentials = (serverUrl: string, token: string) => {
             securityLevel: KeyChain.SECURITY_LEVEL.SECURE_SOFTWARE,
         };
         KeyChain.setInternetCredentials(serverUrl, token, token, options);
+
+        // ik: ensure the credentials are also stored in IkStorage for Android Reply receiver
+        IkStorage.setItem(serverUrl, token);
     } catch (e) {
         logWarning('could not set credentials', e);
     }
