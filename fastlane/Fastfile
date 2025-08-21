@@ -665,6 +665,8 @@ platform :ios do
         clean: true,
         scheme: 'kChat',
         configuration: config_mode,
+        silent: false,
+        verbose: true, 
         workspace: './ios/kChat.xcworkspace',
         export_method: method,
         skip_profile_detection: true,
