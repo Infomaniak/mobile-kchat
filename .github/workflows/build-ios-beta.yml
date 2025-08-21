@@ -43,6 +43,14 @@ jobs:
         uses: ./.github/actions/prepare-ios-build
         env:
           MATTERMOST_BUILD_GH_TOKEN: "${{ secrets.MATTERMOST_BUILD_GH_TOKEN }}"
+      
+      - name: ci/update-fastlane
+        shell: bash
+        working-directory: ./fastlane
+        run: |
+          echo "::group::update-fastlane"
+          bundle update fastlane
+          echo "::endgroup::"
 
       - name: ci/build-and-deploy-ios-beta
         env:
