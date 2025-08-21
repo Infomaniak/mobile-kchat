@@ -1,32 +1,26 @@
 package com.mattermost.helpers;
 
 import android.content.Context;
-
 import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.Promise;
-import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.ReadableMap;
-
 import com.mattermost.networkclient.ApiClientModuleImpl;
-import com.mattermost.networkclient.enums.RetryTypes;
-import com.mattermost.turbolog.TurboLog;
-
 import java.util.Iterator;
 import java.util.Map;
-
 import okhttp3.HttpUrl;
 import okhttp3.Response;
+
 
 
 public class Network {
     private static ApiClientModuleImpl clientModule;
     private static final WritableMap clientOptions = Arguments.createMap();
     private static final Promise emptyPromise = new ResolvePromise();
-    private static ReactApplicationContext reactContext;
+    private static Context context;
 
     public static void init(Context context) {
+        Network.context = context;
         if (clientModule == null) {
             clientModule = new ApiClientModuleImpl(context);
             createClientOptions();
@@ -44,7 +38,8 @@ public class Network {
         }
         WritableMap headers = Arguments.createMap();
 
-        String token = Credentials.getCredentialsForServerSync(reactContext, baseUrl);
+        String token = Credentials.getCredentialsForServerSync(Network.context, baseUrl);
+
         if (token != null) {
             headers.putString("Authorization", "Bearer " + token);
             headers.putString("Content-Type", "application/json");
