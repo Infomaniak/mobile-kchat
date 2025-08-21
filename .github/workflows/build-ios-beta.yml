@@ -27,17 +27,17 @@ jobs:
     needs:
       - test
     steps:
-      # - name: ci/checkout-repo
-      #   uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: ci/checkout-repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      # - name: ci/output-ssh-private-key
-      #   shell: bash
-      #   run: |
-      #     SSH_KEY_PATH=~/.ssh/id_ed25519
-      #     mkdir -p ~/.ssh
-      #     echo -e '${{ secrets.MM_MOBILE_PRIVATE_DEPLOY_KEY }}' > ${SSH_KEY_PATH}
-      #     chmod 0600 ${SSH_KEY_PATH}
-      #     ssh-keygen -y -f ${SSH_KEY_PATH} > ${SSH_KEY_PATH}.pub
+      - name: ci/output-ssh-private-key
+        shell: bash
+        run: |
+          SSH_KEY_PATH=~/.ssh/id_ed25519
+          mkdir -p ~/.ssh
+          echo -e '${{ secrets.MM_MOBILE_PRIVATE_DEPLOY_KEY }}' > ${SSH_KEY_PATH}
+          chmod 0600 ${SSH_KEY_PATH}
+          ssh-keygen -y -f ${SSH_KEY_PATH} > ${SSH_KEY_PATH}.pub
 
       - name: ci/prepare-ios-build
         uses: ./.github/actions/prepare-ios-build
