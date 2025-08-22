@@ -332,8 +332,13 @@ export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}
 }
 
 export function resetToInfomaniakLogin(passProps: LaunchProps) {
-    const theme = getDefaultThemeByAppearance();
+    const theme = getThemeFromState();
     const statusBarTheme = getStatusBarWithTheme(theme);
+
+    // StatusBar for login screen is controlled by Appearance of the system
+    const variant = Appearance.getColorScheme();
+    const statusBarFg: OptionsStatusBar['style'] = variant === 'dark' ? 'light' : 'dark' as const;
+    const statusBarBg = variant === 'dark' ? '#1E1E1E' : '#E6F3F7';
 
     const children = [{
         component: {
@@ -348,17 +353,9 @@ export function resetToInfomaniakLogin(passProps: LaunchProps) {
                     backgroundColor: theme.centerChannelBg,
                     componentBackgroundColor: theme.centerChannelBg,
                 },
-                statusBar: {...statusBarTheme, style: 'dark' as const},
+                statusBar: {...statusBarTheme, style: statusBarFg, backgroundColor: statusBarBg},
                 topBar: {
-                    backButton: {
-                        color: theme.sidebarHeaderTextColor,
-                        title: '',
-                    },
-                    background: {
-                        color: theme.sidebarBg,
-                    },
                     visible: false,
-                    height: 0,
                 },
             },
         },
