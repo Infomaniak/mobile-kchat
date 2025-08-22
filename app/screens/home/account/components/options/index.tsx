@@ -24,17 +24,6 @@ type AccountScreenProps = {
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
-        container: {
-            backgroundColor: theme.centerChannelBg,
-            height: '100%',
-            borderTopRightRadius: 12,
-            borderTopLeftRadius: 12,
-            paddingTop: 12,
-            shadowColor: 'rgba(0, 0, 0, 0.12)',
-            shadowOffset: {width: 0, height: -2},
-            shadowOpacity: 1,
-            shadowRadius: 6,
-        },
         divider: {
             backgroundColor: changeOpacity(theme.centerChannelColor, 0.2),
             height: 1,
@@ -52,16 +41,16 @@ const AccountOptions = ({user, enableCustomUserStatuses, isTablet, theme}: Accou
     const styles = getStyleSheet(theme);
 
     return (
-        <View style={styles.container}>
+        <View >
             <View style={styles.group}>
                 <UserPresence
                     currentUser={user}
                 />
                 {enableCustomUserStatuses &&
-                <CustomStatus
-                    isTablet={isTablet}
-                    currentUser={user}
-                />}
+                    <CustomStatus
+                        isTablet={isTablet}
+                        currentUser={user}
+                    />}
             </View>
             <View style={styles.divider}/>
             <View style={styles.group}>
