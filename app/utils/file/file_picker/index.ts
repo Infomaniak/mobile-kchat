@@ -3,7 +3,7 @@
 
 import RNUtils from '@mattermost/rnutils';
 import {applicationName} from 'expo-application';
-import {Alert, Linking, Platform, StatusBar} from 'react-native';
+import {Alert, Linking, Platform} from 'react-native';
 import DocumentPicker, {type DocumentPickerResponse} from 'react-native-document-picker';
 import {type Asset, type CameraOptions, type ImageLibraryOptions, type ImagePickerResponse, launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import Permissions from 'react-native-permissions';
@@ -296,7 +296,6 @@ export default class FilePickerUtil {
 
         if (hasCameraPermission && hasWriteToStoragePermission) {
             launchCamera(options, async (response: ImagePickerResponse) => {
-                StatusBar.setHidden(false);
 
                 if (response.errorCode || response.didCancel) {
                     return;
@@ -345,7 +344,6 @@ export default class FilePickerUtil {
         const hasPermission = await this.hasPhotoPermission('photo');
         if (hasPermission) {
             launchImageLibrary(options, async (response: ImagePickerResponse) => {
-                StatusBar.setHidden(false);
                 if (response.errorMessage || response.didCancel) {
                     logWarning('Attach failed', response.errorMessage || (response.didCancel ? 'cancelled' : ''));
                     return;

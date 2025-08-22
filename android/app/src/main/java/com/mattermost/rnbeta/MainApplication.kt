@@ -17,6 +17,7 @@ import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.react.modules.network.OkHttpClientProvider
 import com.facebook.react.ReactInstanceManager
 import com.facebook.soloader.SoLoader
+import com.mattermost.ikstorage.IkStoragePackage
 import com.oney.WebRTCModule.WebRTCModuleOptions
 
 import com.mattermost.networkclient.RCTOkHttpClientFactory
@@ -52,6 +53,7 @@ class MainApplication : NavigationApplication(), INotificationsApplication {
                         // add(MyReactNativePackage())
                         add(RNNotificationsPackage(this@MainApplication))
                         add(WatermelonDBJSIPackage())
+                        add(IkStoragePackage())
                     }
 
                 override fun getJSMainModuleName(): String = "index"

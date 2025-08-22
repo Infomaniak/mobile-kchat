@@ -13,6 +13,7 @@ variables:
 # Install npm dependencies
 .script-npm-install: &script-npm-install
   - npm ci --ignore-scripts
+  - node node_modules/@sentry/cli/scripts/install.js
   - npx patch-package
   - node scripts/generate-assets.js
   - node scripts/jitsi-ts-nocheck.js
@@ -34,3 +35,14 @@ test:check:
     - when: never
   script:
     - npm run check
+
+# Execute i18n check
+test:i18n:
+  stage: test
+  extends:
+    - .tests-node
+  rules:
+    - *rule-mr
+    - when: never
+  script:
+    - ./scripts/precommit/i18n.sh

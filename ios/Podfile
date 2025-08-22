@@ -46,8 +46,8 @@ target 'kChat' do
   pod 'simdjson', path: '../node_modules/@nozbe/simdjson', :modular_headers => true
   pod 'CocoaLumberjack', :modular_headers => true
   pod 'TurboLogIOSNative', :git => 'https://github.com/larkox/react-native-turbo-log-ios-native.git', :modular_headers => true
-
-  pod 'JitsiMeetSDKLite', '11.3.1-lite'
+  pod 'JitsiMeetSDKLite', :git => 'https://github.com/jitsi/jitsi-meet-ios-sdk-releases.git', :tag => '11.3.1-lite'
+  
   post_install do |installer|
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
@@ -55,6 +55,30 @@ target 'kChat' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
+    
+    # Bitcode stripping for frameworks
+    bitcode_strip_path = `xcrun --find bitcode_strip`.chop!
+
+    def strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
+      framework_path = File.join(Dir.pwd, framework_relative_path)
+      # Vérifier que le fichier existe avant de le traiter
+      if File.exist?(framework_path)
+        command = "#{bitcode_strip_path} #{framework_path} -r -o #{framework_path}"
+        puts "Stripping bitcode: #{command}"
+        system(command)
+      else
+        puts "Framework not found, skipping: #{framework_path}"
+      end
+    end
+
+    framework_paths = [
+      "Pods/Giphy/GiphySDK/GiphyUISDK.xcframework/ios-arm64/GiphyUISDK.framework/GiphyUISDK",
+    ]
+
+    framework_paths.each do |framework_relative_path|
+      strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
+    end
+    
     # installer.pods_project.targets.each do |target|
     #   target.build_configurations.each do |config|
     #     config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
