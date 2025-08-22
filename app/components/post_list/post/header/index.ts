@@ -5,8 +5,8 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
 
-import {observeFilesForPost} from '@app/queries/servers/file';
 import {getDisplayNamePreferenceAsBool} from '@helpers/api/preference';
+import {observeFilesForPost} from '@queries/servers/file';
 import {observePost, observePostAuthor, queryPostReplies} from '@queries/servers/post';
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
 import {observeConfigBooleanValue} from '@queries/servers/system';

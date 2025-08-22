@@ -41,7 +41,7 @@ const TEST_FILES = {
         size: 100,
         user_id: '1',
         width: 100,
-        transcript: '',
+        transcript: {text: '', duration: 0, language: '', task: 'transcribe' as const, segments: [], words: []},
     },
     existingFile2: {
         id: 'file-2',
@@ -53,7 +53,7 @@ const TEST_FILES = {
         size: 100,
         user_id: '1',
         width: 100,
-        transcript: '',
+        transcript: {text: '', duration: 0, language: '', task: 'transcribe' as const, segments: [], words: []},
     },
     newFile: {
         clientId: 'file-3',

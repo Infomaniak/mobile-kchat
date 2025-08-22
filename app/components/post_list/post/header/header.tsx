@@ -4,7 +4,6 @@
 import React, {useEffect, useState} from 'react';
 import {View} from 'react-native';
 
-import {extractTranscript} from '@components/files/voice_recording_file/utils';
 import FormattedText from '@components/formatted_text';
 import FormattedTime from '@components/formatted_time';
 import PostPriorityLabel from '@components/post_priority/post_priority_label';
@@ -76,6 +75,10 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             opacity: 0.5,
             ...typography('Body', 75, 'Regular'),
         },
+        postPriority: {
+            alignSelf: 'center',
+            marginLeft: 6,
+        },
     };
 });
 
@@ -103,7 +106,7 @@ const Header = (props: HeaderProps) => {
 
     useEffect(() => {
         if (files && files[0]?.transcript) {
-            const text = extractTranscript(files[0]);
+            const text = files[0].transcript.text;
             setIsTranscriptAvailable(Boolean(text));
         }
     }, [files && files[0]?.transcript]);

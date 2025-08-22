@@ -158,6 +158,7 @@ export const transformFileRecord = ({action, database, value}: TransformerArgs<F
         file.imageThumbnail = raw?.mini_preview || record?.imageThumbnail || '';
         file.localPath = raw?.localPath || record?.localPath || null;
         file.isBlocked = record?.isBlocked ?? false;
+        file.transcript = raw?.transcript || record?.transcript || '';
     };
 
     return prepareBaseRecord({

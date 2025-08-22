@@ -90,7 +90,7 @@ export const galleryItemToFileInfo = (item: GalleryItemType): FileInfo => ({
     post_id: item.postId!,
     size: 0,
     user_id: item.authorId!,
-    transcript: '',
+    transcript: {text: '', duration: 0, language: '', task: 'transcribe' as const, segments: [], words: []},
 });
 
 export const getShouldRender = (index: number, activeIndex: number, diffValue = 3) => {

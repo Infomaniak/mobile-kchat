@@ -22,7 +22,7 @@ describe('Files utils', () => {
             extension: 'pdf',
             name: 'file 3',
             has_preview_image: false,
-            transcript: '',
+            transcript: {text: '', duration: 0, language: '', task: 'transcribe' as const, segments: [], words: []},
         }, {
             id: testHelper.generateId(),
             create_at: Date.now() + toMilliseconds({days: 1, hours: 14}),
@@ -35,7 +35,7 @@ describe('Files utils', () => {
             extension: 'png',
             name: 'file 2',
             has_preview_image: true,
-            transcript: '',
+            transcript: {text: '', duration: 0, language: '', task: 'transcribe' as const, segments: [], words: []},
         }, {
             id: testHelper.generateId(),
             create_at: Date.now() + toMilliseconds({days: 1, hours: 12, minutes: 10}),
@@ -48,7 +48,7 @@ describe('Files utils', () => {
             extension: 'mp4',
             name: 'file 1',
             has_preview_image: false,
-            transcript: '',
+            transcript: {text: '', duration: 0, language: '', task: 'transcribe' as const, segments: [], words: []},
         }];
     };
 

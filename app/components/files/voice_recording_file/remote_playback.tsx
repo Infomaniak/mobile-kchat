@@ -23,8 +23,6 @@ import {mmssss} from '@utils/datetime';
 import {preventDoubleTap} from '@utils/tap';
 import {blendColors, changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
-import {extractTranscript} from './utils';
-
 import type {WithDatabaseArgs} from '@typings/database/database';
 import type PostModel from '@typings/database/models/servers/post';
 import type {PlayBackType} from 'react-native-audio-recorder-player';
@@ -123,6 +121,9 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
     const isPlaying = playing === id && status === 'playing';
 
     useEffect(() => {
+        if (files[0]?.transcript?.text || isLoadingTranscript) {
+            return;
+        }
         setIsLoadingTranscript(true);
         const handlePosts = async () => {
             try {
@@ -134,10 +135,16 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
             }
         };
         handlePosts();
-        const text = extractTranscript(files[0]);
-        setTranscript(text);
-        setIsLoadingTranscript(false);
-    }, [files[0]?.transcript]);
+    }, [currentPost.id, serverUrl]);
+
+    useEffect(() => {
+        if (files[0]?.transcript?.text) {
+            setTranscript(files[0].transcript.text);
+        }
+        setTimeout(() => {
+            setIsLoadingTranscript(false);
+        }, 1000);
+    }, [files[0]?.transcript?.text]);
 
     const listener = (e: PlayBackType) => {
         setProgress(e.currentPosition);
@@ -178,7 +185,7 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
                         </Text>
                     </View>
                 }
-                {!isLoadingTranscript && transcript.length > 0 &&
+                {!isLoadingTranscript && transcript && transcript.length > 0 &&
                     <Text style={styles.transcriptText}>{transcript}</Text>
                 }
             </View>

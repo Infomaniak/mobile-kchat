@@ -22,7 +22,7 @@ export function areConsecutivePosts(post: PostModel, previousPost: PostModel) {
     let consecutive = false;
 
     if (post && previousPost) {
-        const isVoiceMessage = Boolean(post.props.type === 'voice');
+        const isVoiceMessage = Boolean(post?.props?.type === 'voice');
         const postFromWebhook = Boolean(post?.props?.from_webhook);
         const prevPostFromWebhook = Boolean(previousPost?.props?.from_webhook);
         const isFromSameUser = previousPost.userId === post.userId;

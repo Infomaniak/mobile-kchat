@@ -1,10 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {field, immutableRelation} from '@nozbe/watermelondb/decorators';
+import {field, immutableRelation, json} from '@nozbe/watermelondb/decorators';
 import Model, {type Associations} from '@nozbe/watermelondb/Model';
 
 import {MM_TABLES} from '@constants/database';
+import {safeParseJSON} from '@utils/helpers';
 
 import type {Relation} from '@nozbe/watermelondb';
 import type FileModelInterface from '@typings/database/models/servers/file';
@@ -51,7 +52,7 @@ export default class FileModel extends Model implements FileModelInterface {
     @field('post_id') postId!: string;
 
     /** post_id : The transcript related to the file */
-    @field('transcript') transcript!: string;
+    @json('transcript', safeParseJSON) transcript!: Transcript;
 
     /** size : The numeric value of the size for the file */
     @field('size') size!: number;
