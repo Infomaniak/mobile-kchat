@@ -592,6 +592,7 @@ describe('Team Queries', () => {
                         scheme_id: '',
                         group_constrained: null,
                         last_team_icon_update: 0,
+                        pack_name: 'ksuite_essential',
                     },
                     {
                         id: teamIds[1],
@@ -610,6 +611,7 @@ describe('Team Queries', () => {
                         scheme_id: '',
                         group_constrained: null,
                         last_team_icon_update: 0,
+                        pack_name: 'ksuite_essential',
                     },
                     {
                         id: 'team3',
@@ -628,6 +630,7 @@ describe('Team Queries', () => {
                         scheme_id: '',
                         group_constrained: null,
                         last_team_icon_update: 0,
+                        pack_name: 'ksuite_essential',
                     },
                 ],
                 prepareRecordsOnly: false,

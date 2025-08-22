@@ -16,7 +16,6 @@ import {
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
-import {useGetUsageDeltas} from '@app/hooks/usage';
 import Autocomplete from '@components/autocomplete';
 import ErrorText from '@components/error_text';
 import FloatingTextInput from '@components/floating_text_input_label';
@@ -28,6 +27,7 @@ import {useTheme} from '@context/theme';
 import {useAutocompleteDefaultAnimatedValues} from '@hooks/autocomplete';
 import {useKeyboardHeight, useKeyboardOverlap} from '@hooks/device';
 import {useInputPropagation} from '@hooks/input';
+import {useGetUsageDeltas} from '@hooks/usage';
 import {t} from '@i18n';
 import {
     changeOpacity,
@@ -38,7 +38,7 @@ import {typography} from '@utils/typography';
 
 import UpgradeChannelBanner from './ik_upgrade_channel';
 
-import type {CloudUsageModel, LimitModel} from '@app/database/models/server';
+import type {CloudUsageModel, LimitModel} from '@database/models/server';
 
 const FIELD_MARGIN_BOTTOM = 24;
 const MAKE_PRIVATE_MARGIN_BOTTOM = 32;

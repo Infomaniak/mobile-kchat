@@ -4,11 +4,11 @@
 import React, {useCallback} from 'react';
 import {Text, TouchableOpacity, View, Image} from 'react-native';
 
-import FormattedText from '@app/components/formatted_text';
-import {useTheme} from '@app/context/theme';
-import {makeStyleSheetFromTheme} from '@app/utils/theme';
+import FormattedText from '@components/formatted_text';
 import {Screens} from '@constants';
+import {useTheme} from '@context/theme';
 import BottomSheet from '@screens/bottom_sheet';
+import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import {dismissBottomSheet} from '../navigation';
 

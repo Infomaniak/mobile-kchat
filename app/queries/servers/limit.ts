@@ -4,9 +4,9 @@
 import {Q, type Database} from '@nozbe/watermelondb';
 import {switchMap} from '@nozbe/watermelondb/utils/rx';
 
-import {MM_TABLES} from '@app/constants/database';
+import {MM_TABLES} from '@constants/database';
 
-import type LimitsModel from '@app/database/models/server/limits';
+import type LimitsModel from '@database/models/server/limits';
 
 const {SERVER: {LIMIT}} = MM_TABLES;
 

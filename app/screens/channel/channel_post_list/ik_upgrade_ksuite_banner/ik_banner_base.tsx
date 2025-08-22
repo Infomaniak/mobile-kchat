@@ -4,8 +4,8 @@
 import React from 'react';
 import {View, type StyleProp, type ViewStyle} from 'react-native';
 
-import {useTheme} from '@app/context/theme';
-import {makeStyleSheetFromTheme} from '@app/utils/theme';
+import {useTheme} from '@context/theme';
+import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import UpgradeIcon from '../upgrade_icon';
 

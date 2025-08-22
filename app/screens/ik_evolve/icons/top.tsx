@@ -14,7 +14,7 @@ import Svg, {
     type SvgProps,
 } from 'react-native-svg';
 
-import {useTheme} from '@app/context/theme';
+import {useTheme} from '@context/theme';
 const {width: screenWidth} = Dimensions.get('window');
 function SvgComponent(props: SvgProps) {
     const theme = useTheme();

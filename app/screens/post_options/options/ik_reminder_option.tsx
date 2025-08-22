@@ -9,7 +9,7 @@ import {useTheme} from '@context/theme';
 import {t} from '@i18n';
 import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
 
-import type {CloudUsageModel, LimitModel} from '@app/database/models/server';
+import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 import type {AvailableScreens} from '@typings/screens/navigation';
 

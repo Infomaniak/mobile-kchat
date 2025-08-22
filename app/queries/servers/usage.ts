@@ -3,9 +3,9 @@
 import {Q, type Database} from '@nozbe/watermelondb';
 import {switchMap} from '@nozbe/watermelondb/utils/rx';
 
-import {MM_TABLES} from '@app/constants/database';
+import {MM_TABLES} from '@constants/database';
 
-import type {CloudUsageModel} from '@app/database/models/server';
+import type {CloudUsageModel} from '@database/models/server';
 
 const {SERVER: {USAGE}} = MM_TABLES;
 

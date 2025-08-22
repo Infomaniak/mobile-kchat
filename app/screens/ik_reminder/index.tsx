@@ -16,18 +16,20 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import {quotaGate} from '@hooks/plans';
 import {useGetUsageDeltas} from '@hooks/usage';
 import NetworkManager from '@managers/network_manager';
 import BottomSheet from '@screens/bottom_sheet';
 import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {isSystemMessage} from '@utils/post';
+import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 import ClearAfterMenuItem from '../custom_status_clear_after/components/clear_after_menu_item';
 
-import type {PostReminderTimestamp} from '@app/client/rest/ikcustomactions';
-import type {CloudUsageModel, LimitModel} from '@app/database/models/server';
+import type {PostReminderTimestamp} from '@client/rest/ikcustomactions';
+import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
 

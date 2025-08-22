@@ -19,7 +19,7 @@ import {makeStyleSheetFromTheme} from '@utils/theme';
 import type {WithDatabaseArgs} from '@typings/database/database';
 
 type Props = {
-    showDate: boolean;
+    showDate?: boolean;
     timezone: string | null;
     isMilitaryTime: boolean;
     theme: Theme;

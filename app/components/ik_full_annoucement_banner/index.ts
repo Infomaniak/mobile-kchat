@@ -4,11 +4,11 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {distinctUntilChanged, map} from '@nozbe/watermelondb/utils/rx';
 
-import {observeLimits} from '@app/queries/servers/limit';
-import {observeCurrentPackName} from '@app/queries/servers/team';
-import {observeUsage} from '@app/queries/servers/usage';
-import {observeCurrentUser} from '@app/queries/servers/user';
-import {isSystemAdmin} from '@app/utils/user';
+import {observeLimits} from '@queries/servers/limit';
+import {observeCurrentPackName} from '@queries/servers/team';
+import {observeUsage} from '@queries/servers/usage';
+import {observeCurrentUser} from '@queries/servers/user';
+import {isSystemAdmin} from '@utils/user';
 
 import FullStorageAnnouncementBar from './full_storage_announcement_bar';
 

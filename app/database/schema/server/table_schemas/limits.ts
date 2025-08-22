@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 import {tableSchema} from '@nozbe/watermelondb';
 
-import {MM_TABLES} from '@app/constants/database';
+import {MM_TABLES} from '@constants/database';
 const {LIMIT} = MM_TABLES.SERVER;
 
 export default tableSchema({

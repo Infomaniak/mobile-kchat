@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import type {PredefinedTimestamp} from '@app/screens/ik_reminder';
+import type {PredefinedTimestamp} from '@screens/ik_reminder';
 
 export type TeamServer = {
     id: string;

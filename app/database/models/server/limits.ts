@@ -3,8 +3,8 @@
 import {Model} from '@nozbe/watermelondb';
 import {field, json, writer} from '@nozbe/watermelondb/decorators';
 
-import {MM_TABLES} from '@app/constants/database';
-import {safeParseJSON} from '@app/utils/helpers';
+import {MM_TABLES} from '@constants/database';
+import {safeParseJSON} from '@utils/helpers';
 
 export default class LimitsModel extends Model {
     static table = MM_TABLES.SERVER.LIMIT;
