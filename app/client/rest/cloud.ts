@@ -9,7 +9,7 @@ export interface CloudLimitMix {
     getUsage: () => Promise<CloudUsage>;
 }
 
-const CloudLimitMix = <TBase extends Constructor<ClientBase>>(superclass: TBase) => class extends superclass {
+const ClientCloudLimitMix = <TBase extends Constructor<ClientBase>>(superclass: TBase) => class extends superclass {
     getCloudLimits = async () => {
         const url = `${this.getCloudRoute()}/limits`;
         return this.doFetch(url, {method: 'get'});
@@ -20,4 +20,4 @@ const CloudLimitMix = <TBase extends Constructor<ClientBase>>(superclass: TBase)
     };
 };
 
-export default CloudLimitMix;
+export default ClientCloudLimitMix;

@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import CloudLimit, {type CloudLimitMix} from '@client/rest/cloud';
+import ClientCloudLimitMix, {type CloudLimitMix} from '@client/rest/cloud';
 import IKClientCalls, {type IKClientCallsMix} from '@client/rest/ikcalls';
 import IKClientCustomActions, {type IKClientCustomActionsMix} from '@client/rest/ikcustomactions';
 import IKClientMultiTeam, {type IKClientMultiTeamMix} from '@client/rest/ikteams';
@@ -78,7 +78,7 @@ class Client extends mix(ClientBase).with(
     ClientUsers,
     ClientPlugins,
     ClientNPS,
-    CloudLimit,
+    ClientCloudLimitMix,
     IKClientMultiTeam,
     IKClientCalls,
     IKClientCustomActions,
