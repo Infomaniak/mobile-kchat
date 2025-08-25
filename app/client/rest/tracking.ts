@@ -424,6 +424,7 @@ export default class ClientTracking {
             server_error_id: response.data?.id as string,
             status_code: response.code,
             url,
+            response: response.data, // ik: important for kmeet handling
         });
     };
 }
