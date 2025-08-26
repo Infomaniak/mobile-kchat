@@ -128,6 +128,38 @@ DEST="./extracted.db"
 adb exec-out run-as $APP_ID cat files/databases/$FILENAME > $DEST
 ```
 
+### View iOS Database 
+
+1. **Go to simulators folder**
+   ```bash
+   cd ~/Library/Developer/CoreSimulator/Devices
+   ```
+
+2. **Find the booted simulator**
+   ```bash
+   xcrun simctl list devices | grep Booted
+   ```
+   → Note the simulator UUID.
+
+3. **Locate the DB file**  
+   The database is stored in:
+   ```
+   ./<SIMULATOR_UDID>/data/Containers/Shared/AppGroup/<APP_GROUP_UUID>/databases/<encoded_url>.db
+   ```
+   > The name is Base64 URL-safe encoded from the server URL (see `urlSafeBase64Encode(serverUrl)` in `app/database/manager/index.ts`).
+
+4. **Decode to identify the server**
+   ```bash
+   echo "aHR0cHM6Ly9leGFtcGxlLmNvbQ==" | base64 -d
+   # Output: https://example.com
+   ```
+
+5. **Copy and open**
+   ```bash
+   cp "./<path>/databases/<encoded_url>.db" ~/Desktop/db-debug.db
+   ```
+   Open `db-debug.db` with [DB Browser for SQLite](https://sqlitebrowser.org/).
+
 ## Known Issues with Dependencies
 ### ⚠️ Jitsi SDK: TypeScript Type Errors
 
