@@ -179,7 +179,7 @@ const entryRest = async (serverUrl: string, teamId?: string, channelId?: string,
 
         const inTeam = teamData.teams?.find((t) => t.id === initialTeamId);
         if (initialTeamId && !inTeam && !teamData.error) {
-            captureException(new Error('User has no teams available after fetch'));
+            captureException(new Error('User is not member of the requested team'));
             initialTeamId = '';
         }
 

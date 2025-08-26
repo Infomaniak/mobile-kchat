@@ -63,7 +63,6 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
     const now = Date.now();
 
     const currentTeamId = await getCurrentTeamId(database);
-    captureException(new Error('Test sentry'));
 
     if (!currentTeamId) {
         captureException(new Error('Empty currentTeamId at reconnect init'));
