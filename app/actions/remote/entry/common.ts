@@ -172,14 +172,14 @@ const entryRest = async (serverUrl: string, teamId?: string, channelId?: string,
         }
 
         if (!teamData.error && teamData.teams?.length === 0) {
-            captureException(new Error('User has no teams available after fetch'));
+            captureException(new Error(`User has no teams available after fetch. teamId: ${teamId}, initialTeamId: ${initialTeamId}, availableTeams: ${teamData}`));
 
             initialTeamId = '';
         }
 
         const inTeam = teamData.teams?.find((t) => t.id === initialTeamId);
         if (initialTeamId && !inTeam && !teamData.error) {
-            captureException(new Error('User is not member of the requested team'));
+            captureException(new Error(`User is not member of the requested team. teamId: ${teamId}, initialTeamId: ${initialTeamId}, availableTeams: ${teamData}`));
             initialTeamId = '';
         }
 
