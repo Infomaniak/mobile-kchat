@@ -14,7 +14,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     container: {
         justifyContent: 'space-between',
         backgroundColor: theme.centerChannelBg,
-        height: 55,
+        height: 200, // ik: abitrary large height so we dont show content behind it (cause : edge2edge android)
         paddingHorizontal: 12,
         paddingTop: 11,
         borderTopColor: changeOpacity(theme.centerChannelColor, 0.08),
