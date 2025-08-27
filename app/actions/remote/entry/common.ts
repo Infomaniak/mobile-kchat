@@ -33,6 +33,7 @@ import {isDefaultChannel, isDMorGM, sortChannelsByDisplayName} from '@utils/chan
 import {getFullErrorMessage} from '@utils/errors';
 import {isMinimumServerVersion, isTablet} from '@utils/helpers';
 import {logDebug, logError} from '@utils/log';
+import {captureException} from '@utils/sentry';
 import {processIsCRTEnabled} from '@utils/thread';
 
 import {fetchPostsForUnreadChannels} from '../post';
@@ -171,11 +172,14 @@ const entryRest = async (serverUrl: string, teamId?: string, channelId?: string,
         }
 
         if (!teamData.error && teamData.teams?.length === 0) {
+            captureException(new Error(`User has no teams available after fetch. teamId: ${teamId}, initialTeamId: ${initialTeamId}, availableTeams: ${teamData}`));
+
             initialTeamId = '';
         }
 
         const inTeam = teamData.teams?.find((t) => t.id === initialTeamId);
         if (initialTeamId && !inTeam && !teamData.error) {
+            captureException(new Error(`User is not member of the requested team. teamId: ${teamId}, initialTeamId: ${initialTeamId}, availableTeams: ${teamData}`));
             initialTeamId = '';
         }
 

@@ -34,6 +34,7 @@ import NavigationStore from '@store/navigation_store';
 import {setTeamLoading} from '@store/team_load_store';
 import {isTablet} from '@utils/helpers';
 import {logDebug, logInfo} from '@utils/log';
+import {captureException} from '@utils/sentry';
 
 export async function handleFirstConnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel) {
     setExtraSessionProps(serverUrl, groupLabel);
@@ -62,6 +63,11 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
     const now = Date.now();
 
     const currentTeamId = await getCurrentTeamId(database);
+
+    if (!currentTeamId) {
+        captureException(new Error(`Empty currentTeamId at reconnect init: ${currentTeamId}`));
+    }
+
     const currentChannelId = await getCurrentChannelId(database);
 
     setTeamLoading(serverUrl, true);
