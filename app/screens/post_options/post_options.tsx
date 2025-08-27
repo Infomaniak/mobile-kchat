@@ -76,15 +76,15 @@ const PostOptions = ({
 
     const shouldRenderFollow = !(sourceScreen !== Screens.CHANNEL || !thread);
     const shouldShowBindings = bindings.length > 0 && !isSystemPost;
-
+    const shouldRenderAi = !isSystemPost && !post.rootId;
     const canShowReminder = !isSystemPost;
     const canTranslate = !isSystemPost;
 
     const snapPoints = useMemo(() => {
         const items: Array<string | number> = [1];
         const optionsCount = [
-            canCopyPermalink, canCopyText, canDelete, canEdit,
-            canMarkAsUnread, canPin, canReply, !isSystemPost, shouldRenderFollow, canShowReminder, canTranslate,
+            canCopyPermalink, canReply, canCopyText, canDelete, canEdit,
+            canMarkAsUnread, canPin, !isSystemPost, shouldRenderAi, shouldRenderFollow, canShowReminder, canTranslate,
         ].reduce((acc, v) => {
             return v ? acc + 1 : acc;
         }, 0) + (shouldShowBindings ? 0.5 : 0);
@@ -127,7 +127,7 @@ const PostOptions = ({
                         thread={thread}
                     />
                 }
-                {!isSystemPost && !post.rootId &&
+                {shouldRenderAi &&
                     <AskAi
                         bottomSheetId={Screens.POST_OPTIONS}
                         post={post}
