@@ -61,7 +61,7 @@ const ProgressiveImage = ({
     const thumbnailSource = {uri: thumbnailUri, headers};
     const showImage = showHighResImage || !thumbnailUri;
 
-    const handleLoad = () => {
+    const dismissLoader = () => {
         setLoading(false);
     };
 
@@ -95,7 +95,7 @@ const ProgressiveImage = ({
                     onError={onError}
                     nativeID={`image-${id}`}
                     recyclingKey={`image-${id}`}
-                    onLoad={handleLoad}
+                    onLoad={dismissLoader}
                 />
             </View>
         );
@@ -118,6 +118,8 @@ const ProgressiveImage = ({
                 style={[StyleSheet.absoluteFill, imageStyle]}
                 source={(showImage) ? {uri: imageUri} : undefined}
                 autoplay={true}
+                onLoad={dismissLoader}
+                onError={onError}
             />
         </Animated.View>
     );
