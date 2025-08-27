@@ -44,7 +44,8 @@ type ChannelProps = {
     scheduledPostCount: number;
 };
 
-const edges: Edge[] = ['left', 'right'];
+// Ik: added bottom edge to make sure action does not conflict with android navigation bar
+const edges: Edge[] = ['left', 'right', 'bottom'];
 
 const styles = StyleSheet.create({
     flex: {
