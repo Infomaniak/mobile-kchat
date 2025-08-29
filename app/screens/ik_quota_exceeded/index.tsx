@@ -1,25 +1,21 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import BottomSheetM, {BottomSheetBackdrop, type BottomSheetBackdropProps} from '@gorhom/bottom-sheet';
 import {Button} from '@rneui/base';
-import React, {useCallback, useRef} from 'react';
+import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
 import {Text, View} from 'react-native';
 
+import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
-import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import BottomSheet from '@screens/bottom_sheet';
 import Header from '@screens/ik_evolve/icons/top';
-import {dismissModal} from '@screens/navigation';
+import {dismissBottomSheet} from '@screens/navigation';
 import {buttonBackgroundStyle} from '@utils/buttonStyles';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import type {AvailableScreens} from '@typings/screens/navigation';
-
 type Props = {
-    componentId: AvailableScreens;
     quotaType: IKQuotaExceeded;
     closeButtonId: string;
 };
@@ -28,19 +24,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     contentStyle: {
         flex: 1,
         alignItems: 'center',
-    },
-    bottomSheet: {
-        backgroundColor: theme.centerChannelBg,
-        borderTopStartRadius: 24,
-        borderTopEndRadius: 24,
-        shadowOffset: {
-            width: 0,
-            height: 8,
-        },
-        shadowOpacity: 0.12,
-        shadowRadius: 24,
-        shadowColor: '#000',
-        elevation: 24,
     },
     bottomSheetBackground: {
         backgroundColor: theme.centerChannelBg,
@@ -109,30 +92,14 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
     title: 'infomaniak.size_quota_exceeded.title',
     description: 'infomaniak.size_quota_exceeded.description',
     image: 'storage',
-}, componentId}: Props) => {
-    const sheetRef = useRef<BottomSheetM>(null);
+}}: Props) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const intl = useIntl();
 
-    const handleCloseButton = useCallback(() => {
-        handleClose();
-    }, []);
-
-    const close = useCallback(() => {
-        dismissModal({componentId});
-    }, [componentId]);
-
-    const handleClose = useCallback(() => {
-        if (sheetRef.current) {
-            sheetRef.current.close();
-        } else {
-            close();
-        }
-    }, []);
-
-    useAndroidHardwareBackHandler(componentId, handleClose);
-    useNavButtonPressed(closeButtonId || '', componentId, close, [close]);
+    const close = () => {
+        dismissBottomSheet();
+    };
 
     const renderContent = useCallback(() => {
         return (
@@ -160,37 +127,29 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
                             buttonBackgroundStyle(theme, 'lg', 'primary', 'default'),
                             styles.ikButton,
                         ]}
-                        onPress={handleCloseButton}
+
+                        onPress={close}
                     />
                 </View>
             </View>
         );
     }, []);
 
-    const renderBackdrop = useCallback((props: BottomSheetBackdropProps) => {
-        return (
-            <BottomSheetBackdrop
-                {...props}
-                disappearsOnIndex={-1}
-                appearsOnIndex={0}
-                opacity={0.6}
-            />
-        );
-    }, []);
+    const snapPoints = [1, '55%'];
 
     return (
-        <BottomSheetM
-            ref={sheetRef}
-            index={0}
-            snapPoints={['55%']}
-            animateOnMount={true}
-            style={styles.bottomSheet}
-            backdropComponent={renderBackdrop}
-            backgroundStyle={styles.bottomSheetBackground}
-            onClose={close}
-        >
-            {renderContent()}
-        </BottomSheetM>
+        <BottomSheet
+            renderContent={renderContent}
+            closeButtonId={closeButtonId}
+            componentId={Screens.INFOMANIAK_QUOTA_EXCEEDED}
+            initialSnapIndex={1}
+            snapPoints={snapPoints}
+            contentStyle={{paddingHorizontal: 0}}
+            headerStyle={{
+                borderTopWidth: 50,
+                borderColor: '#222633',
+            }}
+        />
     );
 };
 
