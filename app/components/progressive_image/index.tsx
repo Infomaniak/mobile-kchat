@@ -116,7 +116,9 @@ const ProgressiveImage = ({
                 testID='progressive_image.highResImage'
                 transition={300}
                 style={[StyleSheet.absoluteFill, imageStyle]}
-                source={(showImage) ? {uri: imageUri} : undefined}
+
+                // Ik change : we need to pass the full image source with headers for authentication
+                source={(showImage) ? imgSource : undefined}
                 autoplay={true}
                 onLoad={dismissLoader}
                 onError={onError}
