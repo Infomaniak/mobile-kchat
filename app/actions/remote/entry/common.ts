@@ -432,6 +432,10 @@ export async function handleEntryAfterLoadNavigation(
             // Switched channels while loading
             if (!channelMembers.find((m) => m.channel_id === currentChannelIdAfterLoad)) {
                 if (tabletDevice || isChannelScreenMounted || isThreadsMounted) {
+                    const err = new Error(`Channel mismatch during load: ${currentChannelIdAfterLoad}, currentChannelId: ${currentChannelId}`);
+                    captureException(err);
+                    logError('handleEntryAfterLoadNavigation', err);
+
                     await handleKickFromChannel(serverUrl, currentChannelIdAfterLoad);
                 } else {
                     await setCurrentTeamAndChannelId(operator, initialTeamId, initialChannelId);
@@ -439,6 +443,9 @@ export async function handleEntryAfterLoadNavigation(
             }
         } else if (currentChannelIdAfterLoad && currentChannelIdAfterLoad !== initialChannelId) {
             if (tabletDevice || isChannelScreenMounted || isThreadsMounted) {
+                const err = new Error(`Deviation from initial channel:. currentChannelIdAfterLoad: ${currentChannelIdAfterLoad}, initialChannelId: ${initialChannelId}`);
+                captureException(err);
+                logError('handleEntryAfterLoadNavigation', err);
                 await handleKickFromChannel(serverUrl, currentChannelIdAfterLoad);
             } else {
                 await setCurrentTeamAndChannelId(operator, initialTeamId, initialChannelId);
