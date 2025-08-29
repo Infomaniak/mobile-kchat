@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useState} from 'react';
-import {type LayoutChangeEvent, StyleSheet, View} from 'react-native';
+import {type LayoutChangeEvent, Platform, StyleSheet, View} from 'react-native';
 import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {storeLastViewedChannelIdAndServer, removeLastViewedChannelIdAndServer} from '@actions/app/global';
@@ -44,8 +44,12 @@ type ChannelProps = {
     scheduledPostCount: number;
 };
 
-// Ik: added bottom edge to make sure action does not conflict with android navigation bar
-const edges: Edge[] = ['left', 'right', 'bottom'];
+const edges: Edge[] = ['left', 'right'];
+
+// Ik: added bottom edge to make sure action does not conflict with android navigation bar only on android
+if (Platform.OS === 'android') {
+    edges.push('bottom');
+}
 
 const styles = StyleSheet.create({
     flex: {
