@@ -64,7 +64,9 @@ export async function switchToServer(serverUrl: string, theme: Theme, intl: Intl
             return;
         }
 
-        const authenticated = await SecurityManager.authenticateWithBiometricsIfNeeded(server.url);
+        // Ik change : disabled for now, causing issues with navigation
+        // const authenticated = await SecurityManager.authenticateWithBiometricsIfNeeded(server.url);
+        const authenticated = true;
         if (authenticated) {
             Navigation.updateProps(Screens.HOME, {extra: undefined});
             DatabaseManager.setActiveServerDatabase(server.url);
@@ -113,9 +115,10 @@ export async function switchToServerAndLogin(serverUrl: string, theme: Theme, in
         }
     }
 
-    let authenticated = true;
+    const authenticated = true;
     if (data.config?.MobileEnableBiometrics === 'true') {
-        authenticated = await SecurityManager.authenticateWithBiometrics(server.url, data.config?.SiteName);
+        // Ik change : disabled for now, causing issues with navigation
+        // authenticated = await SecurityManager.authenticateWithBiometrics(server.url, data.config?.SiteName);
     }
 
     if (authenticated) {

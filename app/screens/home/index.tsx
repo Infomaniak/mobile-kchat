@@ -9,7 +9,6 @@ import {useIntl} from 'react-intl';
 import {DeviceEventEmitter, Platform, StyleSheet, View} from 'react-native';
 import {enableFreeze, enableScreens} from 'react-native-screens';
 
-import {initializeSecurityManager} from '@actions/app/server';
 import {autoUpdateTimezone} from '@actions/remote/user';
 import ServerVersion from '@components/server_version';
 import {Events, Launch, Screens} from '@constants';
@@ -68,9 +67,10 @@ export function HomeScreen(props: HomeProps) {
     const intl = useIntl();
     const appState = useAppState();
 
-    useEffect(() => {
-        initializeSecurityManager();
-    }, []);
+    // Ik change : disabled for now, causing issues with navigation
+    // useEffect(() => {
+    //     initializeSecurityManager();
+    // }, []);
 
     const handleFindChannels = useCallback(() => {
         if (!NavigationStore.getScreensInStack().includes(Screens.FIND_CHANNELS)) {
