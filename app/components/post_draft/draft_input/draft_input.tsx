@@ -5,6 +5,7 @@ import React, {useCallback, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, type LayoutChangeEvent, Platform, ScrollView, View} from 'react-native';
 import Permissions, {openSettings} from 'react-native-permissions';
+import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {userTyping} from '@actions/websocket/users';
 import {Screens} from '@constants';
@@ -64,6 +65,8 @@ export type Props = {
     setIsFocused: (isFocused: boolean) => void;
     scheduledPostsEnabled: boolean;
 }
+
+const SAFE_AREA_VIEW_EDGES: Edge[] = ['left', 'right'];
 
 const SCHEDULED_POST_PICKER_BUTTON = 'close-scheduled-post-picker';
 
@@ -288,7 +291,8 @@ function DraftInput({
                 rootId={rootId}
                 currentUserId={currentUserId}
             />
-            <View
+            <SafeAreaView
+                edges={SAFE_AREA_VIEW_EDGES}
                 onLayout={handleLayout}
                 style={style.inputWrapper}
                 testID={testID}
@@ -359,7 +363,7 @@ function DraftInput({
                         {!isHandlingVoice && getActionButton()}
                     </View>
                 </ScrollView>
-            </View>
+            </SafeAreaView>
         </>
     );
 }
