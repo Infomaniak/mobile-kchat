@@ -7,7 +7,7 @@ import {IntlProvider} from 'react-intl';
 import {Platform} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {Navigation} from 'react-native-navigation';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {initialWindowMetrics, SafeAreaProvider} from 'react-native-safe-area-context';
 
 import {Screens} from '@constants';
 import {withServerDatabase} from '@database/components';
@@ -39,7 +39,7 @@ const withIntl = (Screen: React.ComponentType) => {
 const withSafeAreaInsets = (Screen: React.ComponentType) => {
     return function SafeAreaInsets(props: any) {
         return (
-            <SafeAreaProvider>
+            <SafeAreaProvider initialMetrics={initialWindowMetrics}>
                 <Screen {...props}/>
             </SafeAreaProvider>
         );
