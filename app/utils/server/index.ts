@@ -92,34 +92,6 @@ export function loginOptions(config: ClientConfig, license: ClientLicense) {
     };
 }
 
-export async function loginToServer(theme: Theme, serverUrl: string, displayName: string, config: ClientConfig, license: ClientLicense) {
-    await dismissBottomSheet();
-    const closeButtonId = 'close-server';
-    const {enabledSSOs, hasLoginForm, numberSSOs, ssoOptions} = loginOptions(config, license);
-    const props = {
-        closeButtonId,
-        config,
-        hasLoginForm,
-        launchType: Launch.AddServer,
-        license,
-        serverDisplayName: displayName,
-        serverUrl,
-        ssoOptions,
-        theme,
-    };
-
-    const redirectSSO = !hasLoginForm && numberSSOs === 1;
-    const screen = redirectSSO ? Screens.SSO : Screens.LOGIN;
-    if (redirectSSO) {
-        // @ts-expect-error ssoType not in definition
-        props.ssoType = enabledSSOs[0];
-    }
-
-    const options = buildServerModalOptions(theme, closeButtonId);
-
-    showModal(screen, '', props, options);
-}
-
 export async function editServer(theme: Theme, server: ServersModel) {
     const closeButtonId = 'close-server-edit';
     const props = {

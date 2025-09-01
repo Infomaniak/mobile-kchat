@@ -15,8 +15,7 @@ import {getServer, getServerByIdentifier, queryAllActiveServers} from '@queries/
 import {getSecurityConfig} from '@queries/servers/system';
 import TestHelper from '@test/test_helper';
 import {logError} from '@utils/log';
-import {canReceiveNotifications} from '@utils/push_proxy';
-import {alertServerAlreadyConnected, alertServerError, loginToServer} from '@utils/server';
+import {alertServerAlreadyConnected, alertServerError} from '@utils/server';
 
 import * as Actions from './server';
 
@@ -171,22 +170,6 @@ describe('switchToServerAndLogin', () => {
         await Actions.switchToServerAndLogin('serverUrl', theme, intl, jest.fn());
 
         expect(alertServerAlreadyConnected).toHaveBeenCalledWith(intl);
-    });
-
-    it('should authenticate with biometrics and login to server', async () => {
-        const server = {url: 'serverUrl', displayName: 'Server'} as ServersModel;
-        const config = {DiagnosticId: 'diagId', MobileEnableBiometrics: 'true', SiteName: 'Site'} as ClientConfig;
-        const license = {} as ClientLicense;
-        jest.mocked(getServer).mockResolvedValueOnce(server);
-        jest.mocked(doPing).mockResolvedValueOnce({});
-        jest.mocked(fetchConfigAndLicense).mockResolvedValueOnce({config, license});
-        jest.mocked(getServerByIdentifier).mockResolvedValueOnce(undefined);
-        jest.mocked(SecurityManager.authenticateWithBiometrics).mockResolvedValueOnce(true);
-
-        await Actions.switchToServerAndLogin('serverUrl', theme, intl, jest.fn());
-
-        expect(canReceiveNotifications).toHaveBeenCalledWith('serverUrl', undefined, intl);
-        expect(loginToServer).toHaveBeenCalledWith(theme, 'serverUrl', 'Server', config, license);
     });
 
     it('should not proceed if device is jailbroken', async () => {

@@ -131,9 +131,6 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.FIND_CHANNELS:
             screen = withServerDatabase(require('@screens/find_channels').default);
             break;
-        case Screens.FORGOT_PASSWORD:
-            screen = withIntl(require('@screens/forgot_password').default);
-            break;
         case Screens.GALLERY:
             screen = withServerDatabase(require('@screens/gallery').default);
             break;
@@ -173,9 +170,6 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             break;
         case Screens.LATEX:
             screen = withServerDatabase(require('@screens/latex').default);
-            break;
-        case Screens.LOGIN:
-            screen = withIntl(require('@screens/login').default);
             break;
         case Screens.MANAGE_CHANNEL_MEMBERS:
             screen = withServerDatabase(require('@screens/manage_channel_members').default);
@@ -324,10 +318,8 @@ Navigation.setLazyComponentRegistrator((screenName) => {
 
 export function registerScreens() {
     const homeScreen = require('@screens/home').default;
-    const serverScreen = require('@screens/server').default;
     const onboardingScreen = require('@screens/onboarding').default;
     Navigation.registerComponent(Screens.ONBOARDING, () => withGestures(withIntl(withManagedConfig(onboardingScreen))));
-    Navigation.registerComponent(Screens.SERVER, () => withGestures(withIntl(withManagedConfig(serverScreen))));
     Navigation.registerComponent(Screens.HOME, () => withGestures(withSafeAreaInsets(withServerDatabase(withManagedConfig(homeScreen)))));
     const infomaniakLoginScreen = require('@screens/ik_login').default;
     const infomaniakNoTeams = require('@screens/ik_no_teams').default;

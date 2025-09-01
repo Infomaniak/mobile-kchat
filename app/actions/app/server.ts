@@ -13,7 +13,7 @@ import {getServer, getServerByIdentifier, queryAllActiveServers} from '@queries/
 import {getSecurityConfig} from '@queries/servers/system';
 import {logError} from '@utils/log';
 import {canReceiveNotifications} from '@utils/push_proxy';
-import {alertServerAlreadyConnected, alertServerError, loginToServer} from '@utils/server';
+import {alertServerAlreadyConnected, alertServerError} from '@utils/server';
 
 import type {IntlShape} from 'react-intl';
 
@@ -120,6 +120,5 @@ export async function switchToServerAndLogin(serverUrl: string, theme: Theme, in
 
     if (authenticated) {
         canReceiveNotifications(server.url, result.canReceiveNotifications as string, intl);
-        loginToServer(theme, server.url, server.displayName, data.config!, data.license!);
     }
 }

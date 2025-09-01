@@ -18,7 +18,6 @@ export const appearanceControlledScreens = new Set<AvailableScreens>([
     Screens.INFOMANIAK_NO_TEAMS,
     Screens.ONBOARDING,
     Screens.SERVER,
-    Screens.LOGIN,
     Screens.FORGOT_PASSWORD,
     Screens.MFA,
     Screens.SSO,

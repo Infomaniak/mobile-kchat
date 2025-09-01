@@ -17,7 +17,6 @@ import {
     editServer,
     isSupportedServer,
     loginOptions,
-    loginToServer,
     semverFromServerVersion,
     sortServersByDisplayName,
     unsupportedServer,
@@ -135,44 +134,6 @@ describe('loginOptions', () => {
             numberSSOs: 5,
         });
     });
-});
-describe('loginToServer', () => {
-    const theme = Preferences.THEMES.denim;
-    const serverUrl = 'https://server.com';
-    const displayName = 'Server';
-    const config = {
-        EnableSaml: 'true',
-        EnableSignUpWithGitLab: 'false',
-        EnableSignUpWithGoogle: 'false',
-        EnableSignUpWithOffice365: 'false',
-        EnableSignUpWithOpenId: 'false',
-        EnableLdap: 'false',
-        EnableSignInWithEmail: 'true',
-        EnableSignInWithUsername: 'true',
-        Version: '5.0.0',
-    } as ClientConfig;
-    const license = {
-        IsLicensed: 'true',
-        SAML: 'true',
-        Office365OAuth: 'true',
-        LDAP: 'true',
-    } as ClientLicense;
-
-    it('should call dismissBottomSheet and showModal with LOGIN screen', async () => {
-        await loginToServer(theme, serverUrl, displayName, config, license);
-
-        expect(dismissBottomSheet).toHaveBeenCalled();
-        expect(showModal).toHaveBeenCalledWith(Screens.LOGIN, '', expect.any(Object), expect.any(Object));
-    });
-
-    /* Commented out for now as the test is failing potentially due to incorrect logic in the function
-
-    it('should call showModal with SSO screen if redirectSSO is true', async () => {
-        const configWithSingleSSO = {...config, EnableSignInWithEmail: 'false', EnableSignInWithUsername: 'false'};
-        await loginToServer(theme, serverUrl, displayName, configWithSingleSSO, license);
-
-        expect(showModal).toHaveBeenCalledWith(Screens.SSO, '', expect.any(Object), expect.any(Object));
-    });*/
 });
 
 describe('editServer', () => {
