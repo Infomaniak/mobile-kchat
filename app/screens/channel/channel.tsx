@@ -3,7 +3,7 @@
 
 import React, {useCallback, useEffect, useState} from 'react';
 import {type LayoutChangeEvent, Platform, StyleSheet, View} from 'react-native';
-import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {storeLastViewedChannelIdAndServer, removeLastViewedChannelIdAndServer} from '@actions/app/global';
 import FreezeScreen from '@components/freeze_screen';
@@ -43,13 +43,6 @@ type ChannelProps = {
     includeChannelBanner: boolean;
     scheduledPostCount: number;
 };
-
-const edges: Edge[] = ['left', 'right'];
-
-// Ik: added bottom edge to make sure action does not conflict with android navigation bar only on android
-if (Platform.OS === 'android') {
-    edges.push('bottom');
-}
 
 const styles = StyleSheet.create({
     flex: {
@@ -121,10 +114,8 @@ const Channel = ({
 
     return (
         <FreezeScreen>
-            <SafeAreaView
-                style={styles.flex}
-                mode='margin'
-                edges={edges}
+            <View
+                style={[styles.flex, {paddingBottom: Platform.OS === 'android' ? insets.bottom : 0}]}
                 testID='channel.screen'
                 onLayout={onLayout}
                 nativeID={componentId ? SecurityManager.getShieldScreenId(componentId) : undefined}
@@ -148,7 +139,7 @@ const Channel = ({
                     </View>
                     <>
                         {scheduledPostCount > 0 &&
-                            <ScheduledPostIndicator scheduledPostCount={scheduledPostCount}/>
+                        <ScheduledPostIndicator scheduledPostCount={scheduledPostCount}/>
                         }
                     </>
                     <PostDraft
@@ -161,7 +152,7 @@ const Channel = ({
                     />
                 </ExtraKeyboardProvider>
                 }
-            </SafeAreaView>
+            </View>
         </FreezeScreen>
     );
 };

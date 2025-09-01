@@ -3,7 +3,7 @@
 
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {type StyleProp, StyleSheet, type ViewStyle, DeviceEventEmitter} from 'react-native';
-import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
+import Animated, {type AnimatedStyle} from 'react-native-reanimated';
 
 import {markChannelAsRead, unsetActiveChannelOnServer} from '@actions/remote/channel';
 import {fetchPosts, fetchPostsBefore} from '@actions/remote/post';
@@ -19,7 +19,6 @@ import EphemeralStore from '@store/ephemeral_store';
 import Intro from './intro';
 
 import type PostModel from '@typings/database/models/servers/post';
-import type {AnimatedStyle} from 'react-native-reanimated';
 
 type Props = {
     channelId: string;
@@ -31,7 +30,6 @@ type Props = {
     shouldShowJoinLeaveMessages: boolean;
 }
 
-const edges: Edge[] = [];
 const styles = StyleSheet.create({
     flex: {flex: 1},
     containerStyle: {paddingTop: 12},
@@ -130,12 +128,11 @@ const ChannelPostList = ({
     }
 
     return (
-        <SafeAreaView
-            edges={edges}
+        <Animated.View
             style={styles.flex}
         >
             {postList}
-        </SafeAreaView>
+        </Animated.View>
     );
 };
 
