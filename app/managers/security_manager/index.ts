@@ -142,8 +142,7 @@ class SecurityManagerSingleton {
                     if (authExpired) {
                         const isJailbroken = await this.isDeviceJailbroken(this.activeServer);
                         if (!isJailbroken) {
-                            // Ik change : disabled for now, causing issues with navigation
-                            // await this.authenticateWithBiometrics(this.activeServer);
+                            await this.authenticateWithBiometrics(this.activeServer);
                         }
                     }
                     this.backgroundSince = 0;
