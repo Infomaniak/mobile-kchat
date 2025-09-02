@@ -48,12 +48,16 @@ export const PostTypes = {
 export const PostPriorityColors = {
     URGENT: '#D24B4E',
     IMPORTANT: '#5D89EA',
+    TRANSCRIPT: '#3F435014',
+    TRANSCRIPT_LABEL: '#3F4350BF',
+    TRANSCRIPT_ICON: '#3F4350BF',
 };
 
 export enum PostPriorityType {
     STANDARD = '',
     URGENT = 'urgent',
     IMPORTANT = 'important',
+    TRANSCRIPT = 'transcript'
 }
 
 export const POST_TIME_TO_FAIL = toMilliseconds({seconds: 10});

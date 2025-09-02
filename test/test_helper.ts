@@ -696,7 +696,7 @@ class TestHelperSingleton {
             post: this.fakeRelation(),
             toFileInfo: jest.fn(),
             isBlocked: false,
-            transcript: '',
+            transcript: {text: '', duration: 0, language: '', task: 'transcribe' as const, segments: [], words: []},
             ...overwrite,
         };
     };
@@ -1067,7 +1067,7 @@ class TestHelperSingleton {
             name: 'image1',
             size: 100,
             user_id: '1',
-            transcript: '',
+            transcript: {text: '', duration: 0, language: '', task: 'transcribe' as const, segments: [], words: []},
             post_id: '',
             ...overwrite,
         };

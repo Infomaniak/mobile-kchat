@@ -6,6 +6,7 @@ import {Text, View} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
+import {PostPriorityColors} from '@constants/post';
 import {useTheme} from '@context/theme';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography, type FontSizes} from '@utils/typography';
@@ -15,7 +16,7 @@ import type {MessageDescriptor} from 'react-intl';
 type TagProps = {
     message: MessageDescriptor | string;
     icon?: string;
-    type?: 'general' | 'info' | 'danger' | 'success' | 'warning' | 'infoDim';
+    type?: 'general' | 'info' | 'danger' | 'success' | 'warning' | 'infoDim' | 'transcript';
     size?: 'xs' | 's' | 'm';
     uppercase?: boolean;
     testID?: string;
@@ -65,6 +66,12 @@ const getStyleFromTheme = makeStyleSheetFromTheme((theme: Theme) => {
         },
         infoDimText: {
             color: theme.buttonBg,
+        },
+        transcriptText: {
+            color: PostPriorityColors.TRANSCRIPT_LABEL,
+        },
+        transcriptContainer: {
+            backgroundColor: PostPriorityColors.TRANSCRIPT,
         },
     };
 });

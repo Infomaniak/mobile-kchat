@@ -1,12 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {View} from 'react-native';
 
 import FormattedText from '@components/formatted_text';
 import FormattedTime from '@components/formatted_time';
 import PostPriorityLabel from '@components/post_priority/post_priority_label';
+import {PostPriorityType} from '@constants/post';
 import {CHANNEL, THREAD} from '@constants/screens';
 import {useTheme} from '@context/theme';
 import {DEFAULT_LOCALE} from '@i18n';
@@ -21,6 +22,7 @@ import HeaderDisplayName from './display_name';
 import HeaderReply from './reply';
 import HeaderTag from './tag';
 
+import type {FileModel} from '@database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -45,6 +47,7 @@ type HeaderProps = {
     shouldRenderReplyButton?: boolean;
     teammateNameDisplay: string;
     hideGuestTags: boolean;
+    files?: FileModel[];
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -72,6 +75,10 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             opacity: 0.5,
             ...typography('Body', 75, 'Regular'),
         },
+        postPriority: {
+            alignSelf: 'center',
+            marginLeft: 6,
+        },
     };
 });
 
@@ -79,7 +86,7 @@ const Header = (props: HeaderProps) => {
     const {
         author, commentCount = 0, currentUser, enablePostUsernameOverride, isAutoResponse, isCRTEnabled, isCustomStatusEnabled,
         isEphemeral, isMilitaryTime, isPendingOrFailed, isSystemPost, isWebHook,
-        location, post, rootPostAuthor, showPostPriority, shouldRenderReplyButton, teammateNameDisplay, hideGuestTags,
+        location, post, rootPostAuthor, showPostPriority, shouldRenderReplyButton, teammateNameDisplay, hideGuestTags, files,
     } = props;
     const theme = useTheme();
     const style = getStyleSheet(theme);
@@ -89,12 +96,20 @@ const Header = (props: HeaderProps) => {
     const displayName = postUserDisplayName(post, author, teammateNameDisplay, enablePostUsernameOverride);
     const rootAuthorDisplayName = rootPostAuthor ? displayUsername(rootPostAuthor, currentUser?.locale, teammateNameDisplay, true) : undefined;
     const customStatus = getUserCustomStatus(author);
+    const [isTranscriptAvailable, setIsTranscriptAvailable] = useState(false);
     const showCustomStatusEmoji = Boolean(
         isCustomStatusEnabled && displayName && customStatus &&
         !(isSystemPost || author?.isBot || isAutoResponse || isWebHook),
     ) && !isCustomStatusExpired(author) && Boolean(customStatus?.emoji);
     const userIconOverride = ensureString(post.props?.override_icon_url);
     const usernameOverride = ensureString(post.props?.override_username);
+
+    useEffect(() => {
+        if (files && files[0]?.transcript) {
+            const text = files[0].transcript.text;
+            setIsTranscriptAvailable(Boolean(text));
+        }
+    }, [files && files[0]?.transcript]);
 
     return (
         <>
@@ -141,6 +156,13 @@ const Header = (props: HeaderProps) => {
                         <PostPriorityLabel
                             label={post.metadata.priority.priority}
                         />
+                    )}
+                    {isTranscriptAvailable && post.type === 'voice' && (
+                        <View style={style.postPriority}>
+                            <PostPriorityLabel
+                                label={PostPriorityType.TRANSCRIPT}
+                            />
+                        </View>
                     )}
                     {!isCRTEnabled && showReply && commentCount > 0 &&
                         <HeaderReply

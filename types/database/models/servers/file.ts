@@ -43,7 +43,7 @@ declare class FileModel extends Model {
     width: number;
 
     /** transcript : Text transcript of voice recording attachment, only present for voice type messages, can be asynchronously added to the message once it has been processed via websocket*/
-    transcript: string;
+    transcript: Transcript;
 
     /** post : The related Post record for this file */
     post: Relation<PostModel>;

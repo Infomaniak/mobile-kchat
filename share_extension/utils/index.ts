@@ -15,7 +15,7 @@ export function toFileInfo(f: SharedItem): FileInfo {
         name: f.filename || '',
         size: f.size || 0,
         uri: f.value,
-        transcript: '',
+        transcript: {text: '', duration: 0, language: '', task: 'transcribe' as const, segments: [], words: []},
     };
 }
 

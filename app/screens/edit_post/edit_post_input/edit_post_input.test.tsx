@@ -38,7 +38,7 @@ describe('EditPostInput', () => {
                 size: 100,
                 user_id: '1',
                 width: 100,
-                transcript: '',
+                transcript: {text: '', duration: 0, language: '', task: 'transcribe' as const, segments: [], words: []},
             },
             {
                 id: 'file-2',
@@ -50,7 +50,7 @@ describe('EditPostInput', () => {
                 size: 100,
                 user_id: '1',
                 width: 100,
-                transcript: '',
+                transcript: {text: '', duration: 0, language: '', task: 'transcribe' as const, segments: [], words: []},
             },
         ],
         version: '10.5.0',

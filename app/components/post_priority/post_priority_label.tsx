@@ -20,23 +20,48 @@ const messages = defineMessages({
         id: 'post_priority.label.important',
         defaultMessage: 'IMPORTANT',
     },
+    transcript: {
+        id: 'post_priority.label.transcript',
+        defaultMessage: 'Transcrit Automatiquement',
+    },
 });
+
+const PRIORITY_CONFIG = {
+    [PostPriorityType.URGENT]: {
+        message: messages.urgent,
+        icon: 'alert-outline',
+        type: 'danger',
+        uppercase: true,
+    },
+    [PostPriorityType.IMPORTANT]: {
+        message: messages.important,
+        icon: 'alert-circle-outline',
+        type: 'info',
+        uppercase: true,
+    },
+    [PostPriorityType.TRANSCRIPT]: {
+        message: messages.transcript,
+        icon: 'microphone-outline',
+        type: 'transcript',
+        uppercase: false,
+    },
+} as const;
 
 const PostPriorityLabel = ({label}: Props) => {
     if (label === PostPriorityType.STANDARD) {
         return null;
     }
 
-    const isUrgent = label === PostPriorityType.URGENT; // else it is important
+    const config = PRIORITY_CONFIG[label];
 
     return (
         <Tag
-            message={isUrgent ? messages.urgent : messages.important}
-            icon={isUrgent ? 'alert-outline' : 'alert-circle-outline'}
-            type={isUrgent ? 'danger' : 'info'}
+            message={config.message}
+            icon={config.icon}
+            type={config.type}
             size='xs'
             testID={`${label}_post_priority_label`}
-            uppercase={true}
+            uppercase={config.uppercase}
         />
     );
 };

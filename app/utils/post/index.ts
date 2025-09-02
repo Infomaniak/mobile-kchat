@@ -22,6 +22,7 @@ export function areConsecutivePosts(post: PostModel, previousPost: PostModel) {
     let consecutive = false;
 
     if (post && previousPost) {
+        const isVoiceMessage = Boolean(post?.props?.type === 'voice');
         const postFromWebhook = Boolean(post?.props?.from_webhook);
         const prevPostFromWebhook = Boolean(previousPost?.props?.from_webhook);
         const isFromSameUser = previousPost.userId === post.userId;
@@ -30,7 +31,7 @@ export function areConsecutivePosts(post: PostModel, previousPost: PostModel) {
 
         // Were the last post and this post made by the same user within some time?
         consecutive = previousPost && isFromSameUser && isInTimeframe && !postFromWebhook &&
-        !prevPostFromWebhook && isNotSystemMessage;
+        !prevPostFromWebhook && isNotSystemMessage && isVoiceMessage;
     }
 
     return consecutive;

@@ -16,7 +16,7 @@ type FileInfo = {
     mime_type: string;
     mini_preview?: string;
     name: string;
-    transcript: string;
+    transcript: Transcript;
     post_id: string;
     post_id?: string;
     size: number;
@@ -26,6 +26,34 @@ type FileInfo = {
     width: number;
     is_voice_recording?: boolean;
     postProps?: Record<string, unknown>;
+};
+
+type TranscriptSegment = {
+    id: number;
+    seek: number;
+    start: number;
+    end: number;
+    text: string;
+    tokens: number[];
+    temperature: number;
+    avg_logprob: number;
+    compression_ratio: number;
+    no_speech_prob: number;
+};
+
+type TranscriptWord = {
+    word: string;
+    start: number;
+    end: number;
+};
+
+type Transcript = {
+    text: string;
+    duration: number;
+    language: string;
+    task: 'transcribe' | 'translate';
+    segments: TranscriptSegment[];
+    words?: TranscriptWord[];
 };
 
 type FilesState = {
