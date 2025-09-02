@@ -14,6 +14,7 @@ import {registerScreens} from '@screens/index';
 import {registerNavigationListeners} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
+import {withMinDuration} from '@utils/timing';
 
 // Controls whether the main initialization (database, etc...) is done, either on app launch
 // or on the Share Extension, for example.
@@ -51,22 +52,21 @@ export async function initialize() {
 }
 
 export async function start() {
-    // Clean relevant information on ephemeral stores
-    NavigationStore.reset();
-    EphemeralStore.setCurrentThreadId('');
-    EphemeralStore.setProcessingNotification('');
+    await withMinDuration(async () => {
+        NavigationStore.reset();
+        EphemeralStore.setCurrentThreadId('');
+        EphemeralStore.setProcessingNotification('');
 
-    await initialize();
+        await initialize();
 
-    PushNotifications.init(serverCredentials.length > 0);
+        PushNotifications.init(serverCredentials.length > 0);
 
-    registerNavigationListeners();
-    registerScreens();
+        registerNavigationListeners();
+        registerScreens();
 
-    // IK change : add 2 seconds delay for splash screen
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    await WebsocketManager.init(serverCredentials);
+        await WebsocketManager.init(serverCredentials);
+    }, 1000); // Ik: min duration for splashscreen
 
     initialLaunch();
+
 }
