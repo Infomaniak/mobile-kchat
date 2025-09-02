@@ -3,16 +3,35 @@
 
 import {RUNNING_E2E} from '@env';
 import TurboLogger from '@mattermost/react-native-turbo-log';
-import {LogBox, Platform, UIManager} from 'react-native';
-import ViewReactNativeStyleAttributes from 'react-native/Libraries/Components/View/ReactNativeStyleAttributes';
+import {Alert, AlertButton, AlertOptions, AppState, LogBox, Platform, UIManager} from 'react-native';
 import 'react-native-gesture-handler';
+import ViewReactNativeStyleAttributes from 'react-native/Libraries/Components/View/ReactNativeStyleAttributes';
 import {Navigation} from 'react-native-navigation';
 
 import {start} from './app/init/app';
 import setFontFamily from './app/utils/font_family';
 import {logInfo} from './app/utils/log';
+import {captureException} from './app/utils/sentry';
 
 declare const global: { HermesInternal: null | {} };
+
+export function installAlertSpy() {
+    const originalAlert = Alert.alert;
+
+    Alert.alert = ((title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) => {
+        // eslint-disable-next-line no-console
+        console.log(
+            '[Alert.alert] called',
+            {title, message, buttons, options},
+        );
+
+        const err = new Error(
+            `Alert.alert invoked with title: ${title}, message: ${message}, buttons: ${buttons}, appState: ${AppState.currentState}`,
+        );
+        captureException(err);
+        return (originalAlert as any)(title, message, buttons, options);
+    }) as typeof Alert.alert;
+}
 
 // Add scaleY back to work around its removal in React Native 0.70.
 ViewReactNativeStyleAttributes.scaleY = true;
@@ -38,6 +57,7 @@ if (__DEV__) {
 }
 
 setFontFamily();
+installAlertSpy();
 
 if (global.HermesInternal) {
     // Polyfills required to use Intl with Hermes engine
