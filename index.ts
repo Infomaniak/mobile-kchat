@@ -29,6 +29,11 @@ export function installAlertSpy() {
             `Alert.alert invoked with title: ${title}, message: ${message}, buttons: ${buttons}, appState: ${AppState.currentState}`,
         );
         captureException(err);
+
+        if (AppState.currentState === 'background') {
+            return undefined;
+        }
+
         return (originalAlert as any)(title, message, buttons, options);
     }) as typeof Alert.alert;
 }
