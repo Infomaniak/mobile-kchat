@@ -33,7 +33,7 @@ type ThreadProps = {
     scheduledPostCount: number;
 };
 
-const edges: Edge[] = ['left', 'right', 'bottom'];
+const edges: Edge[] = ['left', 'right'];
 
 const styles = StyleSheet.create({
     flex: {flex: 1},
