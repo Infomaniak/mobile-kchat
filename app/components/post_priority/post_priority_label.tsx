@@ -22,7 +22,7 @@ const messages = defineMessages({
     },
     transcript: {
         id: 'post_priority.label.transcript',
-        defaultMessage: 'Transcrit Automatiquement',
+        defaultMessage: 'Automatically transcribed',
     },
 });
 

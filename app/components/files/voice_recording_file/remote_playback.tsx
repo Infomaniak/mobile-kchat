@@ -65,7 +65,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         },
         openVoiceMessageButtonText: {
             fontSize: 14,
-            color: '#3F4350BF',
+            color: theme.transcriptText,
         },
         centeredView: {
             alignItems: 'flex-start',
@@ -196,7 +196,7 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
                 <CompassIcon
                     name={isOpen ? 'chevron-down' : 'chevron-right'}
                     size={15}
-                    color={'#636780'}
+                    color={theme.transcriptText}
                     style={{marginTop: 1}}
                 />
                 <FormattedText

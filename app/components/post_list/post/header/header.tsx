@@ -78,6 +78,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
         postPriority: {
             alignSelf: 'center',
             marginLeft: 6,
+            flexShrink: 1,
         },
     };
 });
