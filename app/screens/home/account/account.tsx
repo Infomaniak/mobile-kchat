@@ -6,7 +6,7 @@ import React, {useCallback, useState} from 'react';
 import {Freeze} from 'react-freeze';
 import {ScrollView, View} from 'react-native';
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
-import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {View as ViewConstants} from '@constants';
 import {useTheme} from '@context/theme';
@@ -25,12 +25,11 @@ type AccountScreenProps = {
     showFullName: boolean;
 };
 
-const edges: Edge[] = ['left', 'right'];
-
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
-        flex: {
+        container: {
             flex: 1,
+            backgroundColor: theme.sidebarBg,
         },
         flexRow: {
             flex: 1,
@@ -57,7 +56,6 @@ const AccountScreen = ({currentUser, enableCustomUserStatuses, showFullName}: Ac
     const theme = useTheme();
     const [start, setStart] = useState(false);
     const route = useRoute();
-    const insets = useSafeAreaInsets();
     const isTablet = useIsTablet();
     const isFocused = useIsFocused();
 
@@ -113,12 +111,12 @@ const AccountScreen = ({currentUser, enableCustomUserStatuses, showFullName}: Ac
     return (
         <Freeze freeze={!isFocused}>
             <SafeAreaView
-                edges={edges}
-                style={styles.flex}
+                mode='padding'
+                style={[styles.container]}
                 testID='account.screen'
             >
-                <View style={[{height: insets.top, flexDirection: 'row'}]}>
-                    <View style={[styles.flex, tabletSidebarStyle]}/>
+                <View style={[{flexDirection: 'row'}]}>
+                    <View style={[styles.container, tabletSidebarStyle]}/>
                     {isTablet && <View style={styles.tabletContainer}/>}
                 </View>
                 <Animated.View
