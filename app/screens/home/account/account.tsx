@@ -117,7 +117,7 @@ const AccountScreen = ({currentUser, enableCustomUserStatuses, showFullName}: Ac
                 style={styles.flex}
                 testID='account.screen'
             >
-                <View style={[{height: insets.top, flexDirection: 'row', backgroundColor: theme.sidebarBg}]}>
+                <View style={[{height: insets.top, flexDirection: 'row'}]}>
                     <View style={[styles.flex, tabletSidebarStyle]}/>
                     {isTablet && <View style={styles.tabletContainer}/>}
                 </View>

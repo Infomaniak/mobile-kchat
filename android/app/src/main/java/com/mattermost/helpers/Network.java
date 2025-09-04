@@ -2,14 +2,10 @@ package com.mattermost.helpers;
 
 import android.content.Context;
 import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.mattermost.networkclient.ApiClientModuleImpl;
-import com.mattermost.networkclient.enums.RetryTypes;
-import com.mattermost.turbolog.TurboLog;
-
 import java.util.Iterator;
 import java.util.Map;
 import okhttp3.HttpUrl;

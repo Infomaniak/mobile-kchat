@@ -4,8 +4,8 @@
 /* eslint-disable max-lines */
 
 import merge from 'deepmerge';
-import {Appearance, DeviceEventEmitter, Platform, Alert, type EmitterSubscription, Keyboard} from 'react-native';
-import {type ComponentWillAppearEvent, type ImageResource, type LayoutOrientation, Navigation, type Options, OptionsModalPresentationStyle, type OptionsTopBarButton, type ScreenPoppedEvent, type EventSubscription, type OptionsStatusBar} from 'react-native-navigation';
+import {Appearance, DeviceEventEmitter, StatusBar, Platform, Alert, type EmitterSubscription, Keyboard} from 'react-native';
+import {type ComponentWillAppearEvent, type ImageResource, type LayoutOrientation, Navigation, type Options, OptionsModalPresentationStyle, type OptionsTopBarButton, type ScreenPoppedEvent, type EventSubscription} from 'react-native-navigation';
 import tinyColor from 'tinycolor2';
 
 import CompassIcon from '@components/compass_icon';
@@ -274,19 +274,10 @@ export function openToS() {
     return showOverlay(Screens.TERMS_OF_SERVICE, {}, {overlay: {interceptTouchOutside: true}});
 }
 
-function getStatusBarWithTheme(theme: Theme): Partial<OptionsStatusBar> {
-    const isDark = tinyColor(theme.sidebarBg).isDark();
-    return {
-        visible: true,
-        backgroundColor: theme.sidebarBg,
-        drawBehind: true,
-        style: isDark ? 'light' : 'dark',
-    };
-}
-
 export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}) {
     const theme = getThemeFromState();
-    const statusBarTheme = getStatusBarWithTheme(theme);
+    const isDark = tinyColor(theme.sidebarBg).isDark();
+    StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
 
     if (!passProps.coldStart && (passProps.launchType === Launch.AddServer || passProps.launchType === Launch.AddServerFromDeepLink)) {
         dismissModal({componentId: Screens.SERVER});
@@ -308,7 +299,10 @@ export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}
                     layout: {
                         componentBackgroundColor: theme.centerChannelBg,
                     },
-                    statusBar: statusBarTheme,
+                    statusBar: {
+                        visible: true,
+                        backgroundColor: theme.sidebarBg,
+                    },
                     topBar: {
                         visible: false,
                         height: 0,
@@ -332,7 +326,8 @@ export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}
 
 export function resetToInfomaniakLogin(passProps: LaunchProps) {
     const theme = getDefaultThemeByAppearance();
-    const statusBarTheme = getStatusBarWithTheme(theme);
+    const isDark = tinyColor(theme.sidebarBg).isDark();
+    StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
 
     const children = [{
         component: {
@@ -347,7 +342,10 @@ export function resetToInfomaniakLogin(passProps: LaunchProps) {
                     backgroundColor: theme.centerChannelBg,
                     componentBackgroundColor: theme.centerChannelBg,
                 },
-                statusBar: {...statusBarTheme, style: 'dark' as const},
+                statusBar: {
+                    visible: true,
+                    backgroundColor: theme.sidebarBg,
+                },
                 topBar: {
                     backButton: {
                         color: theme.sidebarHeaderTextColor,
@@ -374,7 +372,8 @@ export function resetToInfomaniakLogin(passProps: LaunchProps) {
 
 export function resetToInfomaniakNoTeams() {
     const theme = getDefaultThemeByAppearance();
-    const statusBarTheme = getStatusBarWithTheme(theme);
+    const isDark = tinyColor(theme.sidebarBg).isDark();
+    StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
 
     const children = [{
         component: {
@@ -388,7 +387,10 @@ export function resetToInfomaniakNoTeams() {
                     backgroundColor: theme.centerChannelBg,
                     componentBackgroundColor: theme.centerChannelBg,
                 },
-                statusBar: statusBarTheme,
+                statusBar: {
+                    visible: true,
+                    backgroundColor: theme.sidebarBg,
+                },
                 topBar: {
                     backButton: {
                         color: theme.sidebarHeaderTextColor,
@@ -415,7 +417,8 @@ export function resetToInfomaniakNoTeams() {
 
 export function resetToSelectServer(passProps: LaunchProps) {
     const theme = getDefaultThemeByAppearance();
-    const statusBarTheme = getStatusBarWithTheme(theme);
+    const isDark = tinyColor(theme.sidebarBg).isDark();
+    StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
 
     const children = [{
         component: {
@@ -430,7 +433,10 @@ export function resetToSelectServer(passProps: LaunchProps) {
                     backgroundColor: theme.centerChannelBg,
                     componentBackgroundColor: theme.centerChannelBg,
                 },
-                statusBar: statusBarTheme,
+                statusBar: {
+                    visible: true,
+                    backgroundColor: theme.sidebarBg,
+                },
                 topBar: {
                     backButton: {
                         color: theme.sidebarHeaderTextColor,
@@ -457,7 +463,8 @@ export function resetToSelectServer(passProps: LaunchProps) {
 
 export function resetToOnboarding(passProps: LaunchProps) {
     const theme = getDefaultThemeByAppearance();
-    const statusBarTheme = getStatusBarWithTheme(theme);
+    const isDark = tinyColor(theme.sidebarBg).isDark();
+    StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
 
     const children = [{
         component: {
@@ -472,7 +479,10 @@ export function resetToOnboarding(passProps: LaunchProps) {
                     backgroundColor: theme.centerChannelBg,
                     componentBackgroundColor: theme.centerChannelBg,
                 },
-                statusBar: statusBarTheme,
+                statusBar: {
+                    visible: true,
+                    backgroundColor: theme.sidebarBg,
+                },
                 topBar: {
                     backButton: {
                         color: theme.sidebarHeaderTextColor,
@@ -499,7 +509,8 @@ export function resetToOnboarding(passProps: LaunchProps) {
 
 export function resetToTeams() {
     const theme = getThemeFromState();
-    const statusBarTheme = getStatusBarWithTheme(theme);
+    const isDark = tinyColor(theme.sidebarBg).isDark();
+    StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
 
     return Navigation.setRoot({
         root: {
@@ -512,7 +523,10 @@ export function resetToTeams() {
                             layout: {
                                 componentBackgroundColor: theme.centerChannelBg,
                             },
-                            statusBar: statusBarTheme,
+                            statusBar: {
+                                visible: true,
+                                backgroundColor: theme.sidebarBg,
+                            },
                             topBar: {
                                 visible: false,
                                 height: 0,
@@ -538,7 +552,7 @@ export function goToScreen(name: AvailableScreens, title: string, passProps = {}
     }
 
     const theme = getThemeFromState();
-    const statusBarTheme = getStatusBarWithTheme(theme);
+    const isDark = tinyColor(theme.sidebarBg).isDark();
     const componentId = NavigationStore.getVisibleScreen();
     if (!componentId) {
         logError('Trying to go to screen without any screen on the navigation store');
@@ -554,7 +568,10 @@ export function goToScreen(name: AvailableScreens, title: string, passProps = {}
             left: {enabled: false},
             right: {enabled: false},
         },
-        statusBar: statusBarTheme,
+        statusBar: {
+            style: isDark ? 'light' : 'dark',
+            backgroundColor: theme.sidebarBg,
+        },
         topBar: {
             animate: true,
             visible: true,
@@ -678,7 +695,8 @@ export function showModal(name: AvailableScreens, title: string, passProps = {},
             componentBackgroundColor: theme.centerChannelBg,
         },
         statusBar: {
-            drawBehind: true,
+            visible: true,
+            backgroundColor: theme.sidebarBg,
         },
         topBar: {
             animate: true,

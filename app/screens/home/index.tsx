@@ -153,6 +153,7 @@ export function HomeScreen(props: HomeProps) {
             <NavigationContainer
                 theme={{
                     ...DefaultTheme,
+                    dark: false,
                     colors: {
                         ...DefaultTheme.colors,
                         primary: theme.centerChannelColor,
