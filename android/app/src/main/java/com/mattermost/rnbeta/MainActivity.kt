@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
+import androidx.core.view.WindowCompat
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 import com.facebook.react.ReactActivityDelegate
@@ -42,6 +43,8 @@ class MainActivity : NavigationActivity() {
         handleIntentExtras(getIntent())
         setHWKeyboardConnected()
         foldableObserver.onCreate()
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+
     }
 
     override fun onStart() {

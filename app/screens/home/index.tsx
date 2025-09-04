@@ -146,6 +146,7 @@ export function HomeScreen(props: HomeProps) {
     }, []);
 
     return (
+
         <View
             style={styles.flex}
             nativeID={SecurityManager.getShieldScreenId(Screens.HOME, true)}
