@@ -3,7 +3,6 @@
 
 import React, {useCallback, useMemo, useRef, useState} from 'react';
 import {Keyboard, type LayoutChangeEvent, View} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
 
 import SearchBar from '@components/search';
 import {useTheme} from '@context/theme';
@@ -91,52 +90,47 @@ const FindChannels = ({closeButtonId, componentId}: Props) => {
             testID='find_channels.screen'
             nativeID={SecurityManager.getShieldScreenId(componentId)}
         >
-            {/* ik: Make sure we have an edge limit on the bottom (default) */}
-            <SafeAreaView
-                style={{flex: 1}}
+            <SearchBar
+                autoCapitalize='none'
+                autoFocus={true}
+                cancelButtonProps={cancelButtonProps}
+                clearIconColor={color}
+                inputContainerStyle={styles.inputContainerStyle}
+                inputStyle={styles.inputStyle}
+                keyboardAppearance={getKeyboardAppearanceFromTheme(theme)}
+                onCancel={onCancel}
+                onChangeText={onChangeText}
+                placeholderTextColor={color}
+                searchIconColor={color}
+                selectionColor={color}
+                showLoading={loading}
+                value={term}
+                testID='find_channels.search_bar'
+            />
+            {term === '' && <QuickOptions close={close}/>}
+            <View
+                style={styles.listContainer}
+                onLayout={onLayout}
+                ref={listView}
             >
-                <SearchBar
-                    autoCapitalize='none'
-                    autoFocus={true}
-                    cancelButtonProps={cancelButtonProps}
-                    clearIconColor={color}
-                    inputContainerStyle={styles.inputContainerStyle}
-                    inputStyle={styles.inputStyle}
-                    keyboardAppearance={getKeyboardAppearanceFromTheme(theme)}
-                    onCancel={onCancel}
-                    onChangeText={onChangeText}
-                    placeholderTextColor={color}
-                    searchIconColor={color}
-                    selectionColor={color}
-                    showLoading={loading}
-                    value={term}
-                    testID='find_channels.search_bar'
+                {term === '' &&
+                <UnfilteredList
+                    close={close}
+                    keyboardOverlap={overlap}
+                    testID='find_channels.unfiltered_list'
                 />
-                {term === '' && <QuickOptions close={close}/>}
-                <View
-                    style={styles.listContainer}
-                    onLayout={onLayout}
-                    ref={listView}
-                >
-                    {term === '' &&
-                    <UnfilteredList
-                        close={close}
-                        keyboardOverlap={overlap}
-                        testID='find_channels.unfiltered_list'
-                    />
-                    }
-                    {Boolean(term) &&
-                    <FilteredList
-                        close={close}
-                        keyboardOverlap={overlap}
-                        loading={loading}
-                        onLoading={setLoading}
-                        term={term}
-                        testID='find_channels.filtered_list'
-                    />
-                    }
-                </View>
-            </SafeAreaView>
+                }
+                {Boolean(term) &&
+                <FilteredList
+                    close={close}
+                    keyboardOverlap={overlap}
+                    loading={loading}
+                    onLoading={setLoading}
+                    term={term}
+                    testID='find_channels.filtered_list'
+                />
+                }
+            </View>
         </View>
     );
 };
