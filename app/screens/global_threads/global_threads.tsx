@@ -80,7 +80,7 @@ const GlobalThreads = ({componentId, globalThreadsTab, hasUnreads, teamId}: Prop
     const mounted = useRef(false);
 
     const containerStyle = useMemo(() => {
-        const marginTop = defaultHeight;
+        const marginTop = defaultHeight + topInsetShared.value;
         return {flex: 1, marginTop};
     }, [defaultHeight]);
 
