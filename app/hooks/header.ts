@@ -19,14 +19,13 @@ type HeaderScrollContext = {
 export const MAX_OVERSCROLL = 80;
 
 export const useDefaultHeaderHeight = () => {
-    const insets = useSafeAreaInsets();
     const isTablet = useIsTablet();
 
     let headerHeight = ViewConstants.DEFAULT_HEADER_HEIGHT;
     if (isTablet) {
         headerHeight = ViewConstants.TABLET_HEADER_HEIGHT;
     }
-    return headerHeight + insets.top;
+    return headerHeight;
 };
 
 export const useLargeHeaderHeight = () => {
