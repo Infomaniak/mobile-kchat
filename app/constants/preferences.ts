@@ -92,6 +92,8 @@ const Preferences = {
             codeTheme: 'github',
             guestBannerBackground: '#F4F6FD',
             bgSecondary: '#F5F5F5',
+            transcriptText: '#3F4350BF',
+            transcriptBackground: '#3F435014',
         },
         denim: {
             type: 'Denim',
@@ -236,6 +238,8 @@ const Preferences = {
             codeTheme: 'monokai',
             guestBannerBackground: '#1f2328',
             bgSecondary: '#2A2E35',
+            transcriptText: '#ffffff',
+            transcriptBackground: '#d8d8e214',
         },
     } as Record<ThemeKey, Theme>,
 };

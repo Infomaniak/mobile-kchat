@@ -6,7 +6,6 @@ import {Text, View} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
-import {PostPriorityColors} from '@constants/post';
 import {useTheme} from '@context/theme';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography, type FontSizes} from '@utils/typography';
@@ -68,10 +67,10 @@ const getStyleFromTheme = makeStyleSheetFromTheme((theme: Theme) => {
             color: theme.buttonBg,
         },
         transcriptText: {
-            color: PostPriorityColors.TRANSCRIPT_LABEL,
+            color: theme.transcriptText,
         },
         transcriptContainer: {
-            backgroundColor: PostPriorityColors.TRANSCRIPT,
+            backgroundColor: theme.transcriptBackground,
         },
     };
 });
