@@ -307,14 +307,13 @@ const Markdown = ({
             style.block,
             textStyles[`heading${level}`],
         ];
-        const textStyle = textStyles[`heading${level}Text`];
 
         return (
             <View
                 style={containerStyle as StyleProp<ViewStyle>}
                 testID='markdown_heading'
             >
-                <Text style={textStyle}>
+                <Text>
                     {children}
                 </Text>
             </View>
