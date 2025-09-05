@@ -146,14 +146,16 @@ const Channel = ({
                             <ScheduledPostIndicator scheduledPostCount={scheduledPostCount}/>
                         }
                     </>
-                    <PostDraft
-                        channelId={channelId}
-                        testID='channel.post_draft'
-                        containerHeight={containerHeight}
-                        isChannelScreen={true}
-                        canShowPostPriority={true}
-                        location={Screens.CHANNEL}
-                    />
+                    <SafeAreaView edges={['bottom']}>
+                        <PostDraft
+                            channelId={channelId}
+                            testID='channel.post_draft'
+                            containerHeight={containerHeight}
+                            isChannelScreen={true}
+                            canShowPostPriority={true}
+                            location={Screens.CHANNEL}
+                        />
+                    </SafeAreaView>
                 </ExtraKeyboardProvider>
                 }
             </SafeAreaView>
