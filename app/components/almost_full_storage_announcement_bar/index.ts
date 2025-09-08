@@ -2,10 +2,12 @@
 // See LICENSE.txt for license information.
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
-import {distinctUntilChanged, map} from '@nozbe/watermelondb/utils/rx';
+import {distinctUntilChanged, map, switchMap} from '@nozbe/watermelondb/utils/rx';
+import {of as of$} from 'rxjs';
 
 import {observeLimits} from '@queries/servers/limit';
 import {queryAnnouncementBarVisibilityPreference} from '@queries/servers/preference';
+import {observeCurrentTeamId} from '@queries/servers/system';
 import {observeCurrentPackName} from '@queries/servers/team';
 import {observeUsage} from '@queries/servers/usage';
 import {observeCurrentUser} from '@queries/servers/user';
@@ -21,8 +23,13 @@ const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
         map((user) => isSystemAdmin(user?.roles || '')),
         distinctUntilChanged(),
     );
-    const limits = observeLimits(database);
-    const usage = observeUsage(database);
+    const currentTeamId = observeCurrentTeamId(database);
+    const limits = currentTeamId.pipe(
+        switchMap((teamId) => (teamId ? observeLimits(database, teamId) : of$(null))),
+    );
+    const usage = currentTeamId.pipe(
+        switchMap((teamId) => (teamId ? observeUsage(database, teamId) : of$(null))),
+    );
     const visibility = queryAnnouncementBarVisibilityPreference(database);
 
     return {

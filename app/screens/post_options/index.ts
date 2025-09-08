@@ -14,7 +14,7 @@ import {observeLimits} from '@queries/servers/limit';
 import {observePost, observePostSaved} from '@queries/servers/post';
 import {observeReactionsForPost} from '@queries/servers/reaction';
 import {observePermissionForChannel, observePermissionForPost} from '@queries/servers/role';
-import {observeConfigIntValue, observeConfigValue, observeLicense} from '@queries/servers/system';
+import {observeConfigIntValue, observeConfigValue, observeLicense, observeCurrentTeamId} from '@queries/servers/system';
 import {observeIsCRTEnabled, observeThreadById} from '@queries/servers/thread';
 import {observeUsage} from '@queries/servers/usage';
 import {observeCurrentUser} from '@queries/servers/user';
@@ -153,8 +153,13 @@ const enhanced = withObservables([], ({combinedPost, post, showAddReaction, sour
         switchMap((enabled) => (enabled ? observeThreadById(database, post.id) : of$(undefined))),
     );
 
-    const usage = observeUsage(database);
-    const limits = observeLimits(database);
+    const currentTeamId = observeCurrentTeamId(database);
+    const limits = currentTeamId.pipe(
+        switchMap((teamId) => (teamId ? observeLimits(database, teamId) : of$(null))),
+    );
+    const usage = currentTeamId.pipe(
+        switchMap((teamId) => (teamId ? observeUsage(database, teamId) : of$(null))),
+    );
 
     return {
         canMarkAsUnread,

@@ -25,7 +25,23 @@ export const withBackupValue = (maybeLimit: number | undefined, limitsLoaded: bo
 export function useGetUsageDeltas(usage: CloudUsageModel, limits: LimitModel): CloudUsage {
     const usageDelta = () => {
         const limitsLoaded = true;
-
+        if (!usage || !limits) {
+            return {
+                id: '',
+                storage: -1073741825, // to avoid showing the banner almost full storage banner when we don't have usage/limits yet
+                public_channels: 0,
+                private_channels: 0,
+                guests: 0,
+                pending_guests: 0,
+                members: 0,
+                custom_emojis: 0,
+                incoming_webhooks: 0,
+                outgoing_webhooks: 0,
+                sidebar_categories: 0,
+                scheduled_draft_custom_date: 0,
+                reminder_custom_date: 0,
+            };
+        }
         return (
             {
                 id: '',
@@ -35,24 +51,6 @@ export function useGetUsageDeltas(usage: CloudUsageModel, limits: LimitModel): C
                 guests: usage.guests - withBackupValue(limits.guests, limitsLoaded),
                 pending_guests: -usage.pending_guests,
                 members: usage.members - withBackupValue(limits.members, limitsLoaded),
-
-                // usageLoaded: usage.usageLoaded,
-
-                // files: {
-                //     totalStorage: usage.files.totalStorage - withBackupValue(limits.files?.total_storage, limitsLoaded),
-                //     totalStorageLoaded: usage.files.totalStorageLoaded,
-                // },
-                // messages: {
-                //     history: usage.messages.history - withBackupValue(limits.messages?.history, limitsLoaded),
-                //     historyLoaded: usage.messages.historyLoaded,
-                // },
-                // teams: {
-                //     active: usage.teams.active - withBackupValue(limits.teams?.active, limitsLoaded),
-
-                //     // cloudArchived doesn't count against usage, but we pass the value along for convenience
-                //     cloudArchived: usage.teams.cloudArchived,
-                //     teamsLoaded: usage.teams.teamsLoaded,
-                // },
                 custom_emojis: usage.custom_emojis - withBackupValue(limits.custom_emojis, limitsLoaded),
                 incoming_webhooks: usage.incoming_webhooks - withBackupValue(limits.incoming_webhooks, limitsLoaded),
                 outgoing_webhooks: usage.outgoing_webhooks - withBackupValue(limits.outgoing_webhooks, limitsLoaded),
