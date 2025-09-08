@@ -77,6 +77,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
+            marginRight: 8,
             paddingBottom: Platform.select({
                 ios: 1,
                 android: 2,
