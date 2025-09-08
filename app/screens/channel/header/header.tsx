@@ -23,6 +23,7 @@ import {bottomSheet, popTopScreen, showModal} from '@screens/navigation';
 import {isTypeDMorGM} from '@utils/channel';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {topInsetShared} from '@utils/top_inset_shared';
 import {typography} from '@utils/typography';
 
 import ChannelHeaderBookmarks from './bookmarks';
@@ -115,7 +116,7 @@ const ChannelHeader = ({
 
     const isDMorGM = isTypeDMorGM(channelType);
     const contextStyle = useMemo(() => ({
-        top: defaultHeight,
+        top: defaultHeight + topInsetShared.value,
     }), [defaultHeight]);
 
     const leftComponent = useMemo(() => {

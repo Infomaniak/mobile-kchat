@@ -4,7 +4,6 @@
 import React, {useMemo} from 'react';
 import {Platform, Text, View} from 'react-native';
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
@@ -147,7 +146,6 @@ const Header = ({
     title,
 }: Props) => {
     const styles = getStyleSheet(theme);
-    const insets = useSafeAreaInsets();
 
     const opacity = useAnimatedStyle(() => {
         if (!isLargeTitle) {
@@ -171,7 +169,6 @@ const Header = ({
 
     const containerAnimatedStyle = useAnimatedStyle(() => ({
         height: defaultHeight,
-        paddingTop: insets.top,
     }), [defaultHeight]);
 
     const containerStyle = useMemo(() => (

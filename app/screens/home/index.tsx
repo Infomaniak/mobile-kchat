@@ -146,6 +146,7 @@ export function HomeScreen(props: HomeProps) {
     }, []);
 
     return (
+
         <View
             style={styles.flex}
             nativeID={SecurityManager.getShieldScreenId(Screens.HOME, true)}
@@ -153,6 +154,7 @@ export function HomeScreen(props: HomeProps) {
             <NavigationContainer
                 theme={{
                     ...DefaultTheme,
+                    dark: false,
                     colors: {
                         ...DefaultTheme.colors,
                         primary: theme.centerChannelColor,

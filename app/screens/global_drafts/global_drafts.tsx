@@ -16,6 +16,7 @@ import {useDefaultHeaderHeight} from '@hooks/header';
 import {useTeamSwitch} from '@hooks/team_switch';
 import SecurityManager from '@managers/security_manager';
 import TabbedContents from '@screens/global_drafts/components/tabbed_contents';
+import {topInsetShared} from '@utils/top_inset_shared';
 
 import {popTopScreen} from '../navigation';
 
@@ -54,7 +55,7 @@ const GlobalDraftsAndScheduledPosts = ({componentId, scheduledPostsEnabled, init
     }, [isTablet]);
 
     const contextStyle = useMemo(() => ({
-        top: defaultHeight,
+        top: defaultHeight + topInsetShared.value,
     }), [defaultHeight]);
 
     const containerStyle = useMemo(() => {
