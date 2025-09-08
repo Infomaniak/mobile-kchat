@@ -5,7 +5,8 @@
 
 import merge from 'deepmerge';
 import {Appearance, DeviceEventEmitter, Platform, Alert, type EmitterSubscription, Keyboard} from 'react-native';
-import {type ComponentWillAppearEvent, type ImageResource, type LayoutOrientation, Navigation, type Options, OptionsModalPresentationStyle, type OptionsTopBarButton, type ScreenPoppedEvent, type EventSubscription} from 'react-native-navigation';
+import {type ComponentWillAppearEvent, type ImageResource, type LayoutOrientation, Navigation, type Options, OptionsModalPresentationStyle, type OptionsTopBarButton, type ScreenPoppedEvent, type EventSubscription, type OptionsStatusBar} from 'react-native-navigation';
+import tinyColor from 'tinycolor2';
 
 import CompassIcon from '@components/compass_icon';
 import {Events, Screens, Launch} from '@constants';
@@ -318,6 +319,11 @@ export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}
     });
 }
 
+function computeStatusBarStyle(backgroundHex: string): NonNullable<OptionsStatusBar['style']> {
+    const isDark = tinyColor(backgroundHex).isDark();
+    return isDark ? 'light' : 'dark';
+}
+
 export function resetToInfomaniakLogin(passProps: LaunchProps) {
     const theme = getDefaultThemeByAppearance();
 
@@ -344,6 +350,10 @@ export function resetToInfomaniakLogin(passProps: LaunchProps) {
                     },
                     visible: false,
                     height: 0,
+                },
+                statusBar: {
+                    style: computeStatusBarStyle(theme.centerChannelBg),
+                    visible: true,
                 },
             },
         },
