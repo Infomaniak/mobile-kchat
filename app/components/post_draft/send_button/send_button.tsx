@@ -28,15 +28,11 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         disableButton: {
             backgroundColor: changeOpacity(theme.buttonBg, 0.3),
         },
-        sendButtonContainer: {
-            justifyContent: 'flex-end',
-            paddingRight: 8,
-        },
         sendButton: {
             backgroundColor: theme.buttonBg,
             borderRadius: 4,
             height: 32,
-            width: 80,
+            minWidth: 60,
             alignItems: 'center',
             justifyContent: 'center',
         },
@@ -94,7 +90,6 @@ const SendButton: React.FC<Props> = ({
         <TouchableWithFeedback
             testID={sendButtonTestID}
             onPress={sendMessageWithDoubleTapPrevention}
-            style={style.sendButtonContainer}
             type={'opacity'}
             disabled={disabled}
             onLongPress={scheduledPostEnabled ? showScheduledPostOptions : undefined}

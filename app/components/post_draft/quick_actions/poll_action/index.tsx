@@ -21,7 +21,7 @@ const style = StyleSheet.create({
     icon: {
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 8,
+        flex: 1,
     },
 });
 

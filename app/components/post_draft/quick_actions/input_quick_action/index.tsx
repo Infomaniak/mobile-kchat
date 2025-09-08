@@ -25,7 +25,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         icon: {
             alignItems: 'center',
             justifyContent: 'center',
-            padding: 8,
+            flex: 1,
         },
     };
 });
