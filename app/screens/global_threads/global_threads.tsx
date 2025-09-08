@@ -19,7 +19,6 @@ import {useTeamSwitch} from '@hooks/team_switch';
 import useTabs, {type TabDefinition} from '@hooks/use_tabs';
 import SecurityManager from '@managers/security_manager';
 import {popTopScreen} from '@screens/navigation';
-import {topInsetShared} from '@utils/top_inset_shared';
 
 import ThreadsList from './threads_list';
 import Header from './threads_list/header';
@@ -80,7 +79,7 @@ const GlobalThreads = ({componentId, globalThreadsTab, hasUnreads, teamId}: Prop
     const mounted = useRef(false);
 
     const containerStyle = useMemo(() => {
-        const marginTop = defaultHeight + topInsetShared.value;
+        const marginTop = defaultHeight;
         return {flex: 1, marginTop};
     }, [defaultHeight]);
 
@@ -101,7 +100,7 @@ const GlobalThreads = ({componentId, globalThreadsTab, hasUnreads, teamId}: Prop
     }, [serverUrl, tab]);
 
     const contextStyle = useMemo(() => ({
-        top: defaultHeight + topInsetShared.value,
+        top: defaultHeight,
     }), [defaultHeight]);
 
     const onBackPress = useCallback(() => {

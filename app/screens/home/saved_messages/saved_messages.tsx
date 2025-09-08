@@ -5,7 +5,7 @@ import {useIsFocused, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Freeze} from 'react-freeze';
 import {useIntl} from 'react-intl';
-import {DeviceEventEmitter, type ListRenderItemInfo, StyleSheet, View} from 'react-native';
+import {DeviceEventEmitter, type ListRenderItemInfo, View} from 'react-native';
 import Animated, {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
@@ -21,6 +21,7 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useCollapsibleHeader} from '@hooks/header';
 import {getDateForDateLine, selectOrderedPosts} from '@utils/post_list';
+import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import EmptyState from './components/empty';
 
@@ -36,22 +37,26 @@ type Props = {
 
 const edges: Edge[] = ['bottom', 'left', 'right'];
 
-const styles = StyleSheet.create({
+const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     flex: {
         flex: 1,
+    },
+    background: {
+        backgroundColor: theme.centerChannelBg,
     },
     empty: {
         alignItems: 'center',
         flex: 1,
         justifyContent: 'center',
     },
-});
+}));
 
 function SavedMessages({appsEnabled, posts, currentTimezone, customEmojiNames}: Props) {
     const intl = useIntl();
     const [loading, setLoading] = useState(!posts.length);
     const [refreshing, setRefreshing] = useState(false);
     const theme = useTheme();
+    const styles = getStyleSheet(theme);
     const serverUrl = useServerUrl();
     const route = useRoute();
     const isFocused = useIsFocused();
@@ -166,7 +171,7 @@ function SavedMessages({appsEnabled, posts, currentTimezone, customEmojiNames}: 
             <ExtraKeyboardProvider>
                 <SafeAreaView
                     edges={edges}
-                    style={styles.flex}
+                    style={[styles.flex, styles.background]}
                     testID='saved_messages.screen'
                 >
                     <NavigationHeader

@@ -9,7 +9,6 @@ import {useTheme} from '@context/theme';
 import useHeaderHeight, {MAX_OVERSCROLL} from '@hooks/header';
 import {clamp} from '@utils/gallery';
 import {makeStyleSheetFromTheme} from '@utils/theme';
-import {topInsetShared} from '@utils/top_inset_shared';
 
 import Header, {type HeaderRightButton} from './header';
 import NavigationHeaderLargeTitle from './large';
@@ -75,12 +74,6 @@ const NavigationHeader = forwardRef<SearchRef, Props>(({
         };
     }, [defaultHeight, largeHeight, lockValue, isLargeTitle]);
 
-    const padding = useAnimatedStyle(() => {
-        return {
-            paddingTop: topInsetShared.value,
-        };
-    }, [defaultHeight, largeHeight, lockValue, isLargeTitle]);
-
     const translateY = useDerivedValue(() => (
         lockValue ? -lockValue : Math.min(-minScrollValue.value, headerOffset)
     ), [lockValue, headerOffset]);
@@ -92,7 +85,7 @@ const NavigationHeader = forwardRef<SearchRef, Props>(({
     }, [lockValue, headerOffset]);
 
     return (
-        <Animated.View style={[styles.container, containerHeight, padding]}>
+        <Animated.View style={[styles.container, containerHeight]}>
             <Header
                 defaultHeight={defaultHeight}
                 hasSearch={hasSearch}

@@ -9,6 +9,7 @@ import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import ViewConstants from '@constants/view';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {topInsetShared} from '@utils/top_inset_shared';
 import {typography} from '@utils/typography';
 
 export type HeaderRightButton = {
@@ -169,6 +170,7 @@ const Header = ({
 
     const containerAnimatedStyle = useAnimatedStyle(() => ({
         height: defaultHeight,
+        paddingTop: topInsetShared.value,
     }), [defaultHeight]);
 
     const containerStyle = useMemo(() => (

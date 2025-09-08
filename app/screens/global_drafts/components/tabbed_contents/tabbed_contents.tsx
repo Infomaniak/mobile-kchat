@@ -10,7 +10,6 @@ import Animated, {runOnJS, useAnimatedStyle, withTiming} from 'react-native-rean
 import {DRAFT_SCREEN_TAB_DRAFTS, DRAFT_SCREEN_TAB_SCHEDULED_POSTS, type DraftScreenTab} from '@constants/draft';
 import useTabs from '@hooks/use_tabs';
 import Tabs from '@hooks/use_tabs/tabs';
-import {topInsetShared} from '@utils/top_inset_shared';
 
 const duration = 250;
 
@@ -26,7 +25,6 @@ const getStyleSheet = (width: number) => {
     return StyleSheet.create({
         tabContainer: {
             height: '100%',
-            marginTop: topInsetShared.value,
         },
         tabContentContainer: {
             flex: 1,
