@@ -64,7 +64,9 @@ export const setServerCredentials = (serverUrl: string, token: string) => {
         KeyChain.setInternetCredentials(serverUrl, token, token, options);
 
         // ik: ensure the credentials are also stored in IkStorage for Android Reply receiver
-        IkStorage.setItem(serverUrl, token);
+        if (Platform.OS === 'android') {
+            IkStorage.setItem(serverUrl, token);
+        }
     } catch (e) {
         logWarning('could not set credentials', e);
     }
