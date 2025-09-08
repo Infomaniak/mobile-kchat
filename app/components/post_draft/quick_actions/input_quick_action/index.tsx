@@ -25,7 +25,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         icon: {
             alignItems: 'center',
             justifyContent: 'center',
-            padding: 10,
+            padding: 8,
         },
     };
 });
@@ -52,14 +52,10 @@ export default function InputQuickAction({
         focus();
     }, [inputType, updateValue, focus]);
 
-    const actionTestID = disabled ?
-        `${testID}.disabled` :
-        testID;
+    const actionTestID = disabled ?`${testID}.disabled` :testID;
     const style = getStyleSheet(theme);
     const iconName = inputType === 'at' ? inputType : 'slash-forward-box-outline';
-    const iconColor = disabled ?
-        changeOpacity(theme.centerChannelColor, 0.16) :
-        changeOpacity(theme.centerChannelColor, 0.64);
+    const iconColor = disabled ?changeOpacity(theme.centerChannelColor, 0.16) :changeOpacity(theme.centerChannelColor, 0.64);
 
     return (
         <TouchableWithFeedback
