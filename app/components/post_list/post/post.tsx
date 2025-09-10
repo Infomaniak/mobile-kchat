@@ -24,7 +24,6 @@ import {
 import {isCallsCustomMessage} from '@calls/utils';
 import FormattedText from '@components/formatted_text';
 import IkWelcomeMessage from '@components/post_list/post/ik_welcome_message';
-import PreviewMessage from '@components/post_list/post/preview_message';
 import SystemAvatar from '@components/system_avatar';
 import SystemHeader from '@components/system_header';
 import {POST_TIME_TO_FAIL, PostTypes} from '@constants/post';
@@ -37,7 +36,6 @@ import PerformanceMetricsManager from '@managers/performance_metrics_manager';
 import {openAsBottomSheet} from '@screens/navigation';
 import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {hasJumboEmojiOnly} from '@utils/emoji/helpers';
-import {getMarkdownTextStyles} from '@utils/markdown';
 import {
     fromAutoResponder,
     isFromWebhook,
@@ -176,7 +174,6 @@ const Post = ({
     const theme = useTheme();
     const isTablet = useIsTablet();
     const styles = getStyleSheet(theme);
-    const textStyles = getMarkdownTextStyles(theme);
     const isAutoResponder = fromAutoResponder(post);
     const isPendingOrFailed = isPostPendingOrFailed(post);
     const isFailed = isPostFailed(post);
@@ -318,20 +315,6 @@ const Post = ({
     const itemTestID = `${testID}.${post.id}`;
     const rightColumnStyle: StyleProp<ViewStyle> = [styles.rightColumn, (Boolean(post.rootId) && isLastReply && styles.rightColumnPadding)];
     const pendingPostStyle: StyleProp<ViewStyle> | undefined = isPendingOrFailed ? styles.pendingPost : undefined;
-    const getEmbedFromMetadata = (metadata: PostMetadata) => {
-        if (!metadata || !metadata.embeds || metadata.embeds.length === 0) {
-            return null;
-        }
-        return metadata.embeds[0];
-    };
-    const getEmbed = () => {
-        const {metadata} = post;
-        if (metadata) {
-            return getEmbedFromMetadata(metadata);
-        }
-        return null;
-    };
-    const embed = getEmbed();
 
     let highlightedStyle: StyleProp<ViewStyle>;
     if (highlight) {
@@ -397,6 +380,7 @@ const Post = ({
     }
 
     let body;
+
     if (isSystemPost && !isEphemeral && !isAutoResponder) {
         body = (
             <>
@@ -467,42 +451,6 @@ const Post = ({
         );
     } else if (isCallsPost && !hasBeenDeleted) {
         body = <IkCallsCustomMessage post={post}/>;
-    } else if (post.metadata && post.metadata.embeds && post.metadata.embeds.length > 0 && post.metadata.embeds[0].type === 'permalink' && embed) {
-        const postLink = `/${post.metadata.embeds[0].data.team_name}/pl/${post.metadata.embeds[0].data.post_id}`;
-        body = (
-            <>
-                <Body
-                    appsEnabled={appsEnabled}
-                    hasFiles={hasFiles}
-                    hasReactions={hasReactions}
-                    highlight={Boolean(highlightedStyle)}
-                    highlightReplyBar={highlightReplyBar}
-                    isCRTEnabled={isCRTEnabled}
-                    isEphemeral={isEphemeral}
-                    isFirstReply={isFirstReply}
-                    isJumboEmoji={isJumboEmoji}
-                    isLastReply={isLastReply}
-                    isPendingOrFailed={isPendingOrFailed}
-                    isPostAcknowledgementEnabled={isPostAcknowledgementEnabled}
-                    isPostAddChannelMember={isPostAddChannelMember}
-                    location={location}
-                    post={post}
-                    searchPatterns={searchPatterns}
-                    showAddReaction={showAddReaction}
-                    theme={theme}
-                />
-
-                <PreviewMessage
-                    metadata={embed.data}
-                    post={post}
-                    theme={theme}
-                    location={location}
-                    postLink={postLink}
-                    previewUserId={post.metadata.embeds[0].data.post.user_id}
-                    textStyles={textStyles}
-                />
-            </>
-        );
     } else {
         body = (
             <Body
