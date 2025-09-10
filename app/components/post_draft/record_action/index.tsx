@@ -6,30 +6,30 @@ import React from 'react';
 import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {useTheme} from '@context/theme';
-import {changeOpacity} from '@utils/theme';
+import {makeStyleSheetFromTheme} from '@utils/theme';
 
 type Props = {
     onPress: () => void;
     testID: string;
 }
 
-const styles = {
-    recordButtonContainer: {
-        justifyContent: 'flex-end',
-        paddingRight: 8,
-    },
-    recordButton: {
-        borderRadius: 4,
-        height: 24,
-        width: 24,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-};
+const getStyleSheet = makeStyleSheetFromTheme((theme) => {
+    return {
+        recordButtonContainer: {
+            backgroundColor: theme.buttonBg,
+            borderRadius: 4,
+            height: 32,
+            minWidth: 60,
+            alignItems: 'center',
+            justifyContent: 'center',
+
+        },
+    };
+});
 
 function RecordButton({onPress, testID}: Props) {
     const theme = useTheme();
-
+    const styles = getStyleSheet(theme);
     return (
         <TouchableWithFeedback
             onPress={onPress}
@@ -38,7 +38,7 @@ function RecordButton({onPress, testID}: Props) {
             type={'opacity'}
         >
             <CompassIcon
-                color={changeOpacity(theme.centerChannelColor, 0.64)}
+                color={'#ffff'}
                 name='microphone'
                 size={24}
             />

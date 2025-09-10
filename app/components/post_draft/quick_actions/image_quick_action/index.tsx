@@ -19,7 +19,7 @@ const style = StyleSheet.create({
     icon: {
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 10,
+        flex: 1,
     },
 });
 

@@ -37,6 +37,7 @@ const style = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         height: QUICK_ACTIONS_HEIGHT,
+        width: '80%',
     },
 });
 
