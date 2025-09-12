@@ -30,7 +30,7 @@
 		672D989E29F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D986729F1927F004228D6 /* InfoPlist.strings */; };
 		672D98A329F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987029F1927F004228D6 /* InfoPlist.strings */; };
 		672D98A429F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987029F1927F004228D6 /* InfoPlist.strings */; };
-		672D98A829F1927F004228D6 /* BuildFile in Resources */ = {isa = PBXBuildFile; };
+		672D98A829F1927F004228D6 /* (null) in Resources */ = {isa = PBXBuildFile; };
 		672D98A929F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987929F1927F004228D6 /* InfoPlist.strings */; };
 		672D98AA29F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987929F1927F004228D6 /* InfoPlist.strings */; };
 		672D98AC29F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987C29F1927F004228D6 /* InfoPlist.strings */; };
@@ -130,6 +130,7 @@
 		83ABFD152C1C90D90029685B /* calls_urgent.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 83ABFD112C1C90D90029685B /* calls_urgent.mp3 */; };
 		89F39C169798913D3B11FE6F /* libPods-kChatNotificationService.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF411FDB2155B680B2E2EE6A /* libPods-kChatNotificationService.a */; };
 		9D28B54F45884190C64C695D /* libPods-kChat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1623746E1AB26BD8335911D6 /* libPods-kChat.a */; };
+		A12CB4022E69D55E00C57BE6 /* kChat-AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = A12CB4012E69D55E00C57BE6 /* kChat-AppIcon.icon */; };
 		A94508A396424B2DB778AFE9 /* OpenSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E5C16B14E1CE4868886A1A00 /* OpenSans-SemiBold.ttf */; };
 		C9A107102BBD7C8700753CDC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C9A1070F2BBD7C8700753CDC /* PrivacyInfo.xcprivacy */; };
 		C9A107122BBDA00200753CDC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C9A107112BBDA00200753CDC /* PrivacyInfo.xcprivacy */; };
@@ -311,6 +312,7 @@
 		83ABFD112C1C90D90029685B /* calls_urgent.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = calls_urgent.mp3; path = ../assets/sounds/calls_urgent.mp3; sourceTree = "<group>"; };
 		86CC1D0677F81276B5D27A3C /* Pods-kChatShareExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChatShareExtension.release.xcconfig"; path = "Target Support Files/Pods-kChatShareExtension/Pods-kChatShareExtension.release.xcconfig"; sourceTree = "<group>"; };
 		9EB3044C9E4352BCBCB94179 /* Pods-kChatNotificationService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChatNotificationService.debug.xcconfig"; path = "Target Support Files/Pods-kChatNotificationService/Pods-kChatNotificationService.debug.xcconfig"; sourceTree = "<group>"; };
+		A12CB4012E69D55E00C57BE6 /* kChat-AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = "kChat-AppIcon.icon"; sourceTree = "<group>"; };
 		A66656554C339757628D5D66 /* Pods-kChatShareExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChatShareExtension.debug.xcconfig"; path = "Target Support Files/Pods-kChatShareExtension/Pods-kChatShareExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		AB22941EB6C9E39BAB9B4783 /* Pods-kChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChat.release.xcconfig"; path = "Target Support Files/Pods-kChat/Pods-kChat.release.xcconfig"; sourceTree = "<group>"; };
 		BC977883E2624E05975CA65B /* OpenSans-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-Regular.ttf"; path = "../assets/fonts/OpenSans-Regular.ttf"; sourceTree = "<group>"; };
@@ -423,6 +425,7 @@
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
+				A12CB4012E69D55E00C57BE6 /* kChat-AppIcon.icon */,
 				374AA56A2C64B90C00FA6D63 /* kchat-ringtone.wav */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB71A68108700A75B9A /* main.m */,
@@ -1006,6 +1009,7 @@
 				672D98A929F1927F004228D6 /* InfoPlist.strings in Resources */,
 				83ABFD122C1C90D90029685B /* calls_dynamic.mp3 in Resources */,
 				83ABFD152C1C90D90029685B /* calls_urgent.mp3 in Resources */,
+				A12CB4022E69D55E00C57BE6 /* kChat-AppIcon.icon in Resources */,
 				83ABFD142C1C90D90029685B /* calls_calm.mp3 in Resources */,
 				7FB31F8E2710996D0032E2E5 /* compass-icons.ttf in Resources */,
 				58495E36BF1A4EAB93609E57 /* Metropolis-SemiBold.ttf in Resources */,
@@ -1052,7 +1056,7 @@
 				67FEADED2A12608900DDF4AE /* Localizable.strings in Resources */,
 				7FD4825C2864DC4200A5B18B /* compass-icons.ttf in Resources */,
 				7FD482292864D69700A5B18B /* Assets.xcassets in Resources */,
-				672D98A829F1927F004228D6 /* BuildFile in Resources */,
+				672D98A829F1927F004228D6 /* (null) in Resources */,
 				C9A107142BBDBC8F00753CDC /* PrivacyInfo.xcprivacy in Resources */,
 				7FC5698C28563FDB000B0905 /* MainInterface.storyboard in Resources */,
 			);
@@ -1559,7 +1563,8 @@
 			baseConfigurationReference = ECFAA3716FC33EB5E8D76FA8 /* Pods-kChat.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "kChat-AppIcon";
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Mattermost/Mattermost.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -1602,7 +1607,8 @@
 			baseConfigurationReference = AB22941EB6C9E39BAB9B4783 /* Pods-kChat.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "kChat-AppIcon";
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Mattermost/Mattermost.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
