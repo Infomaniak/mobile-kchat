@@ -5,7 +5,7 @@ import React from 'react';
 
 import {getMarkdownTextStyles} from '@utils/markdown';
 import {isMessageAttachmentArray} from '@utils/message_attachment';
-import {isPostEphemeral, isSystemMessage} from '@utils/post';
+import {isPostEphemeral} from '@utils/post';
 import {isYoutubeLink} from '@utils/url';
 
 import PreviewMessage from '../../preview_message';
@@ -49,7 +49,6 @@ const Content = ({isReplyPost, layoutWidth, location, post, theme}: ContentProps
     }
     const textStyles = getMarkdownTextStyles(theme);
     const isEphemeral = isPostEphemeral(post);
-    const isSystemPost = isSystemMessage(post);
 
     const getEmbedFromMetadata = (metadata: PostMetadata) => {
         if (!metadata || !metadata.embeds || metadata.embeds.length === 0) {
@@ -122,7 +121,12 @@ const Content = ({isReplyPost, layoutWidth, location, post, theme}: ContentProps
                 return null;
             }
 
-            if (isEphemeral && isSystemPost) {
+            // Ik change: There is a case where a ephemeral message has a permalink in the metadata embed
+            // (e.g., when a reminder is triggered — Mattermost does not send a regular ephemeral message in this case).
+            // In such cases, we want to render the attachment list instead of the post preview.
+            // For now, we assume that all ephemeral messages should display the attachment list.
+
+            if (isEphemeral) {
                 return (
                     <MessageAttachments
                         attachments={attachments}
@@ -134,7 +138,7 @@ const Content = ({isReplyPost, layoutWidth, location, post, theme}: ContentProps
                         theme={theme}
                     />
                 );
-            } else if (embed.data && 'post_id' in embed.data && embed.data.post_id && post.props && !(post.props.reschedule || post.props.completed)) {
+            } else if (embed.data?.post_id && post.props && !post.props.reschedule && !post.props.completed) {
                 const postLink = `/${embed.data.team_name}/pl/${embed.data.post_id}`;
                 return (
                     <PreviewMessage
