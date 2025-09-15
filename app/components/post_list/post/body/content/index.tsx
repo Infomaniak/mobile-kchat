@@ -3,8 +3,12 @@
 
 import React from 'react';
 
+import {getMarkdownTextStyles} from '@utils/markdown';
 import {isMessageAttachmentArray} from '@utils/message_attachment';
+import {isPostEphemeral} from '@utils/post';
 import {isYoutubeLink} from '@utils/url';
+
+import PreviewMessage from '../../preview_message';
 
 import EmbeddedBindings from './embedded_bindings';
 import ImagePreview from './image_preview';
@@ -29,6 +33,7 @@ const contentType: Record<string, string> = {
     message_attachment: 'message_attachment',
     opengraph: 'opengraph',
     youtube: 'youtube',
+    permalink: 'permalink',
 };
 
 const Content = ({isReplyPost, layoutWidth, location, post, theme}: ContentProps) => {
@@ -42,9 +47,25 @@ const Content = ({isReplyPost, layoutWidth, location, post, theme}: ContentProps
     if (!type) {
         return null;
     }
+    const textStyles = getMarkdownTextStyles(theme);
+    const isEphemeral = isPostEphemeral(post);
+
+    const getEmbedFromMetadata = (metadata: PostMetadata) => {
+        if (!metadata || !metadata.embeds || metadata.embeds.length === 0) {
+            return null;
+        }
+        return metadata.embeds[0];
+    };
+    const getEmbed = () => {
+        const {metadata} = post;
+        if (metadata) {
+            return getEmbedFromMetadata(metadata);
+        }
+        return null;
+    };
+    const embed = getEmbed();
 
     const attachments = isMessageAttachmentArray(post.props?.attachments) ? post.props.attachments : [];
-
     switch (contentType[type]) {
         case contentType.image:
             return (
@@ -90,6 +111,44 @@ const Content = ({isReplyPost, layoutWidth, location, post, theme}: ContentProps
                         metadata={post.metadata}
                         postId={post.id}
                         theme={theme}
+                    />
+                );
+            }
+            break;
+
+        case contentType.permalink:
+            if (!embed) {
+                return null;
+            }
+
+            // Ik change: There is a case where a ephemeral message has a permalink in the metadata embed
+            // (e.g., when a reminder is triggered — Mattermost does not send a regular ephemeral message in this case).
+            // In such cases, we want to render the attachment list instead of the post preview.
+            // For now, we assume that all ephemeral messages should display the attachment list.
+
+            if (isEphemeral) {
+                return (
+                    <MessageAttachments
+                        attachments={attachments}
+                        channelId={post.channelId}
+                        layoutWidth={layoutWidth}
+                        location={location}
+                        metadata={post.metadata}
+                        postId={post.id}
+                        theme={theme}
+                    />
+                );
+            } else if (embed.data?.post_id && post.props && !post.props.reschedule && !post.props.completed) {
+                const postLink = `/${embed.data.team_name}/pl/${embed.data.post_id}`;
+                return (
+                    <PreviewMessage
+                        metadata={embed.data}
+                        post={post}
+                        theme={theme}
+                        location={location}
+                        postLink={postLink}
+                        previewUserId={embed.data.post.user_id}
+                        textStyles={textStyles}
                     />
                 );
             }
