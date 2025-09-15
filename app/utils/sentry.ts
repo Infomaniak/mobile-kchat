@@ -10,12 +10,11 @@ import DatabaseManager from '@database/manager';
 import {getConfig} from '@queries/servers/system';
 import {getCurrentUser} from '@queries/servers/user';
 import {getFullErrorMessage} from '@utils/errors';
-import {isBetaApp} from '@utils/general';
 
 import {logError, logWarning} from './log';
 
 import type {Database} from '@nozbe/watermelondb';
-import type {Breadcrumb, ErrorEvent} from '@sentry/types';
+import type {Breadcrumb} from '@sentry/types';
 
 export const BREADCRUMB_UNCAUGHT_APP_ERROR = 'uncaught-app-error';
 export const BREADCRUMB_UNCAUGHT_NON_ERROR = 'uncaught-non-error';
@@ -38,13 +37,12 @@ export function initializeSentry() {
     }
 
     const mmConfig = {
-        environment: isBetaApp ? 'beta' : 'production',
-        tracesSampleRate: isBetaApp ? 1.0 : 0.2,
-        sampleRate: isBetaApp ? 1.0 : 0.2,
-        attachStacktrace: Boolean(isBetaApp), // For Beta, stack traces are automatically attached to all messages logged
+        environment: 'production',
+        tracesSampleRate: 0.2,
+        sampleRate: 0.2,
+        attachStacktrace: false,
     };
 
-    const eventFilter = Array.isArray(Config.SentryOptions?.severityLevelFilter) ? Config.SentryOptions.severityLevelFilter : [];
     const sentryOptions = {...Config.SentryOptions};
     Reflect.deleteProperty(sentryOptions, 'severityLevelFilter');
 
@@ -57,13 +55,6 @@ export function initializeSentry() {
         integrations: [
             Sentry.reactNativeNavigationIntegration({navigation: Navigation}),
         ],
-        beforeSend: (event: ErrorEvent) => {
-            if (isBetaApp || (event?.level && eventFilter.includes(event.level))) {
-                return event;
-            }
-
-            return null;
-        },
     });
 }
 
