@@ -45,6 +45,7 @@ import {
     isSystemMessage,
 } from '@utils/post';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {isBot} from '@utils/user';
 
 import Avatar from './avatar';
 import Body from './body';
@@ -94,6 +95,7 @@ type PostProps = {
     style?: StyleProp<ViewStyle>;
     testID?: string;
     thread?: ThreadModel;
+    author?: UserModel;
 };
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -167,6 +169,7 @@ const Post = ({
     thread,
     previousPost,
     isLastPost,
+    author,
 }: PostProps) => {
     const pressDetected = useRef(false);
     const intl = useIntl();
@@ -342,19 +345,20 @@ const Post = ({
     } else {
         postAvatar = (
             <View style={[styles.profilePictureContainer, pendingPostStyle]}>
-                {(isAutoResponder || isSystemPost) ? (
-                    <SystemAvatar/>
-                ) : (
-                    <Avatar
-                        isAutoReponse={isAutoResponder}
-                        location={location}
-                        post={post}
-                    />
-                )}
+                {isAutoResponder ||
+                    (isSystemPost && (!author || !isBot(author))) ? (
+                        <SystemAvatar/>
+                    ) : (
+                        <Avatar
+                            isAutoReponse={isAutoResponder}
+                            location={location}
+                            post={post}
+                        />
+                    )}
             </View>
         );
 
-        if (isSystemPost && !isAutoResponder) {
+        if (isSystemPost && !isAutoResponder && (!author || !isBot(author))) {
             header = (
                 <SystemHeader
                     createAt={post.createAt}
