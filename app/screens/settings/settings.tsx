@@ -9,9 +9,11 @@ import CompassIcon from '@components/compass_icon';
 import SettingContainer from '@components/settings/container';
 import SettingItem from '@components/settings/item';
 import {Screens} from '@constants';
+import {useServerDisplayName} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import {usePreventDoubleTap} from '@hooks/utils';
 import {dismissModal, goToScreen, setButtons} from '@screens/navigation';
 import {gotoSettingsScreen} from '@screens/settings/config';
 import {preventDoubleTap} from '@utils/tap';
@@ -62,11 +64,15 @@ type SettingsProps = {
 
 //todo: Profile the whole feature - https://mattermost.atlassian.net/browse/MM-39711
 
-const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps) => {
+const Settings = ({componentId, helpLink, showHelp, currentUser, siteName}: SettingsProps) => {
     const theme = useTheme();
     const intl = useIntl();
     const styles = getStyleSheet(theme);
     const timezone = useMemo(() => getUserTimezoneProps(currentUser), [currentUser?.timezone]);
+    const serverDisplayName = useServerDisplayName();
+
+    const serverName = siteName || serverDisplayName;
+
     const closeButton = useMemo(() => {
         return {
             id: CLOSE_BUTTON_ID,
@@ -87,6 +93,13 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
 
     useAndroidHardwareBackHandler(componentId, close);
     useNavButtonPressed(CLOSE_BUTTON_ID, componentId, close, []);
+
+    const goToAbout = usePreventDoubleTap(useCallback(() => {
+        const screen = Screens.ABOUT;
+        const title = intl.formatMessage({id: 'settings.about', defaultMessage: 'About {appTitle}'}, {appTitle: serverName});
+
+        goToScreen(screen, title);
+    }, [intl, serverName]));
 
     const goToThemeSettings = preventDoubleTap(() => {
         const screen = Screens.SETTINGS_DISPLAY_THEME;
@@ -155,6 +168,13 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
                 onPress={goToTimezoneSettings}
                 info={intl.formatMessage(timezone.useAutomaticTimezone ? TIMEZONE_FORMAT[0] : TIMEZONE_FORMAT[1])}
                 testID='display_settings.timezone.option'
+            />
+            <SettingItem
+                icon='information-outline'
+                label={intl.formatMessage({id: 'settings.about', defaultMessage: 'About {appTitle}'}, {appTitle: serverName})}
+                onPress={goToAbout}
+                optionName='about'
+                testID='settings.about.option'
             />
             {Platform.OS === 'android' && <View style={styles.helpGroup}/>}
             {showHelp &&

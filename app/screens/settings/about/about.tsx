@@ -10,7 +10,6 @@ import {Text, View} from 'react-native';
 import {getLicenseLoadMetric} from '@actions/remote/license';
 import Config from '@assets/config.json';
 import Button from '@components/button';
-import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
 import SettingContainer from '@components/settings/container';
 import AboutLinks from '@constants/about_links';
@@ -27,7 +26,6 @@ import {typography} from '@utils/typography';
 import {tryOpenURL} from '@utils/url';
 import {onOpenLinkError} from '@utils/url/links';
 
-import LearnMore from './learn_more';
 import Subtitle from './subtitle';
 import Title from './title';
 import TosPrivacyContainer from './tos_privacy';
@@ -99,7 +97,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             flexDirection: 'row',
         },
         copyInfoButtonContainer: {
-            width: 120,
+            maxWidth: 160,
             marginTop: 10,
             position: 'relative',
         },
@@ -145,10 +143,6 @@ const About = ({componentId, config, license}: AboutProps) => {
 
         tryOpenURL(url, onError);
     }, [intl]);
-
-    const handleAboutTeam = usePreventDoubleTap(useCallback(() => {
-        return openURL(Config.WebsiteURL);
-    }, [openURL]));
 
     const handlePlatformNotice = usePreventDoubleTap(useCallback(() => {
         return openURL(Config.ServerNoticeURL);
@@ -207,15 +201,8 @@ const About = ({componentId, config, license}: AboutProps) => {
     return (
         <SettingContainer testID='about'>
             <View style={styles.logoContainer}>
-                <CompassIcon
-                    color={theme.centerChannelColor}
-                    name='mattermost'
-                    size={88}
-                    testID='about.logo'
-                />
                 <Title
                     config={config}
-                    license={license}
                 />
                 <Subtitle config={config}/>
                 <View
@@ -319,10 +306,6 @@ const About = ({componentId, config, license}: AboutProps) => {
                         />
                     </View>
                 )}
-                <LearnMore
-                    config={config}
-                    onPress={handleAboutTeam}
-                />
                 {!MATTERMOST_BUNDLE_IDS.includes(applicationId || '') &&
                     <FormattedText
                         defaultMessage='{site} is powered by Mattermost'
@@ -388,20 +371,6 @@ const About = ({componentId, config, license}: AboutProps) => {
                             testID='about.build_hash.value'
                         >
                             {config.BuildHash}
-                        </Text>
-                    </View>
-                    <View>
-                        <FormattedText
-                            defaultMessage='EE Build Hash:'
-                            id={t('about.hashee')}
-                            style={styles.footerTitleText}
-                            testID='about.build_hash_enterprise.title'
-                        />
-                        <Text
-                            style={styles.footerText}
-                            testID='about.build_hash_enterprise.value'
-                        >
-                            {config.BuildHashEnterprise}
                         </Text>
                     </View>
                 </View>
