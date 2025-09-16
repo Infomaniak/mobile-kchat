@@ -339,26 +339,33 @@ const Post = ({
     const showPostPriority = Boolean(isPostPriorityEnabled && post.metadata?.priority?.priority) && (location !== Screens.THREAD || !post.rootId);
 
     const sameSequence = hasReplies ? (hasReplies && post.rootId) : !post.rootId;
+
+    const shouldShowSystemAvatar =
+    isAutoResponder ||
+    (isSystemPost && (!author || !isBot(author)));
+
+    const shouldShowSystemHeader =
+    isSystemPost && !isAutoResponder && (!author || !isBot(author));
+
     if (!showPostPriority && hasSameRoot && isConsecutivePost && sameSequence && !isVoiceMessage) {
         consecutiveStyle = styles.consecutive;
         postAvatar = <View style={styles.consecutivePostContainer}/>;
     } else {
         postAvatar = (
             <View style={[styles.profilePictureContainer, pendingPostStyle]}>
-                {isAutoResponder ||
-                    (isSystemPost && (!author || !isBot(author))) ? (
-                        <SystemAvatar/>
-                    ) : (
-                        <Avatar
-                            isAutoReponse={isAutoResponder}
-                            location={location}
-                            post={post}
-                        />
-                    )}
+                {shouldShowSystemAvatar ? (
+                    <SystemAvatar/>
+                ) : (
+                    <Avatar
+                        isAutoReponse={isAutoResponder}
+                        location={location}
+                        post={post}
+                    />
+                )}
             </View>
         );
 
-        if (isSystemPost && !isAutoResponder && (!author || !isBot(author))) {
+        if (shouldShowSystemHeader) {
             header = (
                 <SystemHeader
                     createAt={post.createAt}
