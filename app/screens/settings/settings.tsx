@@ -4,6 +4,7 @@
 import React, {useCallback, useEffect, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {Alert, Platform, View} from 'react-native';
+import DeviceInfo from 'react-native-device-info';
 
 import CompassIcon from '@components/compass_icon';
 import SettingContainer from '@components/settings/container';
@@ -70,7 +71,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser, siteName}: Sett
     const styles = getStyleSheet(theme);
     const timezone = useMemo(() => getUserTimezoneProps(currentUser), [currentUser?.timezone]);
     const serverDisplayName = useServerDisplayName();
-
+    const appTitle = DeviceInfo.getApplicationName();
     const serverName = siteName || serverDisplayName;
 
     const closeButton = useMemo(() => {
@@ -96,7 +97,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser, siteName}: Sett
 
     const goToAbout = usePreventDoubleTap(useCallback(() => {
         const screen = Screens.ABOUT;
-        const title = intl.formatMessage({id: 'settings.about', defaultMessage: 'About {appTitle}'}, {appTitle: serverName});
+        const title = intl.formatMessage({id: 'settings.about', defaultMessage: 'About {appTitle}'}, {appTitle});
 
         goToScreen(screen, title);
     }, [intl, serverName]));
@@ -171,7 +172,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser, siteName}: Sett
             />
             <SettingItem
                 icon='information-outline'
-                label={intl.formatMessage({id: 'settings.about', defaultMessage: 'About {appTitle}'}, {appTitle: serverName})}
+                label={intl.formatMessage({id: 'settings.about', defaultMessage: 'About {appTitle}'}, {appTitle})}
                 onPress={goToAbout}
                 optionName='about'
                 testID='settings.about.option'

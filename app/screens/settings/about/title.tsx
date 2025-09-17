@@ -3,6 +3,7 @@
 
 import React from 'react';
 import {Text} from 'react-native';
+import DeviceInfo from 'react-native-device-info';
 
 import {useTheme} from '@context/theme';
 import {makeStyleSheetFromTheme} from '@utils/theme';
@@ -24,12 +25,10 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
     };
 });
 
-type TitleProps = {
-    config: ClientConfig;
-}
-const Title = ({config}: TitleProps) => {
+const Title = () => {
     const theme = useTheme();
     const style = getStyleSheet(theme);
+    const appTitle = DeviceInfo.getApplicationName();
 
     return (
         <>
@@ -37,7 +36,7 @@ const Title = ({config}: TitleProps) => {
                 style={[style.title, style.spacerTop]}
                 testID='about.site_name'
             >
-                {`${config.SiteName} `}
+                {`${appTitle} `}
             </Text>
         </>
 

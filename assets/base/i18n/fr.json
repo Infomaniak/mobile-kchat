@@ -1094,7 +1094,7 @@
   "servers.login": "Se connecter",
   "servers.logout": "Se déconnecter",
   "servers.remove": "Supprimer",
-  "settings.about": "À propos {appTitle}",
+  "settings.about": "À propos de {appTitle}",
   "settings.about.app.version": "Version de l'application : {version} (Build {number})",
   "settings.about.app.version.title": "Version de l'application :",
   "settings.about.app.version.value": "{version} (Build {number})",

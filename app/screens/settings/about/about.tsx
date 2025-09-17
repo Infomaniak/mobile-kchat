@@ -201,9 +201,7 @@ const About = ({componentId, config, license}: AboutProps) => {
     return (
         <SettingContainer testID='about'>
             <View style={styles.logoContainer}>
-                <Title
-                    config={config}
-                />
+                <Title/>
                 <Subtitle config={config}/>
                 <View
                     style={styles.thinLine}
@@ -373,20 +371,6 @@ const About = ({componentId, config, license}: AboutProps) => {
                             {config.BuildHash}
                         </Text>
                     </View>
-                </View>
-                <View style={{marginBottom: 20}}>
-                    <FormattedText
-                        defaultMessage='Build Date:'
-                        id={t('about.date')}
-                        style={styles.footerTitleText}
-                        testID='about.build_date.title'
-                    />
-                    <Text
-                        style={styles.footerText}
-                        testID='about.build_date.value'
-                    >
-                        {config.BuildDate}
-                    </Text>
                 </View>
             </View>
         </SettingContainer>
