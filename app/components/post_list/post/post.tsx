@@ -23,6 +23,7 @@ import {openAsBottomSheet} from '@screens/navigation';
 import {hasJumboEmojiOnly} from '@utils/emoji/helpers';
 import {fromAutoResponder, isFromWebhook, isPostFailed, isPostPendingOrFailed, isSystemMessage} from '@utils/post';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {isBot} from '@utils/user';
 
 import Avatar from './avatar';
 import Body from './body';
@@ -72,6 +73,7 @@ type PostProps = {
     style?: StyleProp<ViewStyle>;
     testID?: string;
     thread?: ThreadModel;
+    author?: UserModel;
 };
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -145,6 +147,7 @@ const Post = ({
     thread,
     previousPost,
     isLastPost,
+    author,
 }: PostProps) => {
     const pressDetected = useRef(false);
     const intl = useIntl();
@@ -289,13 +292,16 @@ const Post = ({
     const showPostPriority = Boolean(isPostPriorityEnabled && post.metadata?.priority?.priority) && (location !== Screens.THREAD || !post.rootId);
 
     const sameSequence = hasReplies ? (hasReplies && post.rootId) : !post.rootId;
+    const shouldShowSystemAvatar = isAutoResponder || (isSystemPost && (!author || !isBot(author)));
+    const shouldUseSystemHeader = isSystemPost && !isAutoResponder && (!author || !isBot(author));
+
     if (!showPostPriority && hasSameRoot && isConsecutivePost && sameSequence) {
         consecutiveStyle = styles.consecutive;
         postAvatar = <View style={styles.consecutivePostContainer}/>;
     } else {
         postAvatar = (
             <View style={[styles.profilePictureContainer, pendingPostStyle]}>
-                {(isAutoResponder || isSystemPost) ? (
+                {shouldShowSystemAvatar ? (
                     <SystemAvatar theme={theme}/>
                 ) : (
                     <Avatar
@@ -307,7 +313,7 @@ const Post = ({
             </View>
         );
 
-        if (isSystemPost && !isAutoResponder) {
+        if (shouldUseSystemHeader) {
             header = (
                 <SystemHeader
                     createAt={post.createAt}
