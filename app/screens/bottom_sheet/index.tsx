@@ -123,7 +123,7 @@ const BottomSheet = ({
         styles.bottomSheetBackground,
         {borderWidth: isTablet ? 0 : 1},
         headerStyle,
-    ], [isTablet, styles]);
+    ], [headerStyle, isTablet, styles.bottomSheetBackground]);
 
     const close = useCallback(() => {
         dismissModal({componentId});

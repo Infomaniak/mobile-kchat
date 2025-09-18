@@ -146,6 +146,9 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
             snapPoints={snapPoints}
             contentStyle={{paddingHorizontal: 0}}
             headerStyle={{
+                borderLeftWidth: 0,
+                borderRightWidth: 0,
+                borderBottomWidth: 0,
                 borderTopWidth: 50,
                 borderColor: '#222633',
             }}

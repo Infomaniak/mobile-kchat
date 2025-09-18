@@ -50,6 +50,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
         },
         actionSubContainer: {
             marginLeft: 'auto',
+            paddingRight: 8,
         },
         container: {
             flexDirection: 'row',

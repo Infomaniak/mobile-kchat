@@ -9,6 +9,7 @@ import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import BottomSheet from '@screens/bottom_sheet';
 import {makeStyleSheetFromTheme} from '@utils/theme';
+import {typography} from '@utils/typography';
 
 import {dismissBottomSheet} from '../navigation';
 
@@ -30,6 +31,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             justifyContent: 'space-evenly',
             alignItems: 'center',
             width: '90%',
+            paddingTop: 10,
         },
         title: {
             fontWeight: '600',
@@ -81,6 +83,9 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             color: '#000',
             textAlign: 'center',
         },
+        boldText: {
+            ...typography('Body', 200, 'SemiBold'),
+        },
     };
 });
 
@@ -119,6 +124,9 @@ const IKEvolve = () => {
                                 style={styles.choiceText}
                                 defaultMessage={'50 GB per user of kDrive and kChat cloud storage'}
                                 id='upgrade_banner_ksuite_benefit'
+                                values={{
+                                    b: (chunk: string) => <Text style={styles.boldText}>{chunk}</Text>,
+                                }}
                             />
                         </View>
                         <View style={styles.choiceItem}>
@@ -127,6 +135,9 @@ const IKEvolve = () => {
                                 style={styles.choiceText}
                                 defaultMessage={'kChat: unlimited message history, more channels, etc.'}
                                 id='upgrade_banner_ksuite_kchat'
+                                values={{
+                                    b: (chunk: string) => <Text style={styles.boldText}>{chunk}</Text>,
+                                }}
                             />
                         </View>
                         <View style={styles.choiceItem}>
@@ -135,6 +146,9 @@ const IKEvolve = () => {
                                 style={styles.choiceText}
                                 defaultMessage={'Mail: unlimited mailbox storage, scheduled sending, etc.'}
                                 id='upgrade_banner_ksuite_mail'
+                                values={{
+                                    b: (chunk: string) => <Text style={styles.boldText}>{chunk}</Text>,
+                                }}
                             />
                         </View>
                         <View style={styles.choiceItem}>
@@ -146,6 +160,9 @@ const IKEvolve = () => {
                                 defaultMessage={'Euria: video transcription, image creation, etc.'}
                                 id='upgrade_banner_ksuite_euria'
                                 style={styles.choiceText}
+                                values={{
+                                    b: (chunk: string) => <Text style={styles.boldText}>{chunk}</Text>,
+                                }}
 
                             />
                         </View>
@@ -190,6 +207,9 @@ const IKEvolve = () => {
             contentStyle={{paddingHorizontal: 0}}
             headerStyle={{
                 borderTopWidth: 50,
+                borderLeftWidth: 0,
+                borderRightWidth: 0,
+                borderBottomWidth: 0,
                 borderColor: '#222633',
             }}
         />

@@ -16,6 +16,8 @@ import {showSnackBar} from '@utils/snack_bar';
 
 import RescheduledDraft from './reschedule_draft';
 
+import type {CloudUsageModel} from '@database/models/server';
+import type LimitsModel from '@database/models/server/limits';
 import type {Database} from '@nozbe/watermelondb';
 import type ScheduledPostModel from '@typings/database/models/servers/scheduled_post';
 
@@ -73,6 +75,8 @@ describe('RescheduledDraft', () => {
             manualTimezone: '',
         },
         draft: mockDraft,
+        limits: {} as LimitsModel,
+        usage: {} as CloudUsageModel,
     };
 
     beforeAll(async () => {
