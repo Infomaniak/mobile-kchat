@@ -233,4 +233,12 @@ export default class ClientBase extends ClientTracking {
     doFetch = async (url: string, options: ClientOptions, returnDataOnly = true) => {
         return this.doFetchWithTracking(url, options, returnDataOnly);
     };
+
+    getCloudRoute() {
+        return `${this.urlVersion}/cloud`;
+    }
+
+    getUsageRoute() {
+        return `${this.urlVersion}/usage`;
+    }
 }

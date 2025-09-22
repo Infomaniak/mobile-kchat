@@ -36,6 +36,7 @@ type Props = {
     snapPoints?: Array<string | number>;
     enableDynamicSizing?: boolean;
     testID?: string;
+    headerStyle?: StyleProp<ViewStyle>;
 }
 
 const PADDING_TOP_MOBILE = 20;
@@ -98,6 +99,7 @@ const BottomSheet = ({
     snapPoints = [1, '50%', '80%'],
     testID,
     enableDynamicSizing = false,
+    headerStyle,
 }: Props) => {
     const reducedMotion = useReducedMotion();
     const sheetRef = useRef<BottomSheetM>(null);
@@ -120,7 +122,8 @@ const BottomSheet = ({
     const bottomSheetBackgroundStyle = useMemo(() => [
         styles.bottomSheetBackground,
         {borderWidth: isTablet ? 0 : 1},
-    ], [isTablet, styles]);
+        headerStyle,
+    ], [headerStyle, isTablet, styles.bottomSheetBackground]);
 
     const close = useCallback(() => {
         dismissModal({componentId});

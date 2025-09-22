@@ -44,10 +44,12 @@ import {
     ChannelBookmarkSchema,
     CustomProfileAttributeSchema,
     CustomProfileFieldSchema,
+    LimitSchema,
+    CloudUsageSchema,
 } from './table_schemas';
 
 export const serverSchema: AppSchema = appSchema({
-    version: 7,
+    version: 8,
     tables: [
         PlaybookRunSchema,
         PlaybookChecklistSchema,
@@ -67,6 +69,8 @@ export const serverSchema: AppSchema = appSchema({
         DraftSchema,
         FileSchema,
         GroupChannelSchema,
+        LimitSchema,
+        CloudUsageSchema,
         GroupMembershipSchema,
         GroupSchema,
         GroupTeamSchema,

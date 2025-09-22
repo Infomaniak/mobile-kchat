@@ -1,8 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-/* eslint-disable max-lines */
-
 import type {DatabaseType} from '@constants/database';
 import type AppDataOperator from '@database/operator/app_data_operator';
 import type ServerDataOperator from '@database/operator/server_data_operator';
@@ -11,6 +9,7 @@ import type Model from '@nozbe/watermelondb/Model';
 import type {Clause} from '@nozbe/watermelondb/QueryDescription';
 import type {Class} from '@nozbe/watermelondb/types';
 import type {CustomProfileField, CustomProfileAttribute} from '@typings/api/custom_profile_attributes';
+import type {CloudUsage, Limits} from '@typings/components/cloud';
 import type System from '@typings/database/models/servers/system';
 
 export type SyncStatus = 'synced' | 'pending' | 'failed';
@@ -297,6 +296,14 @@ export type HandleUsersArgs = PrepareOnly & {
 
 export type HandleDraftArgs = PrepareOnly & {
   drafts?: Draft[];
+};
+
+export type HandleLimitsArgs = PrepareOnly & {
+  limits?: Limits[];
+};
+
+export type HandleUsageArgs = PrepareOnly & {
+  usage?: CloudUsage[];
 };
 
 export type HandleConferencesArgs = PrepareOnly & {

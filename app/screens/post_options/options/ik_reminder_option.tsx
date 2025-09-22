@@ -9,14 +9,17 @@ import {useTheme} from '@context/theme';
 import {t} from '@i18n';
 import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
 
+import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
     bottomSheetId: AvailableScreens;
     post: PostModel;
+    limits: LimitModel;
+    usage: CloudUsageModel;
 }
-const IKReminderOption = ({bottomSheetId, post}: Props) => {
+const IKReminderOption = ({bottomSheetId, post, usage, limits}: Props) => {
     const theme = useTheme();
 
     const onPress = useCallback(async () => {
@@ -29,6 +32,8 @@ const IKReminderOption = ({bottomSheetId, post}: Props) => {
             title: '',
             props: {
                 post,
+                usage,
+                limits,
             },
         });
     }, [bottomSheetId, post]);

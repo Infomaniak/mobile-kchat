@@ -30,6 +30,7 @@ import MarkAsUnreadOption from './options/mark_unread_option';
 import PinChannelOption from './options/pin_channel_option';
 import ReactionBar from './reaction_bar';
 
+import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 import type ThreadModel from '@typings/database/models/servers/thread';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -51,12 +52,15 @@ type PostOptionsProps = {
     componentId: AvailableScreens;
     bindings: AppBinding[];
     serverUrl: string;
+    limits: LimitModel;
+    usage: CloudUsageModel;
 };
 const PostOptions = ({
     canAddReaction, canDelete, canEdit,
     canMarkAsUnread, canPin, canReply,
     combinedPost, componentId, isSaved,
     sourceScreen, post, thread, bindings, serverUrl,
+    usage, limits,
 }: PostOptionsProps) => {
     const managedConfig = useManagedConfig<ManagedConfig>();
     const isTablet = useIsTablet();
@@ -144,6 +148,8 @@ const PostOptions = ({
                     <IKReminderOption
                         bottomSheetId={Screens.POST_OPTIONS}
                         post={post}
+                        usage={usage}
+                        limits={limits}
                     />
                 }
                 {canCopyPermalink &&

@@ -48,6 +48,8 @@ export const MM_TABLES = {
         THREAD_PARTICIPANT: 'ThreadParticipant',
         TEAM_THREADS_SYNC: 'TeamThreadsSync',
         USER: 'User',
+        LIMIT: 'Limit',
+        USAGE: 'Usage',
     },
 };
 

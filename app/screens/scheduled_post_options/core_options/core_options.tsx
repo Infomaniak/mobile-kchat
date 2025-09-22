@@ -7,11 +7,18 @@ import {useIntl} from 'react-intl';
 import {View} from 'react-native';
 
 import DateTimeSelector from '@components/data_time_selector';
+import UpgradeButton from '@components/upgrade/ik_upgrade';
+import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
+import {quotaGate} from '@hooks/plans';
+import {useGetUsageDeltas} from '@hooks/usage';
+import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
 import PickerOption from '@screens/post_priority_picker/components/picker_option';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {getFormattedTime} from '@utils/time';
 
+import type {LimitModel} from '@database/models/server';
+import type CloudUsageModel from '@database/models/server/usage';
 import type {Moment} from 'moment-timezone';
 
 const optionKeysOptionMonday = 'scheduledPostOptionMonday';
@@ -31,9 +38,11 @@ type Props = {
     isMilitaryTime: boolean;
     onSelectOption: (selectedTime: string) => void;
     onCustomTimeSelected: (customTimeSelected: boolean) => void;
+    limits: LimitModel;
+    usage: CloudUsageModel;
 }
 
-export function ScheduledPostCoreOptions({userTimezone, isMilitaryTime, onSelectOption, onCustomTimeSelected}: Props) {
+export function ScheduledPostCoreOptions({userTimezone, isMilitaryTime, onSelectOption, onCustomTimeSelected, limits, usage}: Props) {
     const intl = useIntl();
     const theme = useTheme();
 
@@ -44,7 +53,23 @@ export function ScheduledPostCoreOptions({userTimezone, isMilitaryTime, onSelect
 
     const now = moment().tz(userTimezone);
 
+    // IK change : kSuite free feature
+    const {scheduled_draft_custom_date: scheduledDraftCustomDate} = useGetUsageDeltas(usage, limits);
+    const {isQuotaExceeded} = quotaGate(scheduledDraftCustomDate);
+
+    const onPressEvolve = useCallback(async () => {
+        await dismissBottomSheet(Screens.SCHEDULED_POST_OPTIONS);
+
+        openAsBottomSheet({
+            closeButtonId: 'close-quota-exceeded',
+            screen: Screens.INFOMANIAK_EVOLVE,
+            theme,
+            title: '',
+        });
+    }, [theme]);
+
     const handleSelectOption = useCallback((optionKey: string) => {
+
         setSelectedOptions(optionKey);
         onCustomTimeSelected(optionKey === optionKeyOptionCustom);
         setShowDateTimePicker(optionKey === optionKeyOptionCustom);
@@ -138,9 +163,10 @@ export function ScheduledPostCoreOptions({userTimezone, isMilitaryTime, onSelect
             <PickerOption
                 key={optionKeyOptionCustom}
                 label={intl.formatMessage({id: 'scheduled_post.picker.custom', defaultMessage: 'Custom Time'})}
-                action={handleSelectOption}
+                action={isQuotaExceeded ? onPressEvolve : handleSelectOption}
                 value={optionKeyOptionCustom}
                 selected={selectedOption === optionKeyOptionCustom}
+                rightComponent={isQuotaExceeded ? <UpgradeButton/> : undefined}
             />
             {showDateTimePicker && (
                 <DateTimeSelector

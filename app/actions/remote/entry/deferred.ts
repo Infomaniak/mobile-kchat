@@ -17,6 +17,8 @@ import {isDMorGM} from '@utils/channel';
 import {logError} from '@utils/log';
 import {processIsCRTEnabled} from '@utils/thread';
 
+import {fetchCloudLimits, fetchUsage} from '../cloud';
+
 export async function deferredAppEntryActions(
     serverUrl: string,
     since: number,
@@ -146,6 +148,10 @@ export async function restDeferredAppEntryActions(
 
                 if (initialTeamId) {
                     await fetchScheduledPosts(serverUrl, initialTeamId, true, groupLabel);
+                    await Promise.all([
+                        fetchCloudLimits(serverUrl, initialTeamId),
+                        fetchUsage(serverUrl, initialTeamId),
+                    ]);
                 }
             } catch (error) {
                 logError('Error in processFinalInitializationTasks', groupLabel, error);

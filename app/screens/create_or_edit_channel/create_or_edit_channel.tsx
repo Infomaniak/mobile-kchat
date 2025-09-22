@@ -19,6 +19,7 @@ import {validateDisplayName} from '@utils/channel';
 
 import ChannelInfoForm from './channel_info_form';
 
+import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type ChannelModel from '@typings/database/models/servers/channel';
 import type ChannelInfoModel from '@typings/database/models/servers/channel_info';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -28,6 +29,8 @@ type Props = {
     componentId: AvailableScreens;
     channel?: ChannelModel;
     channelInfo?: ChannelInfoModel;
+    limits: LimitModel;
+    usage: CloudUsageModel;
     headerOnly?: boolean;
     isModal: boolean;
 }
@@ -81,6 +84,8 @@ const CreateOrEditChannel = ({
     channelInfo,
     headerOnly,
     isModal,
+    limits,
+    usage,
 }: Props) => {
     const intl = useIntl();
     const {formatMessage} = intl;
@@ -96,6 +101,7 @@ const CreateOrEditChannel = ({
     const [purpose, setPurpose] = useState<string>(channelInfo?.purpose || '');
     const [header, setHeader] = useState<string>(channelInfo?.header || '');
 
+    const [channelLimitReached, setChannelLimitReached] = useState(false);
     const [appState, dispatch] = useReducer((state: RequestState, action: RequestAction) => {
         switch (action.type) {
             case RequestActions.START:
@@ -151,14 +157,15 @@ const CreateOrEditChannel = ({
     }, [theme, isModal]);
 
     useEffect(() => {
-        setCanSave(
-            displayName.length >= MIN_CHANNEL_NAME_LENGTH && (
-                displayName !== channel?.displayName ||
-                purpose !== channelInfo?.purpose ||
-                header !== channelInfo?.header ||
-                type !== channel.type
-            ),
+        const hasValidName = displayName.length >= MIN_CHANNEL_NAME_LENGTH;
+        const hasChanges = (
+            displayName !== channel?.displayName ||
+            purpose !== channelInfo?.purpose ||
+            header !== channelInfo?.header ||
+            type !== channel.type
         );
+
+        setCanSave(!channelLimitReached && hasValidName && hasChanges);
     }, [channel, displayName, purpose, header, type]);
 
     const isValidDisplayName = useCallback((): boolean => {
@@ -245,6 +252,9 @@ const CreateOrEditChannel = ({
             style={styles.container}
         >
             <ChannelInfoForm
+                limits={limits}
+                usage={usage}
+                onChannelLimitReached={setChannelLimitReached}
                 error={appState.error}
                 saving={appState.saving}
                 channelType={channel?.type}

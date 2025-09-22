@@ -95,6 +95,14 @@ export async function getHasCRTChanged(database: Database, preferences: Preferen
     return oldCRT !== newCRT;
 }
 
+export const queryAnnouncementBarVisibilityPreference = (database: Database) => {
+    return queryPreferencesByCategoryAndName(
+        database,
+        'announcement_bar_visiblity',
+        'almost_full_storage',
+    );
+};
+
 export const queryDisplayNamePreferences = (database: Database, name?: string, value?: string) => {
     return queryPreferencesByCategoryAndName(database, DISPLAY_SETTINGS, name, value);
 };

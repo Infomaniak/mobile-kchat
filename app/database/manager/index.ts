@@ -32,6 +32,9 @@ import {deleteIOSDatabase, getIOSAppGroupDetails, renameIOSDatabase} from '@util
 import {urlSafeBase64Encode} from '@utils/security';
 import {removeProtocol} from '@utils/url';
 
+import LimitsModel from '../models/server/limits';
+import CloudUsageModel from '../models/server/usage';
+
 import type {AppDatabase, CreateServerDatabaseArgs, RegisterServerDatabaseArgs, Models, ServerDatabase, ServerDatabases} from '@typings/database/database';
 
 const {SERVERS} = MM_TABLES.APP;
@@ -88,6 +91,8 @@ class DatabaseManagerSingleton {
             PlaybookRunModel,
             PlaybookChecklistModel,
             PlaybookChecklistItemModel,
+            LimitsModel,
+            CloudUsageModel,
         ];
 
         this.databaseDirectory = Platform.OS === 'ios' ? getIOSAppGroupDetails().appGroupDatabase : `${documentDirectory}/databases/`;

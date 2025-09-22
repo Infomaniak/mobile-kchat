@@ -45,6 +45,7 @@ describe('*** Operator: Team Handlers tests ***', () => {
                 last_team_icon_update: 1525181587639,
                 scheme_id: 'hbwgrncq1pfcdkpotzidfdmarn95o',
                 group_constrained: null,
+                pack_name: '',
             },
         ];
 

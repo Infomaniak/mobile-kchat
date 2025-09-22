@@ -10,11 +10,13 @@ import {AppBindingLocations} from '@constants/apps';
 import {MAX_ALLOWED_REACTIONS} from '@constants/emoji';
 import AppsManager from '@managers/apps_manager';
 import {observeChannel, observeIsReadOnlyChannel} from '@queries/servers/channel';
+import {observeLimits} from '@queries/servers/limit';
 import {observePost, observePostSaved} from '@queries/servers/post';
 import {observeReactionsForPost} from '@queries/servers/reaction';
 import {observePermissionForChannel, observePermissionForPost} from '@queries/servers/role';
-import {observeConfigIntValue, observeConfigValue, observeLicense} from '@queries/servers/system';
+import {observeConfigIntValue, observeConfigValue, observeLicense, observeCurrentTeamId} from '@queries/servers/system';
 import {observeIsCRTEnabled, observeThreadById} from '@queries/servers/thread';
+import {observeUsage} from '@queries/servers/usage';
 import {observeCurrentUser} from '@queries/servers/user';
 import {toMilliseconds} from '@utils/datetime';
 import {isMinimumServerVersion} from '@utils/helpers';
@@ -151,6 +153,14 @@ const enhanced = withObservables([], ({combinedPost, post, showAddReaction, sour
         switchMap((enabled) => (enabled ? observeThreadById(database, post.id) : of$(undefined))),
     );
 
+    const currentTeamId = observeCurrentTeamId(database);
+    const limits = currentTeamId.pipe(
+        switchMap((teamId) => (teamId ? observeLimits(database, teamId) : of$(null))),
+    );
+    const usage = currentTeamId.pipe(
+        switchMap((teamId) => (teamId ? observeUsage(database, teamId) : of$(null))),
+    );
+
     return {
         canMarkAsUnread,
         canAddReaction,
@@ -163,6 +173,8 @@ const enhanced = withObservables([], ({combinedPost, post, showAddReaction, sour
         post,
         thread,
         bindings,
+        usage,
+        limits,
     };
 });
 

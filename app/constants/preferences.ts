@@ -94,6 +94,7 @@ const Preferences = {
             bgSecondary: '#F5F5F5',
             transcriptText: '#3F4350BF',
             transcriptBackground: '#3F435014',
+            textDescription: '#666666',
         },
         denim: {
             type: 'Denim',
@@ -240,6 +241,7 @@ const Preferences = {
             bgSecondary: '#2A2E35',
             transcriptText: '#ffffff',
             transcriptBackground: '#d8d8e214',
+            textDescription: '#a8a4a4ff',
         },
     } as Record<ThemeKey, Theme>,
 };

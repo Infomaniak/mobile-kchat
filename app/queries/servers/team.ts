@@ -408,6 +408,13 @@ export const getAvailableTeamIds = async (database: Database, excludeTeamId: str
     return availableTeamIds.filter((id) => id !== excludeTeamId);
 };
 
+export const observeCurrentPackName = (database: Database) => {
+    return observeCurrentTeam(database).pipe(
+        switchMap((team) => of$(team?.pack_name)),
+        distinctUntilChanged(),
+    );
+};
+
 export const observeCurrentTeam = (database: Database) => {
     return observeCurrentTeamId(database).pipe(
         switchMap((id) => observeTeam(database, id)),

@@ -3,12 +3,13 @@
 
 import {Database, Q} from '@nozbe/watermelondb';
 import {combineLatest, of as of$} from 'rxjs';
-import {distinctUntilChanged, switchMap} from 'rxjs/operators';
+import {distinctUntilChanged, map, switchMap} from 'rxjs/operators';
 
 import {General} from '@constants';
 import {MM_TABLES} from '@constants/database';
 import {getTeammateNameDisplaySetting} from '@helpers/api/preference';
 import {sanitizeLikeString} from '@helpers/database';
+import {isSystemAdmin} from '@utils/user';
 
 import {queryDisplayNamePreferences} from './preference';
 import {observeCurrentUserId, observeLicense, getCurrentUserId, getConfig, getLicense, observeConfigValue} from './system';
@@ -46,6 +47,13 @@ export const getCurrentUser = async (database: Database) => {
 export const observeCurrentUser = (database: Database) => {
     return observeCurrentUserId(database).pipe(
         switchMap((id) => observeUser(database, id)),
+    );
+};
+
+export const observeIsCurrentUserAdmin = (database: Database) => {
+    return observeCurrentUser(database).pipe(
+        map((user) => isSystemAdmin(user?.roles || '')),
+        distinctUntilChanged(),
     );
 };
 

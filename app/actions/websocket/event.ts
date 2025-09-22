@@ -21,6 +21,7 @@ import {handleUserRoleUpdatedEvent, handleTeamMemberRoleUpdatedEvent, handleRole
 import {handleLicenseChangedEvent, handleConfigChangedEvent} from './system';
 import * as teams from './teams';
 import {handleThreadUpdatedEvent, handleThreadReadChangedEvent, handleThreadFollowChangedEvent} from './threads';
+import {handleLimitationChanged} from './usage';
 import {handleUserUpdatedEvent, handleUserTypingEvent, handleStatusChangedEvent, handleCustomProfileAttributesValuesUpdatedEvent, handleCustomProfileAttributesFieldUpdatedEvent, handleCustomProfileAttributesFieldDeletedEvent} from './users';
 
 export async function handleWebSocketEvent(serverUrl: string, msg: WebSocketMessage) {
@@ -257,6 +258,10 @@ export async function handleWebSocketEvent(serverUrl: string, msg: WebSocketMess
         case WebsocketEvents.KSUITE_DELETED:
             handleTeamSyncEvent(serverUrl);
             break;
+        case WebsocketEvents.QUOTA_CHANGED:
+            handleLimitationChanged(serverUrl);
+            break;
+
     }
     handlePlaybookEvents(serverUrl, msg);
 }

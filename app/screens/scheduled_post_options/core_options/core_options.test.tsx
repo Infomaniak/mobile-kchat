@@ -10,6 +10,7 @@ import TestHelper from '@test/test_helper';
 
 import {ScheduledPostCoreOptions} from './core_options';
 
+import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type Database from '@nozbe/watermelondb/Database';
 
 jest.mock('@utils/time', () => ({
@@ -23,6 +24,8 @@ describe('ScheduledPostCoreOptions', () => {
         isMilitaryTime: false,
         onSelectOption: jest.fn(),
         onCustomTimeSelected: jest.fn(),
+        limits: {} as LimitModel,
+        usage: {} as CloudUsageModel,
     };
 
     beforeAll(async () => {

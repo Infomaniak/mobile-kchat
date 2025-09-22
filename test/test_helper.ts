@@ -442,6 +442,7 @@ class TestHelperSingleton {
             create_at: 0,
             delete_at: 0,
             update_at: 0,
+            pack_name: '',
             ...overwrite,
         };
     };
@@ -731,6 +732,7 @@ class TestHelperSingleton {
             members: this.fakeQuery([]),
             teamSearchHistories: this.fakeQuery([]),
             playbookRuns: this.fakeQuery([]),
+            pack_name: '',
             ...overwrite,
         };
     };

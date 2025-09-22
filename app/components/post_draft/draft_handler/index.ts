@@ -7,6 +7,8 @@ import React from 'react';
 import {DEFAULT_SERVER_MAX_FILE_SIZE} from '@constants/post_draft';
 import {observeCanUploadFiles} from '@queries/servers/security';
 import {observeConfigIntValue, observeMaxFileCount} from '@queries/servers/system';
+import {observeCurrentPackName} from '@queries/servers/team';
+import {observeIsCurrentUserAdmin} from '@queries/servers/user';
 
 import DraftHandler from './draft_handler';
 
@@ -16,11 +18,15 @@ const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
     const canUploadFiles = observeCanUploadFiles(database);
     const maxFileSize = observeConfigIntValue(database, 'MaxFileSize', DEFAULT_SERVER_MAX_FILE_SIZE);
     const maxFileCount = observeMaxFileCount(database);
+    const currentPackName = observeCurrentPackName(database);
+    const isCurrentUserAdmin = observeIsCurrentUserAdmin(database);
 
     return {
+        currentPackName,
         maxFileSize,
         canUploadFiles,
         maxFileCount,
+        isCurrentUserAdmin,
     };
 });
 
