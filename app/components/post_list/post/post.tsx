@@ -45,6 +45,7 @@ import {
     isSystemMessage,
 } from '@utils/post';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {isBot} from '@utils/user';
 
 import Avatar from './avatar';
 import Body from './body';
@@ -94,6 +95,7 @@ type PostProps = {
     style?: StyleProp<ViewStyle>;
     testID?: string;
     thread?: ThreadModel;
+    author?: UserModel;
 };
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -167,6 +169,7 @@ const Post = ({
     thread,
     previousPost,
     isLastPost,
+    author,
 }: PostProps) => {
     const pressDetected = useRef(false);
     const intl = useIntl();
@@ -180,9 +183,9 @@ const Post = ({
     const isSystemPost = isSystemMessage(post);
     const isMailAttachment = isMailAttachmentMessage(post);
     const isCallsPost = isCallsCustomMessage(post);
-    const isVoiceMessage = post.type === PostTypes.VOICE_MESSAGE;
     const hasBeenDeleted = (post.deleteAt !== 0);
     const isWebHook = isFromWebhook(post);
+    const isVoiceMessage = post.type === PostTypes.VOICE_MESSAGE;
     const hasSameRoot = useMemo(() => {
         if (isFirstReply) {
             return false;
@@ -335,13 +338,21 @@ const Post = ({
     const showPostPriority = Boolean(isPostPriorityEnabled && post.metadata?.priority?.priority) && (location !== Screens.THREAD || !post.rootId);
 
     const sameSequence = hasReplies ? (hasReplies && post.rootId) : !post.rootId;
+
+    const shouldShowSystemAvatar =
+    isAutoResponder ||
+    (isSystemPost && (!author || !isBot(author)));
+
+    const shouldShowSystemHeader =
+    isSystemPost && !isAutoResponder && (!author || !isBot(author));
+
     if (!showPostPriority && hasSameRoot && isConsecutivePost && sameSequence && !isVoiceMessage) {
         consecutiveStyle = styles.consecutive;
         postAvatar = <View style={styles.consecutivePostContainer}/>;
     } else {
         postAvatar = (
             <View style={[styles.profilePictureContainer, pendingPostStyle]}>
-                {(isAutoResponder || isSystemPost) ? (
+                {shouldShowSystemAvatar ? (
                     <SystemAvatar/>
                 ) : (
                     <Avatar
@@ -353,7 +364,7 @@ const Post = ({
             </View>
         );
 
-        if (isSystemPost && !isAutoResponder) {
+        if (shouldShowSystemHeader) {
             header = (
                 <SystemHeader
                     createAt={post.createAt}

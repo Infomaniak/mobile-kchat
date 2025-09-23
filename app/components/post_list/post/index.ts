@@ -140,6 +140,7 @@ const withPost = withObservables(
         );
 
         return {
+            author,
             canDelete,
             differentThreadSequence: of$(differentThreadSequence),
             hasFiles,
