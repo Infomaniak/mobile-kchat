@@ -28,7 +28,7 @@ const UpgradeKsuiteBanner = ({
     const historyDurationLimit = sanitizeHistoryDuration(limits?.messages?.history);
     const intl = useIntl();
 
-    if (!limits) {
+    if (historyDurationLimit === null || !limits) {
         return null;
     }
 
