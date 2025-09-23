@@ -83,9 +83,6 @@ const withManagedConfig = (Screen: React.ComponentType) => {
 Navigation.setLazyComponentRegistrator((screenName) => {
     let screen: any|undefined;
     switch (screenName) {
-        case Screens.ABOUT:
-            screen = withServerDatabase(require('@screens/settings/about').default);
-            break;
         case Screens.AI_OPTIONS:
             screen = withServerDatabase(require('@screens/ai_options/index').default);
             break;
