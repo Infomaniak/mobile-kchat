@@ -183,6 +183,7 @@ const Post = ({
     const isVoiceMessage = post.type === PostTypes.VOICE_MESSAGE;
     const hasBeenDeleted = (post.deleteAt !== 0);
     const isWebHook = isFromWebhook(post);
+    const isVoiceMessage = post.type === PostTypes.VOICE_MESSAGE;
     const hasSameRoot = useMemo(() => {
         if (isFirstReply) {
             return false;
