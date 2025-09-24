@@ -30,6 +30,7 @@ import {logDebug, logError} from '@utils/log';
 import {processPostsFetched} from '@utils/post';
 import {getPostIdsForCombinedUserActivityPost} from '@utils/post_list';
 import {allSettled} from '@utils/promise';
+import {captureException} from '@utils/sentry';
 
 import {processChannelPostsByTeam} from './post.auxiliary';
 import {forceLogoutIfNecessary} from './session';
@@ -299,6 +300,10 @@ export async function fetchPostsForChannel(serverUrl: string, channelId: string,
         const myChannel = await getMyChannel(database, channelId);
         const postsInChannel = await getRecentPostsInChannel(database, channelId);
         const since = myChannel?.lastFetchedAt || postsInChannel?.[0]?.createAt || 0;
+
+        // Ik change : added to help debug missing posts issues
+        captureException(new Error(`Debug fetchPostsForChannel - channelId: ${channelId}, lastFetchedAt: ${myChannel?.lastFetchedAt}, lastPostCreateAt: ${postsInChannel?.[0]?.createAt}, now: ${Date.now()}`));
+
         if (since) {
             postAction = fetchPostsSince(serverUrl, channelId, since, true, groupLabel);
             deletedPostAction = fetchDeletedPostsIds(serverUrl, channelId, since);
