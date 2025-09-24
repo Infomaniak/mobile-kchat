@@ -1,21 +1,26 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import Clipboard from '@react-native-clipboard/clipboard';
+import {nativeApplicationVersion, nativeBuildVersion} from 'expo-application';
 import React, {useCallback, useEffect, useMemo} from 'react';
 import {useIntl} from 'react-intl';
-import {Alert, Platform, View} from 'react-native';
+import {Alert, Platform, Text, TouchableOpacity, View} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
 import SettingContainer from '@components/settings/container';
 import SettingItem from '@components/settings/item';
 import {Screens} from '@constants';
+import {SNACK_BAR_TYPE} from '@constants/snack_bar';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {dismissModal, goToScreen, setButtons} from '@screens/navigation';
 import {gotoSettingsScreen} from '@screens/settings/config';
+import {showSnackBar} from '@utils/snack_bar';
 import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {typography} from '@utils/typography';
 import {tryOpenURL} from '@utils/url';
 import {getUserTimezoneProps} from '@utils/user';
 
@@ -49,6 +54,19 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 
             // marginTop: 20,
         },
+        group: {
+            flexDirection: 'row',
+            margin: 12,
+        },
+        leftHeading: {
+            ...typography('Body', 100, 'SemiBold'),
+            marginRight: 8,
+            color: theme.centerChannelColor,
+        },
+        rightHeading: {
+            ...typography('Body', 100, 'Regular'),
+            color: theme.centerChannelColor,
+        },
     };
 });
 
@@ -56,7 +74,6 @@ type SettingsProps = {
     componentId: AvailableScreens;
     helpLink: string;
     showHelp: boolean;
-    siteName: string;
     currentUser?: UserModel;
 }
 
@@ -67,6 +84,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
     const intl = useIntl();
     const styles = getStyleSheet(theme);
     const timezone = useMemo(() => getUserTimezoneProps(currentUser), [currentUser?.timezone]);
+
     const closeButton = useMemo(() => {
         return {
             id: CLOSE_BUTTON_ID,
@@ -137,27 +155,39 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
         }
     });
 
+    const copyToClipboard = useCallback(
+        () => {
+            const appVersion = intl.formatMessage({id: 'settings.about.app.version', defaultMessage: 'App Version: {version} (Build {number})'}, {version: nativeApplicationVersion, number: nativeBuildVersion});
+            const copiedString = `${appVersion}`;
+
+            Clipboard.setString(copiedString);
+            showSnackBar({barType: SNACK_BAR_TYPE.INFO_COPIED, sourceScreen: componentId});
+        },
+        [intl, componentId],
+    );
+
     return (
         <SettingContainer testID='settings'>
-            <SettingItem
-                onPress={goToNotificationSettingsPush}
-                optionName='notification'
-                testID='settings.notifications.option'
-            />
-            <SettingItem
-                optionName='theme'
-                onPress={goToThemeSettings}
-                info={theme.ikName!}
-                testID='display_settings.theme.option'
-            />
-            <SettingItem
-                optionName='timezone'
-                onPress={goToTimezoneSettings}
-                info={intl.formatMessage(timezone.useAutomaticTimezone ? TIMEZONE_FORMAT[0] : TIMEZONE_FORMAT[1])}
-                testID='display_settings.timezone.option'
-            />
-            {Platform.OS === 'android' && <View style={styles.helpGroup}/>}
-            {showHelp &&
+            <View style={{flex: 1}}>
+                <SettingItem
+                    onPress={goToNotificationSettingsPush}
+                    optionName='notification'
+                    testID='settings.notifications.option'
+                />
+                <SettingItem
+                    optionName='theme'
+                    onPress={goToThemeSettings}
+                    info={theme.ikName!}
+                    testID='display_settings.theme.option'
+                />
+                <SettingItem
+                    optionName='timezone'
+                    onPress={goToTimezoneSettings}
+                    info={intl.formatMessage(timezone.useAutomaticTimezone ? TIMEZONE_FORMAT[0] : TIMEZONE_FORMAT[1])}
+                    testID='display_settings.timezone.option'
+                />
+                {Platform.OS === 'android' && <View style={styles.helpGroup}/>}
+                {showHelp &&
                 <SettingItem
                     optionLabelTextStyle={{color: theme.linkColor}}
                     onPress={openHelp}
@@ -165,15 +195,46 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
                     testID='settings.help.option'
                     type='default'
                 />
-            }
-            <SettingItem
-                optionLabelTextStyle={{color: theme.linkColor}}
-                onPress={openFeedback}
-                optionName='feedback'
-                separator={false}
-                testID='infomaniak.feedback.option'
-                type='default'
-            />
+                }
+                <SettingItem
+                    optionLabelTextStyle={{color: theme.linkColor}}
+                    onPress={openFeedback}
+                    optionName='feedback'
+                    separator={false}
+                    testID='infomaniak.feedback.option'
+                    type='default'
+                />
+            </View>
+
+            <TouchableOpacity
+                style={styles.group}
+                onPress={copyToClipboard}
+                activeOpacity={0.7}
+                testID='about.app_version.container'
+            >
+                <Text
+                    style={styles.leftHeading}
+                    testID='about.app_version.title'
+                >
+                    {intl.formatMessage({
+                        id: 'settings.about.app.version.title',
+                        defaultMessage: 'App Version:',
+                    })}
+                </Text>
+
+                <Text
+                    style={styles.rightHeading}
+                    testID='about.app_version.value'
+                >
+                    {intl.formatMessage(
+                        {
+                            id: 'settings.about.app.version.value',
+                            defaultMessage: '{version} (Build {number})',
+                        },
+                        {version: nativeApplicationVersion, number: nativeBuildVersion},
+                    )}
+                </Text>
+            </TouchableOpacity>
         </SettingContainer>
     );
 };
