@@ -180,6 +180,7 @@ const Post = ({
     const isSystemPost = isSystemMessage(post);
     const isMailAttachment = isMailAttachmentMessage(post);
     const isCallsPost = isCallsCustomMessage(post);
+    const isVoiceMessage = post.type === PostTypes.VOICE_MESSAGE;
     const hasBeenDeleted = (post.deleteAt !== 0);
     const isWebHook = isFromWebhook(post);
     const hasSameRoot = useMemo(() => {
@@ -334,7 +335,7 @@ const Post = ({
     const showPostPriority = Boolean(isPostPriorityEnabled && post.metadata?.priority?.priority) && (location !== Screens.THREAD || !post.rootId);
 
     const sameSequence = hasReplies ? (hasReplies && post.rootId) : !post.rootId;
-    if (!showPostPriority && hasSameRoot && isConsecutivePost && sameSequence) {
+    if (!showPostPriority && hasSameRoot && isConsecutivePost && sameSequence && !isVoiceMessage) {
         consecutiveStyle = styles.consecutive;
         postAvatar = <View style={styles.consecutivePostContainer}/>;
     } else {
