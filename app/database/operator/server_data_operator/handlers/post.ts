@@ -21,6 +21,7 @@ import FileModel from '@typings/database/models/servers/file';
 import ScheduledPostModel from '@typings/database/models/servers/scheduled_post';
 import {safeParseJSON} from '@utils/helpers';
 import {logWarning} from '@utils/log';
+import {captureException} from '@utils/sentry';
 
 import {shouldUpdateScheduledPostRecord} from '../comparators/scheduled_post';
 
@@ -603,6 +604,9 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             Q.sortBy('latest', Q.desc),
         ).fetch()) as PostsInChannelModel[];
 
+        // Ik change : added to help debug missing posts issues
+        captureException(new Error(`[handleReceivedPostsInChannelSince] Existing chunks: ${chunks.length} channel=${channelId}`));
+
         if (!chunks.length) {
             // Create a new chunk in case somehow the chunks got deleted for this channel
             const earliest = firstPost.create_at;
@@ -610,6 +614,9 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         }
 
         const targetChunk = chunks[0];
+
+        // Ik change : added to help debug missing posts issues
+        captureException(new Error(`[handleReceivedPostsInChannelSince] Received posts: channel=${channelId}, earliest=${firstPost.create_at}, latest=${latest}, count=${posts.length} Target chunk latest: ${targetChunk.latest}`));
 
         if (targetChunk.latest >= latest) {
             return [];
