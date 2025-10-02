@@ -41,10 +41,10 @@ export const fetchCloudLimits = async (serverUrl: string, teamId?: string) => {
                     record.members = limitsFetch.members ?? 0;
                     record.messages = limitsFetch.messages ?? {history: 0};
                     record.outgoing_webhooks = limitsFetch.outgoing_webhooks ?? 0;
-                    record.private_channels = limitsFetch.private_channels ?? 0;
-                    record.public_channels = limitsFetch.public_channels ?? 0;
-                    record.reminder_custom_date = limitsFetch.reminder_custom_date ?? false;
-                    record.scheduled_draft_custom_date = limitsFetch.scheduled_draft_custom_date ?? false;
+                    record.private_channels = limitsFetch.private_channels ?? -1;
+                    record.public_channels = limitsFetch.public_channels ?? -1;
+                    record.reminder_custom_date = limitsFetch.reminder_custom_date ?? true;
+                    record.scheduled_draft_custom_date = limitsFetch.scheduled_draft_custom_date ?? true;
                     record.sidebar_categories = limitsFetch.sidebar_categories ?? 0;
                     record.storage = limitsFetch.storage ?? 0;
                 });
@@ -82,8 +82,8 @@ export const fetchUsage = async (serverUrl: string, teamId?: string) => {
                     record.members = usageFetch.members ?? 0;
                     record.outgoing_webhooks = usageFetch.outgoing_webhooks ?? 0;
                     record.pending_guests = usageFetch.pending_guests ?? 0;
-                    record.private_channels = usageFetch.private_channels ?? 0;
-                    record.public_channels = usageFetch.public_channels ?? 0;
+                    record.private_channels = usageFetch.private_channels ?? -1;
+                    record.public_channels = usageFetch.public_channels ?? -1;
                     record.sidebar_categories = usageFetch.sidebar_categories ?? 0;
                     record.storage = usageFetch.storage ?? 0;
                 });
