@@ -45,6 +45,12 @@ export async function handleCategoryUpdatedEvent(serverUrl: string, msg: Websock
     let categories;
 
     try {
+        // IK change: our event does not include `updatedCategories`,
+        // so we fetch them manually from the server,
+        // following the same approach as in webapp:
+        // https://gitlab.infomaniak.ch/kchat/webapp/-/blob/master/webapp/channels/src/actions/websocket_actions.jsx#L1783
+        fetchCategories(serverUrl, msg.data.team_id);
+
         if (msg?.data?.updatedCategories) {
             categories = msg.data.updatedCategories;
             addOrUpdateCategories(serverUrl, categories);
