@@ -79,3 +79,11 @@ jobs:
         with:
           name: ios-build-beta-${{ github.run_id }}
           path: "*.ipa"
+      - name: ci/close-rm
+        run: bundle exec ruby scripts/close_rm.rb
+        env:
+          REDMINE_DOMAIN: "${{ secrets.REDMINE_DOMAIN }}"
+          REDMINE_API_KEY: "${{ secrets.REDMINE_API_KEY }}"
+          BRANCH_NAME: "${{ secrets.BRANCH_NAME }}"
+          REDMINE_DOMAIN: "${{ secrets.REDMINE_DOMAIN }}"
+          GITHUB_SHA: "${{ secrets.GITHUB_SHA }}"
