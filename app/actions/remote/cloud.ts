@@ -32,21 +32,21 @@ export const fetchCloudLimits = async (serverUrl: string, teamId?: string) => {
             await database.write(async () => {
                 await database.get<LimitModel>(MM_TABLES.SERVER.LIMIT).create((record) => {
                     record._raw.id = teamId;
-                    record.boards = limitsFetch.boards ?? {cards: 0, views: 0};
-                    record.bots = limitsFetch.bots ?? 0;
-                    record.custom_emojis = limitsFetch.custom_emojis ?? 0;
-                    record.guests = limitsFetch.guests ?? 0;
-                    record.incoming_webhooks = limitsFetch.incoming_webhooks ?? 0;
-                    record.integrations = limitsFetch.integrations ?? {enabled: 0};
-                    record.members = limitsFetch.members ?? 0;
-                    record.messages = limitsFetch.messages ?? {history: 0};
-                    record.outgoing_webhooks = limitsFetch.outgoing_webhooks ?? 0;
+                    record.boards = limitsFetch.boards ?? {cards: -1, views: -1};
+                    record.bots = limitsFetch.bots ?? -1;
+                    record.custom_emojis = limitsFetch.custom_emojis ?? -1;
+                    record.guests = limitsFetch.guests ?? -1;
+                    record.incoming_webhooks = limitsFetch.incoming_webhooks ?? -1;
+                    record.integrations = limitsFetch.integrations ?? {enabled: -1};
+                    record.members = limitsFetch.members ?? -1;
+                    record.messages = limitsFetch.messages ?? {history: -1};
+                    record.outgoing_webhooks = limitsFetch.outgoing_webhooks ?? -1;
                     record.private_channels = limitsFetch.private_channels ?? -1;
                     record.public_channels = limitsFetch.public_channels ?? -1;
                     record.reminder_custom_date = limitsFetch.reminder_custom_date ?? true;
                     record.scheduled_draft_custom_date = limitsFetch.scheduled_draft_custom_date ?? true;
-                    record.sidebar_categories = limitsFetch.sidebar_categories ?? 0;
-                    record.storage = limitsFetch.storage ?? 0;
+                    record.sidebar_categories = limitsFetch.sidebar_categories ?? -1;
+                    record.storage = limitsFetch.storage ?? -1;
                 });
             });
         }
@@ -76,16 +76,16 @@ export const fetchUsage = async (serverUrl: string, teamId?: string) => {
             await database.write(async () => {
                 await database.get<CloudUsageModel>(MM_TABLES.SERVER.USAGE).create((record) => {
                     record._raw.id = teamId;
-                    record.custom_emojis = usageFetch.custom_emojis ?? 0;
-                    record.guests = usageFetch.guests ?? 0;
-                    record.incoming_webhooks = usageFetch.incoming_webhooks ?? 0;
-                    record.members = usageFetch.members ?? 0;
-                    record.outgoing_webhooks = usageFetch.outgoing_webhooks ?? 0;
-                    record.pending_guests = usageFetch.pending_guests ?? 0;
+                    record.custom_emojis = usageFetch.custom_emojis ?? -1;
+                    record.guests = usageFetch.guests ?? -1;
+                    record.incoming_webhooks = usageFetch.incoming_webhooks ?? -1;
+                    record.members = usageFetch.members ?? -1;
+                    record.outgoing_webhooks = usageFetch.outgoing_webhooks ?? -1;
+                    record.pending_guests = usageFetch.pending_guests ?? -1;
                     record.private_channels = usageFetch.private_channels ?? -1;
                     record.public_channels = usageFetch.public_channels ?? -1;
-                    record.sidebar_categories = usageFetch.sidebar_categories ?? 0;
-                    record.storage = usageFetch.storage ?? 0;
+                    record.sidebar_categories = usageFetch.sidebar_categories ?? -1;
+                    record.storage = usageFetch.storage ?? -1;
                 });
             });
         }
