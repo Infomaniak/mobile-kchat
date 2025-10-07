@@ -11,7 +11,6 @@ import {Navigation} from 'react-native-navigation';
 import {start} from './app/init/app';
 import setFontFamily from './app/utils/font_family';
 import {logInfo} from './app/utils/log';
-import {captureException} from './app/utils/sentry';
 
 declare const global: { HermesInternal: null | {} };
 
@@ -25,11 +24,7 @@ export function installAlertSpy() {
             {title, message, buttons, options},
         );
 
-        const err = new Error(
-            `Alert.alert invoked with title: ${title}, message: ${message}, buttons: ${buttons}, appState: ${AppState.currentState}`,
-        );
-        captureException(err);
-
+        // Ik change : do not show alerts when app is in background https://trello.com/c/0h69EeHH/1468-ios-un-bouton-ok-apparait-sur-la-home
         if (AppState.currentState === 'background') {
             return undefined;
         }

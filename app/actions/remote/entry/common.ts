@@ -29,7 +29,6 @@ import {isDefaultChannel, isDMorGM, sortChannelsByDisplayName} from '@utils/chan
 import {getFullErrorMessage} from '@utils/errors';
 import {isMinimumServerVersion, isTablet} from '@utils/helpers';
 import {logDebug, logError} from '@utils/log';
-import {captureException} from '@utils/sentry';
 import {processIsCRTEnabled} from '@utils/thread';
 
 import type {Database, Model} from '@nozbe/watermelondb';
@@ -146,18 +145,11 @@ const entryRest = async (serverUrl: string, teamId?: string, channelId?: string,
         }
 
         if (!teamData.error && teamData.teams?.length === 0) {
-            const err = new Error(`User has no teams available after fetch. teamId: ${teamId}, initialTeamId: ${initialTeamId}, availableTeams: ${teamData}`);
-            captureException(err);
-            logError('entryRest', err);
-
             initialTeamId = '';
         }
 
         const inTeam = teamData.teams?.find((t) => t.id === initialTeamId);
         if (initialTeamId && !inTeam && !teamData.error) {
-            const err = new Error(`User is not member of the requested team. teamId: ${teamId}, initialTeamId: ${initialTeamId}, availableTeams: ${teamData}`);
-            captureException(err);
-            logError('entryRest', err);
             initialTeamId = '';
         }
 
@@ -347,10 +339,6 @@ export async function handleEntryAfterLoadNavigation(
             // Switched channels while loading
             if (!channelMembers.find((m) => m.channel_id === currentChannelIdAfterLoad)) {
                 if (tabletDevice || isChannelScreenMounted || isThreadsMounted) {
-                    const err = new Error(`Channel mismatch during load: ${currentChannelIdAfterLoad}, currentChannelId: ${currentChannelId}`);
-                    captureException(err);
-                    logError('handleEntryAfterLoadNavigation', err);
-
                     await handleKickFromChannel(serverUrl, currentChannelIdAfterLoad);
                 } else {
                     await setCurrentTeamAndChannelId(operator, initialTeamId, initialChannelId);
@@ -358,9 +346,6 @@ export async function handleEntryAfterLoadNavigation(
             }
         } else if (currentChannelIdAfterLoad && currentChannelIdAfterLoad !== initialChannelId) {
             if (tabletDevice || isChannelScreenMounted || isThreadsMounted) {
-                const err = new Error(`Deviation from initial channel:. currentChannelIdAfterLoad: ${currentChannelIdAfterLoad}, initialChannelId: ${initialChannelId}`);
-                captureException(err);
-                logError('handleEntryAfterLoadNavigation', err);
                 await handleKickFromChannel(serverUrl, currentChannelIdAfterLoad);
             } else {
                 await setCurrentTeamAndChannelId(operator, initialTeamId, initialChannelId);
