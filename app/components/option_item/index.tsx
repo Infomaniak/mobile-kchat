@@ -47,10 +47,10 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             flexDirection: 'row',
             alignItems: 'center',
             marginLeft: 16,
+            paddingRight: 8,
         },
         actionSubContainer: {
             marginLeft: 'auto',
-            paddingRight: 8,
         },
         container: {
             flexDirection: 'row',
