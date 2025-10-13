@@ -2,12 +2,13 @@
 // See LICENSE.txt for license information.
 
 import NetInfo from '@react-native-community/netinfo';
-import {defineMessages, type IntlShape} from 'react-intl';
-import {Alert, DeviceEventEmitter, Platform, type AlertButton} from 'react-native';
+import {type IntlShape} from 'react-intl';
+import {DeviceEventEmitter, Platform} from 'react-native';
 
 import {Database, Events} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
+import {getAllServerCredentials} from '@init/credentials';
 import PushNotifications from '@init/push_notifications';
 import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
@@ -17,39 +18,13 @@ import EphemeralStore from '@store/ephemeral_store';
 import {getFullErrorMessage, isErrorWithStatusCode, isErrorWithUrl} from '@utils/errors';
 import {logWarning, logError, logDebug} from '@utils/log';
 import {getCSRFFromCookie} from '@utils/security';
+import {captureException} from '@utils/sentry';
 
 import {loginEntry} from './entry';
 
 import type {LoginArgs} from '@typings/database/database';
 
 const HTTP_UNAUTHORIZED = 401;
-
-const logoutMessages = defineMessages({
-    title: {
-        id: 'logout.fail.title',
-        defaultMessage: 'Logout not complete',
-    },
-    bodyForced: {
-        id: 'logout.fail.message.forced',
-        defaultMessage: 'We could not log you out of the server. Some data may continue to be accessible to this device once the device goes back online.',
-    },
-    body: {
-        id: 'logout.fail.message',
-        defaultMessage: 'You’re not fully logged out. Some data may continue to be accessible to this device once the device goes back online. What do you want to do?',
-    },
-    cancel: {
-        id: 'logout.fail.cancel',
-        defaultMessage: 'Cancel',
-    },
-    continue: {
-        id: 'logout.fail.continue_anyway',
-        defaultMessage: 'Continue Anyway',
-    },
-    ok: {
-        id: 'logout.fail.ok',
-        defaultMessage: 'OK',
-    },
-});
 
 export const addPushProxyVerificationStateFromLogin = async (serverUrl: string) => {
     try {
@@ -157,52 +132,42 @@ export const logout = async (
         skipServerLogout = false,
         removeServer = false,
         skipEvents = false,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         logoutOnAlert = false,
-    }: LogoutOptions = {}) => {
+    }: LogoutOptions = {},
+) => {
     if (!skipServerLogout) {
-        let loggedOut = false;
         try {
-            const client = NetworkManager.getClient(serverUrl);
-            const response = await client.logout();
-            if (response.status === 'OK') {
-                loggedOut = true;
-            }
+            const appDatabase = DatabaseManager.appDatabase?.database;
+            const serverCredentials = await getAllServerCredentials();
+
+            await Promise.allSettled(
+                serverCredentials.map(async (credential) => {
+                    const savedServerUrl = credential.serverUrl;
+                    try {
+                        const client = NetworkManager.getClient(savedServerUrl);
+                        const deviceToken = appDatabase ? await getDeviceToken() : undefined;
+
+                        if (!deviceToken) {
+                            captureException(
+                                new Error(`Logout called without deviceToken for server=${savedServerUrl}`),
+                            );
+                        }
+
+                        await client.logout(deviceToken);
+                        WebsocketManager.getClient(savedServerUrl)?.close(true);
+
+                        if (!skipEvents) {
+                            DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: savedServerUrl, removeServer});
+                        }
+                    } catch (error) {
+                        logWarning('An error occurred logging out from the server', savedServerUrl, error);
+                    }
+                }),
+            );
         } catch (error) {
-            // We want to log the user even if logging out from the server failed
             logWarning('An error occurred logging out from the server', serverUrl, getFullErrorMessage(error));
         }
-
-        if (!loggedOut) {
-            const title = intl?.formatMessage(logoutMessages.title) || logoutMessages.title.defaultMessage;
-
-            const bodyMessage = logoutOnAlert ? logoutMessages.bodyForced : logoutMessages.body;
-            const confirmMessage = logoutOnAlert ? logoutMessages.ok : logoutMessages.continue;
-            const body = intl?.formatMessage(bodyMessage) || bodyMessage.defaultMessage;
-            const cancel = intl?.formatMessage(logoutMessages.cancel) || logoutMessages.cancel.defaultMessage;
-            const confirm = intl?.formatMessage(confirmMessage) || confirmMessage.defaultMessage;
-
-            const buttons: AlertButton[] = logoutOnAlert ? [] : [{text: cancel, style: 'cancel'}];
-            buttons.push({
-                text: confirm,
-                onPress: logoutOnAlert ? undefined : () => {
-                    logout(serverUrl, intl, {skipEvents, removeServer, logoutOnAlert, skipServerLogout: true});
-                },
-            });
-            Alert.alert(
-                title,
-                body,
-                buttons,
-            );
-
-            if (!logoutOnAlert) {
-                return {data: false};
-            }
-        }
-    }
-
-    WebsocketManager.getClient(serverUrl)?.close(true);
-    if (!skipEvents) {
-        DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl, removeServer});
     }
 
     return {data: true};
