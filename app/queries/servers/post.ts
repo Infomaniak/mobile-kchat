@@ -217,7 +217,7 @@ export const queryPostsBetween = (database: Database, earliest: number, latest: 
 };
 
 // Ik change : query all posts of a channel in local db instead of using earliest/latest from postsInChannel
-export const queryAllPosts = (database: Database, sort: Q.SortOrder | null, userId?: string, channelId?: string, rootId?: string) => {
+export const queryAllPosts = (database: Database, sort: Q.SortOrder | null, userId?: string, channelId?: string, rootId?: string, limit: number = 200) => {
     const andClauses = [];
     if (channelId) {
         andClauses.push(Q.where('channel_id', channelId));
@@ -235,6 +235,9 @@ export const queryAllPosts = (database: Database, sort: Q.SortOrder | null, user
     if (sort != null) {
         clauses.push(Q.sortBy('create_at', sort));
     }
+
+    clauses.push(Q.take(limit));
+
     return database.get<PostModel>(POST).query(...clauses);
 };
 
