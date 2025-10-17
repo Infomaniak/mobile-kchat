@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useCallback, useEffect, useRef, useState, type RefObject} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState, type RefObject} from 'react';
 
 /**
  * Return a callback that forces a re-render
@@ -44,4 +44,23 @@ export const usePreventDoubleTap = <T extends Function>(callback: T) => {
         lastTapRef.current = now;
         callback(...args);
     }, [callback]);
+};
+
+export const useDebounce = <T extends Function>(callback: T, delay: number) => {
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const cancel = useCallback(() => {
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+    }, []);
+
+    const execute = useCallback((...args: unknown[]) => {
+        cancel();
+        timeoutRef.current = setTimeout(() => callback(...args), delay);
+    }, [callback, delay, cancel]);
+
+    return useMemo(() => {
+        return Object.assign(execute, {cancel});
+    }, [execute, cancel]);
 };

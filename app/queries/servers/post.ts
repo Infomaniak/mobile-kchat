@@ -216,28 +216,6 @@ export const queryPostsBetween = (database: Database, earliest: number, latest: 
     return database.get<PostModel>(POST).query(...clauses);
 };
 
-// Ik change : query all posts of a channel in local db instead of using earliest/latest from postsInChannel
-export const queryAllPosts = (database: Database, sort: Q.SortOrder | null, userId?: string, channelId?: string, rootId?: string) => {
-    const andClauses = [];
-    if (channelId) {
-        andClauses.push(Q.where('channel_id', channelId));
-    }
-
-    if (userId) {
-        andClauses.push(Q.where('user_id', userId));
-    }
-
-    if (rootId != null) {
-        andClauses.push(Q.where('root_id', rootId));
-    }
-
-    const clauses: Q.Clause[] = [Q.and(...andClauses)];
-    if (sort != null) {
-        clauses.push(Q.sortBy('create_at', sort));
-    }
-    return database.get<PostModel>(POST).query(...clauses);
-};
-
 export const queryPinnedPostsInChannel = (database: Database, channelId: string) => {
     return database.get<PostModel>(POST).query(
         Q.and(
