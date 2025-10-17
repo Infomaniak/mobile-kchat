@@ -4,13 +4,13 @@
 import {Q} from '@nozbe/watermelondb';
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import React from 'react';
-import {of as of$} from 'rxjs';
+import {combineLatest, of as of$} from 'rxjs';
 import {switchMap, distinctUntilChanged} from 'rxjs/operators';
 
 import {Preferences} from '@constants';
 import {getAdvanceSettingPreferenceAsBool} from '@helpers/api/preference';
 import {observeMyChannel} from '@queries/servers/channel';
-import {queryAllPosts} from '@queries/servers/post';
+import {queryPostsBetween, queryPostsInChannel} from '@queries/servers/post';
 import {queryAdvanceSettingsPreferences} from '@queries/servers/preference';
 import {observeIsCRTEnabled} from '@queries/servers/thread';
 
@@ -20,6 +20,7 @@ import type {WithDatabaseArgs} from '@typings/database/database';
 
 const enhanced = withObservables(['channelId'], ({database, channelId}: {channelId: string} & WithDatabaseArgs) => {
     const isCRTEnabledObserver = observeIsCRTEnabled(database);
+    const postsInChannelObserver = queryPostsInChannel(database, channelId).observeWithColumns(['earliest', 'latest']);
 
     return {
         isCRTEnabled: isCRTEnabledObserver,
@@ -27,12 +28,15 @@ const enhanced = withObservables(['channelId'], ({database, channelId}: {channel
             switchMap((myChannel) => of$(myChannel?.viewedAt)),
             distinctUntilChanged(),
         ),
+        posts: combineLatest([isCRTEnabledObserver, postsInChannelObserver]).pipe(
+            switchMap(([isCRTEnabled, postsInChannel]) => {
+                if (!postsInChannel.length) {
+                    return of$([]);
+                }
 
-        // Ik change : Query all posts in the channel instead of latest/earliest PostsInChannel logic
-        posts: isCRTEnabledObserver.pipe(
-            switchMap((isCRTEnabled) =>
-                queryAllPosts(database, Q.desc, '', channelId, isCRTEnabled ? '' : undefined).observe(),
-            ),
+                const {earliest, latest} = postsInChannel[0];
+                return queryPostsBetween(database, earliest, latest, Q.desc, '', channelId, isCRTEnabled ? '' : undefined).observe();
+            }),
         ),
         shouldShowJoinLeaveMessages: queryAdvanceSettingsPreferences(database, Preferences.ADVANCED_FILTER_JOIN_LEAVE).
             observeWithColumns(['value']).pipe(
