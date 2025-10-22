@@ -7,7 +7,7 @@ import React, {useCallback, useEffect} from 'react';
 import {useIntl} from 'react-intl';
 import {BackHandler, DeviceEventEmitter, ToastAndroid, View} from 'react-native';
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
-import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets, type Edge} from 'react-native-safe-area-context';
 
 import {refetchCurrentUser} from '@actions/remote/user';
 import AlmostFullStorageAnnouncementBar from '@components/almost_full_storage_announcement_bar';
@@ -83,6 +83,7 @@ const ChannelListScreen = (props: ChannelProps) => {
     const serverUrl = useServerUrl();
     const params = route.params as {direction: string};
     const canAddOtherServers = managedConfig?.allowOtherServers !== 'false';
+    const insets = useSafeAreaInsets();
 
     const handleBackPress = useCallback(() => {
         const isHomeScreen = NavigationStore.getVisibleScreen() === Screens.HOME;
@@ -173,8 +174,13 @@ const ChannelListScreen = (props: ChannelProps) => {
         PerformanceMetricsManager.measureTimeToInteraction();
     }, []);
 
+    const top = useAnimatedStyle(() => {
+        return {height: insets.top, backgroundColor: theme.sidebarBg};
+    }, [theme, insets.top]);
+
     return (
         <>
+            {isTablet && <Animated.View style={top}/>}
             <SafeAreaView
                 style={[styles.flex, !isTablet && styles.background]}
                 testID='channel_list.screen'
