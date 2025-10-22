@@ -7,7 +7,7 @@ import React, {useCallback, useEffect} from 'react';
 import {useIntl} from 'react-intl';
 import {BackHandler, DeviceEventEmitter, ToastAndroid, View} from 'react-native';
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
-import {SafeAreaView, useSafeAreaInsets, type Edge} from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {refetchCurrentUser} from '@actions/remote/user';
 import AlmostFullStorageAnnouncementBar from '@components/almost_full_storage_announcement_bar';
@@ -56,6 +56,10 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     background: {
         backgroundColor: theme.sidebarBg,
     },
+    tabletRightContainer: {
+        backgroundColor: theme.centerChannelBg,
+        flex: 1,
+    },
 }));
 
 let backPressedCount = 0;
@@ -68,7 +72,6 @@ let backPressTimeout: NodeJS.Timeout|undefined;
 // (near the time you will see the rate dialog) will show when switching
 // servers.
 let hasRendered = false;
-const edges: Edge[] = ['bottom', 'left', 'right'];
 
 const ChannelListScreen = (props: ChannelProps) => {
     const theme = useTheme();
@@ -83,7 +86,6 @@ const ChannelListScreen = (props: ChannelProps) => {
     const serverUrl = useServerUrl();
     const params = route.params as {direction: string};
     const canAddOtherServers = managedConfig?.allowOtherServers !== 'false';
-    const insets = useSafeAreaInsets();
 
     const handleBackPress = useCallback(() => {
         const isHomeScreen = NavigationStore.getVisibleScreen() === Screens.HOME;
@@ -174,17 +176,11 @@ const ChannelListScreen = (props: ChannelProps) => {
         PerformanceMetricsManager.measureTimeToInteraction();
     }, []);
 
-    const top = useAnimatedStyle(() => {
-        return {height: insets.top, backgroundColor: theme.sidebarBg};
-    }, [theme, insets.top]);
-
     return (
         <>
-            {isTablet && <Animated.View style={top}/>}
             <SafeAreaView
-                style={[styles.flex, !isTablet && styles.background]}
+                style={[styles.flex, styles.background]}
                 testID='channel_list.screen'
-                edges={isTablet ? edges : undefined}
             >
                 {props.isLicensed &&
                     <AnnouncementBanner/>
@@ -207,7 +203,9 @@ const ChannelListScreen = (props: ChannelProps) => {
                             hasChannels={props.hasChannels}
                         />
                         {isTablet && props.hasChannels &&
+                        <View style={styles.tabletRightContainer}>
                             <AdditionalTabletView/>
+                        </View>
                         }
                     </Animated.View>
                 </View>

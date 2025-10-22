@@ -84,6 +84,8 @@ const Channel = ({
         popTopScreen(componentId);
     }, [componentId]);
 
+    const computedEdges: Edge[] = isTablet ? ['left', 'right'] : edges;
+
     useAndroidHardwareBackHandler(componentId, handleBack);
 
     const marginTop = defaultHeight + (isTablet ? 0 : -insets.top);
@@ -122,7 +124,7 @@ const Channel = ({
             <SafeAreaView
                 style={styles.flex}
                 mode='margin'
-                edges={edges}
+                edges={computedEdges}
                 testID='channel.screen'
                 onLayout={onLayout}
                 nativeID={componentId ? SecurityManager.getShieldScreenId(componentId) : undefined}
