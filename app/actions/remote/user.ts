@@ -3,7 +3,7 @@
 
 /* eslint-disable max-lines */
 
-import {chunk, flatten} from 'lodash';
+import {chunk} from 'lodash';
 
 import {updateChannelsDisplayName} from '@actions/local/channel';
 import {updateRecentCustomStatuses, updateLocalUser} from '@actions/local/user';
@@ -166,24 +166,12 @@ export async function fetchProfilesInGroupChannels(serverUrl: string, groupChann
             const modelPromises: Array<Promise<Model[]>> = [];
             const users = new Set<UserProfile>();
 
-            const memberships = await Promise.all(data.reduce(
-                (acc, {channelId, users: usersChannels}) => {
-                    if (usersChannels) {
-                        const channelMembership = client.getChannelMembersByIds(channelId, usersChannels.map((u) => u.id));
-                        acc.push(channelMembership);
-                    }
-                    return acc;
-                },
-                [] as Array<Promise<ChannelMembership[]>>,
-            ));
-            const flatMemberships = flatten(memberships);
-
-            if (flatMemberships.length) {
-                modelPromises.push(operator.handleChannelMembership({
-                    channelMemberships: flatMemberships,
-                    prepareRecordsOnly: true,
-                }));
+            for (const {users: usersChannels} of data) {
+                if (usersChannels) {
+                    usersChannels.forEach((u) => users.add(u));
+                }
             }
+
             if (users.size) {
                 const prepare = prepareUsers(operator, Array.from(users));
                 modelPromises.push(prepare);
@@ -206,7 +194,6 @@ export async function fetchProfilesPerChannels(
 ): Promise<ProfilesPerChannelRequest> {
     try {
         const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const client = NetworkManager.getClient(serverUrl);
 
         // Batch fetching profiles per channel by chunks of 250
         const channels = chunk(channelIds, 250);
@@ -231,24 +218,6 @@ export async function fetchProfilesPerChannels(
                 }
             }
 
-            const memberships = await Promise.all(data.reduce(
-                (acc, {channelId, users: usersChannels}) => {
-                    if (usersChannels) {
-                        const channelMembership = client.getChannelMembersByIds(channelId, usersChannels.map((u) => u.id));
-                        acc.push(channelMembership);
-                    }
-                    return acc;
-                },
-                [] as Array<Promise<ChannelMembership[]>>,
-            ));
-            const flatMemberships = flatten(memberships);
-
-            if (flatMemberships.length) {
-                modelPromises.push(operator.handleChannelMembership({
-                    channelMemberships: flatMemberships,
-                    prepareRecordsOnly: true,
-                }));
-            }
             if (users.size) {
                 const prepare = prepareUsers(operator, Array.from(users));
                 modelPromises.push(prepare);
