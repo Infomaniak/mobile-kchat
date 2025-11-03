@@ -33,6 +33,7 @@ export interface ClientChannelsMix {
     getChannelTimezones: (channelId: string) => Promise<string[]>;
     getChannelMember: (channelId: string, userId: string, groupLabel?: RequestGroupLabel) => Promise<ChannelMembership>;
     getChannelMembersByIds: (channelId: string, userIds: string[]) => Promise<ChannelMembership[]>;
+    getAllChannelsMembers: (userId: string, page?: number, perPage?: number) => Promise<ChannelMembership[]>;
     addToChannel: (userId: string, channelId: string, postRootId?: string) => Promise<ChannelMembership>;
     notifyUser: (channelId: string, userIds: string[], postId?: string) => Promise<any>;
     removeFromChannel: (userId: string, channelId: string) => Promise<any>;
@@ -230,6 +231,13 @@ const ClientChannels = <TBase extends Constructor<ClientBase>>(superclass: TBase
         return this.doFetch(
             `${this.getUserRoute('me')}/teams/${teamId}/channels/members`,
             {method: 'get', groupLabel},
+        );
+    };
+
+    getAllChannelsMembers = (userId: string, page = 0, perPage = PER_PAGE_DEFAULT) => {
+        return this.doFetch(
+            `${this.getUserRoute(userId)}/channel_members${buildQueryString({page, per_page: perPage})}`,
+            {method: 'get'},
         );
     };
 
