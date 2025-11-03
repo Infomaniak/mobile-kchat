@@ -1,9 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback} from 'react';
+import React from 'react';
 import {useIntl} from 'react-intl';
-import {type LayoutChangeEvent, View} from 'react-native';
+import {View} from 'react-native';
 
 import SettingBlock from '@components/settings/block';
 import SettingOption from '@components/settings/option';
@@ -11,14 +11,12 @@ import SettingSeparator from '@components/settings/separator';
 import {NotificationLevel} from '@constants';
 import {t} from '@i18n';
 
-import type {SharedValue} from 'react-native-reanimated';
-
 type Props = {
     isMuted: boolean;
     defaultLevel: NotificationLevel;
     notifyLevel: NotificationLevel;
-    notifyTitleTop: SharedValue<number>;
     onPress: (level: NotificationLevel) => void;
+    rightHeaderComponent?: React.ReactNode;
 }
 
 type NotifPrefOptions = {
@@ -57,26 +55,20 @@ const NotifyAbout = ({
     defaultLevel,
     isMuted,
     notifyLevel,
-    notifyTitleTop,
     onPress,
+    rightHeaderComponent,
 }: Props) => {
     const {formatMessage} = useIntl();
-    const onLayout = useCallback((e: LayoutChangeEvent) => {
-        const {y} = e.nativeEvent.layout;
-
-        notifyTitleTop.value = y > 0 ? y + 10 : BLOCK_TITLE_HEIGHT;
-    }, []);
 
     let notifyLevelToUse = notifyLevel;
     if (notifyLevel === NotificationLevel.DEFAULT) {
         notifyLevelToUse = defaultLevel;
     }
-
     return (
         <SettingBlock
             headerText={NOTIFY_ABOUT}
             headerStyles={{marginTop: isMuted ? 8 : 12}}
-            onLayout={onLayout}
+            headerRight={rightHeaderComponent}
         >
             {Object.keys(NOTIFY_OPTIONS).map((key) => {
                 const {id, defaultMessage, value, testID} = NOTIFY_OPTIONS[key];

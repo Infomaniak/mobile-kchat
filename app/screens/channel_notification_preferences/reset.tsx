@@ -3,7 +3,7 @@
 
 import React from 'react';
 import {TouchableOpacity} from 'react-native';
-import Animated, {type SharedValue, useAnimatedStyle, withTiming} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
@@ -13,15 +13,9 @@ import {typography} from '@utils/typography';
 
 type Props = {
     onPress: () => void;
-    topPosition: SharedValue<number>;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
-    container: {
-        position: 'absolute',
-        right: 20,
-        zIndex: 1,
-    },
     row: {flexDirection: 'row'},
     text: {
         color: theme.linkColor,
@@ -30,16 +24,12 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
 }));
 
-const ResetToDefault = ({onPress, topPosition}: Props) => {
+const ResetToDefault = ({onPress}: Props) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
 
-    const animatedStyle = useAnimatedStyle(() => ({
-        top: withTiming(topPosition.value, {duration: 100}),
-    }));
-
     return (
-        <Animated.View style={[styles.container, animatedStyle]}>
+        <Animated.View>
             <TouchableOpacity
                 onPress={onPress}
                 style={styles.row}

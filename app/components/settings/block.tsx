@@ -29,6 +29,7 @@ type SettingBlockProps = {
     addButton?: boolean;
     toggleSwitch?: () => void;
     isSwitchOn?: boolean;
+    headerRight?: React.ReactNode;
 };
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
@@ -60,7 +61,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         flexRow: {
             alignItems: 'center',
             flexDirection: 'row',
-            justifyContent: 'space-between',
+            flex: 1,
         },
         optionLabelTextStyle: {
             color: theme.centerChannelColor,
@@ -76,7 +77,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
 
 const SettingBlock = ({
     children, containerStyles, disableFooter, disableHeader,
-    footerStyles, footerText, headerStyles, headerText, onLayout, isSwitchOn, addButton, toggleSwitch,
+    footerStyles, footerText, headerStyles, headerText, onLayout, isSwitchOn, addButton, toggleSwitch, headerRight,
 }: SettingBlockProps) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
@@ -96,13 +97,18 @@ const SettingBlock = ({
         >
 
             {(headerText && !disableHeader) && (
-                <View style={[addButton && styles.flexRow]}>
+                <View style={(addButton || headerRight) ? styles.flexRow : undefined}>
                     <FormattedText
                         defaultMessage={headerText.defaultMessage}
                         id={headerText.id}
                         values={headerText.values}
                         style={[styles.header, headerStyles]}
                     />
+                    {headerRight && (
+                        <View style={{flex: 1}}>
+                            {headerRight}
+                        </View>
+                    )}
                     {addButton && (
                         <View style={styles.button}>
                             <Switch
