@@ -16,7 +16,10 @@ type Props = {
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
-    row: {flexDirection: 'row'},
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     text: {
         color: theme.linkColor,
         marginLeft: 7,
