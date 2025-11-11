@@ -30,6 +30,7 @@ const assetImages = new Map([
     ['kpaste.png', require('@assets/images/emojis/kpaste.png')],
     ['swisstransfer.png', require('@assets/images/emojis/swisstransfer.png')],
     ['tasks.png', require('@assets/images/emojis/tasks.png')],
+    ['ksuite.png', require('@assets/images/emojis/ksuite.png')],
 ]);
 
 const Emoji = (props: EmojiProps) => {
