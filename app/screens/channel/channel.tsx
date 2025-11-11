@@ -81,7 +81,10 @@ const Channel = ({
     const [containerHeight, setContainerHeight] = useState(0);
     const shouldRender = !switchingTeam && !switchingChannels && shouldRenderPosts && Boolean(channelId);
     const handleBack = useCallback(() => {
-        popTopScreen(componentId);
+        // Ik change : sometimes componentId is undefined and it crashes the app only on tablet
+        if (componentId) {
+            popTopScreen(componentId);
+        }
     }, [componentId]);
 
     const computedEdges: Edge[] = isTablet ? ['left', 'right'] : edges;
