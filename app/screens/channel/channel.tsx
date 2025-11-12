@@ -81,8 +81,13 @@ const Channel = ({
     const [containerHeight, setContainerHeight] = useState(0);
     const shouldRender = !switchingTeam && !switchingChannels && shouldRenderPosts && Boolean(channelId);
     const handleBack = useCallback(() => {
-        popTopScreen(componentId);
+        // Ik change : sometimes componentId is undefined and it crashes the app only on tablet
+        if (componentId) {
+            popTopScreen(componentId);
+        }
     }, [componentId]);
+
+    const computedEdges: Edge[] = isTablet ? ['left', 'right'] : edges;
 
     useAndroidHardwareBackHandler(componentId, handleBack);
 
@@ -122,7 +127,7 @@ const Channel = ({
             <SafeAreaView
                 style={styles.flex}
                 mode='margin'
-                edges={edges}
+                edges={computedEdges}
                 testID='channel.screen'
                 onLayout={onLayout}
                 nativeID={componentId ? SecurityManager.getShieldScreenId(componentId) : undefined}

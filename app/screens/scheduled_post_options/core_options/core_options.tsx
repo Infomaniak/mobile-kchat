@@ -78,11 +78,11 @@ export function ScheduledPostCoreOptions({userTimezone, isMilitaryTime, onSelect
         switch (optionKey) {
             case optionKeyOptionNextMonday:
             case optionKeysOptionMonday: {
-                selectedTime = now.clone().isoWeekday(1).add(1, 'week').startOf('day').hour(9).minute(0);
+                selectedTime = now.clone().isoWeekday(1).add(1, 'week').startOf('day').hour(8).minute(0);
                 break;
             }
             case optionKeyOptionTomorrow: {
-                selectedTime = now.clone().add(1, 'day').startOf('day').hour(9).minute(0);
+                selectedTime = now.clone().add(1, 'day').startOf('day').hour(8).minute(0);
                 break;
             }
         }
@@ -96,16 +96,16 @@ export function ScheduledPostCoreOptions({userTimezone, isMilitaryTime, onSelect
         onSelectOption(selectedTime.valueOf().toString());
     }, [onSelectOption]);
 
-    const nineAmTime = moment().
+    const eightAmTime = moment().
         tz(userTimezone).
-        set({hour: 9, minute: 0, second: 0, millisecond: 0}).
+        set({hour: 8, minute: 0, second: 0, millisecond: 0}).
         valueOf();
-    const formattedTimeString = getFormattedTime(isMilitaryTime, userTimezone, nineAmTime);
+    const formattedTimeString = getFormattedTime(isMilitaryTime, userTimezone, eightAmTime);
 
     const optionMonday = (
         <PickerOption
             key={optionKeysOptionMonday}
-            label={intl.formatMessage({id: 'scheduled_post.picker.monday', defaultMessage: 'Monday at {9amTime}'}, {'9amTime': formattedTimeString})}
+            label={intl.formatMessage({id: 'scheduled_post.picker.monday', defaultMessage: 'Monday at {8amTime}'}, {'8amTime': formattedTimeString})}
             action={handleSelectOption}
             value={optionKeysOptionMonday}
             selected={selectedOption === optionKeysOptionMonday}
@@ -115,7 +115,7 @@ export function ScheduledPostCoreOptions({userTimezone, isMilitaryTime, onSelect
     const optionTomorrow = (
         <PickerOption
             key={optionKeyOptionTomorrow}
-            label={intl.formatMessage({id: 'scheduled_post.picker.tomorrow', defaultMessage: 'Tomorrow at {9amTime}'}, {'9amTime': formattedTimeString})}
+            label={intl.formatMessage({id: 'scheduled_post.picker.tomorrow', defaultMessage: 'Tomorrow at {8amTime}'}, {'8amTime': formattedTimeString})}
             action={handleSelectOption}
             value={optionKeyOptionTomorrow}
             selected={selectedOption === optionKeyOptionTomorrow}
@@ -125,7 +125,7 @@ export function ScheduledPostCoreOptions({userTimezone, isMilitaryTime, onSelect
     const optionNextMonday = (
         <PickerOption
             key={optionKeyOptionNextMonday}
-            label={intl.formatMessage({id: 'scheduled_post.picker.next_monday', defaultMessage: 'Next Monday at {9amTime}'}, {'9amTime': formattedTimeString})}
+            label={intl.formatMessage({id: 'scheduled_post.picker.next_monday', defaultMessage: 'Next Monday at {8amTime}'}, {'8amTime': formattedTimeString})}
             action={handleSelectOption}
             value={optionKeyOptionNextMonday}
             selected={selectedOption === optionKeyOptionNextMonday}

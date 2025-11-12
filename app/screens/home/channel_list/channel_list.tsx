@@ -56,6 +56,10 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     background: {
         backgroundColor: theme.sidebarBg,
     },
+    tabletRightContainer: {
+        backgroundColor: theme.centerChannelBg,
+        flex: 1,
+    },
 }));
 
 let backPressedCount = 0;
@@ -199,7 +203,9 @@ const ChannelListScreen = (props: ChannelProps) => {
                             hasChannels={props.hasChannels}
                         />
                         {isTablet && props.hasChannels &&
+                        <View style={styles.tabletRightContainer}>
                             <AdditionalTabletView/>
+                        </View>
                         }
                     </Animated.View>
                 </View>

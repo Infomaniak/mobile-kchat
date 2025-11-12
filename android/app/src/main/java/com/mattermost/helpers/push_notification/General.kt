@@ -1,5 +1,6 @@
 package com.mattermost.helpers.push_notification
 
+import android.util.Log
 import com.facebook.react.bridge.ReadableMap
 import com.mattermost.helpers.Network
 import com.mattermost.helpers.PushNotificationDataRunnable
@@ -13,15 +14,31 @@ internal suspend fun PushNotificationDataRunnable.Companion.fetch(serverUrl: Str
     return suspendCoroutine { cont ->
         Network.get(serverUrl, endpoint, null, object : ResolvePromise() {
             override fun resolve(value: Any?) {
-                val response = value as ReadableMap?
-                if (response != null && !response.getBoolean("ok")) {
-                    val error = response.getMap("data")
-                    cont.resumeWith(Result.failure((IOException("Unexpected code ${error?.getInt("status_code")} ${error?.getString("message")}"))))
-                } else {
-                    cont.resumeWith(Result.success(response))
-                }
-            }
+                val response = value as? ReadableMap
 
+                response?.takeUnless { it.getBoolean("ok") }?.let { res ->
+                    val error = res.getMap("data")
+
+                    val statusCode = runCatching {
+                        error?.takeIf { it.hasKey("status_code") }?.getInt("status_code")
+                    }.getOrElse {
+                        Log.w(
+                            "PushNotificationFetch",
+                            "Missing or invalid 'status_code' in response from $serverUrl/$endpoint\nFull response: $response"
+                        )
+                        -1
+                    }
+
+                    val message = runCatching {
+                        error?.takeIf { it.hasKey("message") }?.getString("message")
+                    }.getOrDefault("Unknown error")
+
+                    cont.resumeWith(Result.failure(IOException("Unexpected code $statusCode $message")))
+                    return
+                }
+
+                cont.resumeWith(Result.success(response))
+            }
             override fun reject(code: String, message: String?) {
                 cont.resumeWith(Result.failure(IOException("Unexpected code $code $message")))
             }

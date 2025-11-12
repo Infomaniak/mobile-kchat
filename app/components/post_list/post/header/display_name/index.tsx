@@ -56,6 +56,9 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
         },
         customStatusEmoji: {
             marginRight: 4,
+
+            // Ik Change : add margin to add space between name and emoji
+            marginLeft: 4,
         },
     };
 });

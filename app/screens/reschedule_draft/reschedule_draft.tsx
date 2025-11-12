@@ -162,11 +162,11 @@ const RescheduledDraft: React.FC<Props> = ({
         switch (optionKey) {
             case optionKeyOptionNextMonday:
             case optionKeysOptionMonday: {
-                selectedTimeValue = now.clone().isoWeekday(1).add(1, 'week').startOf('day').hour(9).minute(0);
+                selectedTimeValue = now.clone().isoWeekday(1).add(1, 'week').startOf('day').hour(8).minute(0);
                 break;
             }
             case optionKeyOptionTomorrow: {
-                selectedTimeValue = now.clone().add(1, 'day').startOf('day').hour(9).minute(0);
+                selectedTimeValue = now.clone().add(1, 'day').startOf('day').hour(8).minute(0);
                 break;
             }
             default:
@@ -196,11 +196,11 @@ const RescheduledDraft: React.FC<Props> = ({
         );
     }
 
-    const nineAmTime = moment().
+    const eightAmTime = moment().
         tz(userTimezone).
-        set({hour: 9, minute: 0, second: 0, millisecond: 0}).
+        set({hour: 8, minute: 0, second: 0, millisecond: 0}).
         valueOf();
-    const formattedTimeString = getFormattedTime(true, userTimezone, nineAmTime);
+    const formattedTimeString = getFormattedTime(true, userTimezone, eightAmTime);
 
     const optionMonday = (
         <PickerOption

@@ -498,9 +498,11 @@ export async function fetchMyChannelsForTeam(
         }
         const client = NetworkManager.getClient(serverUrl);
         const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        const currentUserId = await getCurrentUserId(DatabaseManager.getServerDatabaseAndOperator(serverUrl).database);
+
         const [allChannels, channelMemberships, categoriesWithOrder] = await Promise.all([
             client.getMyChannels(teamId, includeDeleted, since, groupLabel),
-            client.getMyChannelMembers(teamId, groupLabel),
+            client.getAllChannelsMembers(currentUserId, -1),
             client.getCategories('me', teamId, groupLabel),
         ]);
 
