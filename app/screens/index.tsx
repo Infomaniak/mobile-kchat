@@ -12,7 +12,7 @@ import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-contex
 import {Screens} from '@constants';
 import {withServerDatabase} from '@database/components';
 import {DEFAULT_LOCALE, getTranslations} from '@i18n';
-import {topInsetShared} from '@utils/top_inset_shared';
+import {useTopInsetShared} from '@utils/top_inset_shared';
 
 const withGestures = (Screen: React.ComponentType) => {
     return function gestureHoc(props: any) {
@@ -41,6 +41,7 @@ export const withSafeAreaInsets = (Screen: React.ComponentType) => {
     const SafeAreaInsetsWrapper: React.ComponentType = (props) => {
         const Inner: React.ComponentType = (innerProps) => {
             const insets = useSafeAreaInsets();
+            const topInsetShared = useTopInsetShared();
 
             // In RNN, each screen is a separate React tree, so the SafeArea context
             // is independent per screen. useSafeAreaInsets() is computed asynchronously
