@@ -165,13 +165,21 @@ export async function fetchProfilesInGroupChannels(serverUrl: string, groupChann
         if (!fetchOnly) {
             const modelPromises: Array<Promise<Model[]>> = [];
             const users = new Set<UserProfile>();
-
-            for (const {users: usersChannels} of data) {
-                if (usersChannels) {
-                    usersChannels.forEach((u) => users.add(u));
+            const memberships: Array<{channel_id: string; user_id: string}> = [];
+            for (const item of data) {
+                if (item.users?.length) {
+                    for (const u of item.users) {
+                        users.add(u);
+                        memberships.push({channel_id: item.channelId, user_id: u.id});
+                    }
                 }
             }
-
+            if (memberships.length) {
+                modelPromises.push(operator.handleChannelMembership({
+                    channelMemberships: memberships,
+                    prepareRecordsOnly: true,
+                }));
+            }
             if (users.size) {
                 const prepare = prepareUsers(operator, Array.from(users));
                 modelPromises.push(prepare);
@@ -208,16 +216,23 @@ export async function fetchProfilesPerChannels(
         if (!fetchOnly) {
             const modelPromises: Array<Promise<Model[]>> = [];
             const users = new Set<UserProfile>();
+            const memberships: Array<{channel_id: string; user_id: string}> = [];
             for (const item of data) {
                 if (item.users?.length) {
                     for (const u of item.users) {
                         if (u.id !== excludeUserId) {
                             users.add(u);
+                            memberships.push({channel_id: item.channelId, user_id: u.id});
                         }
                     }
                 }
             }
-
+            if (memberships.length) {
+                modelPromises.push(operator.handleChannelMembership({
+                    channelMemberships: memberships,
+                    prepareRecordsOnly: true,
+                }));
+            }
             if (users.size) {
                 const prepare = prepareUsers(operator, Array.from(users));
                 modelPromises.push(prepare);
