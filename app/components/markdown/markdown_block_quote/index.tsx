@@ -2,14 +2,11 @@
 // See LICENSE.txt for license information.
 
 import React, {type ReactNode} from 'react';
-import {type StyleProp, StyleSheet, type TextStyle, View, type ViewStyle} from 'react-native';
-
-import CompassIcon from '@components/compass_icon';
+import {StyleSheet, View, type ViewStyle} from 'react-native';
 
 type MarkdownBlockQuoteProps = {
-    continueBlock?: boolean;
-    iconStyle: StyleProp<Intersection<ViewStyle, TextStyle>>;
     children: ReactNode | ReactNode[];
+    containerStyle?: ViewStyle;
 };
 
 const style = StyleSheet.create({
@@ -25,22 +22,19 @@ const style = StyleSheet.create({
     },
 });
 
-const MarkdownBlockQuote = ({children, continueBlock, iconStyle}: MarkdownBlockQuoteProps) => {
+const MarkdownBlockQuote = ({children, containerStyle}: MarkdownBlockQuoteProps) => {
+
     return (
         <View
             style={style.container}
             testID='markdown_block_quote'
         >
-            {!continueBlock && (
-                <View style={style.icon}>
-                    <CompassIcon
-                        name='format-quote-open'
-                        style={iconStyle}
-                        size={20}
-                    />
-                </View>
-            )}
-            <View style={style.childContainer}>{children}</View>
+            <View
+                style={[style.container, containerStyle]}
+                testID='markdown_block_quote'
+            >
+                {children}
+            </View>
         </View>
     );
 };
