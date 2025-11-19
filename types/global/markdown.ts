@@ -20,7 +20,7 @@ export type HighlightWithoutNotificationKey = {
 export type MarkdownBlockStyles = {
     adjacentParagraph: ViewStyle;
     horizontalRule: ViewStyle;
-    quoteBlockIcon: TextStyle;
+    quoteBlockContainer: ViewStyle;
 };
 
 export type MarkdownTextStyles = {

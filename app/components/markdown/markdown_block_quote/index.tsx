@@ -2,45 +2,28 @@
 // See LICENSE.txt for license information.
 
 import React, {type ReactNode} from 'react';
-import {type StyleProp, StyleSheet, type TextStyle, View, type ViewStyle} from 'react-native';
-
-import CompassIcon from '@components/compass_icon';
+import {StyleSheet, View, type ViewStyle} from 'react-native';
 
 type MarkdownBlockQuoteProps = {
-    continueBlock?: boolean;
-    iconStyle: StyleProp<Intersection<ViewStyle, TextStyle>>;
     children: ReactNode | ReactNode[];
+    blockQuoteContainerStyle?: ViewStyle;
 };
 
 const style = StyleSheet.create({
-    container: {
+    blockQuoteContainer: {
         alignItems: 'flex-start',
         flexDirection: 'row',
     },
-    childContainer: {
-        flex: 1,
-    },
-    icon: {
-        width: 23,
-    },
 });
 
-const MarkdownBlockQuote = ({children, continueBlock, iconStyle}: MarkdownBlockQuoteProps) => {
+const MarkdownBlockQuote = ({children, blockQuoteContainerStyle}: MarkdownBlockQuoteProps) => {
+
     return (
         <View
-            style={style.container}
+            style={[style.blockQuoteContainer, blockQuoteContainerStyle]}
             testID='markdown_block_quote'
         >
-            {!continueBlock && (
-                <View style={style.icon}>
-                    <CompassIcon
-                        name='format-quote-open'
-                        style={iconStyle}
-                        size={20}
-                    />
-                </View>
-            )}
-            <View style={style.childContainer}>{children}</View>
+            {children}
         </View>
     );
 };

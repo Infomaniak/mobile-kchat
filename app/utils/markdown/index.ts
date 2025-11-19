@@ -122,6 +122,16 @@ export const getMarkdownBlockStyles = makeStyleSheetFromTheme((theme: Theme) => 
             height: StyleSheet.hairlineWidth,
             marginVertical: 10,
         },
+        quoteBlockContainer: {
+            paddingVertical: 2,
+            paddingHorizontal: 12,
+            borderLeftWidth: 2,
+            borderLeftColor: changeOpacity(theme.centerChannelColor, 0.20),
+            marginTop: 6,
+            marginBottom: 0,
+            marginLeft: 0,
+            marginRight: 0,
+        },
         quoteBlockIcon: {
             color: changeOpacity(theme.centerChannelColor, 0.5),
         },

@@ -170,7 +170,7 @@ const Markdown = ({
 
         return (
             <MarkdownBlockQuote
-                iconStyle={blockStyles?.quoteBlockIcon}
+                blockQuoteContainerStyle={blockStyles?.quoteBlockContainer}
                 {...otherProps}
             >
                 {children}
