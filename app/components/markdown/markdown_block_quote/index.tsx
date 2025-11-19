@@ -6,35 +6,24 @@ import {StyleSheet, View, type ViewStyle} from 'react-native';
 
 type MarkdownBlockQuoteProps = {
     children: ReactNode | ReactNode[];
-    containerStyle?: ViewStyle;
+    blockQuoteContainerStyle?: ViewStyle;
 };
 
 const style = StyleSheet.create({
-    container: {
+    blockQuoteContainer: {
         alignItems: 'flex-start',
         flexDirection: 'row',
     },
-    childContainer: {
-        flex: 1,
-    },
-    icon: {
-        width: 23,
-    },
 });
 
-const MarkdownBlockQuote = ({children, containerStyle}: MarkdownBlockQuoteProps) => {
+const MarkdownBlockQuote = ({children, blockQuoteContainerStyle}: MarkdownBlockQuoteProps) => {
 
     return (
         <View
-            style={style.container}
+            style={[style.blockQuoteContainer, blockQuoteContainerStyle]}
             testID='markdown_block_quote'
         >
-            <View
-                style={[style.container, containerStyle]}
-                testID='markdown_block_quote'
-            >
-                {children}
-            </View>
+            {children}
         </View>
     );
 };
