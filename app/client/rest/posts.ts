@@ -15,7 +15,7 @@ export interface ClientPostsMix {
     deletePost: (postId: string) => Promise<any>;
     getPostThread: (postId: string, options: FetchPaginatedThreadOptions, groupLabel?: RequestGroupLabel) => Promise<PostResponse>;
     getPosts: (channelId: string, page?: number, perPage?: number, collapsedThreads?: boolean, collapsedThreadsExtended?: boolean, groupLabel?: RequestGroupLabel) => Promise<PostResponse>;
-    getPostsSince: (channelId: string, sinceOrAfter?: number | string, collapsedThreads?: boolean, collapsedThreadsExtended?: boolean, groupLabel?: RequestGroupLabel) => Promise<PostResponse>;
+    getPostsSince: (channelId: string, since?: number, after?: string, collapsedThreads?: boolean, collapsedThreadsExtended?: boolean, groupLabel?: RequestGroupLabel) => Promise<PostResponse>;
     getDeletedPostsIds: (channelId: string, since?: number) => Promise<string[]>;
     getPostsBefore: (channelId: string, postId?: string, page?: number, perPage?: number, collapsedThreads?: boolean, collapsedThreadsExtended?: boolean) => Promise<PostResponse>;
     getPostsAfter: (channelId: string, postId: string, page?: number, perPage?: number, collapsedThreads?: boolean, collapsedThreadsExtended?: boolean) => Promise<PostResponse>;
@@ -98,14 +98,16 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
         );
     };
 
-    getPostsSince = async (channelId: string, sinceOrAfter?: number | string, collapsedThreads = false, collapsedThreadsExtended = false, groupLabel?: RequestGroupLabel) => {
-        const queryParams: Record<string, any> = {collapsedThreads, collapsedThreadsExtended};
-        if (sinceOrAfter !== undefined) {
-            if (typeof sinceOrAfter === 'number') {
-                queryParams.since = sinceOrAfter;
-            } else {
-                queryParams.after = sinceOrAfter;
-            }
+    getPostsSince = async (channelId: string, since?: number, after?: string, collapsedThreads = false, collapsedThreadsExtended = false, groupLabel?: RequestGroupLabel) => {
+        const queryParams: Record<string, any> = {
+            collapsedThreads,
+            collapsedThreadsExtended,
+        };
+
+        if (after !== undefined) {
+            queryParams.after = after;
+        } else if (since !== undefined) {
+            queryParams.since = since;
         }
 
         return this.doFetch(

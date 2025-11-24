@@ -520,28 +520,39 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
         if (!fetchOnly) {
             EphemeralStore.addLoadingMessagesForChannel(serverUrl, channelId);
         }
+
         const client = NetworkManager.getClient(serverUrl);
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-
         const isCRTEnabled = await getIsCRTEnabled(database);
 
         const allPosts: Post[] = [];
         const allOrder: string[] = [];
-        let currentAfter: string | number = since;
+
+        let sinceCursor: number | undefined = since;
+        let afterCursor: string | undefined;
         let hasMore = true;
 
         while (hasMore) {
             // eslint-disable-next-line no-await-in-loop
-            const data = await client.getPostsSince(channelId, currentAfter, isCRTEnabled, isCRTEnabled, groupLabel);
+            const data = await client.getPostsSince(
+                channelId,
+                sinceCursor,
+                afterCursor,
+                isCRTEnabled,
+                isCRTEnabled,
+                groupLabel,
+            );
+
             const result = processPostsFetched(data);
 
             if (result.posts?.length) {
                 allPosts.push(...result.posts);
                 allOrder.push(...(result.order || []));
             }
+
             if (data.next_post_id) {
-                currentAfter = data.next_post_id;
-                hasMore = true;
+                afterCursor = data.next_post_id;
+                sinceCursor = undefined;
             } else {
                 hasMore = false;
             }
@@ -575,8 +586,10 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
                     models.push(...threadModels);
                 }
             }
+
             await operator.batchRecords(models, 'fetchPostsSince');
         }
+
         return finalResult;
     } catch (error) {
         logDebug('error on fetchPostsSince', getFullErrorMessage(error));
