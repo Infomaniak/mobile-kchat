@@ -115,6 +115,7 @@ type PostResponse = {
     order: string[];
     posts: IDMappedObjects<Post>;
     prev_post_id?: string;
+    next_post_id?: string;
     has_limitation?: string;
 };
 

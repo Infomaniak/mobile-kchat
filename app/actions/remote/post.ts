@@ -520,20 +520,58 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
         if (!fetchOnly) {
             EphemeralStore.addLoadingMessagesForChannel(serverUrl, channelId);
         }
+
         const client = NetworkManager.getClient(serverUrl);
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-
         const isCRTEnabled = await getIsCRTEnabled(database);
-        const data = await client.getPostsSince(channelId, since, isCRTEnabled, isCRTEnabled, groupLabel);
-        const result = processPostsFetched(data);
-        if (!fetchOnly) {
+
+        const allPosts: Post[] = [];
+        const allOrder: string[] = [];
+
+        let sinceCursor: number | undefined = since;
+        let afterCursor: string | undefined;
+        let hasMore = true;
+
+        while (hasMore) {
+            // eslint-disable-next-line no-await-in-loop
+            const data = await client.getPostsSince(
+                channelId,
+                sinceCursor,
+                afterCursor,
+                isCRTEnabled,
+                isCRTEnabled,
+                groupLabel,
+            );
+
+            const result = processPostsFetched(data);
+
+            if (result.posts?.length) {
+                allPosts.push(...result.posts);
+                allOrder.push(...(result.order || []));
+            }
+
+            if (data.next_post_id) {
+                afterCursor = data.next_post_id;
+                sinceCursor = undefined;
+            } else {
+                hasMore = false;
+            }
+        }
+
+        const finalResult = {
+            posts: allPosts,
+            order: allOrder,
+            previousPostId: allPosts[0]?.id,
+        };
+
+        if (!fetchOnly && finalResult.posts.length) {
             const models = await operator.handlePosts({
-                ...result,
+                ...finalResult,
                 actionType: ActionType.POSTS.RECEIVED_SINCE,
                 prepareRecordsOnly: true,
             });
 
-            const {authors} = await fetchPostAuthors(serverUrl, result.posts, true, groupLabel);
+            const {authors} = await fetchPostAuthors(serverUrl, finalResult.posts, true, groupLabel);
             if (authors?.length) {
                 const userModels = await operator.handleUsers({
                     users: authors,
@@ -543,14 +581,16 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
             }
 
             if (isCRTEnabled) {
-                const threadModels = await prepareThreadsFromReceivedPosts(operator, result.posts, false);
+                const threadModels = await prepareThreadsFromReceivedPosts(operator, finalResult.posts, false);
                 if (threadModels?.length) {
                     models.push(...threadModels);
                 }
             }
+
             await operator.batchRecords(models, 'fetchPostsSince');
         }
-        return result;
+
+        return finalResult;
     } catch (error) {
         logDebug('error on fetchPostsSince', getFullErrorMessage(error));
         forceLogoutIfNecessary(serverUrl, error as ClientErrorProps);
