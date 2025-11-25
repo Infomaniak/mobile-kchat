@@ -13,7 +13,6 @@ import {observeMyChannel} from '@queries/servers/channel';
 import {queryPostsBetween, queryPostsInChannel} from '@queries/servers/post';
 import {queryAdvanceSettingsPreferences} from '@queries/servers/preference';
 import {observeIsCRTEnabled} from '@queries/servers/thread';
-import {captureException} from '@utils/sentry';
 
 import ChannelPostList from './channel_post_list';
 
@@ -34,10 +33,8 @@ const enhanced = withObservables(['channelId'], ({database, channelId}: {channel
                 if (!postsInChannel.length) {
                     return of$([]);
                 }
+
                 const {earliest, latest} = postsInChannel[0];
-
-                captureException(new Error(`[ChannelPostList] Earliest and latest for channel ${channelId}: ${earliest}, ${latest}`));
-
                 return queryPostsBetween(database, earliest, latest, Q.desc, '', channelId, isCRTEnabled ? '' : undefined).observe();
             }),
         ),
