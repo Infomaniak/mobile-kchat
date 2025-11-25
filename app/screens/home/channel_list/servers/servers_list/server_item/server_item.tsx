@@ -3,7 +3,7 @@
 
 import React, {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {DeviceEventEmitter, InteractionManager, Platform, type StyleProp, Text, View, type ViewStyle} from 'react-native';
+import {DeviceEventEmitter, Platform, type StyleProp, Text, View, type ViewStyle} from 'react-native';
 import {RectButton} from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 
@@ -187,15 +187,15 @@ const ServerItem = ({
     };
 
     const onLayout = useCallback(() => {
-        if (highlight && !tutorialWatched) {
-            if (isTablet) {
-                setShowTutorial(true);
-                return;
-            }
-            InteractionManager.runAfterInteractions(() => {
-                setShowTutorial(true);
-            });
-        }
+        // if (highlight && !tutorialWatched) {
+        //     if (isTablet) {
+        //         setShowTutorial(true);
+        //         return;
+        //     }
+        //     InteractionManager.runAfterInteractions(() => {
+        //         setShowTutorial(true);
+        //     });
+        // }
     }, [highlight, isTablet, tutorialWatched]);
 
     useLayoutEffect(() => {
