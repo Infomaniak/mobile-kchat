@@ -15,6 +15,7 @@ import {useAppState, useIsTablet} from '@hooks/device';
 import useDidUpdate from '@hooks/did_update';
 import {useDebounce} from '@hooks/utils';
 import EphemeralStore from '@store/ephemeral_store';
+import {captureException} from '@utils/sentry';
 
 import Intro from './intro';
 
@@ -59,6 +60,8 @@ const ChannelPostList = ({
             }
         }
     }, [fetchingPosts, serverUrl, channelId, posts]), 500);
+    const postIds = posts.map((post) => post.id);
+    captureException(new Error(`[ChannelPostList] posts length: ${posts.length}, postIds: ${postIds.join(', ')}`));
 
     useDidUpdate(() => {
         setFetchingPosts(EphemeralStore.isLoadingMessagesForChannel(serverUrl, channelId));
