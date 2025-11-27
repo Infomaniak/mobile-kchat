@@ -274,6 +274,7 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
         // We rely on the posts array; if it is empty, we stop processing
         if (!posts?.length) {
+            captureException(new Error('[handlePosts] empty or undefined "posts" array'));
             logWarning(
                 'An empty or undefined "posts" array has been passed to the handlePosts method',
             );
@@ -406,6 +407,8 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         if (actionType !== ActionType.POSTS.RECEIVED_IN_THREAD) {
             // link the newly received posts
             const linkedPosts = createPostsChain({order, posts, previousPostId});
+            captureException(new Error(`[handlePosts] linkedPosts.length: ${linkedPosts.length}`));
+
             if (linkedPosts.length) {
                 const postsInChannel = await this.handlePostsInChannel(linkedPosts, actionType as never, true);
                 if (postsInChannel.length) {
@@ -469,6 +472,7 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         const permittedActions = Object.values(ActionType.POSTS);
 
         if (!posts.length || !permittedActions.includes(actionType)) {
+            captureException(new Error(`[handlePostsInChannel] error !posts.length || !permittedActions.includes(actionType) ${!posts.length} ${!permittedActions.includes(actionType)} ${actionType}`));
             logWarning(
                 'An empty or undefined "posts" array or an non-supported actionType has been passed to the handlePostsInChannel method',
             );

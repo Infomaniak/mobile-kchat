@@ -61,7 +61,7 @@ const ChannelPostList = ({
         }
     }, [fetchingPosts, serverUrl, channelId, posts]), 500);
     const postIds = posts.map((post) => post.id);
-    captureException(new Error(`[ChannelPostList] posts length: ${posts.length}, postIds: ${postIds.join(', ')}`));
+    captureException(new Error(`[ChannelPostList] posts length: ${posts.length}, postIds: ${postIds.join(', ')},  channelId: ${channelId}`));
 
     useDidUpdate(() => {
         setFetchingPosts(EphemeralStore.isLoadingMessagesForChannel(serverUrl, channelId));
