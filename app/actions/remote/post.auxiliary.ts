@@ -6,6 +6,7 @@ import {chunk} from 'lodash';
 import {prepareModelsForChannelPosts} from '@actions/local/post';
 import {ActionType} from '@constants';
 import DatabaseManager from '@database/manager';
+import {captureException} from '@utils/sentry';
 
 import {fetchPostAuthors, fetchPostsForChannel} from './post';
 
@@ -59,16 +60,27 @@ export async function processChannelPostsByTeam(
                             isCRTEnabled,
                         ),
                     );
+                } else {
+                    captureException(new Error(`[processChannelPostsByTeam] Channel ${channelIdsChunk[i]} - No posts retrieved`));
                 }
+            } else {
+                const channelId = channelIdsChunk[i];
+                captureException(new Error(`[processChannelPostsByTeam] Error for channel ${channelId}: ${result.reason}`));
             }
         }
     }
+
+    captureException(new Error(`[processChannelPostsByTeam] Total posts retrieved: ${allPosts.length} | Model promises: ${prepareModelsPromises.length}`));
 
     if (prepareModelsPromises.length) {
         const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
 
         const models = await Promise.all(prepareModelsPromises);
-        operator.batchRecords(models.flat(), 'processTeamChannels');
+        const flatModels = models.flat();
+        operator.batchRecords(flatModels, 'processTeamChannels');
+
+    } else {
+        captureException(new Error('[processChannelPostsByTeam] No models to write to database '));
     }
     if (!skipAuthors && allPosts.length) {
         await fetchPostAuthors(serverUrl, allPosts, false, groupLabel);
