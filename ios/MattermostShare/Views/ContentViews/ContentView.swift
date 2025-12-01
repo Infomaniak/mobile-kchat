@@ -41,8 +41,8 @@ struct ContentView: View {
       VStack (spacing: 0) {
         if shareViewModel.allServers.count > 1 {
           OptionView(
-            navigationTitle: NSLocalizedString("share_extension.servers_screen.title", value: "Select server", comment: ""),
-            label: NSLocalizedString("share_extension.server_label", value: "Server", comment: ""),
+            navigationTitle: NSLocalizedString("share_extension.servers_screen.title", value: "Select an organization", comment: ""),
+            label: NSLocalizedString("share_extension.server_label", value: "Organization", comment: ""),
             value: shareViewModel.server!.displayName
           ) {
             ServerListView()

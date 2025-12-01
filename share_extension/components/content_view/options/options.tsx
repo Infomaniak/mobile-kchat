@@ -30,7 +30,7 @@ const Options = ({channelDisplayName, hasChannels, serverDisplayName, theme}: Pr
     const serverLabel = useMemo(() => {
         return intl.formatMessage({
             id: 'share_extension.server_label',
-            defaultMessage: 'kChat',
+            defaultMessage: 'Organization',
         });
     }, [intl.locale]);
 
