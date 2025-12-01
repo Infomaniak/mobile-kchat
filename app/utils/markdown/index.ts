@@ -49,6 +49,9 @@ export const getMarkdownTextStyles = makeStyleSheetFromTheme((theme: Theme) => {
             color: theme.linkColor,
             fontFamily: 'SuisseIntl-Regular',
         },
+        blockquote: {
+            color: changeOpacity(theme.centerChannelColor, 0.72),
+        },
         heading1: {
             ...typography('Heading', 700),
             paddingTop: 12,

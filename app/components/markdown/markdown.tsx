@@ -510,10 +510,14 @@ const Markdown = ({
 
         // Construct the text style based off of the parents of this node since RN's inheritance is limited
         let styles;
+
+        const hasBlockQuote = context.includes('block_quote');
+        const baseStyleForText = hasBlockQuote && textStyles.blockquote? [baseTextStyle, textStyles.blockquote]: baseTextStyle;
+
         if (disableHeading) {
-            styles = computeTextStyle(textStyles, baseTextStyle, context.filter((c) => !c.startsWith('heading')));
+            styles = computeTextStyle(textStyles, baseStyleForText, context.filter((c) => !c.startsWith('heading')));
         } else {
-            styles = computeTextStyle(textStyles, baseTextStyle, context);
+            styles = computeTextStyle(textStyles, baseStyleForText, context);
         }
 
         if (context.includes('mention_highlight')) {
