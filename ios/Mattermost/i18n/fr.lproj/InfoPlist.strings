@@ -1,10 +1,11 @@
 NSAppleMusicUsageDescription = "Autoriser l'accès à votre bibliothèque de medias signifie que vous pouvez joindre des fichiers de votre bibliothèque aux messages de kChat.";
 NSBluetoothAlwaysUsageDescription = "Autoriser l'accès Blutooth signifie que vous pouvez synchroniser du contenu entre les appareils et clients Mattermost.";
 NSBluetoothPeripheralUsageDescription = "Autoriser l'accès Bluetooth signifie que vous pouvez connecter des périphériques audio pour vos appels, et synchroniser du contenu entre les appareils et clients Mattermost.";
-NSCameraUsageDescription = "Autoriser l'accès aux caméras de votre appareil signifie que vous pouvez prendre des photos et des vidéos, et les téléverser vers kChat.";
+NSCameraUsageDescription = "Autoriser l'accès à votre caméra vous permet de prendre des photos et des vidéos et de les joindre aux messages.";
 NSFaceIDUsageDescription = "Autoriser l'accès à Face ID signifie que vous pouvez restreindre l'accès à kChat aux utilisateurs non autorisés, sur votre appareil.";
 NSLocationAlwaysUsageDescription = "Autoriser l'accès à vos données de localisation signifie que vous pouvez ajouter des metadonnées de localisations aux photos et vidéos que vous partagez dans kChat.";
 NSLocationWhenInUseUsageDescription = "Autoriser l'accès à vos données de localisation signifie que vous pouvez ajouter des metadonnées de localisations aux photos et vidéos que vous partagez dans kChat.";
 NSMicrophoneUsageDescription = "Autoriser l'accès aux microphones de votre appareil signifie que vous pouvez enregistrer le son des appels et vidéos que vous partagez dans kChat.";
 NSPhotoLibraryAddUsageDescription = "Autoriser l'accès en écriture sur votre photothèque signifie que vous pouvez enregistrer photos et vidéos de kChat sur votre appareil.";
 NSPhotoLibraryUsageDescription = "Autoriser l'accès en lecture sur votre photothèque signifie que vous pouvez téléverser des photos et vidéos de votre appareil vers kChat.";
+NSSpeechRecognitionUsageDescription = "Permettre à votre appareil d'envoyer des données utilisateur à Apple vous permet d'envoyer des messages vocaux à kChat.";
