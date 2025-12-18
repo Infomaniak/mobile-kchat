@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useEffect, useRef, useState} from 'react';
-import {DeviceEventEmitter, Platform, StatusBar, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {DeviceEventEmitter, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {GestureDetector, Gesture, GestureHandlerRootView} from 'react-native-gesture-handler';
 import {Navigation} from 'react-native-navigation';
 import Animated, {runOnJS, useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
@@ -16,7 +16,6 @@ import SecurityManager from '@managers/security_manager';
 import {dismissOverlay} from '@screens/navigation';
 import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity} from '@utils/theme';
-import {topInsetShared} from '@utils/top_inset_shared';
 import {secureGetFromRecord} from '@utils/types';
 
 import Icon from './icon';
@@ -75,14 +74,7 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
     const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
     const initial = useSharedValue(-130);
     const isTablet = useIsTablet();
-    let insets = {top: 0};
-    if (Platform.OS === 'ios') {
-        // on Android we disable the safe area provider as it conflicts with the gesture system
-
-        insets = useSafeAreaInsets();
-    }
-    const topInset = Platform.OS === 'ios' ? insets.top : (topInsetShared.value || StatusBar.currentHeight || 0);
-
+    const insets = useSafeAreaInsets();
     const tapped = useRef<boolean>(false);
 
     const animateDismissOverlay = () => {
@@ -143,7 +135,7 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
 
         return {
 
-            marginTop: topInset,
+            marginTop: insets.top,
             transform: [{translateY}],
         };
     }, [animate, insets.top]);
