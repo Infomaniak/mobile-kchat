@@ -53,7 +53,7 @@ fun insertCategoryChannels(db: WMDatabase, categoryId: String, teamId: String, c
 fun insertCategoriesWithChannels(db: WMDatabase, orderCategories: ReadableMap) {
     val categories = orderCategories.getArray("categories") ?: return
     for (i in 0 until categories.size()) {
-        val category = categories.getMap(i)
+        val category = categories.getMap(i) ?: continue
         val id = category.getString("id")
         val teamId = category.getString("team_id")
         val channelIds = category.getArray("channel_ids")
@@ -67,7 +67,7 @@ fun insertCategoriesWithChannels(db: WMDatabase, orderCategories: ReadableMap) {
 fun insertChannelToDefaultCategory(db: WMDatabase, categoryChannels: ReadableArray) {
     try {
         for (i in 0 until categoryChannels.size()) {
-            val cc = categoryChannels.getMap(i)
+            val cc = categoryChannels.getMap(i) ?: continue
             val id = cc.getString("id")
             val categoryId = cc.getString("category_id")
             val channelId = cc.getString("channel_id")

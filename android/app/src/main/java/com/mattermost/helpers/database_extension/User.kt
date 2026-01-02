@@ -47,7 +47,7 @@ fun getCurrentUserLocale(db: WMDatabase): String {
 
 fun handleUsers(db: WMDatabase, users: ReadableArray) {
     for (i in 0 until users.size()) {
-        val user = users.getMap(i)
+        val user = users.getMap(i) ?: continue
         val roles =  user.getString("roles") ?: ""
         val isBot = try {
             user.getBoolean("is_bot")
@@ -61,8 +61,8 @@ fun handleUsers(db: WMDatabase, users: ReadableArray) {
             db.execute(
                     """
                     INSERT INTO User (id, auth_service, update_at, delete_at, email, first_name, is_bot, is_guest,
-                    last_name, last_picture_update, locale, nickname, position, roles, status, username, notify_props, 
-                    props, timezone, _changed, _status) 
+                    last_name, last_picture_update, locale, nickname, position, roles, status, username, notify_props,
+                    props, timezone, _changed, _status)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', 'created')
                     """.trimIndent(),
                     arrayOf(

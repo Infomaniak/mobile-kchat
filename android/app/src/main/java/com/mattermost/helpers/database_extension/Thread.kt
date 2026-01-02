@@ -82,12 +82,12 @@ internal fun updateThread(db: WMDatabase, thread: ReadableMap, existingRecord: R
 internal fun insertThreadParticipants(db: WMDatabase, threadId: String, participants: ReadableArray) {
     for (i in 0 until participants.size()) {
         try {
-            val participant = participants.getMap(i)
+            val participant = participants.getMap(i) ?: continue
             val id = RandomId.generate()
             db.execute(
                     """
-                    INSERT INTO ThreadParticipant 
-                    (id, thread_id, user_id, _changed, _status) 
+                    INSERT INTO ThreadParticipant
+                    (id, thread_id, user_id, _changed, _status)
                     VALUES (?, ?, ?, '', 'created')
                     """.trimIndent(),
                     arrayOf(id, threadId, participant.getString("id"))

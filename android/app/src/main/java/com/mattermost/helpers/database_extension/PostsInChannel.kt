@@ -9,7 +9,7 @@ import com.nozbe.watermelondb.WMDatabase
 
 internal fun findPostInChannel(chunks: ReadableArray, earliest: Double, latest: Double): ReadableMap? {
     for (i in 0 until chunks.size()) {
-        val chunk = chunks.getMap(i)
+        val chunk = chunks.getMap(i) ?: continue
         if (earliest >= chunk.getDouble("earliest") || latest <= chunk.getDouble("latest")) {
             return chunk
         }
@@ -44,7 +44,7 @@ internal fun insertPostInChannel(db: WMDatabase, channelId: String, earliest: Do
 internal fun mergePostsInChannel(db: WMDatabase, existingChunks: ReadableArray, newChunk: ReadableMap) {
     for (i in 0 until existingChunks.size()) {
         try {
-            val chunk = existingChunks.getMap(i)
+            val chunk = existingChunks.getMap(i) ?: continue
             if (newChunk.getDouble("earliest") <= chunk.getDouble("earliest") &&
                     newChunk.getDouble("latest") >= chunk.getDouble("latest")) {
                 db.execute("DELETE FROM PostsInChannel WHERE id = ?", arrayOf(chunk.getString("id")))

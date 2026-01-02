@@ -135,7 +135,7 @@ class PushNotificationDataRunnable {
                     threadsArray.add(thread)
                 }
                 for(i in 0 until it.size()) {
-                    val thread = it.getMap(i)
+                    val thread = it.getMap(i) ?: continue
                     val threadId = thread.getString("id")
                     if (threadId != null) {
                         if (threadIds.contains(threadId)) {

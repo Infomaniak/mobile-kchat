@@ -30,7 +30,7 @@
 		672D989E29F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D986729F1927F004228D6 /* InfoPlist.strings */; };
 		672D98A329F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987029F1927F004228D6 /* InfoPlist.strings */; };
 		672D98A429F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987029F1927F004228D6 /* InfoPlist.strings */; };
-		672D98A829F1927F004228D6 /* (null) in Resources */ = {isa = PBXBuildFile; };
+		672D98A829F1927F004228D6 /* BuildFile in Resources */ = {isa = PBXBuildFile; };
 		672D98A929F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987929F1927F004228D6 /* InfoPlist.strings */; };
 		672D98AA29F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987929F1927F004228D6 /* InfoPlist.strings */; };
 		672D98AC29F1927F004228D6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 672D987C29F1927F004228D6 /* InfoPlist.strings */; };
@@ -1056,7 +1056,7 @@
 				67FEADED2A12608900DDF4AE /* Localizable.strings in Resources */,
 				7FD4825C2864DC4200A5B18B /* compass-icons.ttf in Resources */,
 				7FD482292864D69700A5B18B /* Assets.xcassets in Resources */,
-				672D98A829F1927F004228D6 /* (null) in Resources */,
+				672D98A829F1927F004228D6 /* BuildFile in Resources */,
 				C9A107142BBDBC8F00753CDC /* PrivacyInfo.xcprivacy in Resources */,
 				7FC5698C28563FDB000B0905 /* MainInterface.storyboard in Resources */,
 			);
@@ -1249,8 +1249,6 @@
 				"${PODS_CONFIGURATION_BUILD_DIR}/AppAuth/AppAuthCore_Privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/CocoaLumberjack/CocoaLumberjackPrivacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXApplication/ExpoApplication_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/ExpoConstants_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoDevice/ExpoDevice_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/GTMAppAuth/GTMAppAuth_Privacy.bundle",
@@ -1258,6 +1256,7 @@
 				"${PODS_CONFIGURATION_BUILD_DIR}/GoogleSignIn/GoogleSignIn.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RCT-Folly/RCT-Folly_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RNCAsyncStorage/RNCAsyncStorage_resources.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/RNDeviceInfo/RNDeviceInfoPrivacyInfo.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RNPermissions/RNPermissionsPrivacyInfo.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RNSVG/RNSVGFilters.bundle",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf",
@@ -1296,8 +1295,6 @@
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AppAuthCore_Privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/CocoaLumberjackPrivacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoApplication_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXConstants.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoConstants_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoDevice_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoFileSystem_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GTMAppAuth_Privacy.bundle",
@@ -1305,6 +1302,7 @@
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleSignIn.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RCT-Folly_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNCAsyncStorage_resources.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNDeviceInfoPrivacyInfo.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNPermissionsPrivacyInfo.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNSVGFilters.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AntDesign.ttf",
