@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useEffect, useRef, useState} from 'react';
-import {DeviceEventEmitter, Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {DeviceEventEmitter, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {GestureDetector, Gesture, GestureHandlerRootView} from 'react-native-gesture-handler';
 import {Navigation} from 'react-native-navigation';
 import Animated, {runOnJS, useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
@@ -74,13 +74,7 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
     const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
     const initial = useSharedValue(-130);
     const isTablet = useIsTablet();
-    let insets = {top: 0};
-    if (Platform.OS === 'ios') {
-        // on Android we disable the safe area provider as it conflicts with the gesture system
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        insets = useSafeAreaInsets();
-    }
-
+    const insets = useSafeAreaInsets();
     const tapped = useRef<boolean>(false);
 
     const animateDismissOverlay = () => {
