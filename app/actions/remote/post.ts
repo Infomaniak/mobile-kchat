@@ -299,11 +299,7 @@ export async function fetchPostsForChannel(serverUrl: string, channelId: string,
         let actionType: string|undefined;
         const myChannel = await getMyChannel(database, channelId);
         const postsInChannel = await getRecentPostsInChannel(database, channelId);
-        let since = myChannel?.lastFetchedAt || postsInChannel?.[0]?.createAt || 0;
-
-        if (since > 0) {
-            since = since - 1; // IK change: attempt to fix the issue where the last post wasn't being fetched.
-        }
+        const since = myChannel?.lastFetchedAt || postsInChannel?.[0]?.createAt || 0;
 
         if (since) {
             postAction = fetchPostsSince(serverUrl, channelId, since, true, groupLabel);
