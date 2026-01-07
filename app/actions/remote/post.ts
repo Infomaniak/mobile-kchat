@@ -30,7 +30,6 @@ import {logDebug, logError} from '@utils/log';
 import {processPostsFetched} from '@utils/post';
 import {getPostIdsForCombinedUserActivityPost} from '@utils/post_list';
 import {allSettled} from '@utils/promise';
-import {captureException} from '@utils/sentry';
 
 import {processChannelPostsByTeam} from './post.auxiliary';
 import {forceLogoutIfNecessary} from './session';
@@ -318,12 +317,9 @@ export async function fetchPostsForChannel(serverUrl: string, channelId: string,
         }
         const data = await postAction;
         if (data.error) {
-            captureException(new Error(`[fetchPostsForChannel] data.error: ${data.error}`));
             throw data.error;
         }
         let authors: UserProfile[] = [];
-        captureException(new Error(`[fetchPostsForChannel] data.posts?.length && data.order?.length ${data.posts?.length} data.posts?.length: ${data.posts?.length}`));
-
         if (data.posts?.length && data.order?.length) {
             if (!skipAuthors) {
                 const {authors: fetchedAuthors} = await fetchPostAuthors(serverUrl, data.posts, true, groupLabel);
@@ -331,8 +327,6 @@ export async function fetchPostsForChannel(serverUrl: string, channelId: string,
             }
 
             if (!fetchOnly) {
-                captureException(new Error(`[fetchPostsForChannel] storing posts for channel : ${channelId} data.posts?.length: ${data.posts?.length}`));
-
                 await storePostsForChannel(
                     serverUrl, channelId,
                     data.posts, data.order, data.previousPostId ?? '',
@@ -343,7 +337,6 @@ export async function fetchPostsForChannel(serverUrl: string, channelId: string,
 
         return {posts: data.posts, order: data.order, authors, actionType, previousPostId: data.previousPostId, channelId};
     } catch (error) {
-        captureException(new Error(`[fetchPostsForChannel] error: ${getFullErrorMessage(error)}`));
         logDebug('error on fetchPostsForChannel', getFullErrorMessage(error));
         return {error};
     } finally {
