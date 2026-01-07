@@ -21,7 +21,6 @@ import FileModel from '@typings/database/models/servers/file';
 import ScheduledPostModel from '@typings/database/models/servers/scheduled_post';
 import {safeParseJSON} from '@utils/helpers';
 import {logWarning} from '@utils/log';
-import {captureException} from '@utils/sentry';
 
 import {shouldUpdateScheduledPostRecord} from '../comparators/scheduled_post';
 
@@ -274,7 +273,6 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
         // We rely on the posts array; if it is empty, we stop processing
         if (!posts?.length) {
-            captureException(new Error('[handlePosts] empty or undefined "posts" array'));
             logWarning(
                 'An empty or undefined "posts" array has been passed to the handlePosts method',
             );
@@ -407,8 +405,6 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         if (actionType !== ActionType.POSTS.RECEIVED_IN_THREAD) {
             // link the newly received posts
             const linkedPosts = createPostsChain({order, posts, previousPostId});
-            captureException(new Error(`[handlePosts] linkedPosts.length: ${linkedPosts.length}`));
-
             if (linkedPosts.length) {
                 const postsInChannel = await this.handlePostsInChannel(linkedPosts, actionType as never, true);
                 if (postsInChannel.length) {
@@ -472,7 +468,6 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         const permittedActions = Object.values(ActionType.POSTS);
 
         if (!posts.length || !permittedActions.includes(actionType)) {
-            captureException(new Error(`[handlePostsInChannel] error !posts.length || !permittedActions.includes(actionType) ${!posts.length} ${!permittedActions.includes(actionType)} ${actionType}`));
             logWarning(
                 'An empty or undefined "posts" array or an non-supported actionType has been passed to the handlePostsInChannel method',
             );
@@ -543,7 +538,6 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
         // chunk length 0; then it's a new chunk to be added to the PostsInChannel table
         if (!chunks.length) {
-            captureException(new Error(`[PostsInChannel] chunk length 0, creating new chunk for channelId: ${channelId}, earliest: ${earliest}, latest: ${latest}`));
             return this._createPostsInChannelRecord(channelId, earliest, latest, prepareRecordsOnly);
         }
 
@@ -562,7 +556,6 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
         if (!targetChunk) {
             // Create a new chunk and merge them if needed
-            captureException(new Error(`[PostsInChannel] Creating new chunk for channelId: ${channelId}, earliest: ${earliest}, latest: ${latest}`));
             const models = [];
             models.push(...await this._createPostsInChannelRecord(channelId, earliest, latest, prepareRecordsOnly));
             models.push(...await this._mergePostInChannelChunks(models[0], chunks, prepareRecordsOnly));
@@ -574,15 +567,10 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             targetChunk.earliest <= earliest &&
             targetChunk.latest >= latest
         ) {
-
-            captureException(new Error(`[PostsInChannel] Posts already contained in chunk for channelId: ${channelId}, chunkId: ${targetChunk.id}, existing: [${targetChunk.earliest}, ${targetChunk.latest}], received: [${earliest}, ${latest}]`));
-
             return [];
         }
 
         const models = [];
-        const previousEarliest = targetChunk.earliest;
-        const previousLatest = targetChunk.latest;
 
         // If the chunk was found, Update the chunk and return
         models.push(targetChunk.prepareUpdate((record) => {
@@ -590,7 +578,6 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             record.latest = Math.max(record.latest, latest);
         }));
         models.push(...await this._mergePostInChannelChunks(targetChunk, chunks, prepareRecordsOnly));
-        captureException(new Error(`[PostsInChannel] Updated chunk for channelId: ${channelId}, chunkId: ${targetChunk.id}, previous: [${previousEarliest}, ${previousLatest}], new: [${targetChunk.earliest}, ${targetChunk.latest}]`));
 
         if (!prepareRecordsOnly) {
             this.batchRecords(models, 'handleReceivedPostsInChannel');
@@ -619,15 +606,12 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         if (!chunks.length) {
             // Create a new chunk in case somehow the chunks got deleted for this channel
             const earliest = firstPost.create_at;
-            captureException(new Error(`[PostsInChannelSince] No chunks found, creating new chunk for channelId: ${channelId}, earliest: ${earliest}, latest: ${latest}`));
             return this._createPostsInChannelRecord(channelId, earliest, latest, prepareRecordsOnly);
         }
 
         const targetChunk = chunks[0];
-        const previousLatest = targetChunk.latest;
 
         if (targetChunk.latest >= latest) {
-            captureException(new Error(`[PostsInChannelSince] No update needed for channelId: ${channelId}, chunkId: ${targetChunk.id}, existing latest: ${targetChunk.latest} >= received latest: ${latest}`));
             return [];
         }
 
@@ -635,7 +619,6 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         const models = [targetChunk.prepareUpdate((record) => {
             record.latest = Math.max(record.latest, latest);
         })];
-        captureException(new Error(`[PostsInChannelSince] Updated chunk for channelId: ${channelId}, chunkId: ${targetChunk.id}, previous latest: ${previousLatest}, new latest: ${targetChunk.latest}`));
 
         if (!prepareRecordsOnly) {
             this.batchRecords(models, 'handleReceivedPostsInChannelSince');
