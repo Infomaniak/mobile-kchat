@@ -1189,7 +1189,7 @@
   "system_notice.dont_show": "Ne pas montrer de nouveau",
   "system_notice.remind_me": "Me rappeler plus tard",
   "system_notice.title.gm_as_dm": "Mises à jour des conversations de groupe",
-  "system_noticy.body.gm_as_dm": "Vous serez notifé de toute activité dans les messages de groupe, un pastille de notification accompagnera chaque nouveau message.\n\nVous pouvez le configurer dans les préférences des notification pour chaque message de groupe.",
+  "system_noticy.body.gm_as_dm": "Vous serez notifié de toute activité dans les messages de groupe, une pastille de notification accompagnera chaque nouveau message.\n\nVous pouvez le configurer dans les préférences des notification pour chaque message de groupe.",
   "team_list.no_other_teams.description": "Pour rejoindre une autre équipe, demandez une invitation à un administrateur d'équipe ou créez votre propre équipe.",
   "team_list.no_other_teams.title": "Aucune autre équipe à rejoindre",
   "terms_of_service.acceptButton": "Accepter",
