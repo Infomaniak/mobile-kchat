@@ -12,7 +12,7 @@ class IkStorageModule(reactContext: ReactApplicationContext) :
     ReactContextBaseJavaModule(reactContext) {
 
     private val prefs by lazy {
-        val masterKey = MasterKey.Builder(reactContext, "ik_master_key")
+        val masterKey = MasterKey.Builder(reactContext)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
 
