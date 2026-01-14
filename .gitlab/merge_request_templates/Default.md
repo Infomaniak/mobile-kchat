@@ -28,5 +28,5 @@ For an easier comparison of UI changes a table (template below) can be used.
 -->
 
 /assign me
-/reviewer @antonbuksa @boris.trombert @dimitar.slaev @andy.lerandy @aurelien.sberro @alexandre.pilloud @dev_bot
+/reviewer @antonbuksa @boris.trombert @aurelien.sberro @dev_bot
 /remove_reviewer me
