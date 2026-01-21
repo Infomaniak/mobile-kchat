@@ -9,7 +9,7 @@ import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import ViewConstants from '@constants/view';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
-import {topInsetShared} from '@utils/top_inset_shared';
+import {useTopInsetShared} from '@utils/top_inset_shared';
 import {typography} from '@utils/typography';
 
 export type HeaderRightButton = {
@@ -147,6 +147,7 @@ const Header = ({
     title,
 }: Props) => {
     const styles = getStyleSheet(theme);
+    const topInsetShared = useTopInsetShared();
 
     const opacity = useAnimatedStyle(() => {
         if (!isLargeTitle) {
