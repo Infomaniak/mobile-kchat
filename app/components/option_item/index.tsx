@@ -269,9 +269,11 @@ const OptionItem = ({
                             />
                         </View>
                     )}
-                    <View style={styles.iconContainer}>
-                        {customIcon}
-                    </View>
+                    {Boolean(customIcon) && (
+                        <View>
+                            {customIcon}
+                        </View>
+                    )}
                     {type === OptionTypeConst.RADIO && radioComponent}
                     <View style={labelStyle}>
                         <Text
