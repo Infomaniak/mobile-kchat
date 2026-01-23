@@ -19,6 +19,7 @@ import {getIsCRTEnabled} from '@queries/servers/thread';
 import EphemeralStore from '@store/ephemeral_store';
 import {isErrorWithStatusCode} from '@utils/errors';
 import {emitNotificationError} from '@utils/notification';
+import {captureMessage} from '@utils/sentry';
 import {setThemeDefaults, updateThemeIfNeeded} from '@utils/theme';
 
 import type MyChannelModel from '@typings/database/models/servers/my_channel';
@@ -139,6 +140,9 @@ export async function pushNotificationEntry(serverUrl: string, notification: Not
             PerformanceMetricsManager.setLoadTarget('CHANNEL');
             await switchToChannelById(serverUrl, channelId, teamId, false, groupLabel);
         }
+    } else {
+        // Log when notification redirect fails due to missing channel or team
+        captureMessage(`Notification redirect failed: channelId=${channelId}, teamId=${teamId}, hasMyChannel=${Boolean(myChannel)}, hasMyTeam=${Boolean(myTeam)}, isThread=${isThreadNotification}, isConference=${isConferenceNotification}`);
     }
 
     WebsocketManager.openAll(groupLabel);
