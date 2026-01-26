@@ -28,7 +28,6 @@ const styles = StyleSheet.create({
         right: 0,
     },
     descriptionContainer: {
-        marginBottom: 24,
         marginTop: 12,
     },
     description: {

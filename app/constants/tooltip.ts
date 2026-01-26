@@ -8,6 +8,5 @@ export const staticStyles = StyleSheet.create({
         borderRadius: 8,
         maxWidth: 247,
         padding: 16,
-        maxHeight: 160,
     },
 });
