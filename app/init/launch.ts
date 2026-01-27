@@ -26,6 +26,7 @@ import EphemeralStore from '@store/ephemeral_store';
 import {getLaunchPropsFromDeepLink} from '@utils/deep_link';
 import {logInfo} from '@utils/log';
 import {convertToNotificationData} from '@utils/notification';
+import {captureMessage} from '@utils/sentry';
 import {removeProtocol} from '@utils/url';
 
 import type {DeepLinkWithData, LaunchProps} from '@typings/launch';
@@ -185,6 +186,7 @@ export const launchToHome = async (props: LaunchProps) => {
                 return pushNotificationEntry(props.serverUrl!, extra.payload!, 'Notification');
             }
 
+            captureMessage(`Notification not redirected: serverUrl=${Boolean(props.serverUrl)}, launchError=${props.launchError}, userInteraction=${extra.userInteraction}, channelId=${extra.payload?.channel_id}, isLocal=${extra.payload?.userInfo?.local}`);
             appEntry(props.serverUrl!);
             break;
         }

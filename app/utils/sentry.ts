@@ -80,6 +80,14 @@ export function captureException(error: unknown) {
     Sentry.captureException(error);
 }
 
+export function captureMessage(message: string) {
+    if (!Config.SentryEnabled) {
+        return;
+    }
+
+    Sentry.captureMessage(message);
+}
+
 export function captureJSException(error: unknown, isFatal: boolean) {
     if (!Config.SentryEnabled) {
         return;
