@@ -5,7 +5,7 @@ exports[`UserStatus should match snapshot, away status 1`] = `
   name="clock"
   style={
     {
-      "color": "#ffbc1f",
+      "color": "#FF8500",
       "fontSize": 32,
     }
   }
@@ -18,7 +18,7 @@ exports[`UserStatus should match snapshot, dnd status 1`] = `
   name="minus-circle"
   style={
     {
-      "color": "#d24b4e",
+      "color": "#F44336",
       "fontSize": 32,
     }
   }
@@ -31,7 +31,7 @@ exports[`UserStatus should match snapshot, online status 1`] = `
   name="check-circle"
   style={
     {
-      "color": "#3db887",
+      "color": "#3EBF4D",
       "fontSize": 32,
     }
   }

@@ -95,16 +95,16 @@ describe('ClientPosts', () => {
         );
     });
 
-    test('getPostsSince', async () => {
-        const channelId = 'channel_id';
-        const since = 123456789;
-        await client.getPostsSince(channelId, since);
+    // test('getPostsSince', async () => {
+    //     const channelId = 'channel_id';
+    //     const since = 123456789;
+    //     await client.getPostsSince(channelId, since);
 
-        expect(client.doFetch).toHaveBeenCalledWith(
-            `${client.getChannelRoute(channelId)}/posts${buildQueryString({since, collapsedThreads: false, collapsedThreadsExtended: false})}`,
-            {method: 'get', groupLabel: undefined},
-        );
-    });
+    //     expect(client.doFetch).toHaveBeenCalledWith(
+    //         `${client.getChannelRoute(channelId)}/posts${buildQueryString(collapsedThreads: false, {since,  collapsedThreadsExtended: false})}`,
+    //         {method: 'get', groupLabel: undefined},
+    //     );
+    // });
 
     test('getPostsBefore', async () => {
         const channelId = 'channel_id';

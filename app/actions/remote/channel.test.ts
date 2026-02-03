@@ -103,6 +103,7 @@ const mockClient = {
     getChannelMember: jest.fn((channelId: string, userId: string) => ({id: userId + '-' + channelId, user_id: userId, channel_id: channelId, roles: ''})),
     patchChannel: jest.fn((channelId: string, channel: ChannelPatch) => ({...channel, id: channelId})),
     getUser: jest.fn((userId: string) => ({...user, id: userId})),
+    getAllChannelsMembers: jest.fn(() => [{id: user.id + '-' + channelId, user_id: user.id, channel_id: channelId, roles: ''}]),
     getMyChannels: jest.fn((teamId: string) => ([{id: channelId, name: 'channel1', creatorId: user.id, team_id: teamId}])),
     getMyChannelMembers: jest.fn(() => ([{id: user.id + '-' + channelId, user_id: user.id, channel_id: channelId, roles: ''}])),
     getCategories: jest.fn((userId: string, teamId: string) => ({categories: [{id: 'categoryid', channel_ids: [channelId], team_id: teamId}], order: ['categoryid']})),

@@ -81,7 +81,7 @@ exports[`components/integration_selector/channel_list_row should match snapshot 
             style={
               {
                 "color": "#3f4350",
-                "fontFamily": "OpenSans",
+                "fontFamily": "SuisseIntl",
                 "fontSize": 16,
                 "fontWeight": "400",
                 "lineHeight": 24,
@@ -92,7 +92,7 @@ exports[`components/integration_selector/channel_list_row should match snapshot 
             style={
               {
                 "color": "#3f4350",
-                "fontFamily": "OpenSans",
+                "fontFamily": "SuisseIntl",
                 "fontSize": 16,
                 "fontWeight": "400",
                 "lineHeight": 24,
@@ -191,7 +191,7 @@ exports[`components/integration_selector/channel_list_row should match snapshot 
             style={
               {
                 "color": "#3f4350",
-                "fontFamily": "OpenSans",
+                "fontFamily": "SuisseIntl",
                 "fontSize": 16,
                 "fontWeight": "400",
                 "lineHeight": 24,
@@ -202,7 +202,7 @@ exports[`components/integration_selector/channel_list_row should match snapshot 
             style={
               {
                 "color": "#3f4350",
-                "fontFamily": "OpenSans",
+                "fontFamily": "SuisseIntl",
                 "fontSize": 16,
                 "fontWeight": "400",
                 "lineHeight": 24,
@@ -301,7 +301,7 @@ exports[`components/integration_selector/channel_list_row should match snapshot 
             style={
               {
                 "color": "#3f4350",
-                "fontFamily": "OpenSans",
+                "fontFamily": "SuisseIntl",
                 "fontSize": 16,
                 "fontWeight": "400",
                 "lineHeight": 24,
@@ -312,7 +312,7 @@ exports[`components/integration_selector/channel_list_row should match snapshot 
             style={
               {
                 "color": "#3f4350",
-                "fontFamily": "OpenSans",
+                "fontFamily": "SuisseIntl",
                 "fontSize": 16,
                 "fontWeight": "400",
                 "lineHeight": 24,
@@ -411,7 +411,7 @@ exports[`components/integration_selector/channel_list_row should match snapshot 
             style={
               {
                 "color": "#3f4350",
-                "fontFamily": "OpenSans",
+                "fontFamily": "SuisseIntl",
                 "fontSize": 16,
                 "fontWeight": "400",
                 "lineHeight": 24,
@@ -422,7 +422,7 @@ exports[`components/integration_selector/channel_list_row should match snapshot 
             style={
               {
                 "color": "#3f4350",
-                "fontFamily": "OpenSans",
+                "fontFamily": "SuisseIntl",
                 "fontSize": 16,
                 "fontWeight": "400",
                 "lineHeight": 24,
@@ -440,7 +440,7 @@ exports[`components/integration_selector/channel_list_row should match snapshot 
           style={
             {
               "color": "rgba(63,67,80,0.5)",
-              "fontFamily": "OpenSans",
+              "fontFamily": "SuisseIntl",
               "fontSize": 14,
               "fontWeight": "400",
               "lineHeight": 20,
@@ -537,7 +537,7 @@ exports[`components/integration_selector/channel_list_row should match snapshot 
             style={
               {
                 "color": "#3f4350",
-                "fontFamily": "OpenSans",
+                "fontFamily": "SuisseIntl",
                 "fontSize": 16,
                 "fontWeight": "400",
                 "lineHeight": 24,
@@ -548,7 +548,7 @@ exports[`components/integration_selector/channel_list_row should match snapshot 
             style={
               {
                 "color": "#3f4350",
-                "fontFamily": "OpenSans",
+                "fontFamily": "SuisseIntl",
                 "fontSize": 16,
                 "fontWeight": "400",
                 "lineHeight": 24,

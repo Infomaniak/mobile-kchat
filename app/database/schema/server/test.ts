@@ -45,6 +45,10 @@ const {
     THREADS_IN_TEAM,
     TEAM_THREADS_SYNC,
     USER,
+    CONFERENCE,
+    CONFERENCE_PARTICIPANT,
+    LIMIT,
+    USAGE,
 } = MM_TABLES.SERVER;
 
 const {PLAYBOOK_RUN, PLAYBOOK_CHECKLIST, PLAYBOOK_CHECKLIST_ITEM} = PLAYBOOK_TABLES;
@@ -52,7 +56,7 @@ const {PLAYBOOK_RUN, PLAYBOOK_CHECKLIST, PLAYBOOK_CHECKLIST_ITEM} = PLAYBOOK_TAB
 describe('*** Test schema for SERVER database ***', () => {
     it('=> The SERVER SCHEMA should strictly match', () => {
         expect(serverSchema).toEqual({
-            version: 12,
+            version: 8, // IK change to match our schema version
             unsafeSql: undefined,
             tables: {
                 [CATEGORY]: {
@@ -190,11 +194,13 @@ describe('*** Test schema for SERVER database ***', () => {
                         channel_id: {name: 'channel_id', type: 'string', isIndexed: true},
                         user_id: {name: 'user_id', type: 'string', isIndexed: true},
                         scheme_admin: {name: 'scheme_admin', type: 'boolean'},
+                        roles: {name: 'roles', type: 'string'}, // IK change for roles
                     },
                     columnArray: [
                         {name: 'channel_id', type: 'string', isIndexed: true},
                         {name: 'user_id', type: 'string', isIndexed: true},
                         {name: 'scheme_admin', type: 'boolean'},
+                        {name: 'roles', type: 'string'}, // IK change for roles
                     ],
                 },
                 [CONFIG]: {
@@ -340,6 +346,7 @@ describe('*** Test schema for SERVER database ***', () => {
                         post_id: {name: 'post_id', type: 'string', isIndexed: true},
                         size: {name: 'size', type: 'number'},
                         width: {name: 'width', type: 'number'},
+                        transcript: {name: 'transcript', type: 'string'}, // IK change for transcript
                         is_blocked: {name: 'is_blocked', type: 'boolean'},
                     },
                     columnArray: [
@@ -352,6 +359,7 @@ describe('*** Test schema for SERVER database ***', () => {
                         {name: 'post_id', type: 'string', isIndexed: true},
                         {name: 'size', type: 'number'},
                         {name: 'width', type: 'number'},
+                        {name: 'transcript', type: 'string'}, // IK change for transcript
                         {name: 'is_blocked', type: 'boolean'},
                     ],
                 },
@@ -718,6 +726,7 @@ describe('*** Test schema for SERVER database ***', () => {
                         type: {name: 'type', type: 'string'},
                         update_at: {name: 'update_at', type: 'number'},
                         invite_id: {name: 'invite_id', type: 'string'},
+                        pack_name: {name: 'pack_name', type: 'string'}, // IK change for kSuite free
                     },
                     columnArray: [
                         {name: 'allowed_domains', type: 'string'},
@@ -730,6 +739,7 @@ describe('*** Test schema for SERVER database ***', () => {
                         {name: 'type', type: 'string'},
                         {name: 'update_at', type: 'number'},
                         {name: 'invite_id', type: 'string'},
+                        {name: 'pack_name', type: 'string'}, // IK change for kSuite free
                     ],
                 },
                 [TEAM_CHANNEL_HISTORY]: {
@@ -881,6 +891,116 @@ describe('*** Test schema for SERVER database ***', () => {
                         {name: 'username', type: 'string'},
                         {name: 'terms_of_service_id', type: 'string'},
                         {name: 'terms_of_service_create_at', type: 'number'},
+                    ],
+                },
+
+                // IK TABLES
+                [CONFERENCE]: {
+                    name: CONFERENCE,
+                    unsafeSql: undefined,
+                    columns: {
+                        url: {name: 'url', type: 'string'},
+                        channel_id: {name: 'channel_id', type: 'string', isIndexed: true},
+                        team_id: {name: 'team_id', type: 'string', isIndexed: true},
+                        user_id: {name: 'user_id', type: 'string', isIndexed: true},
+                        create_at: {name: 'create_at', type: 'number'},
+                        delete_at: {name: 'delete_at', type: 'number', isOptional: true},
+                    },
+                    columnArray: [
+                        {name: 'url', type: 'string'},
+                        {name: 'channel_id', type: 'string', isIndexed: true},
+                        {name: 'team_id', type: 'string', isIndexed: true},
+                        {name: 'user_id', type: 'string', isIndexed: true},
+                        {name: 'create_at', type: 'number'},
+                        {name: 'delete_at', type: 'number', isOptional: true},
+                    ],
+                },
+                [CONFERENCE_PARTICIPANT]: {
+                    name: CONFERENCE_PARTICIPANT,
+                    unsafeSql: undefined,
+                    columns: {
+                        channel_id: {name: 'channel_id', type: 'string', isIndexed: true},
+                        conference_id: {name: 'conference_id', type: 'string', isIndexed: true},
+                        user_id: {name: 'user_id', type: 'string', isIndexed: true},
+                        present: {name: 'present', type: 'boolean'},
+                        status: {name: 'status', type: 'string'},
+                    },
+                    columnArray: [
+                        {name: 'channel_id', type: 'string', isIndexed: true},
+                        {name: 'conference_id', type: 'string', isIndexed: true},
+                        {name: 'user_id', type: 'string', isIndexed: true},
+                        {name: 'present', type: 'boolean'},
+                        {name: 'status', type: 'string'},
+                    ],
+                },
+                [LIMIT]: {
+                    name: LIMIT,
+                    unsafeSql: undefined,
+                    columns: {
+                        boards: {name: 'boards', type: 'string'},
+                        bots: {name: 'bots', type: 'number'},
+                        custom_emojis: {name: 'custom_emojis', type: 'number'},
+                        files: {name: 'files', type: 'string'},
+                        guests: {name: 'guests', type: 'number'},
+                        incoming_webhooks: {name: 'incoming_webhooks', type: 'number'},
+                        integrations: {name: 'integrations', type: 'string'},
+                        members: {name: 'members', type: 'number'},
+                        messages: {name: 'messages', type: 'string'},
+                        outgoing_webhooks: {name: 'outgoing_webhooks', type: 'number'},
+                        private_channels: {name: 'private_channels', type: 'number'},
+                        public_channels: {name: 'public_channels', type: 'number'},
+                        reminder_custom_date: {name: 'reminder_custom_date', type: 'boolean'},
+                        scheduled_draft_custom_date: {name: 'scheduled_draft_custom_date', type: 'boolean'},
+                        sidebar_categories: {name: 'sidebar_categories', type: 'number'},
+                        storage: {name: 'storage', type: 'number'},
+                        teams: {name: 'teams', type: 'string'},
+                    },
+                    columnArray: [
+                        {name: 'boards', type: 'string'},
+                        {name: 'bots', type: 'number'},
+                        {name: 'custom_emojis', type: 'number'},
+                        {name: 'files', type: 'string'},
+                        {name: 'guests', type: 'number'},
+                        {name: 'incoming_webhooks', type: 'number'},
+                        {name: 'integrations', type: 'string'},
+                        {name: 'members', type: 'number'},
+                        {name: 'messages', type: 'string'},
+                        {name: 'outgoing_webhooks', type: 'number'},
+                        {name: 'private_channels', type: 'number'},
+                        {name: 'public_channels', type: 'number'},
+                        {name: 'reminder_custom_date', type: 'boolean'},
+                        {name: 'scheduled_draft_custom_date', type: 'boolean'},
+                        {name: 'sidebar_categories', type: 'number'},
+                        {name: 'storage', type: 'number'},
+                        {name: 'teams', type: 'string'},
+                    ],
+                },
+                [USAGE]: {
+                    name: USAGE,
+                    unsafeSql: undefined,
+                    columns: {
+                        custom_emojis: {name: 'custom_emojis', type: 'number'},
+                        guests: {name: 'guests', type: 'number'},
+                        incoming_webhooks: {name: 'incoming_webhooks', type: 'number'},
+                        members: {name: 'members', type: 'number'},
+                        outgoing_webhooks: {name: 'outgoing_webhooks', type: 'number'},
+                        pending_guests: {name: 'pending_guests', type: 'number'},
+                        private_channels: {name: 'private_channels', type: 'number'},
+                        public_channels: {name: 'public_channels', type: 'number'},
+                        sidebar_categories: {name: 'sidebar_categories', type: 'number'},
+                        storage: {name: 'storage', type: 'number'},
+                    },
+                    columnArray: [
+                        {name: 'custom_emojis', type: 'number'},
+                        {name: 'guests', type: 'number'},
+                        {name: 'incoming_webhooks', type: 'number'},
+                        {name: 'members', type: 'number'},
+                        {name: 'outgoing_webhooks', type: 'number'},
+                        {name: 'pending_guests', type: 'number'},
+                        {name: 'private_channels', type: 'number'},
+                        {name: 'public_channels', type: 'number'},
+                        {name: 'sidebar_categories', type: 'number'},
+                        {name: 'storage', type: 'number'},
                     ],
                 },
             },

@@ -1,35 +1,73 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`components/custom_status/custom_status_emoji should match snapshot 1`] = `
-<Text
-  style={
+<ViewManagerAdapter_ExpoImage
+  containerViewRef={"[React.ref]"}
+  contentFit="contain"
+  contentPosition={
+    {
+      "left": "50%",
+      "top": "50%",
+    }
+  }
+  height={16}
+  nativeViewRef={"[React.ref]"}
+  onError={[Function]}
+  onLoad={[Function]}
+  onLoadStart={[Function]}
+  onProgress={[Function]}
+  placeholder={[]}
+  recyclingKey="calendar.png-16-16"
+  source={
     [
-      undefined,
-      undefined,
       {
-        "color": "#000",
-        "fontSize": 16,
+        "testUri": "../../../dist/assets/images/emojis/calendar.png",
       },
     ]
   }
->
-  📆
-</Text>
+  style={
+    {
+      "height": 16,
+      "width": 16,
+    }
+  }
+  transition={null}
+  width={16}
+/>
 `;
 
 exports[`components/custom_status/custom_status_emoji should match snapshot with props 1`] = `
-<Text
-  style={
+<ViewManagerAdapter_ExpoImage
+  containerViewRef={"[React.ref]"}
+  contentFit="contain"
+  contentPosition={
+    {
+      "left": "50%",
+      "top": "50%",
+    }
+  }
+  height={34}
+  nativeViewRef={"[React.ref]"}
+  onError={[Function]}
+  onLoad={[Function]}
+  onLoadStart={[Function]}
+  onProgress={[Function]}
+  placeholder={[]}
+  recyclingKey="calendar.png-34-34"
+  source={
     [
-      undefined,
-      undefined,
       {
-        "color": "#000",
-        "fontSize": 34,
+        "testUri": "../../../dist/assets/images/emojis/calendar.png",
       },
     ]
   }
->
-  📆
-</Text>
+  style={
+    {
+      "height": 34,
+      "width": 34,
+    }
+  }
+  transition={null}
+  width={34}
+/>
 `;

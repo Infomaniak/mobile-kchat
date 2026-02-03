@@ -110,7 +110,7 @@ exports[`components/channel_list_row should show no results 1`] = `
               <RNSVGRect
                 fill={
                   {
-                    "payload": 4280047833,
+                    "payload": 4278229247,
                     "type": 0,
                   }
                 }
@@ -130,7 +130,7 @@ exports[`components/channel_list_row should show no results 1`] = `
               <RNSVGRect
                 fill={
                   {
-                    "payload": 4280047833,
+                    "payload": 4278229247,
                     "type": 0,
                   }
                 }
@@ -150,7 +150,7 @@ exports[`components/channel_list_row should show no results 1`] = `
               <RNSVGRect
                 fill={
                   {
-                    "payload": 4280047833,
+                    "payload": 4278229247,
                     "type": 0,
                   }
                 }
@@ -521,7 +521,7 @@ exports[`components/channel_list_row should show no results 1`] = `
           style={
             {
               "color": "#3f4350",
-              "fontFamily": "Metropolis-SemiBold",
+              "fontFamily": "SuisseIntl-SemiBold",
               "fontSize": 20,
               "fontWeight": "600",
               "lineHeight": 28,
@@ -536,7 +536,7 @@ exports[`components/channel_list_row should show no results 1`] = `
           style={
             {
               "color": "rgba(63,67,80,0.72)",
-              "fontFamily": "OpenSans",
+              "fontFamily": "SuisseIntl",
               "fontSize": 16,
               "fontWeight": "400",
               "lineHeight": 24,
@@ -561,7 +561,7 @@ exports[`components/channel_list_row should show no results 1`] = `
         }
       >
         <ActivityIndicator
-          color="#1c58d9"
+          color="#0098ff"
           size="large"
         />
       </View>
@@ -612,7 +612,9 @@ exports[`components/channel_list_row should show results and tutorial 1`] = `
             },
             "position": "",
             "roles": "",
+            "team_id": "1",
             "update_at": 1111,
+            "user_id": 1,
             "username": "johndoe",
           },
         ],
@@ -675,7 +677,7 @@ exports[`components/channel_list_row should show results and tutorial 1`] = `
             style={
               {
                 "color": "#3f4350",
-                "fontFamily": "OpenSans-SemiBold",
+                "fontFamily": "SuisseIntl-SemiBold",
                 "fontSize": 12,
                 "fontWeight": "600",
                 "lineHeight": 16,
@@ -807,7 +809,10 @@ exports[`components/channel_list_row should show results and tutorial 1`] = `
               source={
                 [
                   {
-                    "uri": "https://community.mattermost.com/api/v4/users/1/image?_=123456",
+                    "headers": {
+                      "Authorization": undefined,
+                    },
+                    "uri": "/api/v4/users/1/image?_=123456",
                   },
                 ]
               }
@@ -847,7 +852,7 @@ exports[`components/channel_list_row should show results and tutorial 1`] = `
                     "color": "#3f4350",
                     "flex": 0,
                     "flexShrink": 1,
-                    "fontFamily": "OpenSans",
+                    "fontFamily": "SuisseIntl",
                     "fontSize": 16,
                     "fontWeight": "400",
                     "lineHeight": 24,
@@ -902,7 +907,7 @@ exports[`components/channel_list_row should show results and tutorial 1`] = `
         }
       >
         <ActivityIndicator
-          color="#1c58d9"
+          color="#0098ff"
           size="large"
         />
       </View>
@@ -953,7 +958,9 @@ exports[`components/channel_list_row should show results no tutorial 1`] = `
             },
             "position": "",
             "roles": "",
+            "team_id": "1",
             "update_at": 1111,
+            "user_id": 1,
             "username": "johndoe",
           },
         ],
@@ -1016,7 +1023,7 @@ exports[`components/channel_list_row should show results no tutorial 1`] = `
             style={
               {
                 "color": "#3f4350",
-                "fontFamily": "OpenSans-SemiBold",
+                "fontFamily": "SuisseIntl-SemiBold",
                 "fontSize": 12,
                 "fontWeight": "600",
                 "lineHeight": 16,
@@ -1148,7 +1155,10 @@ exports[`components/channel_list_row should show results no tutorial 1`] = `
               source={
                 [
                   {
-                    "uri": "https://community.mattermost.com/api/v4/users/1/image?_=123456",
+                    "headers": {
+                      "Authorization": undefined,
+                    },
+                    "uri": "/api/v4/users/1/image?_=123456",
                   },
                 ]
               }
@@ -1188,7 +1198,7 @@ exports[`components/channel_list_row should show results no tutorial 1`] = `
                     "color": "#3f4350",
                     "flex": 0,
                     "flexShrink": 1,
-                    "fontFamily": "OpenSans",
+                    "fontFamily": "SuisseIntl",
                     "fontSize": 16,
                     "fontWeight": "400",
                     "lineHeight": 24,
@@ -1243,7 +1253,7 @@ exports[`components/channel_list_row should show results no tutorial 1`] = `
         }
       >
         <ActivityIndicator
-          color="#1c58d9"
+          color="#0098ff"
           size="large"
         />
       </View>
@@ -1294,7 +1304,9 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
             },
             "position": "",
             "roles": "",
+            "team_id": "1",
             "update_at": 1111,
+            "user_id": 1,
             "username": "johndoe",
           },
         ],
@@ -1332,7 +1344,9 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
             },
             "position": "",
             "roles": "",
+            "team_id": "1",
             "update_at": 1111,
+            "user_id": 2,
             "username": "rocky",
           },
         ],
@@ -1395,7 +1409,7 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
             style={
               {
                 "color": "#3f4350",
-                "fontFamily": "OpenSans-SemiBold",
+                "fontFamily": "SuisseIntl-SemiBold",
                 "fontSize": 12,
                 "fontWeight": "600",
                 "lineHeight": 16,
@@ -1527,7 +1541,10 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
               source={
                 [
                   {
-                    "uri": "https://community.mattermost.com/api/v4/users/1/image?_=123456",
+                    "headers": {
+                      "Authorization": undefined,
+                    },
+                    "uri": "/api/v4/users/1/image?_=123456",
                   },
                 ]
               }
@@ -1567,7 +1584,7 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
                     "color": "#3f4350",
                     "flex": 0,
                     "flexShrink": 1,
-                    "fontFamily": "OpenSans",
+                    "fontFamily": "SuisseIntl",
                     "fontSize": 16,
                     "fontWeight": "400",
                     "lineHeight": 24,
@@ -1635,7 +1652,7 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
             style={
               {
                 "color": "#3f4350",
-                "fontFamily": "OpenSans-SemiBold",
+                "fontFamily": "SuisseIntl-SemiBold",
                 "fontSize": 12,
                 "fontWeight": "600",
                 "lineHeight": 16,
@@ -1767,7 +1784,10 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
               source={
                 [
                   {
-                    "uri": "https://community.mattermost.com/api/v4/users/2/image?_=123456",
+                    "headers": {
+                      "Authorization": undefined,
+                    },
+                    "uri": "/api/v4/users/2/image?_=123456",
                   },
                 ]
               }
@@ -1807,7 +1827,7 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
                     "color": "#3f4350",
                     "flex": 0,
                     "flexShrink": 1,
-                    "fontFamily": "OpenSans",
+                    "fontFamily": "SuisseIntl",
                     "fontSize": 16,
                     "fontWeight": "400",
                     "lineHeight": 24,
@@ -1862,7 +1882,7 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
         }
       >
         <ActivityIndicator
-          color="#1c58d9"
+          color="#0098ff"
           size="large"
         />
       </View>

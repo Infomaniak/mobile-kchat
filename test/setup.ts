@@ -519,3 +519,29 @@ console.debug = filterStackTrace(colors.blue, '🐞 Debug:');
 // Silence warnings about missing EXPO_OS environment variable
 // on tests
 process.env.EXPO_OS = 'ios'; // eslint-disable-line no-process-env
+
+// IK MOCKS
+
+jest.mock('react-native-fs', () => ({
+    unlink: jest.fn(() => Promise.resolve()),
+}));
+
+jest.mock('react-native-color-matrix-image-filters', () => ({
+    Grayscale: ({children}: { children?: React.ReactNode }) => {
+        return children || null;
+    },
+}));
+
+jest.mock('@jitsi/react-native-sdk', () => ({
+    JitsiMeeting: ({children}: { children?: React.ReactNode }) => children || null,
+
+}));
+
+jest.mock('@calls/screens/call_screen/jitsi_components', () => ({
+    AudioMuteButton: () => null,
+    VideoMuteButton: () => null,
+    HangupButton: () => null,
+    ToolboxContainer: () => null,
+    ContentContainer: ({children}: { children?: React.ReactNode }) => children || null,
+    Sound: () => null,
+}));
