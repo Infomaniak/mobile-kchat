@@ -1,16 +1,17 @@
 stages:
-  - test
+  - check
+  - test-unit
+
+default:
+  interruptible: true
 
 variables:
-  NODE_VERSION: 22.14.0 # Sould respect /.nvmrc
+  NODE_VERSION: 22.14.0
 
-# REFERENCES
-# Triggered on Merge Requests
 .rule-mr: &rule-mr
   - if: &if-merge-request "$CI_MERGE_REQUEST_ID"
     when: on_success
 
-# Install npm dependencies
 .script-npm-install: &script-npm-install
   - npm ci --ignore-scripts
   - node node_modules/@sentry/cli/scripts/install.js
@@ -18,16 +19,13 @@ variables:
   - node scripts/generate-assets.js
   - node scripts/jitsi-ts-nocheck.js
 
-# Node-specific test config
 .tests-node: &tests-node
   image: node:${NODE_VERSION}
   before_script:
     - *script-npm-install
 
-# STAGES
-# Execute tsc & eslint
 test:check:
-  stage: test
+  stage: check
   extends:
     - .tests-node
   rules:
@@ -36,9 +34,8 @@ test:check:
   script:
     - npm run check
 
-# Execute i18n check
 test:i18n:
-  stage: test
+  stage: check
   extends:
     - .tests-node
   rules:
@@ -46,3 +43,12 @@ test:i18n:
     - when: never
   script:
     - ./scripts/precommit/i18n.sh
+
+test:unit-tests:
+  stage: test-unit
+  extends: [.tests-node]
+  rules:
+    - *rule-mr
+    - when: never
+  script:
+    - npm run test:ci

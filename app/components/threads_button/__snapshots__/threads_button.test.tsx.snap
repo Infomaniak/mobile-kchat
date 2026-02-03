@@ -57,7 +57,7 @@ exports[`Thread item in the channel list Threads Component should match snapshot
       style={
         [
           {
-            "color": "rgba(255,255,255,0.5)",
+            "color": "rgba(224,224,224,0.5)",
             "fontSize": 24,
             "marginRight": 12,
           },
@@ -73,13 +73,13 @@ exports[`Thread item in the channel list Threads Component should match snapshot
             "flex": 1,
           },
           {
-            "fontFamily": "OpenSans",
+            "fontFamily": "SuisseIntl",
             "fontSize": 16,
             "fontWeight": "400",
             "lineHeight": 24,
           },
           {
-            "color": "rgba(255,255,255,0.72)",
+            "color": "rgba(224,224,224,0.72)",
           },
           false,
           false,
@@ -150,7 +150,7 @@ exports[`Thread item in the channel list Threads Component should match snapshot
       style={
         [
           {
-            "color": "rgba(255,255,255,0.5)",
+            "color": "rgba(224,224,224,0.5)",
             "fontSize": 24,
             "marginRight": 12,
           },
@@ -168,13 +168,13 @@ exports[`Thread item in the channel list Threads Component should match snapshot
             "flex": 1,
           },
           {
-            "fontFamily": "OpenSans",
+            "fontFamily": "SuisseIntl",
             "fontSize": 16,
             "fontWeight": "400",
             "lineHeight": 24,
           },
           {
-            "color": "rgba(255,255,255,0.72)",
+            "color": "rgba(224,224,224,0.72)",
           },
           false,
           false,

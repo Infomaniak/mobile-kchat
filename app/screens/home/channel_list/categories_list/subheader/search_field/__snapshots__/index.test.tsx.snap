@@ -21,7 +21,7 @@ exports[`Search Field should match snapshot 1`] = `
   onStartShouldSetResponder={[Function]}
   style={
     {
-      "backgroundColor": "rgba(255,255,255,0.12)",
+      "backgroundColor": "rgba(224,224,224,0.12)",
       "borderRadius": 8,
       "flex": 1,
       "flexDirection": "row",
@@ -37,7 +37,7 @@ exports[`Search Field should match snapshot 1`] = `
     name="magnify"
     style={
       {
-        "color": "rgba(255,255,255,0.72)",
+        "color": "rgba(224,224,224,0.72)",
         "fontSize": 24,
         "width": 24,
       }
@@ -46,8 +46,8 @@ exports[`Search Field should match snapshot 1`] = `
   <Text
     style={
       {
-        "color": "rgba(255,255,255,0.72)",
-        "fontFamily": "OpenSans",
+        "color": "rgba(224,224,224,0.72)",
+        "fontFamily": "SuisseIntl",
         "fontSize": 16,
         "fontWeight": "400",
         "lineHeight": 24,

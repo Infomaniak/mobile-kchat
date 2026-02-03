@@ -31,6 +31,7 @@ jest.mock('react-native-reanimated', () => ({
         bezier: jest.fn(),
         out: jest.fn(),
     },
+    makeMutable: jest.fn((initialValue) => ({value: initialValue})),
     runOnJS: jest.fn((fn) => fn),
     useAnimatedRef: jest.fn(() => ({})),
     useAnimatedStyle: jest.fn((fn) => fn()),

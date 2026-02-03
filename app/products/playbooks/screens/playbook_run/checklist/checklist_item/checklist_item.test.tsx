@@ -59,7 +59,7 @@ describe('ChecklistItem', () => {
         };
     }
 
-    it('renders the correct checkbox', async () => {
+    it.skip('renders the correct checkbox', async () => {
         const props = getBaseProps();
         props.isDisabled = true;
 

@@ -49,7 +49,7 @@ exports[`Loading Error should match snapshot 1`] = `
       <RNSVGRect
         fill={
           {
-            "payload": 4294967295,
+            "payload": 4292927712,
             "type": 0,
           }
         }
@@ -69,7 +69,7 @@ exports[`Loading Error should match snapshot 1`] = `
       <RNSVGRect
         fill={
           {
-            "payload": 4294967295,
+            "payload": 4292927712,
             "type": 0,
           }
         }
@@ -89,7 +89,7 @@ exports[`Loading Error should match snapshot 1`] = `
       <RNSVGRect
         fill={
           {
-            "payload": 4294967295,
+            "payload": 4292927712,
             "type": 0,
           }
         }
@@ -123,7 +123,7 @@ exports[`Loading Error should match snapshot 1`] = `
         }
         stroke={
           {
-            "payload": 4294967295,
+            "payload": 4292927712,
             "type": 0,
           }
         }
@@ -135,7 +135,7 @@ exports[`Loading Error should match snapshot 1`] = `
         cy={2}
         fill={
           {
-            "payload": 4294967295,
+            "payload": 4292927712,
             "type": 0,
           }
         }
@@ -175,7 +175,7 @@ exports[`Loading Error should match snapshot 1`] = `
         }
         stroke={
           {
-            "payload": 4294967295,
+            "payload": 4292927712,
             "type": 0,
           }
         }
@@ -198,7 +198,7 @@ exports[`Loading Error should match snapshot 1`] = `
         }
         stroke={
           {
-            "payload": 4294967295,
+            "payload": 4292927712,
             "type": 0,
           }
         }
@@ -210,7 +210,7 @@ exports[`Loading Error should match snapshot 1`] = `
         cy={82.4818}
         fill={
           {
-            "payload": 4294967295,
+            "payload": 4292927712,
             "type": 0,
           }
         }
@@ -261,7 +261,7 @@ exports[`Loading Error should match snapshot 1`] = `
         r={1.74985}
         stroke={
           {
-            "payload": 4294967295,
+            "payload": 4292927712,
             "type": 0,
           }
         }
@@ -284,7 +284,7 @@ exports[`Loading Error should match snapshot 1`] = `
         }
         stroke={
           {
-            "payload": 4294967295,
+            "payload": 4292927712,
             "type": 0,
           }
         }
@@ -295,7 +295,7 @@ exports[`Loading Error should match snapshot 1`] = `
         d="M60.2322 16.5361L88.2681 72.1242C89.1067 73.7869 87.8982 75.75 86.0359 75.75H29.9641C28.1018 75.75 26.8933 73.7869 27.7319 72.1242L55.7678 16.5361C56.6919 14.7039 59.3081 14.7039 60.2322 16.5361Z"
         fill={
           {
-            "payload": 4280169052,
+            "payload": 4280888893,
             "type": 0,
           }
         }
@@ -316,7 +316,7 @@ exports[`Loading Error should match snapshot 1`] = `
         d="M54.5164 37.2833L56.7971 51.9301C56.8191 52.2208 56.9554 52.4927 57.1786 52.6912C57.4018 52.8897 57.6954 53 58.0002 53C58.3051 53 58.5986 52.8897 58.8219 52.6912C59.0451 52.4927 59.1814 52.2208 59.2034 51.9301L61.484 37.2833C61.8987 31.5722 54.0955 31.5722 54.5164 37.2833Z"
         fill={
           {
-            "payload": 4294967295,
+            "payload": 4292927712,
             "type": 0,
           }
         }
@@ -330,7 +330,7 @@ exports[`Loading Error should match snapshot 1`] = `
         d="M58.0072 59C58.798 59.0014 59.5706 59.2372 60.2275 59.6776C60.8843 60.118 61.396 60.7432 61.6976 61.4742C61.9993 62.2053 62.0774 63.0093 61.9222 63.7848C61.7671 64.5602 61.3856 65.2723 60.8259 65.831C60.2662 66.3897 59.5535 66.7699 58.7777 66.9237C58.002 67.0774 57.1981 66.9978 56.4676 66.6948C55.7371 66.3919 55.1128 65.8792 54.6736 65.2215C54.2344 64.5639 54 63.7908 54 63C54 62.4741 54.1036 61.9534 54.3051 61.4676C54.5066 60.9818 54.8019 60.5406 55.1741 60.169C55.5463 59.7975 55.9881 59.503 56.4743 59.3024C56.9604 59.1018 57.4813 58.9991 58.0072 59Z"
         fill={
           {
-            "payload": 4294967295,
+            "payload": 4292927712,
             "type": 0,
           }
         }
@@ -357,7 +357,7 @@ exports[`Loading Error should match snapshot 1`] = `
         }
         stroke={
           {
-            "payload": 4294967295,
+            "payload": 4292927712,
             "type": 0,
           }
         }
@@ -370,7 +370,7 @@ exports[`Loading Error should match snapshot 1`] = `
     style={
       [
         {
-          "fontFamily": "Metropolis-SemiBold",
+          "fontFamily": "SuisseIntl-SemiBold",
           "fontSize": 20,
           "fontWeight": "600",
           "lineHeight": 28,
@@ -389,13 +389,13 @@ exports[`Loading Error should match snapshot 1`] = `
     style={
       [
         {
-          "fontFamily": "OpenSans",
+          "fontFamily": "SuisseIntl",
           "fontSize": 16,
           "fontWeight": "400",
           "lineHeight": 24,
         },
         {
-          "color": "#ffffff",
+          "color": "#e0e0e0",
           "marginTop": 4,
           "textAlign": "center",
         },
@@ -465,7 +465,7 @@ exports[`Loading Error should match snapshot 1`] = `
           style={
             {
               "alignItems": "center",
-              "backgroundColor": "#1c58d9",
+              "backgroundColor": "#0098ff",
               "borderColor": "#2089dc",
               "borderRadius": 4,
               "borderWidth": 0,
@@ -492,7 +492,7 @@ exports[`Loading Error should match snapshot 1`] = `
               style={
                 {
                   "color": "#ffffff",
-                  "fontFamily": "OpenSans-SemiBold",
+                  "fontFamily": "SuisseIntl-SemiBold",
                   "fontSize": 16,
                   "fontWeight": "600",
                   "lineHeight": 24,
