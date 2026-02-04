@@ -145,6 +145,10 @@ open class SaveDataTask(private val reactContext: ReactApplicationContext) {
         if (mimeType == null) {
             mimeType = filePath?.let { RealPathUtil.getMimeType(it) }
         }
+        // Fallback to generic binary type for unknown file types
+        if (mimeType == null) {
+            mimeType = "application/octet-stream"
+        }
 
         val intent = Intent()
         intent.setAction(Intent.ACTION_CREATE_DOCUMENT)
@@ -164,14 +168,7 @@ open class SaveDataTask(private val reactContext: ReactApplicationContext) {
                 promise?.reject(Events.SAVE_ERROR_EVENT.event, e.message)
             }
         } else {
-            try {
-                if (mimeType == null) {
-                    throw Exception("It wasn't possible to detect the type of the file")
-                }
-                throw Exception("No app associated with this mime type")
-            } catch (e: Exception) {
-                promise?.reject(Events.SAVE_ERROR_EVENT.event, e.message)
-            }
+            promise?.reject(Events.SAVE_ERROR_EVENT.event, "No app available to save this file type")
         }
     }
 }
