@@ -10,7 +10,6 @@ import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 type Props = {
-    buttonDisabled: boolean;
     connecting: boolean;
     handleConnect: () => void;
     theme: Theme;
@@ -40,7 +39,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 }));
 
 const ServerForm = ({
-    buttonDisabled,
     connecting,
     handleConnect,
     theme,
@@ -53,7 +51,7 @@ const ServerForm = ({
         handleConnect();
     }, []);
 
-    const buttonType = buttonDisabled ? 'disabled' : 'default';
+    const buttonType = connecting ? 'disabled' : 'default';
 
     return (
         <View style={styles.formContainer}>
@@ -64,7 +62,7 @@ const ServerForm = ({
                         defaultMessage: 'Connecting',
                     } : {
                         id: 'mobile.components.select_server_view.connect',
-                        defaultMessage: 'Connecting',
+                        defaultMessage: 'Connect',
                     },
                 )}
                 buttonStyle={[
@@ -78,9 +76,9 @@ const ServerForm = ({
                     marginRight: 20,
                 }}
                 titleStyle={buttonTextStyle(theme, 'lg', 'primary', buttonType)}
-                disabled={buttonDisabled}
+                disabled={connecting}
                 onPress={onConnect}
-                testID={buttonDisabled ? 'server_form.connect.button.disabled' : 'server_form.connect.button'}
+                testID={connecting ? 'server_form.connect.button.disabled' : 'server_form.connect.button'}
                 loading={connecting}
             />
         </View>
