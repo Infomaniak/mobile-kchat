@@ -6,6 +6,7 @@ import {Image, View} from 'react-native';
 
 import {infomaniakLogin} from '@actions/remote/iksession';
 import FormattedText from '@components/formatted_text';
+import {Launch} from '@constants';
 import {login as displayLoginWebView} from '@init/ikauth';
 import PushNotifications from '@init/push_notifications';
 import {resetToHome, resetToInfomaniakNoTeams} from '@screens/navigation';
@@ -24,17 +25,14 @@ interface ServerProps extends LaunchProps {
 
 const Server = ({
     extra,
-    launchType,
     launchError,
     theme,
 }: ServerProps) => {
     const [connecting, setConnecting] = useState(false);
-    const [buttonDisabled, setButtonDisabled] = useState(false);
     const styles = getStyleSheet(theme);
     const isLightMode = theme.type === 'Infomaniak';
 
     const handleConnect = async () => {
-        setButtonDisabled(true);
         setConnecting(true);
         try {
             const accessToken = await displayLoginWebView();
@@ -44,8 +42,10 @@ const Server = ({
             } else {
                 resetToInfomaniakNoTeams();
             }
-        } catch {
-            setButtonDisabled(false);
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('Error during login:', error);
+        } finally {
             setConnecting(false);
         }
     };
@@ -56,7 +56,7 @@ const Server = ({
 
     const goToHome = (serverUrl: string, error?: never) => {
         const hasError = launchError || Boolean(error);
-        resetToHome({extra, launchError: hasError, launchType, serverUrl});
+        resetToHome({extra, launchError: hasError, launchType: Launch.Normal, serverUrl});
     };
 
     return (
@@ -95,7 +95,6 @@ const Server = ({
                             style={styles.description}
                         />
                         <ServerForm
-                            buttonDisabled={buttonDisabled}
                             connecting={connecting}
                             handleConnect={handleConnect}
                             theme={theme}

@@ -614,7 +614,7 @@
   "mobile.channel_list.recent": "Récent",
   "mobile.channel_list.unreads": "Non lus",
   "mobile.commands.error_title": "Une erreur s'est produite durant l'exécution de la commande",
-  "mobile.components.select_server_view.connect": "Connecter",
+  "mobile.components.select_server_view.connect": "Se connecter",
   "mobile.components.select_server_view.connecting": "Connexion",
   "mobile.components.select_server_view.displayHelp": "Choisissez un nom d'affichage pour votre serveur",
   "mobile.components.select_server_view.displayName": "Nom d'affichage",
