@@ -18,14 +18,14 @@ import EphemeralStore from '@store/ephemeral_store';
 import {makeStyleSheetFromTheme, hexToHue, changeOpacity} from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import type {PostList} from '@typings/components/post_list';
+import type {PostListWithGaps} from '@typings/components/post_list';
 
 type Props = {
     channelId: string;
     isCRTEnabled?: boolean;
     isManualUnread?: boolean;
     newMessageLineIndex: number;
-    posts: PostList;
+    posts: PostListWithGaps;
     registerScrollEndIndexListener: (fn: (endIndex: number) => void) => () => void;
     registerViewableItemsListener: (fn: (viewableItems: ViewToken[]) => void) => () => void;
     rootId?: string;

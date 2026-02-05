@@ -39,4 +39,8 @@ export type PostListGapItem = {
     };
 }
 
-export type PostList = Array<PostListItem | PostListOtherItem | PostListGapItem>;
+// Base PostList type used by preparePostList and most of the codebase
+export type PostList = Array<PostListItem | PostListOtherItem>;
+
+// Extended type that includes gap items, used by post_list.tsx when rendering with gaps
+export type PostListWithGaps = Array<PostListItem | PostListOtherItem | PostListGapItem>;

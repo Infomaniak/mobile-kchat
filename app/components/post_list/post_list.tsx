@@ -26,7 +26,7 @@ import {INITIAL_BATCH_TO_RENDER, SCROLL_POSITION_CONFIG, VIEWABILITY_CONFIG} fro
 import MoreMessages from './more_messages';
 import ScrollToEndView from './scroll_to_end_view';
 
-import type {ChunkGap, PostListGapItem, PostListItem, PostListOtherItem, ViewableItemsChanged, ViewableItemsChangedListenerEvent} from '@typings/components/post_list';
+import type {ChunkGap, PostListGapItem, PostListWithGaps, ViewableItemsChanged, ViewableItemsChangedListenerEvent} from '@typings/components/post_list';
 import type PostModel from '@typings/database/models/servers/post';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
@@ -78,7 +78,7 @@ export const postListRef = React.createRef<PostListHandle>();
 const CONTENT_OFFSET_THRESHOLD = 160;
 const SCROLL_EVENT_THROTTLE = Platform.select({android: 17, default: 60});
 
-const keyExtractor = (item: PostListItem | PostListOtherItem | PostListGapItem) => {
+const keyExtractor = (item: PostListWithGaps[number]) => {
     if (item.type === 'post') {
         return item.value.currentPost.id;
     }
@@ -297,7 +297,7 @@ const PostList = ({
         return removeListener;
     }, []);
 
-    const renderItem = useCallback(({item}: ListRenderItemInfo<PostListItem | PostListOtherItem | PostListGapItem>) => {
+    const renderItem = useCallback(({item}: ListRenderItemInfo<PostListWithGaps[number]>) => {
         switch (item.type) {
             case 'start-of-new-messages':
                 return (
