@@ -4,6 +4,11 @@
 import type PostModel from '@typings/database/models/servers/post';
 import type {ViewToken} from 'react-native';
 
+export type ChunkGap = {
+    channelId: string;
+    gapAfterTimestamp: number;
+};
+
 export type ViewableItemsChanged = {
     viewableItems: ViewToken[];
     changed: ViewToken[];
@@ -26,4 +31,12 @@ export type PostListOtherItem = {
     value: string;
 }
 
-export type PostList = Array<PostListItem | PostListOtherItem>;
+export type PostListGapItem = {
+    type: 'gap';
+    value: {
+        channelId: string;
+        gapAfterTimestamp: number;
+    };
+}
+
+export type PostList = Array<PostListItem | PostListOtherItem | PostListGapItem>;

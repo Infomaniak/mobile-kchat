@@ -18,11 +18,13 @@ import EphemeralStore from '@store/ephemeral_store';
 
 import Intro from './intro';
 
+import type {ChunkGap} from '@typings/components/post_list';
 import type PostModel from '@typings/database/models/servers/post';
 import type {AnimatedStyle} from 'react-native-reanimated';
 
 type Props = {
     channelId: string;
+    chunkGaps?: ChunkGap[];
     contentContainerStyle?: StyleProp<AnimatedStyle<ViewStyle>>;
     isCRTEnabled: boolean;
     lastViewedAt: number;
@@ -38,7 +40,7 @@ const styles = StyleSheet.create({
 });
 
 const ChannelPostList = ({
-    channelId, contentContainerStyle, isCRTEnabled,
+    channelId, chunkGaps, contentContainerStyle, isCRTEnabled,
     lastViewedAt, nativeID, posts, shouldShowJoinLeaveMessages,
 }: Props) => {
     const appState = useAppState();
@@ -117,6 +119,7 @@ const ChannelPostList = ({
     const postList = (
         <PostList
             channelId={channelId}
+            chunkGaps={chunkGaps}
             contentContainerStyle={[contentContainerStyle, !isCRTEnabled && styles.containerStyle]}
             isCRTEnabled={isCRTEnabled}
             footer={intro}

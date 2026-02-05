@@ -10,6 +10,7 @@ import {removePost} from '@actions/local/post';
 import {fetchPosts, fetchPostThread} from '@actions/remote/post';
 import CombinedUserActivity from '@components/post_list/combined_user_activity';
 import DateSeparator from '@components/post_list/date_separator';
+import GapIndicator from '@components/post_list/gap_indicator';
 import LimitedMessages, {type KSuiteLimit} from '@components/post_list/limited_messages/limited_messages';
 import NewMessagesLine from '@components/post_list/new_message_line';
 import Post from '@components/post_list/post';
@@ -25,13 +26,14 @@ import {INITIAL_BATCH_TO_RENDER, SCROLL_POSITION_CONFIG, VIEWABILITY_CONFIG} fro
 import MoreMessages from './more_messages';
 import ScrollToEndView from './scroll_to_end_view';
 
-import type {PostListItem, PostListOtherItem, ViewableItemsChanged, ViewableItemsChangedListenerEvent} from '@typings/components/post_list';
+import type {ChunkGap, PostListGapItem, PostListItem, PostListOtherItem, ViewableItemsChanged, ViewableItemsChangedListenerEvent} from '@typings/components/post_list';
 import type PostModel from '@typings/database/models/servers/post';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
     appsEnabled: boolean;
     channelId: string;
+    chunkGaps?: ChunkGap[];
     contentContainerStyle?: StyleProp<AnimatedStyle<ViewStyle>>;
     currentTimezone: string | null;
     currentUserId: string;
@@ -76,7 +78,15 @@ export const postListRef = React.createRef<PostListHandle>();
 const CONTENT_OFFSET_THRESHOLD = 160;
 const SCROLL_EVENT_THROTTLE = Platform.select({android: 17, default: 60});
 
-const keyExtractor = (item: PostListItem | PostListOtherItem) => (item.type === 'post' ? item.value.currentPost.id : item.value);
+const keyExtractor = (item: PostListItem | PostListOtherItem | PostListGapItem) => {
+    if (item.type === 'post') {
+        return item.value.currentPost.id;
+    }
+    if (item.type === 'gap') {
+        return `gap-${item.value.channelId}-${item.value.gapAfterTimestamp}`;
+    }
+    return item.value;
+};
 
 const styles = StyleSheet.create({
     flex: {
@@ -90,6 +100,7 @@ const styles = StyleSheet.create({
 const PostList = ({
     appsEnabled,
     channelId,
+    chunkGaps,
     contentContainerStyle,
     currentTimezone,
     currentUserId,
@@ -128,8 +139,24 @@ const PostList = ({
     const theme = useTheme();
     const serverUrl = useServerUrl();
     const orderedPosts = useMemo(() => {
-        return preparePostList(posts, lastViewedAt, showNewMessageLine, currentUserId, currentUsername, shouldShowJoinLeaveMessages, currentTimezone, location === Screens.THREAD, savedPostIds);
-    }, [posts, lastViewedAt, showNewMessageLine, currentUserId, currentUsername, shouldShowJoinLeaveMessages, currentTimezone, location, savedPostIds]);
+        const prepared = preparePostList(posts, lastViewedAt, showNewMessageLine, currentUserId, currentUsername, shouldShowJoinLeaveMessages, currentTimezone, location === Screens.THREAD, savedPostIds);
+
+        // Add gap indicators at the end of the list (which appears at the bottom due to inverted list)
+        // This allows users to load posts from gaps between POSTS_IN_CHANNEL chunks
+        // See: https://github.com/mattermost/mattermost-mobile/issues/9103
+        if (chunkGaps?.length) {
+            const gapItems: PostListGapItem[] = chunkGaps.map((gap) => ({
+                type: 'gap',
+                value: {
+                    channelId: gap.channelId,
+                    gapAfterTimestamp: gap.gapAfterTimestamp,
+                },
+            }));
+            return [...prepared, ...gapItems];
+        }
+
+        return prepared;
+    }, [posts, lastViewedAt, showNewMessageLine, currentUserId, currentUsername, shouldShowJoinLeaveMessages, currentTimezone, location, savedPostIds, chunkGaps]);
 
     const initialIndex = useMemo(() => {
         return orderedPosts.findIndex((i) => i.type === 'start-of-new-messages');
@@ -270,7 +297,7 @@ const PostList = ({
         return removeListener;
     }, []);
 
-    const renderItem = useCallback(({item}: ListRenderItemInfo<PostListItem | PostListOtherItem>) => {
+    const renderItem = useCallback(({item}: ListRenderItemInfo<PostListItem | PostListOtherItem | PostListGapItem>) => {
         switch (item.type) {
             case 'start-of-new-messages':
                 return (
@@ -313,6 +340,14 @@ const PostList = ({
                         key={item.value}
                     />);
             }
+            case 'gap':
+                return (
+                    <GapIndicator
+                        key={`gap-${item.value.channelId}-${item.value.gapAfterTimestamp}`}
+                        channelId={item.value.channelId}
+                        testID={`${testID}.gap_indicator`}
+                    />
+                );
             default: {
                 const post = item.value.currentPost;
                 const {isSaved, nextPost, previousPost} = item.value;
