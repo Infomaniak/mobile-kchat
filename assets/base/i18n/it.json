@@ -322,6 +322,7 @@
   "gallery.save_failed": "Impossibile salvare il file",
   "gallery.unsupported": "L'anteprima non è supportata per questo tipo di file. Provate a scaricarlo o a condividerlo per aprirlo in un'altra applicazione.",
   "gallery.video_saved": "Video salvato",
+  "gap_indicator.load_more": "Carica altri messaggi",
   "general_settings.about": "Informazioni su {appTitle}",
   "general_settings.advanced_settings": "Impostazioni avanzate",
   "general_settings.display": "Display",

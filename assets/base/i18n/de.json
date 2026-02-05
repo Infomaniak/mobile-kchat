@@ -340,6 +340,7 @@
   "gallery.save_failed": "Die Datei kann nicht gespeichert werden",
   "gallery.unsupported": "Die Vorschau wird für diesen Dateityp nicht unterstützt. Versuche, die Datei herunterzuladen oder zu teilen, um sie in einer anderen Anwendung zu öffnen.",
   "gallery.video_saved": "Video gespeichert",
+  "gap_indicator.load_more": "Weitere Nachrichten laden",
   "general_settings.about": "Über {appTitle}",
   "general_settings.advanced_settings": "Erweiterte Einstellungen",
   "general_settings.display": "Anzeige",

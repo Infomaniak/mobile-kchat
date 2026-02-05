@@ -346,6 +346,7 @@
   "gallery.save_failed": "No es posible guardar el archivo",
   "gallery.unsupported": "La previsualización no está soportada para este tipo de archivo. Intenta descargarlo y abrirlo con otra aplicación.",
   "gallery.video_saved": "Video guardado",
+  "gap_indicator.load_more": "Cargar más mensajes",
   "general_settings.about": "Acerca de {appTitle}",
   "general_settings.advanced_settings": "Ajustes avanzados",
   "general_settings.display": "Pantalla",

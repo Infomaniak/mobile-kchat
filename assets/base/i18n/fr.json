@@ -367,6 +367,7 @@
   "gallery.save_failed": "Impossible d'enregistrer le fichier",
   "gallery.unsupported": "L'aperçu n'est pas pris en charge pour ce type de fichier. Essayez de le télécharger ou de le partager dans une autre application.",
   "gallery.video_saved": "Vidéo enregistrée",
+  "gap_indicator.load_more": "Charger plus de messages",
   "general_settings.about": "À propos {appTitle}",
   "general_settings.advanced_settings": "Paramètres avancés",
   "general_settings.display": "Affichage",

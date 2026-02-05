@@ -19,6 +19,26 @@ import type PostsInChannelModel from '@typings/database/models/servers/posts_in_
 
 const {POSTS_IN_CHANNEL} = MM_TABLES.SERVER;
 
+// Helper function to delete empty chunks (earliest === latest)
+// This fixes the issue where channels appear empty due to corrupted POSTS_IN_CHANNEL state
+const deleteEmptyChunks = async (serverUrl: string, channelId: string) => {
+    const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+
+    const chunks = await database.
+        get<PostsInChannelModel>(POSTS_IN_CHANNEL).
+        query(Q.where('channel_id', channelId)).
+        fetch();
+
+    const emptyChunks = chunks.filter((c) => c.earliest === c.latest);
+    if (emptyChunks.length > 0) {
+        await database.write(async () => {
+            await database.batch(
+                ...emptyChunks.map((c) => c.prepareDestroyPermanently()),
+            );
+        });
+    }
+};
+
 type GapIndicatorProps = {
     channelId: string;
     testID?: string;
@@ -74,20 +94,7 @@ const GapIndicator = ({channelId, testID}: GapIndicatorProps) => {
             // Fix for https://github.com/mattermost/mattermost-mobile/issues/9103
             // First, remove any empty chunks (earliest === latest) that cause gaps
             // This allows fetchPosts to create a proper chunk that will merge correctly
-            const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-
-            await database.write(async () => {
-                const chunks = await database.
-                    get<PostsInChannelModel>(POSTS_IN_CHANNEL).
-                    query(Q.where('channel_id', channelId)).
-                    fetch();
-
-                // Delete empty chunks (earliest === latest)
-                const emptyChunks = chunks.filter((c) => c.earliest === c.latest);
-                await database.batch(
-                    ...emptyChunks.map((c) => c.prepareDestroyPermanently()),
-                );
-            });
+            await deleteEmptyChunks(serverUrl, channelId);
 
             // Now fetch posts - this will create a new chunk that should merge with existing ones
             await fetchPosts(serverUrl, channelId);
