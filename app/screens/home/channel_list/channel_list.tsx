@@ -19,7 +19,7 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import PerformanceMetricsManager from '@managers/performance_metrics_manager';
-import {resetToTeams, openToS} from '@screens/navigation';
+import {openToS, resetToInfomaniakNoTeams} from '@screens/navigation';
 import NavigationStore from '@store/navigation_store';
 import {isMainActivity} from '@utils/helpers';
 import {tryRunAppReview} from '@utils/reviews';
@@ -135,7 +135,7 @@ const ChannelListScreen = (props: ChannelProps) => {
 
     useEffect(() => {
         if (!props.hasTeams) {
-            resetToTeams();
+            resetToInfomaniakNoTeams();
         }
     }, [props.hasTeams]);
 

@@ -21,7 +21,7 @@ import {queryPostsByType} from '@queries/servers/post';
 import {getThemeForCurrentTeam} from '@queries/servers/preference';
 import {getCurrentUserId} from '@queries/servers/system';
 import {queryMyTeams} from '@queries/servers/team';
-import {resetToHome, resetToTeams, resetToOnboarding, resetToInfomaniakLogin} from '@screens/navigation';
+import {resetToHome, resetToOnboarding, resetToInfomaniakLogin, resetToInfomaniakNoTeams} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import {getLaunchPropsFromDeepLink} from '@utils/deep_link';
 import {logInfo} from '@utils/log';
@@ -223,8 +223,8 @@ export const launchToHome = async (props: LaunchProps) => {
         return resetToHome(props);
     }
 
-    logInfo('Launch app in Select Teams screen');
-    return resetToTeams();
+    logInfo('Launch app in Infomaniak No Teams screen');
+    return resetToInfomaniakNoTeams();
 };
 
 export const relaunchApp = (props: LaunchProps) => {
