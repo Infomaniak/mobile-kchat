@@ -6,6 +6,7 @@ import {of as of$} from 'rxjs';
 import {combineLatestWith, switchMap, distinctUntilChanged} from 'rxjs/operators';
 
 import {observeChannel, observeIsLastAdminInChannel} from '@queries/servers/channel';
+import {observeCurrentUserId} from '@queries/servers/system';
 import {observeCurrentUser} from '@queries/servers/user';
 import {isDefaultChannel} from '@utils/channel';
 
@@ -19,6 +20,7 @@ type OwnProps = WithDatabaseArgs & {
 
 const enhanced = withObservables(['channelId'], ({channelId, database}: OwnProps) => {
     const currentUser = observeCurrentUser(database);
+    const currentUserId = observeCurrentUserId(database);
     const channel = observeChannel(database, channelId);
     const channelMembersLength = channel.pipe(
         switchMap((c) => {
@@ -44,6 +46,7 @@ const enhanced = withObservables(['channelId'], ({channelId, database}: OwnProps
 
     return {
         channelMembersLength,
+        currentUserId,
         isLastAdminInChannel,
         canLeave,
         displayName,

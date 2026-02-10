@@ -18,6 +18,7 @@ import {useTheme} from '@context/theme';
 import {useAccessControlAttributes} from '@hooks/access_control_attributes';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import NetworkManager from '@managers/network_manager';
 import SecurityManager from '@managers/security_manager';
 import {openAsBottomSheet, popTopScreen, setButtons} from '@screens/navigation';
 import NavigationStore from '@store/navigation_store';
@@ -25,6 +26,7 @@ import {showRemoveChannelUserSnackbar} from '@utils/snack_bar';
 import {changeOpacity, getKeyboardAppearanceFromTheme} from '@utils/theme';
 import {displayUsername, filterDeactivatedProfiles, filterProfilesMatchingTerm} from '@utils/user';
 
+import type GroupModel from '@typings/database/models/servers/group';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
@@ -103,6 +105,7 @@ export default function ManageChannelMembers({
     const [isManageMode, setIsManageMode] = useState(false);
     const [profiles, setProfiles] = useState<UserProfile[]>(EMPTY);
     const [channelMembers, setChannelMembers] = useState<ChannelMembership[]>(EMPTY_MEMBERS);
+    const [groups, setGroups] = useState<GroupModel[]>([]);
     const [searchResults, setSearchResults] = useState<UserProfile[]>(EMPTY);
     const [loading, setLoading] = useState(true);
     const [term, setTerm] = useState('');
@@ -284,6 +287,29 @@ export default function ManageChannelMembers({
     }, []);
 
     useEffect(() => {
+        const fetchGroups = async () => {
+            try {
+                const client = NetworkManager.getClient(serverUrl);
+
+                const response = await client.getGroupsAssociatedToChannel(channelId);
+                if (mounted.current && response?.length) {
+                    // Map API Group to GroupModel-like shape
+                    const mapped = response.map((g: Group) => ({
+                        id: g.id,
+                        displayName: g.display_name,
+                        memberCount: g.member_count ?? 0,
+                        name: g.name,
+                    })) as unknown as GroupModel[];
+                    setGroups(mapped);
+                }
+            } catch (error) {
+                console.log('🚀 ~ fetchGroups error:', error);
+            }
+        };
+        fetchGroups();
+    }, [serverUrl, channelId]);
+
+    useEffect(() => {
         if (canManageAndRemoveMembers) {
             updateNavigationButtons(false);
         }
@@ -338,6 +364,8 @@ export default function ManageChannelMembers({
                 manageMode={true} // default true to change row select icon to a dropdown
                 profiles={data}
                 channelMembers={channelMembers}
+                groups={groups}
+                channelId={channelId}
                 selectedIds={EMPTY_IDS}
                 showManageMode={canManageAndRemoveMembers && isManageMode}
                 showNoResults={!loading}

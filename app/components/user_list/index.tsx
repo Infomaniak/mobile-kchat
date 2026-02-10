@@ -20,6 +20,9 @@ import {
 } from '@utils/theme';
 import {typography} from '@utils/typography';
 
+import GroupRow from './group_row';
+
+import type GroupModel from '@typings/database/models/servers/group';
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
@@ -33,6 +36,10 @@ const messages = defineMessages({
     admins: {
         id: 'mobile.manage_members.section_title_admins',
         defaultMessage: 'CHANNEL ADMINS',
+    },
+    groups: {
+        id: 'mobile.manage_members.section_title_groups',
+        defaultMessage: 'TEAMS',
     },
     members: {
         id: 'mobile.manage_members.section_title_members',
@@ -63,18 +70,17 @@ const sectionRoleKeyExtractor = (cAdmin: boolean) => {
     return cAdmin ? messages.admins : messages.members;
 };
 
-export function createProfilesSections(intl: IntlShape, profiles: UserProfile[], members?: ChannelMembership[]) {
-    if (!profiles.length) {
+export function createProfilesSections(intl: IntlShape, profiles: UserProfile[], members?: ChannelMembership[], groups?: GroupModel[]) {
+    if (!profiles.length && !groups?.length) {
         return [];
     }
 
-    const sections = new Map<string, UserProfileWithChannelAdmin[]>();
+    const {formatMessage} = intl;
 
     if (members?.length) {
         // when channel members are provided, build the sections by admins and members
         const membersDictionary = new Map<string, ChannelMembership>();
         const membersSections = new Map<string, UserProfileWithChannelAdmin[]>();
-        const {formatMessage} = intl;
         members.forEach((m) => membersDictionary.set(m.user_id, m));
         profiles.forEach((p) => {
             const member = membersDictionary.get(p.id);
@@ -85,17 +91,39 @@ export function createProfilesSections(intl: IntlShape, profiles: UserProfile[],
                 membersSections.set(sectionKey, section);
             }
         });
-        sections.set(formatMessage(messages.admins), membersSections.get(messages.admins.id) || []);
-        sections.set(formatMessage(messages.members), membersSections.get(messages.members.id) || []);
-    } else {
-        // when channel members are not provided, build the sections alphabetically
-        profiles.forEach((p) => {
-            const sectionKey = sectionKeyExtractor(p);
-            const sectionValue = sections.get(sectionKey) || [];
-            const section = [...sectionValue, p];
-            sections.set(sectionKey, section);
-        });
+
+        const results: Array<{first: boolean; id: string; data: any[]; isGroupSection?: boolean}> = [];
+        let index = 0;
+
+        const admins = membersSections.get(messages.admins.id) || [];
+        if (admins.length) {
+            results.push({first: index === 0, id: formatMessage(messages.admins), data: admins});
+            index++;
+        }
+
+        // Insert groups section between admins and members
+        if (groups?.length) {
+            results.push({first: index === 0, id: formatMessage(messages.groups), data: groups, isGroupSection: true});
+            index++;
+        }
+
+        const membersData = membersSections.get(messages.members.id) || [];
+        if (membersData.length) {
+            results.push({first: index === 0, id: formatMessage(messages.members), data: membersData});
+            index++;
+        }
+
+        return results;
     }
+
+    // when channel members are not provided, build the sections alphabetically
+    const sections = new Map<string, UserProfileWithChannelAdmin[]>();
+    profiles.forEach((p) => {
+        const sectionKey = sectionKeyExtractor(p);
+        const sectionValue = sections.get(sectionKey) || [];
+        const section = [...sectionValue, p];
+        sections.set(sectionKey, section);
+    });
 
     const results = [];
     let index = 0;
@@ -172,6 +200,8 @@ const getStyleFromTheme = makeStyleSheetFromTheme((theme) => {
 type Props = {
     profiles: UserProfile[];
     channelMembers?: ChannelMembership[];
+    groups?: GroupModel[];
+    channelId?: string;
     currentUserId: string;
     handleSelectProfile: (user: UserProfile | UserModel) => void;
     fetchMore?: () => void;
@@ -190,6 +220,8 @@ type Props = {
 export default function UserList({
     profiles,
     channelMembers,
+    groups,
+    channelId,
     selectedIds,
     currentUserId,
     handleSelectProfile,
@@ -223,8 +255,8 @@ export default function UserList({
             return createProfiles(profiles, channelMembers);
         }
 
-        return createProfilesSections(intl, profiles, channelMembers);
-    }, [channelMembers, intl, loading, profiles, term]);
+        return createProfilesSections(intl, profiles, channelMembers, groups);
+    }, [channelMembers, groups, intl, loading, profiles, term]);
 
     const openUserProfile = useCallback(async (profile: UserProfile | UserModel) => {
         let user: UserModel;
@@ -299,6 +331,15 @@ export default function UserList({
         );
     }, [showNoResults && style, term, noResutsStyle]);
 
+    const renderGroupItem = useCallback(({item}: {item: any}) => {
+        return (
+            <GroupRow
+                group={item as GroupModel}
+                channelId={channelId || ''}
+            />
+        );
+    }, [channelId]);
+
     const renderSectionHeader = useCallback(({section}: {section: SectionListData<UserProfile>}) => {
         return (
             <View style={style.sectionWrapper}>
@@ -330,7 +371,19 @@ export default function UserList({
         );
     };
 
-    const renderSectionList = (sections: Array<SectionListData<UserProfile>>) => {
+    const renderSectionList = (sections: Array<SectionListData<any>>) => {
+        // Inject per-section renderItem for group sections
+        const enhancedSections = sections.map((section) => {
+            if ((section as any).isGroupSection) {
+                return {
+                    ...section,
+                    renderItem: renderGroupItem,
+                    keyExtractor: (item: any) => item.id,
+                };
+            }
+            return section;
+        });
+
         return (
             <SectionList
                 contentContainerStyle={style.container}
@@ -345,7 +398,7 @@ export default function UserList({
                 renderItem={renderItem}
                 renderSectionHeader={renderSectionHeader}
                 scrollEventThrottle={SCROLL_EVENT_THROTTLE}
-                sections={sections}
+                sections={enhancedSections}
                 style={style.list}
                 stickySectionHeadersEnabled={false}
                 testID={`${testID}.section_list`}
@@ -357,5 +410,5 @@ export default function UserList({
     if (term) {
         return renderFlatList(data as UserProfileWithChannelAdmin[]);
     }
-    return renderSectionList(data as Array<SectionListData<UserProfileWithChannelAdmin>>);
+    return renderSectionList(data as Array<SectionListData<any>>);
 }

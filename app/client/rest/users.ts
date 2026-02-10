@@ -46,6 +46,7 @@ export interface ClientUsersMix {
     updateCustomStatus: (customStatus: UserCustomStatus) => Promise<{status: string}>;
     unsetCustomStatus: () => Promise<{status: string}>;
     removeRecentCustomStatus: (customStatus: UserCustomStatus) => Promise<{status: string}>;
+    getUsersInGroup: (groupId: string, page?: number, perPage?: number, sort?: string) => Promise<UserProfile[]>;
 }
 
 const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) => class extends superclass {
@@ -398,6 +399,18 @@ const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
         return this.doFetch(
             `${this.getUserRoute('me')}/status/custom/recent/delete`,
             {method: 'post', body: customStatus},
+        );
+    };
+
+    getUsersInGroup = async (groupId: string, page = 0, perPage = 60, sort = 'display_name') => {
+        return this.doFetch(
+            `${this.getUsersRoute()}${buildQueryString({
+                in_group: groupId,
+                page,
+                per_page: perPage,
+                sort,
+            })}`,
+            {method: 'get'},
         );
     };
 };

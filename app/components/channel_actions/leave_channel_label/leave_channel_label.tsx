@@ -13,6 +13,7 @@ import {General, Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useIsTablet} from '@hooks/device';
 import {t} from '@i18n';
+import NetworkManager from '@managers/network_manager';
 import {dismissAllModalsAndPopToRoot, dismissBottomSheet, showModal} from '@screens/navigation';
 import {alertErrorWithFallback} from '@utils/draft';
 
@@ -20,6 +21,7 @@ type Props = {
     isOptionItem?: boolean;
     canLeave: boolean;
     channelId: string;
+    currentUserId: string;
     displayName?: string;
     type?: string;
     testID?: string;
@@ -28,7 +30,7 @@ type Props = {
 }
 
 const LeaveChannelLabel = (props: Props) => {
-    const {canLeave, channelId, channelMembersLength, displayName, isOptionItem, type, isLastAdminInChannel, testID} = props;
+    const {canLeave, channelId, channelMembersLength, currentUserId, displayName, isOptionItem, type, isLastAdminInChannel, testID} = props;
     const intl = useIntl();
     const serverUrl = useServerUrl();
     const isTablet = useIsTablet();
@@ -177,7 +179,27 @@ const LeaveChannelLabel = (props: Props) => {
         }
     };
 
-    const onLeave = () => {
+    const onLeave = async () => {
+        try {
+            const client = NetworkManager.getClient(serverUrl);
+            const channelGroups = await client.getGroupsAssociatedToChannel(channelId);
+            if (Array.isArray(channelGroups) && channelGroups.length > 0) {
+                const userGroups = await client.getAllGroupsAssociatedToMembership(currentUserId);
+                const userGroupIds = new Set((Array.isArray(userGroups) ? userGroups : []).map((g: Group) => g.id));
+                const overlap = channelGroups.filter((g: Group) => userGroupIds.has(g.id));
+                if (overlap.length > 0) {
+                    Alert.alert(
+                        intl.formatMessage({id: 'ik_leave_channel_group_blocked.title', defaultMessage: 'Quitter le canal'}),
+                        intl.formatMessage({id: 'ik_leave_channel_group_blocked.body', defaultMessage: 'Ce canal est lié à une de vos équipes, afin de faciliter la collaboration entre ses membres. Pour le quitter, contactez un administrateur si besoin.'}),
+                        [{text: intl.formatMessage({id: 'mobile.server_upgrade.button', defaultMessage: 'OK'})}],
+                    );
+                    return;
+                }
+            }
+        } catch {
+            // If group check fails, fall through to normal flow
+        }
+
         switch (type) {
             case General.OPEN_CHANNEL:
                 leavePublicChannel();

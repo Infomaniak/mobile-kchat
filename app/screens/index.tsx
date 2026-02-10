@@ -165,6 +165,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.GLOBAL_THREADS:
             screen = withServerDatabase(require('@screens/global_threads').default);
             break;
+        case Screens.GROUP_MEMBERS:
+            screen = withServerDatabase(require('@screens/group_members').default);
+            break;
         case Screens.INTERACTIVE_DIALOG:
             screen = withServerDatabase(require('@screens/interactive_dialog').default);
             break;

@@ -9,6 +9,7 @@ import {fetchChannelStats, removeMemberFromChannel, updateChannelMemberSchemeRol
 import OptionItem from '@components/option_item';
 import {Events, Members} from '@constants';
 import {useServerUrl} from '@context/server';
+import NetworkManager from '@managers/network_manager';
 import {dismissBottomSheet} from '@screens/navigation';
 import {alertErrorWithFallback} from '@utils/draft';
 
@@ -72,7 +73,27 @@ const ManageMembersLabel = ({canRemoveUser, channelId, manageOption, testID, use
         DeviceEventEmitter.emit(Events.REMOVE_USER_FROM_CHANNEL, userId);
     }, [channelId, serverUrl, userId]);
 
-    const removeFromChannel = useCallback(() => {
+    const removeFromChannel = useCallback(async () => {
+        try {
+            const client = NetworkManager.getClient(serverUrl);
+            const channelGroups = await client.getGroupsAssociatedToChannel(channelId);
+            if (Array.isArray(channelGroups) && channelGroups.length > 0) {
+                const userGroups = await client.getAllGroupsAssociatedToMembership(userId);
+                const userGroupIds = new Set((Array.isArray(userGroups) ? userGroups : []).map((g: Group) => g.id));
+                const overlap = channelGroups.filter((g: Group) => userGroupIds.has(g.id));
+                if (overlap.length > 0) {
+                    Alert.alert(
+                        formatMessage({id: 'ik_member_in_group.title', defaultMessage: "Retirer l'accès au canal"}),
+                        formatMessage({id: 'ik_member_in_group.body', defaultMessage: "Ce membre fait partie d'équipes ayant accès à ce canal de discussion. Rendez-vous sur l'application web pour le retirer de toutes ces équipes."}),
+                        [{text: formatMessage({id: 'mobile.server_upgrade.button', defaultMessage: 'OK'})}],
+                    );
+                    return;
+                }
+            }
+        } catch {
+            // If group check fails, fall through to normal flow
+        }
+
         Alert.alert(
             formatMessage(messages.remove_title),
             formatMessage(messages.remove_message),
@@ -85,7 +106,7 @@ const ManageMembersLabel = ({canRemoveUser, channelId, manageOption, testID, use
                 onPress: handleRemoveUser,
             }], {cancelable: false},
         );
-    }, [formatMessage, handleRemoveUser]);
+    }, [formatMessage, handleRemoveUser, serverUrl, channelId, userId]);
 
     const updateChannelMemberSchemeRole = useCallback(async (schemeAdmin: boolean) => {
         const result = await updateChannelMemberSchemeRoles(serverUrl, channelId, userId, true, schemeAdmin);
