@@ -1324,5 +1324,9 @@
   "upgrade_banner_channel.description": "Vous avez atteint la limite de {type, select, O {canaux publics} P {canaux privés} other {}} ({usage, number}/{limit, number}) sur votre offre kSuite. {isAdmin, select, true {Modifiez votre offre pour créer des canaux supplémentaires.} other {Veuillez contacter un administrateur pour qu'il modifie l'offre.}}",
   "upgrade_banner.link": "Pour mettre à niveau votre offre, utilisez l’interface web.",
   "upgrade_banner.title": "Débloquez toute la puissance de kChat !",
-  "upgrade_banner.description": "Les messages et fichiers datant de plus de {duration} ne sont plus disponibles. Passez à l'offre {plan} de kSuite Pro pour profiter d'un historique illimité de vos conversations."
+  "upgrade_banner.description": "Les messages et fichiers datant de plus de {duration} ne sont plus disponibles. Passez à l'offre {plan} de kSuite Pro pour profiter d'un historique illimité de vos conversations.",
+  "ik_member_in_group.title": "Retirer l'accès au canal",
+  "ik_member_in_group.body": "Ce membre fait partie d'équipes ayant accès à ce canal de discussion. Rendez-vous sur l'application web pour le retirer de toutes ces équipes.",
+  "ik_leave_channel_group_blocked.title": "Quitter le canal",
+  "ik_leave_channel_group_blocked.body": "Ce canal est lié à une de vos équipes, afin de faciliter la collaboration entre ses membres. Pour le quitter, contactez un administrateur si besoin."
 }
