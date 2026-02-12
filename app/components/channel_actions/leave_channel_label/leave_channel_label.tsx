@@ -189,8 +189,8 @@ const LeaveChannelLabel = (props: Props) => {
                 const overlap = channelGroups.filter((g: Group) => userGroupIds.has(g.id));
                 if (overlap.length > 0) {
                     Alert.alert(
-                        intl.formatMessage({id: 'ik_leave_channel_group_blocked.title', defaultMessage: 'Quitter le canal'}),
-                        intl.formatMessage({id: 'ik_leave_channel_group_blocked.body', defaultMessage: 'Ce canal est lié à une de vos équipes, afin de faciliter la collaboration entre ses membres. Pour le quitter, contactez un administrateur si besoin.'}),
+                        intl.formatMessage({id: 'ik_leave_channel_group_blocked.title', defaultMessage: 'Leave channel'}),
+                        intl.formatMessage({id: 'ik_leave_channel_group_blocked.body', defaultMessage: 'This channel is linked to one of your teams to facilitate collaboration among its members. To leave it, contact an administrator if needed.'}),
                         [{text: intl.formatMessage({id: 'mobile.server_upgrade.button', defaultMessage: 'OK'})}],
                     );
                     return;

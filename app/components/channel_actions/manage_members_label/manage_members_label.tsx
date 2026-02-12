@@ -83,8 +83,8 @@ const ManageMembersLabel = ({canRemoveUser, channelId, manageOption, testID, use
                 const overlap = channelGroups.filter((g: Group) => userGroupIds.has(g.id));
                 if (overlap.length > 0) {
                     Alert.alert(
-                        formatMessage({id: 'ik_member_in_group.title', defaultMessage: "Retirer l'accès au canal"}),
-                        formatMessage({id: 'ik_member_in_group.body', defaultMessage: "Ce membre fait partie d'équipes ayant accès à ce canal de discussion. Rendez-vous sur l'application web pour le retirer de toutes ces équipes."}),
+                        formatMessage({id: 'ik_member_in_group.title', defaultMessage: 'Remove channel access'}),
+                        formatMessage({id: 'ik_member_in_group.body', defaultMessage: 'This member is part of teams that have access to this discussion channel. Go to the web application to remove them from all these teams.'}),
                         [{text: formatMessage({id: 'mobile.server_upgrade.button', defaultMessage: 'OK'})}],
                     );
                     return;
