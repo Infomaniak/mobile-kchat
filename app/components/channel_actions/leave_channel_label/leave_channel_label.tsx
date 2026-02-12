@@ -180,14 +180,16 @@ const LeaveChannelLabel = (props: Props) => {
     };
 
     const onLeave = async () => {
-        const hasOverlappingGroups = await checkUserInOverlappingGroups(serverUrl, channelId, currentUserId);
-        if (hasOverlappingGroups) {
-            Alert.alert(
-                intl.formatMessage({id: 'ik_leave_channel_group_blocked.title', defaultMessage: 'Leave channel'}),
-                intl.formatMessage({id: 'ik_leave_channel_group_blocked.body', defaultMessage: 'This channel is linked to one of your teams to facilitate collaboration among its members. To leave it, contact an administrator if needed.'}),
-                [{text: intl.formatMessage({id: 'mobile.server_upgrade.button', defaultMessage: 'OK'})}],
-            );
-            return;
+        if (type === General.OPEN_CHANNEL || type === General.PRIVATE_CHANNEL) {
+            const hasOverlappingGroups = await checkUserInOverlappingGroups(serverUrl, channelId, currentUserId);
+            if (hasOverlappingGroups) {
+                Alert.alert(
+                    intl.formatMessage({id: 'ik_leave_channel_group_blocked.title', defaultMessage: 'Leave channel'}),
+                    intl.formatMessage({id: 'ik_leave_channel_group_blocked.body', defaultMessage: 'This channel is linked to one of your teams to facilitate collaboration among its members. To leave it, contact an administrator if needed.'}),
+                    [{text: intl.formatMessage({id: 'mobile.server_upgrade.button', defaultMessage: 'OK'})}],
+                );
+                return;
+            }
         }
 
         switch (type) {
