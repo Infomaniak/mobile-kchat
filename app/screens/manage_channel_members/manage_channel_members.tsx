@@ -303,7 +303,7 @@ export default function ManageChannelMembers({
                     setGroups(mapped);
                 }
             } catch (error) {
-                console.log('🚀 ~ fetchGroups error:', error);
+                // Groups are a nice to have, so we can just log the error and not block the screen if the request fails
             }
         };
         fetchGroups();
