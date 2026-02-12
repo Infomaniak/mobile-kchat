@@ -66,7 +66,6 @@ const styles = StyleSheet.create({
     },
 });
 
-const ITEM_HEIGHT = 56;
 const MEMBERS_PER_PAGE = 60;
 
 const keyExtractor = (item: UserProfile) => item.id;
@@ -87,7 +86,7 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
             const response = await client.getGroup(groupId, true);
             setGroup(response);
         } catch (error) {
-            console.log('Error fetching group:', error);
+            // Group details are a nice to have, so we can just log the error and not block the screen if the request fails
         }
     }, [serverUrl, groupId]);
 
@@ -117,7 +116,6 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
                 setHasMore(false);
             }
         } catch (error) {
-            console.log('Error fetching group members:', error);
             setHasMore(false);
         } finally {
             setLoading(false);
@@ -126,7 +124,6 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
     }, [serverUrl, groupId]);
 
     useEffect(() => {
-        console.log('Fetching group and members for groupId:', groupId);
         fetchGroup();
         fetchMembers(0, true);
     }, [fetchGroup, fetchMembers]);
