@@ -2,8 +2,9 @@
 // See LICENSE.txt for license information.
 
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {type ListRenderItemInfo, StyleSheet, View, Text} from 'react-native';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {useIntl} from 'react-intl';
+import {Dimensions, type ListRenderItemInfo, StyleSheet, TouchableOpacity, View, Text} from 'react-native';
 
 import Loading from '@components/loading';
 import UserItem from '@components/user_item';
@@ -16,6 +17,8 @@ import {changeOpacity} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 import GroupIcon from './group_icon';
+
+const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 
 type Props = {
     closeButtonId: string;
@@ -37,6 +40,9 @@ type Group = {
 }
 
 const styles = StyleSheet.create({
+    container: {
+        minHeight: SCREEN_HEIGHT * 0.4,
+    },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -64,6 +70,24 @@ const styles = StyleSheet.create({
         marginHorizontal: 5,
         marginBottom: 16,
     },
+    errorContainer: {
+        minHeight: SCREEN_HEIGHT * 0.4,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 32,
+    },
+    errorText: {
+        textAlign: 'center',
+        marginBottom: 16,
+    },
+    retryButton: {
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 4,
+    },
+    retryButtonText: {
+        ...typography('Body', 200, 'SemiBold'),
+    },
 });
 
 const MEMBERS_PER_PAGE = 60;
@@ -73,19 +97,21 @@ const keyExtractor = (item: UserProfile) => item.id;
 const GroupMembers = ({closeButtonId, groupId}: Props) => {
     const serverUrl = useServerUrl();
     const theme = useTheme();
+    const intl = useIntl();
     const [group, setGroup] = useState<Group | null>(null);
     const [members, setMembers] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
+    const [error, setError] = useState(false);
 
     const fetchGroup = useCallback(async () => {
         try {
             const client = NetworkManager.getClient(serverUrl);
             const response = await client.getGroup(groupId, true);
             setGroup(response);
-        } catch (error) {
+        } catch {
             // Group details are a nice to have, so we can just log the error and not block the screen if the request fails
         }
     }, [serverUrl, groupId]);
@@ -94,6 +120,7 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
         try {
             if (isInitial) {
                 setLoading(true);
+                setError(false);
             } else {
                 setLoadingMore(true);
             }
@@ -115,7 +142,10 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
             } else {
                 setHasMore(false);
             }
-        } catch (error) {
+        } catch {
+            if (isInitial) {
+                setError(true);
+            }
             setHasMore(false);
         } finally {
             setLoading(false);
@@ -123,21 +153,26 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
         }
     }, [serverUrl, groupId]);
 
+    const handleRetry = useCallback(() => {
+        fetchGroup();
+        fetchMembers(0, true);
+    }, [fetchGroup, fetchMembers]);
+
     useEffect(() => {
         fetchGroup();
         fetchMembers(0, true);
     }, [fetchGroup, fetchMembers]);
 
-    const loadingRef = useRef(false);
+    const [isFetching, setIsFetching] = useState(false);
 
     const loadMore = useCallback(() => {
-        if (!loadingRef.current && hasMore) {
-            loadingRef.current = true;
+        if (!isFetching && hasMore && !loadingMore) {
+            setIsFetching(true);
             fetchMembers(page, false).finally(() => {
-                loadingRef.current = false;
+                setIsFetching(false);
             });
         }
-    }, [hasMore, page, fetchMembers]);
+    }, [hasMore, page, fetchMembers, loadingMore, isFetching]);
 
     const snapPoints = useMemo(() => {
         return [1, '50%', '80%'];
@@ -216,14 +251,61 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
         );
     }, [group, theme]);
 
+    const renderError = () => (
+        <View style={styles.errorContainer}>
+            <Text
+                style={[
+                    styles.errorText,
+                    {
+                        color: theme.centerChannelColor,
+                        ...typography('Body', 200),
+                    },
+                ]}
+            >
+                {intl.formatMessage({
+                    id: 'group_members.load_error',
+                    defaultMessage: 'Oops! Something went wrong while loading this group.',
+                })}
+            </Text>
+            <TouchableOpacity
+                onPress={handleRetry}
+                style={[
+                    styles.retryButton,
+                    {backgroundColor: theme.buttonBg},
+                ]}
+                testID='group_members.retry_button'
+            >
+                <Text
+                    style={[
+                        styles.retryButtonText,
+                        {color: theme.buttonColor},
+                    ]}
+                >
+                    {intl.formatMessage({
+                        id: 'group_members.retry',
+                        defaultMessage: 'Retry',
+                    })}
+                </Text>
+            </TouchableOpacity>
+        </View>
+    );
+
     const renderContent = () => {
         if (loading) {
             return (
-                <View style={styles.loadingContainer}>
+                <View style={[styles.container, styles.loadingContainer]}>
                     <Loading
                         color={theme.buttonBg}
                         size='large'
                     />
+                </View>
+            );
+        }
+
+        if (error) {
+            return (
+                <View style={styles.container}>
+                    {renderError()}
                 </View>
             );
         }
