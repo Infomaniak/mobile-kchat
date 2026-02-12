@@ -9,9 +9,9 @@ import {fetchChannelStats, removeMemberFromChannel, updateChannelMemberSchemeRol
 import OptionItem from '@components/option_item';
 import {Events, Members} from '@constants';
 import {useServerUrl} from '@context/server';
-import NetworkManager from '@managers/network_manager';
 import {dismissBottomSheet} from '@screens/navigation';
 import {alertErrorWithFallback} from '@utils/draft';
+import {checkUserInOverlappingGroups} from '@utils/groups';
 
 import type {ManageOptionsTypes} from '@constants/members';
 
@@ -74,24 +74,14 @@ const ManageMembersLabel = ({canRemoveUser, channelId, manageOption, testID, use
     }, [channelId, serverUrl, userId]);
 
     const removeFromChannel = useCallback(async () => {
-        try {
-            const client = NetworkManager.getClient(serverUrl);
-            const channelGroups = await client.getGroupsAssociatedToChannel(channelId);
-            if (Array.isArray(channelGroups) && channelGroups.length > 0) {
-                const userGroups = await client.getAllGroupsAssociatedToMembership(userId);
-                const userGroupIds = new Set((Array.isArray(userGroups) ? userGroups : []).map((g: Group) => g.id));
-                const overlap = channelGroups.filter((g: Group) => userGroupIds.has(g.id));
-                if (overlap.length > 0) {
-                    Alert.alert(
-                        formatMessage({id: 'ik_member_in_group.title', defaultMessage: 'Remove channel access'}),
-                        formatMessage({id: 'ik_member_in_group.body', defaultMessage: 'This member is part of teams that have access to this discussion channel. Go to the web application to remove them from all these teams.'}),
-                        [{text: formatMessage({id: 'mobile.server_upgrade.button', defaultMessage: 'OK'})}],
-                    );
-                    return;
-                }
-            }
-        } catch {
-            // If group check fails, fall through to normal flow
+        const hasOverlappingGroups = await checkUserInOverlappingGroups(serverUrl, channelId, userId);
+        if (hasOverlappingGroups) {
+            Alert.alert(
+                formatMessage({id: 'ik_member_in_group.title', defaultMessage: 'Remove channel access'}),
+                formatMessage({id: 'ik_member_in_group.body', defaultMessage: 'This member is part of teams that have access to this discussion channel. Go to the web application to remove them from all these teams.'}),
+                [{text: formatMessage({id: 'mobile.server_upgrade.button', defaultMessage: 'OK'})}],
+            );
+            return;
         }
 
         Alert.alert(

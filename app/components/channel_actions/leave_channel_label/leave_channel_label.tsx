@@ -13,9 +13,9 @@ import {General, Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useIsTablet} from '@hooks/device';
 import {t} from '@i18n';
-import NetworkManager from '@managers/network_manager';
 import {dismissAllModalsAndPopToRoot, dismissBottomSheet, showModal} from '@screens/navigation';
 import {alertErrorWithFallback} from '@utils/draft';
+import {checkUserInOverlappingGroups} from '@utils/groups';
 
 type Props = {
     isOptionItem?: boolean;
@@ -180,24 +180,14 @@ const LeaveChannelLabel = (props: Props) => {
     };
 
     const onLeave = async () => {
-        try {
-            const client = NetworkManager.getClient(serverUrl);
-            const channelGroups = await client.getGroupsAssociatedToChannel(channelId);
-            if (Array.isArray(channelGroups) && channelGroups.length > 0) {
-                const userGroups = await client.getAllGroupsAssociatedToMembership(currentUserId);
-                const userGroupIds = new Set((Array.isArray(userGroups) ? userGroups : []).map((g: Group) => g.id));
-                const overlap = channelGroups.filter((g: Group) => userGroupIds.has(g.id));
-                if (overlap.length > 0) {
-                    Alert.alert(
-                        intl.formatMessage({id: 'ik_leave_channel_group_blocked.title', defaultMessage: 'Leave channel'}),
-                        intl.formatMessage({id: 'ik_leave_channel_group_blocked.body', defaultMessage: 'This channel is linked to one of your teams to facilitate collaboration among its members. To leave it, contact an administrator if needed.'}),
-                        [{text: intl.formatMessage({id: 'mobile.server_upgrade.button', defaultMessage: 'OK'})}],
-                    );
-                    return;
-                }
-            }
-        } catch {
-            // If group check fails, fall through to normal flow
+        const hasOverlappingGroups = await checkUserInOverlappingGroups(serverUrl, channelId, currentUserId);
+        if (hasOverlappingGroups) {
+            Alert.alert(
+                intl.formatMessage({id: 'ik_leave_channel_group_blocked.title', defaultMessage: 'Leave channel'}),
+                intl.formatMessage({id: 'ik_leave_channel_group_blocked.body', defaultMessage: 'This channel is linked to one of your teams to facilitate collaboration among its members. To leave it, contact an administrator if needed.'}),
+                [{text: intl.formatMessage({id: 'mobile.server_upgrade.button', defaultMessage: 'OK'})}],
+            );
+            return;
         }
 
         switch (type) {
