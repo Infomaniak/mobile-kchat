@@ -25,20 +25,6 @@ type Props = {
     groupId: string;
 }
 
-type Group = {
-    id: string;
-    name: string;
-    display_name: string;
-    description: string;
-    source: string;
-    remote_id: string;
-    member_count?: number;
-    allow_reference: boolean;
-    create_at: number;
-    update_at: number;
-    delete_at: number;
-}
-
 const styles = StyleSheet.create({
     container: {
         minHeight: SCREEN_HEIGHT * 0.4,
