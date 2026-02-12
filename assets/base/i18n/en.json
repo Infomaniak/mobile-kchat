@@ -412,6 +412,8 @@
   "global_threads.options.open_in_channel": "Open in Channel",
   "global_threads.options.title": "Thread Actions",
   "global_threads.unreads": "Unreads",
+  "group_members.load_error": "Oops! Something went wrong while loading this group.",
+  "group_members.retry": "Retry",
   "group_row.member_count": "{count} members",
   "guest_banner.text": "There {count, plural, one {is} other {are}} {count} external {count, plural, one {user} other {users}} in this conversation.",
   "home.header.plus_menu": "Options",
