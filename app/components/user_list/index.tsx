@@ -20,9 +20,8 @@ import {
 } from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import GroupRow from './group_row';
+import GroupRow, {type GroupInfo} from './group_row';
 
-import type GroupModel from '@typings/database/models/servers/group';
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
@@ -70,7 +69,7 @@ const sectionRoleKeyExtractor = (cAdmin: boolean) => {
     return cAdmin ? messages.admins : messages.members;
 };
 
-export function createProfilesSections(intl: IntlShape, profiles: UserProfile[], members?: ChannelMembership[], groups?: GroupModel[]) {
+export function createProfilesSections(intl: IntlShape, profiles: UserProfile[], members?: ChannelMembership[], groups?: GroupInfo[]) {
     if (!profiles.length && !groups?.length) {
         return [];
     }
@@ -200,7 +199,7 @@ const getStyleFromTheme = makeStyleSheetFromTheme((theme) => {
 type Props = {
     profiles: UserProfile[];
     channelMembers?: ChannelMembership[];
-    groups?: GroupModel[];
+    groups?: GroupInfo[];
     channelId?: string;
     currentUserId: string;
     handleSelectProfile: (user: UserProfile | UserModel) => void;
@@ -334,7 +333,7 @@ export default function UserList({
     const renderGroupItem = useCallback(({item}: {item: any}) => {
         return (
             <GroupRow
-                group={item as GroupModel}
+                group={item as GroupInfo}
                 channelId={channelId || ''}
             />
         );

@@ -5,17 +5,15 @@ import React from 'react';
 
 import {renderWithIntlAndTheme} from '@test/intl-test-helper';
 
-import GroupRow from './group_row';
-
-import type GroupModel from '@typings/database/models/servers/group';
+import GroupRow, {type GroupInfo} from './group_row';
 
 describe('components/user_list/GroupRow', () => {
-    const mockGroup: GroupModel = {
+    const mockGroup: GroupInfo = {
         id: 'group-123',
         name: 'engineering-team',
         displayName: 'Engineering Team',
         memberCount: 42,
-    } as GroupModel;
+    };
 
     const mockOpenAsBottomSheet = jest.fn();
     jest.mock('@screens/navigation', () => ({
@@ -50,10 +48,10 @@ describe('components/user_list/GroupRow', () => {
     });
 
     it('should not render username when group name is empty', () => {
-        const groupWithoutName: GroupModel = {
+        const groupWithoutName: GroupInfo = {
             ...mockGroup,
             name: '',
-        } as GroupModel;
+        };
 
         const {queryByText} = renderWithIntlAndTheme(
             <GroupRow

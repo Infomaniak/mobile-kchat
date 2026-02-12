@@ -12,10 +12,15 @@ import {openAsBottomSheet} from '@screens/navigation';
 import {changeOpacity} from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import type GroupModel from '@typings/database/models/servers/group';
+export type GroupInfo = {
+    id: string;
+    displayName: string;
+    name: string;
+    memberCount: number;
+}
 
 type Props = {
-    group: GroupModel;
+    group: GroupInfo;
     channelId: string;
 }
 

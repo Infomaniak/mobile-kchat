@@ -26,7 +26,7 @@ import {showRemoveChannelUserSnackbar} from '@utils/snack_bar';
 import {changeOpacity, getKeyboardAppearanceFromTheme} from '@utils/theme';
 import {displayUsername, filterDeactivatedProfiles, filterProfilesMatchingTerm} from '@utils/user';
 
-import type GroupModel from '@typings/database/models/servers/group';
+import type {GroupInfo} from '@components/user_list/group_row';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
@@ -105,7 +105,7 @@ export default function ManageChannelMembers({
     const [isManageMode, setIsManageMode] = useState(false);
     const [profiles, setProfiles] = useState<UserProfile[]>(EMPTY);
     const [channelMembers, setChannelMembers] = useState<ChannelMembership[]>(EMPTY_MEMBERS);
-    const [groups, setGroups] = useState<GroupModel[]>([]);
+    const [groups, setGroups] = useState<GroupInfo[]>([]);
     const [searchResults, setSearchResults] = useState<UserProfile[]>(EMPTY);
     const [loading, setLoading] = useState(true);
     const [term, setTerm] = useState('');
@@ -293,13 +293,12 @@ export default function ManageChannelMembers({
 
                 const response = await client.getGroupsAssociatedToChannel(channelId);
                 if (mounted.current && response?.length) {
-                    // Map API Group to GroupModel-like shape
-                    const mapped = response.map((g: Group) => ({
+                    const mapped: GroupInfo[] = response.map((g: Group) => ({
                         id: g.id,
                         displayName: g.display_name,
                         memberCount: g.member_count ?? 0,
                         name: g.name,
-                    })) as unknown as GroupModel[];
+                    }));
                     setGroups(mapped);
                 }
             } catch (error) {
