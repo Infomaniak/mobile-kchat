@@ -47,10 +47,6 @@ const styles = StyleSheet.create({
     headerTextContainer: {
         flex: 1,
     },
-    headerTitle: {
-    },
-    headerSubtitle: {
-    },
     separator: {
         height: StyleSheet.hairlineWidth,
         marginHorizontal: 5,
@@ -73,6 +69,9 @@ const styles = StyleSheet.create({
     },
     retryButtonText: {
         ...typography('Body', 200, 'SemiBold'),
+    },
+    listContent: {
+        paddingBottom: 40,
     },
 });
 
@@ -149,16 +148,11 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
         fetchMembers(0, true);
     }, [fetchGroup, fetchMembers]);
 
-    const [isFetching, setIsFetching] = useState(false);
-
     const loadMore = useCallback(() => {
-        if (!isFetching && hasMore && !loadingMore) {
-            setIsFetching(true);
-            fetchMembers(page, false).finally(() => {
-                setIsFetching(false);
-            });
+        if (hasMore && !loadingMore) {
+            fetchMembers(page, false);
         }
-    }, [hasMore, page, fetchMembers, loadingMore, isFetching]);
+    }, [hasMore, page, fetchMembers, loadingMore]);
 
     const snapPoints = useMemo(() => {
         return [1, '50%', '80%'];
@@ -200,26 +194,20 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
                     </View>
                     <View style={styles.headerTextContainer}>
                         <Text
-                            style={[
-                                styles.headerTitle,
-                                {
-                                    color: theme.centerChannelColor,
-                                    ...typography('Heading', 600),
-                                },
-                            ]}
+                            style={{
+                                color: theme.centerChannelColor,
+                                ...typography('Heading', 600),
+                            }}
                             numberOfLines={1}
                         >
                             {group.display_name || group.name}
                         </Text>
                         {Boolean(group.name) && (
                             <Text
-                                style={[
-                                    styles.headerSubtitle,
-                                    {
-                                        color: changeOpacity(theme.centerChannelColor, 0.64),
-                                        ...typography('Body', 100),
-                                    },
-                                ]}
+                                style={{
+                                    color: changeOpacity(theme.centerChannelColor, 0.64),
+                                    ...typography('Body', 100),
+                                }}
                                 numberOfLines={1}
                             >
                                 {`@${group.name}`}
@@ -306,7 +294,7 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
                     onEndReached={loadMore}
                     onEndReachedThreshold={0.5}
                     ListFooterComponent={renderFooter}
-                    contentContainerStyle={{paddingBottom: 40}}
+                    contentContainerStyle={styles.listContent}
                     testID='group_members.flat_list'
                 />
             </>

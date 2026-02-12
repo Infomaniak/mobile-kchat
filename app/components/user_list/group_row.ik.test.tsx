@@ -28,7 +28,7 @@ describe('components/user_list/GroupRow', () => {
         const {getByText} = renderWithIntlAndTheme(
             <GroupRow
                 group={mockGroup}
-                channelId='channel-123'
+
             />,
         );
 
@@ -40,7 +40,7 @@ describe('components/user_list/GroupRow', () => {
         const {getByText} = renderWithIntlAndTheme(
             <GroupRow
                 group={mockGroup}
-                channelId='channel-123'
+
             />,
         );
 
@@ -56,7 +56,7 @@ describe('components/user_list/GroupRow', () => {
         const {queryByText} = renderWithIntlAndTheme(
             <GroupRow
                 group={groupWithoutName}
-                channelId='channel-123'
+
             />,
         );
 
@@ -67,7 +67,7 @@ describe('components/user_list/GroupRow', () => {
         const {getByLabelText} = renderWithIntlAndTheme(
             <GroupRow
                 group={mockGroup}
-                channelId='channel-123'
+
             />,
         );
 
@@ -78,7 +78,7 @@ describe('components/user_list/GroupRow', () => {
         const {getByLabelText} = renderWithIntlAndTheme(
             <GroupRow
                 group={mockGroup}
-                channelId='channel-123'
+
             />,
         );
 

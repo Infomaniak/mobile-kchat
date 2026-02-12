@@ -186,7 +186,7 @@ const LeaveChannelLabel = (props: Props) => {
                 Alert.alert(
                     intl.formatMessage({id: 'ik_leave_channel_group_blocked.title', defaultMessage: 'Leave channel'}),
                     intl.formatMessage({id: 'ik_leave_channel_group_blocked.body', defaultMessage: 'This channel is linked to one of your teams to facilitate collaboration among its members. To leave it, contact an administrator if needed.'}),
-                    [{text: intl.formatMessage({id: 'mobile.server_upgrade.button', defaultMessage: 'OK'})}],
+                    [{text: intl.formatMessage({id: 'mobile.managed.OK', defaultMessage: 'OK'})}],
                 );
                 return;
             }

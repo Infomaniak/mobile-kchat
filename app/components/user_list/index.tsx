@@ -200,7 +200,6 @@ type Props = {
     profiles: UserProfile[];
     channelMembers?: ChannelMembership[];
     groups?: GroupInfo[];
-    channelId?: string;
     currentUserId: string;
     handleSelectProfile: (user: UserProfile | UserModel) => void;
     fetchMore?: () => void;
@@ -220,7 +219,6 @@ export default function UserList({
     profiles,
     channelMembers,
     groups,
-    channelId,
     selectedIds,
     currentUserId,
     handleSelectProfile,
@@ -334,10 +332,9 @@ export default function UserList({
         return (
             <GroupRow
                 group={item as GroupInfo}
-                channelId={channelId || ''}
             />
         );
-    }, [channelId]);
+    }, []);
 
     const renderSectionHeader = useCallback(({section}: {section: SectionListData<UserProfile>}) => {
         return (

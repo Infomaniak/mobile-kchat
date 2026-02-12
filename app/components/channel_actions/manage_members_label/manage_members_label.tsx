@@ -79,7 +79,7 @@ const ManageMembersLabel = ({canRemoveUser, channelId, manageOption, testID, use
             Alert.alert(
                 formatMessage({id: 'ik_member_in_group.title', defaultMessage: 'Remove channel access'}),
                 formatMessage({id: 'ik_member_in_group.body', defaultMessage: 'This member is part of teams that have access to this discussion channel. Go to the web application to remove them from all these teams.'}),
-                [{text: formatMessage({id: 'mobile.server_upgrade.button', defaultMessage: 'OK'})}],
+                [{text: formatMessage({id: 'mobile.managed.OK', defaultMessage: 'OK'})}],
             );
             return;
         }

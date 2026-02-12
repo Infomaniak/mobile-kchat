@@ -364,7 +364,6 @@ export default function ManageChannelMembers({
                 profiles={data}
                 channelMembers={channelMembers}
                 groups={groups}
-                channelId={channelId}
                 selectedIds={EMPTY_IDS}
                 showManageMode={canManageAndRemoveMembers && isManageMode}
                 showNoResults={!loading}

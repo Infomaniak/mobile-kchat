@@ -3,13 +3,13 @@
 
 import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
-import {Keyboard, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Keyboard, Text, TouchableOpacity, View} from 'react-native';
 
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import GroupIcon from '@screens/group_members/group_icon';
 import {openAsBottomSheet} from '@screens/navigation';
-import {changeOpacity} from '@utils/theme';
+import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 export type GroupInfo = {
@@ -21,12 +21,11 @@ export type GroupInfo = {
 
 type Props = {
     group: GroupInfo;
-    channelId: string;
 }
 
 const CLOSE_BUTTON_ID = 'close-group-members';
 
-const getStyleSheet = (theme: Theme) => StyleSheet.create({
+const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -68,9 +67,9 @@ const getStyleSheet = (theme: Theme) => StyleSheet.create({
         color: changeOpacity(theme.centerChannelColor, 0.64),
         ...typography('Body', 75, 'SemiBold'),
     },
-});
+}));
 
-const GroupRow = ({group, channelId}: Props) => {
+const GroupRow = ({group}: Props) => {
     const theme = useTheme();
     const intl = useIntl();
     const styles = getStyleSheet(theme);
@@ -84,9 +83,9 @@ const GroupRow = ({group, channelId}: Props) => {
             title,
             theme,
             closeButtonId: CLOSE_BUTTON_ID,
-            props: {groupId: group.id, channelId},
+            props: {groupId: group.id},
         });
-    }, [group.id, group.displayName, channelId, theme]);
+    }, [group.id, group.displayName, theme]);
 
     return (
         <TouchableOpacity
