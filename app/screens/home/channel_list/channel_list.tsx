@@ -20,6 +20,7 @@ import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import PerformanceMetricsManager from '@managers/performance_metrics_manager';
 import {openToS, resetToInfomaniakNoTeams} from '@screens/navigation';
+import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {isMainActivity} from '@utils/helpers';
 import {tryRunAppReview} from '@utils/reviews';
@@ -134,9 +135,16 @@ const ChannelListScreen = (props: ChannelProps) => {
     }, [isFocused, params]);
 
     useEffect(() => {
-        if (!props.hasTeams) {
-            resetToInfomaniakNoTeams();
+        if (!props.hasTeams && !EphemeralStore.isLoggingIn()) {
+            // Debounce: verify hasTeams is still false after a short delay
+            const timer = setTimeout(() => {
+                if (!EphemeralStore.isLoggingIn()) {
+                    resetToInfomaniakNoTeams();
+                }
+            }, 1000);
+            return () => clearTimeout(timer);
         }
+        return undefined;
     }, [props.hasTeams]);
 
     useEffect(() => {

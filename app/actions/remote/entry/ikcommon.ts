@@ -76,9 +76,14 @@ export const syncMultiTeam = async (accessToken: string) => {
 
         const serverCredentials = await getAllServerCredentials();
         const serverCreationPromises = [];
+        const existingServerUrls: Array<string | null> = [];
         for (const teamServer of teamServers) {
-            // The server doesn't exist, create it
-            if (!serverCredentials.some((element) => element.serverUrl === teamServer.url)) {
+            if (serverCredentials.some((element) => element.serverUrl === teamServer.url)) {
+                // Server already exists - update token and include in results
+                setServerCredentials(teamServer.url, accessToken);
+                existingServerUrls.push(teamServer.url);
+            } else {
+                // The server doesn't exist, create it
                 serverCreationPromises.push(configureServer(teamServer, accessToken));
             }
         }
@@ -90,7 +95,7 @@ export const syncMultiTeam = async (accessToken: string) => {
                 DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: serverCredential.serverUrl, removeServer: true});
             }
         }
-        return serverCreationResults;
+        return [...serverCreationResults, ...existingServerUrls];
     } catch (e) {
         await removeServerCredentials(BASE_SERVER_URL);
 

@@ -8,8 +8,9 @@ import {infomaniakLogin} from '@actions/remote/iksession';
 import FormattedText from '@components/formatted_text';
 import {Launch} from '@constants';
 import {login as displayLoginWebView} from '@init/ikauth';
+import {launchToHome} from '@init/launch';
 import PushNotifications from '@init/push_notifications';
-import {resetToHome, resetToInfomaniakNoTeams} from '@screens/navigation';
+import {resetToInfomaniakNoTeams} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -40,15 +41,17 @@ const Server = ({
             const accessToken = await displayLoginWebView();
             const result = await infomaniakLogin(accessToken);
             if (result.serverUrl) {
-                goToHome(result.serverUrl!, result.error as never);
+                await goToHome(result.serverUrl!, result.error as never);
+                EphemeralStore.setLoggingIn(false);
             } else {
                 resetToInfomaniakNoTeams();
+                EphemeralStore.setLoggingIn(false);
             }
         } catch (error) {
             // eslint-disable-next-line no-console
             console.error('Error during login:', error);
-        } finally {
             EphemeralStore.setLoggingIn(false);
+        } finally {
             setConnecting(false);
         }
     };
@@ -57,9 +60,9 @@ const Server = ({
         PushNotifications.registerIfNeeded();
     }, []);
 
-    const goToHome = (serverUrl: string, error?: never) => {
+    const goToHome = async (serverUrl: string, error?: never) => {
         const hasError = launchError || Boolean(error);
-        resetToHome({extra, launchError: hasError, launchType: Launch.Normal, serverUrl});
+        await launchToHome({extra, launchError: hasError, launchType: Launch.Normal, serverUrl, coldStart: true});
     };
 
     return (

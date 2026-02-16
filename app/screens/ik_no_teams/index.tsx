@@ -8,7 +8,10 @@ import {Image, Linking, Text, View} from 'react-native';
 
 import LaunchType from '@constants/launch';
 import {getDefaultThemeByAppearance} from '@context/theme';
+import DatabaseManager from '@database/manager';
+import {getAllServerCredentials, removeServerCredentials} from '@init/credentials';
 import NetworkManager from '@managers/network_manager';
+import WebsocketManager from '@managers/websocket_manager';
 import {resetToInfomaniakLogin} from '@screens/navigation';
 import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {makeStyleSheetFromTheme} from '@utils/theme';
@@ -75,11 +78,27 @@ const InfomaniakNoTeams = () => {
     }, [theme]);
 
     const [loading, setLoading] = useState(false);
-    const onDisconnectPressed = useCallback(() => {
+    const onDisconnectPressed = useCallback(async () => {
         setLoading(true);
         NetworkManager.invalidateGlobalClient();
+
+        // Properly clean up all servers
+        const credentials = await getAllServerCredentials();
+        for (const {serverUrl} of credentials) {
+            WebsocketManager.invalidateClient(serverUrl);
+            NetworkManager.invalidateClient(serverUrl);
+            // eslint-disable-next-line no-await-in-loop
+            await removeServerCredentials(serverUrl);
+            try {
+                // eslint-disable-next-line no-await-in-loop
+                await DatabaseManager.destroyServerDatabase(serverUrl);
+            } catch {
+                // already destroyed
+            }
+        }
+
         resetToInfomaniakLogin({launchType: LaunchType.Normal});
-    }, [theme]);
+    }, []);
 
     return (
         <>
