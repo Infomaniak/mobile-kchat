@@ -66,7 +66,7 @@ export const fetchGroupsByNames = async (serverUrl: string, names: string[], fet
     }
 };
 
-export const fetchGroupsForChannel = async (serverUrl: string, channelId: string, fetchOnly = false, groupLabel?: RequestGroupLabel) => {
+export const fetchGroupsForChannel = async (serverUrl: string, channelId: string, fetchOnly = false) => {
     try {
         const {operator, database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const license = await getLicense(database);
@@ -75,15 +75,17 @@ export const fetchGroupsForChannel = async (serverUrl: string, channelId: string
         }
 
         const client = NetworkManager.getClient(serverUrl);
-        const response = await client.getAllGroupsAssociatedToChannel(channelId, undefined, groupLabel);
 
-        if (!response.groups.length) {
+        // IK: backend returns Group[] directly
+        const response = await client.getGroupsAssociatedToChannel(channelId);
+
+        if (!response.length) {
             return {groups: [], groupChannels: []};
         }
 
         const [groups, groupChannels] = await Promise.all([
-            operator.handleGroups({groups: response.groups, prepareRecordsOnly: true}),
-            operator.handleGroupChannelsForChannel({groups: response.groups, channelId, prepareRecordsOnly: true}),
+            operator.handleGroups({groups: response, prepareRecordsOnly: true}),
+            operator.handleGroupChannelsForChannel({groups: response, channelId, prepareRecordsOnly: true}),
         ]);
 
         if (!fetchOnly) {
@@ -191,13 +193,13 @@ export const fetchGroupsForTeamIfConstrained = async (serverUrl: string, teamId:
     }
 };
 
-export const fetchGroupsForChannelIfConstrained = async (serverUrl: string, channelId: string, fetchOnly = false, groupLabel?: RequestGroupLabel) => {
+export const fetchGroupsForChannelIfConstrained = async (serverUrl: string, channelId: string, fetchOnly = false) => {
     try {
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const channel = await getChannelById(database, channelId);
 
         if (channel?.isGroupConstrained) {
-            return fetchGroupsForChannel(serverUrl, channelId, fetchOnly, groupLabel);
+            return fetchGroupsForChannel(serverUrl, channelId, fetchOnly);
         }
 
         return {};

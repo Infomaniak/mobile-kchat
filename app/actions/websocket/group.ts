@@ -23,6 +23,17 @@ type WebsocketGroupChannelMessage = WebSocketMessage<{
     group_channel?: GroupChannel;
 }>
 
+// IK: custom WS events for channel groups have a different payload
+type WebsocketChannelGroupAddedMessage = WebSocketMessage<{
+    group: string; // JSON-encoded Group
+    channel_id: string;
+}>
+
+type WebsocketChannelGroupRemovedMessage = WebSocketMessage<{
+    group_id: string;
+    channel_id: string;
+}>
+
 type WSMessage = WebsocketGroupMessage | WebsocketGroupMemberMessage | WebsocketGroupTeamMessage | WebsocketGroupChannelMessage
 
 const handleError = (serverUrl: string, e: unknown, msg: WSMessage) => {
@@ -145,5 +156,34 @@ export async function handleGroupChannelDissociateEvent(serverUrl: string, msg: 
         }
     } catch (e) {
         handleError(serverUrl, e, msg);
+    }
+}
+
+// IK: custom WS events — payload differs from standard MM group_channel events
+export async function handleChannelGroupAddedEvent(serverUrl: string, msg: WebsocketChannelGroupAddedMessage) {
+    try {
+        if (msg?.data?.group && msg?.data?.channel_id) {
+            const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+            const group: Group = JSON.parse(msg.data.group);
+
+            await operator.handleGroups({groups: [group], prepareRecordsOnly: false});
+            await operator.handleGroupChannelsForChannel({channelId: msg.data.channel_id, groups: [{id: group.id}], prepareRecordsOnly: false});
+        }
+    } catch (e) {
+        logError('Group WS: channel_group_added', e, msg);
+        fetchGroupsForChannel(serverUrl, msg.data.channel_id);
+    }
+}
+
+export async function handleChannelGroupRemovedEvent(serverUrl: string, msg: WebsocketChannelGroupRemovedMessage) {
+    try {
+        if (msg?.data?.group_id && msg?.data?.channel_id) {
+            const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+
+            await deleteGroupChannelById(database, generateGroupAssociationId(msg.data.group_id, msg.data.channel_id));
+        }
+    } catch (e) {
+        logError('Group WS: channel_group_removed', e, msg);
+        fetchGroupsForChannel(serverUrl, msg.data.channel_id);
     }
 }

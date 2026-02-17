@@ -95,6 +95,8 @@ const WebsocketEvents = {
     GROUP_DISSOCIATED_TO_TEAM: 'received_group_not_associated_to_team',
     GROUP_ASSOCIATED_TO_CHANNEL: 'received_group_associated_to_channel',
     GROUP_DISSOCIATED_TO_CHANNEL: 'received_group_not_associated_to_channel',
+    CHANNEL_GROUP_ADDED: 'channel_group_added',
+    CHANNEL_GROUP_REMOVED: 'channel_group_removed',
     KSUITE_ADDED: 'ksuite_added',
     KSUITE_DELETED: 'ksuite_deleted',
     CONFERENCE_ADDED: 'conference_added',

@@ -7,6 +7,7 @@ import {DeviceEventEmitter, Keyboard, Platform, StyleSheet, View} from 'react-na
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {fetchChannelMemberships} from '@actions/remote/channel';
+import {fetchGroupsForChannel} from '@actions/remote/groups';
 import {fetchUsersByIds, searchProfiles} from '@actions/remote/user';
 import {PER_PAGE_DEFAULT} from '@client/rest/constants';
 import Search from '@components/search';
@@ -18,7 +19,6 @@ import {useTheme} from '@context/theme';
 import {useAccessControlAttributes} from '@hooks/access_control_attributes';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import NetworkManager from '@managers/network_manager';
 import SecurityManager from '@managers/security_manager';
 import {openAsBottomSheet, popTopScreen, setButtons} from '@screens/navigation';
 import NavigationStore from '@store/navigation_store';
@@ -35,6 +35,7 @@ type Props = {
     componentId: AvailableScreens;
     currentTeamId: string;
     currentUserId: string;
+    groups: GroupInfo[];
     tutorialWatched: boolean;
     teammateDisplayNameSetting: string;
     channelAbacPolicyEnforced: boolean;
@@ -86,6 +87,7 @@ export default function ManageChannelMembers({
     componentId,
     currentTeamId,
     currentUserId,
+    groups,
     tutorialWatched,
     teammateDisplayNameSetting,
     channelAbacPolicyEnforced,
@@ -105,7 +107,6 @@ export default function ManageChannelMembers({
     const [isManageMode, setIsManageMode] = useState(false);
     const [profiles, setProfiles] = useState<UserProfile[]>(EMPTY);
     const [channelMembers, setChannelMembers] = useState<ChannelMembership[]>(EMPTY_MEMBERS);
-    const [groups, setGroups] = useState<GroupInfo[]>([]);
     const [searchResults, setSearchResults] = useState<UserProfile[]>(EMPTY);
     const [loading, setLoading] = useState(true);
     const [term, setTerm] = useState('');
@@ -280,33 +281,12 @@ export default function ManageChannelMembers({
     useEffect(() => {
         mounted.current = true;
         getFetchChannelMembers();
+        fetchGroupsForChannel(serverUrl, channelId);
 
         return () => {
             mounted.current = false;
         };
     }, []);
-
-    useEffect(() => {
-        const fetchGroups = async () => {
-            try {
-                const client = NetworkManager.getClient(serverUrl);
-
-                const response = await client.getGroupsAssociatedToChannel(channelId);
-                if (mounted.current && response?.length) {
-                    const mapped: GroupInfo[] = response.map((g: Group) => ({
-                        id: g.id,
-                        displayName: g.display_name,
-                        memberCount: g.member_count ?? 0,
-                        name: g.name,
-                    }));
-                    setGroups(mapped);
-                }
-            } catch (error) {
-                // Groups are a nice to have, so we can just log the error and not block the screen if the request fails
-            }
-        };
-        fetchGroups();
-    }, [serverUrl, channelId]);
 
     useEffect(() => {
         if (canManageAndRemoveMembers) {

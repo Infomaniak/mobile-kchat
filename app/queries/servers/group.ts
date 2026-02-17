@@ -45,6 +45,17 @@ export const queryGroupChannelForChannel = (database: Database, channelId: strin
     );
 };
 
+export const queryGroupsForChannel = (database: Database, channelId: string) => {
+    return database.collections.get<GroupModel>(GROUP).query(
+        Q.on(GROUP_CHANNEL, 'channel_id', channelId),
+    );
+};
+
+export const observeGroupsForChannel = (database: Database, channelId: string) => {
+    return queryGroupsForChannel(database, channelId).
+        observeWithColumns(['display_name', 'name', 'member_count']);
+};
+
 export const queryGroupMembershipForMember = (database: Database, userId: string) => {
     return database.collections.get<GroupMembershipModel>(GROUP_MEMBERSHIP).query(
         Q.where('user_id', userId),

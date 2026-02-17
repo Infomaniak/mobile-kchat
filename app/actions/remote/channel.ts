@@ -1162,7 +1162,7 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
     openChannelIfNeeded(serverUrl, channelId, groupLabel);
     markChannelAsRead(serverUrl, channelId, false, groupLabel);
     fetchChannelStats(serverUrl, channelId, false, groupLabel);
-    fetchGroupsForChannelIfConstrained(serverUrl, channelId, false, groupLabel);
+    fetchGroupsForChannelIfConstrained(serverUrl, channelId, false);
 
     DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, false);
 
