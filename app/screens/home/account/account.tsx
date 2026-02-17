@@ -48,7 +48,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             borderLeftWidth: 1,
             borderLeftColor: changeOpacity(theme.centerChannelColor, 0.16),
         },
-        totalHeight: {height: '100%'},
+        totalHeight: {flexGrow: 1},
     };
 });
 
