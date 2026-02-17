@@ -21,10 +21,10 @@ import DraftUploadManager from '@managers/draft_upload_manager';
 import * as DraftUtils from '@utils/draft';
 import {isReactionMatch} from '@utils/emoji/helpers';
 import {getErrorMessage, getFullErrorMessage} from '@utils/errors';
+import {checkUserInOverlappingGroups} from '@utils/groups';
 import {scheduledPostFromPost} from '@utils/post';
 import {canPostDraftInChannelOrThread} from '@utils/scheduled_post';
 import {showSnackBar} from '@utils/snack_bar';
-import {checkUserInOverlappingGroups} from '@utils/groups';
 import {confirmOutOfOfficeDisabled} from '@utils/user';
 
 import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji';
