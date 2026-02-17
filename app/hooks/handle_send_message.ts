@@ -4,7 +4,7 @@
 // import {handleCallsSlashCommand} from '@calls/actions';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {DeviceEventEmitter} from 'react-native';
+import {Alert, DeviceEventEmitter} from 'react-native';
 
 import {getChannelTimezones} from '@actions/remote/channel';
 import {executeCommand, handleGotoLocation} from '@actions/remote/command';
@@ -12,7 +12,7 @@ import {createPost} from '@actions/remote/post';
 import {handleReactionToLatestPost} from '@actions/remote/reactions';
 import {createScheduledPost} from '@actions/remote/scheduled_post';
 import {setStatus} from '@actions/remote/user';
-import {Events, Screens} from '@constants';
+import {Events, General, Screens} from '@constants';
 import {PostTypes} from '@constants/post';
 import {NOTIFY_ALL_MEMBERS} from '@constants/post_draft';
 import {MESSAGE_TYPE, SNACK_BAR_TYPE} from '@constants/snack_bar';
@@ -24,6 +24,7 @@ import {getErrorMessage, getFullErrorMessage} from '@utils/errors';
 import {scheduledPostFromPost} from '@utils/post';
 import {canPostDraftInChannelOrThread} from '@utils/scheduled_post';
 import {showSnackBar} from '@utils/snack_bar';
+import {checkUserInOverlappingGroups} from '@utils/groups';
 import {confirmOutOfOfficeDisabled} from '@utils/user';
 
 import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji';
@@ -211,6 +212,20 @@ export const useHandleSendMessage = ({
             confirmOutOfOfficeDisabled(intl, status, updateStatus);
             setSendingMessage(false);
             return;
+        }
+
+        // IK: block /leave if user is in a group associated to this channel
+        if (value.trim().startsWith('/leave') && (channelType === General.OPEN_CHANNEL || channelType === General.PRIVATE_CHANNEL)) {
+            const hasOverlappingGroups = await checkUserInOverlappingGroups(serverUrl, channelId, currentUserId);
+            if (hasOverlappingGroups) {
+                Alert.alert(
+                    intl.formatMessage({id: 'ik_leave_channel_group_blocked.title', defaultMessage: 'Leave channel'}),
+                    intl.formatMessage({id: 'ik_leave_channel_group_blocked.body', defaultMessage: 'This channel is linked to one of your teams to facilitate collaboration among its members. To leave it, contact an administrator if needed.'}),
+                    [{text: intl.formatMessage({id: 'mobile.managed.OK', defaultMessage: 'OK'})}],
+                );
+                setSendingMessage(false);
+                return;
+            }
         }
 
         const {data, error} = await executeCommand(serverUrl, intl, value, channelId, rootId);
