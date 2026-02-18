@@ -21,10 +21,17 @@ export const infomaniakLogin = async (accessToken: string): Promise<IKLoginActio
         const createdServerUrls = await syncMultiTeam(accessToken);
         const firstNotNullServerUrl = createdServerUrls.find((serverUrl) => serverUrl !== null);
 
-        if (!firstNotNullServerUrl) {
-            return {error: 'No server found', failed: true};
+        if (firstNotNullServerUrl) {
+            return {failed: false, serverUrl: firstNotNullServerUrl};
         }
-        return {failed: false, serverUrl: firstNotNullServerUrl};
+
+        // Fallback: check for existing active server
+        const activeServerUrl = await DatabaseManager.getActiveServerUrl();
+        if (activeServerUrl) {
+            return {failed: false, serverUrl: activeServerUrl};
+        }
+
+        return {error: 'No server found', failed: true};
     } catch (e) {
         return {error: e as ClientError, failed: true};
     }

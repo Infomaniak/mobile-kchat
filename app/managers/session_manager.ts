@@ -122,10 +122,10 @@ export class SessionManagerSingleton {
         this.previousAppState = appState;
         switch (appState) {
             case 'active':
-                // if (!EphemeralStore.isLoggingIn()) {
-                //     this.syncServerData();
-                //     this.syncMultiTeam();
-                // }
+                if (!EphemeralStore.isLoggingIn()) {
+                    this.syncServerData();
+                    this.syncMultiTeam();
+                }
                 setTimeout(this.cancelAllSessionNotifications, 750);
                 break;
             case 'background':
