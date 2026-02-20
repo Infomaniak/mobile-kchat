@@ -148,7 +148,7 @@ type MessageAttachment = {
     footer?: string;
     footer_icon?: string;
     timestamp?: number | string;
-    actions?: PostAction[];
+    actions?: PostActionWithClientState[];
 };
 
 type MessageAttachmentField = {

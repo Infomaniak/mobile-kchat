@@ -9,7 +9,7 @@ import ActionMenu from './action_menu';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
-    actions: PostAction[];
+    actions: PostActionWithClientState[];
     postId: string;
     theme: Theme;
     location: AvailableScreens;
@@ -55,6 +55,7 @@ const AttachmentActions = ({
                         disabled={action.disabled}
                         buttonColor={action.style}
                         theme={theme}
+                        isVoted={action.isVoted}
                     />,
                 );
                 break;

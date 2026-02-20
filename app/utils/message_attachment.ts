@@ -34,7 +34,7 @@ export function isPostActionOption(v: unknown): v is PostActionOption {
     return true;
 }
 
-function isPostAction(v: unknown): v is PostAction {
+function isPostAction(v: unknown): v is PostActionWithClientState {
     if (typeof v !== 'object' || !v) {
         return false;
     }
@@ -72,6 +72,10 @@ function isPostAction(v: unknown): v is PostAction {
     }
 
     if ('cookie' in v && typeof v.cookie !== 'string') {
+        return false;
+    }
+
+    if ('isVoted' in v && typeof v.isVoted !== 'boolean') {
         return false;
     }
 

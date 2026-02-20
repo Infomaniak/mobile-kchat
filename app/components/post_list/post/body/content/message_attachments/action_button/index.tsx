@@ -4,7 +4,7 @@
 import {Button} from '@rneui/base';
 import React, {useCallback, useRef} from 'react';
 
-import {postActionWithCookie} from '@actions/remote/integrations';
+import {fetchPollMetadataIfPoll, postActionWithCookie} from '@actions/remote/integrations';
 import {useServerUrl} from '@context/server';
 import {getStatusColors} from '@utils/message_attachment';
 import {preventDoubleTap} from '@utils/tap';
@@ -18,6 +18,7 @@ type Props = {
     cookie?: string;
     disabled?: boolean;
     id: string;
+    isVoted?: boolean;
     name: string;
     postId: string;
     theme: ExtendedTheme;
@@ -46,10 +47,16 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             fontFamily: 'SuisseIntl-SemiBold',
             lineHeight: 17,
         },
+        buttonVoted: {
+            borderColor: theme.buttonBg,
+        },
+        textVoted: {
+            color: theme.buttonBg,
+        },
     };
 });
 
-const ActionButton = ({buttonColor, cookie, disabled, id, name, postId, theme}: Props) => {
+const ActionButton = ({buttonColor, cookie, disabled, id, isVoted, name, postId, theme}: Props) => {
     const presssed = useRef(false);
     const serverUrl = useServerUrl();
     const style = getStyleSheet(theme);
@@ -60,6 +67,7 @@ const ActionButton = ({buttonColor, cookie, disabled, id, name, postId, theme}: 
         if (!presssed.current) {
             presssed.current = true;
             await postActionWithCookie(serverUrl, postId, id, cookie || '');
+            await fetchPollMetadataIfPoll(serverUrl, postId);
             presssed.current = false;
         }
     }), [id, postId, cookie]);
@@ -71,16 +79,19 @@ const ActionButton = ({buttonColor, cookie, disabled, id, name, postId, theme}: 
         customButtonTextStyle = {color: hexColor};
     }
 
+    const votedButtonStyle = isVoted && !buttonColor ? style.buttonVoted : undefined;
+    const votedTextStyle = isVoted && !buttonColor ? style.textVoted : undefined;
+
     return (
         <Button
-            buttonStyle={[style.button, customButtonStyle]}
+            buttonStyle={[style.button, customButtonStyle, votedButtonStyle]}
             disabledStyle={style.buttonDisabled}
             onPress={onPress}
             disabled={disabled}
         >
             <ActionButtonText
                 message={name}
-                style={{...style.text, ...customButtonTextStyle}}
+                style={{...style.text, ...customButtonTextStyle, ...votedTextStyle}}
             />
         </Button>
     );

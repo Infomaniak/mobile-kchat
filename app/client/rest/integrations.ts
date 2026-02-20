@@ -14,6 +14,7 @@ export interface ClientIntegrationsMix {
     executeCommand: (command: string, commandArgs?: CommandArgs) => Promise<CommandResponse>;
     addCommand: (command: Command) => Promise<Command>;
     submitInteractiveDialog: (data: DialogSubmission) => Promise<any>;
+    getPollMetadata: (pollId: string) => Promise<PollMetadata>;
 }
 
 const ClientIntegrations = <TBase extends Constructor<ClientBase>>(superclass: TBase) => class extends superclass {
@@ -56,6 +57,13 @@ const ClientIntegrations = <TBase extends Constructor<ClientBase>>(superclass: T
         return this.doFetch(
             `${this.urlVersion}/actions/dialogs/submit`,
             {method: 'post', body: data},
+        );
+    };
+
+    getPollMetadata = async (pollId: string) => {
+        return this.doFetch(
+            `${this.getPollsRoute()}/${pollId}`,
+            {method: 'get'},
         );
     };
 };
