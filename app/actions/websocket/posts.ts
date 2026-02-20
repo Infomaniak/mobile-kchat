@@ -7,6 +7,7 @@ import {storeMyChannelsForTeam, markChannelAsUnread, markChannelAsViewed, update
 import {addPostAcknowledgement, markPostAsDeleted, removePostAcknowledgement} from '@actions/local/post';
 import {createThreadFromNewPost, updateThread} from '@actions/local/thread';
 import {fetchChannelStats, fetchMyChannel} from '@actions/remote/channel';
+import {fetchPollMetadataIfPoll} from '@actions/remote/integrations';
 import {fetchPostAuthors, fetchPostById} from '@actions/remote/post';
 import {openChannelIfNeeded} from '@actions/remote/preference';
 import {fetchThread} from '@actions/remote/thread';
@@ -252,6 +253,9 @@ export async function handlePostEdited(serverUrl: string, msg: WebSocketMessage)
     models.push(...postModels);
 
     operator.batchRecords(models, 'handlePostEdited');
+
+    // Fire and forget: fetch poll metadata to update voted state
+    fetchPollMetadataIfPoll(serverUrl, post.id);
 }
 
 export async function handlePostDeleted(serverUrl: string, msg: WebSocketMessage) {

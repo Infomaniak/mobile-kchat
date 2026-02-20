@@ -33,7 +33,7 @@ jest.mock('./attachment_footer', () => {
 
 const mockAttachmentActions = jest.fn().mockReturnValue(null);
 jest.mock('./attachment_actions', () => {
-    return function MockAttachmentActions(props: {actions: PostAction[]; postId: string; theme: Theme}) {
+    return function MockAttachmentActions(props: {actions: PostActionWithClientState[]; postId: string; theme: Theme}) {
         mockAttachmentActions(props);
         return null;
     };

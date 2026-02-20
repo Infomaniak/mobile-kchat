@@ -1,9 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View} from 'react-native';
 
+import {fetchPollMetadataIfPoll} from '@actions/remote/integrations';
+import {useServerUrl} from '@context/server';
 import {getMarkdownBlockStyles, getMarkdownTextStyles} from '@utils/markdown';
 import {getStatusColors} from '@utils/message_attachment';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -57,10 +59,19 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 });
 
 export default function MessageAttachment({attachment, channelId, layoutWidth, location, metadata, postId, theme}: Props) {
+    const serverUrl = useServerUrl();
     const style = getStyleSheet(theme);
     const blockStyles = getMarkdownBlockStyles(theme);
     const textStyles = getMarkdownTextStyles(theme);
     const STATUS_COLORS = getStatusColors(theme);
+
+    const pollId = attachment.actions?.[0]?.integration?.context?.['poll-id'];
+
+    useEffect(() => {
+        if (pollId) {
+            fetchPollMetadataIfPoll(serverUrl, postId);
+        }
+    }, [serverUrl, postId, pollId]);
     let borderStyle;
     if (attachment.color) {
         if (attachment.color[0] === '#') {

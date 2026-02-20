@@ -222,6 +222,10 @@ export default class ClientBase extends ClientTracking {
         return `${this.urlVersion}/custom_profile_attributes`;
     }
 
+    getPollsRoute() {
+        return `${this.urlVersion}/polls`;
+    }
+
     getScheduledPostRoute() {
         return `${this.getPostsRoute()}/schedule`;
     }

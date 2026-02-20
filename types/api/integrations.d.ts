@@ -91,6 +91,15 @@ type InteractiveDialogConfig = {
     };
 };
 
+type PollMetadata = {
+    can_manage_poll: boolean;
+    poll_id: string;
+    setting_progress: boolean;
+    setting_public_add_option: boolean;
+    user_id: string;
+    voted_answers: string[];
+};
+
 type PostAction = {
     id?: string;
     type?: string;
@@ -102,6 +111,10 @@ type PostAction = {
     default_option?: string;
     integration?: PostActionIntegration;
     cookie?: string;
+};
+
+type PostActionWithClientState = PostAction & {
+    isVoted?: boolean;
 };
 
 type PostActionOption = {
