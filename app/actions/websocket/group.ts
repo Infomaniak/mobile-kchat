@@ -25,7 +25,7 @@ type WebsocketGroupChannelMessage = WebSocketMessage<{
 
 // IK: custom WS events for channel groups have a different payload
 type WebsocketChannelGroupAddedMessage = WebSocketMessage<{
-    group: string; // JSON-encoded Group
+    group: Group;
     channel_id: string;
 }>
 
@@ -164,7 +164,7 @@ export async function handleChannelGroupAddedEvent(serverUrl: string, msg: Webso
     try {
         if (msg?.data?.group && msg?.data?.channel_id) {
             const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-            const group: Group = JSON.parse(msg.data.group);
+            const group: Group = msg.data.group;
 
             await operator.handleGroups({groups: [group], prepareRecordsOnly: false});
             await operator.handleGroupChannelsForChannel({channelId: msg.data.channel_id, groups: [{id: group.id}], prepareRecordsOnly: false});
