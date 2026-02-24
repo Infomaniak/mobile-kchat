@@ -17,10 +17,11 @@ exports[`components/custom_status/custom_status_emoji should match snapshot 1`] 
   onLoadStart={[Function]}
   onProgress={[Function]}
   placeholder={[]}
-  recyclingKey="calendar.png-16-16"
   source={
     [
       {
+        "cacheKey": "emoji-calendar-16-16",
+        "cachePath": "",
         "testUri": "../../../dist/assets/images/emojis/calendar.png",
       },
     ]
@@ -53,10 +54,11 @@ exports[`components/custom_status/custom_status_emoji should match snapshot with
   onLoadStart={[Function]}
   onProgress={[Function]}
   placeholder={[]}
-  recyclingKey="calendar.png-34-34"
   source={
     [
       {
+        "cacheKey": "emoji-calendar-34-34",
+        "cachePath": "",
         "testUri": "../../../dist/assets/images/emojis/calendar.png",
       },
     ]

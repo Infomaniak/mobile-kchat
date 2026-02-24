@@ -27,6 +27,7 @@ jest.mock('@managers/network_manager', () => {
 
 describe('components/channel_list_row', () => {
     let database: Database;
+    const serverUrl = 'https://infomaniak.kchat.infomaniak.com';
     const user: UserProfile = {
         id: '1',
         user_id: 1,
@@ -133,7 +134,7 @@ describe('components/channel_list_row', () => {
         const props = getBaseProps();
         const wrapper = renderWithEverything(
             <UserList {...props}/>,
-            {database},
+            {database, serverUrl},
         );
 
         expect(wrapper.toJSON()).toMatchSnapshot();
@@ -146,7 +147,7 @@ describe('components/channel_list_row', () => {
 
         const wrapper = renderWithEverything(
             <UserList {...props}/>,
-            {database},
+            {database, serverUrl},
         );
 
         expect(wrapper.toJSON()).toMatchSnapshot();
@@ -158,7 +159,7 @@ describe('components/channel_list_row', () => {
         props.term = '';
         const wrapper = renderWithEverything(
             <UserList {...props}/>,
-            {database},
+            {database, serverUrl},
         );
 
         expect(wrapper.toJSON()).toMatchSnapshot();
@@ -172,7 +173,7 @@ describe('components/channel_list_row', () => {
         props.term = '';
         const wrapper = renderWithEverything(
             <UserList {...props}/>,
-            {database},
+            {database, serverUrl},
         );
 
         expect(wrapper.toJSON()).toMatchSnapshot();

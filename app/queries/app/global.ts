@@ -100,3 +100,13 @@ export const observeTutorialWatched = (tutorial: string) => {
         switchMap((v) => of$(Boolean(v))),
     );
 };
+
+export const getImageCacheMigrationVersion = async (): Promise<number> => {
+    try {
+        const {database} = DatabaseManager.getAppDatabaseAndOperator();
+        const migrationVal = await database.get<GlobalModel>(GLOBAL).find(GLOBAL_IDENTIFIERS.IMAGE_CACHE_MIGRATION);
+        return parseInt(migrationVal?.value, 10) || 0;
+    } catch {
+        return 0;
+    }
+};

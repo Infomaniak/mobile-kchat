@@ -3,6 +3,7 @@
 
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials} from '@init/credentials';
+import ImageCacheMigration from '@init/image_cache_migration';
 import {initialLaunch} from '@init/launch';
 import ManagedApp from '@init/managed_app';
 import PushNotifications from '@init/push_notifications';
@@ -40,11 +41,13 @@ Promise.allSettled = Promise.allSettled || (<T>(promises: Array<Promise<T>>) => 
 export async function initialize() {
     if (!baseAppInitialized) {
         baseAppInitialized = true;
+
         serverCredentials = await getAllServerCredentials();
         const serverUrls = serverCredentials.map((credential) => credential.serverUrl);
 
         await DatabaseManager.init(serverUrls);
         await NetworkManager.init(serverCredentials);
+        await ImageCacheMigration.init();
 
         GlobalEventHandler.init();
         ManagedApp.init();
