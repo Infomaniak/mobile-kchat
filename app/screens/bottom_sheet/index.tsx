@@ -240,9 +240,15 @@ const BottomSheet = ({
             bottomInset={insets.bottom}
             enableDynamicSizing={enableDynamicSizing}
         >
-            <BottomSheetView style={styles.view}>
-                {renderContainerContent()}
-            </BottomSheetView>
+            {enableDynamicSizing ? (
+                <BottomSheetView style={styles.view}>
+                    {renderContainerContent()}
+                </BottomSheetView>
+            ) : (
+                <View style={styles.view}>
+                    {renderContainerContent()}
+                </View>
+            )}
         </BottomSheetM>
     );
 };

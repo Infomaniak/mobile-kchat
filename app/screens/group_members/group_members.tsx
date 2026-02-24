@@ -109,7 +109,6 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
             } else {
                 setLoadingMore(true);
             }
-
             const client = NetworkManager.getClient(serverUrl);
             const response = await client.getUsersInGroup(groupId, pageToLoad, MEMBERS_PER_PAGE);
 
@@ -152,7 +151,7 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
         if (hasMore && !loadingMore) {
             fetchMembers(page, false);
         }
-    }, [hasMore, page, fetchMembers, loadingMore]);
+    }, [hasMore, loadingMore, page, fetchMembers]);
 
     const snapPoints = useMemo(() => {
         return [1, '50%', '80%'];
@@ -285,19 +284,17 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
         }
 
         return (
-            <>
-                {renderHeader()}
-                <BottomSheetFlatList
-                    data={members}
-                    renderItem={renderItem}
-                    keyExtractor={keyExtractor}
-                    onEndReached={loadMore}
-                    onEndReachedThreshold={0.5}
-                    ListFooterComponent={renderFooter}
-                    contentContainerStyle={styles.listContent}
-                    testID='group_members.flat_list'
-                />
-            </>
+            <BottomSheetFlatList
+                data={members}
+                renderItem={renderItem}
+                keyExtractor={keyExtractor}
+                onEndReached={loadMore}
+                onEndReachedThreshold={0.5}
+                ListHeaderComponent={renderHeader}
+                ListFooterComponent={renderFooter}
+                contentContainerStyle={styles.listContent}
+                testID='group_members.flat_list'
+            />
         );
     };
 
