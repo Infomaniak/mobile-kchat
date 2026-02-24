@@ -97,3 +97,7 @@ export const storePushDisabledInServerAcknowledged = async (serverUrl: string) =
 export const removePushDisabledInServerAcknowledged = async (serverUrl: string) => {
     return storeGlobal(`${GLOBAL_IDENTIFIERS.PUSH_DISABLED_ACK}${serverUrl}`, null, false);
 };
+
+export const storeImageCacheMigrationVersion = async (version: number) => {
+    return storeGlobal(GLOBAL_IDENTIFIERS.IMAGE_CACHE_MIGRATION, String(version), false);
+};

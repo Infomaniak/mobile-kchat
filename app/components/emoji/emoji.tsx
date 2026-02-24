@@ -2,13 +2,13 @@
 // See LICENSE.txt for license information.
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
-import {Image as ExpoImage} from 'expo-image';
 import React from 'react';
 import {Image, Platform, StyleSheet, Text} from 'react-native';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
 import {fetchCustomEmojiInBatch} from '@actions/remote/custom_emoji';
+import ExpoImage from '@components/expo_image';
 import {useServerUrl} from '@context/server';
 import NetworkManager from '@managers/network_manager';
 import {queryCustomEmojisByName} from '@queries/servers/custom_emoji';
@@ -107,7 +107,7 @@ const Emoji = (props: EmojiProps) => {
         );
     }
 
-    const key = (`${assetImage}-${height}-${width}`);
+    const cacheId = `emoji-${name}-${height}-${width}`;
     if (assetImage) {
         const image = assetImages.get(assetImage);
         if (!image) {
@@ -117,16 +117,16 @@ const Emoji = (props: EmojiProps) => {
         return Platform.select({
             ios: (
                 <ExpoImage
+                    id={cacheId}
                     source={image}
                     style={[commonStyle, imageStyle, {width, height}]}
                     contentFit='contain'
                     testID={testID}
-                    recyclingKey={key}
                 />
             ),
             android: (
                 <Image
-                    key={key}
+                    key={cacheId}
                     source={image}
                     style={[commonStyle, imageStyle, {width, height}]}
                     resizeMode='contain'
@@ -151,11 +151,11 @@ const Emoji = (props: EmojiProps) => {
     return Platform.select({
         ios: (
             <ExpoImage
+                id={cacheId}
                 style={[commonStyle, imageStyle, {width, height}]}
                 source={imgSource}
                 contentFit='contain'
                 testID={testID}
-                recyclingKey={key}
                 cachePolicy='disk'
                 placeholder={require('@assets/images/thumb.png')}
                 placeholderContentFit='contain'
@@ -167,7 +167,7 @@ const Emoji = (props: EmojiProps) => {
                 style={[commonStyle, imageStyle, {width, height}]}
                 resizeMode='contain'
                 testID={testID}
-                key={key}
+                key={cacheId}
                 defaultSource={require('@assets/images/thumb.png')}
             />
         ),
