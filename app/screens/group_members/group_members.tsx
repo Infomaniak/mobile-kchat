@@ -11,6 +11,7 @@ import UserItem from '@components/user_item';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
 import BottomSheet from '@screens/bottom_sheet';
 import {changeOpacity} from '@utils/theme';
@@ -96,6 +97,10 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
             const client = NetworkManager.getClient(serverUrl);
             const response = await client.getGroup(groupId, true);
             setGroup(response);
+
+            // Sync fresh group data (including member_count) to local DB so badges are up to date
+            const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+            operator.handleGroups({groups: [response], prepareRecordsOnly: false});
         } catch {
             // Group details are a nice to have, so we can just log the error and not block the screen if the request fails
         }
