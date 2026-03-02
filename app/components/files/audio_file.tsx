@@ -12,9 +12,11 @@ import {
 } from 'react-native';
 import Video, {type OnLoadData, type OnProgressData, type OnVideoErrorData, type VideoRef} from 'react-native-video';
 
+import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useDownloadFileAndPreview} from '@hooks/files';
 import useThrottled from '@hooks/throttled';
+import NetworkManager from '@managers/network_manager';
 import {alertDownloadDocumentDisabled, alertOnlyPDFSupported} from '@utils/document';
 import {logDebug} from '@utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -70,6 +72,11 @@ const AudioFile = ({file, canDownloadFiles, enableSecureFilePreview}: Props) => 
     const intl = useIntl();
     const theme = useTheme();
     const style = getStyleSheet(theme);
+    const serverUrl = useServerUrl();
+    const token = useMemo(() => {
+        const client = NetworkManager.getClient(serverUrl);
+        return client?.getCurrentBearerToken();
+    }, [serverUrl]);
     const [hasPaused, setHasPaused] = useState<boolean>(true);
     const [hasError, setHasError] = useState<boolean>(false);
     const [hasEnded, setHasEnded] = useState<boolean>(false);
@@ -92,7 +99,7 @@ const AudioFile = ({file, canDownloadFiles, enableSecureFilePreview}: Props) => 
         return () => null;
     }, [hasEnded]);
 
-    const source = useMemo(() => ({uri: file.uri}), [file.uri]);
+    const source = useMemo(() => ({uri: file.uri, headers: {Authorization: token}}), [file.uri, token]);
 
     const {toggleDownloadAndPreview} = useDownloadFileAndPreview(enableSecureFilePreview);
 
