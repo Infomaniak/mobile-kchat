@@ -3,7 +3,7 @@
 
 import React, {useCallback, useMemo} from 'react';
 import {defineMessages, type IntlShape, useIntl} from 'react-intl';
-import {FlatList, Keyboard, type ListRenderItemInfo, Platform, SectionList, type SectionListData, Text, View} from 'react-native';
+import {Keyboard, type ListRenderItemInfo, Platform, SectionList, type SectionListData, Text, View} from 'react-native';
 
 import {storeProfile} from '@actions/local/user';
 import Loading from '@components/loading';
@@ -139,28 +139,6 @@ export function createProfilesSections(intl: IntlShape, profiles: UserProfile[],
     return results;
 }
 
-function createProfiles(profiles: UserProfile[], members?: ChannelMembership[]): UserProfileWithChannelAdmin[] {
-    if (!profiles.length) {
-        return [];
-    }
-
-    const profileMap = new Map<string, UserProfileWithChannelAdmin>();
-    profiles.forEach((profile) => {
-        profileMap.set(profile.id, profile);
-    });
-
-    if (members?.length) {
-        members.forEach((m) => {
-            const profileFound = profileMap.get(m.user_id);
-            if (profileFound) {
-                profileFound.scheme_admin = m.scheme_admin;
-            }
-        });
-    }
-
-    return Array.from(profileMap.values());
-}
-
 const getStyleFromTheme = makeStyleSheetFromTheme((theme) => {
     return {
         list: {
@@ -243,17 +221,24 @@ export default function UserList({
         {paddingBottom: keyboardHeight},
     ], [style, keyboardHeight]);
 
+    const filteredGroups = useMemo(() => {
+        if (!term || !groups?.length) {
+            return groups;
+        }
+        const lowerTerm = term.toLowerCase();
+        return groups.filter((g) =>
+            g.name.toLowerCase().includes(lowerTerm) ||
+            g.displayName.toLowerCase().includes(lowerTerm),
+        );
+    }, [groups, term]);
+
     const data = useMemo(() => {
-        if (profiles.length === 0 && !loading) {
+        if (profiles.length === 0 && !filteredGroups?.length && !loading) {
             return [];
         }
 
-        if (term) {
-            return createProfiles(profiles, channelMembers);
-        }
-
-        return createProfilesSections(intl, profiles, channelMembers, groups);
-    }, [channelMembers, groups, intl, loading, profiles, term]);
+        return createProfilesSections(intl, profiles, channelMembers, filteredGroups);
+    }, [channelMembers, filteredGroups, intl, loading, profiles]);
 
     const openUserProfile = useCallback(async (profile: UserProfile | UserModel) => {
         let user: UserModel;
@@ -346,27 +331,6 @@ export default function UserList({
         );
     }, [style]);
 
-    const renderFlatList = (items: UserProfile[]) => {
-        return (
-            <FlatList
-                contentContainerStyle={style.container}
-                data={items}
-                keyboardShouldPersistTaps='always'
-                {...keyboardDismissProp}
-                keyExtractor={keyExtractor}
-                initialNumToRender={INITIAL_BATCH_TO_RENDER}
-                ListEmptyComponent={renderNoResults}
-                ListFooterComponent={renderLoading}
-                maxToRenderPerBatch={INITIAL_BATCH_TO_RENDER + 1}
-                removeClippedSubviews={true}
-                renderItem={renderItem}
-                scrollEventThrottle={SCROLL_EVENT_THROTTLE}
-                style={style.list}
-                testID={`${testID}.flat_list`}
-            />
-        );
-    };
-
     const renderSectionList = (sections: Array<SectionListData<any>>) => {
         // Inject per-section renderItem for group sections
         const enhancedSections = sections.map((section) => {
@@ -403,8 +367,5 @@ export default function UserList({
         );
     };
 
-    if (term) {
-        return renderFlatList(data as UserProfileWithChannelAdmin[]);
-    }
     return renderSectionList(data as Array<SectionListData<any>>);
 }

@@ -3,7 +3,7 @@
 
 import {fetchGroupsForChannel, fetchGroupsForMember, fetchGroupsForTeam} from '@actions/remote/groups';
 import DatabaseManager from '@database/manager';
-import {deleteGroupChannelById, deleteGroupMembershipById, deleteGroupTeamById} from '@queries/servers/group';
+import {deleteGroupChannelById, deleteGroupMembershipByGroupAndUser, deleteGroupTeamById, updateGroupMemberCount} from '@queries/servers/group';
 import {generateGroupAssociationId} from '@utils/groups';
 import {logError} from '@utils/log';
 
@@ -71,11 +71,12 @@ export async function handleGroupMemberAddEvent(serverUrl: string, msg: Websocke
 
     try {
         if (msg?.data?.group_member) {
-            const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+            const {operator, database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
             groupMember = msg.data.group_member;
             const group = {id: groupMember.group_id};
 
-            operator.handleGroupMembershipsForMember({userId: groupMember.user_id, groups: [group], prepareRecordsOnly: false});
+            await operator.handleGroupMembershipsForMember({userId: groupMember.user_id, groups: [group], prepareRecordsOnly: false});
+            await updateGroupMemberCount(database, groupMember.group_id, 1);
         }
     } catch (e) {
         handleError(serverUrl, e, msg);
@@ -90,7 +91,8 @@ export async function handleGroupMemberDeleteEvent(serverUrl: string, msg: Webso
             const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
             groupMember = msg.data.group_member;
 
-            await deleteGroupMembershipById(database, generateGroupAssociationId(groupMember.group_id, groupMember.user_id));
+            await deleteGroupMembershipByGroupAndUser(database, groupMember.group_id, groupMember.user_id);
+            await updateGroupMemberCount(database, groupMember.group_id, -1);
         }
     } catch (e) {
         handleError(serverUrl, e, msg);

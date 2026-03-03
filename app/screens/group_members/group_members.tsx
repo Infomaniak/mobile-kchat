@@ -13,17 +13,23 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
+import {upsertGroupMembershipsForGroup} from '@queries/servers/group';
 import BottomSheet from '@screens/bottom_sheet';
 import {changeOpacity} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 import GroupIcon from './group_icon';
 
+import type GroupModel from '@typings/database/models/servers/group';
+import type UserModel from '@typings/database/models/servers/user';
+
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 
 type Props = {
     closeButtonId: string;
     groupId: string;
+    group: GroupModel | undefined;
+    members: UserModel[];
 }
 
 const styles = StyleSheet.create({
@@ -78,33 +84,17 @@ const styles = StyleSheet.create({
 
 const MEMBERS_PER_PAGE = 60;
 
-const keyExtractor = (item: UserProfile) => item.id;
+const keyExtractor = (item: UserModel) => item.id;
 
-const GroupMembers = ({closeButtonId, groupId}: Props) => {
+const GroupMembers = ({closeButtonId, groupId, group, members}: Props) => {
     const serverUrl = useServerUrl();
     const theme = useTheme();
     const intl = useIntl();
-    const [group, setGroup] = useState<Group | null>(null);
-    const [members, setMembers] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [error, setError] = useState(false);
-
-    const fetchGroup = useCallback(async () => {
-        try {
-            const client = NetworkManager.getClient(serverUrl);
-            const response = await client.getGroup(groupId, true);
-            setGroup(response);
-
-            // Sync fresh group data (including member_count) to local DB so badges are up to date
-            const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-            operator.handleGroups({groups: [response], prepareRecordsOnly: false});
-        } catch {
-            // Group details are a nice to have, so we can just log the error and not block the screen if the request fails
-        }
-    }, [serverUrl, groupId]);
 
     const fetchMembers = useCallback(async (pageToLoad: number, isInitial = false) => {
         try {
@@ -118,15 +108,17 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
             const response = await client.getUsersInGroup(groupId, pageToLoad, MEMBERS_PER_PAGE);
 
             if (Array.isArray(response)) {
-                if (isInitial) {
-                    setMembers(response);
-                    setPage(1);
-                } else {
-                    setMembers((prev) => [...prev, ...response]);
-                    setPage(pageToLoad + 1);
+                if (response.length) {
+                    const {operator, database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+                    await operator.handleUsers({users: response, prepareRecordsOnly: false});
+                    await upsertGroupMembershipsForGroup(database, groupId, response.map((u) => u.id));
                 }
 
-                // If less than MEMBERS_PER_PAGE returned, no more data
+                if (isInitial) {
+                    setPage(1);
+                } else {
+                    setPage(pageToLoad + 1);
+                }
                 setHasMore(response.length === MEMBERS_PER_PAGE);
             } else {
                 setHasMore(false);
@@ -143,14 +135,12 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
     }, [serverUrl, groupId]);
 
     const handleRetry = useCallback(() => {
-        fetchGroup();
         fetchMembers(0, true);
-    }, [fetchGroup, fetchMembers]);
+    }, [fetchMembers]);
 
     useEffect(() => {
-        fetchGroup();
         fetchMembers(0, true);
-    }, [fetchGroup, fetchMembers]);
+    }, [fetchMembers]);
 
     const loadMore = useCallback(() => {
         if (hasMore && !loadingMore) {
@@ -162,7 +152,7 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
         return [1, '50%', '80%'];
     }, []);
 
-    const renderItem = useCallback(({item}: ListRenderItemInfo<UserProfile>) => (
+    const renderItem = useCallback(({item}: ListRenderItemInfo<UserModel>) => (
         <UserItem
             user={item}
             padding={5}
@@ -204,7 +194,7 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
                             }}
                             numberOfLines={1}
                         >
-                            {group.display_name || group.name}
+                            {group.displayName || group.name}
                         </Text>
                         {Boolean(group.name) && (
                             <Text
@@ -227,7 +217,8 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
                 />
             </View>
         );
-    }, [group, theme]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [group?.displayName, group?.name, theme]);
 
     const renderError = () => (
         <View style={styles.errorContainer}>
@@ -269,7 +260,7 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
     );
 
     const renderContent = () => {
-        if (loading) {
+        if (loading && !members.length) {
             return (
                 <View style={[styles.container, styles.loadingContainer]}>
                     <Loading
@@ -280,7 +271,7 @@ const GroupMembers = ({closeButtonId, groupId}: Props) => {
             );
         }
 
-        if (error) {
+        if (error && !members.length) {
             return (
                 <View style={styles.container}>
                     {renderError()}

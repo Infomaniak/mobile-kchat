@@ -1,36 +1,20 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {type Database} from '@nozbe/watermelondb';
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
-import {of as of$, combineLatest, switchMap, distinctUntilChanged, map} from 'rxjs';
+import {of as of$, combineLatest, switchMap, distinctUntilChanged} from 'rxjs';
 
 import {Permissions, Tutorial} from '@constants';
 import {observeTutorialWatched} from '@queries/app/global';
 import {observeCurrentChannel} from '@queries/servers/channel';
-import {queryGroupsForChannel} from '@queries/servers/group';
+import {observeGroupsForChannel} from '@queries/servers/group';
 import {observeCanManageChannelMembers, observePermissionForChannel} from '@queries/servers/role';
 import {observeCurrentChannelId, observeCurrentTeamId, observeCurrentUserId} from '@queries/servers/system';
 import {observeCurrentUser, observeTeammateNameDisplay} from '@queries/servers/user';
 
 import ManageChannelMembers from './manage_channel_members';
 
-import type {GroupInfo} from '@components/user_list/group_row';
 import type {WithDatabaseArgs} from '@typings/database/database';
-import type GroupModel from '@typings/database/models/servers/group';
-
-const mapGroupToInfo = (g: GroupModel): GroupInfo => ({
-    id: g.id,
-    displayName: g.displayName,
-    name: g.name,
-    memberCount: g.memberCount ?? 0,
-});
-
-const observeChannelGroups = (database: Database, channelId: string) => {
-    return queryGroupsForChannel(database, channelId).
-        observeWithColumns(['display_name', 'name', 'member_count']).
-        pipe(map((models) => models.map(mapGroupToInfo)));
-};
 
 const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
     const currentUser = observeCurrentUser(database);
@@ -48,7 +32,7 @@ const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
     const teammateDisplayNameSetting = observeTeammateNameDisplay(database);
 
     const groups = currentChannelId.pipe(
-        switchMap((cId) => (cId ? observeChannelGroups(database, cId) : of$([]))),
+        switchMap((cId) => (cId ? observeGroupsForChannel(database, cId) : of$([]))),
     );
 
     return {
