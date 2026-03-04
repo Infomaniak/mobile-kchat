@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import NetworkManager from '@managers/network_manager';
+
 export const generateGroupAssociationId = (groupId: string, otherId: string) => `${groupId}-${otherId}`;
 
 /**
@@ -10,7 +12,6 @@ export const generateGroupAssociationId = (groupId: string, otherId: string) => 
  */
 export const checkUserInOverlappingGroups = async (serverUrl: string, channelId: string, userId: string): Promise<boolean> => {
     try {
-        const NetworkManager = require('@managers/network_manager').default;
         const client = NetworkManager.getClient(serverUrl);
         const channelGroups = await client.getGroupsAssociatedToChannel(channelId);
 
