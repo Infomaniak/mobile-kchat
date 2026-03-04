@@ -3,7 +3,7 @@
 
 import {fetchGroupsForChannel, fetchGroupsForMember, fetchGroupsForTeam} from '@actions/remote/groups';
 import DatabaseManager from '@database/manager';
-import {deleteGroupChannelById, deleteGroupMembershipByGroupAndUser, deleteGroupTeamById, updateGroupMemberCount} from '@queries/servers/group';
+import {deleteGroupChannelById, deleteGroupMembershipById, deleteGroupTeamById, updateGroupMemberCount} from '@queries/servers/group';
 import {generateGroupAssociationId} from '@utils/groups';
 import {logError} from '@utils/log';
 
@@ -90,8 +90,9 @@ export async function handleGroupMemberDeleteEvent(serverUrl: string, msg: Webso
         if (msg?.data?.group_member) {
             const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
             groupMember = msg.data.group_member;
+            const associationId = generateGroupAssociationId(groupMember.group_id, groupMember.user_id);
 
-            await deleteGroupMembershipByGroupAndUser(database, groupMember.group_id, groupMember.user_id);
+            await deleteGroupMembershipById(database, associationId);
             await updateGroupMemberCount(database, groupMember.group_id, -1);
         }
     } catch (e) {
