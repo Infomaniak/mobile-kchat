@@ -91,7 +91,7 @@ const AtMention = ({
         }
     }, []);
 
-    const openGroupMembers = () => {
+    const openGroupMembers = useCallback(() => {
         if (!group) {
             return;
         }
@@ -104,7 +104,7 @@ const AtMention = ({
             closeButtonId: 'close-group-members',
             props: {groupId: group.id},
         });
-    };
+    }, [group, theme]);
 
     const openUserProfile = () => {
         if (!user) {

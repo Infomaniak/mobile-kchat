@@ -212,20 +212,33 @@ export const fetchGroupsForChannelIfConstrained = async (serverUrl: string, chan
  * Checks if a user belongs to any group that is associated with a given channel.
  * Used to prevent users from leaving a channel or being removed from it when
  * they are part of a team that has access to the channel.
+ * Paginates through all channel groups to avoid missing groups beyond PER_PAGE_DEFAULT.
  */
 export const checkUserInOverlappingGroups = async (serverUrl: string, channelId: string, userId: string): Promise<boolean> => {
     try {
         const client = NetworkManager.getClient(serverUrl);
-        const channelGroups = await client.getGroupsAssociatedToChannel(channelId);
-
-        if (!Array.isArray(channelGroups) || channelGroups.length === 0) {
-            return false;
-        }
 
         const userGroups = await client.getAllGroupsAssociatedToMembership(userId);
-        const userGroupIds = new Set((Array.isArray(userGroups) ? userGroups : []).map((g: Group) => g.id));
+        if (!Array.isArray(userGroups) || userGroups.length === 0) {
+            return false;
+        }
+        const userGroupIds = new Set(userGroups.map((g: Group) => g.id));
 
-        return channelGroups.some((g: Group) => userGroupIds.has(g.id));
+        let page = 0;
+        const perPage = 60;
+        while (true) {
+            const channelGroups = await client.getGroupsAssociatedToChannel(channelId, '', page, perPage);
+            if (!Array.isArray(channelGroups) || channelGroups.length === 0) {
+                return false;
+            }
+            if (channelGroups.some((g: Group) => userGroupIds.has(g.id))) {
+                return true;
+            }
+            if (channelGroups.length < perPage) {
+                return false;
+            }
+            page++;
+        }
     } catch {
         // If the check fails, we default to allowing the action
         return false;

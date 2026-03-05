@@ -70,7 +70,6 @@ const ManageMembersLabel = ({canRemoveUser, channelId, manageOption, testID, use
             },
         );
         await dismissBottomSheet();
-        DeviceEventEmitter.emit(Events.REMOVE_USER_FROM_CHANNEL, userId);
     }, [channelId, serverUrl, userId]);
 
     const removeFromChannel = useCallback(async () => {

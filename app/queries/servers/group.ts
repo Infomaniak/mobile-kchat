@@ -147,6 +147,12 @@ export const queryGroupMembershipsForGroup = (database: Database, groupId: strin
     );
 };
 
+/**
+ * Adds new group memberships to the DB for a given page of members.
+ * Only inserts records that don't already exist — never deletes.
+ * Used during pagination (intermediate pages) to avoid removing members
+ * that haven't been fetched yet in subsequent pages.
+ */
 export const upsertGroupMembershipsForGroup = async (database: Database, groupId: string, userIds: string[]) => {
     const collection = database.collections.get<GroupMembershipModel>(GROUP_MEMBERSHIP);
     const existing = await queryGroupMembershipsForGroup(database, groupId).fetch();
@@ -169,6 +175,12 @@ export const upsertGroupMembershipsForGroup = async (database: Database, groupId
     });
 };
 
+/**
+ * Full sync of group memberships against the complete list of member IDs.
+ * Adds missing records and removes records no longer present in the incoming list.
+ * Called on the last pagination page once all member IDs have been accumulated,
+ * to ensure the local DB exactly reflects the server state.
+ */
 export const syncGroupMembershipsForGroup = async (database: Database, groupId: string, userIds: string[]) => {
     const collection = database.collections.get<GroupMembershipModel>(GROUP_MEMBERSHIP);
     const existing = await queryGroupMembershipsForGroup(database, groupId).fetch();

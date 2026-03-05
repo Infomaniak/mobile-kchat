@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Dimensions, type ListRenderItemInfo, StyleSheet, TouchableOpacity, View, Text} from 'react-native';
 
@@ -13,7 +13,7 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
-import {upsertGroupMembershipsForGroup} from '@queries/servers/group';
+import {syncGroupMembershipsForGroup, upsertGroupMembershipsForGroup} from '@queries/servers/group';
 import BottomSheet from '@screens/bottom_sheet';
 import {changeOpacity} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -95,12 +95,15 @@ const GroupMembers = ({closeButtonId, groupId, group, members}: Props) => {
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [error, setError] = useState(false);
+    const accumulatedUserIds = useRef<string[]>([]);
 
     const fetchMembers = useCallback(async (pageToLoad: number, isInitial = false) => {
         try {
             if (isInitial) {
                 setLoading(true);
                 setError(false);
+                // Reset accumulator so a fresh load or retry starts clean
+                accumulatedUserIds.current = [];
             } else {
                 setLoadingMore(true);
             }
@@ -108,9 +111,21 @@ const GroupMembers = ({closeButtonId, groupId, group, members}: Props) => {
             const response = await client.getUsersInGroup(groupId, pageToLoad, MEMBERS_PER_PAGE);
 
             if (Array.isArray(response)) {
+                const {operator, database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+
                 if (response.length) {
-                    const {operator, database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
                     await operator.handleUsers({users: response, prepareRecordsOnly: false});
+                    accumulatedUserIds.current = [...accumulatedUserIds.current, ...response.map((u) => u.id)];
+                }
+
+                const isLastPage = response.length < MEMBERS_PER_PAGE;
+                if (isLastPage) {
+                    // Last page: full sync with all accumulated IDs to remove
+                    // any members that were removed from the group since last load
+                    await syncGroupMembershipsForGroup(database, groupId, accumulatedUserIds.current);
+                } else {
+                    // Intermediate page: only insert new records, don't delete —
+                    // members from upcoming pages haven't been fetched yet
                     await upsertGroupMembershipsForGroup(database, groupId, response.map((u) => u.id));
                 }
 
@@ -119,7 +134,7 @@ const GroupMembers = ({closeButtonId, groupId, group, members}: Props) => {
                 } else {
                     setPage(pageToLoad + 1);
                 }
-                setHasMore(response.length >= MEMBERS_PER_PAGE);
+                setHasMore(!isLastPage);
             } else {
                 setHasMore(false);
             }
@@ -220,7 +235,7 @@ const GroupMembers = ({closeButtonId, groupId, group, members}: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [group?.displayName, group?.name, theme]);
 
-    const renderError = () => (
+    const renderError = useCallback(() => (
         <View style={styles.errorContainer}>
             <Text
                 style={[
@@ -257,9 +272,9 @@ const GroupMembers = ({closeButtonId, groupId, group, members}: Props) => {
                 </Text>
             </TouchableOpacity>
         </View>
-    );
+    ), [handleRetry, intl, theme]);
 
-    const renderContent = () => {
+    const renderContent = useCallback(() => {
         if (loading && !members.length) {
             return (
                 <View style={[styles.container, styles.loadingContainer]}>
@@ -292,7 +307,7 @@ const GroupMembers = ({closeButtonId, groupId, group, members}: Props) => {
                 testID='group_members.flat_list'
             />
         );
-    };
+    }, [error, loading, loadMore, members, renderError, renderFooter, renderHeader, renderItem, theme.buttonBg]);
 
     return (
         <BottomSheet

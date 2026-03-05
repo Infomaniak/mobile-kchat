@@ -174,7 +174,7 @@ export async function handleChannelGroupAddedEvent(serverUrl: string, msg: Webso
         }
     } catch (e) {
         logError('Group WS: channel_group_added', e, msg);
-        fetchGroupsForChannel(serverUrl, msg.data.channel_id);
+        fetchGroupsForChannel(serverUrl, msg?.data?.channel_id);
     }
 }
 
