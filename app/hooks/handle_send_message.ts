@@ -7,6 +7,7 @@ import {useIntl} from 'react-intl';
 import {Alert, DeviceEventEmitter} from 'react-native';
 
 import {getChannelTimezones} from '@actions/remote/channel';
+import {checkUserInOverlappingGroups} from '@actions/remote/groups';
 import {executeCommand, handleGotoLocation} from '@actions/remote/command';
 import {createPost} from '@actions/remote/post';
 import {handleReactionToLatestPost} from '@actions/remote/reactions';
@@ -21,7 +22,6 @@ import DraftUploadManager from '@managers/draft_upload_manager';
 import * as DraftUtils from '@utils/draft';
 import {isReactionMatch} from '@utils/emoji/helpers';
 import {getErrorMessage, getFullErrorMessage} from '@utils/errors';
-import {checkUserInOverlappingGroups} from '@utils/groups';
 import {scheduledPostFromPost} from '@utils/post';
 import {canPostDraftInChannelOrThread} from '@utils/scheduled_post';
 import {showSnackBar} from '@utils/snack_bar';

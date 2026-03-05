@@ -1,9 +1,10 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {checkUserInOverlappingGroups} from '@actions/remote/groups';
 import NetworkManager from '@managers/network_manager';
 
-import {checkUserInOverlappingGroups, generateGroupAssociationId} from './groups';
+import {generateGroupAssociationId} from './groups';
 
 jest.mock('@managers/network_manager');
 

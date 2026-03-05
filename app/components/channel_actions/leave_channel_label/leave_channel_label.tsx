@@ -6,6 +6,7 @@ import {useIntl} from 'react-intl';
 import {Alert} from 'react-native';
 
 import {archiveChannel, leaveChannel} from '@actions/remote/channel';
+import {checkUserInOverlappingGroups} from '@actions/remote/groups';
 import {setDirectChannelVisible} from '@actions/remote/preference';
 import OptionItem from '@components/option_item';
 import SlideUpPanelItem from '@components/slide_up_panel_item';
@@ -15,7 +16,6 @@ import {useIsTablet} from '@hooks/device';
 import {t} from '@i18n';
 import {dismissAllModalsAndPopToRoot, dismissBottomSheet, showModal} from '@screens/navigation';
 import {alertErrorWithFallback} from '@utils/draft';
-import {checkUserInOverlappingGroups} from '@utils/groups';
 
 type Props = {
     isOptionItem?: boolean;

@@ -6,12 +6,12 @@ import {defineMessages, useIntl} from 'react-intl';
 import {Alert, DeviceEventEmitter} from 'react-native';
 
 import {fetchChannelStats, removeMemberFromChannel, updateChannelMemberSchemeRoles} from '@actions/remote/channel';
+import {checkUserInOverlappingGroups} from '@actions/remote/groups';
 import OptionItem from '@components/option_item';
 import {Events, Members} from '@constants';
 import {useServerUrl} from '@context/server';
 import {dismissBottomSheet} from '@screens/navigation';
 import {alertErrorWithFallback} from '@utils/draft';
-import {checkUserInOverlappingGroups} from '@utils/groups';
 
 import type {ManageOptionsTypes} from '@constants/members';
 
