@@ -20,13 +20,15 @@ import {
 } from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import GroupRow, {type GroupInfo} from './group_row';
+import GroupRow from './group_row';
 
+import type GroupModel from '@typings/database/models/servers/group';
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type UserProfileWithChannelAdmin = UserProfile & {scheme_admin?: boolean}
-type RenderItemType = ListRenderItemInfo<UserProfileWithChannelAdmin> & {section?: SectionListData<UserProfileWithChannelAdmin>}
+type RenderItemType = ListRenderItemInfo<UserProfileWithChannelAdmin | GroupModel> & {section?: SectionListData<UserProfileWithChannelAdmin | GroupModel>}
+type SectionWithGroupFlag = SectionListData<UserProfileWithChannelAdmin | GroupModel> & {isGroupSection?: boolean}
 
 const INITIAL_BATCH_TO_RENDER = 15;
 const SCROLL_EVENT_THROTTLE = 60;
@@ -55,9 +57,11 @@ const keyboardDismissProp = Platform.select({
     },
 });
 
-const keyExtractor = (item: UserProfile) => {
+const keyExtractor = (item: UserProfile | GroupModel) => {
     return item.id;
 };
+
+const isGroupModel = (item: UserProfile | GroupModel): item is GroupModel => !('username' in item);
 
 const sectionKeyExtractor = (profile: UserProfile) => {
     // Group items alphabetically by first letter of username
@@ -69,7 +73,7 @@ const sectionRoleKeyExtractor = (cAdmin: boolean) => {
     return cAdmin ? messages.admins : messages.members;
 };
 
-export function createProfilesSections(intl: IntlShape, profiles: UserProfile[], members?: ChannelMembership[], groups?: GroupInfo[]) {
+export function createProfilesSections(intl: IntlShape, profiles: UserProfile[], members?: ChannelMembership[], groups?: GroupModel[]) {
     if (!profiles.length && !groups?.length) {
         return [];
     }
@@ -91,7 +95,7 @@ export function createProfilesSections(intl: IntlShape, profiles: UserProfile[],
             }
         });
 
-        const results: Array<{first: boolean; id: string; data: any[]; isGroupSection?: boolean}> = [];
+        const results: Array<{first: boolean; id: string; data: Array<UserProfileWithChannelAdmin | GroupModel>; isGroupSection?: boolean}> = [];
         let index = 0;
 
         const admins = membersSections.get(messages.admins.id) || [];
@@ -177,7 +181,7 @@ const getStyleFromTheme = makeStyleSheetFromTheme((theme) => {
 type Props = {
     profiles: UserProfile[];
     channelMembers?: ChannelMembership[];
-    groups?: GroupInfo[];
+    groups?: GroupModel[];
     currentUserId: string;
     handleSelectProfile: (user: UserProfile | UserModel) => void;
     fetchMore?: () => void;
@@ -259,6 +263,10 @@ export default function UserList({
     }, [intl, location, serverUrl, theme]);
 
     const renderItem = useCallback(({item, index, section}: RenderItemType) => {
+        if (isGroupModel(item)) {
+            return null; // handled by per-section renderItem
+        }
+
         // The list will re-render when the selection changes because it's passed into the list as extraData
         const selected = Boolean(selectedIds[item.id]);
         const canAdd = Object.keys(selectedIds).length < General.MAX_USERS_IN_GM;
@@ -313,10 +321,13 @@ export default function UserList({
         );
     }, [showNoResults && style, term, noResutsStyle]);
 
-    const renderGroupItem = useCallback(({item}: {item: any}) => {
+    const renderGroupItem = useCallback(({item}: RenderItemType) => {
+        if (!isGroupModel(item)) {
+            return null;
+        }
         return (
             <GroupRow
-                group={item as GroupInfo}
+                group={item}
             />
         );
     }, []);
@@ -331,14 +342,14 @@ export default function UserList({
         );
     }, [style]);
 
-    const renderSectionList = (sections: Array<SectionListData<any>>) => {
+    const renderSectionList = (sections: SectionWithGroupFlag[]) => {
         // Inject per-section renderItem for group sections
         const enhancedSections = sections.map((section) => {
-            if ((section as any).isGroupSection) {
+            if (section.isGroupSection) {
                 return {
                     ...section,
                     renderItem: renderGroupItem,
-                    keyExtractor: (item: any) => item.id,
+                    keyExtractor: (item: GroupModel) => item.id,
                 };
             }
             return section;
@@ -367,5 +378,5 @@ export default function UserList({
         );
     };
 
-    return renderSectionList(data as Array<SectionListData<any>>);
+    return renderSectionList(data as SectionWithGroupFlag[]);
 }

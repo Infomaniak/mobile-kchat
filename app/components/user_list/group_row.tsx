@@ -12,15 +12,10 @@ import {openAsBottomSheet} from '@screens/navigation';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
-export type GroupInfo = {
-    id: string;
-    displayName: string;
-    name: string;
-    memberCount: number;
-}
+import type GroupModel from '@typings/database/models/servers/group';
 
 type Props = {
-    group: GroupInfo;
+    group: GroupModel;
 }
 
 const CLOSE_BUTTON_ID = 'close-group-members';

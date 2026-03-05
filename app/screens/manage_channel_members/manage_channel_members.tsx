@@ -26,7 +26,7 @@ import {showRemoveChannelUserSnackbar} from '@utils/snack_bar';
 import {changeOpacity, getKeyboardAppearanceFromTheme} from '@utils/theme';
 import {displayUsername, filterDeactivatedProfiles, filterProfilesMatchingTerm} from '@utils/user';
 
-import type {GroupInfo} from '@components/user_list/group_row';
+import type GroupModel from '@typings/database/models/servers/group';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
@@ -35,7 +35,7 @@ type Props = {
     componentId: AvailableScreens;
     currentTeamId: string;
     currentUserId: string;
-    groups: GroupInfo[];
+    groups: GroupModel[];
     tutorialWatched: boolean;
     teammateDisplayNameSetting: string;
     channelAbacPolicyEnforced: boolean;
