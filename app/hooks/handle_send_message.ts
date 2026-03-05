@@ -7,8 +7,8 @@ import {useIntl} from 'react-intl';
 import {Alert, DeviceEventEmitter} from 'react-native';
 
 import {getChannelTimezones} from '@actions/remote/channel';
-import {checkUserInOverlappingGroups} from '@actions/remote/groups';
 import {executeCommand, handleGotoLocation} from '@actions/remote/command';
+import {checkUserInOverlappingGroups} from '@actions/remote/groups';
 import {createPost} from '@actions/remote/post';
 import {handleReactionToLatestPost} from '@actions/remote/reactions';
 import {createScheduledPost} from '@actions/remote/scheduled_post';
