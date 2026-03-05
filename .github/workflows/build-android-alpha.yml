@@ -1,11 +1,10 @@
 ---
-name: build-android-beta
+name: build-android-alpha
 
 on:
   push:
     branches:
-      - build-beta-[0-9]+
-      - build-beta-android-[0-9]+
+      - build-alpha-android-[0-9]+
 
 env:
   NODE_VERSION: 22.14.0
@@ -20,13 +19,10 @@ jobs:
       - name: ci/test
         uses: ./.github/actions/test
 
-  build-and-deploy-android-beta:
+  build-and-deploy-android-alpha:
     runs-on: [self-hosted, macOS, Android]
     needs:
       - test
-    permissions:
-      id-token: write
-      contents: read
     steps:
       - name: ci/checkout-repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -39,7 +35,7 @@ jobs:
           STORE_PASSWORD: "${{ secrets.MM_MOBILE_STORE_PASSWORD }}"
           MATTERMOST_BUILD_GH_TOKEN: "${{ secrets.MATTERMOST_BUILD_GH_TOKEN }}"
 
-      - name: ci/build-and-deploy-android-beta
+      - name: ci/build-and-deploy-android-alpha
         env:
           AWS_ACCESS_KEY_ID: "${{ secrets.MM_MOBILE_BETA_AWS_ACCESS_KEY_ID }}"
           AWS_SECRET_ACCESS_KEY: "${{ secrets.MM_MOBILE_BETA_AWS_SECRET_ACCESS_KEY }}"
@@ -49,17 +45,15 @@ jobs:
           SUPPLY_JSON_KEY: ${{ github.workspace }}/mobile-private/android/kchat-credentials.json
         run: |
           echo "::group::Build"
-          bundle exec fastlane android build --env android.beta
+          bundle exec fastlane android build --env android.alpha
           echo "::endgroup::"
-          echo "::group::Deploy to Play Store"
-          bundle exec fastlane android deploy file:"${{ github.workspace }}/*.aab" --env android.beta
+          echo "::group::Deploy to Play Store (alpha)"
+          bundle exec fastlane android deploy file:"${{ github.workspace }}/*.aab" --env android.alpha
           echo "::endgroup::"
         working-directory: ./fastlane
 
-      - name: ci/upload-android-beta-build
+      - name: ci/upload-android-alpha-build
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: android-build-beta-${{ github.run_id }}
-          path: |
-            *.apk
-            *.aab
+          name: android-build-alpha-${{ github.run_id }}
+          path: "*.apk"
