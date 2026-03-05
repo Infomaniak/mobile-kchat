@@ -294,14 +294,24 @@ export default function ManageChannelMembers({
         }
     }, [canManageAndRemoveMembers]);
 
+    const refetchMembers = useCallback(() => {
+        pageRef.current = 0;
+        hasMoreProfiles.current = true;
+        setProfiles(EMPTY);
+        setChannelMembers(EMPTY_MEMBERS);
+        getFetchChannelMembers();
+    }, [getFetchChannelMembers]);
+
     useEffect(() => {
         const removeUserListener = DeviceEventEmitter.addListener(Events.REMOVE_USER_FROM_CHANNEL, handleRemoveUser);
         const changeUserRoleListener = DeviceEventEmitter.addListener(Events.MANAGE_USER_CHANGE_ROLE, handleUserChangeRole);
+        const addUserListener = DeviceEventEmitter.addListener(Events.ADD_USER_TO_CHANNEL, refetchMembers);
         return (() => {
             removeUserListener?.remove();
             changeUserRoleListener?.remove();
+            addUserListener?.remove();
         });
-    }, [handleRemoveUser, handleUserChangeRole]);
+    }, [handleRemoveUser, handleUserChangeRole, refetchMembers]);
 
     return (
         <SafeAreaView

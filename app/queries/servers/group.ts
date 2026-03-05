@@ -56,8 +56,7 @@ export const queryGroupsForChannel = (database: Database, channelId: string) => 
 };
 
 export const observeGroupsForChannel = (database: Database, channelId: string) => {
-    return queryGroupsForChannel(database, channelId).
-        observeWithColumns(['display_name', 'name', 'member_count']);
+    return queryGroupsForChannel(database, channelId).observe();
 };
 
 export const queryGroupMembershipForMember = (database: Database, userId: string) => {
