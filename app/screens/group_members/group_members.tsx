@@ -119,7 +119,7 @@ const GroupMembers = ({closeButtonId, groupId, group, members}: Props) => {
                 } else {
                     setPage(pageToLoad + 1);
                 }
-                setHasMore(response.length === MEMBERS_PER_PAGE);
+                setHasMore(response.length >= MEMBERS_PER_PAGE);
             } else {
                 setHasMore(false);
             }
