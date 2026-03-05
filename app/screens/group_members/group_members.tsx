@@ -102,6 +102,7 @@ const GroupMembers = ({closeButtonId, groupId, group, members}: Props) => {
             if (isInitial) {
                 setLoading(true);
                 setError(false);
+
                 // Reset accumulator so a fresh load or retry starts clean
                 accumulatedUserIds.current = [];
             } else {

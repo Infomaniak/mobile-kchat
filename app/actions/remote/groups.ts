@@ -227,6 +227,7 @@ export const checkUserInOverlappingGroups = async (serverUrl: string, channelId:
         let page = 0;
         const perPage = 60;
         while (true) {
+            // eslint-disable-next-line no-await-in-loop
             const channelGroups = await client.getGroupsAssociatedToChannel(channelId, '', page, perPage);
             if (!Array.isArray(channelGroups) || channelGroups.length === 0) {
                 return false;
