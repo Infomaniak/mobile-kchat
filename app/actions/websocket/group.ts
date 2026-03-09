@@ -170,7 +170,7 @@ export async function handleChannelGroupAddedEvent(serverUrl: string, msg: Webso
             const group: Group = msg.data.group;
 
             await operator.handleGroups({groups: [group], prepareRecordsOnly: false});
-            await operator.handleGroupChannelsForChannel({channelId: msg.data.channel_id, groups: [{id: group.id}], prepareRecordsOnly: false});
+            await operator.handleGroupChannelsForChannel({channelId: msg.data.channel_id, groups: [{id: group.id}], prepareRecordsOnly: false, appendOnly: true});
         }
     } catch (e) {
         logError('Group WS: channel_group_added', e, msg);
