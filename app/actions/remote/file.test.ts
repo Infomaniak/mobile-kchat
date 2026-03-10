@@ -26,6 +26,7 @@ describe('actions/remote/file', () => {
         },
         getFileRoute: jest.fn(),
         getProfilePictureUrl: jest.fn(),
+        getCurrentBearerToken: jest.fn().mockReturnValue('Bearer test-token'),
         uploadAttachment: jest.fn(),
         getFilePublicLink: jest.fn(),
         getFileUrl: jest.fn(),
@@ -43,8 +44,7 @@ describe('actions/remote/file', () => {
     });
 
     describe('downloadFile', () => {
-        it.skip('should download file successfully', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should download file successfully', async () => {
             const fileId = 'file123';
             const destination = 'file:///path/to/file';
             mockClient.getFileRoute.mockReturnValue('/files/file123');
@@ -56,7 +56,7 @@ describe('actions/remote/file', () => {
             expect(mockClient.apiClient.download).toHaveBeenCalledWith(
                 '/files/file123',
                 '/path/to/file',
-                {timeoutInterval: DOWNLOAD_TIMEOUT},
+                {headers: {Authorization: 'Bearer test-token'}, timeoutInterval: DOWNLOAD_TIMEOUT},
             );
         });
 
@@ -64,8 +64,7 @@ describe('actions/remote/file', () => {
          * Not catching/handling the error thrown by the downloadFile function.
          * It should be caught and handled by the caller of the function.
          */
-        it.skip('does not catch/handle download error', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('does not catch/handle download error', async () => {
             const error = new Error('Download failed');
             mockClient.getFileRoute.mockReturnValue('/files/file123');
             mockClient.apiClient.download.mockRejectedValue(error);
