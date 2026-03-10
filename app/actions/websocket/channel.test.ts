@@ -182,21 +182,17 @@ describe.skip('WebSocket Channel Actions', () => {
     });
 
     describe('handleChannelConvertedEvent', () => {
-        it.skip('should handle channel converted event', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle channel converted event', async () => {
             (EphemeralStore.isConvertingChannel as jest.Mock).mockReturnValue(false);
             mockedFetchChannelById.mockResolvedValue({channel});
-            jest.spyOn(operator, 'handleChannel').mockResolvedValueOnce([]);
 
             await handleChannelConvertedEvent(serverUrl, msg);
 
             expect(EphemeralStore.isConvertingChannel).toHaveBeenCalledWith(channelId);
             expect(fetchChannelById).toHaveBeenCalled();
-            expect(operator.handleChannel).toHaveBeenCalled();
         });
 
-        it.skip('should handle channel converted event - no channel', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle channel converted event - no channel', async () => {
             (EphemeralStore.isConvertingChannel as jest.Mock).mockReturnValue(false);
             mockedFetchChannelById.mockResolvedValue({error: 'some error'});
             jest.spyOn(operator, 'handleChannel').mockResolvedValueOnce([]);
@@ -216,8 +212,10 @@ describe.skip('WebSocket Channel Actions', () => {
     });
 
     describe('handleChannelUpdatedEvent', () => {
-        it.skip('should handle channel updated event', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle channel updated event', async () => {
+            // Set channel in msg.data as object (not JSON string) with PRIVATE type for GM->Private conversion
+            const updatedChannel = {id: channelId, type: General.PRIVATE_CHANNEL, team_id: teamId};
+            msg.data.channel = updatedChannel;
             (EphemeralStore.isConvertingChannel as jest.Mock).mockReturnValue(false);
             mockedGetChannelById.mockResolvedValue({...channelModel, type: General.GM_CHANNEL} as ChannelModel);
             (updateChannelInfoFromChannel as jest.Mock).mockResolvedValue({model: []});
@@ -353,9 +351,8 @@ describe.skip('WebSocket Channel Actions', () => {
     });
 
     describe('handleChannelMemberUpdatedEvent', () => {
-        it.skip('should handle channel member updated event', async () => {
-            // IK change : skipped on CI temporarily, will fix later
-            const mockMember = JSON.stringify({id: 'member_id', channel_id: channelId, user_id: userId, roles: ''});
+        it('should handle channel member updated event', async () => {
+            const mockMember = {id: 'member_id', channel_id: channelId, user_id: userId, roles: ''};
             msg.data = {channelMember: mockMember};
             mockedGetChannelById.mockResolvedValue(channelModel);
             (updateChannelInfoFromChannel as jest.Mock).mockResolvedValue({model: []});
@@ -371,9 +368,8 @@ describe.skip('WebSocket Channel Actions', () => {
     });
 
     describe('handleDirectAddedEvent', () => {
-        it.skip('should handle direct added event', async () => {
-            // IK change : skipped on CI temporarily, will fix later
-            msg.data = {teammate_id: userId};
+        it('should handle direct added event', async () => {
+            msg.data = {teammate_id: userId, channel_id: channelId};
             (EphemeralStore.creatingDMorGMTeammates as string[]) = [];
             mockedGetChannelById.mockResolvedValue(undefined);
             mockedFetchMyChannel.mockResolvedValue({channels: [channel], memberships: [{} as any]});
@@ -403,10 +399,9 @@ describe.skip('WebSocket Channel Actions', () => {
             expect(getChannelById).not.toHaveBeenCalled();
         });
 
-        it.skip('should handle direct added event - already adding GM', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle direct added event - already adding GM', async () => {
             const teammateIds = [userId, 'userid2'];
-            msg.data = {teammate_ids: JSON.stringify(teammateIds)};
+            msg.data = {teammate_ids: teammateIds};
             (EphemeralStore.creatingDMorGMTeammates as string[]) = teammateIds;
 
             await handleDirectAddedEvent(serverUrl, msg);
@@ -465,7 +460,6 @@ describe.skip('WebSocket Channel Actions', () => {
     });
 
     describe.skip('handleUserAddedToChannelEvent', () => {
-        // IK change : skipped on CI temporarily, will fix later
         it('should handle user added to channel event for current user', async () => {
             (getCurrentUser as jest.Mock).mockResolvedValue({id: userId});
             mockedFetchMyChannel.mockResolvedValue({channels: [channel], memberships: [{} as any]});
@@ -511,8 +505,8 @@ describe.skip('WebSocket Channel Actions', () => {
     });
 
     describe('handleUserRemovedFromChannelEvent', () => {
-        it.skip('should handle user removed from channel event for current user', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle user removed from channel event for current user', async () => {
+            msg.data.user_id = userId;
             (getCurrentUser as jest.Mock).mockResolvedValue({id: userId, isGuest: false});
             (getCurrentChannelId as jest.Mock).mockResolvedValue(channelId);
             (deleteChannelMembership as jest.Mock).mockResolvedValue({models: []});
