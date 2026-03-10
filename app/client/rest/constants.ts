@@ -23,7 +23,6 @@ export const PER_PAGE_DEFAULT = 60;
 // export const BASE_SERVER_URL = 'https://kchat.preprod.dev.infomaniak.ch';
 // export const BASE_LOGIN_URL = 'https://login.preprod.dev.infomaniak.ch';
 
-
 // Staging Refonte équipe
 export const BASE_SERVER_URL = 'https://infomaniak.kchat.staging-165797.dev.infomaniak.ch';
 export const BASE_LOGIN_URL = 'https://login.staging-165797.dev.infomaniak.ch';
