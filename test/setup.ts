@@ -210,6 +210,9 @@ jest.doMock('react-native', () => {
         RNDocumentPicker: {
             pick: jest.fn(),
         },
+        CallManagerModule: {
+            getToken: jest.fn().mockResolvedValue('mock-pushkit-token'),
+        },
         RNFastStorage: {
             setupLibrary: jest.fn(),
             setStringAsync: jest.fn(),

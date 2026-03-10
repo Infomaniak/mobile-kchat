@@ -195,8 +195,7 @@ describe('actions/remote/entry/common', () => {
     });
 
     describe('setExtraSessionProps', () => {
-        it.skip('should set extra session properties when notifications are granted', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should set extra session properties when notifications are granted', async () => {
             (RESULTS as any).GRANTED = 'granted';
             const mockCheckNotifications = jest.fn().mockResolvedValue({status: RESULTS.GRANTED});
             require('react-native-permissions').checkNotifications = mockCheckNotifications;
@@ -210,11 +209,11 @@ describe('actions/remote/entry/common', () => {
                 false,
                 nativeApplicationVersion,
                 undefined,
+                'mock-pushkit-token',
             );
         });
 
-        it.skip('should set extra session properties when notifications are limited', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should set extra session properties when notifications are limited', async () => {
             (RESULTS as any).LIMITED = 'limited';
             const mockCheckNotifications = jest.fn().mockResolvedValue({status: RESULTS.LIMITED});
             require('react-native-permissions').checkNotifications = mockCheckNotifications;
@@ -228,11 +227,11 @@ describe('actions/remote/entry/common', () => {
                 false,
                 nativeApplicationVersion,
                 undefined,
+                'mock-pushkit-token',
             );
         });
 
-        it.skip('should handle errors gracefully', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle errors gracefully', async () => {
             const mockError = new Error('Failed to set props');
             const mockCheckNotifications = jest.fn().mockRejectedValue(mockError);
             require('react-native-permissions').checkNotifications = mockCheckNotifications;
