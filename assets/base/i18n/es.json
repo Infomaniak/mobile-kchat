@@ -1062,6 +1062,7 @@
   "user.settings.notifications.email_threads.description": "Notificarme sobre todas las respuestas a los hilos que estoy siguiendo",
   "user.tutorial.long_press": "Mantenga presionado un elemento para ver el perfil de un usuario",
   "user_profile.custom_status": "Estado personalizado",
+  "user_profile.system_admin": "Administrador del sistema",
   "user_status.away": "En movimiento",
   "infomaniak.no_team.title": "No tienes kChat, descúbrelo con kSuite",
   "infomaniak.no_team.description": "kSuite integra todas nuestras aplicaciones de productividad, incluido kChat, para comunicar en directo, compartir y coordinar a sus equipos.",
