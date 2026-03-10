@@ -216,6 +216,7 @@ describe('WebSocket Group Actions', () => {
                 channelId,
                 groups: [{id: groupId}],
                 prepareRecordsOnly: false,
+                appendOnly: true,
             });
         });
 
