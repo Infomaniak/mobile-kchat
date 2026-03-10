@@ -1109,6 +1109,7 @@
   "user.settings.notifications.email_threads.description": "Notifica tutte le risposte alle discussioni che sto seguendo",
   "user.tutorial.long_press": "Premere a lungo su un elemento per visualizzare il profilo dell'utente",
   "user_profile.custom_status": "Stato personalizzato",
+  "user_profile.system_admin": "Amministratore di sistema",
   "user_status.away": "Via",
   "user_status.dnd": "Non disturbare",
   "user_status.offline": "Non in linea",
