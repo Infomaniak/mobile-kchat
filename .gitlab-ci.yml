@@ -1,4 +1,5 @@
 stages:
+  - install
   - check
   - test-unit
 
@@ -12,17 +13,39 @@ variables:
   - if: &if-merge-request "$CI_MERGE_REQUEST_ID"
     when: on_success
 
-.script-npm-install: &script-npm-install
-  - npm ci --ignore-scripts
-  - node node_modules/@sentry/cli/scripts/install.js
-  - npx patch-package
-  - node scripts/generate-assets.js
-  - node scripts/jitsi-ts-nocheck.js
+.npm-cache: &npm-cache
+  key:
+    prefix: npm
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
 
 .tests-node: &tests-node
   image: node:${NODE_VERSION}
-  before_script:
-    - *script-npm-install
+  cache:
+    <<: *npm-cache
+    policy: pull
+
+install:
+  stage: install
+  image: node:${NODE_VERSION}
+  rules:
+    - *rule-mr
+    - when: never
+  cache:
+    <<: *npm-cache
+    policy: pull-push
+  script:
+    - npm ci --ignore-scripts
+    - node node_modules/@sentry/cli/scripts/install.js
+    - npx patch-package
+    - node scripts/generate-assets.js
+    - node scripts/jitsi-ts-nocheck.js
+  artifacts:
+    expire_in: 12h
+    paths:
+      - dist/assets/
 
 test:check:
   stage: check
