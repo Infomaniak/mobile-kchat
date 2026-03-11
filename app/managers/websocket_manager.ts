@@ -47,8 +47,16 @@ class WebsocketManagerSingleton {
         const netInfo = await NetInfo.fetch();
         this.netConnected = Boolean(netInfo.isConnected);
         this.netType = netInfo.type;
+
+        // TODO: TEMP DEBUG - only connect to target server
+        const DEBUG_TARGET_SERVER = 'refonte-equipe-preprod';
         serverCredentials.forEach(
             ({serverUrl, token}) => {
+                if (!serverUrl.includes(DEBUG_TARGET_SERVER)) {
+                    // eslint-disable-next-line no-console
+                    console.log(`[WS-DEBUG] Skipping server: ${serverUrl}`);
+                    return;
+                }
                 try {
                     DatabaseManager.getServerDatabaseAndOperator(serverUrl);
                     this.createClient(serverUrl, token);
