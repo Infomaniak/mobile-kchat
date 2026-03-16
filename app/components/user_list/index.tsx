@@ -3,7 +3,7 @@
 
 import React, {useCallback, useMemo} from 'react';
 import {defineMessages, type IntlShape, useIntl} from 'react-intl';
-import {FlatList, Keyboard, type ListRenderItemInfo, Platform, SectionList, type SectionListData, Text, View} from 'react-native';
+import {Keyboard, type ListRenderItemInfo, Platform, SectionList, type SectionListData, Text, View} from 'react-native';
 
 import {storeProfile} from '@actions/local/user';
 import Loading from '@components/loading';
@@ -20,11 +20,15 @@ import {
 } from '@utils/theme';
 import {typography} from '@utils/typography';
 
+import GroupRow from './group_row';
+
+import type GroupModel from '@typings/database/models/servers/group';
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type UserProfileWithChannelAdmin = UserProfile & {scheme_admin?: boolean}
-type RenderItemType = ListRenderItemInfo<UserProfileWithChannelAdmin> & {section?: SectionListData<UserProfileWithChannelAdmin>}
+type RenderItemType = ListRenderItemInfo<UserProfileWithChannelAdmin | GroupModel> & {section?: SectionListData<UserProfileWithChannelAdmin | GroupModel>}
+type SectionWithGroupFlag = SectionListData<UserProfileWithChannelAdmin | GroupModel> & {isGroupSection?: boolean}
 
 const INITIAL_BATCH_TO_RENDER = 15;
 const SCROLL_EVENT_THROTTLE = 60;
@@ -33,6 +37,10 @@ const messages = defineMessages({
     admins: {
         id: 'mobile.manage_members.section_title_admins',
         defaultMessage: 'CHANNEL ADMINS',
+    },
+    groups: {
+        id: 'mobile.manage_members.section_title_groups',
+        defaultMessage: 'TEAMS',
     },
     members: {
         id: 'mobile.manage_members.section_title_members',
@@ -49,9 +57,11 @@ const keyboardDismissProp = Platform.select({
     },
 });
 
-const keyExtractor = (item: UserProfile) => {
+const keyExtractor = (item: UserProfile | GroupModel) => {
     return item.id;
 };
+
+const isGroupModel = (item: UserProfile | GroupModel): item is GroupModel => !('username' in item);
 
 const sectionKeyExtractor = (profile: UserProfile) => {
     // Group items alphabetically by first letter of username
@@ -63,18 +73,17 @@ const sectionRoleKeyExtractor = (cAdmin: boolean) => {
     return cAdmin ? messages.admins : messages.members;
 };
 
-export function createProfilesSections(intl: IntlShape, profiles: UserProfile[], members?: ChannelMembership[]) {
-    if (!profiles.length) {
+export function createProfilesSections(intl: IntlShape, profiles: UserProfile[], members?: ChannelMembership[], groups?: GroupModel[]) {
+    if (!profiles.length && !groups?.length) {
         return [];
     }
 
-    const sections = new Map<string, UserProfileWithChannelAdmin[]>();
+    const {formatMessage} = intl;
 
     if (members?.length) {
         // when channel members are provided, build the sections by admins and members
         const membersDictionary = new Map<string, ChannelMembership>();
         const membersSections = new Map<string, UserProfileWithChannelAdmin[]>();
-        const {formatMessage} = intl;
         members.forEach((m) => membersDictionary.set(m.user_id, m));
         profiles.forEach((p) => {
             const member = membersDictionary.get(p.id);
@@ -85,17 +94,39 @@ export function createProfilesSections(intl: IntlShape, profiles: UserProfile[],
                 membersSections.set(sectionKey, section);
             }
         });
-        sections.set(formatMessage(messages.admins), membersSections.get(messages.admins.id) || []);
-        sections.set(formatMessage(messages.members), membersSections.get(messages.members.id) || []);
-    } else {
-        // when channel members are not provided, build the sections alphabetically
-        profiles.forEach((p) => {
-            const sectionKey = sectionKeyExtractor(p);
-            const sectionValue = sections.get(sectionKey) || [];
-            const section = [...sectionValue, p];
-            sections.set(sectionKey, section);
-        });
+
+        const results: Array<{first: boolean; id: string; data: Array<UserProfileWithChannelAdmin | GroupModel>; isGroupSection?: boolean}> = [];
+        let index = 0;
+
+        const admins = membersSections.get(messages.admins.id) || [];
+        if (admins.length) {
+            results.push({first: index === 0, id: formatMessage(messages.admins), data: admins});
+            index++;
+        }
+
+        // Insert groups section between admins and members
+        if (groups?.length) {
+            results.push({first: index === 0, id: formatMessage(messages.groups), data: groups, isGroupSection: true});
+            index++;
+        }
+
+        const membersData = membersSections.get(messages.members.id) || [];
+        if (membersData.length) {
+            results.push({first: index === 0, id: formatMessage(messages.members), data: membersData});
+            index++;
+        }
+
+        return results;
     }
+
+    // when channel members are not provided, build the sections alphabetically
+    const sections = new Map<string, UserProfileWithChannelAdmin[]>();
+    profiles.forEach((p) => {
+        const sectionKey = sectionKeyExtractor(p);
+        const sectionValue = sections.get(sectionKey) || [];
+        const section = [...sectionValue, p];
+        sections.set(sectionKey, section);
+    });
 
     const results = [];
     let index = 0;
@@ -110,28 +141,6 @@ export function createProfilesSections(intl: IntlShape, profiles: UserProfile[],
         }
     }
     return results;
-}
-
-function createProfiles(profiles: UserProfile[], members?: ChannelMembership[]): UserProfileWithChannelAdmin[] {
-    if (!profiles.length) {
-        return [];
-    }
-
-    const profileMap = new Map<string, UserProfileWithChannelAdmin>();
-    profiles.forEach((profile) => {
-        profileMap.set(profile.id, profile);
-    });
-
-    if (members?.length) {
-        members.forEach((m) => {
-            const profileFound = profileMap.get(m.user_id);
-            if (profileFound) {
-                profileFound.scheme_admin = m.scheme_admin;
-            }
-        });
-    }
-
-    return Array.from(profileMap.values());
 }
 
 const getStyleFromTheme = makeStyleSheetFromTheme((theme) => {
@@ -172,6 +181,7 @@ const getStyleFromTheme = makeStyleSheetFromTheme((theme) => {
 type Props = {
     profiles: UserProfile[];
     channelMembers?: ChannelMembership[];
+    groups?: GroupModel[];
     currentUserId: string;
     handleSelectProfile: (user: UserProfile | UserModel) => void;
     fetchMore?: () => void;
@@ -190,6 +200,7 @@ type Props = {
 export default function UserList({
     profiles,
     channelMembers,
+    groups,
     selectedIds,
     currentUserId,
     handleSelectProfile,
@@ -214,17 +225,24 @@ export default function UserList({
         {paddingBottom: keyboardHeight},
     ], [style, keyboardHeight]);
 
+    const filteredGroups = useMemo(() => {
+        if (!term || !groups?.length) {
+            return groups;
+        }
+        const lowerTerm = term.toLowerCase();
+        return groups.filter((g) =>
+            g.name.toLowerCase().includes(lowerTerm) ||
+            g.displayName.toLowerCase().includes(lowerTerm),
+        );
+    }, [groups, term]);
+
     const data = useMemo(() => {
-        if (profiles.length === 0 && !loading) {
+        if (profiles.length === 0 && !filteredGroups?.length && !loading) {
             return [];
         }
 
-        if (term) {
-            return createProfiles(profiles, channelMembers);
-        }
-
-        return createProfilesSections(intl, profiles, channelMembers);
-    }, [channelMembers, intl, loading, profiles, term]);
+        return createProfilesSections(intl, profiles, channelMembers, filteredGroups);
+    }, [channelMembers, filteredGroups, intl, loading, profiles]);
 
     const openUserProfile = useCallback(async (profile: UserProfile | UserModel) => {
         let user: UserModel;
@@ -245,6 +263,10 @@ export default function UserList({
     }, [intl, location, serverUrl, theme]);
 
     const renderItem = useCallback(({item, index, section}: RenderItemType) => {
+        if (isGroupModel(item)) {
+            return null; // handled by per-section renderItem
+        }
+
         // The list will re-render when the selection changes because it's passed into the list as extraData
         const selected = Boolean(selectedIds[item.id]);
         const canAdd = Object.keys(selectedIds).length < General.MAX_USERS_IN_GM;
@@ -299,6 +321,17 @@ export default function UserList({
         );
     }, [showNoResults && style, term, noResutsStyle]);
 
+    const renderGroupItem = useCallback(({item}: RenderItemType) => {
+        if (!isGroupModel(item)) {
+            return null;
+        }
+        return (
+            <GroupRow
+                group={item}
+            />
+        );
+    }, []);
+
     const renderSectionHeader = useCallback(({section}: {section: SectionListData<UserProfile>}) => {
         return (
             <View style={style.sectionWrapper}>
@@ -309,28 +342,19 @@ export default function UserList({
         );
     }, [style]);
 
-    const renderFlatList = (items: UserProfile[]) => {
-        return (
-            <FlatList
-                contentContainerStyle={style.container}
-                data={items}
-                keyboardShouldPersistTaps='always'
-                {...keyboardDismissProp}
-                keyExtractor={keyExtractor}
-                initialNumToRender={INITIAL_BATCH_TO_RENDER}
-                ListEmptyComponent={renderNoResults}
-                ListFooterComponent={renderLoading}
-                maxToRenderPerBatch={INITIAL_BATCH_TO_RENDER + 1}
-                removeClippedSubviews={true}
-                renderItem={renderItem}
-                scrollEventThrottle={SCROLL_EVENT_THROTTLE}
-                style={style.list}
-                testID={`${testID}.flat_list`}
-            />
-        );
-    };
+    const renderSectionList = (sections: SectionWithGroupFlag[]) => {
+        // Inject per-section renderItem for group sections
+        const enhancedSections = sections.map((section) => {
+            if (section.isGroupSection) {
+                return {
+                    ...section,
+                    renderItem: renderGroupItem,
+                    keyExtractor: (item: GroupModel) => item.id,
+                };
+            }
+            return section;
+        });
 
-    const renderSectionList = (sections: Array<SectionListData<UserProfile>>) => {
         return (
             <SectionList
                 contentContainerStyle={style.container}
@@ -345,7 +369,7 @@ export default function UserList({
                 renderItem={renderItem}
                 renderSectionHeader={renderSectionHeader}
                 scrollEventThrottle={SCROLL_EVENT_THROTTLE}
-                sections={sections}
+                sections={enhancedSections}
                 style={style.list}
                 stickySectionHeadersEnabled={false}
                 testID={`${testID}.section_list`}
@@ -354,8 +378,5 @@ export default function UserList({
         );
     };
 
-    if (term) {
-        return renderFlatList(data as UserProfileWithChannelAdmin[]);
-    }
-    return renderSectionList(data as Array<SectionListData<UserProfileWithChannelAdmin>>);
+    return renderSectionList(data as SectionWithGroupFlag[]);
 }

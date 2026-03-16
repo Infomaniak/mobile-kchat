@@ -18,6 +18,7 @@ exports[`components/channel_list_row should show no results 1`] = `
   keyboardShouldPersistTaps="always"
   maxToRenderPerBatch={16}
   onContentSizeChange={[Function]}
+  onEndReached={[MockFunction]}
   onLayout={[Function]}
   onMomentumScrollBegin={[Function]}
   onMomentumScrollEnd={[Function]}
@@ -34,8 +35,7 @@ exports[`components/channel_list_row should show no results 1`] = `
       "flex": 1,
     }
   }
-  testID="UserListRow.flat_list"
-  viewabilityConfigCallbackPairs={[]}
+  testID="UserListRow.section_list"
 >
   <View>
     <View

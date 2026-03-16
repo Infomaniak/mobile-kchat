@@ -6,6 +6,7 @@ import {useIntl} from 'react-intl';
 import {Alert} from 'react-native';
 
 import {archiveChannel, leaveChannel} from '@actions/remote/channel';
+import {checkUserInOverlappingGroups} from '@actions/remote/groups';
 import {setDirectChannelVisible} from '@actions/remote/preference';
 import OptionItem from '@components/option_item';
 import SlideUpPanelItem from '@components/slide_up_panel_item';
@@ -20,6 +21,7 @@ type Props = {
     isOptionItem?: boolean;
     canLeave: boolean;
     channelId: string;
+    currentUserId: string;
     displayName?: string;
     type?: string;
     testID?: string;
@@ -28,7 +30,7 @@ type Props = {
 }
 
 const LeaveChannelLabel = (props: Props) => {
-    const {canLeave, channelId, channelMembersLength, displayName, isOptionItem, type, isLastAdminInChannel, testID} = props;
+    const {canLeave, channelId, channelMembersLength, currentUserId, displayName, isOptionItem, type, isLastAdminInChannel, testID} = props;
     const intl = useIntl();
     const serverUrl = useServerUrl();
     const isTablet = useIsTablet();
@@ -177,7 +179,19 @@ const LeaveChannelLabel = (props: Props) => {
         }
     };
 
-    const onLeave = () => {
+    const onLeave = async () => {
+        if (type === General.OPEN_CHANNEL || type === General.PRIVATE_CHANNEL) {
+            const hasOverlappingGroups = await checkUserInOverlappingGroups(serverUrl, channelId, currentUserId);
+            if (hasOverlappingGroups) {
+                Alert.alert(
+                    intl.formatMessage({id: 'ik_leave_channel_group_blocked.title', defaultMessage: 'Leave channel'}),
+                    intl.formatMessage({id: 'ik_leave_channel_group_blocked.body', defaultMessage: 'This channel is linked to one of your teams to facilitate collaboration among its members. To leave it, contact an administrator if needed.'}),
+                    [{text: intl.formatMessage({id: 'mobile.managed.OK', defaultMessage: 'OK'})}],
+                );
+                return;
+            }
+        }
+
         switch (type) {
             case General.OPEN_CHANNEL:
                 leavePublicChannel();

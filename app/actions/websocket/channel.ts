@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {DeviceEventEmitter} from 'react-native';
+
 import {addChannelToDefaultCategory, handleConvertedGMCategories} from '@actions/local/category';
 import {
     markChannelAsViewed, removeCurrentUserFromChannel, setChannelDeleteAt,
@@ -205,6 +207,7 @@ export async function handleChannelMemberUpdatedEvent(serverUrl: string, msg: an
             models.push(...await operator.handleRole({roles: rolesRequest.roles, prepareRecordsOnly: true}));
         }
         operator.batchRecords(models, 'handleChannelMemberUpdatedEvent');
+        DeviceEventEmitter.emit(Events.MANAGE_USER_CHANGE_ROLE, {userId: updatedChannelMember.user_id, schemeAdmin: updatedChannelMember.scheme_admin});
     } catch {
         // do nothing
     }
@@ -343,6 +346,7 @@ export async function handleUserAddedToChannelEvent(serverUrl: string, msg: any)
         }
 
         await fetchChannelStats(serverUrl, channelId, false);
+        DeviceEventEmitter.emit(Events.ADD_USER_TO_CHANNEL, channelId);
     } catch {
         // Do nothing
     }
@@ -386,6 +390,7 @@ export async function handleUserRemovedFromChannelEvent(serverUrl: string, msg: 
             if (deleteMemberModels) {
                 models.push(...deleteMemberModels);
             }
+            DeviceEventEmitter.emit(Events.REMOVE_USER_FROM_CHANNEL, userId);
         }
 
         operator.batchRecords(models, 'handleUserRemovedFromChannelEvent');

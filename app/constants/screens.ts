@@ -38,6 +38,7 @@ export const GENERIC_OVERLAY = 'GenericOverlay';
 export const GLOBAL_DRAFTS = 'GlobalDrafts';
 export const GLOBAL_DRAFTS_AND_SCHEDULED_POSTS = 'GlobalDraftsAndScheduledPosts';
 export const GLOBAL_THREADS = 'GlobalThreads';
+export const GROUP_MEMBERS = 'GroupMembers';
 export const HOME = 'Home';
 export const INTEGRATION_SELECTOR = 'IntegrationSelector';
 export const INTERACTIVE_DIALOG = 'InteractiveDialog';
@@ -136,6 +137,7 @@ export default {
     GLOBAL_DRAFTS,
     GLOBAL_DRAFTS_AND_SCHEDULED_POSTS,
     GLOBAL_THREADS,
+    GROUP_MEMBERS,
     HOME,
     INTEGRATION_SELECTOR,
     INTERACTIVE_DIALOG,
@@ -237,6 +239,7 @@ export const SCREENS_AS_BOTTOM_SHEET = new Set<string>([
     INFOMANIAK_QUOTA_EXCEEDED,
     INFOMANIAK_REMINDER,
     SCHEDULED_POST_OPTIONS,
+    GROUP_MEMBERS,
 ]);
 
 export const SCREENS_WITH_EXTRA_KEYBOARD = new Set<string>([CHANNEL, THREAD]);

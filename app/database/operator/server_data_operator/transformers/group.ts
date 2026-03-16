@@ -41,7 +41,7 @@ export const transformGroupRecord = ({action, database, value}: TransformerArgs<
         group.displayName = raw.display_name;
         group.source = raw.source;
         group.remoteId = raw.remote_id;
-        group.memberCount = raw.member_count || 0;
+        group.memberCount = raw.member_count ?? (isCreateAction ? 0 : group.memberCount);
     };
 
     return prepareBaseRecord({

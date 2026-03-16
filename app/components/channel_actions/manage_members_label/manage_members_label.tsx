@@ -6,6 +6,7 @@ import {defineMessages, useIntl} from 'react-intl';
 import {Alert, DeviceEventEmitter} from 'react-native';
 
 import {fetchChannelStats, removeMemberFromChannel, updateChannelMemberSchemeRoles} from '@actions/remote/channel';
+import {checkUserInOverlappingGroups} from '@actions/remote/groups';
 import OptionItem from '@components/option_item';
 import {Events, Members} from '@constants';
 import {useServerUrl} from '@context/server';
@@ -69,10 +70,19 @@ const ManageMembersLabel = ({canRemoveUser, channelId, manageOption, testID, use
             },
         );
         await dismissBottomSheet();
-        DeviceEventEmitter.emit(Events.REMOVE_USER_FROM_CHANNEL, userId);
     }, [channelId, serverUrl, userId]);
 
-    const removeFromChannel = useCallback(() => {
+    const removeFromChannel = useCallback(async () => {
+        const hasOverlappingGroups = await checkUserInOverlappingGroups(serverUrl, channelId, userId);
+        if (hasOverlappingGroups) {
+            Alert.alert(
+                formatMessage({id: 'ik_member_in_group.title', defaultMessage: 'Remove channel access'}),
+                formatMessage({id: 'ik_member_in_group.body', defaultMessage: 'This member is part of teams that have access to this discussion channel. Go to the web application to remove them from all these teams.'}),
+                [{text: formatMessage({id: 'mobile.managed.OK', defaultMessage: 'OK'})}],
+            );
+            return;
+        }
+
         Alert.alert(
             formatMessage(messages.remove_title),
             formatMessage(messages.remove_message),
@@ -85,7 +95,7 @@ const ManageMembersLabel = ({canRemoveUser, channelId, manageOption, testID, use
                 onPress: handleRemoveUser,
             }], {cancelable: false},
         );
-    }, [formatMessage, handleRemoveUser]);
+    }, [formatMessage, handleRemoveUser, serverUrl, channelId, userId]);
 
     const updateChannelMemberSchemeRole = useCallback(async (schemeAdmin: boolean) => {
         const result = await updateChannelMemberSchemeRoles(serverUrl, channelId, userId, true, schemeAdmin);

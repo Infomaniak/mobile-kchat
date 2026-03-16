@@ -7,6 +7,7 @@ import {DeviceEventEmitter, Keyboard, Platform, StyleSheet, View} from 'react-na
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {fetchChannelMemberships} from '@actions/remote/channel';
+import {fetchGroupsForChannel} from '@actions/remote/groups';
 import {fetchUsersByIds, searchProfiles} from '@actions/remote/user';
 import {PER_PAGE_DEFAULT} from '@client/rest/constants';
 import Search from '@components/search';
@@ -25,6 +26,7 @@ import {showRemoveChannelUserSnackbar} from '@utils/snack_bar';
 import {changeOpacity, getKeyboardAppearanceFromTheme} from '@utils/theme';
 import {displayUsername, filterDeactivatedProfiles, filterProfilesMatchingTerm} from '@utils/user';
 
+import type GroupModel from '@typings/database/models/servers/group';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
@@ -33,6 +35,7 @@ type Props = {
     componentId: AvailableScreens;
     currentTeamId: string;
     currentUserId: string;
+    groups: GroupModel[];
     tutorialWatched: boolean;
     teammateDisplayNameSetting: string;
     channelAbacPolicyEnforced: boolean;
@@ -84,6 +87,7 @@ export default function ManageChannelMembers({
     componentId,
     currentTeamId,
     currentUserId,
+    groups,
     tutorialWatched,
     teammateDisplayNameSetting,
     channelAbacPolicyEnforced,
@@ -277,6 +281,7 @@ export default function ManageChannelMembers({
     useEffect(() => {
         mounted.current = true;
         getFetchChannelMembers();
+        fetchGroupsForChannel(serverUrl, channelId);
 
         return () => {
             mounted.current = false;
@@ -289,14 +294,24 @@ export default function ManageChannelMembers({
         }
     }, [canManageAndRemoveMembers]);
 
+    const refetchMembers = useCallback(() => {
+        pageRef.current = 0;
+        hasMoreProfiles.current = true;
+        setProfiles(EMPTY);
+        setChannelMembers(EMPTY_MEMBERS);
+        getFetchChannelMembers();
+    }, [getFetchChannelMembers]);
+
     useEffect(() => {
         const removeUserListener = DeviceEventEmitter.addListener(Events.REMOVE_USER_FROM_CHANNEL, handleRemoveUser);
         const changeUserRoleListener = DeviceEventEmitter.addListener(Events.MANAGE_USER_CHANGE_ROLE, handleUserChangeRole);
+        const addUserListener = DeviceEventEmitter.addListener(Events.ADD_USER_TO_CHANNEL, refetchMembers);
         return (() => {
             removeUserListener?.remove();
             changeUserRoleListener?.remove();
+            addUserListener?.remove();
         });
-    }, [handleRemoveUser, handleUserChangeRole]);
+    }, [handleRemoveUser, handleUserChangeRole, refetchMembers]);
 
     return (
         <SafeAreaView
@@ -338,6 +353,7 @@ export default function ManageChannelMembers({
                 manageMode={true} // default true to change row select icon to a dropdown
                 profiles={data}
                 channelMembers={channelMembers}
+                groups={groups}
                 selectedIds={EMPTY_IDS}
                 showManageMode={canManageAndRemoveMembers && isManageMode}
                 showNoResults={!loading}
