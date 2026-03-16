@@ -7,6 +7,7 @@ import {of as of$, combineLatest, switchMap, distinctUntilChanged} from 'rxjs';
 import {Permissions, Tutorial} from '@constants';
 import {observeTutorialWatched} from '@queries/app/global';
 import {observeCurrentChannel} from '@queries/servers/channel';
+import {observeGroupsForChannel} from '@queries/servers/group';
 import {observeCanManageChannelMembers, observePermissionForChannel} from '@queries/servers/role';
 import {observeCurrentChannelId, observeCurrentTeamId, observeCurrentUserId} from '@queries/servers/system';
 import {observeCurrentUser, observeTeammateNameDisplay} from '@queries/servers/user';
@@ -30,6 +31,10 @@ const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
 
     const teammateDisplayNameSetting = observeTeammateNameDisplay(database);
 
+    const groups = currentChannelId.pipe(
+        switchMap((cId) => (cId ? observeGroupsForChannel(database, cId) : of$([]))),
+    );
+
     return {
         currentUserId: observeCurrentUserId(database),
         currentTeamId: observeCurrentTeamId(database),
@@ -37,6 +42,7 @@ const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
         tutorialWatched: observeTutorialWatched(Tutorial.PROFILE_LONG_PRESS),
         canChangeMemberRoles,
         teammateDisplayNameSetting,
+        groups,
         channelAbacPolicyEnforced: currentChannel.pipe(
             switchMap((channel) => of$(channel?.abacPolicyEnforced || false)),
             distinctUntilChanged(),

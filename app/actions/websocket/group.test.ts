@@ -14,6 +14,8 @@ import {
     handleGroupTeamDissociateEvent,
     handleGroupChannelAssociatedEvent,
     handleGroupChannelDissociateEvent,
+    handleChannelGroupAddedEvent,
+    handleChannelGroupRemovedEvent,
 } from './group';
 
 jest.mock('@actions/remote/groups');
@@ -196,6 +198,83 @@ describe('WebSocket Group Actions', () => {
 
             const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
             expect(deleteGroupChannelById).toHaveBeenCalledWith(database, 'association-id');
+        });
+    });
+
+    describe('handleChannelGroupAddedEvent', () => {
+        it('should upsert the group and create the group-channel association', async () => {
+            const group = {id: groupId, name: 'group-name', display_name: 'Group Name'};
+            const msg = {
+                data: {group, channel_id: channelId},
+            } as unknown as WebSocketMessage;
+
+            await handleChannelGroupAddedEvent(serverUrl, msg);
+
+            const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+            expect(operator.handleGroups).toHaveBeenCalledWith({groups: [group], prepareRecordsOnly: false});
+            expect(operator.handleGroupChannelsForChannel).toHaveBeenCalledWith({
+                channelId,
+                groups: [{id: groupId}],
+                prepareRecordsOnly: false,
+                appendOnly: true,
+            });
+        });
+
+        it('should do nothing when group or channel_id is missing', async () => {
+            const msg = {data: {}} as WebSocketMessage;
+
+            await handleChannelGroupAddedEvent(serverUrl, msg);
+
+            expect(DatabaseManager.getServerDatabaseAndOperator).not.toHaveBeenCalled();
+        });
+
+        it('should fallback to fetchGroupsForChannel on error', async () => {
+            const group = {id: groupId, name: 'group-name'};
+            const msg = {data: {group, channel_id: channelId}} as unknown as WebSocketMessage;
+
+            const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+            (operator.handleGroups as jest.Mock).mockRejectedValue(new Error('DB error'));
+
+            await handleChannelGroupAddedEvent(serverUrl, msg);
+
+            expect(fetchGroupsForChannel).toHaveBeenCalledWith(serverUrl, channelId);
+        });
+    });
+
+    describe('handleChannelGroupRemovedEvent', () => {
+        it('should delete the group-channel association', async () => {
+            const msg = {
+                data: {group_id: groupId, channel_id: channelId},
+            } as unknown as WebSocketMessage;
+
+            jest.mocked(generateGroupAssociationId).mockReturnValue('association-id');
+
+            await handleChannelGroupRemovedEvent(serverUrl, msg);
+
+            const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+            expect(generateGroupAssociationId).toHaveBeenCalledWith(groupId, channelId);
+            expect(deleteGroupChannelById).toHaveBeenCalledWith(database, 'association-id');
+        });
+
+        it('should do nothing when group_id or channel_id is missing', async () => {
+            const msg = {data: {}} as WebSocketMessage;
+
+            await handleChannelGroupRemovedEvent(serverUrl, msg);
+
+            expect(DatabaseManager.getServerDatabaseAndOperator).not.toHaveBeenCalled();
+        });
+
+        it('should fallback to fetchGroupsForChannel on error', async () => {
+            const msg = {
+                data: {group_id: groupId, channel_id: channelId},
+            } as unknown as WebSocketMessage;
+
+            jest.mocked(generateGroupAssociationId).mockReturnValue('association-id');
+            (deleteGroupChannelById as jest.Mock).mockRejectedValue(new Error('DB error'));
+
+            await handleChannelGroupRemovedEvent(serverUrl, msg);
+
+            expect(fetchGroupsForChannel).toHaveBeenCalledWith(serverUrl, channelId);
         });
     });
 

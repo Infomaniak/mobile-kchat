@@ -5,15 +5,16 @@ import {useManagedConfig} from '@mattermost/react-native-emm';
 import Clipboard from '@react-native-clipboard/clipboard';
 import React, {useCallback, useEffect, useMemo} from 'react';
 import {useIntl} from 'react-intl';
-import {type GestureResponderEvent, type StyleProp, StyleSheet, Text, type TextStyle, View} from 'react-native';
+import {type GestureResponderEvent, Keyboard, type StyleProp, StyleSheet, Text, type TextStyle, View} from 'react-native';
 
 import {fetchUserOrGroupsByMentionsInBatch} from '@actions/remote/user';
 import SlideUpPanelItem, {ITEM_HEIGHT} from '@components/slide_up_panel_item';
+import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import GroupModel from '@database/models/server/group';
 import {useMemoMentionedGroup, useMemoMentionedUser} from '@hooks/markdown';
-import {bottomSheet, dismissBottomSheet, openUserProfileModal} from '@screens/navigation';
+import {bottomSheet, dismissBottomSheet, openAsBottomSheet, openUserProfileModal} from '@screens/navigation';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {displayUsername} from '@utils/user';
 
@@ -89,6 +90,21 @@ const AtMention = ({
             fetchUserOrGroupsByMentionsInBatch(serverUrl, mentionName);
         }
     }, []);
+
+    const openGroupMembers = useCallback(() => {
+        if (!group) {
+            return;
+        }
+
+        Keyboard.dismiss();
+        openAsBottomSheet({
+            screen: Screens.GROUP_MEMBERS,
+            title: group.displayName || group.name,
+            theme,
+            closeButtonId: 'close-group-members',
+            props: {groupId: group.id},
+        });
+    }, [group, theme]);
 
     const openUserProfile = () => {
         if (!user) {
@@ -175,7 +191,7 @@ const AtMention = ({
         mention = group.name;
         highlighted = groupMemberships.some((gm) => gm.groupId === group.id);
         isMention = true;
-        canPress = false;
+        canPress = true;
     } else {
         const pattern = new RegExp(/\b(all|channel|here)(?:\.\B|_\b|\b)/, 'i');
         const mentionMatch = pattern.exec(mentionName);
@@ -192,7 +208,11 @@ const AtMention = ({
 
     if (canPress) {
         onLongPress = handleLongPress;
-        onPress = (isSearchResult ? onPostPress : openUserProfile);
+        if (group?.name) {
+            onPress = openGroupMembers;
+        } else {
+            onPress = (isSearchResult ? onPostPress : openUserProfile);
+        }
     }
 
     if (suffix) {

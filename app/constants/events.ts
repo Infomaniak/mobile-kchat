@@ -16,6 +16,7 @@ export default keyMirror({
     LEAVE_TEAM: null,
     LOADING_CHANNEL_POSTS: null,
     NOTIFICATION_ERROR: null,
+    ADD_USER_TO_CHANNEL: null,
     REMOVE_USER_FROM_CHANNEL: null,
     MANAGE_USER_CHANGE_ROLE: null,
     SERVER_LOGOUT: null,

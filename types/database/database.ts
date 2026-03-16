@@ -245,6 +245,7 @@ export type HandleGroupArgs = PrepareOnly & {
 export type HandleGroupChannelsForChannelArgs = PrepareOnly & {
   channelId: string;
   groups?: Array<Pick<Group, 'id'>>;
+  appendOnly?: boolean;
 }
 
 export type HandleGroupMembershipForMemberArgs = PrepareOnly & {

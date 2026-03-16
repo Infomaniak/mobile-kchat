@@ -56,15 +56,20 @@ const GroupHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercl
      * @param {HandleGroupChannelsForChannelArgs}
      * @returns {Promise<GroupChannelModel[]>}
      */
-    handleGroupChannelsForChannel = async ({channelId, groups, prepareRecordsOnly = true}: HandleGroupChannelsForChannelArgs): Promise<GroupChannelModel[]> => {
+    handleGroupChannelsForChannel = async ({channelId, groups, prepareRecordsOnly = true, appendOnly = false}: HandleGroupChannelsForChannelArgs): Promise<GroupChannelModel[]> => {
         // Get existing group channels
         const existingGroupChannels = await queryGroupChannelForChannel(this.database, channelId).fetch();
 
         let records: GroupChannelModel[] = [];
         let rawValues: GroupChannel[] = [];
 
-        // Nothing to add or remove
-        if (!groups?.length && !existingGroupChannels.length) {
+        if (appendOnly) {
+            // Only add new associations, never delete existing ones (used by WS events)
+            const existingGroupIds = new Set(existingGroupChannels.map((gc) => gc.groupId));
+            rawValues = (groups || []).
+                filter((g) => !existingGroupIds.has(g.id)).
+                map((g) => ({id: generateGroupAssociationId(g.id, channelId), channel_id: channelId, group_id: g.id}));
+        } else if (!groups?.length && !existingGroupChannels.length) { // Nothing to add or remove
             return records;
         } else if (!groups?.length && existingGroupChannels.length) { // No groups - remove all existing ones
             records = existingGroupChannels.map((gt) => gt.prepareDestroyPermanently());

@@ -62,6 +62,7 @@ jest.mock('@queries/servers/preference');
 
 const mockClient = {
     getGroups: jest.fn(() => [group1]),
+    getGroupsAssociatedToChannel: jest.fn(() => [group1]),
     getAllGroupsAssociatedToChannel: jest.fn(() => ({groups: [group1], total_group_count: 1})),
     getAllGroupsAssociatedToTeam: jest.fn(() => ({groups: [group1], total_group_count: 1})),
     getAllGroupsAssociatedToMembership: jest.fn(() => [group1]),
@@ -172,7 +173,7 @@ describe('groups', () => {
     });
 
     it('fetchGroupsForChannel - no groups', async () => {
-        mockClient.getAllGroupsAssociatedToChannel.mockImplementationOnce(jest.fn(() => ({groups: [], total_group_count: 0})));
+        mockClient.getGroupsAssociatedToChannel.mockImplementationOnce(jest.fn(() => []));
         await operator.handleSystem({systems: [{id: SYSTEM_IDENTIFIERS.LICENSE, value: {IsLicensed: 'true'}}], prepareRecordsOnly: false});
 
         const result = await fetchGroupsForChannel(serverUrl, channel.id);

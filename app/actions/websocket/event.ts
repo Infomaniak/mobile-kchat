@@ -11,7 +11,7 @@ import {handlePlaybookEvents} from '@playbooks/actions/websocket/events';
 import * as category from './category';
 import * as channel from './channel';
 import {handleConferenceAdded, handleConferenceDeleted, handleConferenceUserConnected, handleConferenceUserDenied, handleConferenceUserDisconnected} from './conference';
-import {handleGroupMemberAddEvent, handleGroupMemberDeleteEvent, handleGroupReceivedEvent, handleGroupTeamAssociatedEvent, handleGroupTeamDissociateEvent} from './group';
+import {handleChannelGroupAddedEvent, handleChannelGroupRemovedEvent, handleGroupMemberAddEvent, handleGroupMemberDeleteEvent, handleGroupReceivedEvent, handleGroupTeamAssociatedEvent, handleGroupTeamDissociateEvent} from './group';
 import {handleTeamSyncEvent} from './ikTeams';
 import {handleOpenDialogEvent} from './integrations';
 import * as posts from './posts';
@@ -251,6 +251,12 @@ export async function handleWebSocketEvent(serverUrl: string, msg: WebSocketMess
         case WebsocketEvents.GROUP_ASSOCIATED_TO_CHANNEL:
             break;
         case WebsocketEvents.GROUP_DISSOCIATED_TO_CHANNEL:
+            break;
+        case WebsocketEvents.CHANNEL_GROUP_ADDED:
+            handleChannelGroupAddedEvent(serverUrl, msg);
+            break;
+        case WebsocketEvents.CHANNEL_GROUP_REMOVED:
+            handleChannelGroupRemovedEvent(serverUrl, msg);
             break;
         case WebsocketEvents.KSUITE_ADDED:
             handleTeamSyncEvent(serverUrl);
