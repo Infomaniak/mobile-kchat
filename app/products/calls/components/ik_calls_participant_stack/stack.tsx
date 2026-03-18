@@ -1,10 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback} from 'react';
+import React, {useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {StyleSheet, TouchableOpacity, View, type StyleProp, type ViewStyle} from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import IkCallsParticipantStackIcon from '@calls/components/ik_calls_participant_stack/icon';
 import IkCallsParticipantStackIconOverflow from '@calls/components/ik_calls_participant_stack/icon_overflow';
@@ -63,13 +62,12 @@ export const IkCallsParticipantStack = ({
     maxDisplayedCount?: number;
     style?: StyleProp<ViewStyle>;
 }) => {
-    const {bottom} = useSafeAreaInsets();
     const {formatMessage} = useIntl();
     const isTablet = useIsTablet();
     const theme = useTheme();
     const style = getStyleSheet(theme);
 
-    const showParticipantList = useCallback(preventDoubleTap(() => {
+    const showParticipantList = useMemo(() => preventDoubleTap(() => {
         const renderContent = () => (
             <>
                 {!isTablet && (
@@ -103,7 +101,7 @@ export const IkCallsParticipantStack = ({
             title: formatMessage({id: 'mobile.call_participants.header', defaultMessage: 'Call Participants'}),
             theme,
         });
-    }), [bottom, channelId, conferenceId, isTablet, participantCount, style]);
+    }), [channelId, conferenceId, formatMessage, isTablet, participantCount, style.listHeader, style.listHeaderText, theme]);
 
     // EFFECTS
     const loading = useFetchParticipantUsers(participants);

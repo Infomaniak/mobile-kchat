@@ -54,7 +54,7 @@ describe.skip('credentials', () => {
 
     describe('setServerCredentials', () => {
         it('should store credentials with pre-auth secret', () => {
-            setServerCredentials(mockServerUrl, mockToken, mockPreauthSecret);
+            setServerCredentials(mockServerUrl, mockToken);
 
             expect(KeyChain.setInternetCredentials).toHaveBeenCalledWith(
                 mockServerUrl,
@@ -93,14 +93,14 @@ describe.skip('credentials', () => {
         });
 
         it('should not store credentials when serverUrl is missing', () => {
-            setServerCredentials('', mockToken, mockPreauthSecret);
+            setServerCredentials('', mockToken);
 
             expect(KeyChain.setInternetCredentials).not.toHaveBeenCalled();
             expect(KeyChain.setGenericPassword).not.toHaveBeenCalled();
         });
 
         it('should not store credentials when token is missing', () => {
-            setServerCredentials(mockServerUrl, '', mockPreauthSecret);
+            setServerCredentials(mockServerUrl, '');
 
             expect(KeyChain.setInternetCredentials).not.toHaveBeenCalled();
             expect(KeyChain.setGenericPassword).not.toHaveBeenCalled();
@@ -109,7 +109,7 @@ describe.skip('credentials', () => {
         it('should use iOS app group on iOS platform', () => {
             Platform.OS = 'ios';
 
-            setServerCredentials(mockServerUrl, mockToken, mockPreauthSecret);
+            setServerCredentials(mockServerUrl, mockToken);
 
             expect(KeyChain.setInternetCredentials).toHaveBeenCalledWith(
                 mockServerUrl,
@@ -124,7 +124,7 @@ describe.skip('credentials', () => {
         it('should not use app group on Android platform', () => {
             Platform.OS = 'android';
 
-            setServerCredentials(mockServerUrl, mockToken, mockPreauthSecret);
+            setServerCredentials(mockServerUrl, mockToken);
 
             expect(KeyChain.setInternetCredentials).toHaveBeenCalledWith(
                 mockServerUrl,

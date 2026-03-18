@@ -112,9 +112,9 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
         };
 
         record();
-    }, []);
+    }, [setRecording]);
 
-    const disableRecord = async (shouldDelete = false) => {
+    const disableRecord = useCallback(async (shouldDelete = false) => {
         setRecording(false);
         setRecorder(undefined);
         await recorder?.stopRecorder();
@@ -123,12 +123,12 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
         if (shouldDelete && url) {
             deleteDeviceFile(url);
         }
-    };
+    }, [recorder, setRecording, url]);
 
     const cancelRecording = useCallback(async () => {
         disableRecord(true);
         onClose();
-    }, [recorder]);
+    }, [disableRecord, onClose]);
 
     const endRecording = useCallback(async () => {
         disableRecord();
@@ -142,7 +142,7 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
 
             addFiles(fi as FileInfo[]);
         }
-    }, [recorder]);
+    }, [addFiles, disableRecord, onClose, recorder, storeLocalAudioURI, url]);
 
     return (
         <View style={styles.mainContainer}>

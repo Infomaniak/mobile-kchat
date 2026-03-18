@@ -5,9 +5,6 @@ import AIRewriteAction from '@agents/components/ai_rewrite_action';
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 
-import BoRQuickAction from '@components/post_draft/quick_actions/bor_quick_action';
-import {Screens} from '@constants';
-
 import AttachmentAction from './attachment_quick_action';
 import EmojiAction from './emoji_quick_action';
 import InputAction from './input_quick_action';
@@ -58,9 +55,7 @@ export default function QuickActions({
     canUploadFiles,
     value,
     fileCount,
-    isAgentsEnabled,
     isPostPriorityEnabled,
-    isBoREnabled,
     canShowSlashCommands = true,
     canShowPostPriority,
     canShowEmojiPicker = true,
@@ -71,13 +66,9 @@ export default function QuickActions({
     updatePostPriority,
     focus,
     channelId,
-    updatePostBoRStatus,
-    postBoRConfig,
-    location,
 }: Props) {
     const atDisabled = value.endsWith('@');
     const slashDisabled = value.length > 0;
-    const showBoRAction = isBoREnabled && updatePostBoRStatus && location === Screens.CHANNEL;
 
     const atInputActionTestID = `${testID}.at_input_action`;
     const slashInputActionTestID = `${testID}.slash_input_action`;
@@ -86,7 +77,6 @@ export default function QuickActions({
     const aiRewriteActionTestID = `${testID}.ai_rewrite_action`;
     const postPriorityActionTestID = `${testID}.post_priority_action`;
     const pollActionTestID = `${testID}.poll_action`;
-    const borPriorityActionTestID = `${testID}.bor_action`;
 
     const uploadProps = {
         disabled: !canUploadFiles,
@@ -144,13 +134,6 @@ export default function QuickActions({
                 testID={pollActionTestID}
                 channelId={channelId}
             />
-            {/* {showBoRAction &&
-                <BoRQuickAction
-                    testId={borPriorityActionTestID}
-                    postBoRConfig={postBoRConfig}
-                    updatePostBoRStatus={updatePostBoRStatus}
-                />
-            } */}
         </View>
     );
 }

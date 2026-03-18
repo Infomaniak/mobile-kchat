@@ -64,7 +64,7 @@ const AlmostFullStorageAnnouncementBar = ({
                 },
             },
         });
-    }, []);
+    }, [currentPackName, isAdmin, theme]);
 
     if (!shouldShow) {
         return null;

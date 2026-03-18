@@ -33,11 +33,6 @@ type ThreadProps = {
     scheduledPostCount: number;
 };
 
-const edges: Edge[] = Platform.select({
-    android: ['left', 'right', 'bottom'],
-    ios: ['left', 'right'],
-}) as Edge[];
-
 const styles = StyleSheet.create({
     flex: {flex: 1},
 });

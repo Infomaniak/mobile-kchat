@@ -188,23 +188,23 @@ const Markdown = ({
     const managedConfig = useManagedConfig<ManagedConfig>();
     const serverUrl = useServerUrl();
 
-    const transformBoldText = (text: string) => {
-        const REGEX = /\*\*(\S.*?\S?)\s*\*\*/;
-        const parts = text.split(REGEX);
-        return parts.map((part, i) => {
-            if (i % 2 === 0) {
-                return part;
-            }
-            return (
-                <Text
-                    key={text}
-                    style={style.bold}
-                >{part.trim()}</Text>
-            );
-        });
-    };
-
     const renderText = useCallback(({context, literal}: MarkdownBaseRenderer) => {
+        const transformBoldText = (text: string) => {
+            const REGEX = /\*\*(\S.*?\S?)\s*\*\*/;
+            const parts = text.split(REGEX);
+            return parts.map((part, i) => {
+                if (i % 2 === 0) {
+                    return part;
+                }
+                return (
+                    <Text
+                        key={text}
+                        style={style.bold}
+                    >{part.trim()}</Text>
+                );
+            });
+        };
+
         const selectable = (managedConfig.copyAndPasteProtection !== 'true') && context.includes('table_cell');
         if (context.indexOf('image') !== -1) {
             // If this text is displayed, it will be styled by the image component
@@ -244,7 +244,7 @@ const Markdown = ({
                 {transformedText}
             </Text>
         );
-    }, [baseTextStyle, disableHeading, managedConfig.copyAndPasteProtection, textStyles, theme.mentionHighlightBg, transformBoldText]);
+    }, [baseTextStyle, disableHeading, managedConfig.copyAndPasteProtection, style.bold, textStyles, theme.mentionHighlightBg]);
 
     //  const renderText = ({context, literal}: MarkdownBaseRenderer) => {
     //     const selectable = (managedConfig.copyAndPasteProtection !== 'true') && context.includes('table_cell');

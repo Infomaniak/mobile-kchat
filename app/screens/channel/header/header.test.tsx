@@ -38,14 +38,11 @@ describe.skip('ChannelHeader', () => {
     function getBaseProps(): ComponentProps<typeof ChannelHeader> {
         return {
             channelId: 'channel-id',
-            channelType: 'O',
-            currentUserId: 'current-user-id',
+            channelType: 'O' as ChannelType,
             displayName: 'Test Channel',
             teamId: 'team-id',
             hasPlaybookRuns: false,
-            playbooksActiveRuns: 0,
             callsEnabledInChannel: false,
-            groupCallsAllowed: false,
             isBookmarksEnabled: false,
             canAddBookmarks: false,
             hasBookmarks: false,
@@ -64,7 +61,7 @@ describe.skip('ChannelHeader', () => {
     });
 
     it('shows playbook button with "+" when there are no active runs', () => {
-        const props = getBaseProps();
+        const props: any = getBaseProps();
         props.hasPlaybookRuns = false;
         props.playbooksActiveRuns = 0;
         props.isPlaybooksEnabled = true;
@@ -83,7 +80,7 @@ describe.skip('ChannelHeader', () => {
     });
 
     it('does not show playbook button when is DM or GM', () => {
-        const props = getBaseProps();
+        const props: any = getBaseProps();
         props.hasPlaybookRuns = true;
         props.playbooksActiveRuns = 1;
         props.channelType = General.DM_CHANNEL;
@@ -123,7 +120,7 @@ describe.skip('ChannelHeader', () => {
 
     it.skip('shows playbook button with count when there are active runs', () => {
         // IK change : skipped on CI temporarily, will fix later
-        const props = getBaseProps();
+        const props: any = getBaseProps();
         props.playbooksActiveRuns = 3;
         props.hasPlaybookRuns = true;
 
@@ -142,7 +139,7 @@ describe.skip('ChannelHeader', () => {
 
     it.skip('navigates to single playbook run when there is an active playbook provided', () => {
         // IK change : skipped on CI temporarily, will fix later
-        const props = getBaseProps();
+        const props: any = getBaseProps();
         props.playbooksActiveRuns = 1;
         props.hasPlaybookRuns = true;
         props.activeRunId = 'run-id';
@@ -160,7 +157,7 @@ describe.skip('ChannelHeader', () => {
 
     it.skip('navigates to playbook runs list when there is no active playbook provided', () => {
         // IK change : skipped on CI temporarily, will fix later
-        const props = getBaseProps();
+        const props: any = getBaseProps();
         props.activeRunId = undefined;
         props.playbooksActiveRuns = 3;
         props.hasPlaybookRuns = true;
@@ -179,10 +176,8 @@ describe.skip('ChannelHeader', () => {
 
     it.skip('should set the ephemeral store when we fetch the playbook runs for the channel', async () => {
         // IK change : skipped on CI temporarily, will fix later
-        const ephemeralGetSpy = jest.spyOn(EphemeralStore, 'getChannelPlaybooksSynced');
-        const ephemeralSetSpy = jest.spyOn(EphemeralStore, 'setChannelPlaybooksSynced');
 
-        const props = getBaseProps();
+        const props: any = getBaseProps();
         props.playbooksActiveRuns = 0;
         props.hasPlaybookRuns = false;
         props.displayName = 'Test Channel';

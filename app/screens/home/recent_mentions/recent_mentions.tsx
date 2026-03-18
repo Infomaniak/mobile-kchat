@@ -136,7 +136,7 @@ const RecentMentionsScreen = ({appsEnabled, customEmojiNames, mentions, currentT
                 <EmptyState/>
             )}
         </View>
-    ), [loading, theme]);
+    ), [loading, styles.empty, theme.centerChannelColor]);
 
     const renderItem = useCallback(({item}: ListRenderItemInfo<PostListItem | PostListOtherItem>) => {
         switch (item.type) {

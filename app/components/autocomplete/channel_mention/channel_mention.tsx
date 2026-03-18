@@ -12,7 +12,6 @@ import {General} from '@constants';
 import {CHANNEL_MENTION_REGEX, CHANNEL_MENTION_SEARCH_REGEX} from '@constants/autocomplete';
 import {useServerUrl} from '@context/server';
 import DatabaseManager from '@database/manager';
-import {debounce} from '@helpers/api/general';
 import useDidUpdate from '@hooks/did_update';
 import {useDebounce} from '@hooks/utils';
 import {getUserById} from '@queries/servers/user';

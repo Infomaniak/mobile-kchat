@@ -10,7 +10,6 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {subscribeAllServers} from '@database/subscription/servers';
 import {subscribeUnreadAndMentionsByServer, type UnreadObserverArgs} from '@database/subscription/unreads';
-import {useIsTablet} from '@hooks/device';
 import useDidMount from '@hooks/did_mount';
 import {BUTTON_HEIGHT, TITLE_HEIGHT} from '@screens/bottom_sheet';
 import {bottomSheet} from '@screens/navigation';
@@ -48,7 +47,6 @@ const Servers = React.forwardRef<ServersRef>((_, ref) => {
     const [total, setTotal] = useState<UnreadMessages>({mentions: 0, unread: false});
     const registeredServers = useRef<ServersModel[]|undefined>();
     const currentServerUrl = useServerUrl();
-    const isTablet = useIsTablet();
     const theme = useTheme();
 
     const updateTotal = () => {
@@ -140,7 +138,7 @@ const Servers = React.forwardRef<ServersRef>((_, ref) => {
                 title: intl.formatMessage({id: 'your.servers', defaultMessage: 'Your servers'}),
             });
         }
-    }, [intl, isTablet, theme]);
+    }, [intl, theme]);
 
     useImperativeHandle(ref, () => ({
         openServers: onPress,

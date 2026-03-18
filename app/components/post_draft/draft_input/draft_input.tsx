@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import RewritingIndicator from '@agents/components/rewriting_indicator';
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, type LayoutChangeEvent, Platform, ScrollView, View} from 'react-native';
 import Permissions, {openSettings} from 'react-native-permissions';
@@ -147,13 +147,11 @@ function DraftInput({
     postPriority,
     updatePostPriority,
     voiceMessageEnabled,
-    updatePostBoRStatus,
     persistentNotificationInterval,
     persistentNotificationMaxRecipients,
     setIsFocused,
     scheduledPostsEnabled,
     postBoRConfig,
-    location,
 }: Props) {
     const [recording, setRecording] = useState(false);
     const intl = useIntl();
@@ -165,7 +163,7 @@ function DraftInput({
 
     const handleLayout = useCallback((e: LayoutChangeEvent) => {
         updatePostInputTop(e.nativeEvent.layout.height);
-    }, []);
+    }, [updatePostInputTop]);
 
     const onPresRecording = useCallback(async () => {
         const permission = Platform.select({
@@ -202,12 +200,12 @@ function DraftInput({
                 openSettings();
             }
         }
-    }, []);
+    }, [channelId, rootId, serverUrl]);
 
     const onCloseRecording = useCallback(() => {
         setRecording(false);
         userTyping('stop', serverUrl, channelId, rootId);
-    }, []);
+    }, [channelId, rootId, serverUrl]);
 
     const isHandlingVoice = recording;
     const isHandlingVoiceAttachement = files[0]?.is_voice_recording;
@@ -272,12 +270,11 @@ function DraftInput({
                 disabled={!canSend}
                 sendMessage={handleSendMessage}
                 testID={sendActionTestID}
-                containerStyle={isHandlingVoice && style.sendVoiceMessage}
                 showScheduledPostOptions={handleShowScheduledPostOptions}
                 scheduledPostEnabled={scheduledPostsEnabled}
             />
         );
-    }, [value.length, files.length, voiceMessageEnabled, canSend, handleSendMessage, sendActionTestID, isHandlingVoice, style.sendVoiceMessage, handleShowScheduledPostOptions, scheduledPostsEnabled, onPresRecording, recordActionTestID]);
+    }, [value.length, files.length, voiceMessageEnabled, canSend, handleSendMessage, sendActionTestID, handleShowScheduledPostOptions, scheduledPostsEnabled, onPresRecording, recordActionTestID]);
 
     return (
         <>

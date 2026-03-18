@@ -3,7 +3,6 @@
 
 import React from 'react';
 
-import {getMarkdownTextStyles} from '@utils/markdown';
 import {isMessageAttachmentArray} from '@utils/message_attachment';
 import {isPostEphemeral} from '@utils/post';
 import {isYoutubeLink} from '@utils/url';
@@ -47,7 +46,7 @@ const Content = ({isReplyPost, layoutWidth, location, post, theme, showPermalink
     if (!type) {
         return null;
     }
-    const textStyles = getMarkdownTextStyles(theme);
+
     const isEphemeral = isPostEphemeral(post);
 
     const getEmbedFromMetadata = (metadata: PostMetadata) => {

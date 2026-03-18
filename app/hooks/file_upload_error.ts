@@ -41,7 +41,7 @@ const useFileUploadError = (currentPackName: PackName, isCurrentUserAdmin: boole
         uploadErrorTimeout.current = setTimeout(() => {
             setUploadError(null);
         }, UPLOAD_ERROR_SHOW_INTERVAL);
-    }, []);
+    }, [currentPackName, isCurrentUserAdmin, theme]);
 
     return {
         uploadError,

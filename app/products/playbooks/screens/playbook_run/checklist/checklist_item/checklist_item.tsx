@@ -90,8 +90,6 @@ type Props = {
     itemNumber: number;
     playbookRunId: string;
     isDisabled: boolean;
-    currentUserId: string;
-    channelType: ChannelType;
 }
 
 const ChecklistItem = ({
@@ -103,8 +101,6 @@ const ChecklistItem = ({
     itemNumber,
     playbookRunId,
     isDisabled,
-    currentUserId,
-    channelType,
 }: Props) => {
     const dueDate = 'dueDate' in item ? item.dueDate : item.due_date;
     const theme = useTheme();
@@ -154,7 +150,7 @@ const ChecklistItem = ({
         // if (item.command?.startsWith('/call')) {
         //     await handleCallsSlashCommand(item.command, serverUrl, channelId, channelType, '', currentUserId, intl);
         // }
-    }, [channelId, channelType, checklistNumber, currentUserId, intl, isExecuting, item.command, itemNumber, playbookRunId, serverUrl]);
+    }, [checklistNumber, isExecuting, itemNumber, playbookRunId, serverUrl]);
 
     const toggleChecked = useCallback(async () => {
         if (isChecking) {

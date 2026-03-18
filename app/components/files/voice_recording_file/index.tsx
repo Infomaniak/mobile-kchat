@@ -89,7 +89,7 @@ const VoiceRecordingFile = ({uploading}: Props) => {
                 </View>
             </>
         );
-    }, [uploading]);
+    }, [styles.centerContainer, styles.mic, styles.title, styles.uploading, theme.buttonBg]);
 
     return (
         <View

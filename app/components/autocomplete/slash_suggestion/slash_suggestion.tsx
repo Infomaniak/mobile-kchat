@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {
     FlatList,
@@ -12,7 +12,6 @@ import {
 
 import {fetchSuggestions} from '@actions/remote/command';
 import {useServerUrl} from '@context/server';
-import {debounce} from '@helpers/api/general';
 import {useDebounce} from '@hooks/utils';
 import IntegrationsManager from '@managers/integrations_manager';
 

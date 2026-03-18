@@ -44,11 +44,6 @@ type ChannelProps = {
     scheduledPostCount: number;
 };
 
-const edges: Edge[] = Platform.select({
-    android: ['left', 'right', 'bottom'],
-    ios: ['left', 'right'],
-}) as Edge[];
-
 const styles = StyleSheet.create({
     flex: {
         flex: 1,
@@ -59,7 +54,6 @@ const Channel = ({
     channelId,
     componentId,
     isCallsEnabledInChannel,
-    groupCallsAllowed,
     isTabletView,
     dismissedGMasDMNotice,
     channelType,
@@ -100,8 +94,6 @@ const Channel = ({
         }
     }, [componentId]);
 
-    const computedEdges: Edge[] = isTablet ? ['left', 'right'] : edges;
-
     useAndroidHardwareBackHandler(componentId, handleBack);
 
     useEffect(() => {
@@ -138,7 +130,7 @@ const Channel = ({
             removeLastViewedChannelIdAndServer();
             EphemeralStore.removeSwitchingToChannel(channelId);
         };
-    }, [channelId]);
+    }, [channelId, serverUrl]);
 
     const onLayout = useCallback((e: LayoutChangeEvent) => {
         setContainerHeight(e.nativeEvent.layout.height);
@@ -158,7 +150,6 @@ const Channel = ({
                     channelId={channelId}
                     componentId={componentId}
                     callsEnabledInChannel={isCallsEnabledInChannel}
-                    groupCallsAllowed={groupCallsAllowed}
                     isTabletView={isTabletView}
                     shouldRenderBookmarks={shouldRender}
                     shouldRenderChannelBanner={includeChannelBanner}

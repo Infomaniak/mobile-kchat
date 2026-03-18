@@ -236,8 +236,6 @@ function Typing({
         }
     };
 
-    const isVisible = typing.current.length > 0;
-
     return (
         <Animated.View style={typingAnimatedStyle}>
             {renderAction('typing') || renderAction('recording')}

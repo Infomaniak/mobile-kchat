@@ -30,14 +30,6 @@ const UpgradeChannelBanner = ({
     publicChannelLimitReached,
     privateChannelLimitReached,
 }: Props) => {
-    console.log('🚀 ~ UpgradeChannelBanner ~ privateChannelsLimit:', privateChannelsLimit);
-    console.log('🚀 ~ UpgradeChannelBanner ~ privateChannelLimitReached:', privateChannelLimitReached);
-    console.log('🚀 ~ UpgradeChannelBanner ~ publicChannelLimitReached:', publicChannelLimitReached);
-    console.log('🚀 ~ UpgradeChannelBanner ~ publicChannelsLimit:', publicChannelsLimit);
-    console.log('🚀 ~ UpgradeChannelBanner ~ privateChannelsUsage:', privateChannelsUsage);
-    console.log('🚀 ~ UpgradeChannelBanner ~ publicChannelsUsage:', publicChannelsUsage);
-    console.log('🚀 ~ UpgradeChannelBanner ~ isAdmin:', isAdmin);
-    console.log('🚀 ~ UpgradeChannelBanner ~ isPrivate:', isPrivate);
     const theme = useTheme();
     const styles = bannerBaseStyles(theme);
     const channelType = isPrivate ? 'P' : 'O';

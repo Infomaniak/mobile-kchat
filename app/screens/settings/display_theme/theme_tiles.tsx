@@ -90,7 +90,7 @@ export const ThemeTile = ({
         action(actionValue);
     }, [action, actionValue]);
 
-    const Tile = useMemo(() => illustrations[theme.ksuiteTheme as keyof typeof illustrations], []);
+    const Tile = useMemo(() => illustrations[theme.ksuiteTheme as keyof typeof illustrations], [theme.ksuiteTheme]);
 
     return (
         <TouchableOpacity

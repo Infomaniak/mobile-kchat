@@ -140,7 +140,7 @@ function SavedMessages({appsEnabled, posts, currentTimezone, customEmojiNames}: 
                 <EmptyState/>
             )}
         </View>
-    ), [loading, theme.buttonBg]);
+    ), [loading, styles.empty, theme.buttonBg]);
 
     const renderItem = useCallback(({item}: ListRenderItemInfo<PostListItem | PostListOtherItem>) => {
         switch (item.type) {

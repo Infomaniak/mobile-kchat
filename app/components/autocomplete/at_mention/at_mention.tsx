@@ -11,7 +11,6 @@ import AutocompleteSectionHeader from '@components/autocomplete/autocomplete_sec
 import SpecialMentionItem from '@components/autocomplete/special_mention_item';
 import {AT_MENTION_REGEX, AT_MENTION_SEARCH_REGEX} from '@constants/autocomplete';
 import {useServerUrl} from '@context/server';
-import {debounce} from '@helpers/api/general';
 import {useDebounce} from '@hooks/utils';
 
 import {SECTION_KEY_GROUPS, SECTION_KEY_SPECIAL, emptyGroupList, emptySectionList, emptyUserlList} from './constants';

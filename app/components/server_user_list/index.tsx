@@ -5,7 +5,6 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import UserList from '@components/user_list';
 import {General} from '@constants';
-import useDidMount from '@hooks/did_mount';
 import {useDebounce} from '@hooks/utils';
 import {filterProfilesMatchingTerm} from '@utils/user';
 
@@ -50,33 +49,32 @@ export default function ServerUserList({
 
     const isSearch = Boolean(term);
 
-    const loadedProfiles = (users: UserProfile[]) => {
-        if (mounted.current) {
-            if (!users.length) {
-                next.current = false;
-            }
-
-            page.current += 1;
-            setLoading(false);
-            setProfiles((current) => {
-                if (users?.length) {
-                    if (loadUsers) {
-                        return [...users];
-                    }
-                    return [...current, ...users];
-                }
-
-                return current;
-            });
-        }
-    };
-
     const getProfiles = useDebounce(useCallback(() => {
         if (next.current && !loading && !term && mounted.current) {
             setLoading(true);
-            fetchFunction(page.current + 1).then(loadedProfiles);
+            fetchFunction(page.current + 1).then((users: UserProfile[]) => {
+                if (mounted.current) {
+                    if (!users.length) {
+                        next.current = false;
+                    }
+
+                    page.current += 1;
+                    setLoading(false);
+                    // eslint-disable-next-line max-nested-callbacks
+                    setProfiles((current) => {
+                        if (users?.length) {
+                            if (loadUsers) {
+                                return [...users];
+                            }
+                            return [...current, ...users];
+                        }
+
+                        return current;
+                    });
+                }
+            });
         }
-    }, [loading, term, fetchFunction]), 100);
+    }, [loading, term, fetchFunction, loadUsers]), 100);
 
     const searchUsers = useCallback(async (searchTerm: string) => {
         setLoading(true);
@@ -102,13 +100,13 @@ export default function ServerUserList({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [term]);
 
-    useDidMount(() => {
-        mounted.current = true;
-        getProfiles();
-        return () => {
-            mounted.current = false;
-        };
-    });
+    // useDidMount(() => {
+    //     mounted.current = true;
+    //     getProfiles();
+    //     return () => {
+    //         mounted.current = false;
+    //     };
+    // });
 
     const data = useMemo(() => {
         if (isSearch) {

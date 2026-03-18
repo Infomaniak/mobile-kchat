@@ -45,7 +45,7 @@ export const getActiveServerUrl = async () => {
     return serverUrl || undefined;
 };
 
-export const setServerCredentials = (serverUrl: string, token: string, preauthSecret?: string) => {
+export const setServerCredentials = (serverUrl: string, token: string) => {
     if (!(serverUrl && token)) {
         return;
     }

@@ -135,7 +135,7 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
             }
         };
         handlePosts();
-    }, [currentPost.id, serverUrl]);
+    }, [currentPost.id, files, isLoadingTranscript, serverUrl]);
 
     useEffect(() => {
         if (files[0]?.transcript?.text) {
@@ -144,7 +144,7 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
         setTimeout(() => {
             setIsLoadingTranscript(false);
         }, 1000);
-    }, [files[0]?.transcript?.text]);
+    }, [files]);
 
     const listener = (e: PlayBackType) => {
         setProgress(e.currentPosition);

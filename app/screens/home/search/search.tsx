@@ -311,18 +311,7 @@ const SearchScreen = ({teamId, teams, crossTeamSearchEnabled}: Props) => {
                 teams={teams}
             />
         );
-    }, [
-        handleModifierTextChange,
-        handleRecentSearch,
-        loading,
-        scrollEnabled,
-        scrollPaddingTop,
-        searchTeamId,
-        searchValue,
-        teams,
-        theme.buttonBg,
-        updateSearchTeamId,
-    ]);
+    }, [handleModifierTextChange, handleRecentSearch, loading, scrollEnabled, scrollPaddingTop, searchTeamId, searchValue, styles.loading, teams, theme.buttonBg, updateSearchTeamId]);
 
     const animated = useAnimatedStyle(() => {
         if (isFocused) {

@@ -261,7 +261,7 @@ export const Sound = (
         if (play) {
             playSound();
         }
-    }, []);
+    }, [play, playSound]);
 
     const soundsPath = Platform.OS === 'ios' ? getSdkBundlePath() : 'asset:/sounds';
 
@@ -274,7 +274,7 @@ export const Sound = (
             };
         }
         return noop;
-    }, [play]);
+    }, [play, playSound, stopSound]);
 
     /* Load the audio file */
     return (

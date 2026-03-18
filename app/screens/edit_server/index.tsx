@@ -188,7 +188,7 @@ const EditServer = ({closeButtonId, componentId, server, theme}: ServerProps) =>
 
         // Save preauth secret to credentials (or remove if empty)
         const credentials = await getServerCredentials(server.url);
-        setServerCredentials(server.url, credentials?.token || '', preauthSecret.trim() || undefined);
+        setServerCredentials(server.url, credentials?.token || '');
 
         // Create and cache new client if preauth secret changed
         try {

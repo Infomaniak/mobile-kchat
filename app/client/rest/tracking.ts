@@ -83,7 +83,7 @@ export default class ClientTracking {
             delete this.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET];
         }
 
-        setServerCredentials(this.apiClient.baseUrl, bearerToken, preauthSecret);
+        setServerCredentials(this.apiClient.baseUrl, bearerToken);
     }
 
     setCSRFToken(csrfToken: string) {

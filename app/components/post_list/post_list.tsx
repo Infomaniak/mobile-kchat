@@ -218,7 +218,7 @@ const PostList = ({
         return () => {
             scrollBottomListener.remove();
         };
-    }, [location, scrollToEnd]);
+    }, [location, scrollToEnd, serverUrl]);
 
     const onRefresh = useCallback(async () => {
         if (disablePullToRefresh) {

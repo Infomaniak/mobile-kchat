@@ -301,7 +301,7 @@ export default function ChannelInfoForm({
             </SafeAreaView>
         );
     }
-    console.log('fhreiofoe');
+
     return (
         <SafeAreaView
             edges={['bottom', 'left', 'right']}

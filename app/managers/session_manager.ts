@@ -5,6 +5,7 @@ import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react
 
 import {storeGlobal, storeOnboardingViewedValue} from '@actions/app/global';
 import {cancelAllSessionNotifications, terminateSession} from '@actions/local/session';
+import {syncMultiTeam, syncServerData} from '@actions/remote/entry/ikcommon';
 import {logout, scheduleSessionNotification} from '@actions/remote/session';
 import {Events, Launch} from '@constants';
 import {GLOBAL_IDENTIFIERS} from '@constants/database';
@@ -20,7 +21,6 @@ import EphemeralStore from '@store/ephemeral_store';
 import {deleteFileCacheByDir} from '@utils/file';
 import {isMainActivity} from '@utils/helpers';
 import {addNewServer} from '@utils/server';
-import {syncMultiTeam, syncServerData} from '@actions/remote/entry/ikcommon';
 
 import type {LaunchType} from '@typings/launch';
 

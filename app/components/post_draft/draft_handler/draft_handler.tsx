@@ -133,7 +133,7 @@ export default function DraftHandler(props: Props) {
                 defaultMessage: 'Recording failed, please try again.',
             }));
         }
-    }, [uploadError, files]);
+    }, [uploadError, files, newUploadError, intl]);
 
     return (
         <SendHandler

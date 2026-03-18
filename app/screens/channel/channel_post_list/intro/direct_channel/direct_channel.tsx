@@ -196,7 +196,7 @@ const DirectChannel = ({
                 {getGMIntroMessageSpecificPart(userNotifyProps, channelNotifyProps, styles.boldText)}
             </Text>
         );
-    }, [channel.type, channel.displayName, hasGMasDMFeature, styles.message, styles.boldText, userNotifyProps, channelNotifyProps]);
+    }, [channel.type, channel.displayName, hasGMasDMFeature, styles.message, styles.boldText, styles.gptDisclaimerContainer, styles.gptDisclaimer, userNotifyProps, channelNotifyProps]);
 
     const profiles = useMemo(() => {
         if (channel.type === General.DM_CHANNEL) {

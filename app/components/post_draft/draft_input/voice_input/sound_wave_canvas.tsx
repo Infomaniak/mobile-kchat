@@ -67,7 +67,7 @@ const SoundWaveCanvas = ({data, isRecording}: SoundWaveCanvasProps) => {
         if (isRecording && canvasContextRef.current) {
             draw(canvasContextRef.current, formattedData, theme.buttonBg);
         }
-    }, [isRecording, data]);
+    }, [isRecording, data, formattedData, theme.buttonBg]);
 
     return (
         <Canvas ref={initCanvas}/>

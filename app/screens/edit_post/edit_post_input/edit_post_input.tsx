@@ -134,7 +134,7 @@ const EditPostInput = ({
                         uploadFileError={null}
                         rootId={post.rootId}
                     />
-                    {/* <QuickActions
+                    <QuickActions
                         channelId={post.channelId}
                         testID='edit_post.quick_actions'
                         fileCount={postFiles.length}
@@ -147,7 +147,7 @@ const EditPostInput = ({
                         canShowSlashCommands={false}
                         canShowEmojiPicker={false}
                         focus={focus}
-                    /> */}
+                    />
                 </>
             }
             {Platform.select({ios: <ExtraKeyboard/>})}

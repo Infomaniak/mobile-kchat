@@ -1,9 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 
-import {saveThemePreference} from '@actions/local/preferences';
 import {savePreference} from '@actions/remote/preference';
 import SettingContainer from '@components/settings/container';
 import {Preferences} from '@constants';

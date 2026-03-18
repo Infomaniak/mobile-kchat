@@ -54,7 +54,7 @@ export const useFetchParticipantUsers = (participants: ConferenceParticipantMode
                 setParticipantUsersVersion((v) => v + 1); // eslint-disable-line max-nested-callbacks
             }
         })();
-    }, [participants]);
+    }, [mountedRef, participants, serverUrl]);
 
     return participantUsersVersion === 0;
 };
@@ -92,7 +92,7 @@ export const IkCallsParticipantStackList = ({
             }
             onUserPress={openUserProfile}
         />
-    ), [openUserProfile]);
+    ), [openUserProfile, rowHeight]);
 
     // EFFECTS
     const loading = useFetchParticipantUsers(participants);

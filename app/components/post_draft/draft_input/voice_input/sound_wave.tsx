@@ -61,7 +61,7 @@ const SoundItem = ({amplitude, isNew}: ItemProps) => {
     useEffect(() => {
         scaleHeightAnimation.value = isNew ? withSpring(height, {duration: 1000}) : height;
         opacityAnimation.value = isNew ? withSpring(1, {duration: 500}) : 1;
-    }, [height, isNew]);
+    }, [height, isNew, opacityAnimation, scaleHeightAnimation]);
 
     return (
         <Animated.View
