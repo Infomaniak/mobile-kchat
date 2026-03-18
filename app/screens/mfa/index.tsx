@@ -10,7 +10,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {login} from '@actions/remote/session';
 import Button from '@components/button';
-import FloatingTextInput from '@components/floating_text_input_label';
+import FloatingTextInput from '@components/floating_input/floating_text_input_label';
 import FormattedText from '@components/formatted_text';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useAvoidKeyboard} from '@hooks/device';
@@ -42,7 +42,7 @@ type MFAProps = {
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     centered: {
         width: '100%',
-        maxWidth: 600,
+        maxWidth: 480,
     },
     container: {
         flex: 1,
@@ -57,8 +57,10 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
     header: {
         color: theme.centerChannelColor,
+        marginTop: 24,
         marginBottom: 12,
         ...typography('Heading', 1000, 'SemiBold'),
+        textAlign: 'center',
     },
     innerContainer: {
         alignItems: 'center',
@@ -71,12 +73,12 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
     shield: {
         alignItems: 'center',
-        marginBottom: 56.22,
     },
     subheader: {
         color: changeOpacity(theme.centerChannelColor, 0.6),
         marginBottom: 12,
         ...typography('Body', 200, 'Regular'),
+        textAlign: 'center',
     },
 }));
 
@@ -153,7 +155,7 @@ const MFA = ({componentId, config, goToHome, license, loginId, password, serverD
                 >
                     <View style={styles.centered}>
                         <View style={styles.shield}>
-                            <Shield/>
+                            <Shield theme={theme}/>
                         </View>
                         <FormattedText
                             defaultMessage='Enter MFA Token'
@@ -168,8 +170,7 @@ const MFA = ({componentId, config, goToHome, license, loginId, password, serverD
                         />
                         <View style={styles.form}>
                             <FloatingTextInput
-                                autoCorrect={false}
-                                autoCapitalize={'none'}
+                                rawInput={true}
                                 blurOnSubmit={true}
                                 disableFullscreenUI={true}
                                 enablesReturnKeyAutomatically={true}
@@ -179,7 +180,6 @@ const MFA = ({componentId, config, goToHome, license, loginId, password, serverD
                                 onChangeText={handleInput}
                                 onSubmitEditing={submit}
                                 returnKeyType='go'
-                                spellCheck={false}
                                 testID='login_mfa.input'
                                 theme={theme}
                                 value={token}

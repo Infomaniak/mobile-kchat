@@ -23,7 +23,6 @@ import {getStyleSheet} from './styles';
 
 import type {UserModel} from '@database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
-import type {MarkdownTextStyles} from '@typings/global/markdown';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type PreviewMessageProps = {
@@ -33,14 +32,13 @@ type PreviewMessageProps = {
     user?: UserModel;
     postLink: string;
     location: AvailableScreens;
-    textStyles?: MarkdownTextStyles;
     siteURL: string;
     metadata: PostPreviewMetadata;
 };
 
 const SHOW_MORE_HEIGHT = 54;
 
-export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, post, metadata, theme, user, postLink, location, siteURL, textStyles}) => {
+export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, post, metadata, theme, user, postLink, location, siteURL}) => {
     const [open, setOpen] = useState(false);
     const [layoutWidth, setLayoutWidth] = useState(0);
     const [height, setHeight] = useState<number|undefined>();
@@ -63,7 +61,7 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
         if (location === Screens.CHANNEL) {
             setLayoutWidth(event.nativeEvent.layout.width);
         }
-    }, []);
+    }, [location]);
 
     const displayName = useMemo(() => {
         const postMetadata = metadata.post;
@@ -99,7 +97,7 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
         const match = matchDeepLink(url, serverUrl, siteURL);
 
         if (match) {
-            const result = await handleDeepLink(match.url, intl);
+            const result = await handleDeepLink(match, intl);
             if (result?.error) {
                 tryOpenURL(match.url, onError);
             }
@@ -141,7 +139,7 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
                                 theme={theme}
                                 location={location}
                                 disableGallery={true}
-                                textStyles={textStyles}
+
                             />
                         </Text>
                         <FormattedRelativeTime
@@ -170,7 +168,6 @@ export const PreviewMessage: FC<PreviewMessageProps> = ({channelDisplayName, pos
                                     location={location}
                                     layoutWidth={layoutWidth}
                                     imagesMetadata={post as unknown as Record<string, PostImage | undefined>}
-                                    textStyles={textStyles}
                                     isEdited={messageEdit}
                                 />
 

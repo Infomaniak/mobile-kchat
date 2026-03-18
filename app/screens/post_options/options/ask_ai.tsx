@@ -6,7 +6,6 @@ import React, {useCallback} from 'react';
 import {BaseOption} from '@components/common_post_options';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
-import {t} from '@i18n';
 import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
 
 import IconAI from '../../../components/illustrations/icon_ai';
@@ -34,11 +33,10 @@ const AskAi = (props: Props) => {
                 post,
             },
         });
-    }, [bottomSheetId, post]);
+    }, [bottomSheetId, post, theme]);
     return (
         <BaseOption
-            i18nId={t('ai.actions')}
-            defaultMessage='AI Actions'
+            message={{id: 'ai.actions', defaultMessage: 'AI Actions'}}
             customIcon={<IconAI theme={theme}/>}
             onPress={onPress}
             testID='post_options.ask_ai.option'

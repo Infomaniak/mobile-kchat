@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useMemo, useRef} from 'react';
-import {ActivityIndicator, StyleSheet, View} from 'react-native';
+import {ActivityIndicator, type FlatList, type GestureResponderEvent, StyleSheet, View} from 'react-native';
 
 import {fetchPostThread} from '@actions/remote/post';
 import {markThreadAsRead} from '@actions/remote/thread';
@@ -11,9 +11,10 @@ import PostList from '@components/post_list';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
-import {debounce} from '@helpers/api/general';
 import {useAppState} from '@hooks/device';
+import useDidMount from '@hooks/did_mount';
 import {useFetchingThreadState} from '@hooks/fetching_thread';
+import {useDebounce} from '@hooks/utils';
 import {isMinimumServerVersion} from '@utils/helpers';
 
 import type PostModel from '@typings/database/models/servers/post';
@@ -22,12 +23,14 @@ import type ThreadModel from '@typings/database/models/servers/thread';
 type Props = {
     channelLastViewedAt: number;
     isCRTEnabled: boolean;
-    nativeID: string;
     posts: PostModel[];
     rootPost: PostModel;
     teamId: string;
     thread?: ThreadModel;
     version?: string;
+    listRef: React.RefObject<FlatList<string | PostModel>>;
+    onTouchMove?: (event: GestureResponderEvent) => void;
+    onTouchEnd?: () => void;
 }
 
 const styles = StyleSheet.create({
@@ -38,7 +41,8 @@ const styles = StyleSheet.create({
 
 const ThreadPostList = ({
     channelLastViewedAt, isCRTEnabled,
-    nativeID, posts, rootPost, teamId, thread, version,
+    posts, rootPost, teamId, thread, version,
+    listRef, onTouchMove, onTouchEnd,
 }: Props) => {
     const appState = useAppState();
     const serverUrl = useServerUrl();
@@ -46,7 +50,7 @@ const ThreadPostList = ({
     const isFetchingThread = useFetchingThreadState(rootPost.id);
 
     const canLoadMorePosts = useRef(true);
-    const onEndReached = useCallback(debounce(async () => {
+    const onEndReached = useDebounce(useCallback(async () => {
         if (isMinimumServerVersion(version || '', 6, 7) && !isFetchingThread && canLoadMorePosts.current && posts.length) {
             const options: FetchPaginatedThreadOptions = {
                 perPage: PER_PAGE_DEFAULT,
@@ -63,18 +67,18 @@ const ThreadPostList = ({
         } else {
             canLoadMorePosts.current = false;
         }
-    }, 500), [isFetchingThread, rootPost, posts, version]);
+    }, [version, isFetchingThread, posts, serverUrl, rootPost.id]), 500);
 
     const threadPosts = useMemo(() => {
         return [...posts, rootPost];
     }, [posts, rootPost]);
 
     // If CRT is enabled, mark the thread as read on mount.
-    useEffect(() => {
+    useDidMount(() => {
         if (isCRTEnabled && thread?.isFollowing) {
             markThreadAsRead(serverUrl, teamId, rootPost.id);
         }
-    }, []);
+    });
 
     // If CRT is enabled, When new post arrives and thread modal is open, mark thread as read.
     const oldPostsCount = useRef<number>(posts.length);
@@ -100,7 +104,6 @@ const ThreadPostList = ({
             isCRTEnabled={isCRTEnabled}
             lastViewedAt={lastViewedAt}
             location={Screens.THREAD}
-            nativeID={nativeID}
             onEndReached={onEndReached}
             posts={threadPosts}
             rootId={rootPost.id}
@@ -109,6 +112,9 @@ const ThreadPostList = ({
             header={header}
             footer={<View style={styles.footer}/>}
             testID='thread.post_list'
+            listRef={listRef}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
         />
     );
 

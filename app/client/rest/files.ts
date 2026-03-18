@@ -84,6 +84,8 @@ const ClientFiles = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
                 },
             },
             timeoutInterval: toMilliseconds({minutes: 3}),
+
+            // headers: this.getRequestHeaders('POST'),
         };
         if (!file.localPath) {
             throw new Error('file does not have local path defined');

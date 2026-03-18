@@ -4,6 +4,7 @@
 import {type ClientHeaders, getOrCreateWebSocketClient, WebSocketReadyState} from '@mattermost/react-native-network-client';
 import Pusher, {ConnectionManager, type Channel} from 'pusher-js/react-native';
 
+import * as ClientConstants from '@client/rest/constants';
 import {WebsocketEvents} from '@constants';
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
@@ -28,6 +29,7 @@ export default class WebSocketClient {
     private connectionTimeout: NodeJS.Timeout | undefined;
     private connectionId = '';
     private token: string;
+    private preauthSecret?: string;
     private stop = false;
     private url = '';
     private serverUrl: string;
@@ -70,6 +72,8 @@ export default class WebSocketClient {
     constructor(serverUrl: string, token: string) {
         this.token = token;
         this.serverUrl = serverUrl;
+
+        // this.preauthSecret = preauthSecret;
     }
 
     public async initialize(opts = {}, shouldSkipSync = false) {

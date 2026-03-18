@@ -20,6 +20,8 @@ export interface ClientUsersMix {
     login: (loginId: string, password: string, token?: string, deviceId?: string, ldapOnly?: boolean) => Promise<UserProfile>;
     loginById: (id: string, password: string, token?: string, deviceId?: string) => Promise<UserProfile>;
     logout: (deviceToken?: string) => Promise<any>;
+    loginByMagicLinkLogin: (token: string, deviceId?: string) => Promise<UserProfile>;
+    loginByIntune: (accessToken: string, deviceId?: string) => Promise<UserProfile>;
     getProfiles: (page?: number, perPage?: number, options?: Record<string, any>) => Promise<UserProfile[]>;
     getProfilesByIds: (userIds: string[], options?: Record<string, any>, groupLabel?: RequestGroupLabel) => Promise<UserProfile[]>;
     getProfilesByUsernames: (usernames: string[], groupLabel?: RequestGroupLabel) => Promise<UserProfile[]>;
@@ -47,6 +49,8 @@ export interface ClientUsersMix {
     unsetCustomStatus: () => Promise<{status: string}>;
     removeRecentCustomStatus: (customStatus: UserCustomStatus) => Promise<{status: string}>;
     getUsersInGroup: (groupId: string, page?: number, perPage?: number, sort?: string) => Promise<UserProfile[]>;
+    exchangeSsoLoginCode: (loginCode: string, codeVerifier: string, state: string) => Promise<{token: string; csrf: string}>;
+    getUserLoginType: (loginId: string, deviceId?: string) => Promise<{auth_service: LoginType; is_deactivated: boolean}>;
 }
 
 const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) => class extends superclass {
@@ -142,7 +146,7 @@ const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     };
 
     loginById = async (id: string, password: string, token = '', deviceId = '') => {
-        const body: any = {
+        const body = {
             device_id: deviceId,
             id,
             password,
@@ -173,6 +177,52 @@ const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
         );
 
         return response;
+
+    };
+
+    loginByIntune = async (accessToken: string, deviceId = '') => {
+        const body = {
+            device_id: deviceId,
+            access_token: accessToken,
+        };
+
+        const resp = await this.doFetch(
+            '/oauth/intune',
+            {
+                method: 'post',
+                body,
+                headers: {'Cache-Control': 'no-store'},
+            },
+            false,
+        );
+
+        return resp?.data;
+    };
+
+    loginByMagicLinkLogin = async (token: string, deviceId = '') => {
+        const body = {
+            magic_link_token: token,
+            device_id: deviceId,
+        };
+
+        const resp = await this.doFetch(
+            `${this.getUsersRoute()}/login`,
+            {
+                method: 'post',
+                body,
+                headers: {'Cache-Control': 'no-store'},
+            },
+            false,
+        );
+
+        return resp?.data;
+    };
+
+    getUserLoginType = async (loginId: string, deviceId?: string) => {
+        return this.doFetch(
+            `${this.getUsersRoute()}/login/type`,
+            {method: 'post', body: {login_id: loginId, device_id: deviceId}},
+        );
     };
 
     getProfiles = async (page = 0, perPage = PER_PAGE_DEFAULT, options = {}) => {
@@ -412,6 +462,24 @@ const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
             })}`,
             {method: 'get'},
         );
+    };
+
+    exchangeSsoLoginCode = async (loginCode: string, codeVerifier: string, state: string) => {
+        const body = {
+            login_code: loginCode,
+            code_verifier: codeVerifier,
+            state,
+        };
+
+        // Intentionally no-cache
+        const resp = await this.doFetch(
+            `${this.getUsersRoute()}/login/sso/code-exchange`,
+            {method: 'post', body, headers: {'Cache-Control': 'no-store'}},
+            false,
+        );
+
+        // Expected shape: { token: string, csrf: string }
+        return resp?.data || resp;
     };
 };
 

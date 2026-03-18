@@ -1,18 +1,20 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Image, type ImageSource} from 'expo-image';
 import {chunk} from 'lodash';
 import React from 'react';
 import {View} from 'react-native';
 
 import {buildAbsoluteUrl} from '@actions/remote/file';
 import {buildProfileImageUrlFromUser} from '@actions/remote/user';
+import ExpoImage from '@components/expo_image';
 import {useServerUrl} from '@context/server';
 import NetworkManager from '@managers/network_manager';
 import {makeStyleSheetFromTheme} from '@utils/theme';
+import {getLastPictureUpdate} from '@utils/user';
 
 import type UserModel from '@typings/database/models/servers/user';
+import type {ImageSource} from 'expo-image';
 
 type Props = {
     theme: Theme;
@@ -45,8 +47,10 @@ const Group = ({theme, users}: Props) => {
     const groups = rows.map((c, k) => {
         const group = c.map((u, i) => {
             const pictureUrl = buildProfileImageUrlFromUser(serverUrl, u);
+            const lastPictureUpdateAt = getLastPictureUpdate(u);
             return (
-                <Image
+                <ExpoImage
+                    id={`user-${u.id}-${lastPictureUpdateAt}`}
                     key={pictureUrl + i.toString()}
                     style={[styles.profile, {transform: [{translateX: -(i * 24)}]}]}
                     source={{uri: buildAbsoluteUrl(serverUrl, pictureUrl), headers}}
@@ -64,11 +68,7 @@ const Group = ({theme, users}: Props) => {
         );
     });
 
-    return (
-        <>
-            {groups}
-        </>
-    );
+    return groups;
 };
 
 export default Group;

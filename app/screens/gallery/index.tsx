@@ -2,12 +2,12 @@
 // See LICENSE.txt for license information.
 
 import RNUtils from '@mattermost/rnutils';
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {DeviceEventEmitter, Platform, StyleSheet, View} from 'react-native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {DeviceEventEmitter, Platform, View} from 'react-native';
+import {initialWindowMetrics, useSafeAreaInsets} from 'react-native-safe-area-context';
 
-import {CaptionsEnabledContext} from '@calls/context';
-import {hasCaptions} from '@calls/utils';
 import {Events} from '@constants';
+import {ANDROID_GALLERY_FOOTER_PADDING, ANDROID_NAV_BAR_HEIGHT} from '@constants/gallery';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useIsTablet, useWindowDimensions} from '@hooks/device';
 import {useGalleryControls} from '@hooks/gallery';
@@ -30,34 +30,19 @@ type Props = {
     items: GalleryItemType[];
 }
 
-const styles = StyleSheet.create({
-    flex: {flex: 1},
-});
-
 const GalleryScreen = ({componentId, galleryIdentifier, hideActions, initialIndex, items}: Props) => {
     const dim = useWindowDimensions();
     const isTablet = useIsTablet();
+    const {bottom: bottomInset} = useSafeAreaInsets();
     const [localIndex, setLocalIndex] = useState(initialIndex);
-    const [captionsEnabled, setCaptionsEnabled] = useState<boolean[]>(new Array(items.length).fill(true));
-    const [captionsAvailable, setCaptionsAvailable] = useState<boolean[]>([]);
-    const {setControlsHidden, headerStyles, footerStyles} = useGalleryControls();
-    const dimensions = useMemo(() => ({width: dim.width, height: dim.height}), [dim]);
+
+    // Fallback for Android when SafeAreaContext returns 0 in overlays
+    const androidBottom = (initialWindowMetrics?.insets.bottom || ANDROID_NAV_BAR_HEIGHT) + ANDROID_GALLERY_FOOTER_PADDING;
+    const bottom = bottomInset || Platform.select({android: androidBottom, default: 0});
+    const {headerAndFooterHidden, hideHeaderAndFooter, headerStyles, footerStyles} = useGalleryControls(bottom);
     const galleryRef = useRef<GalleryRef>(null);
 
-    useEffect(() => {
-        const captions = items.reduce((acc, item) => {
-            acc.push(hasCaptions(item.postProps));
-            return acc;
-        }, [] as boolean[]);
-        setCaptionsAvailable(captions);
-    }, [items]);
-
-    const onCaptionsPressIdx = useCallback((idx: number) => {
-        const enabled = [...captionsEnabled];
-        enabled[idx] = !enabled[idx];
-        setCaptionsEnabled(enabled);
-    }, [captionsEnabled, setCaptionsEnabled]);
-    const onCaptionsPress = useCallback(() => onCaptionsPressIdx(localIndex), [localIndex, onCaptionsPressIdx]);
+    const containerStyle = dim;
 
     const onClose = useCallback(() => {
         // We keep the un freeze here as we want
@@ -91,6 +76,10 @@ const GalleryScreen = ({componentId, galleryIdentifier, hideActions, initialInde
             onClose();
         });
 
+        if (Platform.OS === 'android' && Platform.Version >= 34) {
+            RNUtils.setNavigationBarColor('black', true);
+        }
+
         return () => {
             listener.remove();
         };
@@ -99,37 +88,33 @@ const GalleryScreen = ({componentId, galleryIdentifier, hideActions, initialInde
     useAndroidHardwareBackHandler(componentId, close);
 
     return (
-        <CaptionsEnabledContext.Provider value={captionsEnabled}>
-            <View
-                style={styles.flex}
-                nativeID={SecurityManager.getShieldScreenId(componentId)}
-            >
-                <Header
-                    index={localIndex}
-                    onClose={onClose}
-                    style={headerStyles}
-                    total={items.length}
-                />
-                <Gallery
-                    galleryIdentifier={galleryIdentifier}
-                    initialIndex={initialIndex}
-                    items={items}
-                    onHide={close}
-                    onIndexChange={onIndexChange}
-                    onShouldHideControls={setControlsHidden}
-                    ref={galleryRef}
-                    targetDimensions={dimensions}
-                />
-                <Footer
-                    hideActions={hideActions}
-                    item={items[localIndex]}
-                    style={footerStyles}
-                    hasCaptions={captionsAvailable[localIndex]}
-                    captionEnabled={captionsEnabled[localIndex]}
-                    onCaptionsPress={onCaptionsPress}
-                />
-            </View>
-        </CaptionsEnabledContext.Provider>
+        <View
+            style={containerStyle}
+            nativeID={SecurityManager.getShieldScreenId(componentId)}
+        >
+            <Header
+                index={localIndex}
+                onClose={onClose}
+                style={headerStyles}
+                total={items.length}
+            />
+            <Gallery
+                headerAndFooterHidden={headerAndFooterHidden}
+                galleryIdentifier={galleryIdentifier}
+                initialIndex={initialIndex}
+                items={items}
+                onHide={close}
+                onIndexChange={onIndexChange}
+                hideHeaderAndFooter={hideHeaderAndFooter}
+                ref={galleryRef}
+                targetDimensions={dim}
+            />
+            <Footer
+                hideActions={hideActions}
+                item={items[localIndex]}
+                style={footerStyles}
+            />
+        </View>
     );
 };
 

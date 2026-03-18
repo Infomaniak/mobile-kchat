@@ -56,6 +56,7 @@ export function ScheduledPostCoreOptions({userTimezone, isMilitaryTime, onSelect
     // IK change : kSuite free feature
     const {scheduled_draft_custom_date: scheduledDraftCustomDate} = useGetUsageDeltas(usage, limits);
     const {isQuotaExceeded} = quotaGate(scheduledDraftCustomDate);
+    console.log('🚀 ~ ScheduledPostCoreOptions ~ isQuotaExceeded:', isQuotaExceeded);
 
     const onPressEvolve = useCallback(async () => {
         await dismissBottomSheet(Screens.SCHEDULED_POST_OPTIONS);
@@ -90,7 +91,7 @@ export function ScheduledPostCoreOptions({userTimezone, isMilitaryTime, onSelect
         if (selectedTime) {
             onSelectOption(selectedTime.valueOf().toString());
         }
-    }, [now, onSelectOption]);
+    }, [now, onCustomTimeSelected, onSelectOption]);
 
     const handleCustomTimeChange = useCallback((selectedTime: Moment) => {
         onSelectOption(selectedTime.valueOf().toString());

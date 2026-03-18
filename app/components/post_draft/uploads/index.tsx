@@ -16,7 +16,7 @@ import DraftEditPostUploadManager from '@managers/draft_upload_manager';
 import {fileToGalleryItem, openGalleryAtIndex} from '@utils/gallery';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
-import UploadItem from './upload_item';
+import UploadItem from './upload_item/upload_item_wrapper';
 
 const CONTAINER_HEIGHT_MAX = 80;
 const CONTAINER_HEIGHT_MIN = 0;
@@ -121,7 +121,7 @@ function Uploads({
     }, [containerHeight, hasFiles]);
 
     const openGallery = useCallback((file: FileInfo) => {
-        const items = filesForGallery.current.map((f) => fileToGalleryItem(f, currentUserId));
+        const items = filesForGallery.current.map((f) => fileToGalleryItem(f, currentUserId, undefined, 0, f.id || f.clientId));
         const index = filesForGallery.current.findIndex((f) => f.clientId === file.clientId);
         openGalleryAtIndex(galleryIdentifier, index, items, true);
     }, [currentUserId, galleryIdentifier]);

@@ -15,6 +15,7 @@ import {SNACK_BAR_TYPE} from '@constants/snack_bar';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import {usePreventDoubleTap} from '@hooks/utils';
 import {dismissModal, goToScreen, setButtons} from '@screens/navigation';
 import {gotoSettingsScreen} from '@screens/settings/config';
 import {showSnackBar} from '@utils/snack_bar';
@@ -77,13 +78,11 @@ type SettingsProps = {
     currentUser?: UserModel;
 }
 
-//todo: Profile the whole feature - https://mattermost.atlassian.net/browse/MM-39711
-
 const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps) => {
     const theme = useTheme();
     const intl = useIntl();
     const styles = getStyleSheet(theme);
-    const timezone = useMemo(() => getUserTimezoneProps(currentUser), [currentUser?.timezone]);
+    const timezone = useMemo(() => getUserTimezoneProps(currentUser), [currentUser]);
 
     const closeButton = useMemo(() => {
         return {
@@ -101,7 +100,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
         setButtons(componentId, {
             leftButtons: [closeButton],
         });
-    }, []);
+    }, [closeButton, componentId]);
 
     useAndroidHardwareBackHandler(componentId, close);
     useNavButtonPressed(CLOSE_BUTTON_ID, componentId, close, []);
@@ -128,7 +127,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
         gotoSettingsScreen(screen, title);
     });
 
-    const openHelp = preventDoubleTap(() => {
+    const openHelp = usePreventDoubleTap(useCallback(() => {
         if (helpLink) {
             const onError = () => {
                 Alert.alert(
@@ -139,7 +138,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
 
             tryOpenURL(helpLink, onError);
         }
-    });
+    }, [helpLink, intl]));
 
     const openFeedback = preventDoubleTap(() => {
         const feddbackLink = intl.formatMessage({id: 'infomaniak.feedback.url', defaultMessage: 'https://feedback.userreport.com/6b7737f6-0cc1-410f-993f-be2ffbf73a05#ideas/popular'});
@@ -189,15 +188,13 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
                 {Platform.OS === 'android' && <View style={styles.helpGroup}/>}
                 {showHelp &&
                 <SettingItem
-                    optionLabelTextStyle={{color: theme.linkColor}}
                     onPress={openHelp}
                     optionName='help'
                     testID='settings.help.option'
-                    type='default'
+                    type='link'
                 />
                 }
                 <SettingItem
-                    optionLabelTextStyle={{color: theme.linkColor}}
                     onPress={openFeedback}
                     optionName='feedback'
                     separator={false}

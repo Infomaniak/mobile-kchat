@@ -13,6 +13,7 @@ import {
 import {fetchSuggestions} from '@actions/remote/command';
 import {useServerUrl} from '@context/server';
 import {debounce} from '@helpers/api/general';
+import {useDebounce} from '@hooks/utils';
 import IntegrationsManager from '@managers/integrations_manager';
 
 import {AppCommandParser} from './app_command_parser/app_command_parser';
@@ -91,7 +92,7 @@ const SlashSuggestion = ({
         onShowingChange(Boolean(matches.length));
     }, [onShowingChange]);
 
-    const runFetch = useMemo(() => debounce(async (sUrl: string, term: string, tId: string, cId: string, rId?: string) => {
+    const runFetch = useDebounce(useCallback(async (sUrl: string, term: string, tId: string, cId: string, rId?: string) => {
         try {
             const res = await fetchSuggestions(sUrl, term, tId, cId, rId);
             if (!mounted.current) {
@@ -108,7 +109,7 @@ const SlashSuggestion = ({
         } catch {
             updateSuggestions(emptySuggestionList);
         }
-    }, 200), [updateSuggestions]);
+    }, [updateSuggestions]), 200);
 
     const getAppBaseCommandSuggestions = (pretext: string): AutocompleteSuggestion[] => {
         appCommandParser.current.setChannelContext(channelId, currentTeamId, rootId);
@@ -153,7 +154,7 @@ const SlashSuggestion = ({
                 updateValue(completedDraft.replace(`//${command} `, `/${command} `));
             });
         }
-    }, [updateValue, serverUrl]);
+    }, [updateValue]);
 
     const renderItem = useCallback(({item}: {item: AutocompleteSuggestion}) => (
         <SlashSuggestionItem
@@ -197,6 +198,8 @@ const SlashSuggestion = ({
         }
 
         runFetch(serverUrl, value, currentTeamId, channelId, rootId);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value, commands]);
 
     useEffect(() => {

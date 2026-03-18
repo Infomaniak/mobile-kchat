@@ -165,3 +165,5 @@ type GetUsersOptions = {
 	channel_roles?: string;
 	team_roles?: string;
 };
+
+type LoginType = '' | 'magic_link';

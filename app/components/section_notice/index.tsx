@@ -6,7 +6,6 @@ import {Pressable, Text, View} from 'react-native';
 
 import Tag from '@components/tag';
 import {useTheme} from '@context/theme';
-import {getMarkdownBlockStyles, getMarkdownTextStyles} from '@utils/markdown';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
@@ -103,7 +102,7 @@ const getStyleFromTheme = makeStyleSheetFromTheme((theme) => {
             color: theme.dndIndicator,
         },
         dangerIcon: {
-            color: theme.sidebarTextActiveBorder,
+            color: theme.errorTextColor,
         },
         dangerContainer: {
             borderColor: changeOpacity(theme.dndIndicator, 0.16),
@@ -206,8 +205,6 @@ const SectionNotice = ({
                             theme={theme}
                             location={location}
                             baseTextStyle={styles.baseText}
-                            textStyles={getMarkdownTextStyles(theme)}
-                            blockStyles={getMarkdownBlockStyles(theme)}
                             value={text}
                         />
                     )}

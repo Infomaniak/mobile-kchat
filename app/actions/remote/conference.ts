@@ -7,7 +7,7 @@ import {handleConferenceReceived, handleConferenceUpdatedById} from '@actions/we
 import {type PassedProps} from '@calls/screens/call_screen/call_screen';
 import {Screens} from '@constants';
 import DatabaseManager from '@database/manager';
-import {getTranslations, t} from '@i18n';
+import {getTranslations} from '@i18n';
 import NetworkManager from '@managers/network_manager';
 import {getChannelById} from '@queries/servers/channel';
 import {getConferenceById} from '@queries/servers/conference';
@@ -111,7 +111,7 @@ export const switchToConferenceByChannelId = async (
         // Setup CALL screen props
         // - title
         const translations = getTranslations(userProfile.locale);
-        const title = translations[t('mobile.calls_call_screen')] || 'Call';
+        const title = translations['mobile.calls_call_screen'] || 'Call';
 
         // - passedProps
         const passedProps: PassedProps = {

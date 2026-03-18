@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {type Dispatch, type RefObject, type SetStateAction, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {type Dispatch, type RefObject, type SetStateAction, useCallback, useMemo, useRef, useState} from 'react';
 import {type IntlShape, useIntl} from 'react-intl';
 import {View} from 'react-native';
 import Animated, {type SharedValue, useSharedValue, useAnimatedStyle, withTiming} from 'react-native-reanimated';
@@ -9,6 +9,7 @@ import Animated, {type SharedValue, useSharedValue, useAnimatedStyle, withTiming
 import FormattedText from '@components/formatted_text';
 import {ALL_TEAMS_ID} from '@constants/team';
 import {useTheme} from '@context/theme';
+import useDidMount from '@hooks/did_mount';
 import TeamPicker from '@screens/home/search/team_picker';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -28,7 +29,6 @@ const getStyleFromTheme = makeStyleSheetFromTheme((theme) => {
             alignItems: 'center',
             flexDirection: 'row',
             marginTop: 20,
-            marginHorizontal: 18,
         },
         titleContainer: {
             flex: 1,
@@ -53,22 +53,22 @@ const getModifiersSectionsData = (intl: IntlShape, teamId: string): ModifierItem
         sectionsData.push({
             term: 'From:',
             testID: 'search.modifier.from',
-            description: formatMessage({id: 'mobile.search.modifier.from', defaultMessage: ' a specific user'}),
+            description: formatMessage({id: 'mobile.search.modifier.from', defaultMessage: 'a specific user'}),
         }, {
             term: 'In:',
             testID: 'search.modifier.in',
-            description: formatMessage({id: 'mobile.search.modifier.in', defaultMessage: ' a specific channel'}),
+            description: formatMessage({id: 'mobile.search.modifier.in', defaultMessage: 'a specific channel'}),
         });
     }
 
     sectionsData.push({
         term: '-',
         testID: 'search.modifier.exclude',
-        description: formatMessage({id: 'mobile.search.modifier.exclude', defaultMessage: ' exclude search terms'}),
+        description: formatMessage({id: 'mobile.search.modifier.exclude', defaultMessage: 'exclude search terms'}),
     }, {
         term: '""',
         testID: 'search.modifier.phrases',
-        description: formatMessage({id: 'mobile.search.modifier.phrases', defaultMessage: ' messages with phrases'}),
+        description: formatMessage({id: 'mobile.search.modifier.phrases', defaultMessage: 'messages with phrases'}),
         cursorPosition: -1,
     });
 
@@ -110,19 +110,19 @@ const Modifiers = ({scrollEnabled, searchValue, setSearchValue, searchRef, setTe
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
         }
-        setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
             scrollEnabled.value = true;
         }, 350);
-    }, [showMore]);
+    }, [data.length, height, scrollEnabled, showMore]);
 
-    useEffect(() => {
+    useDidMount(() => {
         return () => {
             if (timeoutRef.current) {
                 scrollEnabled.value = true;
                 clearTimeout(timeoutRef.current);
             }
         };
-    }, []);
+    });
 
     const renderModifier = (item: ModifierItem) => {
         return (

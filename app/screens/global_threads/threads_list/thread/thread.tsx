@@ -7,6 +7,7 @@ import {Text, TouchableHighlight, View} from 'react-native';
 
 import {switchToChannelById} from '@actions/remote/channel';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
+import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
 import FriendlyDate from '@components/friendly_date';
 import RemoveMarkdown from '@components/remove_markdown';
@@ -15,9 +16,9 @@ import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
+import {usePreventDoubleTap} from '@hooks/utils';
 import {bottomSheetModalOptions, showModal, showModalOverCurrentContext} from '@screens/navigation';
-import {getMarkdownTextStyles} from '@utils/markdown';
-import {preventDoubleTap} from '@utils/tap';
+import {getPostTranslatedMessage, getPostTranslation} from '@utils/post';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {displayUsername} from '@utils/user';
@@ -40,6 +41,7 @@ type Props = {
     teammateNameDisplay: string;
     testID: string;
     thread: ThreadModel;
+    isChannelAutotranslated: boolean;
 };
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -72,6 +74,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             flexDirection: 'row',
             marginRight: 12,
             overflow: 'hidden',
+            gap: 6,
         },
         threadDeleted: {
             color: changeOpacity(theme.centerChannelColor, 0.72),
@@ -80,7 +83,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
         threadStarter: {
             color: theme.centerChannelColor,
             ...typography('Body', 200, 'SemiBold'),
-            paddingRight: 6,
         },
         threadText: {
             overflow: 'hidden',
@@ -130,12 +132,11 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const Thread = ({author, channel, location, post, teammateNameDisplay, testID, thread}: Props) => {
+const Thread = ({author, channel, location, post, teammateNameDisplay, testID, thread, isChannelAutotranslated}: Props) => {
     const intl = useIntl();
     const isTablet = useIsTablet();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
-    const textStyles = getMarkdownTextStyles(theme);
     const serverUrl = useServerUrl();
 
     const [isChannelNamePressed, setIsChannelNamePressed] = useState<Boolean>(false);
@@ -148,9 +149,9 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
         setIsChannelNamePressed((prevState) => !prevState);
     }, []);
 
-    const showThread = useCallback(preventDoubleTap(() => {
+    const showThread = usePreventDoubleTap(useCallback(() => {
         fetchAndSwitchToThread(serverUrl, thread.id);
-    }), [serverUrl, thread.id]);
+    }, [serverUrl, thread.id]));
 
     const onChannelNamePressed = useCallback(() => {
         if (channel?.id) {
@@ -167,10 +168,16 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
         } else {
             showModalOverCurrentContext(Screens.THREAD_OPTIONS, passProps);
         }
-    }, [isTablet, theme, thread]);
+    }, [intl, isTablet, theme, thread]);
 
     if (!post || !channel) {
         return null;
+    }
+
+    const translation = getPostTranslation(post, intl.locale);
+    let message = post.message;
+    if (isChannelAutotranslated && post.type === '' && translation?.state === 'ready') {
+        message = getPostTranslatedMessage(message, translation);
     }
 
     let threadStarterName = displayUsername(author, intl.locale, teammateNameDisplay);
@@ -224,7 +231,7 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
                 {threadStarterName}
             </Text>
         );
-        if (post.message) {
+        if (message) {
             postBody = (
                 <Text numberOfLines={2}>
                     <RemoveMarkdown
@@ -233,9 +240,8 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
                         enableChannelLink={true}
                         enableHardBreak={true}
                         enableSoftBreak={true}
-                        textStyle={textStyles}
                         baseStyle={styles.message}
-                        value={post.message.substring(0, 100)} // This substring helps to avoid ANR's
+                        value={message.substring(0, 100)} // This substring helps to avoid ANR's
                     />
                 </Text>
             );
@@ -264,6 +270,13 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
                     <View style={styles.header}>
                         <View style={styles.headerInfoContainer}>
                             {name}
+                            {isChannelAutotranslated && post.type === '' && translation?.state === 'ready' && (
+                                <CompassIcon
+                                    name='translate'
+                                    size={16}
+                                    color={changeOpacity(theme.centerChannelColor, 0.56)}
+                                />
+                            )}
                             {threadStarterName !== channel?.displayName && (
                                 <View style={styles.channelNameContainer}>
                                     <TouchableWithFeedback

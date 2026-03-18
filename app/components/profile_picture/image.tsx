@@ -40,7 +40,7 @@ const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Pro
     serverUrl = url || serverUrl;
 
     const style = getStyleSheet(theme);
-    const lastPictureUpdate = author ? getLastPictureUpdate(author) : 0;
+    const lastPictureUpdateAt = author ? getLastPictureUpdate(author) : 0;
 
     const fIStyle = useMemo(() => ({
         borderRadius: size / 2,
@@ -59,21 +59,21 @@ const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Pro
             return undefined;
         }
 
-        const pictureUrl = client.getProfilePictureUrl(author.id, lastPictureUpdate);
+        const pictureUrl = client.getProfilePictureUrl(author.id, lastPictureUpdateAt);
         return source ?? {
             uri: new URL(pictureUrl, serverUrl).toString(),
             headers: {
                 Authorization: client.getCurrentBearerToken(),
             },
         };
-    }, [author, serverUrl, source, lastPictureUpdate]);
+    }, [author, serverUrl, source, lastPictureUpdateAt]);
 
     const id = useMemo(() => {
         if (author) {
-            return `user-${author.id}-${lastPictureUpdate}`;
+            return `user-${author.id}-${lastPictureUpdateAt}`;
         }
         return undefined;
-    }, [author, lastPictureUpdate]);
+    }, [author, lastPictureUpdateAt]);
 
     if (typeof source === 'string') {
         return (
@@ -100,7 +100,7 @@ const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Pro
 
         return (
             <ExpoImageAnimated
-                id={id!}
+                id={id}
                 key={id}
                 ref={forwardRef}
                 style={fIStyle}
@@ -110,6 +110,17 @@ const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Pro
     };
 
     const image = renderImage();
+    if (imgSource) {
+        return (
+            <ExpoImageAnimated
+                id={id}
+                key={id}
+                ref={forwardRef}
+                style={fIStyle}
+                source={imgSource}
+            />
+        );
+    }
 
     return grayscale ? <Grayscale>{image}</Grayscale> : image;
 };

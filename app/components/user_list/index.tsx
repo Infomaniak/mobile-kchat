@@ -182,19 +182,19 @@ type Props = {
     profiles: UserProfile[];
     channelMembers?: ChannelMembership[];
     groups?: GroupModel[];
-    currentUserId: string;
     handleSelectProfile: (user: UserProfile | UserModel) => void;
     fetchMore?: () => void;
     loading: boolean;
     manageMode?: boolean;
     showManageMode?: boolean;
     showNoResults: boolean;
-    selectedIds: {[id: string]: UserProfile};
+    selectedIds: Set<string>;
     testID?: string;
     term?: string;
     tutorialWatched: boolean;
     includeUserMargin?: boolean;
     location: AvailableScreens;
+    customSection?: (profiles: UserProfile[]) => Array<SectionListData<UserProfile>>;
 }
 
 export default function UserList({
@@ -202,7 +202,6 @@ export default function UserList({
     channelMembers,
     groups,
     selectedIds,
-    currentUserId,
     handleSelectProfile,
     fetchMore,
     loading,
@@ -214,6 +213,7 @@ export default function UserList({
     tutorialWatched,
     includeUserMargin,
     location,
+    customSection,
 }: Props) {
     const intl = useIntl();
     const theme = useTheme();
@@ -241,8 +241,11 @@ export default function UserList({
             return [];
         }
 
+        if (customSection) {
+            return customSection(profiles);
+        }
         return createProfilesSections(intl, profiles, channelMembers, filteredGroups);
-    }, [channelMembers, filteredGroups, intl, loading, profiles]);
+    }, [channelMembers, customSection, filteredGroups, intl, loading, profiles]);
 
     const openUserProfile = useCallback(async (profile: UserProfile | UserModel) => {
         let user: UserModel;
@@ -268,8 +271,8 @@ export default function UserList({
         }
 
         // The list will re-render when the selection changes because it's passed into the list as extraData
-        const selected = Boolean(selectedIds[item.id]);
-        const canAdd = Object.keys(selectedIds).length < General.MAX_USERS_IN_GM;
+        const selected = selectedIds.has(item.id);
+        const canAdd = selectedIds.size < General.MAX_USERS_IN_GM;
 
         const isChAdmin = item.scheme_admin || false;
 
@@ -279,7 +282,6 @@ export default function UserList({
                 highlight={section?.first && index === 0}
                 id={item.id}
                 isChannelAdmin={isChAdmin}
-                isMyUser={currentUserId === item.id}
                 manageMode={manageMode}
                 onPress={handleSelectProfile}
                 onLongPress={openUserProfile}
@@ -287,13 +289,13 @@ export default function UserList({
                 disabled={!canAdd}
                 selected={selected}
                 showManageMode={showManageMode}
-                testID='create_direct_message.user_list.user_item'
+                testID={`${testID}.user_item`}
                 tutorialWatched={tutorialWatched}
                 user={item}
                 includeMargin={includeUserMargin}
             />
         );
-    }, [selectedIds, currentUserId, manageMode, handleSelectProfile, openUserProfile, showManageMode, tutorialWatched, includeUserMargin]);
+    }, [selectedIds, manageMode, handleSelectProfile, openUserProfile, showManageMode, testID, tutorialWatched, includeUserMargin]);
 
     const renderLoading = useCallback(() => {
         if (!loading) {
@@ -307,7 +309,7 @@ export default function UserList({
                 size='large'
             />
         );
-    }, [loading, theme]);
+    }, [loading, style.loadingContainer, theme.buttonBg]);
 
     const renderNoResults = useCallback(() => {
         if (!showNoResults || !term) {
@@ -319,7 +321,7 @@ export default function UserList({
                 <NoResultsWithTerm term={term}/>
             </View>
         );
-    }, [showNoResults && style, term, noResutsStyle]);
+    }, [showNoResults, term, noResutsStyle]);
 
     const renderGroupItem = useCallback(({item}: RenderItemType) => {
         if (!isGroupModel(item)) {

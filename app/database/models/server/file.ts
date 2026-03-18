@@ -52,7 +52,7 @@ export default class FileModel extends Model implements FileModelInterface {
     @field('post_id') postId!: string;
 
     /** post_id : The transcript related to the file */
-    @json('transcript', safeParseJSON) transcript!: Transcript;
+    @json('transcript', safeParseJSON) transcript?: Transcript;
 
     /** size : The numeric value of the size for the file */
     @field('size') size!: number;

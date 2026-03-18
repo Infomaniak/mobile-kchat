@@ -67,7 +67,7 @@ const EditPostInput = ({
     const disableCopyAndPaste = managedConfig.copyAndPasteProtection === 'true';
     const focus = useCallback(() => {
         inputRef.current?.focus();
-    }, []);
+    }, [inputRef]);
 
     const updateValue = useCallback((valueOrUpdater: string | ((prevValue: string) => string)) => {
         if (typeof valueOrUpdater === 'function') {
@@ -134,7 +134,7 @@ const EditPostInput = ({
                         uploadFileError={null}
                         rootId={post.rootId}
                     />
-                    <QuickActions
+                    {/* <QuickActions
                         channelId={post.channelId}
                         testID='edit_post.quick_actions'
                         fileCount={postFiles.length}
@@ -145,8 +145,9 @@ const EditPostInput = ({
                         canShowPostPriority={false}
                         postPriority={INITIAL_PRIORITY}
                         canShowSlashCommands={false}
+                        canShowEmojiPicker={false}
                         focus={focus}
-                    />
+                    /> */}
                 </>
             }
             {Platform.select({ios: <ExtraKeyboard/>})}

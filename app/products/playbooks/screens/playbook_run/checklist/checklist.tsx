@@ -2,13 +2,21 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useMemo, useState} from 'react';
-import {View, Text, TouchableOpacity, type LayoutChangeEvent, useWindowDimensions, StyleSheet} from 'react-native';
+import {useIntl} from 'react-intl';
+import {View, Text, TouchableOpacity, type GestureResponderEvent, type LayoutChangeEvent, useWindowDimensions, StyleSheet} from 'react-native';
 import Animated, {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 
+import Button from '@components/button';
 import CompassIcon from '@components/compass_icon';
+import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import {renameChecklist, addChecklistItem} from '@playbooks/actions/remote/checklist';
 import ProgressBar from '@playbooks/components/progress_bar';
+import {goToRenameChecklist, goToAddChecklistItem} from '@playbooks/screens/navigation';
 import {getChecklistProgress} from '@playbooks/utils/progress';
+import {getFullErrorMessage} from '@utils/errors';
+import {logError} from '@utils/log';
+import {showPlaybookErrorSnackbar} from '@utils/snack_bar';
 import {makeStyleSheetFromTheme, changeOpacity} from '@utils/theme';
 import {typography} from '@utils/typography';
 
@@ -37,6 +45,14 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
         fontSize: 18,
         color: changeOpacity(theme.centerChannelColor, 0.56),
     },
+    editIconContainer: {
+        alignItems: 'flex-end',
+    },
+    editIcon: {
+        fontSize: 18,
+        color: changeOpacity(theme.centerChannelColor, 0.56),
+        paddingHorizontal: 4,
+    },
     progressText: {
         ...typography('Body', 100, 'Regular'),
         color: changeOpacity(theme.centerChannelColor, 0.48),
@@ -61,6 +77,31 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
     skippedText: {
         textDecorationLine: 'line-through',
     },
+    titleContainer: {
+        flex: 1,
+    },
+    progressAndEditContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginLeft: 'auto',
+    },
+    addButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        gap: 6,
+    },
+    addButtonText: {
+        ...typography('Body', 100, 'SemiBold'),
+        color: changeOpacity(theme.centerChannelColor, 0.64),
+    },
+    addButtonIcon: {
+        fontSize: 18,
+        color: changeOpacity(theme.centerChannelColor, 0.64),
+    },
 }));
 
 type Props = {
@@ -69,8 +110,10 @@ type Props = {
     items: Array<PlaybookChecklistItemModel | PlaybookChecklistItem>;
     channelId: string;
     playbookRunId: string;
+    playbookRunName: string;
     isFinished: boolean;
     isParticipant: boolean;
+    checklistProgress: ReturnType<typeof getChecklistProgress>;
 }
 
 const Checklist = ({
@@ -79,20 +122,52 @@ const Checklist = ({
     items,
     channelId,
     playbookRunId,
+    playbookRunName,
     isFinished,
     isParticipant,
+    checklistProgress: {
+        skipped,
+        completed,
+        totalNumber,
+        progress,
+    },
 }: Props) => {
     const [expanded, setExpanded] = useState(true);
+    const intl = useIntl();
+    const serverUrl = useServerUrl();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const height = useSharedValue(0);
     const windowDimensions = useWindowDimensions();
 
-    const {skipped, completed, totalNumber, progress} = useMemo(() => getChecklistProgress(items), [items]);
-
     const toggleExpanded = useCallback(() => {
         setExpanded((prev) => !prev);
     }, []);
+
+    const handleRename = useCallback(async (newTitle: string) => {
+        const res = await renameChecklist(serverUrl, playbookRunId, checklistNumber, checklist.id, newTitle);
+        if ('error' in res && res.error) {
+            showPlaybookErrorSnackbar();
+            logError('error on renameChecklist', getFullErrorMessage(res.error));
+        }
+    }, [serverUrl, playbookRunId, checklist.id, checklistNumber]);
+
+    const handleEditPress = useCallback((e: GestureResponderEvent) => {
+        e.stopPropagation();
+        goToRenameChecklist(intl, theme, playbookRunName, checklist.title, handleRename);
+    }, [intl, theme, playbookRunName, checklist.title, handleRename]);
+
+    const handleAddItem = useCallback(async (item: ChecklistItemInput) => {
+        const res = await addChecklistItem(serverUrl, playbookRunId, checklistNumber, item);
+        if ('error' in res && res.error) {
+            showPlaybookErrorSnackbar();
+            logError('error on addChecklistItem', getFullErrorMessage(res.error));
+        }
+    }, [serverUrl, playbookRunId, checklistNumber]);
+
+    const handleAddPress = useCallback(() => {
+        goToAddChecklistItem(intl, theme, playbookRunName, handleAddItem);
+    }, [intl, theme, playbookRunName, handleAddItem]);
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
@@ -129,8 +204,26 @@ const Checklist = ({
                         name={expanded ? 'chevron-down' : 'chevron-right'}
                         style={styles.chevron}
                     />
-                    <Text style={titleTextStyle}>{checklist.title}</Text>
-                    <Text style={styles.progressText}>{`${completed} / ${totalNumber} done`}</Text>
+                    <View style={styles.titleContainer}>
+                        <Text
+                            style={titleTextStyle}
+                            numberOfLines={1}
+                        >
+                            {checklist.title}
+                        </Text>
+                    </View>
+                    <View style={styles.progressAndEditContainer}>
+                        <Text style={styles.progressText}>{`${completed} / ${totalNumber} done`}</Text>
+                        <TouchableOpacity
+                            onPress={handleEditPress}
+                            testID='edit-checklist-button'
+                        >
+                            <CompassIcon
+                                name='pencil-outline'
+                                style={styles.editIcon}
+                            />
+                        </TouchableOpacity>
+                    </View>
                 </View>
                 <ProgressBar
                     progress={progress}
@@ -152,6 +245,17 @@ const Checklist = ({
                         isDisabled={isFinished || !isParticipant}
                     />
                 ))}
+                {!isFinished && isParticipant && (
+                    <Button
+                        text={intl.formatMessage({id: 'playbooks.checklist_item.add.button', defaultMessage: 'New'})}
+                        iconName='plus'
+                        onPress={handleAddPress}
+                        theme={theme}
+                        size='m'
+                        emphasis='tertiary'
+                        testID='add-checklist-item-button'
+                    />
+                )}
             </Animated.View>
             {/* This is a hack to get the height of the checklist items */}
             <View
@@ -160,7 +264,7 @@ const Checklist = ({
             >
                 {items.map((item, index) => (
                     <ChecklistItem
-                        key={item.id}
+                        key={`calc-${item.id}`}
                         item={item}
                         channelId={channelId}
                         checklistNumber={checklistNumber}
@@ -169,6 +273,17 @@ const Checklist = ({
                         isDisabled={isFinished || !isParticipant}
                     />
                 ))}
+                {!isFinished && isParticipant && (
+                    <View style={styles.addButton}>
+                        <CompassIcon
+                            name='plus'
+                            style={styles.addButtonIcon}
+                        />
+                        <Text style={styles.addButtonText}>
+                            {intl.formatMessage({id: 'playbooks.checklist_item.add.button', defaultMessage: 'New'})}
+                        </Text>
+                    </View>
+                )}
             </View>
         </View>
     );

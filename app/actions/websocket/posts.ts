@@ -1,11 +1,14 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import streamingStore from '@agents/store/streaming_store';
+import {isAgentPost} from '@agents/utils';
 import {DeviceEventEmitter} from 'react-native';
 
 import {storeMyChannelsForTeam, markChannelAsUnread, markChannelAsViewed, updateLastPostAt} from '@actions/local/channel';
-import {addPostAcknowledgement, markPostAsDeleted, removePostAcknowledgement} from '@actions/local/post';
+import {addPostAcknowledgement, markPostAsDeleted, removePostAcknowledgement, updatePostTranslation} from '@actions/local/post';
 import {createThreadFromNewPost, updateThread} from '@actions/local/thread';
+import {getCurrentUserLocale} from '@actions/local/user';
 import {fetchChannelStats, fetchMyChannel} from '@actions/remote/channel';
 import {fetchPollMetadataIfPoll} from '@actions/remote/integrations';
 import {fetchPostAuthors, fetchPostById} from '@actions/remote/post';
@@ -16,12 +19,13 @@ import {ActionType, Events, Screens} from '@constants';
 import {PostTypes} from '@constants/post';
 import DatabaseManager from '@database/manager';
 import {getChannelById, getMyChannel} from '@queries/servers/channel';
-import {getPostById} from '@queries/servers/post';
+import {getPostById, syncPermalinkPreviewsForEditedPost} from '@queries/servers/post';
 import {getCurrentChannelId, getCurrentTeamId, getCurrentUserId} from '@queries/servers/system';
 import {getIsCRTEnabled} from '@queries/servers/thread';
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {hasArrayChanged, isTablet} from '@utils/helpers';
+import {logWarning} from '@utils/log';
 import {isFromWebhook, isSystemMessage, shouldIgnorePost} from '@utils/post';
 
 import type {Model} from '@nozbe/watermelondb';
@@ -209,13 +213,28 @@ export async function handlePostEdited(serverUrl: string, msg: WebSocketMessage)
         return;
     }
 
-    const models: Model[] = [];
+    const permalinkModels: Model[] = [];
+    try {
+        const updatedPermalinkPosts = await syncPermalinkPreviewsForEditedPost(database, post);
+        if (updatedPermalinkPosts.length) {
+            permalinkModels.push(...updatedPermalinkPosts);
+        }
+    } catch (error) {
+        logWarning('Failed to sync permalink previews for edited post:', error);
+    }
 
     const oldPost = await getPostById(database, post.id);
     if (!oldPost) {
         EphemeralStore.addEditingPost(serverUrl, post);
+
+        // If we have permalink updates but no post to process, batch just the permalinks
+        if (permalinkModels.length) {
+            operator.batchRecords(permalinkModels, 'handlePostEdited - permalink sync only');
+        }
         return;
     }
+
+    const models: Model[] = [...permalinkModels];
 
     if (post.type === PostTypes.EPHEMERAL && post.create_at === 0) {
         // Updated ephemeral messages don't have a create_at value
@@ -252,10 +271,14 @@ export async function handlePostEdited(serverUrl: string, msg: WebSocketMessage)
     });
     models.push(...postModels);
 
-    operator.batchRecords(models, 'handlePostEdited');
+    await operator.batchRecords(models, 'handlePostEdited');
 
     // Fire and forget: fetch poll metadata to update voted state
     fetchPollMetadataIfPoll(serverUrl, post.id);
+
+    if (isAgentPost(post)) {
+        streamingStore.removePost(post.id);
+    }
 }
 
 export async function handlePostDeleted(serverUrl: string, msg: WebSocketMessage) {
@@ -382,6 +405,27 @@ export async function handlePostAcknowledgementRemoved(serverUrl: string, msg: W
             return;
         }
         await removePostAcknowledgement(serverUrl, post_id, user_id);
+    } catch (error) {
+        // Do nothing
+    }
+}
+
+export async function handlePostTranslationUpdatedEvent(serverUrl: string, msg: WebSocketMessage) {
+    try {
+        const translationData: PostTranslationUpdateData = msg.data;
+        const locale = await getCurrentUserLocale(serverUrl);
+        const myLanguageTranslation = translationData.translations[locale];
+
+        if (!myLanguageTranslation) {
+            return;
+        }
+
+        const translationObject: PostTranslation['object'] = myLanguageTranslation?.translation ? JSON.parse(myLanguageTranslation.translation) : undefined;
+        await updatePostTranslation(serverUrl, translationData.object_id, locale, {
+            object: translationObject,
+            state: myLanguageTranslation.state,
+            source_lang: myLanguageTranslation.src_lang,
+        });
     } catch (error) {
         // Do nothing
     }

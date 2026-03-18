@@ -6,7 +6,6 @@ import {View} from 'react-native';
 
 import {fetchPollMetadataIfPoll} from '@actions/remote/integrations';
 import {useServerUrl} from '@context/server';
-import {getMarkdownBlockStyles, getMarkdownTextStyles} from '@utils/markdown';
 import {getStatusColors} from '@utils/message_attachment';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {secureGetFromRecord} from '@utils/types';
@@ -61,8 +60,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 export default function MessageAttachment({attachment, channelId, layoutWidth, location, metadata, postId, theme}: Props) {
     const serverUrl = useServerUrl();
     const style = getStyleSheet(theme);
-    const blockStyles = getMarkdownBlockStyles(theme);
-    const textStyles = getMarkdownTextStyles(theme);
     const STATUS_COLORS = getStatusColors(theme);
 
     const pollId = attachment.actions?.[0]?.integration?.context?.['poll-id'];
@@ -85,11 +82,9 @@ export default function MessageAttachment({attachment, channelId, layoutWidth, l
         <>
             <AttachmentPreText
                 baseTextStyle={style.message}
-                blockStyles={blockStyles}
                 channelId={channelId}
                 location={location}
                 metadata={metadata}
-                textStyles={textStyles}
                 theme={theme}
                 value={attachment.pretext}
             />
@@ -117,12 +112,10 @@ export default function MessageAttachment({attachment, channelId, layoutWidth, l
                 {Boolean(attachment.text) &&
                 <AttachmentText
                     baseTextStyle={style.message}
-                    blockStyles={blockStyles}
                     channelId={channelId}
                     location={location}
                     hasThumbnail={Boolean(attachment.thumb_url)}
                     metadata={metadata}
-                    textStyles={textStyles}
                     value={attachment.text}
                     theme={theme}
                 />
@@ -130,12 +123,10 @@ export default function MessageAttachment({attachment, channelId, layoutWidth, l
                 {Boolean(attachment.fields?.length) &&
                 <AttachmentFields
                     baseTextStyle={style.message}
-                    blockStyles={blockStyles}
                     channelId={channelId}
                     location={location}
                     fields={attachment.fields!}
                     metadata={metadata}
-                    textStyles={textStyles}
                     theme={theme}
                 />
                 }

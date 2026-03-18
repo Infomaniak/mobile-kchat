@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import type {IntlShape} from 'react-intl';
+
 export function isSameDate(a: Date, b: Date = new Date()): boolean {
     return a.getDate() === b.getDate() && isSameMonth(a, b) && isSameYear(a, b);
 }
@@ -27,10 +29,15 @@ export function isYesterday(date: Date): boolean {
 }
 
 export function toMilliseconds({days, hours, minutes, seconds}: {days?: number; hours?: number; minutes?: number; seconds?: number}) {
+    const totalSeconds = toSeconds({days, hours, minutes, seconds});
+    return totalSeconds * 1000;
+}
+
+export function toSeconds({days, hours, minutes, seconds}: {days?: number; hours?: number; minutes?: number; seconds?: number}) {
     const totalHours = ((days || 0) * 24) + (hours || 0);
     const totalMinutes = (totalHours * 60) + (minutes || 0);
     const totalSeconds = (totalMinutes * 60) + (seconds || 0);
-    return totalSeconds * 1000;
+    return totalSeconds;
 }
 
 export function getReadableTimestamp(timestamp: number, timeZone: string, isMilitaryTime: boolean, currentUserLocale: string): string {
@@ -64,4 +71,30 @@ export function mmssss(milisecs: number) {
     // return pad(minutes) + ':' + pad(seconds) + ':' + pad(miliseconds);
 
     return pad(minutes) + ':' + pad(seconds);
+}
+
+export function formatTime(seconds: number, textTime: boolean = false, intl?: IntlShape) {
+    const h = Math.max(Math.floor(seconds / 3600), 0);
+    const m = Math.max(Math.floor((seconds % 3600) / 60), 0);
+    const s = Math.max(Math.floor(seconds % 60), 0);
+
+    if (textTime && intl) {
+        const parts: string[] = [];
+        if (h > 0) {
+            parts.push(intl.formatMessage({id: 'mobile.format_time.text_time.hours_component', defaultMessage: '{hours}h'}, {hours: h}));
+        }
+        if (m > 0) {
+            parts.push(intl.formatMessage({id: 'mobile.format_time.text_time.minutes_component', defaultMessage: '{minutes}m'}, {minutes: m}));
+        }
+        if (s > 0) {
+            parts.push(intl.formatMessage({id: 'mobile.format_time.text_time.seconds_component', defaultMessage: '{seconds}s'}, {seconds: s}));
+        }
+        return parts.length > 0 ? parts.join(' ') : intl.formatMessage({id: 'mobile.format_time.text_time.seconds_component', defaultMessage: '{seconds}s'}, {seconds: 0});
+    }
+
+    const hh = h > 0 ? `${h}:` : '';
+    const mm = h > 0 ? `${m.toString().padStart(2, '0')}` : `${m}`;
+    const ss = s.toString().padStart(2, '0');
+
+    return `${hh}${mm}:${ss}`;
 }

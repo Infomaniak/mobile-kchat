@@ -1,22 +1,17 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
-// See LICENSE.txt for license information.
-
-import {Image} from 'expo-image';
 import React, {useMemo} from 'react';
 import {StyleSheet, View} from 'react-native';
-import Animated from 'react-native-reanimated';
 
 import CompassIcon from '@components/compass_icon';
+import {ExpoImageAnimated} from '@components/expo_image';
 import ProfilePicture from '@components/profile_picture';
 import {useServerUrl} from '@context/server';
 import NetworkManager from '@managers/network_manager';
+import {urlSafeBase64Encode} from '@utils/security';
 
 import type UserModel from '@typings/database/models/servers/user';
-
-const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 type Props = {
     enablePostIconOverride: boolean;
@@ -53,7 +48,8 @@ const UserProfileAvatar = ({enablePostIconOverride, forwardRef, imageSize, user,
         }
         return (
             <View style={styles.avatar}>
-                <AnimatedImage
+                <ExpoImageAnimated
+                    id={`user-override-icon-${urlSafeBase64Encode(userIconOverride)}`}
                     ref={forwardRef}
                     style={styles.avatar}
                     source={source}

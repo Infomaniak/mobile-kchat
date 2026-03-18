@@ -22,14 +22,15 @@ extension ShareExtension {
     public func uploadFiles(serverUrl: String, channelId: String, message: String,
                             files: [String], completionHandler: @escaping () -> Void) -> String? {
         let id = "mattermost-share-upload-\(UUID().uuidString)"
-        
+
         createUploadSessionData(
             id: id, serverUrl: serverUrl,
             channelId: channelId, message: message,
             files: files
         )
         
-        guard let token = try? Keychain.default.getToken(for: serverUrl) else { return "Could not retrieve the session token from the KeyChain" }
+        guard let credentials = try? Keychain.default.getCredentials(for: serverUrl),
+              let token = credentials.token else {return "Could not retrieve the session token from the KeyChain"}
 
         if !files.isEmpty {
             createBackroundSession(id: id)
@@ -109,10 +110,10 @@ extension ShareExtension {
             )
             self.postMessageForSession(withId: id, completionHandler: completionHandler)
         }
-        
+
         return nil
     }
-    
+
     func postMessageForSession(withId id: String, completionHandler: (() -> Void)? = nil) {
         guard let data = getUploadSessionData(id: id)
         else {
@@ -123,12 +124,12 @@ extension ShareExtension {
             )
             return
         }
-        
+
         self.removeUploadSessionData(id: id)
         self.deleteUploadedFiles(files: data.files)
-        
+
         if let serverUrl = data.serverUrl,
-           let channelId = data.channelId {
+            let channelId = data.channelId {
             Network.default.createPost(
                 serverUrl: serverUrl,
                 channelId: channelId,
@@ -144,7 +145,7 @@ extension ShareExtension {
                             err.localizedDescription
                         )
                     }
-                    
+
                     if let handler = completionHandler {
                         os_log(
                             OSLogType.default,

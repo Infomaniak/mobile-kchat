@@ -2,14 +2,17 @@
 // See LICENSE.txt for license information.
 
 import {Database, Model, Q, Query} from '@nozbe/watermelondb';
-import {of as of$, combineLatestWith} from 'rxjs';
+import {of as of$, combineLatestWith, combineLatest} from 'rxjs';
 import {switchMap, distinctUntilChanged} from 'rxjs/operators';
 
 import {MM_TABLES} from '@constants/database';
+import {SKU_SHORT_NAME} from '@constants/license';
+import {logDebug, logWarning} from '@utils/log';
+import {updatePermalinkMetadata} from '@utils/permalink_sync';
 
 import {queryGroupsByNames} from './group';
 import {querySavedPostsPreferences} from './preference';
-import {getConfigValue, observeConfigBooleanValue} from './system';
+import {getConfigValue, observeConfigBooleanValue, observeConfigIntValue, observeIsMinimumLicenseTier} from './system';
 import {queryUsersByUsername, observeUser, observeCurrentUser} from './user';
 
 import type PostModel from '@typings/database/models/servers/post';
@@ -17,6 +20,9 @@ import type PostInChannelModel from '@typings/database/models/servers/posts_in_c
 import type PostsInThreadModel from '@typings/database/models/servers/posts_in_thread';
 
 const {SERVER: {POST, POSTS_IN_CHANNEL, POSTS_IN_THREAD}} = MM_TABLES;
+
+const DEFAULT_BURN_ON_READ_DURATION_SECONDS = '600';
+const DEFAULT_BURN_ON_READ_MAXIMUM_TTL_SECONDS = '604800';
 
 export const prepareDeletePost = async (post: PostModel): Promise<Model[]> => {
     const preparedModels: Model[] = [post.prepareDestroyPermanently()];
@@ -252,6 +258,32 @@ export const observeIsPostPriorityEnabled = (database: Database) => {
     return observeConfigBooleanValue(database, 'PostPriority');
 };
 
+export const observeIsBoREnabled = (database: Database) => {
+    const featureEnabled = observeConfigBooleanValue(database, 'EnableBurnOnRead');
+    const licenseValid = observeIsMinimumLicenseTier(database, SKU_SHORT_NAME.EnterpriseAdvanced);
+
+    return combineLatest([featureEnabled, licenseValid]).pipe(
+        switchMap(([enabled, licensed]) => of$(enabled && licensed)),
+    );
+};
+
+export const observeBoRConfig = (database: Database) => {
+    const borDurationSecondsObservable = observeConfigIntValue(database, 'BurnOnReadDurationSeconds');
+    const maxBoRDurationSecondsStringObservable = observeConfigIntValue(database, 'BurnOnReadMaximumTimeToLiveSeconds');
+
+    // merge all observables and return single observable of object with both values
+    return combineLatest([borDurationSecondsObservable, maxBoRDurationSecondsStringObservable]).pipe(
+        switchMap(([borDurationSeconds, borMaximumTimeToLiveSeconds]) => {
+            const borConfig = {
+                enabled: false,
+                borDurationSeconds: borDurationSeconds || parseInt(DEFAULT_BURN_ON_READ_DURATION_SECONDS, 10),
+                borMaximumTimeToLiveSeconds: borMaximumTimeToLiveSeconds || parseInt(DEFAULT_BURN_ON_READ_MAXIMUM_TTL_SECONDS, 10),
+            };
+            return of$(borConfig);
+        }),
+    );
+};
+
 export const observeIsPostAcknowledgementsEnabled = (database: Database) => {
     return observeConfigBooleanValue(database, 'PostAcknowledgements');
 };
@@ -278,4 +310,92 @@ export const countUsersFromMentions = async (database: Database, mentions: strin
     const usersQuery = queryUsersByUsername(database, mentions).fetchCount();
     const [groups, usersCount] = await Promise.all([groupsQuery, usersQuery]);
     return groups.reduce((acc, v) => acc + v.memberCount, usersCount);
+};
+
+export const queryPostsWithPermalinkReferences = async (
+    database: Database,
+    referencedPostId: string,
+): Promise<PostModel[]> => {
+    try {
+        const clauses: Q.Clause[] = [
+            Q.where('metadata', Q.notEq(null)),
+            Q.where('delete_at', Q.eq(0)),
+        ];
+
+        const postsWithMetadata = await database.get<PostModel>(POST).
+            query(...clauses).
+            fetch();
+
+        const referencingPosts: PostModel[] = [];
+
+        for (const post of postsWithMetadata) {
+            const metadata = post.metadata;
+            if (metadata?.embeds?.length) {
+                for (const embed of metadata.embeds) {
+                    if (embed.type === 'permalink' && embed.data?.post_id === referencedPostId) {
+                        referencingPosts.push(post);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return referencingPosts;
+    } catch (error) {
+        return [];
+    }
+};
+
+/**
+ * Find posts that contain permalink previews referencing the given post ID
+ */
+export const findPostsWithPermalinkReferences = async (
+    database: Database,
+    referencedPostId: string,
+): Promise<PostModel[]> => {
+    try {
+        const referencingPosts = await queryPostsWithPermalinkReferences(database, referencedPostId);
+        return referencingPosts;
+    } catch (error) {
+        logWarning('Error finding posts with permalink references:', error);
+        return [];
+    }
+};
+
+/**
+ * Synchronize permalink previews when a post is edited
+ */
+export const syncPermalinkPreviewsForEditedPost = async (
+    database: Database,
+    editedPost: Post,
+): Promise<PostModel[]> => {
+    try {
+        const referencingPosts = await findPostsWithPermalinkReferences(
+            database,
+            editedPost.id,
+        );
+
+        if (!referencingPosts.length) {
+            return [];
+        }
+
+        const updatedPosts: PostModel[] = [];
+        for (const referencingPost of referencingPosts) {
+            const updatedPost = updatePermalinkMetadata(
+                referencingPost,
+                editedPost.id,
+                editedPost,
+            );
+
+            if (updatedPost) {
+                updatedPosts.push(updatedPost);
+            }
+        }
+
+        logDebug(`Updated ${updatedPosts.length} permalink previews for edited post ${editedPost.id}`);
+        return updatedPosts;
+    } catch (error) {
+        logWarning('Error syncing permalink previews for edited post:', error);
+        return [];
+    }
 };

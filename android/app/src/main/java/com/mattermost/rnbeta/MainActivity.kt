@@ -6,9 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import androidx.core.view.WindowCompat
+import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint
 import com.facebook.react.defaults.DefaultReactActivityDelegate
-import com.facebook.react.ReactActivityDelegate
 import com.mattermost.call.CallManagerModule
 import com.mattermost.hardware.keyboard.MattermostHardwareKeyboardImpl
 import com.mattermost.notification.NotificationUtils
@@ -21,6 +21,7 @@ import expo.modules.ReactActivityDelegateWrapper
 class MainActivity : NavigationActivity() {
     private var HWKeyboardConnected = false
     private val foldableObserver = FoldableObserver.getInstance(this)
+    private var lastOrientation: Int = Configuration.ORIENTATION_UNDEFINED
 
     /**
      * Returns the name of the main component registered from JavaScript. This is used to schedule
@@ -42,6 +43,7 @@ class MainActivity : NavigationActivity() {
         setContentView(R.layout.launch_screen)
         handleIntentExtras(getIntent())
         setHWKeyboardConnected()
+        lastOrientation = this.resources.configuration.orientation
         foldableObserver.onCreate()
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
@@ -64,6 +66,11 @@ class MainActivity : NavigationActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        val newOrientation = newConfig.orientation
+        if (newOrientation != lastOrientation) {
+            lastOrientation = newOrientation
+            foldableObserver.handleWindowLayoutInfo()
+        }
         if (newConfig.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO) {
             HWKeyboardConnected = true
         } else if (newConfig.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES) {

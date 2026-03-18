@@ -1,4 +1,4 @@
-# Server Database - Schema Version 10
+# Server Database - Schema Version 19
 # Please bump the version by 1, any time the schema changes.
 # Also, include the migration plan under app/database/migration/server,
 # update all models, relationships and types.
@@ -41,6 +41,7 @@ type string
 update_at number
 banner_info string
 abac_policy_enforced boolean
+autotranslation boolean
 
 
 ChannelInfo
@@ -95,6 +96,23 @@ channel_id string  INDEX FK >- Channel.id
 files string #stringify (array)
 message string
 root_id string INDEX NULL FK >- Post.id
+type string NULL
+
+
+ScheduledPost
+-
+id PK string # auto-generated
+channel_id string  INDEX FK >- Channel.id
+files string #stringify (array)
+message string
+root_id string INDEX NULL FK >- Post.id
+metadata string NULL
+create_at number
+update_at number
+scheduled_at number
+processed_at number NULL
+error_code string
+type string NULL
 
 
 File
@@ -161,6 +179,7 @@ mentions_count number
 message_count number
 roles string
 viewed_at number
+autotranslation_disabled boolean
 
 
 MyChannelSettings
@@ -223,10 +242,32 @@ command string
 command_last_run number
 due_date number
 task_actions string # stringified array of TaskAction
+condition_action string # condition action for the checklist item (values should be '' or 'hidden')
+condition_reason string # condition reason for the checklist item (default empty string meaning there is no condition affecting)
 order number
 completed_at number
 synced string NULL INDEX # optional field for sync status
 last_sync_at number NULL # optional field for last sync timestamp
+
+PlaybookRunAttribute
+-
+id PK string # server-generated
+group_id string
+name string
+type string
+target_id string
+target_type string
+create_at number
+update_at number
+delete_at number
+attrs string NULL # stringified JSON
+
+PlaybookRunAttributeValue
+-
+id PK string # composition ID PlaybookRun.id-PlaybookRunAttribute.id
+attribute_id string INDEX FK >- PlaybookRunAttribute.id
+run_id string INDEX FK >- PlaybookRun.id
+value string
 
 Post
 -
@@ -381,3 +422,27 @@ status string
 timezone string
 update_at number
 username string
+
+
+AiBot
+-
+id PK string
+display_name string
+username string
+last_icon_update number
+dm_channel_id string INDEX
+channel_access_level number
+channel_ids string
+user_access_level number
+user_ids string
+team_ids string
+
+
+AiThread
+-
+id PK string
+message string
+title string
+channel_id string INDEX FK >- Channel.id
+reply_count number
+update_at number INDEX

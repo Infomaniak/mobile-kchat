@@ -17,6 +17,7 @@ import UserItem from '@components/user_item';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {debounce} from '@helpers/api/general';
+import {useDebounce} from '@hooks/utils';
 import {sortChannelsByDisplayName} from '@utils/channel';
 import {displayUsername} from '@utils/user';
 
@@ -90,7 +91,7 @@ const FilteredList = ({
 
     const normalize = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-    const search = async () => {
+    const search = useDebounce(useCallback(async () => {
         onLoading(true);
         if (mounted.current) {
             setRemoteChannels({archived: [], startWith: [], matches: []});
@@ -143,7 +144,7 @@ const FilteredList = ({
         }
 
         onLoading(false);
-    };
+    }, [archivedChannels, channelsMatch, channelsMatchStart, currentTeamId, locale, onLoading, restrictDirectMessage, serverUrl, teamIds, term, totalLocalResults]), 500);
 
     const onJoinChannel = useCallback(async (c: Channel | ChannelModel) => {
         const res = await joinChannelIfNeeded(serverUrl, c.id);
@@ -161,7 +162,7 @@ const FilteredList = ({
 
         await close();
         switchToChannelById(serverUrl, c.id, undefined, true);
-    }, [serverUrl, close, locale]);
+    }, [serverUrl, close, formatMessage]);
 
     const onOpenDirectMessage = useCallback(async (u: UserProfile | UserModel) => {
         const displayName = displayUsername(u, locale, teammateDisplayNameSetting);
@@ -179,7 +180,7 @@ const FilteredList = ({
 
         await close();
         switchToChannelById(serverUrl, data.id);
-    }, [serverUrl, close, locale, teammateDisplayNameSetting]);
+    }, [locale, teammateDisplayNameSetting, serverUrl, close, formatMessage]);
 
     const onSwitchToChannel = useCallback(async (c: Channel | ChannelModel) => {
         await close();
@@ -257,14 +258,14 @@ const FilteredList = ({
                 testID='find_channels.filtered_list.remote_channel_item'
             />
         );
-    }, [onJoinChannel, onOpenDirectMessage, onSwitchToChannel, showTeamName, teammateDisplayNameSetting]);
+    }, [onJoinChannel, onOpenDirectMessage, onSwitchToChannel, onSwitchToThreads, showTeamName]);
 
     const threadLabel = useMemo(
         () => formatMessage({
             id: 'threads',
             defaultMessage: 'Threads',
         }).toLowerCase(),
-        [locale],
+        [formatMessage],
     );
 
     const data = useMemo(() => {
@@ -327,13 +328,10 @@ const FilteredList = ({
     }, []);
 
     useEffect(() => {
-        bounce.current = debounce(search, 500);
-        bounce.current();
-        return () => {
-            if (bounce.current) {
-                bounce.current.cancel();
-            }
-        };
+        search();
+
+        // We only want to search if the term changes
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [term]);
 
     return (

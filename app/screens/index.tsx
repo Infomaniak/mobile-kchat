@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {loadAgentsScreen} from '@agents/screens';
 import {Provider as EMMProvider} from '@mattermost/react-native-emm';
 import React, {type ComponentType} from 'react';
 import {IntlProvider} from 'react-intl';
@@ -12,6 +13,8 @@ import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-contex
 import {Screens} from '@constants';
 import {withServerDatabase} from '@database/components';
 import {DEFAULT_LOCALE, getTranslations} from '@i18n';
+import {loadPlaybooksScreen} from '@playbooks/screens';
+import {logDebug} from '@utils/log';
 import {useTopInsetShared} from '@utils/top_inset_shared';
 
 const withGestures = (Screen: React.ComponentType) => {
@@ -90,6 +93,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.APPS_FORM:
             screen = withServerDatabase(require('@screens/apps_form').default);
             break;
+        case Screens.ATTACHMENT_OPTIONS:
+            screen = withServerDatabase(require('@screens/attachment_options').default);
+            break;
         case Screens.BOTTOM_SHEET:
             screen = withServerDatabase(require('@screens/bottom_sheet').default);
             break;
@@ -104,6 +110,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             break;
         case Screens.CHANNEL_NOTIFICATION_PREFERENCES:
             screen = withServerDatabase(require('@screens/channel_notification_preferences').default);
+            break;
+        case Screens.CHANNEL_SETTINGS:
+            screen = withServerDatabase(require('@screens/channel_settings').default);
             break;
         case Screens.CHANNEL_FILES:
             screen = withServerDatabase(require('@screens/channel_files').default);
@@ -171,6 +180,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.INTERACTIVE_DIALOG:
             screen = withServerDatabase(require('@screens/interactive_dialog').default);
             break;
+        case Screens.DIALOG_ROUTER:
+            screen = withServerDatabase(require('@screens/dialog_router').default);
+            break;
         case Screens.INTEGRATION_SELECTOR:
             screen = withServerDatabase(require('@screens/integration_selector').default);
             break;
@@ -210,12 +222,6 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             break;
         case Screens.PINNED_MESSAGES:
             screen = withServerDatabase(require('@screens/pinned_messages').default);
-            break;
-        case Screens.PLAYBOOKS_RUNS:
-            screen = withServerDatabase(require('@playbooks/screens/playbooks_runs').default);
-            break;
-        case Screens.PLAYBOOK_RUN:
-            screen = withServerDatabase(require('@playbooks/screens/playbook_run').default);
             break;
         case Screens.POST_OPTIONS:
             screen = withServerDatabase(require('@screens/post_options').default);
@@ -316,6 +322,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.USER_PROFILE:
             screen = withServerDatabase(require('@screens/user_profile').default);
             break;
+        case Screens.SHOW_TRANSLATION:
+            screen = withServerDatabase(require('@screens/show_translation').default);
+            break;
         case Screens.CALL:
             screen = withServerDatabase(require('@calls/screens/call_screen').default);
             break;
@@ -331,6 +340,18 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.INFOMANIAK_EVOLVE:
             screen = withServerDatabase(require('@screens/ik_evolve').default);
             break;
+    }
+
+    if (!screen) {
+        screen = loadAgentsScreen(screenName);
+    }
+
+    if (!screen) {
+        screen = loadPlaybooksScreen(screenName);
+    }
+
+    if (!screen) {
+        logDebug(`Screen not found: ${screenName}`);
     }
 
     if (screen) {

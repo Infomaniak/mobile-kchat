@@ -5,7 +5,6 @@ import React, {useCallback} from 'react';
 
 import {BaseOption} from '@components/common_post_options';
 import {useServerUrl} from '@context/server';
-import {t} from '@i18n';
 import NetworkManager from '@managers/network_manager';
 import {dismissBottomSheet} from '@screens/navigation';
 
@@ -27,12 +26,11 @@ const IKTranslateOption = ({bottomSheetId, post}: Props) => {
         } catch (e) {
             // do nothing
         }
-    }, [bottomSheetId, post]);
+    }, [bottomSheetId, post.id, serverUrl]);
 
     return (
         <BaseOption
-            i18nId={t('infomaniak.post_info.post_translate.menu')}
-            defaultMessage='Translate'
+            message={{id: 'infomaniak.post_info.post_translate.menu', defaultMessage: 'Traduire'}}
             onPress={onPress}
             iconName='format-letter-case'
             testID='infomaniak.post_info.post_translate.menu'

@@ -1,10 +1,16 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import AGENTS_SCREENS from '@agents/constants/screens';
+
+import PLAYBOOKS_SCREENS from '@playbooks/constants/screens';
+
 export const ABOUT = 'About';
 export const ACCOUNT = 'Account';
 export const AI_OPTIONS = 'AiOptions';
+export const AGENTS = 'Agents';
 export const APPS_FORM = 'AppForm';
+export const ATTACHMENT_OPTIONS = 'AttachmentOptions';
 export const BOTTOM_SHEET = 'BottomSheet';
 export const BROWSE_CHANNELS = 'BrowseChannels';
 export const CALL = 'Call';
@@ -17,6 +23,7 @@ export const CHANNEL_BOOKMARK = 'ChannelBookmarkAddOrEdit';
 export const CHANNEL_FILES = 'ChannelFiles';
 export const CHANNEL_INFO = 'ChannelInfo';
 export const CHANNEL_NOTIFICATION_PREFERENCES = 'ChannelNotificationPreferences';
+export const CHANNEL_SETTINGS = 'ChannelSettings';
 export const CODE = 'Code';
 export const CONVERT_GM_TO_CHANNEL = 'ConvertGMToChannel';
 export const CREATE_DIRECT_MESSAGE = 'CreateDirectMessage';
@@ -42,6 +49,7 @@ export const GROUP_MEMBERS = 'GroupMembers';
 export const HOME = 'Home';
 export const INTEGRATION_SELECTOR = 'IntegrationSelector';
 export const INTERACTIVE_DIALOG = 'InteractiveDialog';
+export const DIALOG_ROUTER = 'DialogRouter';
 export const INVITE = 'Invite';
 export const IN_APP_NOTIFICATION = 'InAppNotification';
 export const JOIN_TEAM = 'JoinTeam';
@@ -55,8 +63,6 @@ export const ONBOARDING = 'Onboarding';
 export const PDF_VIEWER = 'PdfViewer';
 export const PERMALINK = 'Permalink';
 export const PINNED_MESSAGES = 'PinnedMessages';
-export const PLAYBOOKS_RUNS = 'PlaybookRuns';
-export const PLAYBOOK_RUN = 'PlaybookRun';
 export const POST_OPTIONS = 'PostOptions';
 export const POST_PRIORITY_PICKER = 'PostPriorityPicker';
 export const REACTIONS = 'Reactions';
@@ -99,12 +105,15 @@ export const INFOMANIAK_QUOTA_EXCEEDED = 'InfomaniakQuotaExceeded';
 export const INFOMANIAK_REMINDER = 'InfomaniakReminder';
 export const TRANSCRIPTION = 'Transcription';
 export const INFOMANIAK_EVOLVE = 'InfomaniakEvolve';
+export const SHOW_TRANSLATION = 'ShowTranslation';
 
 export default {
     ABOUT,
     ACCOUNT,
     AI_OPTIONS,
+    AGENTS,
     APPS_FORM,
+    ATTACHMENT_OPTIONS,
     BOTTOM_SHEET,
     BROWSE_CHANNELS,
     CALL,
@@ -117,6 +126,7 @@ export default {
     CHANNEL_FILES,
     CHANNEL_INFO,
     CHANNEL_NOTIFICATION_PREFERENCES,
+    CHANNEL_SETTINGS,
     CODE,
     CONVERT_GM_TO_CHANNEL,
     COMPONENT_LIBRARY,
@@ -141,6 +151,7 @@ export default {
     HOME,
     INTEGRATION_SELECTOR,
     INTERACTIVE_DIALOG,
+    DIALOG_ROUTER,
     INVITE,
     IN_APP_NOTIFICATION,
     JOIN_TEAM,
@@ -154,8 +165,6 @@ export default {
     PDF_VIEWER,
     PERMALINK,
     PINNED_MESSAGES,
-    PLAYBOOKS_RUNS,
-    PLAYBOOK_RUN,
     POST_OPTIONS,
     POST_PRIORITY_PICKER,
     REACTIONS,
@@ -197,6 +206,9 @@ export default {
     INFOMANIAK_REMINDER,
     INFOMANIAK_EVOLVE,
     TRANSCRIPTION,
+    SHOW_TRANSLATION,
+    ...PLAYBOOKS_SCREENS,
+    ...AGENTS_SCREENS,
 } as const;
 
 export const MODAL_SCREENS_WITHOUT_BACK = new Set<string>([
@@ -226,6 +238,9 @@ export const SCREENS_WITH_TRANSPARENT_BACKGROUND = new Set<string>([
 ]);
 
 export const SCREENS_AS_BOTTOM_SHEET = new Set<string>([
+    AGENTS_SCREENS.AGENTS_SELECTOR,
+    AGENTS_SCREENS.AGENTS_REWRITE_OPTIONS,
+    ATTACHMENT_OPTIONS,
     BOTTOM_SHEET,
     DRAFT_SCHEDULED_POST_OPTIONS,
     EMOJI_PICKER,

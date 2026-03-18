@@ -11,15 +11,17 @@ import {ServerErrors} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import DatabaseManager from '@database/manager';
+import {usePreventDoubleTap} from '@hooks/utils';
 import {getCurrentTeamId} from '@queries/servers/system';
 import {isErrorWithMessage, isServerError} from '@utils/errors';
 import {logError} from '@utils/log';
-import {preventDoubleTap} from '@utils/tap';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {displayUsername} from '@utils/user';
 
 import {ChannelNameInput} from '../channel_name_input';
 import MessageBox from '../message_box/message_box';
+
+import {NoCommonTeamForm} from './no_common_teams_form';
 
 const getStyleFromTheme = makeStyleSheetFromTheme((theme: Theme) => {
     return {
@@ -45,6 +47,7 @@ type Props = {
     profiles: UserProfile[];
     locale?: string;
     teammateNameDisplay?: string;
+    commonTeams: Team[];
 }
 
 export const ConvertGMToChannelForm = ({
@@ -52,6 +55,7 @@ export const ConvertGMToChannelForm = ({
     profiles,
     locale,
     teammateNameDisplay,
+    commonTeams,
 }: Props) => {
     const theme = useTheme();
     const styles = getStyleFromTheme(theme);
@@ -67,7 +71,7 @@ export const ConvertGMToChannelForm = ({
     const userDisplayNames = useMemo(() => profiles.map((profile) => displayUsername(profile, locale, teammateNameDisplay)), [profiles, teammateNameDisplay, locale]);
     const submitButtonEnabled = !conversionInProgress && newChannelName.trim();
 
-    const handleOnPress = useCallback(preventDoubleTap(async () => {
+    const handleOnPress = usePreventDoubleTap(useCallback(async () => {
         if (!submitButtonEnabled) {
             return;
         }
@@ -99,7 +103,13 @@ export const ConvertGMToChannelForm = ({
         setErrorMessage('');
         switchToChannelById(serverUrl, updatedChannel.id);
         setConversionInProgress(false);
-    }), [newChannelName, submitButtonEnabled]);
+    }, [submitButtonEnabled, database, serverUrl, channelId, newChannelName, formatMessage]));
+
+    if (commonTeams.length === 0) {
+        return (
+            <NoCommonTeamForm containerStyles={styles.container}/>
+        );
+    }
 
     const messageBoxHeader = formatMessage({
         id: 'channel_info.convert_gm_to_channel.warning.header',

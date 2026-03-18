@@ -48,7 +48,7 @@ const ServerList = ({servers}: Props) => {
 
     const onAddServer = useCallback(async () => {
         addNewServer(theme);
-    }, [servers]);
+    }, [theme]);
 
     const filteredServers = useMemo(() => servers.filter((s) => s.url !== BASE_SERVER_URL), [servers]);
 
@@ -60,7 +60,7 @@ const ServerList = ({servers}: Props) => {
                 server={t}
             />
         );
-    }, []);
+    }, [serverUrl]);
 
     const List = useMemo(() => (isTablet ? FlatList : BottomSheetFlatList), [isTablet]);
 

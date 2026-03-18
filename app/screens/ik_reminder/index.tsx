@@ -5,7 +5,6 @@ import {BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import moment from 'moment';
 import React, {useCallback, useMemo, useState} from 'react';
 import {Platform, ScrollView, TouchableOpacity, View} from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {BaseOption} from '@components/common_post_options';
 import FormattedText from '@components/formatted_text';
@@ -22,7 +21,6 @@ import NetworkManager from '@managers/network_manager';
 import BottomSheet from '@screens/bottom_sheet';
 import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
 import {bottomSheetSnapPoint} from '@utils/helpers';
-import {isSystemMessage} from '@utils/post';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
@@ -78,7 +76,6 @@ export type PredefinedTimestamp = typeof IkPostReminder[keyof typeof IkPostRemin
 
 const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, usage}: Props) => {
     const serverUrl = useServerUrl();
-    const {bottom} = useSafeAreaInsets();
     const isTablet = useIsTablet();
     const theme = useTheme();
     const styles = getStyleFromTheme(theme);
@@ -111,11 +108,6 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
 
     useNavButtonPressed(POST_OPTIONS_BUTTON, componentId, close, []);
 
-    let isSystemPost = true;
-    if (post) {
-        isSystemPost = isSystemMessage(post);
-    }
-
     const handleItemClick = useCallback((dur: string, expires: string) => {
         setExpiresAt(expires);
         setDuration(dur);
@@ -130,7 +122,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         }
         items.push(bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT) + space);
         return items;
-    }, [isSystemPost, bottom, showCustomPicker]);
+    }, [postReminderTimes.length, showCustomPicker, isAndroid]);
 
     const handleCustomValidate = () => {
         if (!expiresAt) {
@@ -208,7 +200,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
                 post,
             },
         });
-    }, [Screens.INFOMANIAK_REMINDER, post]);
+    }, [post, theme]);
 
     const renderContent = () => {
         const {isQuotaExceeded} = quotaGate(reminderCustomDate);
@@ -227,8 +219,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
                     return (
                         <BaseOption
                             key={item.id}
-                            i18nId={item.label}
-                            defaultMessage={item.labelDefault}
+                            message={{id: item.label, defaultMessage: item.labelDefault}}
                             onPress={shouldUpgrade ? onPressEvolve : () => onPress(item.id)}
                             iconName=''
                             testID={item.id}

@@ -146,7 +146,7 @@ const ChannelItem = ({
 
     const handleOnPress = useCallback(() => {
         onPress(channel);
-    }, [channel.id]);
+    }, [channel, onPress]);
 
     const textStyles = useMemo(() => [
         isBolded && !isMuted ? textStyle.bold : textStyle.regular,

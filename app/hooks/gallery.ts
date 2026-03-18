@@ -1,18 +1,16 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useCallback, useEffect} from 'react';
-import {Platform} from 'react-native';
+import {useCallback} from 'react';
 import {
-    Easing, runOnJS, useAnimatedRef, useAnimatedStyle, useEvent,
+    Easing, runOnJS, useAnimatedRef, useAnimatedStyle,
     useSharedValue,
     withTiming, type WithTimingConfig,
 } from 'react-native-reanimated';
 
 import {useGallery} from '@context/gallery';
 
-import type {Context, GestureHandlers, OnGestureEvent} from '@typings/screens/gallery';
-import type {GestureHandlerGestureEvent} from 'react-native-gesture-handler';
+import useDidMount from './did_mount';
 
 export function diff(context: any, name: string, value: any) {
     'worklet';
@@ -36,136 +34,19 @@ export function diff(context: any, name: string, value: any) {
     return d.stash;
 }
 
-export function useCreateAnimatedGestureHandler<T extends GestureHandlerGestureEvent, TContext extends Context>(handlers: GestureHandlers<T['nativeEvent'], TContext>) {
-    const sharedContext = useSharedValue<any>({
-        __initialized: false,
-    });
+export const translateYConfig: WithTimingConfig = {
+    duration: 400,
+    easing: Easing.bezier(0.33, 0.01, 0, 1),
+};
 
-    const isAndroid = Platform.OS === 'android';
-
-    const handler = (event: T['nativeEvent']) => {
-        'worklet';
-
-        const FAILED = 1;
-        const BEGAN = 2;
-        const CANCELLED = 3;
-        const ACTIVE = 4;
-        const END = 5;
-
-        const context = sharedContext.value;
-        if (handlers.onInit && !context.__initialized) {
-            context.__initialized = true;
-            handlers.onInit(event, context);
-        }
-
-        if (handlers.onGesture) {
-            handlers.onGesture(event, context);
-        }
-
-        const stateDiff = diff(context, 'pinchState', event.state);
-
-        const pinchBeganAndroid = stateDiff === ACTIVE - BEGAN ? event.state === ACTIVE : false;
-
-        const isBegan = isAndroid ? pinchBeganAndroid : (event.state === BEGAN || event.oldState === BEGAN) &&
-            (event.velocityX !== 0 || event.velocityY !== 0);
-
-        if (isBegan) {
-            if (handlers.shouldHandleEvent) {
-                context._shouldSkip = !handlers.shouldHandleEvent(event, context);
-            } else {
-                context._shouldSkip = false;
-            }
-        } else if (typeof context._shouldSkip === 'undefined') {
-            return;
-        }
-
-        if (!context._shouldSkip && !context._shouldCancel) {
-            if (handlers.onEvent) {
-                handlers.onEvent(event, context);
-            }
-
-            if (handlers.shouldCancel) {
-                context._shouldCancel = handlers.shouldCancel(event, context);
-
-                if (context._shouldCancel) {
-                    if (handlers.onEnd) {
-                        handlers.onEnd(event, context, true);
-                    }
-                    return;
-                }
-            }
-
-            if (handlers.beforeEach) {
-                handlers.beforeEach(event, context);
-            }
-
-            if (isBegan && handlers.onStart) {
-                handlers.onStart(event, context);
-            }
-
-            if (event.state === ACTIVE && handlers.onActive) {
-                handlers.onActive(event, context);
-            }
-            if (event.oldState === ACTIVE && event.state === END && handlers.onEnd) {
-                handlers.onEnd(event, context, false);
-            }
-            if (event.oldState === ACTIVE && event.state === FAILED && handlers.onFail) {
-                handlers.onFail(event, context);
-            }
-            if (event.oldState === ACTIVE && event.state === CANCELLED && handlers.onCancel) {
-                handlers.onCancel(event, context);
-            }
-            if (event.oldState === ACTIVE) {
-                if (handlers.onFinish) {
-                    handlers.onFinish(
-                        event,
-                        context,
-                        event.state === CANCELLED || event.state === FAILED,
-                    );
-                }
-            }
-
-            if (handlers.afterEach) {
-                handlers.afterEach(event, context);
-            }
-        }
-
-        // clean up context
-        if (event.oldState === ACTIVE) {
-            context._shouldSkip = undefined;
-            context._shouldCancel = undefined;
-        }
-    };
-
-    return handler;
-}
-
-export function useAnimatedGestureHandler<T extends GestureHandlerGestureEvent, TContext extends Context>(
-    handlers: GestureHandlers<T['nativeEvent'], TContext>,
-): OnGestureEvent<T> {
-    const handler = useCallback(
-        useCreateAnimatedGestureHandler<T, TContext>(handlers),
-        [],
-    );
-
-    return useEvent<any, TContext>(
-        handler, ['onGestureHandlerStateChange', 'onGestureHandlerEvent'], false,
-    );
-}
-
-export function useGalleryControls() {
-    const controlsHidden = useSharedValue(false);
-
-    const translateYConfig: WithTimingConfig = {
-        duration: 400,
-        easing: Easing.bezier(0.33, 0.01, 0, 1),
-    };
+export function useGalleryControls(bottomInset = 0) {
+    const headerAndFooterHidden = useSharedValue(false);
 
     const headerStyles = useAnimatedStyle(() => ({
-        opacity: controlsHidden.value ? withTiming(0) : withTiming(1),
+        opacity: headerAndFooterHidden.value ? withTiming(0) : withTiming(1),
         transform: [
             {
-                translateY: controlsHidden.value ? withTiming(-100, translateYConfig) : withTiming(0, translateYConfig),
+                translateY: headerAndFooterHidden.value ? withTiming(-100, translateYConfig) : withTiming(0, translateYConfig),
             },
         ],
         position: 'absolute',
@@ -175,33 +56,39 @@ export function useGalleryControls() {
     }));
 
     const footerStyles = useAnimatedStyle(() => ({
-        opacity: controlsHidden.value ? withTiming(0) : withTiming(1),
+        opacity: headerAndFooterHidden.value ? withTiming(0) : withTiming(1),
         transform: [
             {
-                translateY: controlsHidden.value ? withTiming(100, translateYConfig) : withTiming(0, translateYConfig),
+                translateY: headerAndFooterHidden.value ? withTiming(100, translateYConfig) : withTiming(0, translateYConfig),
             },
         ],
         position: 'absolute',
-        bottom: 0,
+        bottom: bottomInset,
         width: '100%',
         zIndex: 1,
-    }));
+    }), [bottomInset]);
 
-    const setControlsHidden = useCallback((hidden: boolean) => {
+    const hideHeaderAndFooter = useCallback((hidden?: boolean) => {
         'worklet';
 
-        if (controlsHidden.value === hidden) {
+        if (hidden == null) {
+            // if we don't pass hidden, then we toggle the current value
+            headerAndFooterHidden.value = !headerAndFooterHidden.value;
             return;
         }
 
-        controlsHidden.value = hidden;
-    }, []);
+        if (headerAndFooterHidden.value === hidden) {
+            return;
+        }
+
+        headerAndFooterHidden.value = hidden;
+    }, [headerAndFooterHidden]);
 
     return {
-        controlsHidden,
+        headerAndFooterHidden,
         headerStyles,
         footerStyles,
-        setControlsHidden,
+        hideHeaderAndFooter,
     };
 }
 
@@ -220,9 +107,9 @@ export function useGalleryItem(
         };
     }, []);
 
-    useEffect(() => {
+    useDidMount(() => {
         gallery.registerItem(index, ref);
-    }, []);
+    });
 
     const onGestureEvent = () => {
         'worklet';

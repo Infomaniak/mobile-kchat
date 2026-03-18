@@ -7,7 +7,6 @@ import {reactForMe} from '@actions/remote/thread';
 import {BaseOption} from '@components/common_post_options';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
-import {t} from '@i18n';
 import {dismissBottomSheet} from '@screens/navigation';
 
 import IconReactForMe from '../../../../components/illustrations/icon_react_for_me';
@@ -32,8 +31,7 @@ const ReactForMe = (props: Props) => {
 
     return (
         <BaseOption
-            i18nId={t('ai.react_for_me')}
-            defaultMessage='React for me'
+            message={{id: 'ai.react_for_me', defaultMessage: 'React for me'}}
             customIcon={<IconReactForMe theme={theme}/>}
             onPress={handleReactForMe}
             testID='post_options.react_for_me_thread.option'

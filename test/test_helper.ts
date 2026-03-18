@@ -16,6 +16,7 @@ import {Ringtone} from '@constants/calls';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import {PUSH_PROXY_STATUS_VERIFIED} from '@constants/push_proxy';
 import DatabaseManager from '@database/manager';
+import {PLAYBOOK_RUN_TYPES} from '@playbooks/constants/playbook_run';
 import {prepareCommonSystemValues} from '@queries/servers/system';
 
 import type {APIClientInterface} from '@mattermost/react-native-network-client';
@@ -23,6 +24,9 @@ import type {Model, Query, Relation} from '@nozbe/watermelondb';
 import type PlaybookChecklistModel from '@playbooks/types/database/models/playbook_checklist';
 import type PlaybookChecklistItemModel from '@playbooks/types/database/models/playbook_checklist_item';
 import type PlaybookRunModel from '@playbooks/types/database/models/playbook_run';
+import type PlaybookRunAttributeModel from '@playbooks/types/database/models/playbook_run_attribute';
+import type PlaybookRunAttributeValueModel from '@playbooks/types/database/models/playbook_run_attribute_value';
+import type CategoryModel from '@typings/database/models/servers/category';
 import type CategoryChannelModel from '@typings/database/models/servers/category_channel';
 import type ChannelModel from '@typings/database/models/servers/channel';
 import type ChannelBookmarkModel from '@typings/database/models/servers/channel_bookmark';
@@ -56,6 +60,7 @@ class TestHelperSingleton {
     basicCategory: Category | null;
     basicCategoryChannel: CategoryChannel | null;
     basicChannel: Channel | null;
+    basicChannelInfo: ChannelInfo | null;
     basicChannelMember: ChannelMembership | null;
     basicMyChannel: ChannelMembership | null;
     basicMyChannelSettings: ChannelMembership | null;
@@ -71,6 +76,7 @@ class TestHelperSingleton {
         this.basicCategory = null;
         this.basicCategoryChannel = null;
         this.basicChannel = null;
+        this.basicChannelInfo = null;
         this.basicChannelMember = null;
         this.basicMyChannel = null;
         this.basicMyChannelSettings = null;
@@ -114,6 +120,10 @@ class TestHelperSingleton {
             channels: [this.basicChannel!],
             prepareRecordsOnly: false,
         });
+        await operator.handleChannelInfo({
+            channelInfos: [this.basicChannelInfo!],
+            prepareRecordsOnly: false,
+        });
         await operator.handleMyChannel({
             prepareRecordsOnly: false,
             channels: [this.basicChannel!],
@@ -143,6 +153,11 @@ class TestHelperSingleton {
             actionType: ActionType.POSTS.RECEIVED_NEW,
             order: [this.basicPost!.id],
             posts: [this.basicPost!],
+            prepareRecordsOnly: false,
+        });
+
+        await operator.handleRole({
+            roles: Object.values(this.basicRoles!),
             prepareRecordsOnly: false,
         });
 
@@ -593,6 +608,7 @@ class TestHelperSingleton {
             shared: false,
             teamId: this.generateId(),
             type: 'O' as const,
+            autotranslation: false,
             members: this.fakeQuery([]),
             drafts: this.fakeQuery([]),
             bookmarks: this.fakeQuery([]),
@@ -637,6 +653,27 @@ class TestHelperSingleton {
         };
     };
 
+    fakeCategoryModel = (overwrite?: Partial<CategoryModel>): CategoryModel => {
+        return {
+            ...this.fakeModel(),
+            displayName: this.generateId(),
+            type: 'custom',
+            sortOrder: 0,
+            sorting: 'alpha',
+            muted: false,
+            collapsed: false,
+            teamId: this.generateId(),
+            team: this.fakeRelation(),
+            categoryChannels: this.fakeQuery([]),
+            categoryChannelsBySortOrder: this.fakeQuery([]),
+            channels: this.fakeQuery([]),
+            myChannels: this.fakeQuery([]),
+            observeHasChannels: jest.fn(),
+            toCategoryWithChannels: jest.fn(),
+            ...overwrite,
+        };
+    };
+
     fakeDraftModel = (overwrite?: Partial<DraftModel>): DraftModel => {
         return {
             ...this.fakeModel(),
@@ -646,6 +683,7 @@ class TestHelperSingleton {
             files: [],
             metadata: {},
             updateAt: 0,
+            type: '',
             ...overwrite,
         };
     };
@@ -752,7 +790,7 @@ class TestHelperSingleton {
     };
 
     fakePostModel = (overwrite?: Partial<PostModel>): PostModel => {
-        return {
+        const fakePost: PostModel = {
             ...this.fakeModel(),
             channelId: this.generateId(),
             createAt: 0,
@@ -782,6 +820,9 @@ class TestHelperSingleton {
             toApi: jest.fn(),
             ...overwrite,
         };
+
+        jest.mocked(fakePost.observe).mockReturnValue(of$(fakePost));
+        return fakePost;
     };
 
     fakeGroupModel = (overwrite?: Partial<GroupModel>): GroupModel => {
@@ -816,6 +857,7 @@ class TestHelperSingleton {
             roles: '',
             viewedAt: 0,
             lastPlaybookRunsFetchAt: 0,
+            autotranslationDisabled: false,
             channel: this.fakeRelation(),
             settings: this.fakeRelation(),
             resetPreparedState: jest.fn(),
@@ -873,6 +915,7 @@ class TestHelperSingleton {
             scheduledAt: 0,
             processedAt: 0,
             errorCode: '',
+            type: '',
             toApi: jest.fn(),
             ...overwrite,
         };
@@ -1075,7 +1118,7 @@ class TestHelperSingleton {
         };
     };
 
-    createPlaybookItem =(prefix: string, index: number): PlaybookChecklistItem => ({
+    createPlaybookItem = (prefix: string, index: number): PlaybookChecklistItem => ({
         id: `${prefix}-item_${index}`,
         title: `Item ${index + 1} of Checklist ${prefix}`,
         description: 'Item description',
@@ -1088,7 +1131,30 @@ class TestHelperSingleton {
         due_date: 0,
         completed_at: 0,
         task_actions: [],
+        condition_action: '',
+        condition_reason: '',
         update_at: 0,
+    });
+
+    createPlaybookRunAttribute = (prefix: string, index: number): PlaybookRunPropertyField => ({
+        id: `${prefix}-attribute_${index}`,
+        group_id: 'group_1',
+        name: `Attribute ${index + 1}`,
+        type: 'text',
+        target_id: `${prefix}`,
+        target_type: 'playbook_run',
+        create_at: Date.now(),
+        update_at: Date.now(),
+        delete_at: 0,
+        attrs: '',
+    });
+
+    createPlaybookRunAttributeValue = (attributeId: string, runId: string, index: number): PlaybookRunPropertyValue => ({
+        id: `${runId}-${attributeId}-value_${index}`,
+        field_id: attributeId,
+        target_id: runId,
+        update_at: Date.now(),
+        value: `Value ${index + 1}`,
     });
 
     createPlaybookChecklist = (prefix: string, itemsCount: number, index: number): PlaybookChecklist => {
@@ -1158,9 +1224,38 @@ class TestHelperSingleton {
                 checklists,
                 update_at: Date.now() + i,
                 items_order: checklists.map((checklist) => checklist.id),
+                status_update_broadcast_channels_enabled: false,
+                type: PLAYBOOK_RUN_TYPES.PlaybookType,
             });
         }
         return playbookRuns;
+    };
+
+    fakePlaybook = (overwrite: Partial<Playbook> = {}): Playbook => {
+        return {
+            id: this.generateId(),
+            title: 'Test Playbook',
+            description: 'Test Description',
+            team_id: this.basicTeam?.id || '',
+            create_public_playbook_run: false,
+            delete_at: 0,
+            run_summary_template_enabled: false,
+            run_summary_template: '',
+            channel_name_template: '',
+            channel_mode: '',
+            public: false,
+            default_owner_id: '',
+            default_owner_enabled: false,
+            num_stages: 0,
+            num_steps: 0,
+            num_runs: 0,
+            num_actions: 0,
+            last_run_at: 0,
+            members: [],
+            default_playbook_member_role: '',
+            active_runs: 0,
+            ...overwrite,
+        };
     };
 
     fakePlaybookRun = (overwrite: Partial<PlaybookRun> = {}): PlaybookRun => {
@@ -1190,10 +1285,23 @@ class TestHelperSingleton {
         };
     };
 
+    fakePlaybookRunMetadata = (overwrite: Partial<PlaybookRunMetadata> = {}): PlaybookRunMetadata => {
+        return {
+            channel_name: 'channel-name',
+            channel_display_name: 'Channel Display Name',
+            team_name: 'team-name',
+            num_participants: 5,
+            total_posts: 10,
+            followers: ['user-id-1', 'user-id-2'],
+            ...overwrite,
+        };
+    };
+
     fakePlaybookRunModel = (overwrite: Partial<PlaybookRunModel> = {}): PlaybookRunModel => {
         return {
             ...this.fakeModel(),
             playbookId: this.generateId(),
+            type: 'playbook',
             postId: null,
             ownerUserId: this.basicUser?.id || '',
             teamId: this.basicTeam?.id || '',
@@ -1219,7 +1327,6 @@ class TestHelperSingleton {
             channel: this.fakeRelation(),
             owner: this.fakeRelation(),
             checklists: this.fakeQuery([]),
-            participants: () => this.fakeQuery([]),
             prepareDestroyWithRelations: jest.fn().mockResolvedValue([]),
             previousReminder: 0,
             itemsOrder: [],
@@ -1262,8 +1369,66 @@ class TestHelperSingleton {
             sync: 'synced',
             lastSyncAt: 0,
             taskActions: [],
+            conditionAction: '',
+            conditionReason: '',
             checklist: this.fakeRelation(),
             updateAt: 0,
+            ...overwrite,
+        };
+    };
+
+    fakePlaybookRunAttribute = (overwrite: Partial<PlaybookRunPropertyField> = {}): PlaybookRunPropertyField => {
+        return {
+            id: this.generateId(),
+            group_id: this.generateId(),
+            name: 'Test Attribute',
+            type: 'text',
+            target_id: this.generateId(),
+            target_type: 'playbook_run',
+            create_at: Date.now(),
+            update_at: Date.now(),
+            delete_at: 0,
+            attrs: '',
+            ...overwrite,
+        };
+    };
+
+    fakePlaybookRunAttributeValue = (attributeId: string, runId: string, overwrite: Partial<PlaybookRunPropertyValue> = {}): PlaybookRunPropertyValue => {
+        return {
+            id: this.generateId(),
+            field_id: attributeId,
+            target_id: runId,
+            update_at: Date.now(),
+            value: 'Test Value',
+            ...overwrite,
+        };
+    };
+
+    fakePlaybookRunAttributeModel = (overwrite: Partial<PlaybookRunAttributeModel> = {}): PlaybookRunAttributeModel => {
+        return {
+            ...this.fakeModel(),
+            groupId: this.generateId(),
+            name: 'Test Attribute',
+            type: 'text',
+            targetId: this.generateId(),
+            targetType: 'playbook_run',
+            createAt: Date.now(),
+            updateAt: Date.now(),
+            deleteAt: 0,
+            attrs: '',
+            ...overwrite,
+        };
+    };
+
+    fakePlaybookRunAttributeValueModel = (overwrite: Partial<PlaybookRunAttributeValueModel> = {}): PlaybookRunAttributeValueModel => {
+        return {
+            ...this.fakeModel(),
+            attributeId: this.generateId(),
+            runId: this.generateId(),
+            value: 'Test Value',
+            updateAt: Date.now(),
+            attribute: this.fakeRelation(),
+            run: this.fakeRelation(),
             ...overwrite,
         };
     };
@@ -1307,6 +1472,7 @@ class TestHelperSingleton {
         this.basicTeamMember = this.fakeTeamMember(this.basicUser.id, this.basicTeam.id);
         this.basicCategory = this.fakeCategoryWithId(this.basicTeam.id);
         this.basicChannel = this.fakeChannelWithId(this.basicTeam.id);
+        this.basicChannelInfo = this.fakeChannelInfo({id: this.basicChannel.id, member_count: 100});
         this.basicCategoryChannel = this.fakeCategoryChannelWithId(this.basicTeam.id, this.basicCategory.id, this.basicChannel.id);
         this.basicChannelMember = this.fakeChannelMember({user_id: this.basicUser.id, channel_id: this.basicChannel.id});
         this.basicMyChannel = this.fakeMyChannel({user_id: this.basicUser.id, channel_id: this.basicChannel.id});
@@ -1320,6 +1486,8 @@ class TestHelperSingleton {
                 description: 'authentication.roles.global_admin.description',
                 permissions: [
                     'system_admin_permission',
+                    'create_post',
+                    'edit_post',
                 ],
                 scheme_managed: true,
                 built_in: true,
@@ -1331,6 +1499,8 @@ class TestHelperSingleton {
                 description: 'authentication.roles.global_user.description',
                 permissions: [
                     'system_user_permission',
+                    'create_post',
+                    'edit_post',
                 ],
                 scheme_managed: true,
                 built_in: true,
@@ -1342,6 +1512,8 @@ class TestHelperSingleton {
                 description: 'authentication.roles.team_admin.description',
                 permissions: [
                     'team_admin_permission',
+                    'create_post',
+                    'edit_post',
                 ],
                 scheme_managed: true,
                 built_in: true,
@@ -1353,6 +1525,8 @@ class TestHelperSingleton {
                 description: 'authentication.roles.team_user.description',
                 permissions: [
                     'team_user_permission',
+                    'create_post',
+                    'edit_post',
                 ],
                 scheme_managed: true,
                 built_in: true,
@@ -1364,6 +1538,8 @@ class TestHelperSingleton {
                 description: 'authentication.roles.channel_admin.description',
                 permissions: [
                     'channel_admin_permission',
+                    'create_post',
+                    'edit_post',
                 ],
                 scheme_managed: true,
                 built_in: true,
@@ -1375,6 +1551,8 @@ class TestHelperSingleton {
                 description: 'authentication.roles.channel_user.description',
                 permissions: [
                     'channel_user_permission',
+                    'create_post',
+                    'edit_post',
                 ],
                 scheme_managed: true,
                 built_in: true,

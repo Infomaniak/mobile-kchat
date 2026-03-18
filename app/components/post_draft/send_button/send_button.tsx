@@ -10,6 +10,7 @@ import CompassIcon from '@components/compass_icon';
 import ScheduledPostTooltip from '@components/post_draft/send_button/scheduled_post_tooltip';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {useTheme} from '@context/theme';
+import useDidMount from '@hooks/did_mount';
 import {usePreventDoubleTap} from '@hooks/utils';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
@@ -62,7 +63,7 @@ const SendButton: React.FC<Props> = ({
 
     const [scheduledPostTooltipVisible, setScheduledPostTooltipVisible] = useState(false);
 
-    useEffect(() => {
+    useDidMount(() => {
         if (scheduledPostFeatureTooltipWatched || !scheduledPostEnabled) {
             return;
         }
@@ -70,10 +71,7 @@ const SendButton: React.FC<Props> = ({
         InteractionManager.runAfterInteractions(() => {
             setScheduledPostTooltipVisible(true);
         });
-
-        // This effect is intended to run only on the first mount, so dependencies are omitted intentionally.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    });
 
     const onCloseScheduledPostTooltip = useCallback(() => {
         setScheduledPostTooltipVisible(false);

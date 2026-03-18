@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, type LayoutChangeEvent, Platform, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -131,6 +131,7 @@ export default function LeaveChannelModal({
     const [term, setTerm] = useState('');
     const [addingMembers, setAddingMembers] = useState(false);
     const [selectedIds, setSelectedIds] = useState<{[id: string]: UserProfile}>({});
+    const selectedIdsSet = useMemo(() => new Set(Object.keys(selectedIds)), [selectedIds]);
 
     const clearSearch = useCallback(() => {
         setTerm('');
@@ -171,7 +172,7 @@ export default function LeaveChannelModal({
         } catch (error) {
             // do nothing
         }
-    }, [channel, addingMembers, selectedIds, serverUrl, intl]);
+    }, [channel, addingMembers, selectedIds, serverUrl]);
 
     const handleSelectProfile = useCallback((user: UserProfile) => {
         clearSearch();
@@ -181,7 +182,7 @@ export default function LeaveChannelModal({
             }
             return {...current, [user.id]: user};
         });
-    }, [clearSearch, currentUser.id]);
+    }, [clearSearch]);
 
     const onTextChange = useCallback((searchTerm: string) => {
         setTerm(searchTerm);
@@ -209,7 +210,7 @@ export default function LeaveChannelModal({
         }
 
         return [];
-    }, [serverUrl, channel]);
+    }, [channel, serverUrl, currentUser.id]);
 
     const userSearchFunction = useCallback(async () => {
         if (!channel) {
@@ -272,9 +273,8 @@ export default function LeaveChannelModal({
                 />
             </View>
             <ServerUserList
-                currentUserId={currentUser.id}
                 handleSelectProfile={handleSelectProfile}
-                selectedIds={selectedIds}
+                selectedIds={selectedIdsSet}
                 term={term}
                 testID={`${TEST_ID}.user_list`}
                 tutorialWatched={tutorialWatched}
@@ -286,7 +286,7 @@ export default function LeaveChannelModal({
             />
             <SelectedUsers
                 keyboardOverlap={keyboardOverlap}
-                selectedIds={selectedIds}
+                selectedIds={selectedIdsSet}
                 onRemove={handleRemoveProfile}
                 teammateNameDisplay={teammateNameDisplay}
                 onPress={addMembers}

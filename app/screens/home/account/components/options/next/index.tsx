@@ -3,16 +3,11 @@
 
 import React, {useMemo} from 'react';
 import {useIntl} from 'react-intl';
-import {StyleSheet} from 'react-native';
 
 import OptionItem from '@components/option_item';
 import {useNextState} from '@hooks/network';
 
 const COLOR = '#7974B4';
-
-const styles = StyleSheet.create({
-    labelText: {color: COLOR},
-});
 
 const Next = () => {
     const {formatMessage} = useIntl();
@@ -24,19 +19,15 @@ const Next = () => {
     }) : formatMessage({
         id: 'account.server_preprod',
         defaultMessage: 'Switch to NEXT',
-    })), [isNext]);
+    })), [formatMessage, isNext]);
 
     return typeof isNext === 'boolean' ? (
         <OptionItem
             action={onNextToggle}
-
             icon='flag'
             type='default'
-
             label={label}
-
             iconColor={COLOR}
-            optionLabelTextStyle={styles.labelText}
         />
     ) : null;
 };

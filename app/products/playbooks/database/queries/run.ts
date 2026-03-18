@@ -15,7 +15,7 @@ import type PlaybookRunModel from '@playbooks/types/database/models/playbook_run
 import type MyChannelModel from '@typings/database/models/servers/my_channel';
 
 const {PLAYBOOK_RUN, PLAYBOOK_CHECKLIST, PLAYBOOK_CHECKLIST_ITEM} = PLAYBOOK_TABLES;
-const {MY_CHANNEL} = MM_TABLES.SERVER;
+const {MY_CHANNEL, CHANNEL} = MM_TABLES.SERVER;
 
 export const queryPlaybookRunsPerChannel = (database: Database, channelId: string, finished?: boolean) => {
     const conditions = [Q.where('channel_id', channelId)];
@@ -71,4 +71,40 @@ export const getLastPlaybookRunsFetchAt = async (database: Database, channelId: 
 export const queryParticipantsFromAPIRun = (database: Database, run: PlaybookRun) => {
     const participantsIds = run.participant_ids.filter((id) => id !== run.owner_user_id);
     return queryUsersById(database, participantsIds);
+};
+
+const emptyParticipantsList: string[] = [];
+export const observeParticipantsIdsFromPlaybookModel = (runModel: PlaybookRunModel | undefined, includeOwner = false) => {
+    if (!runModel) {
+        return of$(emptyParticipantsList);
+    }
+    return runModel.observe().pipe(
+        switchMap((run) => {
+            let participantsIds = run.participantIds;
+            if (!includeOwner) {
+                participantsIds = participantsIds.filter((id) => id !== run.ownerUserId);
+            }
+            return of$(participantsIds);
+        }),
+    );
+};
+
+export const queryPlaybookRunsByParticipantAndTeam = (database: Database, participantId: string, teamId: string) => {
+    return database.get<PlaybookRunModel>(PLAYBOOK_RUN).query(
+        Q.experimentalJoinTables([CHANNEL]),
+        Q.on(CHANNEL, 'team_id', Q.eq(teamId)),
+        Q.where('participant_ids', Q.like(`%"${participantId}"%`)),
+        Q.sortBy('create_at', 'desc'),
+    );
+};
+
+export const observeHasRunningPlaybookRunsInTeam = (database: Database, teamId: string) => {
+    return database.get<PlaybookRunModel>(PLAYBOOK_RUN).query(
+        Q.and(
+            Q.where('team_id', teamId),
+            Q.where('end_at', Q.eq(0)),
+        ),
+    ).observeCount().pipe(
+        switchMap((count) => of$(count > 0)),
+    );
 };

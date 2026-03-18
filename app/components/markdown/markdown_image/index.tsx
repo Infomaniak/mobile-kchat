@@ -17,19 +17,18 @@ import SlideUpPanelItem, {ITEM_HEIGHT} from '@components/slide_up_panel_item';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {GalleryInit} from '@context/gallery';
 import {useServerUrl} from '@context/server';
-import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import {useGalleryItem} from '@hooks/gallery';
 import {bottomSheet, dismissBottomSheet} from '@screens/navigation';
 import {lookupMimeType} from '@utils/file';
 import {fileToGalleryItem, openGalleryAtIndex} from '@utils/gallery';
-import {generateId} from '@utils/general';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {calculateDimensions, getViewPortWidth, isGifTooLarge} from '@utils/images';
 import {getMarkdownImageSize, removeImageProxyForKey} from '@utils/markdown';
+import {urlSafeBase64Encode} from '@utils/security';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {secureGetFromRecord} from '@utils/types';
-import {normalizeProtocol, tryOpenURL} from '@utils/url';
+import {normalizeProtocol, safeDecodeURIComponent, tryOpenURL} from '@utils/url';
 import {onOpenLinkError} from '@utils/url/links';
 
 import type {GalleryItemType} from '@typings/screens/gallery';
@@ -46,6 +45,7 @@ type MarkdownImageProps = {
     postId: string;
     source: string;
     sourceSize?: {width?: number; height?: number};
+    theme: Theme;
 }
 
 const ANDROID_MAX_HEIGHT = 4096;
@@ -71,25 +71,43 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 }));
 
 const MarkdownImage = ({
-    disabled, errorTextStyle, imagesMetadata, isReplyPost = false,
-    layoutWidth, layoutHeight, linkDestination, location, postId, source, sourceSize,
+    disabled,
+    errorTextStyle,
+    imagesMetadata,
+    isReplyPost = false,
+    layoutWidth,
+    layoutHeight,
+    linkDestination,
+    location,
+    postId,
+    source,
+    sourceSize,
+    theme,
 }: MarkdownImageProps) => {
     const intl = useIntl();
     const isTablet = useIsTablet();
-    const theme = useTheme();
     const style = getStyleSheet(theme);
     const managedConfig = useManagedConfig<ManagedConfig>();
-    const genericFileId = useRef(generateId('uid')).current;
-    const metadata = secureGetFromRecord(imagesMetadata, removeImageProxyForKey(source)) || Object.values(imagesMetadata || {})[0];
-    const [failed, setFailed] = useState(isGifTooLarge(metadata));
-    const originalSize = getMarkdownImageSize(isReplyPost, isTablet, sourceSize, metadata, layoutWidth, layoutHeight);
+    const sourceKey = removeImageProxyForKey(source);
+
+    // Pattern suggested in https://react.dev/reference/react/useRef#avoiding-recreating-the-ref-contents
+    const genericFileRef = useRef<string | null>(null);
+    if (genericFileRef.current === null) {
+        genericFileRef.current = `uid-${urlSafeBase64Encode(sourceKey)}`;
+    }
+    const genericFileId = genericFileRef.current;
+
+    const metadata = secureGetFromRecord(imagesMetadata, sourceKey) || Object.values(imagesMetadata || {})[0];
+    const [failed, setFailed] = useState(() => isGifTooLarge(metadata));
     const serverUrl = useServerUrl();
     const galleryIdentifier = `${postId}-${genericFileId}-${location}`;
-    const uri = source.startsWith('/') ? serverUrl + source : source;
 
     const fileInfo = useMemo(() => {
-        const link = uri;
-        let filename = parseUrl(link.substring(link.lastIndexOf('/'))).pathname.replace('/', '');
+        const uri = source.startsWith('/') ? serverUrl + source : source;
+        const originalSize = getMarkdownImageSize(isReplyPost, isTablet, sourceSize, metadata, layoutWidth, layoutHeight);
+
+        const decodedLink = safeDecodeURIComponent(uri);
+        let filename = parseUrl(decodedLink.substr(decodedLink.lastIndexOf('/'))).pathname.replace('/', '');
         let extension = metadata?.format || filename.split('.').pop();
         if (extension === filename) {
             const ext = filename.indexOf('.') === -1 ? '.png' : filename.substring(filename.lastIndexOf('.'));
@@ -108,16 +126,16 @@ const MarkdownImage = ({
             width: originalSize.width,
             height: originalSize.height,
         } as FileInfo;
-    }, [originalSize, metadata]);
+    }, [source, serverUrl, isReplyPost, isTablet, sourceSize, metadata, layoutWidth, layoutHeight, genericFileId, postId]);
 
     const handlePreviewImage = useCallback(() => {
         const item: GalleryItemType = {
-            ...fileToGalleryItem(fileInfo),
+            ...fileToGalleryItem(fileInfo, undefined, undefined, 0, fileInfo.id),
             mime_type: lookupMimeType(fileInfo.name),
             type: 'image',
         };
         openGalleryAtIndex(galleryIdentifier, 0, [item]);
-    }, [fileInfo]);
+    }, [fileInfo, galleryIdentifier]);
 
     const {ref, onGestureEvent, styles} = useGalleryItem(
         galleryIdentifier,
@@ -126,6 +144,8 @@ const MarkdownImage = ({
     );
 
     const {height, width} = calculateDimensions(fileInfo.height, fileInfo.width, layoutWidth || getViewPortWidth(isReplyPost, isTablet));
+
+    const progressiveImageStyle = useMemo(() => ({width, height}), [width, height]);
 
     const handleLinkPress = useCallback(() => {
         if (linkDestination) {
@@ -230,7 +250,8 @@ const MarkdownImage = ({
                             imageUri={fileInfo.uri}
                             onError={handleOnError}
                             contentFit='contain'
-                            style={{width, height}}
+                            style={progressiveImageStyle}
+                            theme={theme}
                         />
                     </Animated.View>
                 </TouchableWithoutFeedback>
@@ -250,7 +271,8 @@ const MarkdownImage = ({
                     imageUri={fileInfo.uri}
                     onError={handleOnError}
                     contentFit='contain'
-                    style={{width, height}}
+                    style={progressiveImageStyle}
+                    theme={theme}
                 />
             </TouchableWithFeedback>
         );

@@ -6,7 +6,7 @@ import {type StyleProp, View, type ViewStyle} from 'react-native';
 
 import Emoji from '@components/emoji';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
-import {preventDoubleTap} from '@utils/tap';
+import {usePreventDoubleTap} from '@hooks/utils';
 
 import SkinnedEmoji from './skinned_emoji';
 
@@ -14,6 +14,7 @@ type Props = {
     category?: string;
     name: string;
     onEmojiPress: (emoji: string) => void;
+    preventDoubleTap?: boolean;
     size?: number;
     style?: StyleProp<ViewStyle>;
 }
@@ -22,14 +23,16 @@ const CATEGORIES_WITH_SKINS = ['people-body'];
 
 const hitSlop = {top: 10, bottom: 10, left: 10, right: 10};
 
-const TouchableEmoji = ({category, name, onEmojiPress, size = 30, style}: Props) => {
-    const onPress = useCallback(preventDoubleTap(() => onEmojiPress(name)), []);
+const TouchableEmoji = ({category, name, onEmojiPress, preventDoubleTap = true, size = 30, style}: Props) => {
+    const handlePress = useCallback(() => onEmojiPress(name), [name, onEmojiPress]);
+    const onPress = preventDoubleTap ? usePreventDoubleTap(handlePress) : handlePress;
 
     if (category && CATEGORIES_WITH_SKINS.includes(category)) {
         return (
             <SkinnedEmoji
                 name={name}
                 onEmojiPress={onEmojiPress}
+                preventDoubleTap={preventDoubleTap}
                 size={size}
                 style={style}
             />

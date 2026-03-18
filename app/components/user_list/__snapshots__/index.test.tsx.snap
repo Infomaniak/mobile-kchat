@@ -35,7 +35,7 @@ exports[`components/channel_list_row should show no results 1`] = `
       "flex": 1,
     }
   }
-  testID="UserListRow.section_list"
+  testID="create_direct_message.user_list.section_list"
 >
   <View>
     <View
@@ -648,7 +648,7 @@ exports[`components/channel_list_row should show results and tutorial 1`] = `
       "flex": 1,
     }
   }
-  testID="UserListRow.section_list"
+  testID="create_direct_message.user_list.section_list"
 >
   <View>
     <View
@@ -813,6 +813,7 @@ exports[`components/channel_list_row should show results and tutorial 1`] = `
                     "cachePath": "aHR0cHM6Ly9pbmZvbWFuaWFrLmtjaGF0LmluZm9tYW5pYWsuY29t",
                     "headers": {
                       "Authorization": undefined,
+                      "Content-Type": "application/json",
                     },
                     "uri": "https://infomaniak.kchat.infomaniak.com/api/v4/users/1/image?_=123456",
                   },
@@ -996,7 +997,7 @@ exports[`components/channel_list_row should show results no tutorial 1`] = `
       "flex": 1,
     }
   }
-  testID="UserListRow.section_list"
+  testID="create_direct_message.user_list.section_list"
 >
   <View>
     <View
@@ -1161,6 +1162,7 @@ exports[`components/channel_list_row should show results no tutorial 1`] = `
                     "cachePath": "aHR0cHM6Ly9pbmZvbWFuaWFrLmtjaGF0LmluZm9tYW5pYWsuY29t",
                     "headers": {
                       "Authorization": undefined,
+                      "Content-Type": "application/json",
                     },
                     "uri": "https://infomaniak.kchat.infomaniak.com/api/v4/users/1/image?_=123456",
                   },
@@ -1384,7 +1386,7 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
       "flex": 1,
     }
   }
-  testID="UserListRow.section_list"
+  testID="create_direct_message.user_list.section_list"
 >
   <View>
     <View
@@ -1549,6 +1551,7 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
                     "cachePath": "aHR0cHM6Ly9pbmZvbWFuaWFrLmtjaGF0LmluZm9tYW5pYWsuY29t",
                     "headers": {
                       "Authorization": undefined,
+                      "Content-Type": "application/json",
                     },
                     "uri": "https://infomaniak.kchat.infomaniak.com/api/v4/users/1/image?_=123456",
                   },
@@ -1794,6 +1797,7 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
                     "cachePath": "aHR0cHM6Ly9pbmZvbWFuaWFrLmtjaGF0LmluZm9tYW5pYWsuY29t",
                     "headers": {
                       "Authorization": undefined,
+                      "Content-Type": "application/json",
                     },
                     "uri": "https://infomaniak.kchat.infomaniak.com/api/v4/users/2/image?_=123456",
                   },

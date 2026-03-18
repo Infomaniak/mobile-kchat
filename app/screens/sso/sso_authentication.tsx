@@ -3,13 +3,15 @@
 
 import {openAuthSessionAsync} from 'expo-web-browser';
 import qs from 'querystringify';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Linking, Platform, StyleSheet, View, type EventSubscription} from 'react-native';
 import urlParse from 'url-parse';
 
 import {Sso} from '@constants';
 import {isBetaApp} from '@utils/general';
+import {createSamlChallenge} from '@utils/saml_challenge';
+import {sanitizeUrl} from '@utils/url';
 
 import AuthError from './components/auth_error';
 import AuthRedirect from './components/auth_redirect';
@@ -17,8 +19,10 @@ import AuthSuccess from './components/auth_success';
 
 interface SSOAuthenticationProps {
     doSSOLogin: (bearerToken: string, csrfToken: string) => void;
+    doSSOCodeExchange: (loginCode: string, samlChallenge: {codeVerifier: string; state: string}) => void;
     loginError: string;
     loginUrl: string;
+    serverUrl: string;
     setLoginError: (value: string) => void;
     theme: Theme;
 }
@@ -30,7 +34,7 @@ const style = StyleSheet.create({
     },
 });
 
-const SSOAuthentication = ({doSSOLogin, loginError, loginUrl, setLoginError, theme}: SSOAuthenticationProps) => {
+const SSOAuthentication = ({doSSOLogin, doSSOCodeExchange, loginError, loginUrl, serverUrl, setLoginError, theme}: SSOAuthenticationProps) => {
     const [error, setError] = useState<string>('');
     const [loginSuccess, setLoginSuccess] = useState(false);
     const intl = useIntl();
@@ -40,7 +44,19 @@ const SSOAuthentication = ({doSSOLogin, loginError, loginUrl, setLoginError, the
     }
 
     const redirectUrl = customUrlScheme + 'callback';
-    const init = async (resetErrors = true) => {
+    const samlChallenge = useMemo(() => createSamlChallenge(), []);
+
+    // Verify that the srv parameter from the callback matches the expected server
+    const verifyServerOrigin = useCallback((srvParam: string | undefined): boolean => {
+        if (!srvParam) {
+            // Old servers don't send srv parameter - allow for backwards compatibility
+            return true;
+        }
+        const normalizedExpected = sanitizeUrl(serverUrl);
+        const normalizedActual = sanitizeUrl(srvParam);
+        return normalizedExpected === normalizedActual;
+    }, [serverUrl]);
+    const init = useCallback(async (resetErrors = true) => {
         setLoginSuccess(false);
         if (resetErrors !== false) {
             setError('');
@@ -50,12 +66,35 @@ const SSOAuthentication = ({doSSOLogin, loginError, loginUrl, setLoginError, the
         const query: Record<string, string> = {
             ...parsedUrl.query,
             redirect_to: redirectUrl,
+            state: samlChallenge.state,
+            code_challenge: samlChallenge.codeChallenge,
+            code_challenge_method: samlChallenge.method,
         };
         parsedUrl.set('query', qs.stringify(query));
         const url = parsedUrl.toString();
         const result = await openAuthSessionAsync(url, null, {preferEphemeralSession: true, createTask: false});
         if ('url' in result && result.url) {
             const resultUrl = urlParse(result.url, true);
+            const srvParam = resultUrl.query?.srv as string | undefined;
+
+            // Verify server origin before accepting credentials
+            if (!verifyServerOrigin(srvParam)) {
+                setError(
+                    intl.formatMessage({
+                        id: 'mobile.oauth.server_mismatch',
+                        defaultMessage: 'Login failed: Unable to complete authentication with this server. Please try again.',
+                    }),
+                );
+                return;
+            }
+
+            const loginCode = resultUrl.query?.login_code as string | undefined;
+            if (loginCode) {
+                // Prefer code exchange when available
+                setLoginSuccess(true);
+                doSSOCodeExchange(loginCode, {codeVerifier: samlChallenge.codeVerifier, state: samlChallenge.state});
+                return;
+            }
             const bearerToken = resultUrl.query?.MMAUTHTOKEN;
             const csrfToken = resultUrl.query?.MMCSRF;
             if (bearerToken && csrfToken) {
@@ -70,7 +109,7 @@ const SSOAuthentication = ({doSSOLogin, loginError, loginUrl, setLoginError, the
                 }),
             );
         }
-    };
+    }, [doSSOCodeExchange, doSSOLogin, intl, loginUrl, samlChallenge, redirectUrl, setLoginError, verifyServerOrigin]);
 
     useEffect(() => {
         let listener: EventSubscription | null = null;
@@ -80,6 +119,25 @@ const SSOAuthentication = ({doSSOLogin, loginError, loginUrl, setLoginError, the
                 setError('');
                 if (url && url.startsWith(redirectUrl)) {
                     const parsedUrl = urlParse(url, true);
+                    const srvParam = parsedUrl.query?.srv as string | undefined;
+
+                    // Verify server origin before accepting credentials
+                    if (!verifyServerOrigin(srvParam)) {
+                        setError(
+                            intl.formatMessage({
+                                id: 'mobile.oauth.server_mismatch',
+                                defaultMessage: 'Login failed: Unable to complete authentication with this server. Please try again.',
+                            }),
+                        );
+                        return;
+                    }
+
+                    const loginCode = parsedUrl.query?.login_code as string | undefined;
+                    if (loginCode) {
+                        setLoginSuccess(true);
+                        doSSOCodeExchange(loginCode, {codeVerifier: samlChallenge.codeVerifier, state: samlChallenge.state});
+                        return;
+                    }
                     const bearerToken = parsedUrl.query?.MMAUTHTOKEN;
                     const csrfToken = parsedUrl.query?.MMCSRF;
                     if (bearerToken && csrfToken) {
@@ -107,7 +165,7 @@ const SSOAuthentication = ({doSSOLogin, loginError, loginUrl, setLoginError, the
             clearTimeout(timeout);
             listener?.remove();
         };
-    }, []);
+    }, [doSSOCodeExchange, doSSOLogin, init, intl, samlChallenge, redirectUrl, verifyServerOrigin]);
 
     let content;
     if (loginSuccess) {

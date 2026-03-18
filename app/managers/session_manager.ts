@@ -1,29 +1,26 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import CookieManager, {type Cookie} from '@react-native-cookies/cookies';
-import {Image} from 'expo-image';
 import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react-native';
 
-import {storeOnboardingViewedValue} from '@actions/app/global';
-import {syncMultiTeam, syncServerData} from '@actions/remote/entry/ikcommon';
-import {cancelSessionNotification, logout} from '@actions/remote/session';
+import {storeGlobal, storeOnboardingViewedValue} from '@actions/app/global';
+import {cancelAllSessionNotifications, terminateSession} from '@actions/local/session';
+import {logout, scheduleSessionNotification} from '@actions/remote/session';
 import {Events, Launch} from '@constants';
+import {GLOBAL_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
-import {resetMomentLocale} from '@i18n';
-import {getAllServerCredentials, removeServerCredentials} from '@init/credentials';
+import {getAllServerCredentials} from '@init/credentials';
 import {relaunchApp} from '@init/launch';
-import PushNotifications from '@init/push_notifications';
-import NetworkManager from '@managers/network_manager';
+import IntuneManager from '@managers/intune_manager';
 import SecurityManager from '@managers/security_manager';
-import WebsocketManager from '@managers/websocket_manager';
+import {queryGlobalValue} from '@queries/app/global';
 import {getAllServers, getServerDisplayName} from '@queries/app/servers';
-import {getCurrentUser} from '@queries/servers/user';
 import {getThemeFromState} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
-import {deleteFileCache, deleteFileCacheByDir} from '@utils/file';
+import {deleteFileCacheByDir} from '@utils/file';
 import {isMainActivity} from '@utils/helpers';
 import {addNewServer} from '@utils/server';
+import {syncMultiTeam, syncServerData} from '@actions/remote/entry/ikcommon';
 
 import type {LaunchType} from '@typings/launch';
 
@@ -47,70 +44,38 @@ export class SessionManagerSingleton {
     }
 
     init() {
-        this.cancelAllSessionNotifications();
+        cancelAllSessionNotifications();
+
+        let updateToMigrationDone = false;
+        queryGlobalValue(GLOBAL_IDENTIFIERS.CACHE_MIGRATION)?.fetch().then((records) => {
+            const cacheMigrationDone = Boolean(records?.[0]?.value);
+            if (!cacheMigrationDone) {
+                if (Platform.OS === 'ios') {
+                    deleteFileCacheByDir('com.hackemist.SDImageCache');
+                } else if (Platform.OS === 'android') {
+                    deleteFileCacheByDir('image_cache');
+                    deleteFileCacheByDir('image_manager_disk_cache');
+                }
+                updateToMigrationDone = true;
+            }
+        }).finally(() => {
+            if (updateToMigrationDone) {
+                storeGlobal(GLOBAL_IDENTIFIERS.CACHE_MIGRATION, true);
+            }
+        });
     }
 
-    private cancelAllSessionNotifications = async () => {
-        const serverCredentials = await getAllServerCredentials();
-        for (const {serverUrl} of serverCredentials) {
-            cancelSessionNotification(serverUrl);
-        }
-    };
+    private scheduleAllSessionNotifications = async () => {
+        if (!this.scheduling) {
+            this.scheduling = true;
+            const serverCredentials = await getAllServerCredentials();
+            const promises: Array<Promise<{error: unknown} | {error?: undefined}>> = [];
+            for (const {serverUrl} of serverCredentials) {
+                promises.push(scheduleSessionNotification(serverUrl));
+            }
 
-    private clearCookies = async (serverUrl: string, webKit: boolean) => {
-        try {
-            const cookies = await CookieManager.get(serverUrl, webKit);
-            const values = Object.values(cookies);
-            values.forEach((cookie: Cookie) => {
-                CookieManager.clearByName(serverUrl, cookie.name, webKit);
-            });
-        } catch (error) {
-            // Nothing to clear
-        }
-    };
-
-    private clearCookiesForServer = async (serverUrl: string) => {
-        if (Platform.OS === 'ios') {
-            this.clearCookies(serverUrl, false);
-            this.clearCookies(serverUrl, true);
-        } else if (Platform.OS === 'android') {
-            CookieManager.flush();
-        }
-    };
-
-    private resetLocale = async () => {
-        if (Object.keys(DatabaseManager.serverDatabases).length) {
-            const serverDatabase = await DatabaseManager.getActiveServerDatabase();
-            const user = await getCurrentUser(serverDatabase!);
-            resetMomentLocale(user?.locale);
-        } else {
-            resetMomentLocale();
-        }
-    };
-
-    private terminateSession = async (serverUrl: string, removeServer: boolean) => {
-        cancelSessionNotification(serverUrl);
-        await removeServerCredentials(serverUrl);
-        PushNotifications.removeServerNotifications(serverUrl);
-        SecurityManager.removeServer(serverUrl);
-
-        NetworkManager.invalidateClient(serverUrl);
-        WebsocketManager.invalidateClient(serverUrl);
-
-        if (removeServer) {
-            await DatabaseManager.destroyServerDatabase(serverUrl);
-        } else {
-            await DatabaseManager.deleteServerDatabase(serverUrl);
-        }
-
-        this.resetLocale();
-        this.clearCookiesForServer(serverUrl);
-        Image.clearDiskCache();
-        deleteFileCache(serverUrl);
-        deleteFileCacheByDir('mmPasteInput');
-        deleteFileCacheByDir('thumbnails');
-        if (Platform.OS === 'android') {
-            deleteFileCacheByDir('image_cache');
+            await Promise.all(promises);
+            this.scheduling = false;
         }
     };
 
@@ -126,7 +91,7 @@ export class SessionManagerSingleton {
                     this.syncServerData();
                     this.syncMultiTeam();
                 }
-                setTimeout(this.cancelAllSessionNotifications, 750);
+                setTimeout(cancelAllSessionNotifications, 750);
                 break;
             case 'background':
             case 'inactive':
@@ -158,51 +123,66 @@ export class SessionManagerSingleton {
         if (this.terminatingSessionUrl.has(serverUrl)) {
             return;
         }
-        const activeServerUrl = await DatabaseManager.getActiveServerUrl();
-        const activeServerDisplayName = await DatabaseManager.getActiveServerDisplayName();
-        await this.terminateSession(serverUrl, removeServer);
+        try {
+            this.terminatingSessionUrl.add(serverUrl);
 
-        if (activeServerUrl === serverUrl) {
-            let displayName = '';
-            let launchType: LaunchType = Launch.AddServer;
-            if (!Object.keys(DatabaseManager.serverDatabases).length) {
-                EphemeralStore.theme = undefined;
-                launchType = Launch.Normal;
+            const activeServerUrl = await DatabaseManager.getActiveServerUrl();
+            const activeServerDisplayName = await DatabaseManager.getActiveServerDisplayName();
 
-                if (activeServerDisplayName) {
-                    displayName = activeServerDisplayName;
+            // We do not unenroll with Wipe as we already removed all the data during terminateSession
+            await IntuneManager.unenrollServer(serverUrl, false);
+            await terminateSession(serverUrl, removeServer);
+            SecurityManager.removeServer(serverUrl);
+
+            if (activeServerUrl === serverUrl) {
+                let displayName = '';
+                let launchType: LaunchType = Launch.AddServer;
+                if (!Object.keys(DatabaseManager.serverDatabases).length) {
+                    EphemeralStore.theme = undefined;
+                    launchType = Launch.Normal;
+
+                    if (activeServerDisplayName) {
+                        displayName = activeServerDisplayName;
+                    }
                 }
-            }
 
-            // set the onboardingViewed value to false so the launch will show the onboarding screen after all servers were removed
-            const servers = await getAllServers();
-            if (!servers.length) {
-                await storeOnboardingViewedValue(false);
-            }
+                // set the onboardingViewed value to false so the launch will show the onboarding screen after all servers were removed
+                const servers = await getAllServers();
+                if (!servers.length) {
+                    await storeOnboardingViewedValue(false);
+                }
 
-            relaunchApp({launchType, serverUrl, displayName});
+                relaunchApp({launchType, serverUrl, displayName});
+            }
+        } finally {
+            this.terminatingSessionUrl.delete(serverUrl);
         }
     };
 
     private onSessionExpired = async (serverUrl: string) => {
         this.terminatingSessionUrl.add(serverUrl);
 
+        try {
         // logout is not doing anything in this scenario, but we keep it
         // to keep the same flow as other logout scenarios.
-        await logout(serverUrl, undefined, {skipServerLogout: true, skipEvents: true});
+            await logout(serverUrl, undefined, {skipServerLogout: true, skipEvents: true});
 
-        await this.terminateSession(serverUrl, false);
+            await terminateSession(serverUrl, false);
+            SecurityManager.removeServer(serverUrl);
+            await IntuneManager.unenrollServer(serverUrl, true);
 
-        const activeServerUrl = await DatabaseManager.getActiveServerUrl();
-        const serverDisplayName = await getServerDisplayName(serverUrl);
+            const activeServerUrl = await DatabaseManager.getActiveServerUrl();
+            const serverDisplayName = await getServerDisplayName(serverUrl);
 
-        await relaunchApp({launchType: Launch.Normal, serverUrl, displayName: serverDisplayName});
-        if (activeServerUrl) {
-            addNewServer(getThemeFromState(), serverUrl, serverDisplayName);
-        } else {
-            EphemeralStore.theme = undefined;
+            await relaunchApp({launchType: Launch.Normal, serverUrl, displayName: serverDisplayName});
+            if (activeServerUrl) {
+                addNewServer(getThemeFromState(), serverUrl, serverDisplayName);
+            } else {
+                EphemeralStore.theme = undefined;
+            }
+        } finally {
+            this.terminatingSessionUrl.delete(serverUrl);
         }
-        this.terminatingSessionUrl.delete(serverUrl);
     };
 }
 

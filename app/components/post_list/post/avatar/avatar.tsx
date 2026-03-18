@@ -1,20 +1,20 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Image} from 'expo-image';
-import React, {type ReactNode} from 'react';
+import React, {useCallback, type ReactNode} from 'react';
 import {useIntl} from 'react-intl';
 import {Platform, StyleSheet, TouchableOpacity, View} from 'react-native';
 
 import {buildAbsoluteUrl} from '@actions/remote/file';
 import CompassIcon from '@components/compass_icon';
+import ExpoImage from '@components/expo_image';
 import ProfilePicture from '@components/profile_picture';
 import {View as ViewConstant} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import {usePreventDoubleTap} from '@hooks/utils';
 import NetworkManager from '@managers/network_manager';
 import {openUserProfileModal} from '@screens/navigation';
-import {preventDoubleTap} from '@utils/tap';
 import {ensureString} from '@utils/types';
 
 import type {Client} from '@client/rest';
@@ -67,13 +67,14 @@ const Avatar = ({author, enablePostIconOverride, isAutoReponse, location, post}:
             };
 
             if (typeof post.props?.override_icon_url === 'string' && post.props?.override_icon_url.startsWith('/')) {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
                 // @ts-ignore
                 source.headers.Authorization = client?.getCurrentBearerToken();
             }
 
             iconComponent = (
-                <Image
+                <ExpoImage
+                    id={`user-override-icon-${post.id}`}
                     source={source}
                     style={{
                         height: pictureSize,
@@ -106,7 +107,7 @@ const Avatar = ({author, enablePostIconOverride, isAutoReponse, location, post}:
         );
     }
 
-    const openUserProfile = preventDoubleTap(() => {
+    const openUserProfile = usePreventDoubleTap(useCallback(() => {
         if (!author) {
             return;
         }
@@ -117,7 +118,7 @@ const Avatar = ({author, enablePostIconOverride, isAutoReponse, location, post}:
             userIconOverride: propsIconUrl,
             usernameOverride: propsUsername,
         });
-    });
+    }, [author, intl, location, post.channelId, propsIconUrl, propsUsername, theme]));
 
     let component = (
         <ProfilePicture

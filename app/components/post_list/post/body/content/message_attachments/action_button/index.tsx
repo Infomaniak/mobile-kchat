@@ -6,8 +6,8 @@ import React, {useCallback, useRef} from 'react';
 
 import {fetchPollMetadataIfPoll, postActionWithCookie} from '@actions/remote/integrations';
 import {useServerUrl} from '@context/server';
+import {usePreventDoubleTap} from '@hooks/utils';
 import {getStatusColors} from '@utils/message_attachment';
-import {preventDoubleTap} from '@utils/tap';
 import {makeStyleSheetFromTheme, changeOpacity} from '@utils/theme';
 import {secureGetFromRecord} from '@utils/types';
 
@@ -63,19 +63,24 @@ const ActionButton = ({buttonColor, cookie, disabled, id, isVoted, name, postId,
     let customButtonStyle;
     let customButtonTextStyle;
 
-    const onPress = useCallback(preventDoubleTap(async () => {
+    const onPress = usePreventDoubleTap(useCallback(async () => {
         if (!presssed.current) {
             presssed.current = true;
             await postActionWithCookie(serverUrl, postId, id, cookie || '');
             await fetchPollMetadataIfPoll(serverUrl, postId);
             presssed.current = false;
         }
-    }), [id, postId, cookie]);
+    }, [serverUrl, postId, id, cookie]));
 
+    const STATUS_COLORS = getStatusColors(theme);
+    let hexColor: string | undefined;
     if (buttonColor) {
-        const STATUS_COLORS = getStatusColors(theme);
-        const hexColor = secureGetFromRecord(STATUS_COLORS, buttonColor) || secureGetFromRecord(theme, buttonColor) || buttonColor;
-        customButtonStyle = {borderColor: changeOpacity(hexColor, 0.25), backgroundColor: '#ffffff'};
+        hexColor = secureGetFromRecord(STATUS_COLORS, buttonColor) || secureGetFromRecord(theme, buttonColor) || buttonColor;
+    } else {
+        hexColor = secureGetFromRecord(STATUS_COLORS, 'default');
+    }
+    if (hexColor) {
+        customButtonStyle = {borderColor: changeOpacity(hexColor, 0.16), backgroundColor: changeOpacity(hexColor, 0.08), borderWidth: 0};
         customButtonTextStyle = {color: hexColor};
     }
 

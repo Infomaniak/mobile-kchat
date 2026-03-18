@@ -1,8 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useEffect, useRef, useState} from 'react';
-import {DeviceEventEmitter, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {useCallback, useRef, useState} from 'react';
+import {DeviceEventEmitter, Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {GestureDetector, Gesture, GestureHandlerRootView} from 'react-native-gesture-handler';
 import {Navigation} from 'react-native-navigation';
 import Animated, {runOnJS, useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
@@ -12,9 +12,10 @@ import {openNotification} from '@actions/remote/notifications';
 import {Navigation as NavigationTypes} from '@constants';
 import DatabaseManager from '@database/manager';
 import {useIsTablet} from '@hooks/device';
+import useDidMount from '@hooks/did_mount';
+import {usePreventDoubleTap} from '@hooks/utils';
 import SecurityManager from '@managers/security_manager';
 import {dismissOverlay} from '@screens/navigation';
-import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity} from '@utils/theme';
 import {secureGetFromRecord} from '@utils/types';
 
@@ -89,17 +90,17 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
         }
     };
 
-    const dismiss = () => {
+    const dismiss = useCallback(() => {
         cancelDismissTimer();
         dismissOverlay(componentId);
-    };
+    }, [componentId]);
 
-    const notificationTapped = preventDoubleTap(() => {
+    const notificationTapped = usePreventDoubleTap(useCallback(() => {
         tapped.current = true;
         dismiss();
-    });
+    }, [dismiss]));
 
-    useEffect(() => {
+    useDidMount(() => {
         initial.value = 0;
 
         dismissTimerRef.current = setTimeout(() => {
@@ -109,9 +110,9 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
         }, AUTO_DISMISS_TIME_MILLIS);
 
         return cancelDismissTimer;
-    }, []);
+    });
 
-    useEffect(() => {
+    useDidMount(() => {
         const didDismissListener = Navigation.events().registerComponentDidDisappearListener(async ({componentId: screen}) => {
             if (componentId === screen && tapped.current && serverUrl) {
                 const {channel_id} = notification.payload || {};
@@ -122,13 +123,13 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
         });
 
         return () => didDismissListener.remove();
-    }, []);
+    });
 
-    useEffect(() => {
+    useDidMount(() => {
         const listener = DeviceEventEmitter.addListener(NavigationTypes.NAVIGATION_SHOW_OVERLAY, dismiss);
 
         return () => listener.remove();
-    }, []);
+    });
 
     const animatedStyle = useAnimatedStyle(() => {
         const translateY = animate ? withTiming(-130, {duration: 300}) : withTiming(initial.value, {duration: 300});
@@ -141,7 +142,6 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
     }, [animate, insets.top]);
 
     const message = notification.payload?.body || notification.payload?.message;
-    // eslint-disable-next-line new-cap
     const gesture = Gesture.Pan().activeOffsetY(-20).onStart(() => runOnJS(animateDismissOverlay)());
 
     const database = secureGetFromRecord(DatabaseManager.serverDatabases, serverUrl)?.database;

@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useMemo, useState} from 'react';
+import {useIntl} from 'react-intl';
 import {type LayoutChangeEvent, ScrollView, useWindowDimensions, View} from 'react-native';
 import Animated from 'react-native-reanimated';
 
@@ -9,7 +10,7 @@ import Markdown from '@components/markdown';
 import {isChannelMentions} from '@components/markdown/channel_mention/channel_mention';
 import {SEARCH} from '@constants/screens';
 import {useShowMoreAnimatedStyle} from '@hooks/show_more';
-import {getMarkdownTextStyles, getMarkdownBlockStyles} from '@utils/markdown';
+import {getPostTranslatedMessage, getPostTranslation} from '@utils/post';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
@@ -17,7 +18,7 @@ import ShowMoreButton from './show_more_button';
 
 import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
-import type {HighlightWithoutNotificationKey, SearchPattern, UserMentionKey} from '@typings/global/markdown';
+import type {HighlightWithoutNotificationKey, SearchPattern} from '@typings/global/markdown';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type MessageProps = {
@@ -32,11 +33,11 @@ type MessageProps = {
     post: PostModel;
     searchPatterns?: SearchPattern[];
     theme: Theme;
+    isChannelAutotranslated?: boolean;
 }
 
 const SHOW_MORE_HEIGHT = 54;
 
-const EMPTY_MENTION_KEYS: UserMentionKey[] = [];
 const EMPTY_HIGHLIGHT_KEYS: HighlightWithoutNotificationKey[] = [];
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -58,15 +59,37 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const Message = ({currentUser, isHighlightWithoutNotificationLicensed, highlight, isEdited, isPendingOrFailed, isReplyPost, layoutWidth, location, post, searchPatterns, theme}: MessageProps) => {
+const Message = ({
+    currentUser,
+    isHighlightWithoutNotificationLicensed,
+    highlight,
+    isEdited,
+    isPendingOrFailed,
+    isReplyPost,
+    layoutWidth,
+    location,
+    post,
+    searchPatterns,
+    theme,
+    isChannelAutotranslated,
+}: MessageProps) => {
     const [open, setOpen] = useState(false);
     const [height, setHeight] = useState<number|undefined>();
     const dimensions = useWindowDimensions();
     const maxHeight = Math.round((dimensions.height * 0.5) + SHOW_MORE_HEIGHT);
     const animatedStyle = useShowMoreAnimatedStyle(height, maxHeight, open);
     const style = getStyleSheet(theme);
-    const blockStyles = getMarkdownBlockStyles(theme);
-    const textStyles = getMarkdownTextStyles(theme);
+    const intl = useIntl();
+
+    // We need to memoize these two values because they are actually getters that return a new list
+    // on every render. We need to trust that changes in the currentUser will trigger the recalculation.
+    const mentionKeys = useMemo(() => currentUser?.mentionKeys ?? undefined, [currentUser]);
+    const highlightKeys = useMemo(() => {
+        if (isHighlightWithoutNotificationLicensed) {
+            return currentUser?.highlightKeys ?? EMPTY_HIGHLIGHT_KEYS;
+        }
+        return EMPTY_HIGHLIGHT_KEYS;
+    }, [currentUser, isHighlightWithoutNotificationLicensed]);
 
     const onLayout = useCallback((event: LayoutChangeEvent) => {
         const h = event.nativeEvent.layout.height;
@@ -85,6 +108,12 @@ const Message = ({currentUser, isHighlightWithoutNotificationLicensed, highlight
         return isChannelMentions(post.props?.channel_mentions) ? post.props.channel_mentions : {};
     }, [post.props?.channel_mentions]);
 
+    const translation = getPostTranslation(post, intl.locale);
+    let message = post.message;
+    if (isChannelAutotranslated && post.type === '' && translation?.state === 'ready') {
+        message = getPostTranslatedMessage(post.message, translation);
+    }
+
     return (
         <>
             <Animated.View style={animatedStyle}>
@@ -100,7 +129,6 @@ const Message = ({currentUser, isHighlightWithoutNotificationLicensed, highlight
                     >
                         <Markdown
                             baseTextStyle={style.message}
-                            blockStyles={blockStyles}
                             channelId={post.channelId}
                             channelMentions={channelMentions}
                             imagesMetadata={post.metadata?.images}
@@ -110,10 +138,9 @@ const Message = ({currentUser, isHighlightWithoutNotificationLicensed, highlight
                             layoutWidth={layoutWidth}
                             location={location}
                             postId={post.id}
-                            textStyles={textStyles}
                             value={cleanMessage}
-                            mentionKeys={currentUser?.mentionKeys ?? EMPTY_MENTION_KEYS}
-                            highlightKeys={isHighlightWithoutNotificationLicensed ? (currentUser?.highlightKeys ?? EMPTY_HIGHLIGHT_KEYS) : EMPTY_HIGHLIGHT_KEYS}
+                            mentionKeys={mentionKeys}
+                            highlightKeys={highlightKeys}
                             searchPatterns={searchPatterns}
                             theme={theme}
                             isUnsafeLinksPost={Boolean(post.props?.unsafe_links && post.props.unsafe_links !== '')}

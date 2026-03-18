@@ -12,8 +12,12 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import {usePreventDoubleTap} from '@hooks/utils';
 import NetworkManager from '@managers/network_manager';
+import SecurityManager from '@managers/security_manager';
 import {dismissModal, popTopScreen, setButtons} from '@screens/navigation';
+import {logError} from '@utils/log';
+import {isCustomFieldSamlLinked} from '@utils/user';
 
 import type {EditProfileProps} from '@typings/screens/edit_profile';
 

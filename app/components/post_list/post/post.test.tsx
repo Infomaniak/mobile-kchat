@@ -85,4 +85,40 @@ describe('plugins', () => {
     test('dummy test', () => {
         expect(true).toBe(true);
     });
+
+    // it('should render unrevealed post correctly', async () => {
+    //     const props = getBaseProps();
+    //     props.post = TestHelper.fakePostModel({
+    //         type: PostTypes.BURN_ON_READ,
+    //         props: {
+    //             expire_at: Date.now() + 1000000,
+    //         },
+    //     });
+
+    //     renderWithEverything(<Post {...props}/>, {database, serverUrl});
+    //     await waitFor(() => {
+    //         expect(UnrevealedBurnOnReadPost).toHaveBeenCalled();
+    //     });
+    // });
+
+    // it('own BoR post should show as revealed even without metadata', async () => {
+    //     const currentUser = TestHelper.fakeUserModel();
+    //     const props = {
+    //         ...getBaseProps(),
+    //         currentUser,
+    //     };
+    //     props.post = TestHelper.fakePostModel({
+    //         type: PostTypes.BURN_ON_READ,
+    //         userId: currentUser.id,
+    //         props: {
+    //             expire_at: Date.now() + 1000000,
+    //         },
+    //     });
+
+    //     renderWithEverything(<Post {...props}/>, {database, serverUrl});
+    //     await waitFor(() => {
+    //         expect(Body).toHaveBeenCalled();
+    //     });
+    //     expect(UnrevealedBurnOnReadPost).not.toHaveBeenCalled();
+    // });
 });

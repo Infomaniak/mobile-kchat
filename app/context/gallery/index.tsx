@@ -1,8 +1,10 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useEffect, useLayoutEffect} from 'react';
-import Animated, {makeMutable, runOnUI, type AnimatedRef} from 'react-native-reanimated';
+import {useLayoutEffect} from 'react';
+import {makeMutable, runOnUI, type AnimatedRef, type SharedValue} from 'react-native-reanimated';
+
+import useDidMount from '@hooks/did_mount';
 
 import type {GalleryManagerSharedValues} from '@typings/screens/gallery';
 
@@ -24,7 +26,7 @@ class Gallery {
     private init = false;
     private timeout: NodeJS.Timeout | null = null;
 
-    public refsByIndexSV: Animated.SharedValue<GalleryManagerItems> = makeMutable({});
+    public refsByIndexSV: SharedValue<GalleryManagerItems> = makeMutable({});
 
     public sharedValues: GalleryManagerSharedValues = {
         width: makeMutable(0),
@@ -35,6 +37,7 @@ class Gallery {
         activeIndex: makeMutable(0),
         targetWidth: makeMutable(0),
         targetHeight: makeMutable(0),
+        scale: makeMutable(1),
     };
 
     public items = new Map<number, GalleryManagerItem>();
@@ -154,13 +157,16 @@ export function GalleryInit({children, galleryIdentifier}: GalleryInitProps) {
         return () => {
             gallery.reset();
         };
+
+    // Execute only on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(() => {
+    useDidMount(() => {
         return () => {
             galleryManager.remove(galleryIdentifier);
         };
-    }, []);
+    });
 
     return children;
 }

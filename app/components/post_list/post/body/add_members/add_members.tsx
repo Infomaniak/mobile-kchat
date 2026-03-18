@@ -82,11 +82,11 @@ const definedMessages = defineMessages({
     },
     messageOne: {
         id: 'post_body.check_for_out_of_channel_mentions.message.one',
-        defaultMessage: '{username} was mentioned but is not in the channel. Would you like to ',
+        defaultMessage: 'was mentioned but is not in the channel. Would you like to ',
     },
     messageMultiple: {
         id: 'post_body.check_for_out_of_channel_mentions.message.multiple',
-        defaultMessage: '{usernames} were mentioned but they are not in the channel. Would you like to ',
+        defaultMessage: 'were mentioned but they are not in the channel. Would you like to ',
     },
     outOfGroupsMessage: {
         id: 'post_body.check_for_out_of_channel_groups_mentions.message',
@@ -151,6 +151,7 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
                     location={location}
                     mentionName={names[0]}
                     mentionStyle={textStyles.mention}
+                    theme={theme}
                 />
             );
         } else if (names.length > 1) {
@@ -180,6 +181,7 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
                                     location={location}
                                     mentionStyle={textStyles.mention}
                                     mentionName={username}
+                                    theme={theme}
                                 />
                             );
                         }).reduce((acc: ReactNode[], el: ReactNode, idx: number, arr: ReactNode[]) => {

@@ -3,8 +3,9 @@
 
 /* eslint-disable max-lines */
 
+import RNUtils from '@mattermost/rnutils';
 import merge from 'deepmerge';
-import {Appearance, DeviceEventEmitter, Platform, Alert, type EmitterSubscription, Keyboard} from 'react-native';
+import {Appearance, DeviceEventEmitter, Platform, Alert, type EmitterSubscription, Keyboard, StatusBar} from 'react-native';
 import {type ComponentWillAppearEvent, type ImageResource, type LayoutOrientation, Navigation, type Options, OptionsModalPresentationStyle, type OptionsTopBarButton, type ScreenPoppedEvent, type EventSubscription, type OptionsStatusBar} from 'react-native-navigation';
 import tinyColor from 'tinycolor2';
 
@@ -25,6 +26,7 @@ import type {LaunchProps} from '@typings/launch';
 import type {AvailableScreens, NavButtons} from '@typings/screens/navigation';
 import type {ComponentProps} from 'react';
 import type {IntlShape} from 'react-intl';
+import type {Asset} from 'react-native-image-picker';
 
 const alpha = {
     from: 0,
@@ -35,6 +37,31 @@ let subscriptions: Array<EmitterSubscription | EventSubscription> | undefined;
 
 export const allOrientations: LayoutOrientation[] = ['sensor', 'sensorLandscape', 'sensorPortrait', 'landscape', 'portrait'];
 export const portraitOrientation: LayoutOrientation[] = ['portrait'];
+
+const loginFlowScreens = new Set<AvailableScreens>([
+    Screens.ONBOARDING,
+    Screens.SERVER,
+    Screens.LOGIN,
+    Screens.SSO,
+    Screens.MFA,
+    Screens.FORGOT_PASSWORD,
+]);
+
+function setNavigationBarColor(screen: AvailableScreens, th?: Theme) {
+    if (Platform.OS === 'android' && Platform.Version >= 34) {
+        const theme = th || getThemeFromState();
+        const color = loginFlowScreens.has(screen) ? theme.sidebarBg : theme.centerChannelBg;
+        if (color) {
+            RNUtils.setNavigationBarColor(color, tinyColor(color).isLight());
+        }
+    }
+}
+
+function showBottomTabsIfNeeded(screen: AvailableScreens) {
+    if (screen === Screens.HOME) {
+        DeviceEventEmitter.emit(Events.TAB_BAR_VISIBLE, true);
+    }
+}
 
 export function registerNavigationListeners() {
     subscriptions?.forEach((v) => v.remove());
@@ -78,20 +105,24 @@ function onCommandListener(name: string, params: any) {
             break;
     }
 
-    if (NavigationStore.getVisibleScreen() === Screens.HOME) {
-        DeviceEventEmitter.emit(Events.TAB_BAR_VISIBLE, true);
-    }
+    const screen = NavigationStore.getVisibleScreen();
+    showBottomTabsIfNeeded(screen);
+    setNavigationBarColor(screen);
 }
 
 function onPoppedListener({componentId}: ScreenPoppedEvent) {
     // screen pop does not trigger registerCommandListener, but does trigger screenPoppedListener
-    NavigationStore.removeScreenFromStack(componentId as AvailableScreens);
+    const screen = componentId as AvailableScreens;
+    NavigationStore.removeScreenFromStack(screen);
+
+    // If we pop to home, we need to show the tab bar
+    showBottomTabsIfNeeded(NavigationStore.getVisibleScreen());
+
+    setNavigationBarColor(screen);
 }
 
 function onScreenWillAppear(event: ComponentWillAppearEvent) {
-    if (event.componentId === Screens.HOME) {
-        DeviceEventEmitter.emit(Events.TAB_BAR_VISIBLE, true);
-    }
+    showBottomTabsIfNeeded(event.componentId as AvailableScreens);
 }
 
 export const loginAnimationOptions = () => {
@@ -270,6 +301,32 @@ function isScreenRegistered(screen: AvailableScreens) {
     return true;
 }
 
+function edgeToEdgeHack(screen: AvailableScreens, theme: Theme) {
+    const isDark = tinyColor(theme.sidebarBg).isDark();
+
+    if (Platform.OS === 'android') {
+        if (Platform.Version >= 34) {
+            const listener = Navigation.events().registerComponentDidAppearListener((event) => {
+                if (event.componentName === screen) {
+                    setNavigationBarColor(screen, theme);
+                    listener.remove();
+                }
+            });
+        }
+
+        if (Platform.Version >= 36) {
+            return {
+                drawBehind: true,
+                translucent: false,
+                isDark,
+            };
+        }
+    }
+
+    StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
+    return {isDark};
+}
+
 export function openToS() {
     NavigationStore.setToSOpen(true);
     return showOverlay(Screens.TERMS_OF_SERVICE, {}, {overlay: {interceptTouchOutside: true}});
@@ -277,6 +334,7 @@ export function openToS() {
 
 export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}) {
     const theme = getThemeFromState();
+    const edgeToEdge = edgeToEdgeHack(Screens.HOME, theme);
 
     if (!passProps.coldStart && (passProps.launchType === Launch.AddServer || passProps.launchType === Launch.AddServerFromDeepLink)) {
         dismissModal({componentId: Screens.SERVER});
@@ -297,6 +355,11 @@ export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}
                 options: {
                     layout: {
                         componentBackgroundColor: theme.centerChannelBg,
+                    },
+                    statusBar: {
+                        visible: true,
+                        backgroundColor: theme.sidebarBg,
+                        ...edgeToEdge,
                     },
                     topBar: {
                         visible: false,
@@ -409,6 +472,7 @@ export function resetToInfomaniakNoTeams() {
 
 export function resetToSelectServer(passProps: LaunchProps) {
     const theme = getDefaultThemeByAppearance();
+    const edgeToEdge = edgeToEdgeHack(Screens.SERVER, theme);
 
     const children = [{
         component: {
@@ -422,6 +486,11 @@ export function resetToSelectServer(passProps: LaunchProps) {
                 layout: {
                     backgroundColor: theme.centerChannelBg,
                     componentBackgroundColor: theme.centerChannelBg,
+                },
+                statusBar: {
+                    visible: true,
+                    backgroundColor: theme.sidebarBg,
+                    ...edgeToEdge,
                 },
                 topBar: {
                     backButton: {
@@ -449,6 +518,7 @@ export function resetToSelectServer(passProps: LaunchProps) {
 
 export function resetToOnboarding(passProps: LaunchProps) {
     const theme = getDefaultThemeByAppearance();
+    const edgeToEdge = edgeToEdgeHack(Screens.ONBOARDING, theme);
 
     const children = [{
         component: {
@@ -462,6 +532,11 @@ export function resetToOnboarding(passProps: LaunchProps) {
                 layout: {
                     backgroundColor: theme.centerChannelBg,
                     componentBackgroundColor: theme.centerChannelBg,
+                },
+                statusBar: {
+                    visible: true,
+                    backgroundColor: theme.sidebarBg,
+                    ...edgeToEdge,
                 },
                 topBar: {
                     backButton: {
@@ -489,6 +564,7 @@ export function resetToOnboarding(passProps: LaunchProps) {
 
 export function resetToTeams() {
     const theme = getThemeFromState();
+    const edgeToEdge = edgeToEdgeHack(Screens.SELECT_TEAM, theme);
 
     return Navigation.setRoot({
         root: {
@@ -500,6 +576,11 @@ export function resetToTeams() {
                         options: {
                             layout: {
                                 componentBackgroundColor: theme.centerChannelBg,
+                            },
+                            statusBar: {
+                                visible: true,
+                                backgroundColor: theme.sidebarBg,
+                                ...edgeToEdge,
                             },
                             topBar: {
                                 visible: false,
@@ -526,6 +607,7 @@ export function goToScreen(name: AvailableScreens, title: string, passProps = {}
     }
 
     const theme = getThemeFromState();
+    const edgeToEdge = edgeToEdgeHack(name, theme);
     const componentId = NavigationStore.getVisibleScreen();
     if (!componentId) {
         logError('Trying to go to screen without any screen on the navigation store');
@@ -540,6 +622,12 @@ export function goToScreen(name: AvailableScreens, title: string, passProps = {}
         sideMenu: {
             left: {enabled: false},
             right: {enabled: false},
+        },
+        statusBar: {
+            style: edgeToEdge.isDark ? 'light' : 'dark',
+            backgroundColor: theme.sidebarBg,
+            drawBehind: edgeToEdge.drawBehind ?? false,
+            translucent: edgeToEdge.translucent ?? false,
         },
         topBar: {
             animate: true,
@@ -641,13 +729,13 @@ export async function dismissAllModalsAndPopToScreen(screenId: AvailableScreens,
         try {
             await Navigation.popTo(screenId, mergeOptions);
             if (Object.keys(passProps).length > 0) {
-                await Navigation.updateProps(screenId, passProps);
+                Navigation.updateProps(screenId, passProps);
             }
         } catch {
             // catch in case there is nothing to pop
         }
     } else {
-        goToScreen(screenId, title, passProps, options);
+        await goToScreen(screenId, title, passProps, options);
     }
 }
 
@@ -657,11 +745,17 @@ export function showModal(name: AvailableScreens, title: string, passProps = {},
     }
 
     const theme = getThemeFromState();
+    const edgeToEdge = edgeToEdgeHack(name, theme);
     const modalPresentationStyle: OptionsModalPresentationStyle = Platform.OS === 'ios' ? OptionsModalPresentationStyle.pageSheet : OptionsModalPresentationStyle.none;
     const defaultOptions: Options = {
         modalPresentationStyle,
         layout: {
             componentBackgroundColor: theme.centerChannelBg,
+        },
+        statusBar: {
+            visible: true,
+            backgroundColor: theme.sidebarBg,
+            ...edgeToEdge,
         },
         topBar: {
             animate: true,
@@ -856,29 +950,35 @@ export async function dismissAllOverlays() {
 
 type BottomSheetArgs = {
     closeButtonId: string;
+    enableDynamicSizing?: boolean;
     initialSnapIndex?: number;
     footerComponent?: React.FC<BottomSheetFooterProps>;
     renderContent: () => React.ReactNode;
     snapPoints: Array<number | string>;
     theme: Theme;
     title: string;
+    scrollable?: boolean;
 }
 
-export function bottomSheet({title, renderContent, footerComponent, snapPoints, initialSnapIndex = 1, theme, closeButtonId}: BottomSheetArgs) {
+export function bottomSheet({title, renderContent, footerComponent, snapPoints, initialSnapIndex = 1, theme, closeButtonId, scrollable = false, enableDynamicSizing}: BottomSheetArgs) {
     if (isTablet()) {
         showModal(Screens.BOTTOM_SHEET, title, {
             closeButtonId,
+            enableDynamicSizing,
             initialSnapIndex,
             renderContent,
             footerComponent,
             snapPoints,
+            scrollable,
         }, bottomSheetModalOptions(theme, closeButtonId));
     } else {
         showModalOverCurrentContext(Screens.BOTTOM_SHEET, {
+            enableDynamicSizing,
             initialSnapIndex,
             renderContent,
             footerComponent,
             snapPoints,
+            scrollable,
         }, bottomSheetModalOptions(theme));
     }
 }
@@ -905,6 +1005,28 @@ export function openAsBottomSheet({closeButtonId, screen, theme, title, props}: 
     } else {
         showModalOverCurrentContext(screen, props, bottomSheetModalOptions(theme));
     }
+}
+
+export function openAttachmentOptions(
+    intl: IntlShape,
+    theme: Theme,
+    props: {
+        onUploadFiles: (files: Asset[]) => void;
+        maxFilesReached: boolean;
+        canUploadFiles: boolean;
+        testID?: string;
+        fileCount?: number;
+        maxFileCount?: number;
+    },
+) {
+    const title = intl.formatMessage({id: 'mobile.file_attachment.title', defaultMessage: 'Files and media'});
+    openAsBottomSheet({
+        closeButtonId: 'attachment-close-id',
+        screen: Screens.ATTACHMENT_OPTIONS,
+        theme,
+        title,
+        props,
+    });
 }
 
 export const showAppForm = async (form: AppForm, context: AppContext) => {

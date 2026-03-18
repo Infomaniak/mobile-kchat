@@ -6,7 +6,6 @@ import {ScrollView, View} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import ChannelActions from '@components/channel_actions';
-import ConvertToChannelLabel from '@components/channel_actions/convert_to_channel/convert_to_channel_label';
 import ChannelBookmarks from '@components/channel_bookmarks';
 import {General} from '@constants';
 import {useServerUrl} from '@context/server';
@@ -27,18 +26,19 @@ import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
     canAddBookmarks: boolean;
-    canEnableDisableCalls: boolean;
-    canManageSettings: boolean;
     channelId: string;
     closeButtonId: string;
     componentId: AvailableScreens;
     type?: ChannelType;
     isBookmarksEnabled: boolean;
     isCallsEnabledInChannel: boolean;
+    isPlaybooksEnabled: boolean;
+    groupCallsAllowed: boolean;
     canManageMembers: boolean;
-    isConvertGMFeatureAvailable: boolean;
     isCRTEnabled: boolean;
     isGuestUser: boolean;
+    hasChannelSettingsActions: boolean;
+    isAutotranslationEnabledForThisChannel: boolean;
 }
 
 const edges: Edge[] = ['bottom', 'left', 'right'];
@@ -60,18 +60,21 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 
 const ChannelInfo = ({
     canAddBookmarks,
-    canEnableDisableCalls,
     canManageMembers,
-    canManageSettings,
     channelId,
     closeButtonId,
     componentId,
     isBookmarksEnabled,
     isCallsEnabledInChannel,
-    isConvertGMFeatureAvailable,
+
+    // isConvertGMFeatureAvailable,
+    // isPlaybooksEnabled,
+
+    // groupCallsAllowed,
     isCRTEnabled,
-    isGuestUser,
     type,
+    hasChannelSettingsActions,
+    isAutotranslationEnabledForThisChannel,
 }: Props) => {
     const theme = useTheme();
     const serverUrl = useServerUrl();
@@ -87,8 +90,6 @@ const ChannelInfo = ({
 
     useNavButtonPressed(closeButtonId, componentId, onPressed, [onPressed]);
     useAndroidHardwareBackHandler(componentId, onPressed);
-
-    const convertGMOptionAvailable = isConvertGMFeatureAvailable && type === General.GM_CHANNEL && !isGuestUser;
 
     return (
         <View
@@ -128,27 +129,30 @@ const ChannelInfo = ({
                     <Options
                         channelId={channelId}
                         type={type}
-                        callsEnabled={callsAvailable}
+                        callsEnabled={isCallsEnabledInChannel}
                         canManageMembers={canManageMembers}
                         isCRTEnabled={isCRTEnabled}
-                        canManageSettings={canManageSettings}
+
+                        // isPlaybooksEnabled={isPlaybooksEnabled}
+                        hasChannelSettingsActions={hasChannelSettingsActions}
+                        isAutotranslationEnabledForThisChannel={isAutotranslationEnabledForThisChannel}
                     />
                     <View style={styles.separator}/>
-                    {convertGMOptionAvailable &&
+                    {/* {convertGMOptionAvailable &&
                     <>
                         <ConvertToChannelLabel channelId={channelId}/>
                         <View style={styles.separator}/>
                     </>
-                    }
-                    {canEnableDisableCalls &&
+                    } */}
+                    {/* {canEnableDisableCalls &&
                         <>
-                            {/* <ChannelInfoEnableCalls
+                            <ChannelInfoEnableCalls
                                 channelId={channelId}
                                 enabled={isCallsEnabledInChannel}
-                            /> */}
+                            />
                             <View style={styles.separator}/>
                         </>
-                    }
+                    } */}
                     <ChannelInfoAppBindings
                         channelId={channelId}
                         serverUrl={serverUrl}
@@ -156,8 +160,6 @@ const ChannelInfo = ({
                     />
                     <DestructiveOptions
                         channelId={channelId}
-                        componentId={componentId}
-                        type={type}
                     />
                 </ScrollView>
             </SafeAreaView>

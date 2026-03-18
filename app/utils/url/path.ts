@@ -4,6 +4,8 @@
 export const ID_PATH_PATTERN = '[a-z0-9-]{36}';
 export const PLUGIN_ID_PATH_PATTERN = '[a-zA-Z0-9-_.]{3,190}';
 
+export const TOKEN_PATH_PATTERN = '[a-z0-9]{64}';
+
 // This should cover:
 // - Team name (lowercase english characters, numbers or -)
 // - Two ids separated by __ (userID__userID)

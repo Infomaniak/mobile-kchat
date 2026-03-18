@@ -17,7 +17,7 @@ export type HeaderRightButton = {
     buttonType?: 'native' | 'opacity' | 'highlight';
     color?: string;
     iconName: string;
-    count?: number;
+    count?: number | string;
     onPress: () => void;
     rippleRadius?: number;
     testID?: string;
@@ -38,6 +38,7 @@ type Props = {
     subtitleCompanion?: React.ReactElement;
     theme: Theme;
     title?: string;
+    titleCompanion?: React.ReactElement;
 }
 
 const hitSlop = {top: 20, bottom: 20, left: 20, right: 20};
@@ -73,10 +74,8 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         justifyContent: 'center',
         flex: 3,
         height: '100%',
-        paddingHorizontal: 8,
         ...Platform.select({
             ios: {
-                paddingHorizontal: 60,
                 flex: undefined,
                 width: '100%',
                 position: 'absolute',
@@ -128,6 +127,11 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         color: theme.sidebarHeaderTextColor,
         ...typography('Heading', 300),
     },
+    titleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
 }));
 
 const Header = ({
@@ -145,6 +149,7 @@ const Header = ({
     subtitleCompanion,
     theme,
     title,
+    titleCompanion,
 }: Props) => {
     const styles = getStyleSheet(theme);
     const topInsetShared = useTopInsetShared();
@@ -177,9 +182,15 @@ const Header = ({
     const containerStyle = useMemo(() => (
         [styles.container, containerAnimatedStyle]), [styles, containerAnimatedStyle]);
 
-    const additionalTitleStyle = useMemo(() => ({
-        marginLeft: Platform.select({android: showBackButton && !leftComponent ? 20 : 0}),
-    }), [leftComponent, showBackButton]);
+    const additionalTitleStyle = useMemo(() => {
+        return {
+            marginLeft: Platform.select({android: showBackButton && !leftComponent ? 20 : 0}),
+            paddingHorizontal: Platform.select({
+                ios: rightButtons?.length === 2 ? 90 : 60,
+                android: 8,
+            }),
+        };
+    }, [leftComponent, showBackButton, rightButtons]);
 
     return (
         <Animated.View style={containerStyle}>
@@ -212,14 +223,17 @@ const Header = ({
                 >
                     <View style={styles.centered}>
                         {!hasSearch &&
-                        <Animated.Text
-                            ellipsizeMode='tail'
-                            numberOfLines={1}
-                            style={[styles.title, opacity]}
-                            testID='navigation.header.title'
-                        >
-                            {title}
-                        </Animated.Text>
+                        <View style={styles.titleRow}>
+                            <Animated.Text
+                                ellipsizeMode='tail'
+                                numberOfLines={1}
+                                style={[styles.title, opacity]}
+                                testID='navigation.header.title'
+                            >
+                                {title}
+                            </Animated.Text>
+                            {titleCompanion}
+                        </View>
                         }
                         {!isLargeTitle && Boolean(subtitle || subtitleCompanion) &&
                         <View style={styles.subtitleContainer}>
