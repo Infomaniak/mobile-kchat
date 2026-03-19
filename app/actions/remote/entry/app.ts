@@ -1,7 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {fetchAgents} from '@agents/actions/remote/agents';
+// IK change: agents feature not available on our server
+// import {fetchAgents} from '@agents/actions/remote/agents';
 
 import {setLastServerVersionCheck} from '@actions/local/systems';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
@@ -37,8 +38,8 @@ export async function appEntry(serverUrl: string, since = 0) {
 
     verifyPushProxy(serverUrl);
 
-    // Fetch agents to determine if AI features are available
-    fetchAgents(serverUrl);
+    // IK change: agents feature not available on our server
+    // fetchAgents(serverUrl);
 
     return {};
 }

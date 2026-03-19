@@ -1,7 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {checkIsAgentsPluginEnabled} from '@agents/actions/remote/agents_status';
+// IK change: agents feature not available on our server
+// import {checkIsAgentsPluginEnabled} from '@agents/actions/remote/agents_status';
 import {handleAgentPostUpdate} from '@agents/actions/websocket';
 import {handleAgentsEvents} from '@agents/actions/websocket/events';
 
@@ -206,7 +207,8 @@ export async function handleWebSocketEvent(serverUrl: string, msg: WebSocketMess
         case WebsocketEvents.PLUGIN_STATUSES_CHANGED:
         case WebsocketEvents.PLUGIN_ENABLED:
         case WebsocketEvents.PLUGIN_DISABLED:
-            checkIsAgentsPluginEnabled(serverUrl);
+            // IK change: agents feature not available on our server
+            // checkIsAgentsPluginEnabled(serverUrl);
             break;
 
         // bookmarks

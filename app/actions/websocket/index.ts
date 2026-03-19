@@ -1,8 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {checkIsAgentsPluginEnabled} from '@agents/actions/remote/agents_status';
-import {handleAgentsReconnect} from '@agents/actions/websocket/reconnect';
+// IK change: agents feature not available on our server
+// import {checkIsAgentsPluginEnabled} from '@agents/actions/remote/agents_status';
+// import {handleAgentsReconnect} from '@agents/actions/websocket/reconnect';
 
 import {markChannelAsViewed} from '@actions/local/channel';
 import {dataRetentionCleanup, expiredBoRPostCleanup} from '@actions/local/systems';
@@ -19,7 +20,6 @@ import {autoUpdateTimezone} from '@actions/remote/user';
 import {Screens} from '@constants';
 import DatabaseManager from '@database/manager';
 import AppsManager from '@managers/apps_manager';
-import {handlePlaybookReconnect} from '@playbooks/actions/websocket/reconnect';
 import {getActiveServerUrl} from '@queries/app/servers';
 import {getLastPostInThread} from '@queries/servers/post';
 import {
@@ -91,14 +91,16 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
     const license = await getLicense(database);
     const config = await getConfig(database);
 
-    handlePlaybookReconnect(serverUrl);
-    handleAgentsReconnect(serverUrl);
+    // handlePlaybookReconnect(serverUrl);
+    // IK change: agents feature not available on our server
+    // handleAgentsReconnect(serverUrl);
 
     // if (isSupportedServerCalls(config?.Version)) {
     //     loadConfigAndCalls(serverUrl, currentUserId, groupLabel);
     // }
 
-    checkIsAgentsPluginEnabled(serverUrl);
+    // IK change: agents feature not available on our server
+    // checkIsAgentsPluginEnabled(serverUrl);
 
     await deferredAppEntryActions(serverUrl, lastFullSync, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, meData, initialTeamId, undefined, groupLabel);
 
