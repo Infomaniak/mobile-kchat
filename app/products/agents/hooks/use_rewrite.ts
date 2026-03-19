@@ -16,7 +16,6 @@ type StartRewriteCallback = (
     message: string,
     action: RewriteAction,
     customPrompt: string | undefined,
-    agentId: string | undefined,
     onSuccess: (rewrittenText: string) => void,
     onError: (error: string) => void,
 ) => void;
@@ -61,7 +60,6 @@ export const useRewrite = (): UseRewriteReturn => {
         message: string,
         action: RewriteAction,
         customPrompt: string | undefined,
-        agentId: string | undefined,
         onSuccess: (rewrittenText: string) => void,
         onError: (error: string) => void,
     ) => {
@@ -82,7 +80,7 @@ export const useRewrite = (): UseRewriteReturn => {
 
         const runRewrite = async () => {
             try {
-                const rewritePromise = rewriteMessage(serverUrl, message, action, customPrompt, agentId);
+                const rewritePromise = rewriteMessage(serverUrl, message, action, customPrompt);
                 currentPromiseRef.current = rewritePromise;
 
                 const result = await Promise.race([rewritePromise, timeoutPromise]);
