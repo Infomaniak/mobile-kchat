@@ -25,7 +25,7 @@ export interface ClientAgentsMix {
     submitToolResult: (postId: string, acceptedToolIds: string[]) => Promise<void>;
 
     // Rewrite methods
-    getRewrittenMessage: (message: string, action?: string, customPrompt?: string, agentId?: string) => Promise<string>;
+    getRewrittenMessage: (message: string, action?: string, customPrompt?: string) => Promise<string>;
     getAgentsStatus: () => Promise<AgentsStatusResponse>;
 }
 
@@ -136,9 +136,8 @@ const ClientAgents = (superclass: any) => class extends superclass {
     // Rewrite Methods
     // =========================================================================
 
-    getRewrittenMessage = async (message: string, action?: string, customPrompt?: string, agentId?: string): Promise<string> => {
+    getRewrittenMessage = async (message: string, action?: string, customPrompt?: string): Promise<string> => {
         const body: RewriteRequest = {
-            agent_id: agentId,
             message,
             action,
             custom_prompt: customPrompt,
