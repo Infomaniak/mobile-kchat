@@ -12,7 +12,7 @@ require File.join(File.dirname(`node --print "require.resolve('expo/package.json
 node_require('react-native/scripts/react_native_pods.rb')
 node_require('react-native-permissions/scripts/setup.rb')
 
-platform :ios, '16.0' #min_ios_version_supported
+platform :ios, '16.6' #min_ios_version_supported
 prepare_react_native_project!
 
 Pod::UI.puts "Configuring Pod with statically linked Frameworks".green
@@ -111,6 +111,18 @@ post_install do |installer|
       bc.build_settings['OTHER_LDFLAGS']        = ['$(inherited)', '-ObjC']
       bc.build_settings['STRIP_SWIFT_SYMBOLS']  = 'NO'
       bc.build_settings['ENABLE_BITCODE']       = 'NO'
+      # Force minimum deployment target for Xcode 26 compatibility
+      if bc.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 16.0
+        bc.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
+      end
+    end
+
+    # react-native-worklets-core (Jitsi fork) expects jsc/JSCRuntime.h but we use JSC via React-jsc
+    if t.name == 'react-native-worklets-core'
+      t.build_configurations.each do |bc|
+        jsc_path = File.join(Pod::Config.instance.installation_root, '..', 'node_modules', 'react-native', 'ReactCommon')
+        bc.build_settings['HEADER_SEARCH_PATHS'] = "$(inherited) \"#{jsc_path}\""
+      end
     end
   end
 
@@ -121,6 +133,17 @@ post_install do |installer|
     target.build_configurations.each do |c|
       c.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES'
       c.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'YES'
+    end
+  end
+
+  # Xcode 26: libc++ is no longer auto-linked for extension targets
+  installer.aggregate_targets.each do |aggregate_target|
+    if %w[Pods-kChatNotificationService Pods-kChatShareExtension].include?(aggregate_target.name)
+      aggregate_target.xcconfigs.each do |config_name, config|
+        config.other_linker_flags[:simple] |= ['-lc++']
+        xcconfig_path = aggregate_target.xcconfig_path(config_name)
+        config.save_as(xcconfig_path)
+      end
     end
   end
 

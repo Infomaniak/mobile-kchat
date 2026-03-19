@@ -76,11 +76,30 @@ PODS:
   - Gekidou (0.1.0):
     - SQLite.swift (= 0.15.4)
     - SwiftJWT (= 3.6.200)
-  - Giphy (2.2.4):
+  - Giphy (2.2.16):
     - libwebp
-  - giphy-react-native-sdk (2.3.0):
-    - Giphy (= 2.2.4)
+  - giphy-react-native-sdk (4.1.0):
+    - DoubleConversion
+    - Giphy (= 2.2.16)
+    - glog
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - glog (0.3.5)
   - GoogleSignIn (7.1.0):
     - AppAuth (< 2.0, >= 1.7.3)
@@ -91,7 +110,7 @@ PODS:
     - GTMSessionFetcher/Core (< 4.0, >= 3.3)
   - GTMSessionFetcher/Core (3.5.0)
   - HMSegmentedControl (1.5.6)
-  - jitsi-meet-rnsdk (11.1.2):
+  - jitsi-meet-rnsdk (12.0.0):
     - ObjectiveDropboxOfficial (= 6.2.3)
     - React-Core
     - react-native-webrtc
@@ -1502,9 +1521,9 @@ PODS:
     - Yoga
   - react-native-notifications (5.1.0):
     - React-Core
-  - react-native-orientation-locker (1.6.0):
+  - react-native-orientation-locker (1.5.0):
     - React-Core
-  - react-native-pager-view (6.4.1):
+  - react-native-pager-view (6.8.1):
     - DoubleConversion
     - glog
     - RCT-Folly (= 2024.11.18.00)
@@ -1552,8 +1571,27 @@ PODS:
     - React-Core
   - react-native-safe-area-context (5.3.0):
     - React-Core
-  - react-native-slider (4.4.3):
+  - react-native-slider (4.5.6):
+    - DoubleConversion
+    - glog
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-video (6.13.0):
     - DoubleConversion
     - glog
@@ -1597,10 +1635,31 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-webrtc (124.0.4):
+  - react-native-webrtc (124.0.7):
     - JitsiWebRTC (~> 124.0.0)
     - React-Core
   - react-native-webview (13.13.5):
+    - DoubleConversion
+    - glog
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - react-native-worklets-core (1.6.2):
     - DoubleConversion
     - glog
     - RCT-Folly (= 2024.11.18.00)
@@ -1922,7 +1981,7 @@ PODS:
     - React-Core
   - RNDefaultPreference (1.4.4):
     - React-Core
-  - RNDeviceInfo (10.9.0):
+  - RNDeviceInfo (12.1.0):
     - React-Core
   - RNFileViewer (2.1.5):
     - React-Core
@@ -2377,6 +2436,7 @@ DEPENDENCIES:
   - react-native-video (from `../node_modules/react-native-video`)
   - react-native-webrtc (from `../node_modules/react-native-webrtc`)
   - react-native-webview (from `../node_modules/react-native-webview`)
+  - react-native-worklets-core (from `../node_modules/react-native-worklets-core`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -2633,6 +2693,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-webrtc"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
+  react-native-worklets-core:
+    :path: "../node_modules/react-native-worklets-core"
   React-nativeconfig:
     :path: "../node_modules/react-native/ReactCommon"
   React-NativeModulesApple:
@@ -2792,14 +2854,14 @@ SPEC CHECKSUMS:
   FBLazyVector: 23d8c5470c648a635893dc0956c6dbaead54b656
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   Gekidou: 94199ed8d31b900f2caeb9d5739c19bed9defc4a
-  Giphy: 6b5f6986c8df4f71e01a8ef86595f426b3439fb5
-  giphy-react-native-sdk: 19840fe2a5a8350baf0978636f977dcf7636d058
+  Giphy: 55914215541027873875757f350530e6d8986fba
+  giphy-react-native-sdk: e24bb6d2fa67a8db8f303bd22b4c0ff43140e960
   glog: eb93e2f488219332457c3c4eafd2738ddc7e80b8
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   HMSegmentedControl: 34c1f54d822d8308e7b24f5d901ec674dfa31352
-  jitsi-meet-rnsdk: 58ae0f960f258f97e6a165bb4ff27adef0d3a7e4
+  jitsi-meet-rnsdk: b38d6c73502e9d3616a199bb8e378c24b420260f
   JitsiMeetSDKLite: 7533568e61f16dbcbf821d17dd36b075090ca33c
   JitsiWebRTC: b47805ab5668be38e7ee60e2258f49badfe8e1d0
   KituraContracts: e845e60dc8627ad0a76fa55ef20a45451d8f830b
@@ -2854,16 +2916,17 @@ SPEC CHECKSUMS:
   react-native-netinfo: 5364263f903da576bdef9c84a76fe243ab06812c
   react-native-network-client: 040bbe3aeff68466f3043e313c9141d634838e66
   react-native-notifications: 3bafa1237ae8a47569a84801f17d80242fe9f6a5
-  react-native-orientation-locker: ee8bb2177365ca74f51dc1e11218fe544634d523
-  react-native-pager-view: 6c67ebc9cb43f3115332787265fb203d58adacb4
+  react-native-orientation-locker: dbd3f6ddbe9e62389cb0807dc2af63f6c36dec36
+  react-native-pager-view: 3b28bfc65564b3391bbb0b2795c2f8dacfc7cdc4
   react-native-paste-input: 3c37f4386a5928cc24a1318994a8417efb8eb026
   react-native-performance: 125a96c145e29918b55b45ce25cbba54f1e24dcd
   react-native-restart: 0bc732f4461709022a742bb29bcccf6bbc5b4863
   react-native-safe-area-context: fdb0a66feac038cb6eb1edafcf2ccee2b5cf0284
-  react-native-slider: e472a35a07451af85d2aad887d550dd3213c6190
+  react-native-slider: d6fa3030ccf51d24816fd1eef2892080f4ad7546
   react-native-video: 850536e35ded767e203d8bf445e46436d0c67637
-  react-native-webrtc: 2261a482150195092246fe70b3aff976f2e11ec5
+  react-native-webrtc: e8f0ce746353adc2744a2b933645e1aeb41eaa74
   react-native-webview: a5bf548de0eb81652c1f7459d92c0ac4b7d211ed
+  react-native-worklets-core: c2d1fa2092bb4d2edfaac00e84bb64e153191c4f
   React-nativeconfig: 29f53f7caa03e1d3f49396320f4f055ae42ab8db
   React-NativeModulesApple: 83d38e0ffedd1dbacec5444bfe50adab95810776
   React-perflogger: 1f83401f01544142b32151ef6c66870455c64994
@@ -2901,7 +2964,7 @@ SPEC CHECKSUMS:
   RNCClipboard: 7c3e3b5f71d84ef61690ad377b6c50cf27864ff5
   RNDateTimePicker: 29264364ea7b8cc0fb355b3843cf276a4ff78966
   RNDefaultPreference: ee13d69e6693d193cd223d10e15e5b3c012d31ba
-  RNDeviceInfo: 8af23685571b7867d8dc15fb89e7fb5fa8607e1e
+  RNDeviceInfo: 723e97dd98af9b7913477e7a40252c15517c258c
   RNFileViewer: 4b5d83358214347e4ab2d4ca8d5c1c90d869e251
   RNFlashList: 2b86b048155fce03c43ce58327dcb365bceec24d
   RNFS: 89de7d7f4c0f6bafa05343c578f61118c8282ed8
@@ -2934,6 +2997,6 @@ SPEC CHECKSUMS:
   WatermelonDB: 4c846c8cb94eef3cba90fa034d15310163226703
   Yoga: 2b02f3f767761bb4ffd25b1bb56fd264be57bd6b
 
-PODFILE CHECKSUM: d70452d2409c30d7ac63a16ce0e8c6ff69075a39
+PODFILE CHECKSUM: 6ce9ad1756a725e4fc905fbcb7653e70d23ea648
 
 COCOAPODS: 1.16.1
