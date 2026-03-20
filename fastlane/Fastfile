@@ -509,7 +509,7 @@ platform :ios do
     )
 
     find_replace_string(
-        path_to_file: './ios/Mattermost.xcodeproj/project.pbxproj',
+        path_to_file: './ios/kChat.xcodeproj/project.pbxproj',
         old_string: 'com.mattermost.rnbeta',
         new_string: app_bundle_id
     )
@@ -548,7 +548,7 @@ platform :ios do
     )
 
     find_replace_string(
-        path_to_file: './ios/Mattermost.xcodeproj/project.pbxproj',
+        path_to_file: './ios/kChat.xcodeproj/project.pbxproj',
         old_string: 'com.mattermost.rnbeta.MattermostShare',
         new_string: extension_bundle_id
     )
@@ -561,7 +561,7 @@ platform :ios do
     # Configure Notification Service settings
     notification_bundle_id = ENV['NOTIFICATION_SERVICE_IDENTIFIER'] || 'com.mattermost.rnbeta.NotificationService'
     update_info_plist(
-      xcodeproj: './ios/Mattermost.xcodeproj',
+      xcodeproj: './ios/kChat.xcodeproj',
       plist_path: 'NotificationService/Info.plist',
       block: proc do |plist|
         plist["CFBundleIdentifier"] = notification_bundle_id
