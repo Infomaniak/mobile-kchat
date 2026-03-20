@@ -1,8 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React from 'react';
 import {render} from '@testing-library/react-native';
+import React from 'react';
 
 import Image from './image';
 
@@ -29,7 +29,11 @@ jest.mock('@components/expo_image', () => {
     const MockReact = require('react');
     return {
         ExpoImageAnimated: MockReact.forwardRef((props: any, ref: any) => (
-            <View {...props} ref={ref} testID='expo-image-animated'/>
+            <View
+                {...props}
+                ref={ref}
+                testID='expo-image-animated'
+            />
         )),
     };
 });
