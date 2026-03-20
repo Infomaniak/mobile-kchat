@@ -175,10 +175,9 @@ describe('ClientUsers', () => {
         expect(client.doFetch).toHaveBeenCalledWith(expectedUrl, defaultExpectedOptions, false);
     });
 
-    test.skip('logout', async () => {
-        // IK change : skipped on CI temporarily, will fix later
+    test('logout', async () => {
         const expectedUrl = `${client.getUsersRoute()}/logout`;
-        const expectedOptions = {method: 'post'};
+        const expectedOptions = {method: 'post', body: {device_id: undefined}};
 
         await client.logout();
 

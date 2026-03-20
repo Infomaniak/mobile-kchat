@@ -53,7 +53,7 @@ describe('WebSocket Preferences Actions', () => {
 
             const msg = {
                 data: {
-                    preference: JSON.stringify(mockPreference),
+                    preference: mockPreference,
                 },
             } as WebSocketMessage;
 
@@ -62,11 +62,10 @@ describe('WebSocket Preferences Actions', () => {
             expect(operator.handlePreferences).not.toHaveBeenCalled();
         });
 
-        it.skip('should handle preference change with saved post', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle preference change with saved post', async () => {
             const msg = {
                 data: {
-                    preference: JSON.stringify(mockPreference),
+                    preference: mockPreference,
                 },
             } as WebSocketMessage;
 
@@ -86,7 +85,7 @@ describe('WebSocket Preferences Actions', () => {
         it('should handle name format changes', async () => {
             const msg = {
                 data: {
-                    preference: JSON.stringify(mockPreference),
+                    preference: mockPreference,
                 },
             } as WebSocketMessage;
 
@@ -101,7 +100,7 @@ describe('WebSocket Preferences Actions', () => {
         it('should handle CRT changes', async () => {
             const msg = {
                 data: {
-                    preference: JSON.stringify(mockPreference),
+                    preference: mockPreference,
                 },
             } as WebSocketMessage;
 
@@ -127,7 +126,7 @@ describe('WebSocket Preferences Actions', () => {
 
             const msg = {
                 data: {
-                    preferences: JSON.stringify(mockPreferences),
+                    preferences: mockPreferences,
                 },
             } as WebSocketMessage;
 
@@ -136,11 +135,10 @@ describe('WebSocket Preferences Actions', () => {
             expect(operator.handlePreferences).not.toHaveBeenCalled();
         });
 
-        it.skip('should handle multiple preferences change', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle multiple preferences change', async () => {
             const msg = {
                 data: {
-                    preferences: JSON.stringify(mockPreferences),
+                    preferences: mockPreferences,
                 },
             } as WebSocketMessage;
 
@@ -160,7 +158,7 @@ describe('WebSocket Preferences Actions', () => {
         it('should handle name format changes in bulk', async () => {
             const msg = {
                 data: {
-                    preferences: JSON.stringify(mockPreferences),
+                    preferences: mockPreferences,
                 },
             } as WebSocketMessage;
 
@@ -184,7 +182,7 @@ describe('WebSocket Preferences Actions', () => {
         it('should delete preferences', async () => {
             const msg = {
                 data: {
-                    preferences: JSON.stringify(mockPreferences),
+                    preferences: mockPreferences,
                 },
             } as WebSocketMessage;
 
@@ -194,16 +192,8 @@ describe('WebSocket Preferences Actions', () => {
         });
 
         it.skip('should handle invalid preferences data', async () => {
-            // IK change : skipped on CI temporarily, will fix later
-            const msg = {
-                data: {
-                    preferences: 'invalid-json',
-                },
-            } as WebSocketMessage;
-
-            await handlePreferencesDeletedEvent(serverUrl, msg);
-
-            expect(deletePreferences).not.toHaveBeenCalled();
+            // IK: Skipped - kChat sends parsed objects, not JSON strings
+            // This test is only relevant for Mattermost upstream which stringifies WS data
         });
     });
 });

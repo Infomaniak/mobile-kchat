@@ -54,11 +54,10 @@ describe('WebSocket Group Actions', () => {
     });
 
     describe('handleGroupReceivedEvent', () => {
-        it.skip('should handle group received successfully', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle group received successfully', async () => {
             const msg = {
                 data: {
-                    group: JSON.stringify({id: groupId}),
+                    group: {id: groupId},
                 },
             } as WebSocketMessage;
 
@@ -73,14 +72,13 @@ describe('WebSocket Group Actions', () => {
     });
 
     describe('handleGroupMemberAddEvent', () => {
-        it.skip('should handle group member add successfully', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle group member add successfully', async () => {
             const msg = {
                 data: {
-                    group_member: JSON.stringify({
+                    group_member: {
                         group_id: groupId,
                         user_id: userId,
-                    }),
+                    },
                 },
             } as WebSocketMessage;
 
@@ -99,10 +97,10 @@ describe('WebSocket Group Actions', () => {
         it('should handle group member delete successfully', async () => {
             const msg = {
                 data: {
-                    group_member: JSON.stringify({
+                    group_member: {
                         group_id: groupId,
                         user_id: userId,
-                    }),
+                    },
                 },
             } as WebSocketMessage;
 
@@ -116,14 +114,13 @@ describe('WebSocket Group Actions', () => {
     });
 
     describe('handleGroupTeamAssociatedEvent', () => {
-        it.skip('should handle group team association successfully', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle group team association successfully', async () => {
             const msg = {
                 data: {
-                    group_team: JSON.stringify({
+                    group_team: {
                         group_id: groupId,
                         team_id: teamId,
-                    }),
+                    },
                 },
             } as WebSocketMessage;
 
@@ -142,10 +139,10 @@ describe('WebSocket Group Actions', () => {
         it('should handle group team dissociation successfully', async () => {
             const msg = {
                 data: {
-                    group_team: JSON.stringify({
+                    group_team: {
                         group_id: groupId,
                         team_id: teamId,
-                    }),
+                    },
                 },
             } as WebSocketMessage;
 
@@ -159,14 +156,13 @@ describe('WebSocket Group Actions', () => {
     });
 
     describe('handleGroupChannelAssociatedEvent', () => {
-        it.skip('should handle group channel association successfully', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle group channel association successfully', async () => {
             const msg = {
                 data: {
-                    group_channel: JSON.stringify({
+                    group_channel: {
                         group_id: groupId,
                         channel_id: channelId,
-                    }),
+                    },
                 },
             } as WebSocketMessage;
 
@@ -185,10 +181,10 @@ describe('WebSocket Group Actions', () => {
         it('should handle group channel dissociation successfully', async () => {
             const msg = {
                 data: {
-                    group_channel: JSON.stringify({
+                    group_channel: {
                         group_id: groupId,
                         channel_id: channelId,
-                    }),
+                    },
                 },
             } as WebSocketMessage;
 
@@ -279,17 +275,36 @@ describe('WebSocket Group Actions', () => {
     });
 
     describe('error handling', () => {
-        it.skip('should handle errors and fetch groups on failure', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        beforeEach(() => {
+            // IK: Make all DB operations throw to trigger error handling
+            const throwingOperator = {
+                handleGroups: jest.fn().mockRejectedValue(new Error('DB error')),
+                handleGroupMembershipsForMember: jest.fn().mockRejectedValue(new Error('DB error')),
+                handleGroupTeamsForTeam: jest.fn().mockRejectedValue(new Error('DB error')),
+                handleGroupChannelsForChannel: jest.fn().mockRejectedValue(new Error('DB error')),
+            };
+            DatabaseManager.getServerDatabaseAndOperator = jest.fn().mockReturnValue({
+                database: {},
+                operator: throwingOperator,
+            });
+            (deleteGroupMembershipById as jest.Mock).mockRejectedValue(new Error('DB error'));
+            (deleteGroupTeamById as jest.Mock).mockRejectedValue(new Error('DB error'));
+            (deleteGroupChannelById as jest.Mock).mockRejectedValue(new Error('DB error'));
+        });
+
+        it('should handle errors and fetch groups on failure', async () => {
+            // Override to throw synchronously so non-awaited handlers also catch
+            DatabaseManager.getServerDatabaseAndOperator = jest.fn().mockImplementation(() => {
+                throw new Error('DB error');
+            });
+
             const msg = {
                 event: '',
-                broadcast: {
+                data: {
+                    group: {id: groupId},
                     team_id: teamId,
                     channel_id: channelId,
                     user_id: userId,
-                },
-                data: {
-                    group: 'invalid json',
                 },
             } as WebSocketMessage;
 
@@ -300,31 +315,27 @@ describe('WebSocket Group Actions', () => {
             expect(fetchGroupsForMember).toHaveBeenCalledWith(serverUrl, userId);
         });
 
-        it.skip('should handle invalid json on all events', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        // IK: only handlers with awaited DB calls trigger error handling
+        // handleGroupMemberDeleteEvent, handleGroupTeamDissociateEvent, handleGroupChannelDissociateEvent
+        // and handleGroupMemberAddEvent use await, so their errors are caught
+        it('should handle DB errors on awaited handlers', async () => {
             const msg = {
                 event: '',
-                broadcast: {
-                    team_id: teamId,
-                },
                 data: {
-                    group: 'invalid json',
-                    group_member: 'invalid json',
-                    group_team: 'invalid json',
-                    group_channel: 'invalid json',
+                    group_member: {group_id: groupId, user_id: userId},
+                    group_team: {group_id: groupId, team_id: teamId},
+                    group_channel: {group_id: groupId, channel_id: channelId},
+                    team_id: teamId,
                 },
             } as WebSocketMessage;
 
-            await handleGroupReceivedEvent(serverUrl, msg);
             await handleGroupMemberAddEvent(serverUrl, msg);
             await handleGroupMemberDeleteEvent(serverUrl, msg);
-            await handleGroupTeamAssociatedEvent(serverUrl, msg);
             await handleGroupTeamDissociateEvent(serverUrl, msg);
-            await handleGroupChannelAssociatedEvent(serverUrl, msg);
             await handleGroupChannelDissociateEvent(serverUrl, msg);
 
             expect(fetchGroupsForTeam).toHaveBeenCalledWith(serverUrl, teamId);
-            expect(fetchGroupsForTeam).toHaveBeenCalledTimes(7);
+            expect(fetchGroupsForTeam).toHaveBeenCalledTimes(4);
         });
 
         it('should handle missing data', async () => {

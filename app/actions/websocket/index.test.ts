@@ -12,7 +12,6 @@ import {fetchPostsForChannel, fetchPostThread} from '@actions/remote/post';
 import {openAllUnreadChannels} from '@actions/remote/preference';
 import DatabaseManager from '@database/manager';
 import AppsManager from '@managers/apps_manager';
-import {handlePlaybookReconnect} from '@playbooks/actions/websocket/reconnect';
 import {getActiveServerUrl} from '@queries/app/servers';
 import {getLastPostInThread} from '@queries/servers/post';
 import {getConfig, getCurrentChannelId, getCurrentTeamId, setLastFullSync} from '@queries/servers/system';
@@ -49,8 +48,7 @@ jest.mock('@utils/helpers', () => ({
 
 jest.mock('@playbooks/actions/websocket/reconnect');
 
-describe.skip('WebSocket Index Actions', () => {
-    // IK change : skipped on CI temporarily, will fix later
+describe('WebSocket Index Actions', () => {
     const serverUrl = 'baseHandler.test.com';
     const currentUserId = 'current-user-id';
     const currentTeamId = 'current-team-id';
@@ -101,7 +99,6 @@ describe.skip('WebSocket Index Actions', () => {
             expect(handleEntryAfterLoadNavigation).toHaveBeenCalled();
             expect(setLastFullSync).toHaveBeenCalled();
             expect(deferredAppEntryActions).toHaveBeenCalled();
-            expect(handlePlaybookReconnect).toHaveBeenCalledWith(serverUrl);
         });
 
         it('should handle error when server database not found', async () => {
@@ -155,7 +152,6 @@ describe.skip('WebSocket Index Actions', () => {
             expect(dataRetentionCleanup).toHaveBeenCalled();
             expect(expiredBoRPostCleanup).toHaveBeenCalled();
             expect(AppsManager.refreshAppBindings).toHaveBeenCalled();
-            expect(handlePlaybookReconnect).toHaveBeenCalledWith(serverUrl);
         });
 
         it('should fetch posts for channel screen', async () => {

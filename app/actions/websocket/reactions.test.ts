@@ -43,8 +43,7 @@ describe('WebSocket Reactions Actions', () => {
     });
 
     describe('handleAddCustomEmoji', () => {
-        it.skip('should handle custom emoji addition', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle custom emoji addition', async () => {
             const emoji = {
                 id: 'emoji-id',
                 name: 'custom-emoji',
@@ -53,7 +52,7 @@ describe('WebSocket Reactions Actions', () => {
 
             const msg = {
                 data: {
-                    emoji: JSON.stringify(emoji),
+                    emoji,
                 },
             } as WebSocketMessage;
 
@@ -66,22 +65,13 @@ describe('WebSocket Reactions Actions', () => {
         });
 
         it.skip('should handle invalid emoji data gracefully', async () => {
-            // IK change : skipped on CI temporarily, will fix later
-            const msg = {
-                data: {
-                    emoji: 'invalid-json',
-                },
-            } as WebSocketMessage;
-
-            await handleAddCustomEmoji(serverUrl, msg);
-
-            expect(operator.handleCustomEmojis).not.toHaveBeenCalled();
+            // IK: Skipped - kChat sends parsed objects, not JSON strings
+            // This test is only relevant for Mattermost upstream which stringifies WS data
         });
     });
 
     describe('handleReactionAddedToPostEvent', () => {
-        it.skip('should handle reaction addition', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle reaction addition', async () => {
             const reaction = {
                 user_id: userId,
                 post_id: postId,
@@ -91,7 +81,7 @@ describe('WebSocket Reactions Actions', () => {
 
             const msg = {
                 data: {
-                    reaction: JSON.stringify(reaction),
+                    reaction,
                 },
             } as WebSocketMessage;
 
@@ -108,22 +98,13 @@ describe('WebSocket Reactions Actions', () => {
         });
 
         it.skip('should handle invalid reaction data gracefully', async () => {
-            // IK change : skipped on CI temporarily, will fix later
-            const msg = {
-                data: {
-                    reaction: 'invalid-json',
-                },
-            } as WebSocketMessage;
-
-            await handleReactionAddedToPostEvent(serverUrl, msg);
-
-            expect(operator.handleReactions).not.toHaveBeenCalled();
+            // IK: Skipped - kChat sends parsed objects, not JSON strings
+            // This test is only relevant for Mattermost upstream which stringifies WS data
         });
     });
 
     describe('handleReactionRemovedFromPostEvent', () => {
-        it.skip('should handle reaction removal', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle reaction removal', async () => {
             const reaction = {
                 user_id: userId,
                 post_id: postId,
@@ -140,7 +121,7 @@ describe('WebSocket Reactions Actions', () => {
 
             const msg = {
                 data: {
-                    reaction: JSON.stringify(reaction),
+                    reaction,
                 },
             } as WebSocketMessage;
 
@@ -158,11 +139,11 @@ describe('WebSocket Reactions Actions', () => {
 
             const msg = {
                 data: {
-                    reaction: JSON.stringify({
+                    reaction: {
                         user_id: userId,
                         post_id: postId,
                         emoji_name: emojiName,
-                    }),
+                    },
                 },
             } as WebSocketMessage;
 
@@ -172,17 +153,8 @@ describe('WebSocket Reactions Actions', () => {
         });
 
         it.skip('should handle invalid reaction data gracefully', async () => {
-            // IK change : skipped on CI temporarily, will fix later
-            const msg = {
-                data: {
-                    reaction: 'invalid-json',
-                },
-            } as WebSocketMessage;
-
-            await handleReactionRemovedFromPostEvent(serverUrl, msg);
-
-            expect(queryReaction).not.toHaveBeenCalled();
-            expect(database.write).not.toHaveBeenCalled();
+            // IK: Skipped - kChat sends parsed objects, not JSON strings
+            // This test is only relevant for Mattermost upstream which stringifies WS data
         });
     });
 });

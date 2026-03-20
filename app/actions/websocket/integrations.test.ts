@@ -63,7 +63,7 @@ describe('WebSocket Integrations Actions', () => {
 
             const msg = {
                 data: {
-                    dialog: JSON.stringify(mockDialog),
+                    dialog: mockDialog,
                 },
             } as WebSocketMessage;
 
@@ -72,13 +72,12 @@ describe('WebSocket Integrations Actions', () => {
             expect(IntegrationsManager.getManager).not.toHaveBeenCalled();
         });
 
-        it.skip('should set dialog when server url matches active server', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should set dialog when server url matches active server', async () => {
             jest.mocked(getActiveServerUrl).mockResolvedValue(serverUrl);
 
             const msg = {
                 data: {
-                    dialog: JSON.stringify(mockDialog),
+                    dialog: mockDialog,
                 },
             } as WebSocketMessage;
 

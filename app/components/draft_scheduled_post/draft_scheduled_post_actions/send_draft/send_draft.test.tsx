@@ -161,8 +161,7 @@ describe('Send Draft', () => {
         expect(deleteScheduledPost).toHaveBeenCalled();
     });
 
-    it.skip('should call dismissBottomSheet after sending the draft and should call createPost', async () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('should call dismissBottomSheet after sending the draft and should call createPost', async () => {
         jest.mocked(canPostDraftInChannelOrThread).mockResolvedValueOnce(true);
         jest.mocked(sendMessageWithAlert).mockImplementation(() => {
             return Promise.resolve();
@@ -193,6 +192,7 @@ describe('Send Draft', () => {
                 channel_id: 'channel_id',
                 root_id: '',
                 message: 'value',
+                type: '',
             }, [],
         );
     });

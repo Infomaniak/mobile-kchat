@@ -39,7 +39,7 @@ afterEach(async () => {
 
 describe('handleCreateOrUpdateSchedulePost', () => {
     it('handle database not found', async () => {
-        const {error} = await handleCreateOrUpdateScheduledPost('foo', {data: {scheduledPost: JSON.stringify(scheduledPost)}} as WebSocketMessage);
+        const {error} = await handleCreateOrUpdateScheduledPost('foo', {data: {scheduledPost}} as WebSocketMessage);
         expect((error as Error).message).toBe('foo database not found');
     });
 
@@ -54,9 +54,8 @@ describe('handleCreateOrUpdateSchedulePost', () => {
         expect(models).toBeUndefined();
     });
 
-    it.skip('success', async () => {
-        // IK change : skipped on CI temporarily, will fix later
-        const {models} = await handleCreateOrUpdateScheduledPost(serverUrl, {data: {scheduledPost: JSON.stringify(scheduledPost)}} as WebSocketMessage);
+    it('success', async () => {
+        const {models} = await handleCreateOrUpdateScheduledPost(serverUrl, {data: {scheduledPost}} as WebSocketMessage);
         expect(models).toBeDefined();
         expect(models![0].id).toEqual(scheduledPost.id);
 
@@ -67,10 +66,9 @@ describe('handleCreateOrUpdateSchedulePost', () => {
         expect(scheduledPosts[0].message).toBe(scheduledPost.message);
     });
 
-    it('should return error for invalid JSON payload', async () => {
-        const {models, error} = await handleCreateOrUpdateScheduledPost(serverUrl, {data: {scheduledPost: 'invalid_json'}} as WebSocketMessage);
-        expect(models).toBeUndefined();
-        expect(error).toBeDefined();
+    it.skip('should return error for invalid JSON payload', async () => {
+        // IK: Skipped - kChat sends parsed objects, not JSON strings
+        // This test is only relevant for Mattermost upstream which stringifies WS data
     });
 });
 
@@ -86,15 +84,14 @@ describe('handleDeleteScheduledPost', () => {
         expect(models).toBeUndefined();
     });
 
-    it.skip('success', async () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('success', async () => {
         await operator.handleScheduledPosts({
             actionType: ActionType.SCHEDULED_POSTS.CREATE_OR_UPDATED_SCHEDULED_POST,
             scheduledPosts: [scheduledPost],
             prepareRecordsOnly: false,
         });
 
-        const deletedRecord = await handleDeleteScheduledPost(serverUrl, {data: {scheduledPost: JSON.stringify(scheduledPost)}} as WebSocketMessage);
+        const deletedRecord = await handleDeleteScheduledPost(serverUrl, {data: {scheduledPost}} as WebSocketMessage);
         expect(deletedRecord.models).toBeDefined();
         expect(deletedRecord!.models!.length).toBe(1);
         expect(deletedRecord!.models![0].id).toBe(scheduledPost.id);
@@ -105,9 +102,7 @@ describe('handleDeleteScheduledPost', () => {
     });
 
     it.skip('should return error for invalid JSON payload', async () => {
-        // IK change : skipped on CI temporarily, will fix later
-        const {models, error} = await handleDeleteScheduledPost(serverUrl, {data: {scheduledPost: 'invalid_json'}} as WebSocketMessage);
-        expect(models).toBeUndefined();
-        expect(error).toBeDefined();
+        // IK: Skipped - kChat sends parsed objects, not JSON strings
+        // This test is only relevant for Mattermost upstream which stringifies WS data
     });
 });
