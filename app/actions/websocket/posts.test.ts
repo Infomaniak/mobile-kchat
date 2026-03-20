@@ -48,8 +48,7 @@ jest.mock('@utils/permalink_sync');
 
 const serverUrl = 'baseHandler.test.com';
 
-// Ik change : skip on CI, will fix later
-describe.skip('WebSocket Post Actions', () => {
+describe('WebSocket Post Actions', () => {
     let operator: ServerDataOperator;
 
     const post = TestHelper.fakePost({id: 'post1', channel_id: 'channel1', user_id: 'user1', create_at: 12345, message: 'hello'});
@@ -92,7 +91,7 @@ describe.skip('WebSocket Post Actions', () => {
     describe('handleNewPostEvent', () => {
         const msg = {
             data: {
-                post: JSON.stringify(post),
+                post,
                 mentions: ['user1'],
             },
         } as WebSocketMessage;
@@ -205,7 +204,7 @@ describe.skip('WebSocket Post Actions', () => {
             mockedGetIsCRTEnabled.mockResolvedValue(true);
             mockedShouldIgnorePost.mockReturnValue(false);
 
-            await handleNewPostEvent(serverUrl, {data: {post: JSON.stringify(newPost), mentions: []}} as WebSocketMessage);
+            await handleNewPostEvent(serverUrl, {data: {post: newPost, mentions: []}} as WebSocketMessage);
 
             expect(emitSpy).toHaveBeenCalledWith(Events.USER_STOP_TYPING, {
                 channelId: 'channel1',
@@ -228,7 +227,7 @@ describe.skip('WebSocket Post Actions', () => {
             mockedIsTablet.mockReturnValueOnce(true);
             mockedGetScreensInStack.mockReturnValue([]);
 
-            await handleNewPostEvent(serverUrl, {data: {post: JSON.stringify({...post, props: {from_webhook: 'true'}}), mentions: []}} as WebSocketMessage);
+            await handleNewPostEvent(serverUrl, {data: {post: {...post, props: {from_webhook: 'true'}}, mentions: []}} as WebSocketMessage);
 
             expect(mockedGetScreensInStack).toHaveBeenCalled();
             expect(emitSpy).toHaveBeenCalledWith(Events.USER_STOP_TYPING, {
@@ -283,7 +282,7 @@ describe.skip('WebSocket Post Actions', () => {
         const editedPost = {id: 'post1', channel_id: 'channel1', user_id: 'user1', is_pinned: false, edit_at: 54321, message: 'edited message'};
         const msg = {
             data: {
-                post: JSON.stringify(editedPost),
+                post: editedPost,
             },
         } as WebSocketMessage;
 
@@ -394,7 +393,7 @@ describe.skip('WebSocket Post Actions', () => {
             const batchRecordsSpy = jest.spyOn(operator, 'batchRecords').mockImplementation(jest.fn());
             const ephemeralPost = TestHelper.fakePost({type: PostTypes.EPHEMERAL, create_at: 0});
             const ephemeralMsg = {
-                data: {post: JSON.stringify(ephemeralPost)},
+                data: {post: ephemeralPost},
             } as WebSocketMessage;
 
             mockedGetPostById.mockResolvedValueOnce(postModels[0]);
@@ -454,7 +453,7 @@ describe.skip('WebSocket Post Actions', () => {
         const deletedPost = {id: 'post1', channel_id: 'channel1', user_id: 'user1', root_id: 'root1', reply_count: 1};
         const msg = {
             data: {
-                post: JSON.stringify(deletedPost),
+                post: deletedPost,
             },
         } as WebSocketMessage;
 
@@ -503,7 +502,7 @@ describe.skip('WebSocket Post Actions', () => {
             mockedGetPostById.mockResolvedValue(postModels[0]);
             mockedMarkPostAsDeleted.mockResolvedValue({error: 'not found'});
 
-            await handlePostDeleted(serverUrl, {data: {post: JSON.stringify({...deletedPost, root_id: ''})}} as WebSocketMessage);
+            await handlePostDeleted(serverUrl, {data: {post: {...deletedPost, root_id: ''}}} as WebSocketMessage);
 
             expect(mockedMarkPostAsDeleted).toHaveBeenCalledWith(serverUrl, expect.any(Object), true);
             expect(batchRecordsSpy).not.toHaveBeenCalled();
@@ -514,6 +513,8 @@ describe.skip('WebSocket Post Actions', () => {
         const msg = {
             event: 'post_unread',
             data: {
+                channel_id: 'channel1',
+                team_id: 'team1',
                 mention_count: 1,
                 mention_count_root: 1,
                 msg_count: 1,
@@ -522,8 +523,7 @@ describe.skip('WebSocket Post Actions', () => {
             },
         } as WebSocketMessage;
 
-        it.skip('should handle post unread event', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle post unread event', async () => {
             mockedGetMyChannel.mockResolvedValue(myChannelModel);
             mockedGetIsCRTEnabled.mockResolvedValue(false);
             mockedFetchMyChannel.mockResolvedValue({teamId: 'team1', memberships: [TestHelper.fakeChannelMember({user_id: 'user1', channel_id: 'channel1'})]});

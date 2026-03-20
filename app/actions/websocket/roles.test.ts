@@ -52,7 +52,7 @@ describe('WebSocket Roles Actions', () => {
             DatabaseManager.serverDatabases = {};
             const msg = {
                 data: {
-                    role: JSON.stringify({id: roleId}),
+                    role: {id: roleId},
                 },
             } as WebSocketMessage;
             await handleRoleUpdatedEvent(serverUrl, msg);
@@ -63,15 +63,14 @@ describe('WebSocket Roles Actions', () => {
             jest.mocked(getRoleById).mockResolvedValue(undefined);
             const msg = {
                 data: {
-                    role: JSON.stringify({id: roleId}),
+                    role: {id: roleId},
                 },
             } as WebSocketMessage;
             await handleRoleUpdatedEvent(serverUrl, msg);
             expect(handleRole).not.toHaveBeenCalled();
         });
 
-        it.skip('should update existing role', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should update existing role', async () => {
             const mockRole = {
                 id: roleId,
                 name: 'test_role',
@@ -80,7 +79,7 @@ describe('WebSocket Roles Actions', () => {
             jest.mocked(getRoleById).mockResolvedValue(TestHelper.fakeRoleModel({id: roleId}));
             const msg = {
                 data: {
-                    role: JSON.stringify(mockRole),
+                    role: mockRole,
                 },
             } as WebSocketMessage;
 
@@ -93,16 +92,8 @@ describe('WebSocket Roles Actions', () => {
         });
 
         it.skip('should handle invalid JSON in role data', async () => {
-            // IK change : skipped on CI temporarily, will fix later
-            jest.mocked(getRoleById).mockResolvedValue(TestHelper.fakeRoleModel({id: roleId}));
-            const msg = {
-                data: {
-                    role: 'invalid json',
-                },
-            } as WebSocketMessage;
-
-            await handleRoleUpdatedEvent(serverUrl, msg);
-            expect(handleRole).not.toHaveBeenCalled();
+            // IK: Skipped - kChat sends parsed objects, not JSON strings
+            // This test is only relevant for Mattermost upstream which stringifies WS data
         });
     });
 
@@ -201,12 +192,12 @@ describe('WebSocket Roles Actions', () => {
             DatabaseManager.serverDatabases = {};
             const msg = {
                 data: {
-                    member: JSON.stringify({
+                    member: {
                         user_id: currentUserId,
                         team_id: teamId,
                         roles: 'role1',
                         delete_at: 0,
-                    }),
+                    },
                 },
             } as WebSocketMessage;
             await handleTeamMemberRoleUpdatedEvent(serverUrl, msg);
@@ -232,20 +223,19 @@ describe('WebSocket Roles Actions', () => {
             jest.mocked(getCurrentUserId).mockResolvedValue('different-user');
             const msg = {
                 data: {
-                    member: JSON.stringify({
+                    member: {
                         user_id: currentUserId,
                         team_id: teamId,
                         roles: 'role1',
                         delete_at: 0,
-                    }),
+                    },
                 },
             } as WebSocketMessage;
             await handleTeamMemberRoleUpdatedEvent(serverUrl, msg);
             expect(handleRole).not.toHaveBeenCalled();
         });
 
-        it.skip('should update roles, myTeam and teamMembership', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should update roles, myTeam and teamMembership', async () => {
             jest.mocked(getCurrentUserId).mockResolvedValue(currentUserId);
             jest.mocked(fetchRolesIfNeeded).mockResolvedValue({
                 roles: [TestHelper.fakeRole({id: 'role1'})],
@@ -253,12 +243,12 @@ describe('WebSocket Roles Actions', () => {
 
             const msg = {
                 data: {
-                    member: JSON.stringify({
+                    member: {
                         user_id: currentUserId,
                         team_id: teamId,
                         roles: 'role1',
                         delete_at: 0,
-                    }),
+                    },
                 },
             } as WebSocketMessage;
 
@@ -283,8 +273,7 @@ describe('WebSocket Roles Actions', () => {
             expect(handleTeamMemberships).not.toHaveBeenCalled();
         });
 
-        it.skip('should handle no new roles from fetchRolesIfNeeded', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle no new roles from fetchRolesIfNeeded', async () => {
             jest.mocked(getCurrentUserId).mockResolvedValue(currentUserId);
             jest.mocked(fetchRolesIfNeeded).mockResolvedValue({
                 roles: [],
@@ -292,12 +281,12 @@ describe('WebSocket Roles Actions', () => {
 
             const msg = {
                 data: {
-                    member: JSON.stringify({
+                    member: {
                         user_id: currentUserId,
                         team_id: teamId,
                         roles: 'role1',
                         delete_at: 0,
-                    }),
+                    },
                 },
             } as WebSocketMessage;
 

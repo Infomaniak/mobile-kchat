@@ -172,8 +172,7 @@ describe('BaseChip', () => {
         expect(getByText('Test Label')).toHaveStyle({fontWeight: '400'});
     });
 
-    it.skip('should use the correct text color based on the type', () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('should use the correct text color based on the type', () => {
         const {getByText, rerender} = renderWithIntlAndTheme(
             <BaseChip
                 label='Test Label'
@@ -182,7 +181,7 @@ describe('BaseChip', () => {
             />,
         );
 
-        expect(getByText('Test Label')).toHaveStyle({color: Preferences.THEMES.denim.centerChannelColor});
+        expect(getByText('Test Label')).toHaveStyle({color: Preferences.THEMES.infomaniak.centerChannelColor});
 
         rerender(
             <BaseChip
@@ -192,7 +191,7 @@ describe('BaseChip', () => {
             />,
         );
 
-        expect(getByText('Test Label')).toHaveStyle({color: Preferences.THEMES.denim.errorTextColor});
+        expect(getByText('Test Label')).toHaveStyle({color: Preferences.THEMES.infomaniak.dndIndicator});
 
         rerender(
             <BaseChip
@@ -202,6 +201,6 @@ describe('BaseChip', () => {
             />,
         );
 
-        expect(getByText('Test Label')).toHaveStyle({color: Preferences.THEMES.denim.linkColor});
+        expect(getByText('Test Label')).toHaveStyle({color: Preferences.THEMES.infomaniak.linkColor});
     });
 });

@@ -33,8 +33,7 @@ describe('WebSocket Threads Actions', () => {
     });
 
     describe('handleThreadUpdatedEvent', () => {
-        it.skip('should process received thread', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should process received thread', async () => {
             const mockThread = {
                 id: threadId,
                 reply_count: 3,
@@ -43,7 +42,7 @@ describe('WebSocket Threads Actions', () => {
             const msg = {
                 event: 'thread_updated',
                 data: {
-                    thread: JSON.stringify(mockThread),
+                    thread: mockThread,
                 },
                 broadcast: {
                     team_id: teamId,
@@ -62,8 +61,7 @@ describe('WebSocket Threads Actions', () => {
             );
         });
 
-        it.skip('should handle missing team_id', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should handle missing team_id', async () => {
             const mockThread = {
                 id: threadId,
                 reply_count: 3,
@@ -72,7 +70,7 @@ describe('WebSocket Threads Actions', () => {
             const msg = {
                 event: 'thread_updated',
                 data: {
-                    thread: JSON.stringify(mockThread),
+                    thread: mockThread,
                 },
                 broadcast: {},
             } as WebSocketMessage;
@@ -89,18 +87,8 @@ describe('WebSocket Threads Actions', () => {
         });
 
         it.skip('should handle error gracefully', async () => {
-            // IK change : skipped on CI temporarily, will fix later
-            const msg = {
-                event: 'thread_updated',
-                data: {
-                    thread: 'invalid-json',
-                },
-                broadcast: {},
-            } as WebSocketMessage;
-
-            await handleThreadUpdatedEvent(serverUrl, msg);
-
-            expect(processReceivedThreads).not.toHaveBeenCalled();
+            // IK: Skipped - kChat sends parsed objects, not JSON strings
+            // This test is only relevant for Mattermost upstream which stringifies WS data
         });
     });
 

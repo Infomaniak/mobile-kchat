@@ -69,8 +69,7 @@ test('getFilePublicLink', async () => {
     expect(client.doFetch).toHaveBeenCalledWith(expectedUrl, expectedOptions);
 });
 
-test.skip('uploadAttachment', () => {
-    // IK change : skipped on CI temporarily, will fix later
+test('uploadAttachment', () => {
     const file = {localPath: '/path/to/file'} as FileInfo;
     const channelId = 'channel_id';
     const onProgress = jest.fn();
@@ -88,7 +87,7 @@ test.skip('uploadAttachment', () => {
             },
         },
         timeoutInterval: 180000,
-        headers: {Accept: 'application/json'},
+        headers: {Authorization: undefined},
     };
 
     (client.apiClient.upload as jest.Mock).mockReturnValue({
@@ -112,7 +111,7 @@ test.skip('uploadAttachment', () => {
             },
         },
         timeoutInterval: 180000,
-        headers: {Accept: 'application/json'},
+        headers: {Authorization: undefined},
     };
     client.uploadAttachment(file, channelId, onProgress, onComplete, onError);
     expect(client.apiClient.upload).toHaveBeenCalledWith(client.getFilesRoute(), file.localPath, expectedDefaultOptions);
