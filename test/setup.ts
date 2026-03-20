@@ -79,6 +79,21 @@ jest.mock('@react-native-camera-roll/camera-roll', () => ({}));
 jest.mock('@sayem314/react-native-keep-awake', () => ({
     useKeepAwake: jest.fn(),
 }));
+jest.mock('pusher-js/react-native', () => {
+    const MockChannel = {
+        bind: jest.fn(),
+        unbind: jest.fn(),
+        unbind_all: jest.fn(),
+    };
+    const MockPusher = jest.fn(() => ({
+        // eslint-disable-next-line max-nested-callbacks
+        subscribe: jest.fn(() => MockChannel),
+        unsubscribe: jest.fn(),
+        disconnect: jest.fn(),
+        connection: {bind: jest.fn(), unbind: jest.fn()},
+    }));
+    return {__esModule: true, default: MockPusher, ConnectionManager: jest.fn()};
+});
 
 jest.mock('@mattermost/react-native-turbo-log', () => ({
     getLogPaths: jest.fn(),

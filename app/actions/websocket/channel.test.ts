@@ -37,13 +37,16 @@ jest.mock('@queries/servers/user');
 jest.mock('@actions/local/user');
 jest.mock('@utils/log');
 jest.mock('@calls/state');
+jest.mock('@managers/network_manager', () => ({
+    __esModule: true,
+    default: {getClient: jest.fn(() => ({getChannelMembersByIds: jest.fn().mockResolvedValue([])}))},
+}));
 
 // jest.mock('@calls/actions/calls');
 
 const serverUrl = 'baseHandler.test.com';
 
-// Ik change : skip on CI, will fix later
-describe.skip('WebSocket Channel Actions', () => {
+describe('WebSocket Channel Actions', () => {
     let msg: any;
     let operator: ServerDataOperator;
 
@@ -74,6 +77,7 @@ describe.skip('WebSocket Channel Actions', () => {
             data: {
                 team_id: teamId,
                 channel_id: channelId,
+                user_id: userId,
                 channel: JSON.stringify({id: channelId, type: General.PRIVATE_CHANNEL, team_id: teamId}),
             },
             broadcast: {
@@ -259,7 +263,7 @@ describe.skip('WebSocket Channel Actions', () => {
         });
 
         it.skip('should call deletePostsForChannel when autotranslation is disabled', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+            // IK change : skipped on CI we disable this feature on our fork
             jest.mocked(EphemeralStore.isConvertingChannel).mockReturnValue(false);
             mockedGetChannelById.mockResolvedValue({...channelModel, autotranslation: true} as ChannelModel);
             msg.data.channel = JSON.stringify({id: channelId, type: General.PRIVATE_CHANNEL, team_id: teamId, autotranslation: false});
@@ -272,7 +276,7 @@ describe.skip('WebSocket Channel Actions', () => {
         });
 
         it.skip('should not call deletePostsForChannel when autotranslation stays enabled', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+            // IK change : skipped on CI we disable this feature on our fork
             jest.mocked(EphemeralStore.isConvertingChannel).mockReturnValue(false);
             mockedGetChannelById.mockResolvedValue({...channelModel, autotranslation: true} as ChannelModel);
             msg.data.channel = JSON.stringify({id: channelId, type: General.PRIVATE_CHANNEL, team_id: teamId, autotranslation: true});
@@ -459,7 +463,7 @@ describe.skip('WebSocket Channel Actions', () => {
         });
     });
 
-    describe.skip('handleUserAddedToChannelEvent', () => {
+    describe('handleUserAddedToChannelEvent', () => {
         it('should handle user added to channel event for current user', async () => {
             (getCurrentUser as jest.Mock).mockResolvedValue({id: userId});
             mockedFetchMyChannel.mockResolvedValue({channels: [channel], memberships: [{} as any]});
