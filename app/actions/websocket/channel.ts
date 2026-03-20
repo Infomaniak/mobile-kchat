@@ -287,9 +287,9 @@ export async function handleUserAddedToChannelEvent(serverUrl: string, msg: any)
     const userId = msg.data.user_id || msg.data.userId;
     const channelId = msg.data.channel_id || msg.data.channel_id;
     const {team_id: teamId} = msg.data;
-    const client = NetworkManager.getClient(serverUrl);
 
     try {
+        const client = NetworkManager.getClient(serverUrl);
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const currentUser = await getCurrentUser(database);
         const models: Model[] = [];

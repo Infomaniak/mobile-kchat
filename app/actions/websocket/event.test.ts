@@ -398,9 +398,9 @@
 //         expect(handlePlaybookEvents).toHaveBeenCalledWith(serverUrl, msg);
 //     });
 // });
-describe('plugins', () => {
-    test('dummy test', () => {
-        expect(true).toBe(true);
-    });
-});
+// describe('plugins', () => {
+//     test('dummy test', () => {
+//         expect(true).toBe(true);
+//     });
+// });
 

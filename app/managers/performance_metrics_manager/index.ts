@@ -25,12 +25,18 @@ type MetricName = 'mobile_channel_switch' |
 const RETRY_TIME = 100;
 const MAX_RETRIES = 3;
 
+// IK change: disabled — we don't use Mattermost client performance metrics
+const IK_PERFORMANCE_METRICS_ENABLED = false;
+
 class PerformanceMetricsManagerSingleton {
     private target: Target;
     private batchers: {[serverUrl: string]: Batcher} = {};
     private lastAppStateIsActive = AppState.currentState === 'active';
 
     constructor() {
+        if (!IK_PERFORMANCE_METRICS_ENABLED) {
+            return;
+        }
         AppState.addEventListener('change', (appState: AppStateStatus) => this.onAppStateChange(appState));
     }
 
@@ -54,14 +60,23 @@ class PerformanceMetricsManagerSingleton {
     }
 
     public setLoadTarget(target: Target) {
+        if (!IK_PERFORMANCE_METRICS_ENABLED) {
+            return;
+        }
         this.target = target;
     }
 
     public skipLoadMetric() {
+        if (!IK_PERFORMANCE_METRICS_ENABLED) {
+            return;
+        }
         RNUtils.setHasRegisteredLoad();
     }
 
     public finishLoad(location: Target, serverUrl: string) {
+        if (!IK_PERFORMANCE_METRICS_ENABLED) {
+            return;
+        }
         this.finishLoadWithRetries(location, serverUrl, 0);
     }
 
@@ -92,14 +107,23 @@ class PerformanceMetricsManagerSingleton {
     }
 
     public startMetric(metricName: MetricName) {
+        if (!IK_PERFORMANCE_METRICS_ENABLED) {
+            return;
+        }
         performance.mark(metricName, {detail: 'startMetric'});
     }
 
     public mark(metricName: MetricName, options?: MarkOptions) {
+        if (!IK_PERFORMANCE_METRICS_ENABLED) {
+            return;
+        }
         performance.mark(metricName, options);
     }
 
     public endMetric(metricName: MetricName, serverUrl: string) {
+        if (!IK_PERFORMANCE_METRICS_ENABLED) {
+            return;
+        }
         const marks = performance.getEntriesByName(metricName, 'mark') as PerformanceMarkWithDetail[];
         if (!marks.length) {
             return;
@@ -137,10 +161,16 @@ class PerformanceMetricsManagerSingleton {
     }
 
     public startTimeToInteraction(options?: MarkOptions) {
+        if (!IK_PERFORMANCE_METRICS_ENABLED) {
+            return;
+        }
         performance.mark('tti', options);
     }
 
     public measureTimeToInteraction() {
+        if (!IK_PERFORMANCE_METRICS_ENABLED) {
+            return undefined;
+        }
         try {
             const result = performance.measure('TTI', 'tti');
             performance.clearMarks('tti');
@@ -153,6 +183,9 @@ class PerformanceMetricsManagerSingleton {
     }
 
     public collectNetworkRequestData = (name: NetworkRequestMetrics, value: number, {serverUrl, groupLabel}: NetworkRequestDataOtherInfo) => {
+        if (!IK_PERFORMANCE_METRICS_ENABLED) {
+            return;
+        }
         this.ensureBatcher(serverUrl).addToBatch({
             metric: name,
             value,

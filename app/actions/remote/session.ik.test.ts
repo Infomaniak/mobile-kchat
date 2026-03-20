@@ -97,6 +97,7 @@ describe.skip('logout', () => {
         ];
         (getAllServerCredentials as jest.Mock).mockResolvedValue(servers);
         (getDeviceToken as jest.Mock).mockResolvedValue('token123');
+        mockClient.logout.mockResolvedValue({status: 'OK'});
 
         await logout('https://server1.com', undefined);
 
@@ -106,7 +107,7 @@ describe.skip('logout', () => {
             expect(mockClient.logout).toHaveBeenNthCalledWith(index + 1, 'token123');
         });
 
-        expect(DeviceEventEmitter.emit).toHaveBeenCalledTimes(2);
+        expect(DeviceEventEmitter.emit).toHaveBeenCalledTimes(3);
         servers.forEach((server) => {
             expect(DeviceEventEmitter.emit).toHaveBeenCalledWith(
                 Events.SERVER_LOGOUT,
