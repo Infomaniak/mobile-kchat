@@ -13,7 +13,7 @@ struct NoMembershipView: View {
     VStack (spacing: 8) {
       Text(
         NSLocalizedString("extension.no_memberships.title",
-          value: "Not a member of any team yet",
+          value: "Not a member of any organizations yet",
           comment: ""
         )
       )

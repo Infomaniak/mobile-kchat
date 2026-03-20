@@ -114,7 +114,7 @@ describe('MyAutotranslation', () => {
             fireEvent(toggle, 'valueChange', false);
         });
         await waitFor(() => {
-            expect(Alert.alert).toHaveBeenCalledWith('Turn off auto-translation', 'Messages in this channel will revert to their original language. This will only affect how you see this channel. Other members won’t be affected.', [
+            expect(Alert.alert).toHaveBeenCalledWith('Turn off auto-translation', "Messages in this channel will revert to their original language. This will only affect how you see this channel. Other members won't be affected.", [
                 {text: 'cancel', style: 'cancel'},
                 {text: 'Yes, turn off', onPress: expect.any(Function)},
             ]);

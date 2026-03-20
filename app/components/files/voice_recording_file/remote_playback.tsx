@@ -135,7 +135,8 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
             }
         };
         handlePosts();
-    }, [currentPost.id, files, isLoadingTranscript, serverUrl]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentPost.id, serverUrl]);
 
     useEffect(() => {
         if (files[0]?.transcript?.text) {
@@ -144,7 +145,8 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
         setTimeout(() => {
             setIsLoadingTranscript(false);
         }, 1000);
-    }, [files]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [files[0]?.transcript?.text]);
 
     const listener = (e: PlayBackType) => {
         setProgress(e.currentPosition);

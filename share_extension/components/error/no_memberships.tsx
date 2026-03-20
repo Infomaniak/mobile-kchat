@@ -38,7 +38,7 @@ const NoMemberships = ({theme}: Props) => {
         <View style={styles.container}>
             <FormattedText
                 id='extension.no_memberships.title'
-                defaultMessage='Not a member of any kChat yet'
+                defaultMessage='Not a member of any organizations yet'
                 style={styles.title}
             />
             <FormattedText

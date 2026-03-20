@@ -44,7 +44,7 @@ const Options = ({channelDisplayName, hasChannels, serverDisplayName, theme}: Pr
     const errorLabel = useMemo(() => {
         return intl.formatMessage({
             id: 'share_extension.channel_error',
-            defaultMessage: 'You are not a member of a team on the selected kChat. Select another kChat.',
+            defaultMessage: 'You are not a member of a team on the selected organisation. Select another organisation.',
         });
     }, [intl]);
 

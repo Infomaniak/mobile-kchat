@@ -13,7 +13,7 @@ struct NoServersView: View {
     VStack (spacing: 8) {
       Text(
         NSLocalizedString("extension.no_servers.title",
-          value: "Not connected to any servers",
+          value: "Not connected to any organisations",
           comment: ""
         )
       )
@@ -21,7 +21,7 @@ struct NoServersView: View {
       .foregroundColor(Color.theme.centerChannelColor)
       Text(
         NSLocalizedString("extension.no_servers.description",
-          value: "To share content, you'll need to be logged in to a Mattermost server.",
+          value: "To share content, you'll need to be logged in to a kChat server.",
           comment: ""
         )
       )

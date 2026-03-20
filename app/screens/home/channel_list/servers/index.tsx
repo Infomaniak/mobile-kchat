@@ -135,7 +135,7 @@ const Servers = React.forwardRef<ServersRef>((_, ref) => {
                 footerComponent: undefined,
                 snapPoints,
                 theme,
-                title: intl.formatMessage({id: 'your.servers', defaultMessage: 'Your servers'}),
+                title: intl.formatMessage({id: 'your.servers', defaultMessage: 'Your organizations'}),
             });
         }
     }, [intl, theme]);

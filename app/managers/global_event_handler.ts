@@ -36,7 +36,7 @@ const messages = defineMessages({
     },
     serverUpgradeDescription: {
         id: 'mobile.server_upgrade.description',
-        defaultMessage: '\nA server upgrade is required to use the Mattermost app. Please ask your System Administrator for details.\n',
+        defaultMessage: '\nA server upgrade is required to use the kChat app. Please ask your System Administrator for details.\n',
     },
     serverUpgradeButton: {
         id: 'mobile.server_upgrade.button',

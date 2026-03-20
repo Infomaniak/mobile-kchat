@@ -196,7 +196,7 @@ const ReviewApp = ({
                         <View style={styles.content}>
                             <ReviewAppIllustration theme={theme}/>
                             <Text style={styles.title}>
-                                {intl.formatMessage({id: 'rate.title', defaultMessage: 'Enjoying Mattermost?'})}
+                                {intl.formatMessage({id: 'rate.title', defaultMessage: 'Enjoying kChat?'})}
                             </Text>
                             <Text style={styles.subtitle}>
                                 {intl.formatMessage({id: 'rate.subtitle', defaultMessage: 'Let us know what you think.'})}

@@ -240,7 +240,7 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
                         <FormattedText
                             style={textStyles.link}
                             id={'post_body.check_for_out_of_channel_groups_mentions_notify.message'}
-                            defaultMessage={'{count, plural, one {le notifier} other {les notifier}}'}
+                            defaultMessage={'{count, plural, one {notify him} other {notify them}}'}
                             values={{
                                 count: usernames.length,
                             }}

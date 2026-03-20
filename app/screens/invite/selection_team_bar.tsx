@@ -105,7 +105,7 @@ export default function SelectionTeamBar({
     const handleShareLink = usePreventDoubleTap(useCallback(async () => {
         const url = `${serverUrl}/signup_user_complete/?id=${teamInviteId}`;
         const title = formatMessage({id: 'invite_people_to_team.title', defaultMessage: 'Join the {team} team'}, {team: teamDisplayName});
-        const message = formatMessage({id: 'invite_people_to_team.message', defaultMessage: 'Here’s a link to collaborate and communicate with us on Mattermost.'});
+        const message = formatMessage({id: 'invite_people_to_team.message', defaultMessage: 'Here’s a link to collaborate and communicate with us on kChat.'});
         const icon = 'data:<data_type>/<file_extension>;base64,<base64_data>';
 
         const options: ShareOptions = Platform.select({
