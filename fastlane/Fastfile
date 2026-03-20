@@ -638,13 +638,20 @@ platform :ios do
       intune_client_id = ENV['INTUNE_CLIENT_ID']
       intune_redirect_uri = "msauth.#{app_bundle_id}://auth"
 
-    update_info_plist(
-      xcodeproj: './ios/kChat.xcodeproj',
-      plist_path: 'Mattermost/Info.plist',
-      block: proc do |plist|
-        plist["AppGroupIdentifier"] = app_group_id
-      end
-    )
+      update_info_plist(
+          xcodeproj: './ios/kChat.xcodeproj',
+          plist_path: 'Mattermost/Info.plist',
+          block: proc do |plist|
+            urlScheme = plist["CFBundleURLTypes"].find{|scheme| scheme["CFBundleURLName"] == "com.mattermost"}
+            urlScheme[:CFBundleURLSchemes] = [
+              app_scheme,
+              app_auth_scheme,
+              "msauth.#{app_bundle_id}",
+              "#{app_scheme}-intunemam",
+              "#{app_auth_scheme}-intunemam",
+              "msauth.com.microsoft.intunemam",
+              "msauth.com.microsoft.intunemam-intunemam"
+            ]
 
             plist["IntuneMAMSettings"] = {
               "AppGroupIdentifiers" => [ENV['IOS_APP_GROUP'] || 'group.com.mattermost.rnbeta'],
@@ -656,6 +663,26 @@ platform :ios do
               "ADALRedirectUri" => intune_redirect_uri,
               "MaxFileProtectionLevel" => "NSFileProtectionCompleteUntilFirstUserAuthentication"
             }
+
+            plist["LSApplicationQueriesSchemes"] = [
+              "scmx", "smsec", "microsoft-edge-http", "microsoft-edge-http-intunemam",
+              "lookoutwork-ase", "mvisionmobile", "skycure", "companyportal", "lacoonsecurity",
+              "intunemam-mtd", "msauthv2", "wandera", "betteractiveshield", "msauthv3",
+              "microsoft-edge-https", "microsoft-edge-https-intunemam"
+            ]
+          end
+      )
+
+      update_keychain_access_groups(
+          entitlements_file: './ios/Mattermost/Mattermost.entitlements',
+          identifiers: [
+            keychain_group,
+            "$(AppIdentifierPrefix)com.microsoft.intune.mam",
+            "$(AppIdentifierPrefix)com.microsoft.adalcache",
+            "$(AppIdentifierPrefix)#{app_bundle_id}.intunemam"
+          ],
+      )
+    end
 
     update_info_plist(
       xcodeproj: './ios/kChat.xcodeproj',
