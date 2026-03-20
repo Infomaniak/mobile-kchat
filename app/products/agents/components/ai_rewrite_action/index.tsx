@@ -26,7 +26,7 @@ const styles = {
     icon: {
         alignItems: 'center' as const,
         justifyContent: 'center' as const,
-        padding: 10,
+        flex: 1,
     },
 };
 

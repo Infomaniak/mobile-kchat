@@ -111,8 +111,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         includeFontPadding: false,
         ...typography('Body', 200),
         textAlignVertical: 'center',
-        verticalAlign: 'middle',
-        justifyContent: 'center',
+        padding: 0,
     },
     optionsContainer: {
         paddingTop: OPTIONS_PADDING,
