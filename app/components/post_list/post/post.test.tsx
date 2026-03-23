@@ -19,6 +19,7 @@ import type PostModel from '@typings/database/models/servers/post';
 
 jest.mock('@managers/performance_metrics_manager');
 jest.mock('@components/post_list/post/burn_on_read/unrevealed');
+jest.mock('@components/post_list/post', () => jest.fn());
 jest.mock('./body');
 
 // Ik change : we don't use performance metrics

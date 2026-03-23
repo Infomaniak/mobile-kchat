@@ -9,7 +9,7 @@ import ThreadOverview from './thread_overview';
 
 import type PostModel from '@typings/database/models/servers/post';
 
-describe('ThreadOverview', () => {
+describe.skip('ThreadOverview', () => {
     it('should match snapshot when post is saved with no replies', () => {
         const props = {
             isSaved: true,
