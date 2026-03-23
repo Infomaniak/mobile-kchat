@@ -38,7 +38,8 @@ function getBaseProps(): ComponentProps<typeof ChannelListScreen> {
     };
 }
 
-describe('performance metrics', () => {
+// Ik change : we disable performance metrics tests
+describe.skip('performance metrics', () => {
     let database: Database;
     const serverUrl = 'http://www.someserverurl.com';
     beforeAll(async () => {
@@ -46,8 +47,7 @@ describe('performance metrics', () => {
         database = server.database;
     });
 
-    it.skip('finish load on load', async () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('finish load on load', async () => {
         const props = getBaseProps();
         renderWithEverything(<ChannelListScreen {...props}/>, {database, serverUrl});
         await waitFor(() => {

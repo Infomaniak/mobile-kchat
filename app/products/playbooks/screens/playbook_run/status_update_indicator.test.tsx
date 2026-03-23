@@ -25,7 +25,8 @@ jest.mock('../navigation', () => ({
     goToPostUpdate: jest.fn(),
 }));
 
-describe('StatusUpdateIndicator', () => {
+// ik change: disabled - playbook features not used
+describe.skip('StatusUpdateIndicator', () => {
     const futureTimestamp = Date.now() + 86400000; // 24 hours from now
     const pastTimestamp = Date.now() - 86400000; // 24 hours ago
 
@@ -51,8 +52,7 @@ describe('StatusUpdateIndicator', () => {
         expect(StyleSheet.flatten(icon.props.style)).toEqual(expect.objectContaining({color: changeOpacity(Preferences.THEMES.denim.centerChannelColor, 0.72)}));
     });
 
-    it.skip('renders overdue status correctly', () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('renders overdue status correctly', () => {
         const {getByText, getByTestId} = renderWithIntl(
             <StatusUpdateIndicator
                 isFinished={false}

@@ -22,8 +22,7 @@ import type {UserMentionKey} from '@typings/global/markdown';
 
 /* eslint-disable max-lines */
 
-// Ik change : skip on CI, will fix later
-describe.skip('Components.Markdown.transform', () => {
+describe('Components.Markdown.transform', () => {
     const parser = new Parser();
 
     describe('combineTextNodes', () => {

@@ -672,6 +672,23 @@ process.env.EXPO_OS = 'ios'; // eslint-disable-line no-process-env
 
 // IK MOCKS
 
+jest.mock('react-native-webview', () => {
+    const React = jest.requireActual('react');
+    const {View} = jest.requireActual('react-native');
+
+    // eslint-disable-next-line react/no-multi-comp
+    class WebView extends React.Component {
+        render() {
+            return React.createElement(View, {testID: 'webview-mock'});
+        }
+    }
+
+    return {
+        __esModule: true,
+        default: WebView,
+    };
+});
+
 jest.mock('react-native-fs', () => ({
     unlink: jest.fn(() => Promise.resolve()),
 }));

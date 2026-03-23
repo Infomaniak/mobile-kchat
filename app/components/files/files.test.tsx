@@ -86,8 +86,7 @@ function getBaseProps(): ComponentProps<typeof Files> {
     };
 }
 
-// Ik change : skip on CI, will fix later
-describe.skip('Files', () => {
+describe('Files', () => {
     it('should render attachments, with images in the image row', () => {
         const filesInfo = [
             TestHelper.fakeFileInfo({id: '1'}),

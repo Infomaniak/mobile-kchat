@@ -21,6 +21,20 @@ jest.mock('./reschedule_draft', () => ({
     default: jest.fn(),
 }));
 
+jest.mock('@queries/servers/limit', () => {
+    const {of} = require('rxjs');
+    return {
+        observeLimits: jest.fn(() => of(null)),
+    };
+});
+
+jest.mock('@queries/servers/usage', () => {
+    const {of} = require('rxjs');
+    return {
+        observeUsage: jest.fn(() => of(null)),
+    };
+});
+
 jest.mocked(RescheduledDraft).mockImplementation((props) => React.createElement('RescheduledDraft', {...props, testID: 'reschedule-draft'}));
 
 describe('EnhancedRescheduledDraft', () => {
@@ -43,8 +57,7 @@ describe('EnhancedRescheduledDraft', () => {
         await DatabaseManager.destroyServerDatabase(serverUrl);
     });
 
-    it.skip('should correctly return the current user timezone', async () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('should correctly return the current user timezone', async () => {
         await operator.handleUsers({users: [TestHelper.fakeUser({id: 'user1', timezone: {useAutomaticTimezone: false, manualTimezone: 'America/New_York', automaticTimezone: 'America/New_York'}})], prepareRecordsOnly: false});
 
         const {getByTestId} = renderWithEverything(
@@ -64,8 +77,7 @@ describe('EnhancedRescheduledDraft', () => {
         });
     });
 
-    it.skip('should return undefined if the current user timezone is not set', async () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('should return undefined if the current user timezone is not set', async () => {
         await operator.handleUsers({users: [TestHelper.fakeUser({id: 'user1', timezone: undefined})], prepareRecordsOnly: false});
 
         const {getByTestId} = renderWithEverything(

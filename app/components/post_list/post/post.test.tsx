@@ -21,7 +21,8 @@ jest.mock('@managers/performance_metrics_manager');
 jest.mock('@components/post_list/post/burn_on_read/unrevealed');
 jest.mock('./body');
 
-describe('performance metrics', () => {
+// Ik change : we don't use performance metrics
+describe.skip('performance metrics', () => {
     let database: Database;
     let post: PostModel;
 

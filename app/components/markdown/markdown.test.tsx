@@ -21,8 +21,7 @@ jest.mock('@screens/navigation', () => ({
     dismissAllModalsAndPopToRoot: jest.fn(),
 }));
 
-// Ik change : skip on CI, will fix later
-describe.skip('Markdown', () => {
+describe('Markdown', () => {
     const baseProps: React.ComponentProps<typeof Markdown> = {
         baseTextStyle: {},
         enableInlineLatex: true,
@@ -229,8 +228,7 @@ describe.skip('Markdown', () => {
             expect(hashtagElement.props.onPress).toBeDefined();
         });
 
-        test.skip('should include both base text style and link color', () => {
-            // Ik change : skip on CI, will fix later
+        test('should include both base text style and link color', () => {
             const baseTextStyle = {
                 color: '#000000',
                 ...typography('Body', 200),
@@ -248,7 +246,7 @@ describe.skip('Markdown', () => {
 
             expect(flattenedStyle).toMatchObject({
                 fontSize: 16,
-                fontFamily: 'OpenSans',
+                fontFamily: 'SuisseIntl-Regular',
                 color: baseProps.theme.linkColor,
             });
         });

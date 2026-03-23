@@ -72,7 +72,7 @@ jest.mock('@managers/network_performance_manager', () => ({
     },
 }));
 
-// Ik change : skip on CI, will fix later
+// Ik change : we are not tracking client
 describe.skip('ClientTracking', () => {
     const mockedNPM = jest.mocked(NetworkPerformanceManager);
     const apiClientMock = {
