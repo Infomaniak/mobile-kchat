@@ -38,6 +38,23 @@ const {PLAYBOOK_RUN, PLAYBOOK_CHECKLIST, PLAYBOOK_CHECKLIST_ITEM} = PLAYBOOK_TAB
 export default schemaMigrations({
     migrations: [
         {
+            toVersion: 9,
+            steps: [
+                addColumns({
+                    table: CHANNEL,
+                    columns: [
+                        {name: 'autotranslation', type: 'boolean', isOptional: true},
+                    ],
+                }),
+                addColumns({
+                    table: MY_CHANNEL,
+                    columns: [
+                        {name: 'autotranslation_disabled', type: 'boolean', isOptional: true},
+                    ],
+                }),
+            ],
+        },
+        {
             toVersion: 8,
             steps: [
                 createTable({
