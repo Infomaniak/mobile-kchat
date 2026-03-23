@@ -35,8 +35,7 @@ describe('Tab', () => {
         expect(getByText('Test Tab')).toBeTruthy();
     });
 
-    it.skip('shows selected state', () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('shows selected state', () => {
         const {getByText} = renderWithIntl(
             <Tab
                 {...baseProps}
@@ -45,7 +44,7 @@ describe('Tab', () => {
         );
 
         const text = getByText('Test Tab');
-        expect(text).toHaveStyle({color: Preferences.THEMES.denim.buttonBg});
+        expect(text).toHaveStyle({color: Preferences.THEMES.infomaniak.buttonBg});
     });
 
     it('shows dot indicator when hasDot is true', () => {

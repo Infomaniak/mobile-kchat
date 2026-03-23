@@ -1,12 +1,10 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {act} from '@testing-library/react-hooks';
 import {fireEvent} from '@testing-library/react-native';
 import React from 'react';
 
-import {License, Screens} from '@constants';
-import {SYSTEM_IDENTIFIERS} from '@constants/database';
+import {Screens} from '@constants';
 import {PostPriorityType} from '@constants/post';
 import NetworkManager from '@managers/network_manager';
 import {openAsBottomSheet} from '@screens/navigation';
@@ -40,8 +38,7 @@ jest.mock('@utils/post', () => ({
     persistentNotificationsConfirmation: jest.fn(),
 }));
 
-// Ik change : skip on CI, will fix later
-describe.skip('DraftInput', () => {
+describe('DraftInput', () => {
     const baseProps = {
         testID: 'draft_input',
         channelId: 'channelId',
@@ -168,8 +165,7 @@ describe.skip('DraftInput', () => {
             expect(baseProps.sendMessage).not.toHaveBeenCalled();
         });
 
-        it.skip('handles persistent notifications', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('handles persistent notifications', async () => {
             jest.mocked(persistentNotificationsConfirmation).mockResolvedValueOnce();
             const props = {
                 ...baseProps,
@@ -253,42 +249,8 @@ describe.skip('DraftInput', () => {
             expect(getByTestId('bor_label')).toHaveTextContent('BURN ON READ (5m)');
         });
 
-        it('calls updatePostBoRStatus when BoR is toggled', async () => {
-            await operator.handleConfigs({
-                configs: [
-                    {id: 'EnableBurnOnRead', value: 'true'},
-                    {id: 'BuildEnterpriseReady', value: 'true'},
-                    {id: 'BurnOnReadDurationSeconds', value: '300'},
-                    {id: 'BurnOnReadMaximumTimeToLiveSeconds', value: '3600'},
-                ],
-                configsToDelete: [],
-                prepareRecordsOnly: false,
-            });
-
-            await operator.handleSystem({
-                systems: [{id: SYSTEM_IDENTIFIERS.LICENSE, value: {IsLicensed: 'true', SkuShortName: License.SKU_SHORT_NAME.EnterpriseAdvanced}}],
-                prepareRecordsOnly: false,
-            });
-
-            const updatePostBoRStatusMock = jest.fn();
-            const props = {
-                ...baseProps,
-                updatePostBoRStatus: updatePostBoRStatusMock,
-            };
-
-            const {getByTestId} = renderWithEverything(<DraftInput {...props}/>, {database});
-            const borQuickAction = getByTestId('draft_input.quick_actions.bor_action');
-            expect(borQuickAction).toBeVisible();
-
-            await act(async () => {
-                fireEvent.press(borQuickAction);
-            });
-
-            expect(updatePostBoRStatusMock).toHaveBeenCalledWith({
-                enabled: true,
-                borDurationSeconds: 300,
-                borMaximumTimeToLiveSeconds: 3600,
-            });
+        it.skip('calls updatePostBoRStatus when BoR is toggled', async () => {
+            // IK custom feature: Burn on Read - removed from this fork
         });
 
         it('renders Header component with BoR config', () => {

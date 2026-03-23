@@ -142,34 +142,33 @@ describe('Section notice', () => {
         expect(wrapper.queryByTestId('sectionNoticeHeaderIcon')).not.toBeVisible();
     });
 
-    it.skip('should have the correct background on each section type', () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('should have the correct background on each section type', () => {
         const props = getBaseProps();
 
         props.type = 'info';
         const wrapper = renderWithEverything(<SectionNotice {...props}/>, {database});
         let container = wrapper.getByTestId('sectionNoticeContainer');
-        expect(container).toHaveStyle({backgroundColor: 'rgba(93,137,234,0.08)'});
+        expect(container).toHaveStyle({backgroundColor: 'rgba(76,183,255,0.08)'});
 
         props.type = 'danger';
         wrapper.rerender(<SectionNotice {...props}/>);
         container = wrapper.getByTestId('sectionNoticeContainer');
-        expect(container).toHaveStyle({backgroundColor: 'rgba(210,75,78,0.08)'});
+        expect(container).toHaveStyle({backgroundColor: 'rgba(244,67,54,0.08)'});
 
         props.type = 'hint';
         wrapper.rerender(<SectionNotice {...props}/>);
         container = wrapper.getByTestId('sectionNoticeContainer');
-        expect(container).toHaveStyle({backgroundColor: 'rgba(93,137,234,0.08)'});
+        expect(container).toHaveStyle({backgroundColor: 'rgba(76,183,255,0.08)'});
 
         props.type = 'success';
         wrapper.rerender(<SectionNotice {...props}/>);
         container = wrapper.getByTestId('sectionNoticeContainer');
-        expect(container).toHaveStyle({backgroundColor: 'rgba(61,184,135,0.08)'});
+        expect(container).toHaveStyle({backgroundColor: 'rgba(62,191,77,0.08)'});
 
         props.type = 'warning';
         wrapper.rerender(<SectionNotice {...props}/>);
         container = wrapper.getByTestId('sectionNoticeContainer');
-        expect(container).toHaveStyle({backgroundColor: 'rgba(255,188,31,0.08)'});
+        expect(container).toHaveStyle({backgroundColor: 'rgba(255,133,0,0.08)'});
 
         props.type = 'welcome';
         wrapper.rerender(<SectionNotice {...props}/>);

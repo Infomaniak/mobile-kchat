@@ -45,8 +45,7 @@ const database = {
     write: jest.fn(async (callback) => callback()),
 };
 
-describe.skip('useHandleSendMessage', () => {
-    // IK change : skipped on CI temporarily, will fix later
+describe('useHandleSendMessage', () => {
     const defaultProps = {
         value: 'test message',
         channelId: 'channel-id',
