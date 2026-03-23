@@ -204,7 +204,7 @@ const RescheduledDraft: React.FC<Props> = ({
     const optionMonday = (
         <PickerOption
             key={optionKeysOptionMonday}
-            label={intl.formatMessage({id: 'scheduled_post.picker.monday', defaultMessage: 'Monday at {9amTime}'}, {'9amTime': formattedTimeString})}
+            label={intl.formatMessage({id: 'scheduled_post.picker.monday', defaultMessage: 'Monday at {8amTime}'}, {'8amTime': formattedTimeString})}
             action={handleSelectOption}
             value={optionKeysOptionMonday}
             selected={selectedOption === optionKeysOptionMonday}
@@ -214,7 +214,7 @@ const RescheduledDraft: React.FC<Props> = ({
     const optionTomorrow = (
         <PickerOption
             key={optionKeyOptionTomorrow}
-            label={intl.formatMessage({id: 'scheduled_post.picker.tomorrow', defaultMessage: 'Tomorrow at {9amTime}'}, {'9amTime': formattedTimeString})}
+            label={intl.formatMessage({id: 'scheduled_post.picker.tomorrow', defaultMessage: 'Tomorrow at {8amTime}'}, {'8amTime': formattedTimeString})}
             action={handleSelectOption}
             value={optionKeyOptionTomorrow}
             selected={selectedOption === optionKeyOptionTomorrow}
@@ -224,7 +224,7 @@ const RescheduledDraft: React.FC<Props> = ({
     const optionNextMonday = (
         <PickerOption
             key={optionKeyOptionNextMonday}
-            label={intl.formatMessage({id: 'scheduled_post.picker.next_monday', defaultMessage: 'Next Monday at {9amTime}'}, {'9amTime': formattedTimeString})}
+            label={intl.formatMessage({id: 'scheduled_post.picker.next_monday', defaultMessage: 'Next Monday at {8amTime}'}, {'8amTime': formattedTimeString})}
             action={handleSelectOption}
             value={optionKeyOptionNextMonday}
             selected={selectedOption === optionKeyOptionNextMonday}
