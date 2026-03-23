@@ -57,7 +57,7 @@ jest.mock('@context/server', () => ({
 const SERVER_URL = 'https://appv1.mattermost.com';
 
 // Ik change : skip on CI, will fix later
-describe.skip('RescheduledDraft', () => {
+describe('RescheduledDraft', () => {
     let database: Database;
 
     const mockDraft = {
@@ -97,7 +97,7 @@ describe.skip('RescheduledDraft', () => {
         expect(getByTestId('edit_post.screen')).toBeTruthy();
     });
 
-    it.skip('should have navigation component registered on initialization', async () => {
+    it('should have navigation component registered on initialization', async () => {
         // IK change : skipped on CI temporarily, will fix later
         const {getByTestId} = renderWithEverything(<RescheduledDraft {...baseProps}/>, {database});
 
@@ -128,7 +128,7 @@ describe.skip('RescheduledDraft', () => {
         );
     });
 
-    it.skip('Should enable save button when data changes', async () => {
+    it('Should enable save button when data changes', async () => {
         // IK change : skipped on CI temporarily, will fix later
         jest.mocked(updateScheduledPost).mockResolvedValue({scheduledPost: {} as ScheduledPost, error: undefined});
 
@@ -164,7 +164,7 @@ describe.skip('RescheduledDraft', () => {
         expect(saveButton?.enabled).toBeTruthy();
     });
 
-    it.skip('should call Navigation event when save button is pressed', async () => {
+    it('should call Navigation event when save button is pressed', async () => {
         // IK change : skipped on CI temporarily, will fix later
         const {getByTestId} = renderWithEverything(
             <RescheduledDraft {...baseProps}/>,
@@ -225,7 +225,7 @@ describe.skip('RescheduledDraft', () => {
         expect(dismissModal).toHaveBeenCalledWith({componentId: baseProps.componentId});
     });
 
-    it.skip('should show snackbar when no time is selected', async () => {
+    it('should show snackbar when no time is selected', async () => {
         // IK change : skipped on CI temporarily, will fix later
         jest.mocked(updateScheduledPost).mockResolvedValue({scheduledPost: {} as ScheduledPost, error: undefined});
         const {getByTestId} = renderWithEverything(

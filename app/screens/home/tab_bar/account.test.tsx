@@ -25,8 +25,7 @@ const theme = {
     centerChannelColor: '#fff',
 };
 
-// Ik change : skip on CI, will fix later
-describe.skip('Account', () => {
+describe('Account', () => {
     const centerChannelColorWithOpacity = changeOpacity(theme.centerChannelColor, 0.48);
 
     it('should render correctly when focused', () => {
@@ -42,8 +41,7 @@ describe.skip('Account', () => {
         expect(container.props.style).toContainEqual({borderColor: theme.buttonBg});
     });
 
-    it.skip('should render correctly when unfocused', () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('should render correctly when unfocused', () => {
         const {getByTestId} = renderWithIntl(
             <Account
                 currentUser={currentUser}

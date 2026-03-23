@@ -14,7 +14,7 @@ jest.mock('@context/theme', () => ({
 }));
 jest.mock('@components/emoji', () => 'Emoji');
 
-// Ik change : skip on CI, will fix later
+// Ik change : skipped, we are not using this feature
 describe.skip('components/channel_bookmarks/channel_bookmark/BookmarkIcon', () => {
     const baseProps = {
         emojiSize: 24,

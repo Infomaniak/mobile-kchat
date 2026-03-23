@@ -61,8 +61,7 @@ function getTimezoneTestsCases() {
     return testCases;
 }
 
-// Ik change : skip on CI, will fix later
-describe.skip('<FormattedDate/>', () => {
+describe('<FormattedDate/>', () => {
     it.each(TEST_MATRIX)("should match snapshot for '%s' locale and '%p' format", (locale, format) => {
         const wrapper = renderWithIntl(
             <FormattedDate

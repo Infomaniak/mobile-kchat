@@ -226,7 +226,7 @@ describe('handlePlaybookRunUpdatedIncremental', () => {
     });
 
     it.skip('should handle playbook run incremental update successfully', async () => {
-        // IK change : skipped on CI temporarily, will fix later
+        // IK change : we do not use playbooks on this fork
         await operator.handlePlaybookRun({
             prepareRecordsOnly: false,
             runs: mockPlaybookList,

@@ -33,7 +33,7 @@ const serverUrl = 'some.server.url';
 jest.mock('@context/server');
 jest.mocked(useServerUrl).mockReturnValue(serverUrl);
 
-// Ik change : skip on CI, will fix later
+// Ik change : playbook feature not used
 describe.skip('ChannelHeader', () => {
     function getBaseProps(): ComponentProps<typeof ChannelHeader> {
         return {
@@ -118,8 +118,7 @@ describe.skip('ChannelHeader', () => {
         );
     });
 
-    it.skip('shows playbook button with count when there are active runs', () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('shows playbook button with count when there are active runs', () => {
         const props: any = getBaseProps();
         props.playbooksActiveRuns = 3;
         props.hasPlaybookRuns = true;
@@ -137,8 +136,7 @@ describe.skip('ChannelHeader', () => {
         );
     });
 
-    it.skip('navigates to single playbook run when there is an active playbook provided', () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('navigates to single playbook run when there is an active playbook provided', () => {
         const props: any = getBaseProps();
         props.playbooksActiveRuns = 1;
         props.hasPlaybookRuns = true;
@@ -155,8 +153,7 @@ describe.skip('ChannelHeader', () => {
         expect(goToPlaybookRuns).not.toHaveBeenCalled();
     });
 
-    it.skip('navigates to playbook runs list when there is no active playbook provided', () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('navigates to playbook runs list when there is no active playbook provided', () => {
         const props: any = getBaseProps();
         props.activeRunId = undefined;
         props.playbooksActiveRuns = 3;
@@ -174,8 +171,7 @@ describe.skip('ChannelHeader', () => {
         expect(goToPlaybookRun).not.toHaveBeenCalled();
     });
 
-    it.skip('should set the ephemeral store when we fetch the playbook runs for the channel', async () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('should set the ephemeral store when we fetch the playbook runs for the channel', async () => {
 
         const props: any = getBaseProps();
         props.playbooksActiveRuns = 0;
@@ -218,8 +214,7 @@ describe.skip('ChannelHeader', () => {
         });
     });
 
-    it.skip('should not fetch runs when we already have the runs synced', async () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('should not fetch runs when we already have the runs synced', async () => {
         const ephemeralGetSpy = jest.spyOn(EphemeralStore, 'getChannelPlaybooksSynced');
 
         const props = getBaseProps();

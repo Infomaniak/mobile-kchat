@@ -79,7 +79,7 @@ jest.mock('@utils/file');
 jest.mock('@utils/helpers');
 
 // IK change : skip - we do not use session on Infomaniak
-describe('SessionManager', () => {
+describe.skip('SessionManager', () => {
     const mockServerUrl = 'https://example.com';
     const mockServerDisplayName = 'Example Server';
     let appStateCallback: ((state: string) => void) | undefined;
@@ -135,7 +135,6 @@ describe('SessionManager', () => {
     });
 
     describe('constructor', () => {
-        // IK change : skip - we do not use session on Infomaniak
         it('should construct with Android correctly', async () => {
             Platform.OS = 'android';
             const manager = new SessionManagerClass();
