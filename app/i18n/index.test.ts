@@ -51,8 +51,7 @@ jest.mock('@assets/i18n/it.json', () => ({test: 'Test', hello: 'Ciao'}));
 // jest.mock('@assets/i18n/zh-CN.json', () => ({test: '测试', hello: '你好'}));
 // jest.mock('@assets/i18n/zh-TW.json', () => ({test: '測試', hello: '你好'}));
 
-describe.skip('i18n', () => {
-    // IK change : skipped on CI temporarily, will fix later
+describe('i18n', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         jest.mocked(getLocales).mockReturnValue([{
@@ -133,28 +132,13 @@ describe.skip('i18n', () => {
 
         it('returns correct translations for all supported locales', () => {
             const testCases = [
-                {locale: 'bg', hello: 'Здравейте', test: 'Тест'},
-                {locale: 'de', hello: 'Hallo', test: 'Test'},
+
+                // IK: Only testing supported locales in this fork (en, de, it, es, fr)
                 {locale: 'en', hello: 'Hello', test: 'Test'},
-                {locale: 'en-AU', hello: 'G\'day', test: 'Test'},
+                {locale: 'de', hello: 'Hallo', test: 'Test'},
                 {locale: 'es', hello: 'Hola', test: 'Prueba'},
-                {locale: 'fa', hello: 'سلام', test: 'تست'},
                 {locale: 'fr', hello: 'Bonjour', test: 'Test'},
-                {locale: 'hu', hello: 'Helló', test: 'Teszt'},
                 {locale: 'it', hello: 'Ciao', test: 'Test'},
-                {locale: 'ja', hello: 'こんにちは', test: 'テスト'},
-                {locale: 'ko', hello: '안녕하세요', test: '테스트'},
-                {locale: 'nl', hello: 'Hallo', test: 'Test'},
-                {locale: 'pl', hello: 'Cześć', test: 'Test'},
-                {locale: 'pt-BR', hello: 'Olá', test: 'Teste'},
-                {locale: 'ro', hello: 'Bună', test: 'Test'},
-                {locale: 'ru', hello: 'Привет', test: 'Тест'},
-                {locale: 'sv', hello: 'Hej', test: 'Test'},
-                {locale: 'tr', hello: 'Merhaba', test: 'Test'},
-                {locale: 'uk', hello: 'Привіт', test: 'Тест'},
-                {locale: 'vi', hello: 'Xin chào', test: 'Kiểm tra'},
-                {locale: 'zh-CN', hello: '你好', test: '测试'},
-                {locale: 'zh-TW', hello: '你好', test: '測試'},
             ];
 
             testCases.forEach(({locale, hello, test: testWord}) => {
@@ -170,14 +154,8 @@ describe.skip('i18n', () => {
             expect(logUtils.logError).not.toHaveBeenCalled();
         });
 
-        it('loads correct polyfills for Chinese locales', () => {
-            const zhCNTranslations = getTranslations('zh-CN');
-            expect(zhCNTranslations.hello).toBe('你好');
-            expect(zhCNTranslations.test).toBe('测试');
-
-            const zhTWTranslations = getTranslations('zh-TW');
-            expect(zhTWTranslations.hello).toBe('你好');
-            expect(zhTWTranslations.test).toBe('測試');
+        // IK: Chinese locales not supported in this fork
+        it.skip('loads correct polyfills for Chinese locales', () => {
         });
     });
 

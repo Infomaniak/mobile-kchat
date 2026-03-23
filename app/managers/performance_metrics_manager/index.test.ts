@@ -37,7 +37,7 @@ jest.mock('@utils/log', () => ({
 
 performance.timeOrigin = TEST_EPOCH;
 
-// Ik change : skip on CI, will fix later
+// IK change : we do not use performance metrics on Infomaniak
 describe.skip('performance_metrics_manager', () => {
     const serverUrl = 'http://www.someserverurl.com/';
     const expectedUrl = `${serverUrl}/api/v4/client_perf`;
@@ -94,8 +94,7 @@ describe.skip('performance_metrics_manager', () => {
             performance.clearMarks();
         });
 
-        it.skip('only load on target', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('only load on target', async () => {
             performance.mark('nativeLaunchStart');
             const measure = getMeasure(TEST_EPOCH + INTERVAL_TIME, INTERVAL_TIME);
             const expectedRequest = getBaseReportRequest(measure.timestamp, measure.timestamp + 1);
@@ -114,8 +113,7 @@ describe.skip('performance_metrics_manager', () => {
             expect(mockApiClient.post).toHaveBeenCalledWith(expectedUrl, expectedRequest);
         });
 
-        it.skip('only register load once', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('only register load once', async () => {
             performance.mark('nativeLaunchStart');
             const measure = getMeasure(TEST_EPOCH, 0);
             const expectedRequest = getBaseReportRequest(measure.timestamp, measure.timestamp + 1);
@@ -135,8 +133,7 @@ describe.skip('performance_metrics_manager', () => {
             expect(mockApiClient.post).not.toHaveBeenCalled();
         });
 
-        it.skip('retry if the mark is not yet present', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('retry if the mark is not yet present', async () => {
             const measure = getMeasure(TEST_EPOCH + (RETRY_TIME * 2), RETRY_TIME);
             const expectedRequest = getBaseReportRequest(measure.timestamp, measure.timestamp + 1);
             expectedRequest.body.histograms = [measure];
@@ -189,8 +186,7 @@ describe.skip('performance_metrics_manager', () => {
             PerformanceMetricsManager = new PerformanceMetricsManagerClass();
         });
 
-        it.skip('forces send on app state change to inactive, or anything other than active', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('forces send on app state change to inactive, or anything other than active', async () => {
             const appStateSpy = jest.spyOn(AppState, 'addEventListener');
 
             const measure = getMeasure(TEST_EPOCH, 0);
@@ -238,8 +234,7 @@ describe.skip('performance_metrics_manager', () => {
             await TestHelper.tearDown();
         });
 
-        it.skip('collects network request metrics', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('collects network request metrics', async () => {
             const timestamp = TEST_EPOCH;
             jest.setSystemTime(new Date(timestamp));
 
@@ -309,8 +304,7 @@ describe.skip('performance_metrics_manager', () => {
             expect(mockApiClient.post).not.toHaveBeenCalled();
         });
 
-        it.skip('send metric after it has been started', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('send metric after it has been started', async () => {
             const expectedRequest = getBaseReportRequest(measure1.timestamp, measure1.timestamp + 1);
             expectedRequest.body.histograms = [measure1];
 
@@ -325,8 +319,7 @@ describe.skip('performance_metrics_manager', () => {
             expect(mockApiClient.post).toHaveBeenCalledWith(expectedUrl1, expectedRequest);
         });
 
-        it.skip('a second end metric does not generate a second measure', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('a second end metric does not generate a second measure', async () => {
             const expectedRequest = getBaseReportRequest(measure1.timestamp, measure1.timestamp + 1);
             expectedRequest.body.histograms = [measure1];
 
@@ -345,8 +338,7 @@ describe.skip('performance_metrics_manager', () => {
             expect(mockApiClient.post).toHaveBeenCalledWith(expectedUrl1, expectedRequest);
         });
 
-        it.skip('different metrics do not interfere', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('different metrics do not interfere', async () => {
             const expectedRequest = getBaseReportRequest(measure1.timestamp, measure2.timestamp);
             expectedRequest.body.histograms = [measure1, measure2];
 
@@ -366,8 +358,7 @@ describe.skip('performance_metrics_manager', () => {
             expect(mockApiClient.post).toHaveBeenCalledWith(expectedUrl1, expectedRequest);
         });
 
-        it.skip('metrics to different servers do not interfere', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('metrics to different servers do not interfere', async () => {
             const expectedRequest1 = getBaseReportRequest(measure1.timestamp, measure1.timestamp + 1);
             expectedRequest1.body.histograms = [measure1];
 
@@ -391,8 +382,7 @@ describe.skip('performance_metrics_manager', () => {
             expect(mockApiClient.post).toHaveBeenCalledWith(expectedUrl2, expectedRequest2);
         });
 
-        it.skip('handles multiple marks with detailed logging', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('handles multiple marks with detailed logging', async () => {
             const timestamp = TEST_EPOCH + 200;
             const expectedRequest = getBaseReportRequest(timestamp, timestamp + 1);
             expectedRequest.body.histograms = [{

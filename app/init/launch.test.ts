@@ -88,7 +88,7 @@ describe('Launch', () => {
 
     describe('initialLaunch', () => {
         it.skip('should handle deep link launch', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+            // IK change : custom behavior, tested in launch.ik.test.ts
             const deepLinkUrl = 'mattermost://server-1.com';
             const launchProps = {
                 launchType: Launch.DeepLink,
@@ -108,7 +108,7 @@ describe('Launch', () => {
         });
 
         it.skip('should handle notification launch', async () => {
-            // IK change : skipped on CI temporarily, will fix later
+            // IK change : we do not use session notifications
             const payload = {type: PushNotification.NOTIFICATION_TYPE.SESSION, ack_id: 'ack1'};
 
             jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(null);

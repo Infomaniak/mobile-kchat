@@ -78,8 +78,8 @@ jest.mock('@store/ephemeral_store');
 jest.mock('@utils/file');
 jest.mock('@utils/helpers');
 
-// Ik change : skip on CI, will fix later
-describe.skip('SessionManager', () => {
+// IK change : skip - we do not use session on Infomaniak
+describe('SessionManager', () => {
     const mockServerUrl = 'https://example.com';
     const mockServerDisplayName = 'Example Server';
     let appStateCallback: ((state: string) => void) | undefined;
@@ -135,8 +135,8 @@ describe.skip('SessionManager', () => {
     });
 
     describe('constructor', () => {
-        // IK change : skipped on CI temporarily, will fix later
-        it.skip('should construct with Android correctly', async () => {
+        // IK change : skip - we do not use session on Infomaniak
+        it('should construct with Android correctly', async () => {
             Platform.OS = 'android';
             const manager = new SessionManagerClass();
             expect(manager).toBeDefined();

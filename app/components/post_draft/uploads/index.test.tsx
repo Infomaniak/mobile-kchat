@@ -15,6 +15,12 @@ jest.mock('@managers/draft_upload_manager', () => ({
     registerProgressHandler: jest.fn(() => jest.fn()),
 }));
 
+jest.mock('@managers/network_manager', () => ({
+    getClient: jest.fn(() => ({
+        getCurrentBearerToken: jest.fn(() => 'mock-token'),
+    })),
+}));
+
 jest.mock('@utils/gallery', () => ({
     fileToGalleryItem: jest.fn((file) => ({
         id: file.id,
@@ -57,8 +63,7 @@ describe('Uploads', () => {
         expect(getByTestId('uploads')).toBeTruthy();
     });
 
-    it.skip('should render with image files', () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('should render with image files', () => {
         const imageFiles = [
             {
                 id: 'image1',
@@ -140,8 +145,7 @@ describe('Uploads', () => {
         expect(getByTestId('uploads')).toBeTruthy();
     });
 
-    it.skip('should render with mixed file types', () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('should render with mixed file types', () => {
         const mixedFiles = [
             {
                 id: 'image1',
@@ -197,8 +201,7 @@ describe('Uploads', () => {
         expect(getByText('File upload failed')).toBeTruthy();
     });
 
-    it.skip('should filter out failed and uploading files from gallery', () => {
-        // IK change : skipped on CI temporarily, will fix later
+    it('should filter out failed and uploading files from gallery', () => {
         const filesWithFailedAndUploading = [
             {
                 id: 'file1',

@@ -29,6 +29,9 @@ jest.mock('react-native-reanimated', () => {
             sharedValues.set(key, sv);
             return sv;
         }),
+        makeMutable: jest.fn(() => ({
+            value: 20, // Match the mocked safe area inset top value
+        })),
         useAnimatedScrollHandler: jest.fn((handlers) => (event: any) => {
             if (handlers.onScroll) {
                 handlers.onScroll(event);
@@ -53,14 +56,12 @@ describe('Header Hooks', () => {
     });
 
     describe('useDefaultHeaderHeight', () => {
-        it.skip('should return correct height for mobile', () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should return correct height for mobile', () => {
             const {result} = renderHook(() => useDefaultHeaderHeight());
             expect(result.current).toBe(ViewConstants.DEFAULT_HEADER_HEIGHT + 20);
         });
 
-        it.skip('should return correct height for tablet', () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should return correct height for tablet', () => {
             (useIsTablet as jest.Mock).mockReturnValue(true);
             const {result} = renderHook(() => useDefaultHeaderHeight());
             expect(result.current).toBe(ViewConstants.TABLET_HEADER_HEIGHT + 20);
@@ -68,8 +69,7 @@ describe('Header Hooks', () => {
     });
 
     describe('useLargeHeaderHeight', () => {
-        it.skip('should return correct large header height', () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should return correct large header height', () => {
             const {result} = renderHook(() => useLargeHeaderHeight());
             const expectedHeight = ViewConstants.DEFAULT_HEADER_HEIGHT +
                                  ViewConstants.LARGE_HEADER_TITLE_HEIGHT +
@@ -79,8 +79,7 @@ describe('Header Hooks', () => {
     });
 
     describe('useHeaderHeight', () => {
-        it.skip('should return correct height values', () => {
-            // IK change : skipped on CI temporarily, will fix later
+        it('should return correct height values', () => {
             const {result} = renderHook(() => useHeaderHeight());
             const defaultHeight = ViewConstants.DEFAULT_HEADER_HEIGHT + 20;
             const largeHeight = defaultHeight +
