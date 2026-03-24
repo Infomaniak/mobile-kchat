@@ -1,9 +1,9 @@
 {
-  "name": "mattermost-mobile",
-  "version": "2.38.0",
-  "description": "Mattermost Mobile with React Native",
-  "repository": "git@github.com:mattermost/mattermost-mobile.git",
-  "author": "Mattermost, Inc.",
+  "name": "mobile-kchat",
+  "version": "1.0.45",
+  "description": "kChat Mobile with React Native",
+  "repository": "git@github.com:Infomaniak/mobile-kchat.git",
+  "author": "Infomaniak Network SA",
   "license": "Apache 2.0",
   "private": true,
   "engines": {
