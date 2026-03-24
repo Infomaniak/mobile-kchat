@@ -38,6 +38,23 @@ const {PLAYBOOK_RUN, PLAYBOOK_CHECKLIST, PLAYBOOK_CHECKLIST_ITEM} = PLAYBOOK_TAB
 export default schemaMigrations({
     migrations: [
         {
+            toVersion: 10,
+            steps: [
+                addColumns({
+                    table: SCHEDULED_POST,
+                    columns: [
+                        {name: 'type', type: 'string', isOptional: true},
+                    ],
+                }),
+                addColumns({
+                    table: DRAFT,
+                    columns: [
+                        {name: 'type', type: 'string', isOptional: true},
+                    ],
+                }),
+            ],
+        },
+        {
             toVersion: 9,
             steps: [
                 addColumns({
