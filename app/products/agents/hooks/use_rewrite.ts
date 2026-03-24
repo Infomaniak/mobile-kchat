@@ -115,6 +115,15 @@ export const useRewrite = (): UseRewriteReturn => {
                             }
                         }
 
+                        // Save history for cancel/regenerate
+                        // Only save originalText on the first rewrite — keep the original across successive rewrites
+                        const existingHistory = rewriteStore.getRewriteHistory();
+                        rewriteStore.setRewriteHistory({
+                            originalText: existingHistory?.originalText ?? message,
+                            lastAction: action,
+                            lastCustomPrompt: customPrompt,
+                        });
+
                         rewriteStore.setRewriteProcessing(false, '');
                         currentPromiseRef.current = null;
                         onSuccess(formattedResponse);
