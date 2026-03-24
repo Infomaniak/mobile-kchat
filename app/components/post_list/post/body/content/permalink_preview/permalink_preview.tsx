@@ -12,7 +12,7 @@ import FormattedText from '@components/formatted_text';
 import FormattedTime from '@components/formatted_time';
 import Markdown from '@components/markdown';
 import TranslateIcon from '@components/post_list/post/header/translate_icon';
-import ProfilePicture from '@components/profile_picture';
+import ProfilePicture from '@components/post_list/post/profile_picture/profile_picture';
 import {View as ViewConstants} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
@@ -24,6 +24,7 @@ import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {displayUsername, getUserTimezone} from '@utils/user';
 
+import MessageAttachment from '../message_attachments/message_attachment';
 import Opengraph from '../opengraph';
 
 import PermalinkFiles from './permalink_files';
@@ -142,6 +143,7 @@ const PermalinkPreview = ({
     const isTablet = useIsTablet();
     const styles = getStyleSheet(theme);
     const [showGradient, setShowGradient] = useState(false);
+    const [layoutWidth, setLayoutWidth] = useState(0);
 
     const maxWidth = useMemo(() => {
         if (!isTablet) {
@@ -199,8 +201,12 @@ const PermalinkPreview = ({
     const isEdited = useMemo(() => embedData && embedData.post && embedData.post.edit_at > 0, [embedData]);
 
     const authorDisplayName = useMemo(() => {
+        const props = embedPost?.props;
+        if (props?.from_webhook === 'true' && typeof props.override_username === 'string') {
+            return props.override_username;
+        }
         return displayUsername(author, locale, teammateNameDisplay);
-    }, [author, locale, teammateNameDisplay]);
+    }, [author, locale, teammateNameDisplay, embedPost?.props]);
 
     const channelContextText = useMemo(() => {
         const displayName = channel_type === 'D' ? authorDisplayName : channel_display_name;
@@ -223,8 +229,9 @@ const PermalinkPreview = ({
     }, [embedData.team_name, embedData.post_id, serverUrl]));
 
     const handleContentLayout = useCallback((event: LayoutChangeEvent) => {
-        const {height} = event.nativeEvent.layout;
+        const {height, width} = event.nativeEvent.layout;
         setShowGradient(height >= maxPermalinkHeight);
+        setLayoutWidth(width);
     }, [maxPermalinkHeight]);
 
     // We need to memoize this value because it is actually a getter that returns a new list
@@ -251,9 +258,7 @@ const PermalinkPreview = ({
                 <View onLayout={handleContentLayout}>
                     <View style={styles.header}>
                         <ProfilePicture
-                            author={author}
-                            size={32}
-                            showStatus={false}
+                            author={embedPost || author}
                         />
                         <View style={styles.authorInfo}>
                             <Text
@@ -305,6 +310,18 @@ const PermalinkPreview = ({
                         theme={theme}
                         isEmbedded={true}
                     />
+
+                    {Array.isArray(embedPost?.props?.attachments) && embedPost?.props?.attachments[0] && (
+                        <MessageAttachment
+                            attachment={embedPost.props.attachments[0]}
+                            channelId={embedData.channel_id}
+                            layoutWidth={layoutWidth}
+                            location={location}
+                            metadata={embedData?.post?.metadata || null}
+                            postId={embedData?.post?.id || ''}
+                            theme={theme}
+                        />
+                    )}
 
                     {hasFiles && post && (
                         <PermalinkFiles
