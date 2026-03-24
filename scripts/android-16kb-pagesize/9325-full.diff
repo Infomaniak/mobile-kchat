@@ -28,9 +28,9 @@ index 08eb45fcd9..914911c17a 100644
 +++ b/app.json
 @@ -1,4 +1,7 @@
  {
-   "name": "Mattermost",
--  "displayName": "Mattermost"
-+  "displayName": "Mattermost",
+   "name": "kChat",
+-  "displayName": "kChat"
++  "displayName": "kChat",
 +  "plugins": [
 +    "expo-web-browser"
 +  ]
