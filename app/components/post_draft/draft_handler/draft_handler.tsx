@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {rewriteStore} from '@agents/store';
 import React, {useCallback, useEffect, useRef} from 'react';
 import {useIntl} from 'react-intl';
 
@@ -69,6 +70,7 @@ export default function DraftHandler(props: Props) {
     const clearDraft = useCallback(() => {
         removeDraft(serverUrl, channelId, rootId);
         updateValue('');
+        rewriteStore.clearRewriteHistory();
     }, [serverUrl, channelId, rootId, updateValue]);
 
     const addFiles = useCallback((newFiles: FileInfo[]) => {
