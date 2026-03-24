@@ -770,7 +770,6 @@ exports[`components/channel_list_row should show results and tutorial 1`] = `
             testID="create_direct_message.user_list.user_item.1.1.profile_picture"
           >
             <ViewManagerAdapter_ExpoImage
-              backgroundColor={4294967295}
               borderRadius={12}
               collapsable={false}
               containerViewRef={"[React.ref]"}
@@ -794,7 +793,6 @@ exports[`components/channel_list_row should show results and tutorial 1`] = `
               }
               jestInlineStyle={
                 {
-                  "backgroundColor": "#ffffff",
                   "borderRadius": 12,
                   "height": 24,
                   "width": 24,
@@ -821,7 +819,6 @@ exports[`components/channel_list_row should show results and tutorial 1`] = `
               }
               style={
                 {
-                  "backgroundColor": "#ffffff",
                   "borderRadius": 12,
                   "height": 24,
                   "width": 24,
@@ -1119,7 +1116,6 @@ exports[`components/channel_list_row should show results no tutorial 1`] = `
             testID="create_direct_message.user_list.user_item.1.1.profile_picture"
           >
             <ViewManagerAdapter_ExpoImage
-              backgroundColor={4294967295}
               borderRadius={12}
               collapsable={false}
               containerViewRef={"[React.ref]"}
@@ -1143,7 +1139,6 @@ exports[`components/channel_list_row should show results no tutorial 1`] = `
               }
               jestInlineStyle={
                 {
-                  "backgroundColor": "#ffffff",
                   "borderRadius": 12,
                   "height": 24,
                   "width": 24,
@@ -1170,7 +1165,6 @@ exports[`components/channel_list_row should show results no tutorial 1`] = `
               }
               style={
                 {
-                  "backgroundColor": "#ffffff",
                   "borderRadius": 12,
                   "height": 24,
                   "width": 24,
@@ -1508,7 +1502,6 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
             testID="create_direct_message.user_list.user_item.1.1.profile_picture"
           >
             <ViewManagerAdapter_ExpoImage
-              backgroundColor={4294967295}
               borderRadius={12}
               collapsable={false}
               containerViewRef={"[React.ref]"}
@@ -1532,7 +1525,6 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
               }
               jestInlineStyle={
                 {
-                  "backgroundColor": "#ffffff",
                   "borderRadius": 12,
                   "height": 24,
                   "width": 24,
@@ -1559,7 +1551,6 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
               }
               style={
                 {
-                  "backgroundColor": "#ffffff",
                   "borderRadius": 12,
                   "height": 24,
                   "width": 24,
@@ -1754,7 +1745,6 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
             testID="create_direct_message.user_list.user_item.2.2.profile_picture"
           >
             <ViewManagerAdapter_ExpoImage
-              backgroundColor={4294967295}
               borderRadius={12}
               collapsable={false}
               containerViewRef={"[React.ref]"}
@@ -1778,7 +1768,6 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
               }
               jestInlineStyle={
                 {
-                  "backgroundColor": "#ffffff",
                   "borderRadius": 12,
                   "height": 24,
                   "width": 24,
@@ -1805,7 +1794,6 @@ exports[`components/channel_list_row should show results no tutorial 2 users 1`]
               }
               style={
                 {
-                  "backgroundColor": "#ffffff",
                   "borderRadius": 12,
                   "height": 24,
                   "width": 24,

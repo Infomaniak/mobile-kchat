@@ -44,10 +44,9 @@ const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Pro
 
     const fIStyle = useMemo(() => ({
         borderRadius: size / 2,
-        backgroundColor: theme.centerChannelBg,
         height: size,
         width: size,
-    }), [size, theme.centerChannelBg]);
+    }), [size]);
 
     const imgSource = useMemo(() => {
         if (!author || typeof source === 'string') {
