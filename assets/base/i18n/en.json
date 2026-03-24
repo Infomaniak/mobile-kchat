@@ -1,6 +1,5 @@
 {
   "account.logout": "Log out",
-  "account.logout_from": "Log out of {serverName}",
   "account.server_preprod": "Switch to NEXT",
   "account.server_prod": "Switch to STABLE",
   "account.settings": "Settings",

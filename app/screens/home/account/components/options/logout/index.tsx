@@ -25,7 +25,6 @@ const LogOut = () => {
     return (
         <OptionItem
             action={onLogout}
-            description={intl.formatMessage({id: 'account.logout_from', defaultMessage: 'Log out of {serverName}'}, {serverName: serverDisplayName})}
             destructive={true}
             icon='exit-to-app'
             label={intl.formatMessage({id: 'account.logout', defaultMessage: 'Log out'})}
