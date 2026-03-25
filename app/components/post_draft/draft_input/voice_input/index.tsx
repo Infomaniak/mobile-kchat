@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useKeepAwake} from 'expo-keep-awake';
+import {useKeepAwake} from '@sayem314/react-native-keep-awake';
 import React, {useCallback, useEffect, useState} from 'react';
 import {TouchableOpacity, View} from 'react-native';
 import AudioRecorderPlayer, {AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption, AudioEncoderAndroidType, AudioSourceAndroidType, OutputFormatAndroidType, type AudioSet} from 'react-native-audio-recorder-player';
@@ -66,6 +66,7 @@ type VoiceInputProps = {
 }
 
 const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
+    useKeepAwake();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const {storeLocalAudioURI} = useAudioPlayerContext();
@@ -73,9 +74,6 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
     const [timing, setTiming] = useState('00:00');
     const [recorder, setRecorder] = useState<AudioRecorderPlayer>();
     const [recordData, setRecordData] = useState<Array<{ metering: number; isNew: boolean }>>([]);
-
-    // Prevent the device from going to sleep while recording
-    useKeepAwake();
 
     useEffect(() => {
         const record = async () => {
