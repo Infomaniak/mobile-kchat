@@ -1,16 +1,14 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useMemo, useState, useEffect} from 'react';
 
-import {savePreference} from '@actions/remote/preference';
+import {saveThemePreference} from '@actions/local/preferences';
 import SettingContainer from '@components/settings/container';
 import {Preferences} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import useDidUpdate from '@hooks/did_update';
-import {usePreventDoubleTap} from '@hooks/utils';
 import {popTopScreen} from '@screens/navigation';
 
 import CustomTheme from './custom_theme';
@@ -22,49 +20,51 @@ type DisplayThemeProps = {
     allowedThemeKeys: string[];
     componentId: AvailableScreens;
     currentTeamId: string;
-    currentUserId: string;
 }
-const DisplayTheme = ({allowedThemeKeys, componentId, currentTeamId, currentUserId}: DisplayThemeProps) => {
+const DisplayTheme = ({allowedThemeKeys, componentId, currentTeamId}: DisplayThemeProps) => {
     const serverUrl = useServerUrl();
     const theme = useTheme();
-    const [customTheme, setCustomTheme] = useState(theme.type?.toLowerCase() === 'custom' ? theme : undefined);
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const initialTheme = useMemo(() => theme, [/* dependency array should remain empty */]);
+    const [newTheme, setNewTheme] = useState<string | undefined>(undefined);
     const close = () => popTopScreen(componentId);
 
-    const handleThemeChange = usePreventDoubleTap(useCallback(async (themeSelected: string) => {
-        const allowedTheme = allowedThemeKeys.find((tk) => tk === themeSelected);
-        const themeJson = Preferences.THEMES[allowedTheme as ThemeKey] || customTheme;
+    useEffect(() => {
+        const differentTheme = theme.type?.toLowerCase() !== newTheme?.toLowerCase();
 
-        const pref: PreferenceType = {
-            category: Preferences.CATEGORIES.THEME,
-            name: currentTeamId,
-            user_id: currentUserId,
-            value: JSON.stringify(themeJson),
-        };
-        await savePreference(serverUrl, [pref]);
-    }, [allowedThemeKeys, currentTeamId, currentUserId, customTheme, serverUrl]));
-
-    useDidUpdate(() => {
-        // when the user selects any of the predefined theme when the current theme is custom, the custom theme will disappear.
-        // by storing the current theme in the state, the custom theme will remain, and the user can switch back to it
-        if (theme.type?.toLowerCase() === 'custom') {
-            setCustomTheme(theme);
+        if (!differentTheme) {
+            close();
+            return;
         }
-    }, [theme.type]);
+        setThemePreference();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [newTheme]);
 
-    useAndroidHardwareBackHandler(componentId, close);
+    const setThemePreference = useCallback(() => {
+        const allowedTheme = allowedThemeKeys.find((tk) => tk === newTheme);
+        const themeJson = Preferences.THEMES[allowedTheme as ThemeKey] || initialTheme;
+        saveThemePreference(themeJson);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [allowedThemeKeys, currentTeamId, theme.type, serverUrl, newTheme]);
+
+    const onAndroidBack = () => {
+        setThemePreference();
+        close();
+    };
+
+    useAndroidHardwareBackHandler(componentId, onAndroidBack);
 
     return (
         <SettingContainer testID='theme_display_settings'>
             <ThemeTiles
                 allowedThemeKeys={allowedThemeKeys}
-                onThemeChange={handleThemeChange}
+                onThemeChange={setNewTheme}
                 selectedTheme={theme.ksuiteTheme}
             />
-            {customTheme && (
+            {initialTheme.type === 'custom' && (
                 <CustomTheme
-                    setTheme={handleThemeChange}
-                    displayTheme={'custom'}
+                    setTheme={setNewTheme}
+                    displayTheme={initialTheme.type}
                 />
             )}
         </SettingContainer>

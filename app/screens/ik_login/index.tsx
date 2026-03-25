@@ -7,6 +7,7 @@ import {Image, View} from 'react-native';
 import {infomaniakLogin} from '@actions/remote/iksession';
 import FormattedText from '@components/formatted_text';
 import {Launch} from '@constants';
+import {getDefaultThemeByAppearance} from '@context/theme';
 import {login as displayLoginWebView} from '@init/ikauth';
 import {launchToHome} from '@init/launch';
 import PushNotifications from '@init/push_notifications';
@@ -31,8 +32,9 @@ const Server = ({
     theme,
 }: ServerProps) => {
     const [connecting, setConnecting] = useState(false);
-    const styles = getStyleSheet(theme);
-    const isLightMode = theme.type === 'Infomaniak';
+    const safeTheme = theme || getDefaultThemeByAppearance();
+    const styles = getStyleSheet(safeTheme);
+    const isLightMode = safeTheme.type === 'Infomaniak';
 
     const handleConnect = async () => {
         setConnecting(true);
@@ -103,7 +105,7 @@ const Server = ({
                         <ServerForm
                             connecting={connecting}
                             handleConnect={handleConnect}
-                            theme={theme}
+                            theme={safeTheme}
                         />
                     </View>
                 </View>
