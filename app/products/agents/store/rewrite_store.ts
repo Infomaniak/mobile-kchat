@@ -3,7 +3,7 @@
 
 import {BehaviorSubject} from 'rxjs';
 
-import type {Agent} from '@agents/types';
+import type {Agent, RewriteAction} from '@agents/types';
 
 /**
  * Rewrite processing state
@@ -14,11 +14,21 @@ export interface RewriteState {
 }
 
 /**
+ * State to track the last rewrite for cancel/regenerate
+ */
+export interface RewriteHistory {
+    originalText: string;
+    lastAction: RewriteAction;
+    lastCustomPrompt?: string;
+}
+
+/**
  * Store for managing rewrite-related ephemeral state
  */
 class RewriteStore {
     private agentsSubjects: Map<string, BehaviorSubject<Agent[]>> = new Map();
     private rewriteState = new BehaviorSubject<RewriteState>({isProcessing: false, serverUrl: ''});
+    private rewriteHistory: RewriteHistory | null = null;
 
     /**
      * Get or create a BehaviorSubject for agents per server
@@ -87,6 +97,22 @@ class RewriteStore {
      */
     isRewriteProcessing(): boolean {
         return this.rewriteState.getValue().isProcessing;
+    }
+
+    // =========================================================================
+    // Rewrite History (for cancel/regenerate)
+    // =========================================================================
+
+    setRewriteHistory(history: RewriteHistory | null) {
+        this.rewriteHistory = history;
+    }
+
+    getRewriteHistory(): RewriteHistory | null {
+        return this.rewriteHistory;
+    }
+
+    clearRewriteHistory() {
+        this.rewriteHistory = null;
     }
 }
 
