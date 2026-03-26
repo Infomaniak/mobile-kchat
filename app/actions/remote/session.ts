@@ -188,7 +188,7 @@ export const logout = async (
     intl: IntlShape | undefined,
     {
         skipServerLogout = false,
-        removeServer = false,
+        removeServer = true,
         skipEvents = false,
         logoutOnAlert = false,
         skipAlert = false,
