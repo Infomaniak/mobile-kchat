@@ -2,4 +2,4 @@
 // See LICENSE.txt for license information.
 
 export {default as streamingStore, useStreamingState} from './streaming_store';
-export {default as rewriteStore, type RewriteState} from './rewrite_store';
+export {default as rewriteStore, type RewriteState, type RewriteHistory} from './rewrite_store';

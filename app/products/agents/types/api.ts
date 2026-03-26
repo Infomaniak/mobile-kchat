@@ -50,7 +50,6 @@ export type AgentsStatusResponse = {
  * Request payload for rewriting a message
  */
 export type RewriteRequest = {
-    agent_id?: string;
     message: string;
     action?: string;
     custom_prompt?: string;

@@ -1,18 +1,17 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import EuriaIcon from '@agents/components/euria_icon';
 import {useRewrite} from '@agents/hooks';
 import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard} from 'react-native';
 
-import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import {openAsBottomSheet} from '@screens/navigation';
-import {changeOpacity} from '@utils/theme';
 
 const ICON_SIZE = 24;
 
@@ -27,7 +26,7 @@ const styles = {
     icon: {
         alignItems: 'center' as const,
         justifyContent: 'center' as const,
-        padding: 10,
+        flex: 1,
     },
 };
 
@@ -44,7 +43,7 @@ export default function AIRewriteAction({
 
     const handlePress = useCallback(() => {
         Keyboard.dismiss();
-        const title = isTablet ? intl.formatMessage({id: 'ai_rewrite.title', defaultMessage: 'AI Rewrite'}) : '';
+        const title = isTablet ? intl.formatMessage({id: 'ai_rewrite.title', defaultMessage: 'Ask Euria'}) : '';
 
         openAsBottomSheet({
             closeButtonId: 'close-ai-rewrite',
@@ -59,23 +58,19 @@ export default function AIRewriteAction({
         });
     }, [intl, isTablet, theme, value, updateValue]);
 
-    const isDisabled = disabled || isProcessing;
+    const hasMessage = Boolean(value.trim());
+    const isDisabled = disabled || isProcessing || !hasMessage;
     const actionTestID = isDisabled ? `${testID}.disabled` : testID;
-    const iconColor = isDisabled ?
-        changeOpacity(theme.centerChannelColor, 0.16) :
-        changeOpacity(theme.centerChannelColor, 0.64);
 
     return (
         <TouchableWithFeedback
             testID={actionTestID}
             disabled={isDisabled}
             onPress={handlePress}
-            style={styles.icon}
+            style={[styles.icon, isDisabled && {opacity: 0.4}]}
             type={'opacity'}
         >
-            <CompassIcon
-                name='creation-outline'
-                color={iconColor}
+            <EuriaIcon
                 size={ICON_SIZE}
             />
         </TouchableWithFeedback>
