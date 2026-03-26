@@ -76,6 +76,10 @@ jest.mock('expo-web-browser', () => ({
 
 jest.mock('@react-native-camera-roll/camera-roll', () => ({}));
 
+jest.mock('@sayem314/react-native-keep-awake', () => ({
+    useKeepAwake: jest.fn(),
+}));
+
 jest.mock('@mattermost/react-native-turbo-log', () => ({
     getLogPaths: jest.fn(),
 }));
