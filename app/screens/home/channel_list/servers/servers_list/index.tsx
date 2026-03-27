@@ -72,7 +72,7 @@ const ServerList = ({servers}: Props) => {
             showButton={false}
             showTitle={!isTablet}
             testID='server_list'
-            title={intl.formatMessage({id: 'your.teams', defaultMessage: 'Your teams'})}
+            title={intl.formatMessage({id: 'your.servers', defaultMessage: 'Your organizations'})}
         >
             <View style={[styles.container, {marginTop: isTablet ? 12 : 0}]}>
                 <List
