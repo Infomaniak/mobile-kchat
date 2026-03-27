@@ -3,10 +3,8 @@ name: build-ios-beta
 
 on:
   push:
-    branches:
-      - build-beta-[0-9]+
-      - build-beta-ios-[0-9]+
-      - build-beta-sim-[0-9]+
+    tags:
+      - '*-beta-ios.*'
 
 env:
   NODE_VERSION: 22.14.0
