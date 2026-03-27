@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {rewriteStore} from '@agents/store';
 import React, {useCallback, useEffect, useRef} from 'react';
 import {useIntl} from 'react-intl';
 
@@ -14,6 +15,7 @@ import SendHandler from '../send_handler';
 
 import type {PackName} from '@hooks/plans';
 import type {ErrorHandlers} from '@typings/components/upload_error_handlers';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
     testID?: string;
@@ -32,6 +34,8 @@ type Props = {
     setIsFocused: (isFocused: boolean) => void;
     isCurrentUserAdmin: boolean;
     currentPackName: PackName;
+    onPostCreated?: (postId: string) => void;
+    location?: AvailableScreens;
 }
 
 const emptyFileList: FileInfo[] = [];
@@ -54,6 +58,8 @@ export default function DraftHandler(props: Props) {
         setIsFocused,
         currentPackName,
         isCurrentUserAdmin,
+        onPostCreated,
+        location,
     } = props;
     const serverUrl = useServerUrl();
     const intl = useIntl();
@@ -64,7 +70,8 @@ export default function DraftHandler(props: Props) {
     const clearDraft = useCallback(() => {
         removeDraft(serverUrl, channelId, rootId);
         updateValue('');
-    }, [serverUrl, channelId, rootId]);
+        rewriteStore.clearRewriteHistory();
+    }, [serverUrl, channelId, rootId, updateValue]);
 
     const addFiles = useCallback((newFiles: FileInfo[]) => {
         if (!newFiles.length) {
@@ -97,7 +104,7 @@ export default function DraftHandler(props: Props) {
         }
 
         newUploadError(null);
-    }, [intl, newUploadError, maxFileSize, serverUrl, files?.length, channelId, rootId]);
+    }, [intl, newUploadError, maxFileSize, serverUrl, files?.length, channelId, rootId, canUploadFiles, maxFileCount]);
 
     // This effect mainly handles keeping clean the uploadErrorHandlers, and
     // reinstantiate them on component mount and file retry.
@@ -119,7 +126,7 @@ export default function DraftHandler(props: Props) {
                 uploadErrorHandlers.current[file.clientId!] = DraftEditPostUploadManager.registerErrorHandler(file.clientId!, newUploadError);
             }
         }
-    }, [files]);
+    }, [files, newUploadError]);
 
     useEffect(() => {
         if (uploadError && files?.[0].is_voice_recording) {
@@ -128,7 +135,7 @@ export default function DraftHandler(props: Props) {
                 defaultMessage: 'Recording failed, please try again.',
             }));
         }
-    }, [uploadError, files]);
+    }, [uploadError, files, newUploadError, intl]);
 
     return (
         <SendHandler
@@ -148,6 +155,8 @@ export default function DraftHandler(props: Props) {
             updatePostInputTop={updatePostInputTop}
             updateValue={updateValue}
             setIsFocused={setIsFocused}
+            onPostCreated={onPostCreated}
+            location={location}
         />
     );
 }

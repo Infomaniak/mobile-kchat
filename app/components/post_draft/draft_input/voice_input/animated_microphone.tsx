@@ -75,7 +75,7 @@ const AnimatedMicrophone = () => {
             800,
             true,
         );
-    }, []);
+    }, [val]);
 
     return (
         <View style={[styles.mic]}>

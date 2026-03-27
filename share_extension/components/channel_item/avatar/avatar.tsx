@@ -5,11 +5,13 @@ import {Image, type ImageProps} from 'expo-image';
 import React from 'react';
 import {View} from 'react-native';
 
+import {buildAbsoluteUrl} from '@actions/remote/file';
 import CompassIcon from '@components/compass_icon';
 import {ACCOUNT_OUTLINE_IMAGE} from '@constants/profile';
 import NetworkManager from '@managers/network_manager';
 import {useShareExtensionServerUrl} from '@share/state';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {getLastPictureUpdate} from '@utils/user';
 
 import type UserModel from '@typings/database/models/servers/user';
 
@@ -64,13 +66,14 @@ const Avatar = ({author, theme}: Props) => {
     }
 
     let icon;
-    if (pictureUrl && token) {
+    if (author && pictureUrl && token && serverUrl) {
         const imgSource: ImageProps['source'] = {
-            uri: pictureUrl,
+            uri: buildAbsoluteUrl(serverUrl, pictureUrl),
             headers: {Authorization: token},
         };
         icon = (
             <Image
+                id={`user-${author.id}-${getLastPictureUpdate(author)}`}
                 key={pictureUrl}
                 style={style.image}
                 source={imgSource}

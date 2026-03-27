@@ -2,8 +2,8 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {DeviceEventEmitter} from 'react-native';
-import Animated, {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
+import {Animated, DeviceEventEmitter} from 'react-native';
+import {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 
 import FormattedText from '@components/formatted_text';
 import {Events} from '@constants';
@@ -40,7 +40,8 @@ function Typing({
     const recording = useRef<Array<{id: string; now: number; username: string}>>([]);
     const timeoutToDisappear = useRef<{ [k in Action]?: NodeJS.Timeout }>({});
     const mounted = useRef(false);
-    const [refresh, setRefresh] = useState(0);
+
+    const [refresh, setRefresh] = useState(0); // Used to trigger re-renders when typing state changes
 
     const theme = useTheme();
     const style = getStyleSheet(theme);
@@ -77,7 +78,7 @@ function Typing({
         if (mounted.current) {
             setRefresh(Date.now());
         }
-    }, [channelId, rootId]);
+    }, [action]);
     const onUserStartTyping = useCreateOnUserStartAction('typing');
     const onUserStartRecording = useCreateOnUserStartAction('recording');
 
@@ -111,7 +112,7 @@ function Typing({
         } else if (mounted.current) {
             setRefresh(Date.now());
         }
-    }, [channelId, rootId]);
+    }, [action, ref]);
     const onUserStopTyping = useCreateOnUserStopAction('typing', typing);
     const onUserStopRecording = useCreateOnUserStopAction('recording', recording);
 
@@ -134,7 +135,7 @@ function Typing({
                 listener.remove();
             }
         };
-    }, []);
+    }, [onUserStartRecording, onUserStartTyping, onUserStopRecording, onUserStopTyping]);
 
     useEffect(() => {
         const listener = DeviceEventEmitter.addListener(Events.USER_STOP_TYPING, onUserStopTyping);
@@ -145,7 +146,7 @@ function Typing({
 
     useEffect(() => {
         height.value = (typing.current.length + recording.current.length) ? TYPING_HEIGHT : 0;
-    }, [refresh]);
+    }, [height, refresh]);
 
     useEffect(() => {
         typing.current = [];
@@ -243,4 +244,3 @@ function Typing({
 }
 
 export default React.memo(Typing);
-

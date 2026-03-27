@@ -2,12 +2,13 @@
 // See LICENSE.txt for license information.
 
 import {nativeApplicationVersion, nativeBuildVersion} from 'expo-application';
-import React, {useEffect} from 'react';
+import React from 'react';
+import {defineMessages} from 'react-intl';
 import {Keyboard, StyleSheet, type TextStyle, View} from 'react-native';
 import Animated, {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 
 import FormattedText from '@components/formatted_text';
-import {t} from '@i18n';
+import useDidMount from '@hooks/did_mount';
 
 const style = StyleSheet.create({
     info: {
@@ -26,6 +27,13 @@ type AppVersionProps = {
     textStyle?: TextStyle;
 }
 
+const messages = defineMessages({
+    appVersion: {
+        id: 'mobile.about.appVersion',
+        defaultMessage: 'App Version: {version} (Build {number})',
+    },
+});
+
 const AppVersion = ({isWrapped = true, textStyle = {}}: AppVersionProps) => {
     const opacity = useSharedValue(1);
     const animatedStyle = useAnimatedStyle(() => {
@@ -34,7 +42,7 @@ const AppVersion = ({isWrapped = true, textStyle = {}}: AppVersionProps) => {
         };
     });
 
-    useEffect(() => {
+    useDidMount(() => {
         const willHide = Keyboard.addListener('keyboardDidHide', () => {
             opacity.value = 1;
         });
@@ -46,12 +54,11 @@ const AppVersion = ({isWrapped = true, textStyle = {}}: AppVersionProps) => {
             willHide.remove();
             willShow.remove();
         };
-    }, []);
+    });
 
     const appVersion = (
         <FormattedText
-            id={t('mobile.about.appVersion')}
-            defaultMessage='App Version: {version} (Build {number})'
+            {...messages.appVersion}
             style={StyleSheet.flatten([style.version, textStyle])}
             values={{
                 version: nativeApplicationVersion,

@@ -6,11 +6,14 @@ import {PER_PAGE_DEFAULT} from '@client/rest/constants';
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
 import {updateLastPlaybookRunsFetchAt} from '@playbooks/actions/local/channel';
-import {handlePlaybookRuns} from '@playbooks/actions/local/run';
+import {handlePlaybookRuns, setOwner as localSetOwner, updatePlaybookRun as localUpdatePlaybookRun} from '@playbooks/actions/local/run';
 import {getLastPlaybookRunsFetchAt} from '@playbooks/database/queries/run';
 import {getMaxRunUpdateAt} from '@playbooks/utils/run';
+import EphemeralStore from '@store/ephemeral_store';
 import {getFullErrorMessage} from '@utils/errors';
 import {logDebug} from '@utils/log';
+
+import {fetchPlaybookRunPropertyFields} from './property_fields';
 
 type PlaybookRunsRequest = {
     runs?: PlaybookRun[];
@@ -44,14 +47,20 @@ export const fetchPlaybookRunsForChannel = async (serverUrl: string, channelId: 
         }
 
         if (!allRuns.length) {
+            EphemeralStore.setChannelPlaybooksSynced(serverUrl, channelId);
             return {runs: []};
         }
 
-        updateLastPlaybookRunsFetchAt(serverUrl, channelId, getMaxRunUpdateAt(allRuns));
-
         if (!fetchOnly) {
-            handlePlaybookRuns(serverUrl, allRuns, false, true);
+            const result = await handlePlaybookRuns(serverUrl, allRuns, false, true);
+            if (result.error) {
+                throw result.error;
+            }
+
+            EphemeralStore.setChannelPlaybooksSynced(serverUrl, channelId);
         }
+
+        updateLastPlaybookRunsFetchAt(serverUrl, channelId, getMaxRunUpdateAt(allRuns));
 
         return {runs: allRuns};
     } catch (error) {
@@ -70,12 +79,157 @@ export const fetchFinishedRunsForChannel = async (serverUrl: string, channelId: 
             per_page: PER_PAGE_DEFAULT,
             channel_id: channelId,
             statuses: ['Finished'],
-            sort: 'end_at',
+            sort: 'create_at',
+            direction: 'desc',
         });
 
         return {runs, has_more};
     } catch (error) {
         logDebug('error on fetchFinishedRunsForChannel', getFullErrorMessage(error));
+        forceLogoutIfNecessary(serverUrl, error);
+        return {error};
+    }
+};
+
+export const fetchPlaybookRun = async (serverUrl: string, runId: string, fetchOnly = false) => {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        const run = await client.fetchPlaybookRun(runId);
+
+        if (!fetchOnly) {
+            const result = await handlePlaybookRuns(serverUrl, [run], false, true);
+            if (result.error) {
+                logDebug('error on handlePlaybookRuns', getFullErrorMessage(result.error));
+                return {error: result.error};
+            }
+
+            // Fetch property fields and values for the run
+            const propertyFieldsResult = await fetchPlaybookRunPropertyFields(serverUrl, runId, fetchOnly);
+            if (propertyFieldsResult.error) {
+                logDebug('error on fetchPlaybookRunPropertyFields', getFullErrorMessage(propertyFieldsResult.error));
+
+                // Don't return error - property fields are not critical, just log it
+            }
+        }
+
+        return {run};
+    } catch (error) {
+        logDebug('error on fetchPlaybookRun', getFullErrorMessage(error));
+        forceLogoutIfNecessary(serverUrl, error);
+        return {error};
+    }
+};
+
+export const fetchPlaybookRunMetadata = async (serverUrl: string, runId: string) => {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        const metadata = await client.fetchPlaybookRunMetadata(runId);
+        return {metadata};
+    } catch (error) {
+        logDebug('error on fetchPlaybookRunMetadata', getFullErrorMessage(error));
+        forceLogoutIfNecessary(serverUrl, error);
+        return {error};
+    }
+};
+
+export const setOwner = async (serverUrl: string, playbookRunId: string, ownerId: string) => {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        await client.setOwner(playbookRunId, ownerId);
+
+        await localSetOwner(serverUrl, playbookRunId, ownerId);
+        return {data: true};
+    } catch (error) {
+        logDebug('error on setOwner', getFullErrorMessage(error));
+        forceLogoutIfNecessary(serverUrl, error);
+        return {error};
+    }
+};
+
+export const updatePlaybookRun = async (serverUrl: string, playbookRunId: string, name: string, summary: string, canEditSummary: boolean) => {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        const updates: Partial<PlaybookRun> = {name};
+        if (canEditSummary) {
+            updates.summary = summary;
+        }
+        await client.patchPlaybookRun(playbookRunId, updates);
+
+        // Update local database
+        const result = await localUpdatePlaybookRun(serverUrl, playbookRunId, name, canEditSummary ? summary : undefined);
+        if (result.error) {
+            logDebug('[updatePlaybookRun] local update failed after successful API call', getFullErrorMessage(result.error));
+            return result;
+        }
+        return {data: true};
+    } catch (error) {
+        logDebug('[updatePlaybookRun]', getFullErrorMessage(error));
+        forceLogoutIfNecessary(serverUrl, error);
+        return {error};
+    }
+};
+
+export const createPlaybookRun = async (
+    serverUrl: string,
+    playbook_id: string,
+    owner_user_id: string,
+    team_id: string,
+    name: string,
+    description: string,
+    channel_id?: string,
+    create_public_run?: boolean,
+) => {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        const run = await client.createPlaybookRun(playbook_id, owner_user_id, team_id, name, description, channel_id, create_public_run);
+        return {data: run};
+    } catch (error) {
+        logDebug('error on createPlaybookRun', getFullErrorMessage(error));
+        forceLogoutIfNecessary(serverUrl, error);
+        return {error};
+    }
+};
+
+export const postStatusUpdate = async (serverUrl: string, playbookRunID: string, payload: PostStatusUpdatePayload, ids: PostStatusUpdateIds) => {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        await client.postStatusUpdate(playbookRunID, payload, ids);
+        return {data: true};
+    } catch (error) {
+        logDebug('error on postStatusUpdate', getFullErrorMessage(error));
+        forceLogoutIfNecessary(serverUrl, error);
+        return {error};
+    }
+};
+
+export const finishRun = async (serverUrl: string, playbookRunId: string) => {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+        await client.finishRun(playbookRunId);
+        return {data: true};
+    } catch (error) {
+        logDebug('error on finishRun', getFullErrorMessage(error));
+        forceLogoutIfNecessary(serverUrl, error);
+        return {error};
+    }
+};
+
+export const fetchPlaybookRunsPageForParticipant = async (serverUrl: string, participantId: string, teamId: string, page = 0) => {
+    try {
+        const client = NetworkManager.getClient(serverUrl);
+
+        const {items: runs, has_more} = await client.fetchPlaybookRuns({
+            page,
+            per_page: PER_PAGE_DEFAULT,
+            participant_id: participantId,
+            sort: 'create_at',
+            direction: 'desc',
+            team_id: teamId,
+        });
+
+        return {runs, hasMore: has_more};
+    } catch (error) {
+        logDebug('error on fetchPlaybookRunsPageForParticipant', getFullErrorMessage(error));
         forceLogoutIfNecessary(serverUrl, error);
         return {error};
     }

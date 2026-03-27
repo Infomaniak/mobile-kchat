@@ -135,6 +135,7 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
             }
         };
         handlePosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPost.id, serverUrl]);
 
     useEffect(() => {
@@ -144,6 +145,7 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
         setTimeout(() => {
             setIsLoadingTranscript(false);
         }, 1000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [files[0]?.transcript?.text]);
 
     const listener = (e: PlayBackType) => {

@@ -170,4 +170,34 @@ describe('components/categories_list', () => {
         );
         expect(wrapper.queryByText('Drafts')).not.toBeTruthy();
     });
+
+    it('should not render Playbooks menu when showPlaybooksButton is false', () => {
+        const wrapper = renderWithEverything(
+            <CategoriesList
+                moreThanOneTeam={false}
+                hasChannels={true}
+                draftsCount={0}
+                scheduledPostCount={0}
+                scheduledPostHasError={false}
+                showPlaybooksButton={false}
+            />,
+            {database},
+        );
+        expect(wrapper.queryByText('Playbook checklists')).toBeNull();
+    });
+
+    it('should render Playbooks menu when showPlaybooksButton is true', () => {
+        const wrapper = renderWithEverything(
+            <CategoriesList
+                moreThanOneTeam={false}
+                hasChannels={true}
+                draftsCount={0}
+                scheduledPostCount={0}
+                scheduledPostHasError={false}
+                showPlaybooksButton={true}
+            />,
+            {database},
+        );
+        expect(wrapper.getByText('Playbook checklists')).toBeTruthy();
+    });
 });

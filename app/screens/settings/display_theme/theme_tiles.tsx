@@ -14,18 +14,17 @@ import {typography} from '@utils/typography';
 
 import illustrations from './illustrations';
 
-const TILE_PADDING = 8;
+const TILE_PADDING = 16;
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
     return {
         container: {
             flexDirection: 'column',
-            padding: TILE_PADDING,
+            gap: 8,
         },
         imageWrapper: {
             position: 'relative',
             alignItems: 'flex-start',
-            marginBottom: 8,
         },
         thumbnail: {
             resizeMode: 'stretch',
@@ -43,10 +42,10 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         },
         tilesContainer: {
             marginBottom: 30,
-            paddingLeft: 8,
             flexDirection: 'row',
             flexWrap: 'wrap',
             backgroundColor: theme.centerChannelBg,
+            gap: TILE_PADDING,
         },
     };
 });
@@ -75,14 +74,14 @@ export const ThemeTile = ({
 
     const layoutStyle = useMemo(() => {
         const tilesPerLine = isTablet ? 4 : 2;
-        const fullWidth = isTablet ? deviceWidth - 40 : deviceWidth;
+        const fullWidth = deviceWidth - 40;
 
         return {
             container: {
                 width: (fullWidth / tilesPerLine) - TILE_PADDING,
             },
             thumbnail: {
-                width: (fullWidth / tilesPerLine) - (TILE_PADDING + 16),
+                width: (fullWidth / tilesPerLine) - (TILE_PADDING),
             },
         };
     }, [isTablet, deviceWidth]);
@@ -91,7 +90,7 @@ export const ThemeTile = ({
         action(actionValue);
     }, [action, actionValue]);
 
-    const Tile = useMemo(() => illustrations[theme.ksuiteTheme as keyof typeof illustrations], []);
+    const Tile = useMemo(() => illustrations[theme.ksuiteTheme as keyof typeof illustrations], [theme.ksuiteTheme]);
 
     return (
         <TouchableOpacity

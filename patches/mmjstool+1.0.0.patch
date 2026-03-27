@@ -1,0 +1,13 @@
+diff --git a/node_modules/mmjstool/bin/mmjstool b/node_modules/mmjstool/bin/mmjstool
+index 2675379..348c3ad 100755
+--- a/node_modules/mmjstool/bin/mmjstool
++++ b/node_modules/mmjstool/bin/mmjstool
+@@ -706,7 +706,7 @@ const ignored = yargs.
+             }).
+             option('mobile-dir', {
+                 describe: 'mobile source code directory',
+-                default: '../mattermost-mobile',
++                default: '.',
+             });
+     }, () => { /* empty function */ },
+     ).argv;

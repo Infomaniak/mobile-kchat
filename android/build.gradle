@@ -6,11 +6,11 @@ buildscript {
         compileSdkVersion = 35
         targetSdkVersion = 35
         supportLibVersion = "35.0.0"
-        kotlinVersion = "1.9.25"
-        kotlin_version = kotlinVersion
+        kotlinVersion = "2.0.21"
+        kotlin_version = kotlinVersion                                                                                                          
         RNNKotlinVersion = kotlinVersion
         firebaseVersion = "24.1.0"
-        ndkVersion = "26.1.10909125"
+        ndkVersion = "27.1.12297006"
 
         // for react-native-audio-recorder-player compatibility
         androidXVersion = '1.8.0'

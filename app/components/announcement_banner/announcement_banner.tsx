@@ -17,7 +17,6 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {bottomSheet} from '@screens/navigation';
 import {bottomSheetSnapPoint} from '@utils/helpers';
-import {getMarkdownTextStyles} from '@utils/markdown';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
@@ -95,7 +94,6 @@ const AnnouncementBanner = ({
     const theme = useTheme();
     const [visible, setVisible] = useState(false);
     const style = getStyle(theme);
-    const markdownTextStyles = getMarkdownTextStyles(theme);
 
     const renderContent = useCallback(() => (
         <ExpandedAnnouncementBanner
@@ -161,7 +159,6 @@ const AnnouncementBanner = ({
                                 {icon && <View style={{marginRight: 6}}>{icon}</View>}
                                 <RemoveMarkdown
                                     value={bannerText}
-                                    textStyle={markdownTextStyles}
                                     baseStyle={style.bannerText}
                                 />
                             </View>

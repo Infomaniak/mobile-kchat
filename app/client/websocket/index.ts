@@ -28,6 +28,7 @@ export default class WebSocketClient {
     private connectionTimeout: NodeJS.Timeout | undefined;
     private connectionId = '';
     private token: string;
+    private preauthSecret?: string;
     private stop = false;
     private url = '';
     private serverUrl: string;
@@ -70,6 +71,8 @@ export default class WebSocketClient {
     constructor(serverUrl: string, token: string) {
         this.token = token;
         this.serverUrl = serverUrl;
+
+        // this.preauthSecret = preauthSecret;
     }
 
     public async initialize(opts = {}, shouldSkipSync = false) {

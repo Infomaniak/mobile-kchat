@@ -12,6 +12,22 @@
 #import "kChat-Swift.h"
 #import <os/log.h>
 
+#if __has_include(<MSAL/MSAL.h>)
+  #import <MSAL/MSAL.h>
+  #define HAS_MSAL 1
+#else
+  #define HAS_MSAL 0
+#endif
+
+#if __has_include(<mattermost_intune/IntuneAccess.h>)
+  #import <mattermost_intune/IntuneAccess.h>
+  #define HAS_INTUNE 1
+#else
+  #define HAS_INTUNE 0
+#endif
+
+#define INTUNE_AVAILABLE   ((HAS_MSAL) && (HAS_INTUNE))
+
 @implementation AppDelegate
 
 @synthesize orientationLock;
@@ -47,6 +63,15 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
       NSLog(@"Failed to configure TurboLog: %@", error.localizedDescription);
     }
   [TurboLog writeWithLogLevel:TurboLogLevelInfo message:@[@"Configured turbolog"]];
+
+  // Configure Gekidou to use TurboLog via wrapper
+  [[GekidouWrapper default] configureTurboLogForGekidou];
+  
+#if INTUNE_AVAILABLE
+  // Initialize Intune MAM delegates BEFORE React Native
+  [IntuneAccess initializeIntuneDelegates];
+#endif
+  
   OrientationManager.shared.delegate = self;
   
   // Clear keychain on first run in case of reinstallation
@@ -71,6 +96,11 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
   os_log(OS_LOG_DEFAULT, "Mattermost started!!");
   [ReactNativeNavigation bootstrapWithDelegate:self launchOptions:launchOptions];
 
+#if INTUNE_AVAILABLE
+  // Restore enrollments if needed (silent, non-blocking)
+  [IntuneAccess checkAndRestoreEnrollmentOnLaunch];
+#endif
+  
   return YES;
 }
 
@@ -137,11 +167,21 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
   if (state != UIApplicationStateActive) {
     [[GekidouWrapper default] fetchDataForPushNotification:userInfo withContentHandler:^(NSData * _Nullable data) {
       NSMutableDictionary *notification = [userInfo mutableCopy];
-      NSError *jsonError;
+      if (notification == nil) {
+        [TurboLog writeWithLogLevel:TurboLogLevelError message:@[@"Mattermost AppDelegate: Failed to copy userInfo dictionary"]];
+        completionHandler(UIBackgroundFetchResultFailed);
+        return;
+      }
+
       if (data != nil) {
+        NSError *jsonError = nil;
         id json = [NSJSONSerialization JSONObjectWithData:data options:NULL error:&jsonError];
-        if (!jsonError) {
+        if (jsonError) {
+          [TurboLog writeWithLogLevel:TurboLogLevelError message:@[@"Mattermost AppDelegate: JSON serialization error", jsonError.localizedDescription]];
+        } else if (json != nil) {
           [notification setObject:json forKey:@"data"];
+        } else {
+          [TurboLog writeWithLogLevel:TurboLogLevelWarning message:@[@"Mattermost AppDelegate: JSON serialization returned nil without error"]];
         }
       }
       [RNNotifications didReceiveBackgroundNotification:notification withCompletionHandler:completionHandler];
@@ -169,6 +209,21 @@ NSString* const NOTIFICATION_JOINED_CALL = @"joined_call";
           annotation: (id)annotation
 {
   return [RCTLinkingManager application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
+}
+
+// Helper method to handle MSAL URL schemes
+- (BOOL)handleMSALURL:(NSURL *)url {
+#if INTUNE_AVAILABLE
+  NSString *urlString = url.absoluteString;
+  NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
+  NSString *expectedPrefix = [NSString stringWithFormat:@"msauth.%@", bundleId];
+
+  if ([urlString hasPrefix:expectedPrefix]) {
+    [TurboLog writeWithLogLevel:TurboLogLevelInfo message:@[@"[Intune] MSAL URL handled"]];
+    return [MSALPublicClientApplication handleMSALResponse:url sourceApplication:nil];
+  }
+#endif
+  return NO;
 }
 
 // Only if your app is using [Universal Links](https://developer.apple.com/library/prerelease/ios/documentation/General/Conceptual/AppSearch/UniversalLinks.html).

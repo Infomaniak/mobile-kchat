@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 import {TouchableWithoutFeedback, View} from 'react-native';
 import Animated from 'react-native-reanimated';
 
@@ -12,8 +12,8 @@ import {useIsTablet} from '@hooks/device';
 import {useGalleryItem} from '@hooks/gallery';
 import {lookupMimeType} from '@utils/file';
 import {openGalleryAtIndex} from '@utils/gallery';
-import {generateId} from '@utils/general';
 import {isGifTooLarge, calculateDimensions, getViewPortWidth} from '@utils/images';
+import {urlSafeBase64Encode} from '@utils/security';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {extractFilenameFromUrl, isValidUrl} from '@utils/url';
 
@@ -55,10 +55,14 @@ export type Props = {
 const AttachmentImage = ({imageUrl, imageMetadata, layoutWidth, location, postId, theme}: Props) => {
     const galleryIdentifier = `${postId}-AttachmentImage-${location}`;
     const [error, setError] = useState(false);
-    const fileId = useRef(generateId('uid')).current;
+    const fileId = useRef<string | null>(null);
+    if (fileId.current === null) {
+        fileId.current = `uid-${urlSafeBase64Encode(imageUrl)}`;
+    }
     const isTablet = useIsTablet();
     const {height, width} = calculateDimensions(imageMetadata.height, imageMetadata.width, layoutWidth || getViewPortWidth(false, isTablet, true));
     const style = getStyleSheet(theme);
+    const progressiveImageStyle = useMemo(() => ({width, height}), [width, height]);
 
     const onError = useCallback(() => {
         setError(true);
@@ -66,7 +70,7 @@ const AttachmentImage = ({imageUrl, imageMetadata, layoutWidth, location, postId
 
     const onPress = () => {
         const item: GalleryItemType = {
-            id: fileId,
+            id: fileId.current || '',
             postId,
             uri: imageUrl,
             width: imageMetadata.width,
@@ -75,6 +79,7 @@ const AttachmentImage = ({imageUrl, imageMetadata, layoutWidth, location, postId
             mime_type: lookupMimeType(imageUrl) || 'image/png',
             type: 'image',
             lastPictureUpdate: 0,
+            cacheKey: fileId.current || '',
         };
         openGalleryAtIndex(galleryIdentifier, 0, [item]);
     };
@@ -104,12 +109,13 @@ const AttachmentImage = ({imageUrl, imageMetadata, layoutWidth, location, postId
                     <Animated.View testID={`attachmentImage-${fileId}`}>
                         <ProgressiveImage
                             forwardRef={ref}
-                            id={fileId}
+                            id={fileId.current}
                             imageStyle={style.attachmentMargin}
                             imageUri={imageUrl}
                             onError={onError}
                             contentFit='contain'
-                            style={{height, width}}
+                            style={progressiveImageStyle}
+                            theme={theme}
                         />
                     </Animated.View>
                 </TouchableWithoutFeedback>

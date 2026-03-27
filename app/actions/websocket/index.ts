@@ -1,8 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+// IK change: agents feature not available on our server
+// import {checkIsAgentsPluginEnabled} from '@agents/actions/remote/agents_status';
+// import {handleAgentsReconnect} from '@agents/actions/websocket/reconnect';
+
 import {markChannelAsViewed} from '@actions/local/channel';
-import {dataRetentionCleanup} from '@actions/local/systems';
+import {dataRetentionCleanup, expiredBoRPostCleanup} from '@actions/local/systems';
 import {markChannelAsRead} from '@actions/remote/channel';
 import {
     entry,
@@ -16,7 +20,6 @@ import {autoUpdateTimezone} from '@actions/remote/user';
 import {Screens} from '@constants';
 import DatabaseManager from '@database/manager';
 import AppsManager from '@managers/apps_manager';
-import {updatePlaybooksVersion} from '@playbooks/actions/remote/version';
 import {getActiveServerUrl} from '@queries/app/servers';
 import {getLastPostInThread} from '@queries/servers/post';
 import {
@@ -88,12 +91,16 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
     const license = await getLicense(database);
     const config = await getConfig(database);
 
-    // Set the version of the playbooks plugin to the systems table
-    updatePlaybooksVersion(serverUrl);
+    // handlePlaybookReconnect(serverUrl);
+    // IK change: agents feature not available on our server
+    // handleAgentsReconnect(serverUrl);
 
     // if (isSupportedServerCalls(config?.Version)) {
     //     loadConfigAndCalls(serverUrl, currentUserId, groupLabel);
     // }
+
+    // IK change: agents feature not available on our server
+    // checkIsAgentsPluginEnabled(serverUrl);
 
     await deferredAppEntryActions(serverUrl, lastFullSync, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, meData, initialTeamId, undefined, groupLabel);
 
@@ -103,6 +110,8 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
     openAllUnreadChannels(serverUrl, groupLabel);
 
     dataRetentionCleanup(serverUrl);
+
+    expiredBoRPostCleanup(serverUrl);
 
     AppsManager.refreshAppBindings(serverUrl, groupLabel);
     return undefined;

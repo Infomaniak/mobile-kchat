@@ -77,6 +77,9 @@ function SavedMessages({appsEnabled, posts, currentTimezone, customEmojiNames}: 
     useEffect(() => {
         opacity.value = isFocused ? 1 : 0;
         translateX.value = isFocused ? 0 : translateSide;
+
+    // We only want to update the shared values when `isFocused` changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isFocused]);
 
     useEffect(() => {
@@ -90,7 +93,7 @@ function SavedMessages({appsEnabled, posts, currentTimezone, customEmojiNames}: 
 
     const {scrollPaddingTop, scrollRef, scrollValue, onScroll, headerHeight} = useCollapsibleHeader<Animated.FlatList<string>>(true, onSnap);
     const paddingTop = useMemo(() => ({paddingTop: scrollPaddingTop, flexGrow: 1}), [scrollPaddingTop]);
-    const data = useMemo(() => selectOrderedPosts(posts, 0, false, '', '', false, currentTimezone, false).reverse(), [posts]);
+    const data = useMemo(() => selectOrderedPosts(posts, 0, false, '', '', false, currentTimezone, false).reverse(), [currentTimezone, posts]);
 
     const animated = useAnimatedStyle(() => {
         return {
@@ -137,7 +140,7 @@ function SavedMessages({appsEnabled, posts, currentTimezone, customEmojiNames}: 
                 <EmptyState/>
             )}
         </View>
-    ), [loading, theme.buttonBg]);
+    ), [loading, styles.empty, theme.buttonBg]);
 
     const renderItem = useCallback(({item}: ListRenderItemInfo<PostListItem | PostListOtherItem>) => {
         switch (item.type) {
@@ -164,7 +167,7 @@ function SavedMessages({appsEnabled, posts, currentTimezone, customEmojiNames}: 
             default:
                 return null;
         }
-    }, [appsEnabled, currentTimezone, customEmojiNames, theme]);
+    }, [appsEnabled, currentTimezone, customEmojiNames]);
 
     return (
         <Freeze freeze={!isFocused}>

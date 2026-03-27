@@ -2,57 +2,26 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback} from 'react';
-import {View, Platform, type StyleProp, type ViewStyle} from 'react-native';
 
 import {removeDraftFile} from '@actions/local/draft';
-import CompassIcon from '@components/compass_icon';
-import TouchableWithFeedback from '@components/touchable_with_feedback';
+import RemoveButton from '@components/upload_item_shared/remove_button';
 import {useEditPost} from '@context/edit_post';
 import {useServerUrl} from '@context/server';
-import {useTheme} from '@context/theme';
 import DraftEditPostUploadManager from '@managers/draft_upload_manager';
-import {makeStyleSheetFromTheme, changeOpacity} from '@utils/theme';
 
 type Props = {
     channelId: string;
     rootId: string;
     clientId: string;
-    containerStyle?: StyleProp<ViewStyle>;
     fileId: string;
 }
 
-const getStyleSheet = makeStyleSheetFromTheme((theme) => {
-    return {
-        tappableContainer: {
-            position: 'absolute',
-            elevation: 11,
-            top: -12,
-            right: -10,
-            width: 24,
-            height: 24,
-        },
-        removeButton: {
-            borderRadius: 12,
-            marginTop: Platform.select({
-                ios: 5.4,
-                android: 4.75,
-            }),
-            backgroundColor: theme.centerChannelBg,
-            width: 24,
-            height: 25,
-        },
-    };
-});
-
 export default function UploadRemove({
     channelId,
-    containerStyle,
     rootId,
     clientId,
     fileId,
 }: Props) {
-    const theme = useTheme();
-    const style = getStyleSheet(theme);
     const serverUrl = useServerUrl();
     const {onFileRemove, isEditMode} = useEditPost();
 
@@ -66,19 +35,9 @@ export default function UploadRemove({
     }, [onFileRemove, isEditMode, fileId, clientId, serverUrl, channelId, rootId]);
 
     return (
-        <TouchableWithFeedback
-            style={[style.tappableContainer, containerStyle]}
+        <RemoveButton
             onPress={onPress}
-            type={'opacity'}
             testID={`remove-button-${fileId}`}
-        >
-            <View style={style.removeButton}>
-                <CompassIcon
-                    name='close-circle'
-                    color={changeOpacity(theme.centerChannelColor, 0.64)}
-                    size={24}
-                />
-            </View>
-        </TouchableWithFeedback>
+        />
     );
 }

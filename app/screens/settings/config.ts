@@ -47,7 +47,7 @@ const messages = defineMessages({
         id: 'infomaniak.feedback.title',
     },
     report_problem: {
-        defaultMessage: 'Report a Problem',
+        defaultMessage: 'Report a problem',
         id: 'general_settings.report_problem',
     },
     notifications: {

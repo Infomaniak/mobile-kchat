@@ -73,7 +73,7 @@ const IkCallsParticipantStackIconOverflow = ({
             borderColor: backgroundColor || theme.centerChannelBg,
         },
         baseContainerStyle,
-    ], [style, backgroundColor, baseContainerStyle, size]);
+    ], [style.container, isFirst, size, backgroundColor, theme.centerChannelBg, baseContainerStyle]);
 
     const countStyle = useMemo(() => [
         style.count,

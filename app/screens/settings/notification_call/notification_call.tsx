@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {defineMessages, useIntl} from 'react-intl';
 import InCallManager from 'react-native-incall-manager';
 
@@ -16,9 +16,9 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useBackNavigation from '@hooks/navigate_back';
+import useNotificationProps from '@hooks/notification_props';
 import {popTopScreen} from '@screens/navigation';
 import {changeOpacity} from '@utils/theme';
-import {getNotificationProps} from '@utils/user';
 
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -40,19 +40,16 @@ const NotificationCall = ({componentId, currentUser}: Props) => {
     const intl = useIntl();
     const theme = useTheme();
 
-    const notifyProps = useMemo(() => getNotificationProps(currentUser), [currentUser?.notifyProps]);
+    const notifyProps = useNotificationProps(currentUser);
 
-    const initialCallsMobileSound = useMemo(() => Boolean(notifyProps?.calls_mobile_sound ? notifyProps.calls_mobile_sound === 'true' : notifyProps?.calls_desktop_sound === 'true'),
-        [/* dependency array should remain empty */]);
-    const [callsMobileSound, setCallsMobileSound] = useState(initialCallsMobileSound);
-    const initialCallsMobileNotificationSound = useMemo(() => {
+    const [callsMobileSound, setCallsMobileSound] = useState(() => Boolean(notifyProps?.calls_mobile_sound ? notifyProps.calls_mobile_sound === 'true' : notifyProps?.calls_desktop_sound === 'true'));
+    const [callsMobileNotificationSound, setCallsMobileNotificationSound] = useState(() => {
         let initialSound = notifyProps?.calls_mobile_notification_sound ? notifyProps.calls_mobile_notification_sound : notifyProps?.calls_notification_sound;
         if (!initialSound) {
             initialSound = Calls.RINGTONE_DEFAULT;
         }
         return initialSound;
-    }, [/* dependency array should remain empty */]);
-    const [callsMobileNotificationSound, setCallsMobileNotificationSound] = useState(initialCallsMobileNotificationSound);
+    });
     const [playingRingtone, setPlayingRingtone] = useState(false);
 
     const close = useCallback(() => {
@@ -107,7 +104,7 @@ const NotificationCall = ({componentId, currentUser}: Props) => {
             updateMe(serverUrl, {notify_props});
         }
         close();
-    }, [serverUrl, canSaveSettings, close, notifyProps, callsMobileSound, callsMobileNotificationSound, playingRingtone]);
+    }, [serverUrl, canSaveSettings, close, notifyProps, callsMobileSound, callsMobileNotificationSound]);
 
     useBackNavigation(saveNotificationSettings);
 

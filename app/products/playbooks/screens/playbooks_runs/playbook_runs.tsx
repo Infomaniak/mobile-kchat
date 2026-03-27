@@ -1,24 +1,14 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {FlashList, type ListRenderItem} from '@shopify/flash-list';
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {defineMessage} from 'react-intl';
-import {StyleSheet, View} from 'react-native';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 
-import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
-import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import useTabs, {type TabDefinition} from '@hooks/use_tabs';
-import Tabs from '@hooks/use_tabs/tabs';
 import {fetchFinishedRunsForChannel} from '@playbooks/actions/remote/runs';
+import RunList, {type RunListTabsNames} from '@playbooks/components/run_list';
 import {isRunFinished} from '@playbooks/utils/run';
 import {popTopScreen} from '@screens/navigation';
-import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
-
-import EmptyState from './empty_state';
-import PlaybookCard, {CARD_HEIGHT} from './playbook_card';
 
 import type PlaybookRunModel from '@playbooks/types/database/models/playbook_run';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -29,54 +19,18 @@ type Props = {
     componentId: AvailableScreens;
 };
 
-type TabsNames = 'in-progress' | 'finished';
-
-const itemSeparatorStyle = StyleSheet.create({
-    itemSeparator: {
-        height: 12,
-    },
-});
-const getStyleFromTheme = makeStyleSheetFromTheme((theme: Theme) => ({
-    container: {
-        padding: 20,
-    },
-    tabContainer: {
-        borderBottomWidth: 1,
-        borderBottomColor: changeOpacity(theme.centerChannelColor, 0.12),
-    },
-}));
-
-const ItemSeparator = () => {
-    return <View style={itemSeparatorStyle.itemSeparator}/>;
-};
-
-const tabs: Array<TabDefinition<TabsNames>> = [
-    {
-        id: 'in-progress',
-        name: defineMessage({
-            id: 'playbook.runs.in-progress',
-            defaultMessage: 'In Progress',
-        }),
-    },
-    {
-        id: 'finished',
-        name: defineMessage({
-            id: 'playbook.runs.finished',
-            defaultMessage: 'Finished',
-        }),
-    },
-];
-
 const PlaybookRuns = ({
     channelId,
     allRuns,
     componentId,
 }: Props) => {
     const serverUrl = useServerUrl();
-    const theme = useTheme();
-    const styles = getStyleFromTheme(theme);
 
-    const [fetchedFinishedRuns, setFetchedFinishedRuns] = useState<PlaybookRun[]>([]);
+    const [fetching, setFetching] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const page = useRef(0);
+
+    const [remoteFinishedRuns, setRemoteFinishedRuns] = useState<PlaybookRun[]>([]);
 
     const exit = useCallback(() => {
         popTopScreen(componentId);
@@ -84,7 +38,7 @@ const PlaybookRuns = ({
 
     useAndroidHardwareBackHandler(componentId, exit);
 
-    const [inProgressRuns, finishedRuns] = useMemo(() => {
+    const [inProgressRuns, localFinishedRuns] = useMemo(() => {
         const inProgress: PlaybookRunModel[] = [];
         const finished: PlaybookRunModel[] = [];
 
@@ -98,84 +52,39 @@ const PlaybookRuns = ({
 
         return [inProgress, finished] as const;
     }, [allRuns]);
-    const hasMoreFinishedRuns = useRef(true);
-    const finishedRunsPage = useRef(0);
-    const fetching = useRef(false);
 
-    const initialTab: TabsNames = inProgressRuns.length ? 'in-progress' : 'finished';
-    const [activeTab, tabsProps] = useTabs<TabsNames>(initialTab, tabs);
+    const showMoreButton = useCallback((tab: RunListTabsNames) => {
+        return tab === 'finished' && hasMore;
+    }, [hasMore]);
 
-    let data: Array<PlaybookRunModel | PlaybookRun> = inProgressRuns;
-    if (activeTab === 'finished') {
-        if (fetchedFinishedRuns.length) {
-            data = fetchedFinishedRuns;
-        } else {
-            data = finishedRuns;
-        }
-    }
-
-    const isEmpty = data.length === 0;
-
-    const renderItem: ListRenderItem<PlaybookRunModel> = useCallback(({item}) => {
-        return (
-            <PlaybookCard
-                run={item}
-                location={Screens.PLAYBOOKS_RUNS}
-            />
-        );
-    }, []);
-
-    const fetchFinishedRuns = useCallback(async () => {
-        if (fetching.current) {
+    const fetchMoreFinishedRuns = useCallback(async (tab: RunListTabsNames) => {
+        if (fetching || tab !== 'finished') {
             return;
         }
-        fetching.current = true;
-        const {runs, has_more, error} = await fetchFinishedRunsForChannel(serverUrl, channelId, finishedRunsPage.current);
-        fetching.current = false;
+        setFetching(true);
+        const {runs, has_more = false, error} = await fetchFinishedRunsForChannel(serverUrl, channelId, page.current);
+        setFetching(false);
         if (error) {
-            hasMoreFinishedRuns.current = false;
+            setHasMore(false);
             return;
         }
-        hasMoreFinishedRuns.current = has_more ?? false;
-        finishedRunsPage.current++;
+        setHasMore(has_more);
+        page.current++;
         if (runs?.length) {
-            setFetchedFinishedRuns(runs);
+            setRemoteFinishedRuns((prev) => [...prev, ...runs]);
         }
-    }, [channelId, serverUrl]);
-
-    const onFinishedRunsReachEnd = useCallback(() => {
-        if (hasMoreFinishedRuns.current) {
-            fetchFinishedRuns();
-        }
-    }, [fetchFinishedRuns]);
-
-    useEffect(() => {
-        if (activeTab === 'finished' && hasMoreFinishedRuns.current && !finishedRuns.length) {
-            fetchFinishedRuns();
-        }
-    }, [activeTab, fetchFinishedRuns, finishedRuns.length]);
-
-    let content = (<EmptyState tab={activeTab}/>);
-    if (!isEmpty) {
-        content = (
-            <FlashList
-                data={data}
-                renderItem={renderItem}
-                contentContainerStyle={styles.container}
-                ItemSeparatorComponent={ItemSeparator}
-                estimatedItemSize={CARD_HEIGHT}
-                onEndReached={activeTab === 'finished' ? onFinishedRunsReachEnd : undefined}
-            />
-        );
-    }
+    }, [channelId, fetching, serverUrl]);
 
     return (
-        <>
-            <View style={styles.tabContainer}>
-                <Tabs {...tabsProps}/>
-            </View>
-            {content}
-        </>
+        <RunList
+            componentId={componentId}
+            inProgressRuns={inProgressRuns}
+            finishedRuns={remoteFinishedRuns.length ? remoteFinishedRuns : localFinishedRuns}
+            fetchMoreRuns={fetchMoreFinishedRuns}
+            showMoreButton={showMoreButton}
+            fetching={fetching}
+            channelId={channelId}
+        />
     );
 };
 

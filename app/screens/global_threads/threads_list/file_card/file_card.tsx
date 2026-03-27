@@ -58,6 +58,7 @@ export const FileCard: React.FC<CardProps> = ({post, theme}) => {
                                 imageUri={imageUri}
                                 id={files[0].id!}
                                 onError={handleError}
+                                theme={theme}
                             />
                         </View>
 

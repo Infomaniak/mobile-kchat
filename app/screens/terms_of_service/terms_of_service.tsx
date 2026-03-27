@@ -20,10 +20,10 @@ import {Screens} from '@constants/index';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
+import useDidMount from '@hooks/did_mount';
 import SecurityManager from '@managers/security_manager';
 import {dismissOverlay} from '@screens/navigation';
 import NavigationStore from '@store/navigation_store';
-import {getMarkdownTextStyles, getMarkdownBlockStyles} from '@utils/markdown';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
@@ -191,9 +191,9 @@ const TermsOfService = ({
         }
     }, [declineTerms, closeTermsAndLogout, getTermsError]);
 
-    useEffect(() => {
+    useDidMount(() => {
         getTerms();
-    }, []);
+    });
 
     useEffect(() => {
         return () => {
@@ -208,9 +208,6 @@ const TermsOfService = ({
     }, [showToS, componentId]);
 
     useAndroidHardwareBackHandler(componentId, onPressClose);
-
-    const blockStyles = useMemo(() => getMarkdownBlockStyles(theme), [theme]);
-    const textStyles = useMemo(() => getMarkdownTextStyles(theme), [theme]);
 
     let content;
     if (loading) {
@@ -253,8 +250,6 @@ const TermsOfService = ({
                 >
                     <Markdown
                         baseTextStyle={styles.baseText}
-                        textStyles={textStyles}
-                        blockStyles={blockStyles}
                         value={termsText}
                         disableHashtags={true}
                         disableAtMentions={true}

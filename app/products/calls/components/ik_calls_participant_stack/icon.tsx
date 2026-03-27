@@ -78,7 +78,7 @@ const IkCallsParticipantStackIcon = ({
             backgroundColor,
         },
         baseContainerStyle,
-    ], [style, backgroundColor, baseContainerStyle, size]);
+    ], [style.container, isFirst, size, backgroundColor, baseContainerStyle]);
 
     const iconContainerStyle = useMemo(() => [
         style.iconContainer,

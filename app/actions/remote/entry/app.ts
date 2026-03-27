@@ -1,6 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+// IK change: agents feature not available on our server
+// import {fetchAgents} from '@agents/actions/remote/agents';
+
 import {setLastServerVersionCheck} from '@actions/local/systems';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
 import DatabaseManager from '@database/manager';
@@ -34,6 +37,9 @@ export async function appEntry(serverUrl: string, since = 0) {
     WebsocketManager.openAll('Cold Start');
 
     verifyPushProxy(serverUrl);
+
+    // IK change: agents feature not available on our server
+    // fetchAgents(serverUrl);
 
     return {};
 }

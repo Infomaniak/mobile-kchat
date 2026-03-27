@@ -3,6 +3,7 @@
 import moment from 'moment-timezone';
 import {NativeModules, Platform} from 'react-native';
 
+import {License} from '@constants';
 import {STATUS_BAR_HEIGHT} from '@constants/view';
 
 import {
@@ -23,6 +24,7 @@ import {
     isMainActivity,
     areBothStringArraysEqual,
     hasArrayChanged,
+    isMinimumLicenseTier,
 } from './helpers';
 
 jest.mock('@mattermost/rnshare', () => ({
@@ -207,12 +209,16 @@ describe('Helpers', () => {
     describe('getRoundedTime', () => {
         test('should round time to nearest interval', () => {
             const time = moment('2024-06-01T12:34:00Z');
-            const result = getRoundedTime(time);
-            expect(result.minute() % 30).toBe(0); // Assuming CUSTOM_STATUS_TIME_PICKER_INTERVALS_IN_MINUTES is 15
+            const result = getRoundedTime(time, 3);
+            expect(result.minute() % 3).toBe(0);
 
             const time2 = moment('2024-06-01T12:00:00Z');
-            const result2 = getRoundedTime(time2);
-            expect(result2.minute() % 30).toBe(0);
+            const result2 = getRoundedTime(time2, 7);
+            expect(result2.minute() % 7).toBe(0);
+
+            const time3 = moment('2024-06-01T12:34:00Z');
+            const result3 = getRoundedTime(time3, 11);
+            expect(result3.minute() % 11).toBe(0);
         });
     });
 
@@ -344,6 +350,96 @@ describe('Helpers', () => {
         test('should handle duplicate elements correctly', () => {
             expect(hasArrayChanged(['a', 'a', 'b'], ['a', 'b', 'a'])).toBe(false);
             expect(hasArrayChanged(['a', 'a'], ['a', 'b'])).toBe(true);
+        });
+    });
+
+    describe('isMinimumLicenseTier', () => {
+        test('should return false when license is not provided', () => {
+            expect(isMinimumLicenseTier(undefined, License.SKU_SHORT_NAME.Professional)).toBe(false);
+        });
+
+        test('should return false when license is not licensed', () => {
+            const license = {
+                IsLicensed: 'false',
+                SkuShortName: License.SKU_SHORT_NAME.Professional,
+            };
+            expect(isMinimumLicenseTier(license, License.SKU_SHORT_NAME.Professional)).toBe(false);
+        });
+
+        test('should return false when license SkuShortName is missing', () => {
+            const license = {
+                IsLicensed: 'true',
+            };
+            expect(isMinimumLicenseTier(license, License.SKU_SHORT_NAME.Professional)).toBe(false);
+        });
+
+        test('should return true when license tier equals target tier', () => {
+            const license = {
+                IsLicensed: 'true',
+                SkuShortName: License.SKU_SHORT_NAME.Professional,
+            };
+            expect(isMinimumLicenseTier(license, License.SKU_SHORT_NAME.Professional)).toBe(true);
+        });
+
+        test('should return true when license tier exceeds target tier - Enterprise >= Professional', () => {
+            const license = {
+                IsLicensed: 'true',
+                SkuShortName: License.SKU_SHORT_NAME.Enterprise,
+            };
+            expect(isMinimumLicenseTier(license, License.SKU_SHORT_NAME.Professional)).toBe(true);
+        });
+
+        test('should return true when license tier exceeds target tier - EnterpriseAdvanced >= Professional', () => {
+            const license = {
+                IsLicensed: 'true',
+                SkuShortName: License.SKU_SHORT_NAME.EnterpriseAdvanced,
+            };
+            expect(isMinimumLicenseTier(license, License.SKU_SHORT_NAME.Professional)).toBe(true);
+        });
+
+        test('should return true when license tier exceeds target tier - EnterpriseAdvanced >= Enterprise', () => {
+            const license = {
+                IsLicensed: 'true',
+                SkuShortName: License.SKU_SHORT_NAME.EnterpriseAdvanced,
+            };
+            expect(isMinimumLicenseTier(license, License.SKU_SHORT_NAME.Enterprise)).toBe(true);
+        });
+
+        test('should return false when license tier is below target tier - Professional < Enterprise', () => {
+            const license = {
+                IsLicensed: 'true',
+                SkuShortName: License.SKU_SHORT_NAME.Professional,
+            };
+            expect(isMinimumLicenseTier(license, License.SKU_SHORT_NAME.Enterprise)).toBe(false);
+        });
+
+        test('should return false when license tier is below target tier - Professional < EnterpriseAdvanced', () => {
+            const license = {
+                IsLicensed: 'true',
+                SkuShortName: License.SKU_SHORT_NAME.Professional,
+            };
+            expect(isMinimumLicenseTier(license, License.SKU_SHORT_NAME.EnterpriseAdvanced)).toBe(false);
+        });
+
+        test('should return false when license tier is below target tier - Enterprise < EnterpriseAdvanced', () => {
+            const license = {
+                IsLicensed: 'true',
+                SkuShortName: License.SKU_SHORT_NAME.Enterprise,
+            };
+            expect(isMinimumLicenseTier(license, License.SKU_SHORT_NAME.EnterpriseAdvanced)).toBe(false);
+        });
+
+        test('should handle partial license objects', () => {
+            const license = {
+                IsLicensed: 'true',
+                SkuShortName: License.SKU_SHORT_NAME.EnterpriseAdvanced,
+            };
+            expect(isMinimumLicenseTier(license, License.SKU_SHORT_NAME.Professional)).toBe(true);
+        });
+
+        test('should return false for empty license object', () => {
+            const license = {};
+            expect(isMinimumLicenseTier(license, License.SKU_SHORT_NAME.Professional)).toBe(false);
         });
     });
 });

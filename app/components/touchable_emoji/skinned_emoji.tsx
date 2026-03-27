@@ -7,20 +7,21 @@ import {type StyleProp, View, type ViewStyle} from 'react-native';
 import Emoji from '@components/emoji';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {useEmojiSkinTone} from '@hooks/emoji_category_bar';
+import {usePreventDoubleTap} from '@hooks/utils';
 import {skinCodes} from '@utils/emoji';
 import {isValidNamedEmoji} from '@utils/emoji/helpers';
-import {preventDoubleTap} from '@utils/tap';
 
 type Props = {
     name: string;
     onEmojiPress: (emoji: string) => void;
+    preventDoubleTap?: boolean;
     size?: number;
     style?: StyleProp<ViewStyle>;
 }
 
 const hitSlop = {top: 10, bottom: 10, left: 10, right: 10};
 
-const SkinnedEmoji = ({name, onEmojiPress, size = 30, style}: Props) => {
+const SkinnedEmoji = ({name, onEmojiPress, preventDoubleTap = true, size = 30, style}: Props) => {
     const skinTone = useEmojiSkinTone();
     const emojiName = useMemo(() => {
         const skinnedEmoji = `${name}_${skinCodes[skinTone]}`;
@@ -30,9 +31,10 @@ const SkinnedEmoji = ({name, onEmojiPress, size = 30, style}: Props) => {
         return skinnedEmoji;
     }, [name, skinTone]);
 
-    const onPress = useCallback(preventDoubleTap(() => {
+    const handlePress = useCallback(() => {
         onEmojiPress(emojiName);
-    }), [emojiName]);
+    }, [emojiName, onEmojiPress]);
+    const onPress = preventDoubleTap ? usePreventDoubleTap(handlePress) : handlePress;
 
     return (
         <View

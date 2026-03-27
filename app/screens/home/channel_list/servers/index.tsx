@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useImperativeHandle, useRef, useState} from 'react';
+import React, {useCallback, useImperativeHandle, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Dimensions, StyleSheet} from 'react-native';
 
@@ -10,7 +10,7 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {subscribeAllServers} from '@database/subscription/servers';
 import {subscribeUnreadAndMentionsByServer, type UnreadObserverArgs} from '@database/subscription/unreads';
-import {useIsTablet} from '@hooks/device';
+import useDidMount from '@hooks/did_mount';
 import {BUTTON_HEIGHT, TITLE_HEIGHT} from '@screens/bottom_sheet';
 import {bottomSheet} from '@screens/navigation';
 import {bottomSheetSnapPoint} from '@utils/helpers';
@@ -47,7 +47,6 @@ const Servers = React.forwardRef<ServersRef>((_, ref) => {
     const [total, setTotal] = useState<UnreadMessages>({mentions: 0, unread: false});
     const registeredServers = useRef<ServersModel[]|undefined>();
     const currentServerUrl = useServerUrl();
-    const isTablet = useIsTablet();
     const theme = useTheme();
 
     const updateTotal = () => {
@@ -136,16 +135,16 @@ const Servers = React.forwardRef<ServersRef>((_, ref) => {
                 footerComponent: undefined,
                 snapPoints,
                 theme,
-                title: intl.formatMessage({id: 'your.servers', defaultMessage: 'Your servers'}),
+                title: intl.formatMessage({id: 'your.servers', defaultMessage: 'Your organizations'}),
             });
         }
-    }, [intl, isTablet, theme]);
+    }, [intl, theme]);
 
     useImperativeHandle(ref, () => ({
         openServers: onPress,
     }), [onPress]);
 
-    useEffect(() => {
+    useDidMount(() => {
         const subscription = subscribeAllServers(serversObserver);
 
         return () => {
@@ -155,7 +154,7 @@ const Servers = React.forwardRef<ServersRef>((_, ref) => {
             });
             subscriptions.clear();
         };
-    }, []);
+    });
 
     return (
         <ServerIcon

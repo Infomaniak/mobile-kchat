@@ -138,7 +138,7 @@ const hasUpdatedRef = <T extends unknown>(ref: MutableRefObject<T>, newValue: T)
 };
 
 const FrozenJitsiMeeting = forwardRef<JitsiRefProps, ComponentProps<typeof JitsiMeeting>>((props, ref) =>
-    useMemo(() => (<JitsiMeeting ref={ref} {...props}/>), []));
+    useMemo(() => (<JitsiMeeting ref={ref} {...props}/>), [props, ref]));
 
 const CallScreen = ({
 
@@ -210,7 +210,7 @@ const CallScreen = ({
         } else if (audioMutedRef.current !== nextState) {
             setAudioMuted(nextState);
         }
-    }, []);
+    }, [audioMutedRef]);
 
     /**
      * Mute/Unmute video
@@ -235,7 +235,7 @@ const CallScreen = ({
         } else if (videoMutedRef.current !== nextState) {
             setVideoMuted(nextState);
         }
-    }, []);
+    }, [videoMutedRef]);
 
     /**
      * Is the current channel a DM or GM, will be false
@@ -295,7 +295,7 @@ const CallScreen = ({
         }
 
         return callUsersRef.current!;
-    }, [isDMorGM]);
+    }, [channelId, currentUserIdRef, isDMorGM, serverUrl]);
 
     /**
      * Lazily query the callName
@@ -313,7 +313,7 @@ const CallScreen = ({
         }
 
         return callNameRef.current ?? '...';
-    }, [channel]);
+    }, [channel, currentUserIdRef, serverUrl]);
 
     /**
      * Unpack the recipient from the lazily queried call users
@@ -462,12 +462,12 @@ const CallScreen = ({
         onReadyToClose: () => {
             leaveCallRef.current!('internal');
         },
-    }), []);
+    }), [audioMutedRef, channelId, conferenceId, getCallName, initiator, leaveCallRef, serverId, videoMutedRef]);
 
     // STYLES
     const styles = getStyleSheet(theme);
-    const {scrollPaddingTop, scrollValue/*, headerHeight*/} = useCollapsibleHeader<FlatList<string>>(true);
-    const paddingTop = useMemo(() => ({flexGrow: 1/*, paddingTop: scrollPaddingTop*/}), [scrollPaddingTop]);
+    const {scrollValue/*, headerHeight*/} = useCollapsibleHeader<FlatList<string>>(true);
+    const paddingTop = useMemo(() => ({flexGrow: 1/*, paddingTop: scrollPaddingTop*/}), []);
     // const top = useAnimatedStyle(() => ({top: headerHeight.value}));
 
     // IMPERATIVE HANDLE
@@ -477,7 +477,7 @@ const CallScreen = ({
     // Leave/cancel the call on unmount
     useEffect(() => () => {
         leaveCallRef.current!();
-    }, []);
+    }, [leaveCallRef]);
 
     // Fetch and update the current callName
     useEffect(() => {
@@ -486,21 +486,21 @@ const CallScreen = ({
             // when both calledUsers and callName has been resolved
             Promise.all([getCallUsers(), getCallName()]).then(rerender);
         }
-    }, [Boolean(channel && currentUserId)]);
+    }, [channel, currentUserId, getCallName, getCallUsers, rerender]);
 
     // Fetch the current channel if necessary
     useEffect(() => {
         if (!channel) {
             fetchChannelById(serverUrl, channelId);
         }
-    }, [channel]);
+    }, [channel, channelId, serverUrl]);
 
     // Fetch the current conference if it was not received via WS
     useEffect(() => {
         if (!conference) {
             fetchConference(serverUrl, conferenceId);
         }
-    }, [conference]);
+    }, [conference, conferenceId, serverUrl]);
 
     /**
      * If the user called but the recipient did not answer
@@ -531,7 +531,7 @@ const CallScreen = ({
             // Conference deleted via websocket
             leaveCallRef.current!('api');
         }
-    }, [shouldLeaveCall]);
+    }, [leaveCallRef, shouldLeaveCall]);
 
     /**
      * Trigger the native iOS calling screen
@@ -543,7 +543,7 @@ const CallScreen = ({
                 CallManager.nativeReporters.ios.callStarted(serverUrl, channelId, callName, conferenceId, conferenceJWT, conferenceURL);
             })();
         }
-    }, [shouldDisplayNativeCall]);
+    }, [channel, channelId, conferenceId, conferenceJWT, conferenceURL, currentUserId, serverUrl, shouldDisplayNativeCall]);
 
     if (
         shouldDisplayLoadingScreen ||

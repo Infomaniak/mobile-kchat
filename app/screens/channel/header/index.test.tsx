@@ -45,7 +45,6 @@ describe('ChannelHeader Index', () => {
                 channelId,
                 componentId: 'Channel' as const,
                 callsEnabledInChannel: false,
-                groupCallsAllowed: false,
                 shouldRenderBookmarks: false,
                 shouldRenderChannelBanner: false,
                 isTabletView: false,

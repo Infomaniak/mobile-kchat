@@ -60,7 +60,7 @@ const FullStorageAnnouncementBar = ({
                 },
             },
         });
-    }, []);
+    }, [currentPackName, isAdmin, theme]);
 
     if (!isFull) {
         return null;

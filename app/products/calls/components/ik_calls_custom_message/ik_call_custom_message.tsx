@@ -178,7 +178,7 @@ const IkCallsCustomMessageInner = ({currentUser, isDM, isMilitaryTime, callProps
             } else {
                 isActiveRef.current = isActive;
             }
-        }, [isActive],
+        }, [isActive, isMountedRef],
     );
 
     /**
@@ -189,7 +189,7 @@ const IkCallsCustomMessageInner = ({currentUser, isDM, isMilitaryTime, callProps
         if (isActive) {
             fetchConference(serverUrl, conferenceId);
         }
-    }, []);
+    }, [conferenceId, isActive, serverUrl]);
 
     /**
      * Only allow answering call if it's a missed DM

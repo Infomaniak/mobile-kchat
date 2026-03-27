@@ -10,6 +10,7 @@ import {PER_PAGE_DEFAULT} from '@client/rest/constants';
 import Loading from '@components/loading';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import useDidMount from '@hooks/did_mount';
 import SecurityManager from '@managers/security_manager';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -89,21 +90,21 @@ const ConvertGMToChannel = ({
 
     const loadingAnimationTimeoutRef = useRef<NodeJS.Timeout>();
 
-    useEffect(() => {
+    useDidMount(() => {
         loadingAnimationTimeoutRef.current = setTimeout(() => setLoadingAnimationTimeout(true), loadingIndicatorTimeout);
 
         return () => {
             clearTimeout(loadingAnimationTimeoutRef.current);
         };
-    }, []);
+    });
 
-    useEffect(() => {
+    useDidMount(() => {
         mounted.current = true;
 
         return () => {
             mounted.current = false;
         };
-    }, []);
+    });
 
     useEffect(() => {
         if (!currentUserId) {
@@ -142,6 +143,7 @@ const ConvertGMToChannel = ({
             <ConvertGMToChannelForm
                 profiles={profiles}
                 channelId={channelId}
+                commonTeams={[]}
             />
         );
     }

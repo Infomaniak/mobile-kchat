@@ -30,6 +30,20 @@ describe('progress utils', () => {
             expect(result.totalNumber).toBe(2);
         });
 
+        it('should handle database model items', () => {
+            const items = [
+                TestHelper.fakePlaybookChecklistItemModel({state: ''}),
+                TestHelper.fakePlaybookChecklistItemModel({state: 'in_progress'}),
+            ];
+
+            const result = getChecklistProgress(items);
+
+            expect(result.progress).toBe(0);
+            expect(result.skipped).toBe(false);
+            expect(result.completed).toBe(0);
+            expect(result.totalNumber).toBe(2);
+        });
+
         it('should return 100 progress for all completed items', () => {
             const items = [
                 TestHelper.fakePlaybookChecklistItem('checklist-id', {state: 'closed'}),
@@ -116,6 +130,121 @@ describe('progress utils', () => {
             expect(result.progress).toBe(33); // 1/3 = 33.33... rounded to 33
             expect(result.completed).toBe(1);
             expect(result.totalNumber).toBe(3);
+        });
+    });
+
+    describe('getChecklistProgress with conditions', () => {
+        it('should exclude hidden incomplete items from progress', () => {
+            const items = [
+                TestHelper.fakePlaybookChecklistItem('checklist-id', {
+                    state: 'closed',
+                    condition_action: '',
+                    completed_at: 123456,
+                }),
+                TestHelper.fakePlaybookChecklistItem('checklist-id', {
+                    state: '',
+                    condition_action: 'hidden',
+                    completed_at: 0,
+                }),
+                TestHelper.fakePlaybookChecklistItem('checklist-id', {
+                    state: '',
+                    condition_action: '',
+                    completed_at: 0,
+                }),
+            ];
+
+            const result = getChecklistProgress(items);
+
+            // Hidden incomplete item should be excluded, so 1 completed out of 2 visible = 50%
+            expect(result.progress).toBe(50);
+            expect(result.completed).toBe(1);
+            expect(result.totalNumber).toBe(2);
+        });
+
+        it('should include hidden completed items in progress', () => {
+            const items = [
+                TestHelper.fakePlaybookChecklistItem('checklist-id', {
+                    state: 'closed',
+                    condition_action: 'hidden',
+                    completed_at: 123456,
+                }),
+                TestHelper.fakePlaybookChecklistItem('checklist-id', {
+                    state: '',
+                    condition_action: '',
+                    completed_at: 0,
+                }),
+            ];
+
+            const result = getChecklistProgress(items);
+
+            // Hidden but completed item should be counted, so 1 completed out of 2 visible = 50%
+            expect(result.progress).toBe(50);
+            expect(result.completed).toBe(1);
+            expect(result.totalNumber).toBe(2);
+        });
+
+        it('should handle all items hidden and incomplete', () => {
+            const items = [
+                TestHelper.fakePlaybookChecklistItem('checklist-id', {
+                    state: '',
+                    condition_action: 'hidden',
+                    completed_at: 0,
+                }),
+                TestHelper.fakePlaybookChecklistItem('checklist-id', {
+                    state: '',
+                    condition_action: 'hidden',
+                    completed_at: 0,
+                }),
+            ];
+
+            const result = getChecklistProgress(items);
+
+            // All items hidden, so 0 total
+            expect(result.progress).toBe(0);
+            expect(result.completed).toBe(0);
+            expect(result.totalNumber).toBe(0);
+        });
+
+        it('should handle shown_because_modified items', () => {
+            const items = [
+                TestHelper.fakePlaybookChecklistItem('checklist-id', {
+                    state: 'closed',
+                    condition_action: 'shown_because_modified',
+                    completed_at: 123456,
+                }),
+                TestHelper.fakePlaybookChecklistItem('checklist-id', {
+                    state: '',
+                    condition_action: 'shown_because_modified',
+                    completed_at: 0,
+                }),
+            ];
+
+            const result = getChecklistProgress(items);
+
+            // Both items should be visible, 1 completed out of 2 = 50%
+            expect(result.progress).toBe(50);
+            expect(result.completed).toBe(1);
+            expect(result.totalNumber).toBe(2);
+        });
+
+        it('should handle API format (snake_case) condition fields', () => {
+            const items = [
+                TestHelper.fakePlaybookChecklistItem('checklist-id', {
+                    state: '',
+                    condition_action: 'hidden',
+                    completed_at: 0,
+                }),
+                TestHelper.fakePlaybookChecklistItem('checklist-id', {
+                    state: '',
+                    condition_action: '',
+                    completed_at: 0,
+                }),
+            ];
+
+            const result = getChecklistProgress(items);
+
+            // Hidden item excluded, so 1 visible item
+            expect(result.totalNumber).toBe(1);
         });
     });
 

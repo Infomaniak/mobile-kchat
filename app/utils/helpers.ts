@@ -5,7 +5,7 @@ import RNUtils, {type SplitViewResult} from '@mattermost/rnutils';
 import moment, {type Moment} from 'moment-timezone';
 import {Platform} from 'react-native';
 
-import {CUSTOM_STATUS_TIME_PICKER_INTERVALS_IN_MINUTES} from '@constants/custom_status';
+import License from '@constants/license';
 import {STATUS_BAR_HEIGHT} from '@constants/view';
 
 // isMinimumServerVersion will return true if currentVersion is equal to higher or than
@@ -49,6 +49,33 @@ export const isMinimumServerVersion = (currentVersion = '', minMajorVersion = 0,
 
     // Dot version is equal
     return true;
+};
+
+export type LicenseTierSku = keyof typeof License.LicenseSkuTier;
+
+// isMinimumLicenseTier will return true if the license meets or exceeds the target SKU tier
+// license is a ClientLicense object
+// targetSku is a string, e.g 'professional', 'enterprise', 'advanced'
+export const isMinimumLicenseTier = (license: Partial<ClientLicense> | undefined, targetSku: LicenseTierSku): boolean => {
+    if (!targetSku || !license) {
+        return false;
+    }
+
+    const isLicensed = license.IsLicensed === 'true';
+    if (!isLicensed) {
+        return false;
+    }
+
+    // Only use SkuShortName if it's a valid SKU
+    const sku = license.SkuShortName as LicenseTierSku;
+    if (!sku || !(sku in License.LicenseSkuTier)) {
+        return false;
+    }
+
+    const currentTier = License.LicenseSkuTier[sku];
+    const targetTier = License.LicenseSkuTier[targetSku];
+
+    return Boolean(currentTier) && Boolean(targetTier) && currentTier >= targetTier;
 };
 
 export function buildQueryString(parameters: Dictionary<any>): string {
@@ -143,8 +170,7 @@ export function toTitleCase(str: string) {
     return str.replace(/\w\S*/g, doTitleCase);
 }
 
-export function getRoundedTime(value: Moment) {
-    const roundedTo = CUSTOM_STATUS_TIME_PICKER_INTERVALS_IN_MINUTES;
+export function getRoundedTime(value: Moment, roundedTo: number) {
     const start = moment(value);
     const diff = start.minute() % roundedTo;
     if (diff === 0) {

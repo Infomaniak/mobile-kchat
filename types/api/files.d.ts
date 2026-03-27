@@ -1,6 +1,17 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+type FileDownloadType = 'file' | 'thumbnail' | 'preview' | 'public';
+
+type FileDownloadRejectedEvent = {
+    file_id: string;
+    file_name: string;
+    rejection_reason: string;
+    channel_id: string;
+    post_id: string;
+    download_type: FileDownloadType;
+};
+
 type FileInfo = {
     id?: string;
     bytesRead?: number;
@@ -16,7 +27,7 @@ type FileInfo = {
     mime_type: string;
     mini_preview?: string;
     name: string;
-    transcript: Transcript;
+    transcript?: Transcript;
     post_id: string;
     post_id?: string;
     size: number;

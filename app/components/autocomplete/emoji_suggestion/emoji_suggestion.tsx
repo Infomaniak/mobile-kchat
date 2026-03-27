@@ -12,7 +12,7 @@ import Emoji from '@components/emoji';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
-import {debounce} from '@helpers/api/general';
+import {useDebounce} from '@hooks/utils';
 import {getEmojiByName, getEmojis, searchEmojis} from '@utils/emoji/helpers';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
@@ -158,7 +158,7 @@ const EmojiSuggestion = ({
                 updateValue(completedDraft.replace(`::${emoji}: `, `:${emoji}: `));
             });
         }
-    }, [value, updateValue, rootId, cursorPosition, shouldDirectlyReact]);
+    }, [shouldDirectlyReact, value, cursorPosition, customEmojis, updateValue, serverUrl, rootId]);
 
     const renderItem = useCallback(({item}: {item: string}) => {
         const completeItemSuggestion = () => completeSuggestion(item);
@@ -192,10 +192,17 @@ const EmojiSuggestion = ({
 
     useEffect(() => {
         onShowingChange(showingElements);
+
+        // We only want to update the showing elements if the showing elements change
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showingElements]);
 
+    const search = useDebounce(
+        useCallback(() => searchCustomEmojis(serverUrl, searchTerm), [serverUrl, searchTerm]),
+        SEARCH_DELAY,
+    );
+
     useEffect(() => {
-        const search = debounce(() => searchCustomEmojis(serverUrl, searchTerm), SEARCH_DELAY);
         if (searchTerm.length >= MIN_SEARCH_LENGTH) {
             search();
         }
@@ -203,6 +210,9 @@ const EmojiSuggestion = ({
         return () => {
             search.cancel();
         };
+
+        // We only want to search if the search term changes
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchTerm]);
 
     if (!data.length) {

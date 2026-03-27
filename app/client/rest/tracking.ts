@@ -1,12 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {defineMessage} from 'react-intl';
 import {DeviceEventEmitter, Platform} from 'react-native';
 
 import {CollectNetworkMetrics} from '@assets/config.json';
 import {Events} from '@constants';
-import {t} from '@i18n';
 import {setServerCredentials} from '@init/credentials';
+import NetworkPerformanceManager from '@managers/network_performance_manager';
 import PerformanceMetricsManager from '@managers/performance_metrics_manager';
 import {NetworkRequestMetrics} from '@managers/performance_metrics_manager/constant';
 import {isErrorWithStatusCode} from '@utils/errors';
@@ -72,8 +73,16 @@ export default class ClientTracking {
         this.apiClient = apiClient;
     }
 
-    setBearerToken(bearerToken: string) {
+    setClientCredentials(bearerToken: string, preauthSecret?: string) {
         this.requestHeaders[ClientConstants.HEADER_AUTH] = `${ClientConstants.HEADER_BEARER} ${bearerToken}`;
+
+        if (preauthSecret) {
+            this.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET] = preauthSecret;
+        } else {
+            // Remove shared password header when undefined
+            delete this.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET];
+        }
+
         setServerCredentials(this.apiClient.baseUrl, bearerToken);
     }
 
@@ -363,10 +372,10 @@ export default class ClientTracking {
             default:
                 return {error: new ClientError(this.apiClient.baseUrl, {
                     message: 'Invalid request method',
-                    intl: {
-                        id: t('mobile.request.invalid_request_method'),
+                    intl: defineMessage({
+                        id: 'mobile.request.invalid_request_method',
                         defaultMessage: 'Invalid request method',
-                    },
+                    }),
                     url,
                 })};
         }
@@ -375,19 +384,24 @@ export default class ClientTracking {
             this.incrementRequestCount(groupLabel);
         }
 
+        const performanceRequestId = NetworkPerformanceManager.startRequestTracking(this.apiClient.baseUrl, url);
+
         let response: ClientResponse;
         try {
             response = await request!(url, this.buildRequestOptions(options));
         } catch (error) {
+            NetworkPerformanceManager.cancelRequestTracking(this.apiClient.baseUrl, performanceRequestId);
+            const response_error = error as ClientError;
             const status_code = isErrorWithStatusCode(error) ? error.status_code : undefined;
             throw new ClientError(this.apiClient.baseUrl, {
                 message: 'Received invalid response from the server.',
-                intl: {
-                    id: t('mobile.request.invalid_response'),
+                intl: defineMessage({
+                    id: 'mobile.request.invalid_response',
                     defaultMessage: 'Received invalid response from the server.',
-                },
+                }),
                 url,
-                details: error,
+                details: response_error,
+                headers: response_error.headers ? response_error.headers : undefined,
                 status_code,
             });
         } finally {
@@ -399,6 +413,7 @@ export default class ClientTracking {
         if (groupLabel && CollectNetworkMetrics) {
             this.trackRequest(groupLabel, url, response.metrics);
         }
+        NetworkPerformanceManager.completeRequestTracking(this.apiClient.baseUrl, performanceRequestId, response.metrics);
         const serverVersion = semverFromServerVersion(
             headers[ClientConstants.HEADER_X_VERSION_ID] || headers[ClientConstants.HEADER_X_VERSION_ID.toLowerCase()],
         );
@@ -412,7 +427,8 @@ export default class ClientTracking {
 
         const bearerToken = headers[ClientConstants.HEADER_TOKEN] || headers[ClientConstants.HEADER_TOKEN.toLowerCase()];
         if (bearerToken) {
-            this.setBearerToken(bearerToken);
+            const existingSharedPassword = this.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET];
+            this.setClientCredentials(bearerToken, existingSharedPassword);
         }
 
         if (response.ok) {
@@ -425,6 +441,7 @@ export default class ClientTracking {
             status_code: response.code,
             url,
             response: response.data, // ik: important for kmeet handling
+            headers,
         });
     };
 }

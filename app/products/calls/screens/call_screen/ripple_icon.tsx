@@ -45,7 +45,7 @@ const RippleIcon = () => {
     // EFFECTS
     useEffect(() => {
         interpolated.value = withRepeat(withTiming(1, {duration: DURATION, easing: EASING}), -1);
-    }, []);
+    }, [interpolated]);
 
     return <Animated.View style={[styles.root, animatedStyle]}/>;
 };

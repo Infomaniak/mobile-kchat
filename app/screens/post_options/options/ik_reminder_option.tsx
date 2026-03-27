@@ -6,7 +6,6 @@ import React, {useCallback} from 'react';
 import {BaseOption} from '@components/common_post_options';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
-import {t} from '@i18n';
 import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
 
 import type {CloudUsageModel, LimitModel} from '@database/models/server';
@@ -36,12 +35,11 @@ const IKReminderOption = ({bottomSheetId, post, usage, limits}: Props) => {
                 limits,
             },
         });
-    }, [bottomSheetId, post]);
+    }, [bottomSheetId, limits, post, theme, usage]);
 
     return (
         <BaseOption
-            i18nId={t('infomaniak.post_info.post_reminder.menu')}
-            defaultMessage='Remind'
+            message={{id: 'infomaniak.post_info.post_reminder.menu', defaultMessage: 'Remind'}}
             onPress={onPress}
             iconName='bell-outline'
             testID='infomaniak.post_info.post_reminder.menu'

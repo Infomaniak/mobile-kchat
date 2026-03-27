@@ -3,6 +3,8 @@
 
 type ChecklistItemState = '' | 'in_progress' | 'closed' | 'skipped';
 
+type ConditionAction = '' | 'hidden' | 'shown_because_modified';
+
 const PlaybookRunStatus = {
     InProgress: 'InProgress',
     Finished: 'Finished',
@@ -30,8 +32,15 @@ type PlaybookChecklistItem = {
     command_last_run: number;
     due_date: number;
     task_actions?: TaskAction[];
+    condition_action?: ConditionAction;
+    condition_reason?: string;
     completed_at: number;
     update_at: number;
+}
+
+type ChecklistItemInput = {
+    title: string;
+    description?: string;
 }
 
 type PlaybookChecklist = {
@@ -50,6 +59,7 @@ type RunMetricData = {
 type StatusPost = {
     id: string;
     create_at: number;
+    delete_at: number;
 }
 
 type TimelineEvent = {
@@ -67,6 +77,34 @@ type TimelineEvent = {
 
 type PlaybookRunStatusType = typeof PlaybookRunStatus[keyof typeof PlaybookRunStatus];
 
+type PlaybookRunPropertyField = {
+    id: string;
+    group_id: string;
+    name: string;
+    type: string;
+    target_id: string;
+    target_type: string;
+    create_at: number;
+    update_at: number;
+    delete_at: number;
+    attrs?: string | {
+        options?: Array<{id: string; name: string}>;
+        parent_id?: string;
+        sort_order?: number;
+        value_type?: string;
+    };
+}
+
+type PlaybookRunPropertyValue = {
+    id: string;
+    field_id: string;
+    target_id: string;
+    update_at: number;
+    value: string;
+}
+
+type PlaybookRunType = typeof PLAYBOOK_RUN_TYPES[keyof typeof PLAYBOOK_RUN_TYPES];
+
 type PlaybookRun = {
     id: string;
     name: string;
@@ -83,7 +121,8 @@ type PlaybookRun = {
     create_at: number;
     end_at: number;
     post_id?: string;
-    playbook_id: string;
+    playbook_id?: string;
+    type?: PlaybookRunType;
     current_status: PlaybookRunStatusType;
     last_status_update_at: number;
     reminder_post_id?: string;
@@ -109,6 +148,48 @@ type PlaybookRun = {
     status_posts: StatusPost[];
     checklists: PlaybookChecklist[];
     metrics_data: RunMetricData[];
+    property_fields?: PlaybookRunPropertyField[];
+    property_values?: PlaybookRunPropertyValue[];
     update_at: number;
     items_order: string[];
+    status_update_broadcast_channels_enabled: boolean;
+}
+
+type PlaybookRunMetadata = {
+    channel_name: string;
+    channel_display_name: string;
+    team_name: string;
+    num_participants: number;
+    total_posts: number;
+    followers: string[];
+}
+
+type Playbook = {
+    id: string;
+    title: string;
+    description: string;
+    team_id: string;
+    create_public_playbook_run: boolean;
+    delete_at: number;
+    run_summary_template_enabled: boolean;
+    run_summary_template: string;
+    channel_name_template: string;
+    channel_mode: string;
+    public: boolean;
+    default_owner_id: string;
+    default_owner_enabled: boolean;
+    num_stages: number;
+    num_steps: number;
+    num_runs: number;
+    num_actions: number;
+    last_run_at: number;
+    members: PlaybookMember[];
+    default_playbook_member_role: string;
+    active_runs: number;
+}
+
+type PlaybookMember = {
+    user_id: string;
+    roles: string[];
+    scheme_roles?: string[];
 }

@@ -1,25 +1,18 @@
-#### Summary
+## Bug / Problème
+
+#### Fonctionnel
+<!-- Ce que l'utilisateur observe, l'impact métier -->
+
+#### Technique
+ <!-- Cause racine, composant concerné, pourquoi ça casse -->
+
+## Solution
+<!-- Explique l'approche choisie et pourquoi -->
+
+## Comment tester
+
+## Screenshots (si applicable)
 <!--
-A description of what this merge request does.
--->
-
-#### Ticket Link
-<!--
-If this merge request addresses a redmine ticket, please link it here
--->
-
-#### How to test
-<!--
-Add here steps to replicate/test the issue/bug/feature.
-
-Or simply add "See related Ticket"
--->
-
-#### Screenshots
-<!--
-If the MR includes UI changes, include screenshots/GIFs.
-
-For an easier comparison of UI changes a table (template below) can be used.
 
 |  before  |  after  |
 |----|----|
@@ -27,6 +20,13 @@ For an easier comparison of UI changes a table (template below) can be used.
 
 -->
 
-/assign me
-/reviewer @antonbuksa @boris.trombert @aurelien.sberro @dev_bot
-/remove_reviewer me
+## Ticket liée
+
+## Checklist
+
+- [ ] J'ai ajouté/modifié les tests unitaires pour cette feature/bug
+- [ ] J'ai vérifié que les tests existants passent
+
+/assign me  
+/reviewer @boris.trombert @aurelien.sberro
+/remove_reviewer me  

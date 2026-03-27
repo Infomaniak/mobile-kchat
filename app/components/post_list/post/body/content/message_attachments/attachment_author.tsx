@@ -1,14 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Image} from 'expo-image';
-import React, {useCallback} from 'react';
-import {useIntl} from 'react-intl';
+import React from 'react';
 import {Text, View} from 'react-native';
 
+import ExpoImage from '@components/expo_image';
+import {useExternalLinkHandler} from '@hooks/use_external_link_handler';
+import {urlSafeBase64Encode} from '@utils/security';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
-import {tryOpenURL} from '@utils/url';
-import {onOpenLinkError} from '@utils/url/links';
 
 type Props = {
     icon?: string;
@@ -37,23 +36,14 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 });
 
 const AttachmentAuthor = ({icon, link, name, theme}: Props) => {
-    const intl = useIntl();
     const style = getStyleSheet(theme);
-
-    const openLink = useCallback(() => {
-        if (link) {
-            const onError = () => {
-                onOpenLinkError(intl);
-            };
-
-            tryOpenURL(link, onError);
-        }
-    }, [intl, link]);
+    const openLink = useExternalLinkHandler(link);
 
     return (
         <View style={style.container}>
             {Boolean(icon) &&
-            <Image
+            <ExpoImage
+                id={`attachment-author-icon-${urlSafeBase64Encode(icon!)}`}
                 source={{uri: icon}}
                 key='author_icon'
                 style={style.icon}

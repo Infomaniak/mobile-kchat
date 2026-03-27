@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import ClientAgents, {type ClientAgentsMix} from '@agents/client/rest';
+
 import ClientCloudLimitMix, {type CloudLimitMix} from '@client/rest/cloud';
 import IKClientCalls, {type IKClientCallsMix} from '@client/rest/ikcalls';
 import IKClientCustomActions, {type IKClientCustomActionsMix} from '@client/rest/ikcustomactions';
@@ -33,6 +35,7 @@ import ClientUsers, {type ClientUsersMix} from './users';
 import type {APIClientInterface} from '@mattermost/react-native-network-client';
 
 interface Client extends ClientBase,
+    ClientAgentsMix,
     ClientAppsMix,
     ClientCategoriesMix,
     ClientChannelsMix,
@@ -57,9 +60,13 @@ interface Client extends ClientBase,
     IKClientCustomActionsMix,
     ClientCustomAttributesMix,
     ClientPlaybooksMix
-{}
+{
+    setClientCredentials: (token: string, preauthSecret?: string) => void;
+    setCSRFToken: (csrfToken: string) => void;
+}
 
 class Client extends mix(ClientBase).with(
+    ClientAgents,
     ClientApps,
     ClientCategories,
     ClientChannels,
@@ -87,8 +94,8 @@ class Client extends mix(ClientBase).with(
     ClientPlaybooks,
 ) {
     // eslint-disable-next-line no-useless-constructor
-    constructor(apiClient: APIClientInterface, serverUrl: string, bearerToken?: string, csrfToken?: string) {
-        super(apiClient, serverUrl, bearerToken, csrfToken);
+    constructor(apiClient: APIClientInterface, serverUrl: string, bearerToken?: string, csrfToken?: string, preauthSecret?: string) {
+        super(apiClient, serverUrl, bearerToken, csrfToken, preauthSecret);
     }
 }
 

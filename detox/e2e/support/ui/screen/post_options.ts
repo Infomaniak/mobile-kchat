@@ -25,8 +25,11 @@ class PostOptionsScreen {
         aiSummarizeThreadOption: 'post_options.ai_summarize_thread.option',
         reactForMeThreadOption: 'post_options.react_for_me_thread.option',
         askAiOption: 'post_options.ask_ai.option',
+        pinnedPostListItemPrefix: 'pinned_messages.post_list.post',
     };
 
+    searchedPostListItem = (postId: string) => element(by.id(`search_results.post_list.post.${postId}`));
+    pinnedPostListItem = (postId: string) => element(by.id(`pinned_messages.post_list.post.${postId}`));
     postOptionsScreen = element(by.id(this.testID.postOptionsScreen));
     pickReactionButton = element(by.id(this.testID.pickReactionButton));
     replyPostOption = element(by.id(this.testID.replyPostOption));
@@ -84,6 +87,16 @@ class PostOptionsScreen {
             await expect(this.postOptionsScreen).toExist();
             await this.close();
         }
+    };
+
+    openPostOptionsForPinedPosts = async (postId: string) => {
+        await waitFor(this.pinnedPostListItem(postId)).toExist().withTimeout(timeouts.TWO_SEC);
+        await this.pinnedPostListItem(postId).longPress(timeouts.TWO_SEC);
+    };
+
+    openPostOptionsForSearchedPosts = async (postId: string) => {
+        await waitFor(this.searchedPostListItem(postId)).toExist().withTimeout(timeouts.TWO_SEC);
+        await this.searchedPostListItem(postId).longPress(timeouts.TWO_SEC);
     };
 }
 

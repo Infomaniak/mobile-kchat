@@ -47,7 +47,6 @@ const ProgressBar = ({color, containerStyle, progress, withCursor, style, onSeek
     const progressValue = useSharedValue(progress);
     const isGestureActive = useSharedValue(false);
 
-    // eslint-disable-next-line new-cap
     const panGesture = Gesture.Pan().
         onStart(() => {
             isGestureActive.value = true;
@@ -65,7 +64,6 @@ const ProgressBar = ({color, containerStyle, progress, withCursor, style, onSeek
             isGestureActive.value = false;
         });
 
-    // eslint-disable-next-line new-cap
     const tapGesture = Gesture.Tap().
         onStart(() => {
             isGestureActive.value = true;
@@ -81,7 +79,6 @@ const ProgressBar = ({color, containerStyle, progress, withCursor, style, onSeek
             isGestureActive.value = false;
         });
 
-    // eslint-disable-next-line new-cap
     const composedGestures = Gesture.Race(tapGesture, panGesture);
 
     const progressAnimatedStyle = useAnimatedStyle(() => {
@@ -108,11 +105,14 @@ const ProgressBar = ({color, containerStyle, progress, withCursor, style, onSeek
 
     useEffect(() => {
         progressValue.value = progress;
+
+    // Update the shared value only when the progress changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [progress]);
 
     const onLayout = useCallback((e: LayoutChangeEvent) => {
         widthValue.value = e.nativeEvent.layout.width;
-    }, []);
+    }, [widthValue]);
 
     return (
         <GestureDetector gesture={composedGestures}>

@@ -73,6 +73,9 @@ const RecentMentionsScreen = ({appsEnabled, customEmojiNames, mentions, currentT
     useEffect(() => {
         opacity.value = isFocused ? 1 : 0;
         translateX.value = isFocused ? 0 : translateSide;
+
+    // We only want to update the shared values when `isFocused` changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isFocused]);
 
     useEffect(() => {
@@ -86,7 +89,7 @@ const RecentMentionsScreen = ({appsEnabled, customEmojiNames, mentions, currentT
 
     const {scrollPaddingTop, scrollRef, scrollValue, onScroll, headerHeight} = useCollapsibleHeader<Animated.FlatList<string>>(true, onSnap);
     const paddingTop = useMemo(() => ({paddingTop: scrollPaddingTop, flexGrow: 1}), [scrollPaddingTop]);
-    const posts = useMemo(() => selectOrderedPosts(mentions, 0, false, '', '', false, currentTimezone, false).reverse(), [mentions]);
+    const posts = useMemo(() => selectOrderedPosts(mentions, 0, false, '', '', false, currentTimezone, false).reverse(), [currentTimezone, mentions]);
 
     const animated = useAnimatedStyle(() => {
         return {
@@ -133,7 +136,7 @@ const RecentMentionsScreen = ({appsEnabled, customEmojiNames, mentions, currentT
                 <EmptyState/>
             )}
         </View>
-    ), [loading, theme, paddingTop]);
+    ), [loading, styles.empty, theme.centerChannelColor]);
 
     const renderItem = useCallback(({item}: ListRenderItemInfo<PostListItem | PostListOtherItem>) => {
         switch (item.type) {
@@ -159,7 +162,7 @@ const RecentMentionsScreen = ({appsEnabled, customEmojiNames, mentions, currentT
             default:
                 return null;
         }
-    }, [appsEnabled, customEmojiNames]);
+    }, [appsEnabled, currentTimezone, customEmojiNames]);
 
     return (
         <Freeze freeze={!isFocused}>

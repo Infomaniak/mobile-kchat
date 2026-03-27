@@ -1,16 +1,20 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
+import {useIntl} from 'react-intl';
 import {type LayoutChangeEvent, type StyleProp, View, type ViewStyle} from 'react-native';
 
 import Files from '@components/files';
 import RemotePlayback from '@components/files/voice_recording_file/remote_playback';
 import FormattedText from '@components/formatted_text';
 import JumboEmoji from '@components/jumbo_emoji';
+import ErrorBoundary from '@components/markdown/error_boundary';
 import {Screens} from '@constants';
 import {PostTypes} from '@constants/post';
 import {THREAD} from '@constants/screens';
+import StatusUpdatePost from '@playbooks/components/status_update_post';
+import {PLAYBOOKS_UPDATE_STATUS_POST_TYPE} from '@playbooks/constants/plugin';
 import {isEdited as postEdited, isPostFailed} from '@utils/post';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
@@ -43,10 +47,10 @@ type BodyProps = {
     post: PostModel;
     searchPatterns?: SearchPattern[];
     showAddReaction?: boolean;
-    voiceMessageEnabled?: boolean;
     theme: Theme;
+    voiceMessageEnabled?: boolean;
+    isChannelAutotranslated?: boolean;
 };
-
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
         ackAndReactionsContainer: {
@@ -105,9 +109,11 @@ const Body = ({
     post,
     searchPatterns,
     showAddReaction,
-    voiceMessageEnabled,
     theme,
+    isChannelAutotranslated,
+    voiceMessageEnabled,
 }: BodyProps) => {
+    const intl = useIntl();
     const style = getStyleSheet(theme);
     const isEdited = postEdited(post);
     const isFailed = isPostFailed(post);
@@ -116,10 +122,13 @@ const Body = ({
     let body;
     let message;
 
-    const isReplyPost = Boolean(post.rootId && (!isEphemeral || !hasBeenDeleted) && location !== THREAD);
-    const hasContent = (post.metadata?.embeds?.length || (appsEnabled && Array.isArray(post.props?.app_bindings) && post.props?.app_bindings?.length)) || (Array.isArray(post.props?.attachments) && post.props?.attachments?.length);
+    const nBindings = Array.isArray(post.props?.app_bindings) ? post.props?.app_bindings.length : 0;
+    const nAttachments = Array.isArray(post.props?.attachments) ? post.props?.attachments.length : 0;
 
-    const replyBarStyle = useCallback((): StyleProp<ViewStyle> | undefined => {
+    const isReplyPost = Boolean(post.rootId && (!isEphemeral || !hasBeenDeleted) && location !== THREAD);
+    const hasContent = Boolean((post.metadata?.embeds?.length || (appsEnabled && nBindings)) || nAttachments);
+
+    const replyBarStyle = useMemo<StyleProp<ViewStyle>|undefined>(() => {
         if (!isReplyPost || (isCRTEnabled && location === Screens.PERMALINK)) {
             return undefined;
         }
@@ -139,7 +148,7 @@ const Body = ({
         }
 
         return barStyle;
-    }, []);
+    }, [highlightReplyBar, isCRTEnabled, isFirstReply, isLastReply, isReplyPost, location, style]);
 
     const onLayout = useCallback((e: LayoutChangeEvent) => {
         if (location === Screens.SAVED_MESSAGES) {
@@ -153,6 +162,14 @@ const Body = ({
                 style={style.message}
                 id='post_body.deleted'
                 defaultMessage='(message deleted)'
+            />
+        );
+    } else if (post.type === PLAYBOOKS_UPDATE_STATUS_POST_TYPE && post.props != null) {
+        message = (
+            <StatusUpdatePost
+                location={location}
+                post={post}
+                theme={theme}
             />
         );
     } else if (isPostAddChannelMember) {
@@ -171,7 +188,7 @@ const Body = ({
                 value={post.message}
             />
         );
-    } else if (post.message.length) {
+    } else if (post.message.length || isEdited) { // isEdited is added to handle the case where the post is edited and the message is empty
         message = (
             <Message
                 highlight={highlight}
@@ -183,12 +200,14 @@ const Body = ({
                 post={post}
                 searchPatterns={searchPatterns}
                 theme={theme}
+                isChannelAutotranslated={isChannelAutotranslated}
             />
         );
     }
 
     const acknowledgementsVisible = isPostAcknowledgementEnabled && post.metadata?.priority?.requested_ack;
     const reactionsVisible = hasReactions && showAddReaction;
+
     if (!hasBeenDeleted) {
         if (voiceMessageEnabled && post.type === PostTypes.VOICE_MESSAGE) {
             body = (
@@ -210,22 +229,22 @@ const Body = ({
                 <View style={style.messageBody}>
                     {message}
                     {hasContent &&
-                        <Content
-                            isReplyPost={isReplyPost}
-                            layoutWidth={layoutWidth}
-                            location={location}
-                            post={post}
-                            theme={theme}
-                        />
+                    <Content
+                        isReplyPost={isReplyPost}
+                        layoutWidth={layoutWidth}
+                        location={location}
+                        post={post}
+                        theme={theme}
+                    />
                     }
                     {hasFiles &&
-                        <Files
-                            failed={isFailed}
-                            layoutWidth={layoutWidth}
-                            location={location}
-                            post={post}
-                            isReplyPost={isReplyPost}
-                        />
+                    <Files
+                        failed={isFailed}
+                        layoutWidth={layoutWidth}
+                        location={location}
+                        post={post}
+                        isReplyPost={isReplyPost}
+                    />
                     }
                     {(acknowledgementsVisible || reactionsVisible) && (
                         <View style={style.ackAndReactionsContainer}>
@@ -252,19 +271,24 @@ const Body = ({
     }
 
     return (
-        <View
-            style={style.messageContainerWithReplyBar}
-            onLayout={onLayout}
+        <ErrorBoundary
+            error={intl.formatMessage({id: 'post.error', defaultMessage: 'There has been an error rendering this post.'})}
+            theme={theme}
         >
-            <View style={replyBarStyle()}/>
-            {body}
-            {isFailed &&
+            <View
+                style={style.messageContainerWithReplyBar}
+                onLayout={onLayout}
+            >
+                <View style={replyBarStyle}/>
+                {body}
+                {isFailed &&
                 <Failed
                     post={post}
                     theme={theme}
                 />
-            }
-        </View>
+                }
+            </View>
+        </ErrorBoundary>
     );
 };
 

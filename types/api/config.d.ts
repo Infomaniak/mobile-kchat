@@ -22,6 +22,8 @@ interface ClientConfig {
     BuildHash: string;
     BuildHashEnterprise: string;
     BuildNumber: string;
+    BurnOnReadMaximumTimeToLiveSeconds: string;
+    BurnOnReadDurationSeconds: string;
     CloseUnusedDirectMessages: string;
     CollapsedThreads: string;
     CustomBrandText: string;
@@ -46,6 +48,7 @@ interface ClientConfig {
     EmailNotificationContentsType: string;
     EnableBanner: string;
     EnableBotAccountCreation: string;
+    EnableBurnOnRead: string;
     EnableChannelViewedMessages: string;
     EnableClientMetrics?: string;
     EnableCluster: string;
@@ -62,6 +65,7 @@ interface ClientConfig {
     EnableEmailBatching: string;
     EnableEmailInvitations: string;
     EnableEmojiPicker: string;
+    EnableGuestMagicLink: string;
     EnableFileAttachments: string;
     EnableGifPicker: string;
     EnableGuestAccounts: string;
@@ -70,6 +74,7 @@ interface ClientConfig {
     EnableLatex: string;
     EnableLdap: string;
     EnableLinkPreviews: string;
+    EnablePermalinkPreviews: string;
     EnableMarketplace: string;
     EnableMetrics: string;
     EnableMobileFileDownload: string;
@@ -126,6 +131,7 @@ interface ClientConfig {
     FeatureFlagEnableVoiceMessages?: string;
     FeatureFlagChannelBookmarks?: string;
     FeatureFlagCustomProfileAttributes?: string;
+    FeatureFlagInteractiveDialogAppsForm?: string;
     ForgotPasswordLink?: string;
     GfycatApiKey: string;
     GfycatApiSecret: string;
@@ -137,6 +143,9 @@ interface ClientConfig {
     IosAppDownloadLink: string;
     IosLatestVersion: string;
     IosMinVersion: string;
+    IntuneMAMEnabled?: string;
+    IntuneScope?: string;
+    IntuneAuthService?: string;
     LdapFirstNameAttributeSet: string;
     LdapLastNameAttributeSet: string;
     LdapLoginButtonBorderColor: string;
@@ -208,6 +217,12 @@ interface ClientConfig {
     WebsocketPort: string;
     WebsocketSecurePort: string;
     WebsocketURL: string;
+    BurnOnReadDurationSeconds: string;
+
+    // Autotranslations
+    AutoTranslationLanguages: string;
+    EnableAutoTranslation: string;
+    RestrictDMAndGMAutotranslation: string;
 }
 
 type SecurityClientConfig = Pick<ClientConfig, 'MobileEnableBiometrics' | 'MobileJailbreakProtection' | 'MobilePreventScreenCapture' | 'SiteName'>

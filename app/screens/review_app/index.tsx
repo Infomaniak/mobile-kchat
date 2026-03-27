@@ -146,7 +146,7 @@ const ReviewApp = ({
         close(async () => {
             await dismissOverlay(componentId);
         });
-    }, [close, intl, componentId]);
+    }, [close, componentId]);
 
     const onPressClose = useCallback(() => {
         close(async () => {
@@ -166,7 +166,7 @@ const ReviewApp = ({
         if (finished) {
             runOnJS(doAfterAnimation)();
         }
-    }), []);
+    }), [doAfterAnimation]);
 
     return (
         <View
@@ -196,7 +196,7 @@ const ReviewApp = ({
                         <View style={styles.content}>
                             <ReviewAppIllustration theme={theme}/>
                             <Text style={styles.title}>
-                                {intl.formatMessage({id: 'rate.title', defaultMessage: 'Enjoying Mattermost?'})}
+                                {intl.formatMessage({id: 'rate.title', defaultMessage: 'Enjoying kChat?'})}
                             </Text>
                             <Text style={styles.subtitle}>
                                 {intl.formatMessage({id: 'rate.subtitle', defaultMessage: 'Let us know what you think.'})}

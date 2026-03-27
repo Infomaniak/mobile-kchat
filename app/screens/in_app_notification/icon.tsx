@@ -2,16 +2,19 @@
 // See LICENSE.txt for license information.
 
 import {withObservables} from '@nozbe/watermelondb/react';
-import {Image, type ImageSource} from 'expo-image';
+import {type ImageSource} from 'expo-image';
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 
 import {buildAbsoluteUrl} from '@actions/remote/file';
 import {buildProfileImageUrlFromUser} from '@actions/remote/user';
 import CompassIcon from '@components/compass_icon';
+import ExpoImage from '@components/expo_image';
 import NetworkManager from '@managers/network_manager';
 import {observeConfigBooleanValue} from '@queries/servers/system';
 import {observeUser} from '@queries/servers/user';
+import {urlSafeBase64Encode} from '@utils/security';
+import {getLastPictureUpdate} from '@utils/user';
 
 import type {WithDatabaseArgs} from '@typings/database/database';
 import type UserModel from '@typings/database/models/servers/user';
@@ -48,7 +51,8 @@ const NotificationIcon = ({author, enablePostIconOverride, fromWebhook, override
                 headers: overrideIconUrl.startsWith('/') ? authorizedHeaders : {},
             };
             icon = (
-                <Image
+                <ExpoImage
+                    id={`user-override-icon-${urlSafeBase64Encode(overrideIconUrl)}`}
                     source={source}
                     style={styles.icon}
                 />
@@ -63,8 +67,10 @@ const NotificationIcon = ({author, enablePostIconOverride, fromWebhook, override
         }
     } else if (author) {
         const pictureUrl = buildProfileImageUrlFromUser(serverUrl, author);
+        const lastPictureUpdateAt = getLastPictureUpdate(author);
         icon = (
-            <Image
+            <ExpoImage
+                id={`user-${author.id}-${lastPictureUpdateAt}`}
                 key={pictureUrl}
                 style={{width: IMAGE_SIZE, height: IMAGE_SIZE, borderRadius: (IMAGE_SIZE / 2)}}
                 source={{
@@ -75,7 +81,8 @@ const NotificationIcon = ({author, enablePostIconOverride, fromWebhook, override
         );
     } else {
         icon = (
-            <Image
+            <ExpoImage
+                cachePolicy='memory'
                 source={logo}
                 style={styles.icon}
             />

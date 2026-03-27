@@ -10,6 +10,7 @@ import PushNotifications from '@init/push_notifications';
 import GlobalEventHandler from '@managers/global_event_handler';
 import {matomo} from '@managers/matomo';
 import NetworkManager from '@managers/network_manager';
+import SecurityManager from '@managers/security_manager';
 import SessionManager from '@managers/session_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {registerScreens} from '@screens/index';
@@ -48,6 +49,7 @@ export async function initialize() {
         await DatabaseManager.init(serverUrls);
         await NetworkManager.init(serverCredentials);
         await ImageCacheMigration.init();
+        await SecurityManager.init();
 
         GlobalEventHandler.init();
         ManagedApp.init();

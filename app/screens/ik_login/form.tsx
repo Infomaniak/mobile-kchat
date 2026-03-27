@@ -49,7 +49,7 @@ const ServerForm = ({
     const onConnect = useCallback(() => {
         Keyboard.dismiss();
         handleConnect();
-    }, []);
+    }, [handleConnect]);
 
     const buttonType = connecting ? 'disabled' : 'default';
 

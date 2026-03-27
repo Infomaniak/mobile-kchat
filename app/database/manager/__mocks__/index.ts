@@ -1,12 +1,14 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {AiBotModel, AiThreadModel} from '@agents/database/models';
 import {Database, Q} from '@nozbe/watermelondb';
 import LokiJSAdapter from '@nozbe/watermelondb/adapters/lokijs';
 import logger from '@nozbe/watermelondb/utils/common/logger';
 import {deleteAsync} from 'expo-file-system';
 import {DeviceEventEmitter, Platform} from 'react-native';
 
+import {Events} from '@constants';
 import {DatabaseType, MIGRATION_EVENTS, MM_TABLES} from '@constants/database';
 import AppDatabaseMigrations from '@database/migration/app';
 import ServerDatabaseMigrations from '@database/migration/server';
@@ -22,7 +24,7 @@ import AppDataOperator from '@database/operator/app_data_operator';
 import ServerDataOperator from '@database/operator/server_data_operator';
 import {schema as appSchema} from '@database/schema/app';
 import {serverSchema} from '@database/schema/server';
-import {PlaybookRunModel, PlaybookChecklistModel, PlaybookChecklistItemModel} from '@playbooks/database/models';
+import {PlaybookRunModel, PlaybookChecklistModel, PlaybookChecklistItemModel, PlaybookRunPropertyFieldModel, PlaybookRunPropertyValueModel} from '@playbooks/database/models';
 import {deleteIOSDatabase} from '@utils/mattermost_managed';
 import {urlSafeBase64Encode} from '@utils/security';
 import {removeProtocol} from '@utils/url';
@@ -54,7 +56,8 @@ class DatabaseManagerSingleton {
             PostModel, PostsInChannelModel, PostsInThreadModel, PreferenceModel, ReactionModel, RoleModel,
             ScheduledPostModel, SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
             ThreadModel, ThreadParticipantModel, ThreadInTeamModel, TeamThreadsSyncModel, UserModel,
-            PlaybookRunModel, PlaybookChecklistModel, PlaybookChecklistItemModel,
+            PlaybookRunModel, PlaybookChecklistModel, PlaybookChecklistItemModel, PlaybookRunPropertyFieldModel, PlaybookRunPropertyValueModel,
+            AiBotModel, AiThreadModel,
         ];
         this.databaseDirectory = '';
     }
@@ -243,15 +246,16 @@ class DatabaseManagerSingleton {
         return undefined;
     };
 
-    public setActiveServerDatabase = async (serverUrl: string): Promise<void> => {
+    public setActiveServerDatabase = async (serverUrl: string, options?: ActiveServerOptions): Promise<void> => {
         if (this.appDatabase?.database) {
             const database = this.appDatabase?.database;
             await database.write(async () => {
                 const servers = await database.collections.get(SERVERS).query(Q.where('url', serverUrl)).fetch();
                 if (servers.length) {
-                    servers[0].update((server: ServersModel) => {
+                    await servers[0].update((server: ServersModel) => {
                         server.lastActiveAt = Date.now();
                     });
+                    DeviceEventEmitter.emit(Events.ACTIVE_SERVER_CHANGED, {serverUrl, options});
                 }
             });
         }

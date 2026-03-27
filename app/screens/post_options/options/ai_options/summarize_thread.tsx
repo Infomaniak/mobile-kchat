@@ -7,7 +7,6 @@ import {fetchAndSwitchToThread, summarizeThread} from '@actions/remote/thread';
 import {BaseOption} from '@components/common_post_options';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
-import {t} from '@i18n';
 import {dismissBottomSheet} from '@screens/navigation';
 
 import IconThreadSummarization from '../../../../components/illustrations/icon_thread_summarization';
@@ -32,8 +31,7 @@ const SummarizeThread = ({post, bottomSheetId}: Props) => {
 
     return (
         <BaseOption
-            i18nId={t('ai.summarizeThread')}
-            defaultMessage='Summarize Thread'
+            message={{id: 'ai.summarizeThread', defaultMessage: 'Summarize thread'}}
             customIcon={<IconThreadSummarization theme={theme}/>}
             onPress={handleSummarizeThread}
             testID='post_options.ai_summarize_thread.option'

@@ -1,0 +1,373 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
+import EuriaIcon from '@agents/components/euria_icon';
+import {useRewrite} from '@agents/hooks';
+import {rewriteStore} from '@agents/store';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {defineMessages, useIntl} from 'react-intl';
+import {Alert, Keyboard, Pressable, TextInput, View} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+
+import CompassIcon from '@components/compass_icon';
+import FormattedText from '@components/formatted_text';
+import OptionItem, {ITEM_HEIGHT} from '@components/option_item';
+import {Screens} from '@constants';
+import {useServerUrl} from '@context/server';
+import {useTheme} from '@context/theme';
+import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
+import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import {usePreventDoubleTap} from '@hooks/utils';
+import BottomSheet from '@screens/bottom_sheet';
+import {dismissBottomSheet} from '@screens/navigation';
+import {bottomSheetSnapPoint} from '@utils/helpers';
+import {logWarning} from '@utils/log';
+import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {typography} from '@utils/typography';
+
+import type {RewriteAction} from '@agents/types';
+import type {AvailableScreens} from '@typings/screens/navigation';
+
+const messages = defineMessages({
+    errorTitle: {
+        id: 'ai_rewrite.error.title',
+        defaultMessage: 'AI Rewrite Error',
+    },
+    errorOk: {
+        id: 'ai_rewrite.error.ok',
+        defaultMessage: 'OK',
+    },
+    generatePrompt: {
+        id: 'ai_rewrite.generate_prompt',
+        defaultMessage: 'Ask Euria to create a message',
+    },
+    customPrompt: {
+        id: 'ai_rewrite.custom_prompt',
+        defaultMessage: 'Ask Euria to edit message...',
+    },
+    shorten: {
+        id: 'ai_rewrite.shorten',
+        defaultMessage: 'Shorten',
+    },
+    elaborate: {
+        id: 'ai_rewrite.elaborate',
+        defaultMessage: 'Elaborate',
+    },
+    improveWriting: {
+        id: 'ai_rewrite.improve_writing',
+        defaultMessage: 'Improve writing',
+    },
+    fixSpelling: {
+        id: 'ai_rewrite.fix_spelling',
+        defaultMessage: 'Fix spelling and grammar',
+    },
+    simplify: {
+        id: 'ai_rewrite.simplify',
+        defaultMessage: 'Simplify',
+    },
+    summarize: {
+        id: 'ai_rewrite.summarize',
+        defaultMessage: 'Summarize',
+    },
+    cancel: {
+        id: 'ai_rewrite.cancel',
+        defaultMessage: 'Cancel',
+    },
+    regenerate: {
+        id: 'ai_rewrite.regenerate',
+        defaultMessage: 'Regenerate',
+    },
+});
+
+type Props = {
+    closeButtonId: string;
+    componentId: AvailableScreens;
+    originalMessage: string;
+    updateValue: (value: string | ((prevValue: string) => string)) => void;
+};
+
+const CUSTOM_PROMPT_INPUT_HEIGHT = 64;
+const OPTIONS_PADDING = 8;
+const HISTORY_BUTTONS_HEIGHT = 44;
+
+const options: Array<{action: RewriteAction; message: typeof messages.shorten; icon: string}> = [
+    {action: 'shorten', message: messages.shorten, icon: 'text-short'},
+    {action: 'elaborate', message: messages.elaborate, icon: 'text-long'},
+    {action: 'improve_writing', message: messages.improveWriting, icon: 'auto-fix'},
+    {action: 'fix_spelling', message: messages.fixSpelling, icon: 'spellcheck'},
+    {action: 'simplify', message: messages.simplify, icon: 'creation-outline'},
+    {action: 'summarize', message: messages.summarize, icon: 'ai-summarize'},
+];
+
+const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
+    container: {
+        backgroundColor: theme.centerChannelBg,
+    },
+    headerContainer: {
+        gap: 4,
+    },
+    customPromptContainer: {},
+    customPromptInputWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: theme.centerChannelBg,
+        borderWidth: 1,
+        borderColor: changeOpacity(theme.centerChannelColor, 0.16),
+        borderRadius: 4,
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+        gap: 4,
+    },
+    customPromptInput: {
+        flex: 1,
+        color: theme.centerChannelColor,
+        includeFontPadding: false,
+        ...typography('Body', 200),
+        textAlignVertical: 'center',
+        padding: 0,
+    },
+    optionsContainer: {
+        paddingTop: OPTIONS_PADDING,
+    },
+    historyButtonsContainer: {
+        flexDirection: 'row',
+        gap: 8,
+        paddingTop: 8,
+        paddingBottom: 4,
+    },
+    historyButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: changeOpacity(theme.centerChannelColor, 0.16),
+    },
+    historyButtonText: {
+        color: theme.centerChannelColor,
+        ...typography('Body', 100, 'SemiBold'),
+    },
+    bottomSheetContent: {
+        paddingTop: 10,
+    },
+}));
+
+const RewriteOptions = ({
+    closeButtonId,
+    componentId,
+    originalMessage,
+    updateValue,
+}: Props) => {
+    const intl = useIntl();
+    const theme = useTheme();
+    const serverUrl = useServerUrl();
+    const styles = getStyleSheet(theme);
+    const insets = useSafeAreaInsets();
+    const {startRewrite} = useRewrite();
+
+    const [customPrompt, setCustomPrompt] = useState('');
+    const textInputRef = useRef<TextInput>(null);
+
+    // Determine if we're in generation mode (empty original message)
+    const isInGenerationMode = !originalMessage || !originalMessage.trim();
+
+    const rewriteHistory = rewriteStore.getRewriteHistory();
+    const hasHistory = rewriteHistory !== null && !isInGenerationMode;
+
+    const closeBottomSheet = useCallback(async () => {
+        await dismissBottomSheet(Screens.AGENTS_REWRITE_OPTIONS);
+    }, []);
+
+    useNavButtonPressed(closeButtonId, componentId, closeBottomSheet, []);
+    useAndroidHardwareBackHandler(componentId, closeBottomSheet);
+
+    const handleRewriteSuccess = useCallback((rewrittenText: string) => {
+        updateValue(rewrittenText);
+    }, [updateValue]);
+
+    const handleRewriteError = useCallback((errorMsg: string) => {
+        Alert.alert(
+            intl.formatMessage(messages.errorTitle),
+            errorMsg,
+            [{
+                text: intl.formatMessage(messages.errorOk),
+            }],
+        );
+    }, [intl]);
+
+    const handleRewrite = useCallback(async (action: RewriteAction, prompt?: string) => {
+        Keyboard.dismiss();
+
+        // Determine if we're generating new content or editing existing content
+        const isGenerating = !originalMessage || !originalMessage.trim();
+
+        // For content generation, we need a custom prompt
+        if (isGenerating && (!prompt || !prompt.trim())) {
+            logWarning('[RewriteOptions] Content generation called without prompt');
+            return;
+        }
+
+        // For generation, pass empty string as message and use prompt; for editing, use original message
+        const messageToProcess = isGenerating ? '' : originalMessage;
+
+        const triggerRewrite = () => {
+            startRewrite(
+                serverUrl,
+                messageToProcess,
+                action,
+                prompt,
+                handleRewriteSuccess,
+                handleRewriteError,
+            );
+        };
+
+        // Close the bottom sheet first, then start rewrite
+        try {
+            await closeBottomSheet();
+            triggerRewrite();
+        } catch (e) {
+            logWarning('[RewriteOptions] Error closing bottom sheet:', e);
+
+            // Still try to start the rewrite even if sheet close failed
+            triggerRewrite();
+        }
+    }, [originalMessage, serverUrl, closeBottomSheet, startRewrite, handleRewriteSuccess, handleRewriteError]);
+
+    // Auto-focus the text input when in generation mode
+    useEffect(() => {
+        if (isInGenerationMode) {
+            // Small delay to ensure the bottom sheet has finished animating
+            const timer = setTimeout(() => {
+                textInputRef.current?.focus();
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+        return undefined;
+    }, [isInGenerationMode]);
+
+    const handleCancel = usePreventDoubleTap(useCallback(async () => {
+        if (rewriteHistory) {
+            updateValue(rewriteHistory.originalText);
+            rewriteStore.clearRewriteHistory();
+        }
+        await closeBottomSheet();
+    }, [rewriteHistory, updateValue, closeBottomSheet]));
+
+    const handleRegenerate = usePreventDoubleTap(useCallback(async () => {
+        if (rewriteHistory) {
+            await handleRewrite(rewriteHistory.lastAction, rewriteHistory.lastCustomPrompt);
+        }
+    }, [rewriteHistory, handleRewrite]));
+
+    const handleCustomPromptSubmit = useCallback(() => {
+        Keyboard.dismiss();
+
+        if (customPrompt && customPrompt.trim()) {
+            handleRewrite('custom', customPrompt);
+        }
+    }, [customPrompt, handleRewrite]);
+
+    const snapPoints = useMemo(() => {
+        const paddingBottom = 10;
+
+        // Use the same height for both generation and editing modes
+        const optionsHeight = OPTIONS_PADDING + bottomSheetSnapPoint(6, ITEM_HEIGHT);
+        const historyHeight = hasHistory ? HISTORY_BUTTONS_HEIGHT : 0;
+        const COMPONENT_HEIGHT = CUSTOM_PROMPT_INPUT_HEIGHT + optionsHeight + historyHeight + paddingBottom + insets.bottom;
+
+        return [1, COMPONENT_HEIGHT];
+    }, [insets.bottom, hasHistory]);
+
+    const renderContent = useCallback(() => (
+        <View style={styles.container}>
+            <View style={styles.headerContainer}>
+                <View style={styles.customPromptContainer}>
+                    <View style={styles.customPromptInputWrapper}>
+                        <EuriaIcon size={20}/>
+                        <TextInput
+                            ref={textInputRef}
+                            style={styles.customPromptInput}
+                            placeholder={intl.formatMessage(isInGenerationMode ? messages.generatePrompt : messages.customPrompt)}
+                            placeholderTextColor={changeOpacity(theme.centerChannelColor, 0.64)}
+                            value={customPrompt}
+                            onChangeText={setCustomPrompt}
+                            onSubmitEditing={handleCustomPromptSubmit}
+                            returnKeyType='send'
+                            multiline={false}
+                            autoCapitalize='none'
+                        />
+                    </View>
+                </View>
+            </View>
+
+            {hasHistory && (
+                <View style={styles.historyButtonsContainer}>
+                    <Pressable
+                        onPress={handleCancel}
+                        style={({pressed}) => [styles.historyButton, pressed && {opacity: 0.72}]}
+                        testID='ai_rewrite.cancel'
+                    >
+                        <CompassIcon
+                            name='close'
+                            size={16}
+                            color={theme.centerChannelColor}
+                        />
+                        <FormattedText
+                            {...messages.cancel}
+                            style={styles.historyButtonText}
+                        />
+                    </Pressable>
+                    <Pressable
+                        onPress={handleRegenerate}
+                        style={({pressed}) => [styles.historyButton, pressed && {opacity: 0.72}]}
+                        testID='ai_rewrite.regenerate'
+                    >
+                        <CompassIcon
+                            name='refresh'
+                            size={16}
+                            color={theme.centerChannelColor}
+                        />
+                        <FormattedText
+                            {...messages.regenerate}
+                            style={styles.historyButtonText}
+                        />
+                    </Pressable>
+                </View>
+            )}
+
+            {!isInGenerationMode && (
+                <View style={styles.optionsContainer}>
+                    {options.map((option) => (
+                        <OptionItem
+                            key={option.action}
+                            label={intl.formatMessage(option.message)}
+                            icon={option.icon}
+                            action={() => handleRewrite(option.action)}
+                            type='default'
+                            testID={`ai_rewrite.option.${option.action}`}
+                        />
+                    ))}
+                </View>
+            )}
+        </View>
+    ), [styles, intl, theme, isInGenerationMode, customPrompt, handleCustomPromptSubmit, handleRewrite, hasHistory, handleCancel, handleRegenerate]);
+
+    return (
+        <BottomSheet
+            renderContent={renderContent}
+            closeButtonId={closeButtonId}
+            componentId={Screens.AGENTS_REWRITE_OPTIONS}
+            initialSnapIndex={1}
+            snapPoints={snapPoints}
+            scrollable={true}
+            keyboardBehavior='fillParent'
+            keyboardBlurBehavior='none'
+            testID='ai_rewrite_options'
+            contentStyle={styles.bottomSheetContent}
+        />
+    );
+};
+
+export default RewriteOptions;

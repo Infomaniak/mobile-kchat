@@ -133,7 +133,7 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
                 </View>
             </View>
         );
-    }, []);
+    }, [intl, quotaType.description, quotaType.title, styles.content, styles.description, styles.discoverButton, styles.ikButton, styles.ikTextButton, styles.title, theme]);
 
     const snapPoints = [1, '55%'];
 

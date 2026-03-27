@@ -38,7 +38,7 @@ export default function Poll({
 
     const onPress = useCallback(() => {
         executeCommand(serverUrl, intl, '/poll', channelId);
-    }, [executeCommand]);
+    }, [channelId, intl, serverUrl]);
 
     return (
         <TouchableWithFeedback

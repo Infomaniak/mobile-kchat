@@ -23,6 +23,9 @@ declare class PlaybookRunModel extends Model {
     // Foreign key to the playbook that generated this run
     playbookId: string;
 
+    // The type of run ('playbook' or 'channelChecklist')
+    type: PlaybookRunType;
+
     // ID of the post that created the run (nullable)
     postId: string | null;
 
@@ -106,9 +109,6 @@ declare class PlaybookRunModel extends Model {
 
     /** checklists : The CHECKLISTS associated with this Playbook Run */
     checklists: Query<PlaybookChecklistModel>;
-
-    /** participants : The USERS that participate in this Playbook Run */
-    participants: () => Query<UserModel>;
 
     /** prepareDestroyWithRelations : Prepare the model for deletion with its relations */
     prepareDestroyWithRelations: () => Promise<Model[]>;

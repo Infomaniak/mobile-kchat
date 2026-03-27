@@ -24,6 +24,7 @@ type DisplayThemeProps = {
 const DisplayTheme = ({allowedThemeKeys, componentId, currentTeamId}: DisplayThemeProps) => {
     const serverUrl = useServerUrl();
     const theme = useTheme();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const initialTheme = useMemo(() => theme, [/* dependency array should remain empty */]);
     const [newTheme, setNewTheme] = useState<string | undefined>(undefined);
     const close = () => popTopScreen(componentId);
@@ -36,12 +37,14 @@ const DisplayTheme = ({allowedThemeKeys, componentId, currentTeamId}: DisplayThe
             return;
         }
         setThemePreference();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [newTheme]);
 
     const setThemePreference = useCallback(() => {
         const allowedTheme = allowedThemeKeys.find((tk) => tk === newTheme);
         const themeJson = Preferences.THEMES[allowedTheme as ThemeKey] || initialTheme;
         saveThemePreference(themeJson);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [allowedThemeKeys, currentTeamId, theme.type, serverUrl, newTheme]);
 
     const onAndroidBack = () => {

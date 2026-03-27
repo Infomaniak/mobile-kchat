@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-/* eslint-disable react/no-multi-comp */
+/* eslint-disable max-lines */
 
 import {setGenerator} from '@nozbe/watermelondb/utils/common/randomId';
 import * as ReactNative from 'react-native';
@@ -35,6 +35,11 @@ jest.mock('expo-application', () => {
 
 jest.mock('expo-crypto', () => ({
     randomUUID: jest.fn(() => '12345678-1234-1234-1234-1234567890ab'),
+    getRandomValues: jest.fn((arr: Uint8Array) => {
+        // deterministic non-zero bytes for tests
+        arr.fill(0x7b);
+        return arr;
+    }),
 }));
 
 jest.mock('expo-device', () => {
@@ -71,6 +76,10 @@ jest.mock('expo-web-browser', () => ({
 
 jest.mock('@react-native-camera-roll/camera-roll', () => ({}));
 
+jest.mock('@sayem314/react-native-keep-awake', () => ({
+    useKeepAwake: jest.fn(),
+}));
+
 jest.mock('@mattermost/react-native-turbo-log', () => ({
     getLogPaths: jest.fn(),
 }));
@@ -85,6 +94,30 @@ jest.mock('@nozbe/watermelondb/react/withObservables/garbageCollector', () => {
 
 /* eslint-disable no-console */
 jest.mock('@database/manager');
+
+jest.mock('@managers/intune_manager', () => ({
+    __esModule: true,
+    default: {
+        init: jest.fn(),
+        login: jest.fn(),
+        enrollServer: jest.fn(),
+        unenrollServer: jest.fn(),
+        setCurrentIdentity: jest.fn(),
+        cleanupAfterWipe: jest.fn(),
+        reportWipeComplete: jest.fn(),
+        getPendingWipes: jest.fn(() => Promise.resolve([])),
+        getPolicy: jest.fn(() => Promise.resolve(null)),
+        isIntuneMAMEnabledForServer: jest.fn(() => Promise.resolve(false)),
+        isManagedServer: jest.fn(() => Promise.resolve(false)),
+        subscribeToPolicyChanges: jest.fn(() => ({remove: jest.fn()})),
+        subscribeToEnrollmentChanges: jest.fn(() => ({remove: jest.fn()})),
+        subscribeToWipeRequests: jest.fn(() => ({remove: jest.fn()})),
+        subscribeToAuthRequired: jest.fn(() => ({remove: jest.fn()})),
+        subscribeToConditionalLaunchBlocked: jest.fn(() => ({remove: jest.fn()})),
+        subscribeToIdentitySwitchRequired: jest.fn(() => ({remove: jest.fn()})),
+    },
+}));
+
 jest.doMock('react-native', () => {
     const {
         AppState: RNAppState,
@@ -243,6 +276,15 @@ jest.doMock('react-native', () => {
             senderGetCapabilities: jest.fn().mockReturnValue(null),
             receiverGetCapabilities: jest.fn().mockReturnValue(null),
         },
+        RNIntune: {
+            login: jest.fn(),
+            enrollInMAM: jest.fn(),
+            deregisterAndUnenroll: jest.fn(),
+            setCurrentIdentity: jest.fn(),
+            isManagedServer: jest.fn().mockResolvedValue(false),
+            getPolicy: jest.fn().mockResolvedValue(null),
+            getEnrolledAccount: jest.fn().mockResolvedValue(null),
+        },
     };
 
     const Linking = {
@@ -255,6 +297,7 @@ jest.doMock('react-native', () => {
 
     const Keyboard = {
         ...RNKeyboard,
+        isVisible: jest.fn(() => false),
         dismiss: jest.fn(),
         addListener: jest.fn(() => ({
             remove: jest.fn(),
@@ -282,6 +325,12 @@ jest.doMock('react-native', () => {
         NativeModules,
         Linking,
         Keyboard,
+        DeviceEventEmitter: mockDeviceEventEmitter,
+        NativeEventEmitter: class MockNativeEventEmitter {
+            constructor() {
+                return mockDeviceEventEmitter;
+            }
+        },
         Animated: {
             ...ReactNative.Animated,
             timing: jest.fn(() => ({
@@ -306,7 +355,88 @@ jest.mock('react-native-vector-icons', () => {
     };
 });
 
-jest.mock('../node_modules/react-native/Libraries/EventEmitter/NativeEventEmitter');
+// Mock Intune module - use virtual: true since module may not exist when Intune is disabled
+jest.mock('@mattermost/intune', () => ({
+    __esModule: true,
+    default: {
+        login: jest.fn(),
+        enrollInMAM: jest.fn(),
+        deregisterAndUnenroll: jest.fn(),
+        isManagedServer: jest.fn().mockResolvedValue(false),
+        setCurrentIdentity: jest.fn(),
+        getPolicy: jest.fn().mockResolvedValue(null),
+        getEnrolledAccount: jest.fn().mockResolvedValue(null),
+        onIntunePolicyChanged: jest.fn(() => ({remove: jest.fn()})),
+        onIntuneEnrollmentChanged: jest.fn(() => ({remove: jest.fn()})),
+        onIntuneWipeRequested: jest.fn(() => ({remove: jest.fn()})),
+        onIntuneAuthRequired: jest.fn(() => ({remove: jest.fn()})),
+        onIntuneConditionalLaunchBlocked: jest.fn(() => ({remove: jest.fn()})),
+        onIntuneIdentitySwitchRequired: jest.fn(() => ({remove: jest.fn()})),
+    },
+}), {virtual: true});
+
+// Create a working DeviceEventEmitter mock
+const createEventEmitter = () => {
+    const listeners = new Map<string, Set<Function>>();
+
+    return {
+        addListener: jest.fn((eventType: string, listener: Function) => {
+            if (!listeners.has(eventType)) {
+                listeners.set(eventType, new Set());
+            }
+            listeners.get(eventType)!.add(listener);
+            return {
+                remove: jest.fn(() => {
+                    listeners.get(eventType)?.delete(listener);
+                }),
+            };
+        }),
+        emit: jest.fn((eventType: string, ...args: unknown[]) => {
+            listeners.get(eventType)?.forEach((listener) => {
+                listener(...args);
+            });
+        }),
+        removeListener: jest.fn((eventType: string, listener: Function) => {
+            listeners.get(eventType)?.delete(listener);
+        }),
+        removeAllListeners: jest.fn((eventType?: string) => {
+            if (eventType) {
+                listeners.delete(eventType);
+            } else {
+                listeners.clear();
+            }
+        }),
+        listenerCount: jest.fn((eventType: string) => {
+            return listeners.get(eventType)?.size || 0;
+        }),
+    };
+};
+
+const mockDeviceEventEmitter = createEventEmitter();
+
+jest.mock('../node_modules/react-native/Libraries/EventEmitter/NativeEventEmitter', () => {
+    // Return a constructor function that returns our mock event emitter
+    return class MockNativeEventEmitter {
+        constructor() {
+            return mockDeviceEventEmitter;
+        }
+    };
+});
+
+jest.mock('react-native-keyboard-controller', () => {
+    return {
+        KeyboardProvider: ({children}: {children: React.ReactNode}) => children,
+        KeyboardController: {
+            dismiss: jest.fn(),
+            isVisible: jest.fn(() => false),
+        },
+        useKeyboardHandler: jest.fn(),
+        useKeyboardState: jest.fn(() => ({
+            isVisible: false,
+        })),
+        KeyboardGestureArea: ({children}: {children: React.ReactNode}) => children,
+    };
+});
 
 jest.mock('react-native-localize', () => ({
     getTimeZone: () => 'World/Somewhere',
@@ -375,6 +505,7 @@ jest.mock('react-native-notifications', () => {
         Notifications: {
             registerRemoteNotifications: jest.fn(),
             addEventListener: jest.fn(),
+            isRegisteredForRemoteNotifications: jest.fn(),
             setDeliveredNotifications: jest.fn((notifications) => {
                 deliveredNotifications = notifications;
             }),
@@ -389,7 +520,7 @@ jest.mock('react-native-notifications', () => {
             ios: {
                 getDeliveredNotifications: jest.fn().mockImplementation(() => Promise.resolve(deliveredNotifications)),
                 removeDeliveredNotifications: jest.fn((ids) => {
-                    // eslint-disable-next-line
+
                     // @ts-ignore
                     deliveredNotifications = deliveredNotifications.filter((n) => !ids.includes(n.identifier));
                 }),
@@ -426,6 +557,7 @@ jest.mock('@screens/navigation', () => ({
     dismissBottomSheet: jest.fn(),
     openUserProfileModal: jest.fn(),
     popTo: jest.fn(),
+    bottomSheet: jest.fn(),
 }));
 
 jest.mock('@mattermost/react-native-emm', () => ({
@@ -545,3 +677,9 @@ jest.mock('@calls/screens/call_screen/jitsi_components', () => ({
     ContentContainer: ({children}: { children?: React.ReactNode }) => children || null,
     Sound: () => null,
 }));
+
+// Global afterAll to clean up event listeners that might prevent Jest from exiting
+afterAll(() => {
+    // Clear all event listeners from DeviceEventEmitter to prevent hanging
+    mockDeviceEventEmitter.removeAllListeners();
+});

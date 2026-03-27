@@ -1,17 +1,15 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Image, ImageBackground, type ImageContentFit, type ImageStyle} from 'expo-image';
+import {type ImageContentFit, type ImageStyle} from 'expo-image';
 import React, {type ReactNode, useEffect, useState} from 'react';
 import {ActivityIndicator, type StyleProp, StyleSheet, View, type ViewStyle} from 'react-native';
 import Animated from 'react-native-reanimated';
 
+import ExpoImage, {ExpoImageAnimated, ExpoImageBackground} from '@components/expo_image';
 import {useServerUrl} from '@context/server';
-import {useTheme} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
-
-const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 type Props = ProgressiveImageProps & {
     children?: ReactNode | ReactNode[];
@@ -23,6 +21,7 @@ type Props = ProgressiveImageProps & {
     contentFit?: ImageContentFit;
     style?: StyleProp<ViewStyle>;
     tintDefaultSource?: boolean;
+    theme: Theme;
 };
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
@@ -40,12 +39,23 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
 });
 
 const ProgressiveImage = ({
-    children, defaultSource, forwardRef, id, imageStyle, imageUri, inViewPort, isBackgroundImage,
-    onError, contentFit = 'contain', style = {}, thumbnailUri, tintDefaultSource,
+    children,
+    defaultSource,
+    forwardRef,
+    id,
+    imageStyle,
+    imageUri,
+    inViewPort,
+    isBackgroundImage,
+    onError,
+    contentFit = 'contain',
+    style = {},
+    thumbnailUri,
+    tintDefaultSource,
+    theme,
 }: Props) => {
     const [showHighResImage, setShowHighResImage] = useState(false);
     const [loading, setLoading] = useState(true);
-    const theme = useTheme();
     const styles = getStyleSheet(theme);
 
     useEffect(() => {
@@ -68,14 +78,14 @@ const ProgressiveImage = ({
     if (isBackgroundImage && imageUri) {
         return (
             <View style={[styles.defaultImageContainer, style]}>
-                <ImageBackground
-                    key={id}
-                    source={imgSource}
+                <ExpoImageBackground
+                    id={id}
+                    source={{uri: imageUri}}
                     contentFit='cover'
                     style={[StyleSheet.absoluteFill, imageStyle as StyleProp<ViewStyle>]}
                 >
                     {children}
-                </ImageBackground>
+                </ExpoImageBackground>
             </View>
         );
     }
@@ -83,7 +93,8 @@ const ProgressiveImage = ({
     if (defaultSource) {
         return (
             <View style={[styles.defaultImageContainer, style]}>
-                <AnimatedImage
+                <ExpoImageAnimated
+                    id={id}
                     ref={forwardRef}
                     source={{...defaultSource, headers}}
                     style={[
@@ -107,7 +118,8 @@ const ProgressiveImage = ({
                 size='small'
                 color={theme.centerChannelColor}
             />}
-            <Image
+            <ExpoImage
+                id={id}
                 ref={forwardRef}
                 placeholder={thumbnailSource}
                 placeholderContentFit='cover'

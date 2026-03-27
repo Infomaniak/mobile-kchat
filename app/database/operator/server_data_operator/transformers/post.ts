@@ -113,6 +113,8 @@ export const transformDraftRecord = ({action, database, value}: TransformerArgs<
         draft.channelId = raw?.channel_id ?? '';
         draft.files = raw?.files ?? emptyFileInfo;
         draft.metadata = raw?.metadata ?? emptyPostMetadata;
+        draft.updateAt = raw.update_at ?? Date.now();
+        draft.type = raw.type ?? '';
     };
 
     return prepareBaseRecord({
@@ -181,6 +183,7 @@ export const transformSchedulePostsRecord = ({action, database, value}: Transfor
         scheduledPost.scheduledAt = raw.scheduled_at;
         scheduledPost.processedAt = raw.processed_at ?? 0;
         scheduledPost.errorCode = raw.error_code || scheduledPost.errorCode;
+        scheduledPost.type = raw.type || '';
     };
 
     return prepareBaseRecord({

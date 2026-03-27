@@ -5,6 +5,7 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {combineLatest, distinctUntilChanged, of as of$, switchMap} from 'rxjs';
 
 import {areItemsOrdersEqual} from '@playbooks/utils/items_order';
+import {getChecklistProgress} from '@playbooks/utils/progress';
 
 import Checklist from './checklist';
 
@@ -29,25 +30,51 @@ const getIds = (items: PlaybookChecklistItemModel[]) => {
     return items.map((i) => i.id);
 };
 
+const filterVisibleItems = (items: PlaybookChecklistItemModel[]) => {
+    return items.filter((item) => {
+        if (item.conditionAction === 'hidden' && !item.completedAt) {
+            return false;
+        }
+        return true;
+    });
+};
+
 const enhanced = withObservables(['checklist'], ({checklist}: OwnProps) => {
     if ('observe' in checklist) {
         const observedChecklist = checklist.observe();
-        const items = checklist.items.observeWithColumns(['state']);
-        const sortedItems = combineLatest([observedChecklist, items]).pipe(
+        const items = checklist.items.observeWithColumns(['state', 'condition_action', 'state_modified']);
+        const filteredAndSortedItems = combineLatest([observedChecklist, items]).pipe(
             switchMap(([cl, i]) => {
-                return of$(sortItems(cl, i));
+                // Filter out hidden incomplete items
+                const visibleItems = filterVisibleItems(i);
+                return of$(sortItems(cl, visibleItems));
             }),
             distinctUntilChanged((a, b) => areItemsOrdersEqual(getIds(a), getIds(b))),
         );
+
+        const checklistProgress = items.pipe(
+            switchMap((i) => of$(getChecklistProgress(i))),
+        );
+
         return {
             checklist: observedChecklist,
-            items: sortedItems,
+            items: filteredAndSortedItems,
+            checklistProgress,
         };
     }
 
+    // Filter visible items for non-model checklist
+    const visibleItems = checklist.items.filter((item) => {
+        if (item.condition_action === 'hidden' && !item.completed_at) {
+            return false;
+        }
+        return true;
+    });
+
     return {
         checklist: of$(checklist),
-        items: of$(checklist.items),
+        items: of$(visibleItems),
+        checklistProgress: of$(getChecklistProgress(checklist.items)),
     };
 });
 

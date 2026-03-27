@@ -75,7 +75,7 @@ const InfomaniakNoTeams = () => {
 
     const onDiscoverKSuitePressed = useCallback(() => {
         Linking.openURL('https://www.infomaniak.com/ksuite');
-    }, [theme]);
+    }, []);
 
     const [loading, setLoading] = useState(false);
     const onDisconnectPressed = useCallback(async () => {

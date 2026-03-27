@@ -2,6 +2,7 @@
 
 exports[`components/custom_status/custom_status_emoji should match snapshot 1`] = `
 <ViewManagerAdapter_ExpoImage
+  cachePolicy="memory"
   containerViewRef={"[React.ref]"}
   contentFit="contain"
   contentPosition={
@@ -17,11 +18,13 @@ exports[`components/custom_status/custom_status_emoji should match snapshot 1`] 
   onLoadStart={[Function]}
   onProgress={[Function]}
   placeholder={[]}
+  recyclingKey="calendar.png-16-16"
   source={
     [
       {
-        "cacheKey": "emoji-calendar-16-16",
+        "cacheKey": "emoji-calendar",
         "cachePath": "",
+        "headers": undefined,
         "testUri": "../../../dist/assets/images/emojis/calendar.png",
       },
     ]
@@ -32,13 +35,18 @@ exports[`components/custom_status/custom_status_emoji should match snapshot 1`] 
       "width": 16,
     }
   }
-  transition={null}
+  transition={
+    {
+      "duration": 0,
+    }
+  }
   width={16}
 />
 `;
 
 exports[`components/custom_status/custom_status_emoji should match snapshot with props 1`] = `
 <ViewManagerAdapter_ExpoImage
+  cachePolicy="memory"
   containerViewRef={"[React.ref]"}
   contentFit="contain"
   contentPosition={
@@ -54,11 +62,13 @@ exports[`components/custom_status/custom_status_emoji should match snapshot with
   onLoadStart={[Function]}
   onProgress={[Function]}
   placeholder={[]}
+  recyclingKey="calendar.png-34-34"
   source={
     [
       {
-        "cacheKey": "emoji-calendar-34-34",
+        "cacheKey": "emoji-calendar",
         "cachePath": "",
+        "headers": undefined,
         "testUri": "../../../dist/assets/images/emojis/calendar.png",
       },
     ]
@@ -69,7 +79,11 @@ exports[`components/custom_status/custom_status_emoji should match snapshot with
       "width": 34,
     }
   }
-  transition={null}
+  transition={
+    {
+      "duration": 0,
+    }
+  }
   width={34}
 />
 `;

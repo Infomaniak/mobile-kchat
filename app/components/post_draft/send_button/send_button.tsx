@@ -1,8 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {InteractionManager, View, type StyleProp, type ViewStyle} from 'react-native';
+import React, {useCallback, useMemo, useState} from 'react';
+import {InteractionManager, View} from 'react-native';
 import Tooltip from 'react-native-walkthrough-tooltip';
 
 import {storeScheduledPostTutorial} from '@actions/app/global';
@@ -10,6 +10,7 @@ import CompassIcon from '@components/compass_icon';
 import ScheduledPostTooltip from '@components/post_draft/send_button/scheduled_post_tooltip';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {useTheme} from '@context/theme';
+import useDidMount from '@hooks/did_mount';
 import {usePreventDoubleTap} from '@hooks/utils';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
@@ -20,7 +21,6 @@ type Props = {
     showScheduledPostOptions: () => void;
     scheduledPostFeatureTooltipWatched: boolean;
     scheduledPostEnabled: boolean;
-    containerStyle?: StyleProp<ViewStyle>;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
@@ -62,7 +62,7 @@ const SendButton: React.FC<Props> = ({
 
     const [scheduledPostTooltipVisible, setScheduledPostTooltipVisible] = useState(false);
 
-    useEffect(() => {
+    useDidMount(() => {
         if (scheduledPostFeatureTooltipWatched || !scheduledPostEnabled) {
             return;
         }
@@ -70,10 +70,7 @@ const SendButton: React.FC<Props> = ({
         InteractionManager.runAfterInteractions(() => {
             setScheduledPostTooltipVisible(true);
         });
-
-        // This effect is intended to run only on the first mount, so dependencies are omitted intentionally.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    });
 
     const onCloseScheduledPostTooltip = useCallback(() => {
         setScheduledPostTooltipVisible(false);

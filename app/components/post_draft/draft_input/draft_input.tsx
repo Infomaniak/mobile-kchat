@@ -1,7 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useRef, useState} from 'react';
+import RewritingIndicator from '@agents/components/rewriting_indicator';
+import React, {useCallback, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, type LayoutChangeEvent, Platform, ScrollView, View} from 'react-native';
 import Permissions, {openSettings} from 'react-native-permissions';
@@ -9,6 +10,7 @@ import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {userTyping} from '@actions/websocket/users';
 import {Screens} from '@constants';
+import {useKeyboardAnimationContext} from '@context/keyboard_animation';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
@@ -28,7 +30,7 @@ import Uploads from '../uploads';
 import Header from './header';
 import VoiceInput from './voice_input';
 
-import type {PasteInputRef} from '@mattermost/react-native-paste-input';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
 export type Props = {
     testID?: string;
@@ -39,10 +41,13 @@ export type Props = {
     currentUserId: string;
     canShowPostPriority?: boolean;
     voiceMessageEnabled: boolean;
+    location?: AvailableScreens;
 
     // Post Props
     postPriority: PostPriority;
+    postBoRConfig?: PostBoRConfig;
     updatePostPriority: (postPriority: PostPriority) => void;
+    updatePostBoRStatus: (config: PostBoRConfig) => void;
     persistentNotificationInterval: number;
     persistentNotificationMaxRecipients: number;
 
@@ -66,9 +71,8 @@ export type Props = {
     scheduledPostsEnabled: boolean;
 }
 
-const SAFE_AREA_VIEW_EDGES: Edge[] = ['left', 'right'];
-
 const SCHEDULED_POST_PICKER_BUTTON = 'close-scheduled-post-picker';
+const SAFE_AREA_VIEW_EDGES: Edge[] = ['left', 'right'];
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
     return {
@@ -147,6 +151,7 @@ function DraftInput({
     persistentNotificationMaxRecipients,
     setIsFocused,
     scheduledPostsEnabled,
+    postBoRConfig,
 }: Props) {
     const [recording, setRecording] = useState(false);
     const intl = useIntl();
@@ -154,9 +159,11 @@ function DraftInput({
     const theme = useTheme();
     const isTablet = useIsTablet();
 
+    const {inputRef, focusInput: focus} = useKeyboardAnimationContext();
+
     const handleLayout = useCallback((e: LayoutChangeEvent) => {
         updatePostInputTop(e.nativeEvent.layout.height);
-    }, []);
+    }, [updatePostInputTop]);
 
     const onPresRecording = useCallback(async () => {
         const permission = Platform.select({
@@ -193,20 +200,15 @@ function DraftInput({
                 openSettings();
             }
         }
-    }, []);
+    }, [channelId, rootId, serverUrl]);
 
     const onCloseRecording = useCallback(() => {
         setRecording(false);
         userTyping('stop', serverUrl, channelId, rootId);
-    }, []);
+    }, [channelId, rootId, serverUrl]);
 
     const isHandlingVoice = recording;
     const isHandlingVoiceAttachement = files[0]?.is_voice_recording;
-
-    const inputRef = useRef<PasteInputRef>();
-    const focus = useCallback(() => {
-        inputRef.current?.focus();
-    }, []);
 
     // Render
     const postInputTestID = `${testID}.post.input`;
@@ -266,27 +268,17 @@ function DraftInput({
         return (
             <SendAction
                 disabled={!canSend}
-                sendMessage={() => sendMessage(undefined)}
+                sendMessage={handleSendMessage}
                 testID={sendActionTestID}
-                containerStyle={isHandlingVoice && style.sendVoiceMessage}
                 showScheduledPostOptions={handleShowScheduledPostOptions}
                 scheduledPostEnabled={scheduledPostsEnabled}
             />
         );
-    }, [
-        canSend,
-        files.length,
-        onCloseRecording,
-        onPresRecording,
-        sendMessage,
-        testID,
-        value.length,
-        voiceMessageEnabled,
-        isHandlingVoice,
-    ]);
+    }, [value.length, files.length, voiceMessageEnabled, canSend, handleSendMessage, sendActionTestID, handleShowScheduledPostOptions, scheduledPostsEnabled, onPresRecording, recordActionTestID]);
 
     return (
         <>
+            <RewritingIndicator/>
             <Typing
                 channelId={channelId}
                 rootId={rootId}
@@ -298,7 +290,6 @@ function DraftInput({
                 style={style.inputWrapper}
                 testID={testID}
             >
-
                 <ScrollView
                     style={style.inputContainer}
                     contentContainerStyle={style.inputContentContainer}
@@ -313,6 +304,7 @@ function DraftInput({
                     <Header
                         noMentionsError={noMentionsError}
                         postPriority={postPriority}
+                        postBoRConfig={postBoRConfig}
                     />
 
                     {recording && (
@@ -348,18 +340,18 @@ function DraftInput({
                     />
                     <View style={style.actionsContainer}>
                         {!isHandlingVoice &&
-                            <QuickActions
-                                testID={quickActionsTestID}
-                                fileCount={files.length}
-                                addFiles={addFiles}
-                                updateValue={updateValue}
-                                value={value}
-                                postPriority={postPriority}
-                                updatePostPriority={updatePostPriority}
-                                canShowPostPriority={canShowPostPriority}
-                                focus={focus}
-                                channelId={channelId}
-                            />
+                        <QuickActions
+                            testID={quickActionsTestID}
+                            fileCount={files.length}
+                            addFiles={addFiles}
+                            updateValue={updateValue}
+                            value={value}
+                            postPriority={postPriority}
+                            updatePostPriority={updatePostPriority}
+                            canShowPostPriority={canShowPostPriority}
+                            focus={focus}
+                            channelId={channelId}
+                        />
                         }
                         {!isHandlingVoice && getActionButton()}
                     </View>

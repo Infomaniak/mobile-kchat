@@ -37,7 +37,7 @@ public extension Network {
 extension Network {
   func fetchUserProfile(forServerUrl serverUrl: String) async throws -> MeUserProfile {
     let endpoint = "/users/me"
-    let url = buildApiUrl(serverUrl, endpoint)
+    guard let url = buildApiUrl(serverUrl, endpoint) else { throw URLError(.badURL) }
 
     let (userProfileData, _) = try await request(
       url,
@@ -54,7 +54,7 @@ extension Network {
   }
 
   func fetchChannel(id channelId: String, serverUrl: String) async throws -> Channel {
-    let channelUrl = buildApiUrl(serverUrl, "/channels/\(channelId)")
+    guard let channelUrl = buildApiUrl(serverUrl, "/channels/\(channelId)") else { throw URLError(.badURL) }
 
     let (channelData, _) = try await request(
       channelUrl,
@@ -69,7 +69,7 @@ extension Network {
 
   func startCall(forServerUrl serverUrl: String, channelId: String) async throws -> (Data, URLResponse) {
     let endpoint = "/conferences"
-    let url = buildApiUrl(serverUrl, endpoint)
+    guard let url = buildApiUrl(serverUrl, endpoint) else { throw URLError(.badURL) }
 
     let headers = ["Content-Type": "application/json; charset=utf-8"]
     let data = try? JSONSerialization.data(withJSONObject: ["channel_id": channelId], options: [])
@@ -85,7 +85,7 @@ extension Network {
 
   func answerCall(forServerUrl serverUrl: String, conferenceId: String) async throws -> (Data, URLResponse) {
     let endpoint = "/conferences/\(conferenceId)"
-    let url = buildApiUrl(serverUrl, endpoint)
+    guard let url = buildApiUrl(serverUrl, endpoint) else { throw URLError(.badURL) }
 
     return try await request(
       url,
@@ -98,7 +98,7 @@ extension Network {
 
   func declineCall(forServerUrl serverUrl: String, conferenceId: String) async throws -> (Data, URLResponse) {
     let endpoint = "/conferences/\(conferenceId)/decline"
-    let url = buildApiUrl(serverUrl, endpoint)
+    guard let url = buildApiUrl(serverUrl, endpoint) else { throw URLError(.badURL) }
 
     return try await request(
       url,

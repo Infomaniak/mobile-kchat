@@ -38,7 +38,7 @@ const NoServers = ({theme}: Props) => {
         <View style={styles.container}>
             <FormattedText
                 id='extension.no_servers.title'
-                defaultMessage='Not connected to any kChat'
+                defaultMessage='Not connected to any organisations'
                 style={styles.title}
             />
             <FormattedText

@@ -4,10 +4,11 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {DeviceEventEmitter, type StyleProp, StyleSheet, View, type ViewStyle} from 'react-native';
 import Animated from 'react-native-reanimated';
-import {SafeAreaView, type Edge, useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {Events} from '@constants';
 import {GALLERY_FOOTER_HEIGHT} from '@constants/gallery';
+import {useServerUrl} from '@context/server';
+import SecurityManager from '@managers/security_manager';
 import {changeOpacity} from '@utils/theme';
 import {ensureString} from '@utils/types';
 import {displayUsername} from '@utils/user';
@@ -18,6 +19,7 @@ import CopyPublicLink from './copy_public_link';
 import Details from './details';
 import DownloadWithAction from './download_with_action';
 
+import type {IntuneMAMSaveLocation} from '@managers/intune_manager/types';
 import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
 import type {GalleryAction, GalleryItemType} from '@typings/screens/gallery';
@@ -37,20 +39,14 @@ type Props = {
     post?: PostModel;
     style: StyleProp<ViewStyle>;
     teammateNameDisplay: string;
-    hasCaptions: boolean;
-    captionEnabled: boolean;
-    onCaptionsPress: () => void;
 }
 
-const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
-const edges: Edge[] = ['left', 'right'];
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
         backgroundColor: '#000',
         borderTopColor: changeOpacity('#fff', 0.4),
         borderTopWidth: 1,
-        flex: 1,
         flexDirection: 'row',
         justifyContent: 'center',
         height: GALLERY_FOOTER_HEIGHT,
@@ -63,13 +59,10 @@ const Footer = ({
     author, canDownloadFiles, channelName, currentUserId,
     enablePostIconOverride, enablePostUsernameOverride, enablePublicLink, enableSecureFilePreview,
     hideActions, isDirectChannel, item, post, style, teammateNameDisplay,
-    hasCaptions, captionEnabled, onCaptionsPress,
 }: Props) => {
+    const serverUrl = useServerUrl();
     const showActions = !hideActions && Boolean(item.id) && !item.id?.startsWith('uid');
     const [action, setAction] = useState<GalleryAction>('none');
-    const {bottom} = useSafeAreaInsets();
-
-    const bottomStyle = useMemo(() => ({height: bottom, backgroundColor: '#000'}), [bottom]);
 
     let overrideIconUrl;
     if (enablePostIconOverride && post?.props?.use_user_icon !== 'true' && post?.props?.override_icon_url) {
@@ -97,6 +90,14 @@ const Footer = ({
         setAction('sharing');
     }, []);
 
+    const allowSaveToLocation = useMemo(() => {
+        let location: keyof IntuneMAMSaveLocation = 'CameraRoll';
+        if (item.type === 'file') {
+            location = 'FilesApp';
+        }
+        return canDownloadFiles && SecurityManager.canSaveToLocation(serverUrl, location);
+    }, [canDownloadFiles, item.type, serverUrl]);
+
     useEffect(() => {
         const listener = DeviceEventEmitter.addListener(Events.GALLERY_ACTIONS, (value: GalleryAction) => {
             setAction(value);
@@ -106,9 +107,7 @@ const Footer = ({
     }, []);
 
     return (
-        <AnimatedSafeAreaView
-            mode='padding'
-            edges={edges}
+        <Animated.View
             style={[style]}
         >
             {['downloading', 'sharing'].includes(action) && !enableSecureFilePreview && canDownloadFiles &&
@@ -142,6 +141,7 @@ const Footer = ({
                 </View>
                 {showActions &&
                 <Actions
+                    allowSaveToLocation={allowSaveToLocation}
                     disabled={action !== 'none'}
                     canDownloadFiles={!enableSecureFilePreview && canDownloadFiles}
                     enablePublicLinks={!enableSecureFilePreview && enablePublicLink && item.type !== 'avatar'}
@@ -149,14 +149,10 @@ const Footer = ({
                     onCopyPublicLink={handleCopyLink}
                     onDownload={handleDownload}
                     onShare={handleShare}
-                    hasCaptions={hasCaptions}
-                    captionEnabled={captionEnabled}
-                    onCaptionsPress={onCaptionsPress}
                 />
                 }
             </View>
-            <View style={bottomStyle}/>
-        </AnimatedSafeAreaView>
+        </Animated.View>
     );
 };
 

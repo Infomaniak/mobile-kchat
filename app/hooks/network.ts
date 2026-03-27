@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import CookieManager from '@react-native-cookies/cookies';
-import {useCallback, useEffect, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import RNRestart from 'react-native-restart';
 
 import {BASE_SERVER_URL} from '@client/rest/constants';
@@ -26,7 +26,7 @@ export const useNextState = (): [boolean | undefined, () => void] => {
     /**
      * Update the KCHAT_NEXT cookie and reload the app
      */
-    const onNextToggle = useCallback(preventDoubleTap(() => {
+    const onNextToggle = useMemo(() => preventDoubleTap(() => {
         const expiresDate = new Date();
         expiresDate.setFullYear(expiresDate.getFullYear() + 1);
 
@@ -45,7 +45,7 @@ export const useNextState = (): [boolean | undefined, () => void] => {
         // Reload the application
         // Ref. https://www.npmjs.com/package/react-native-restart#usage
         RNRestart.restart();
-    }), []);
+    }), [isNextRef, serverUrl]);
 
     /**
      * Lazy compute if we are currently on preprod
@@ -61,7 +61,7 @@ export const useNextState = (): [boolean | undefined, () => void] => {
             })();
             /* eslint-enable max-nested-callbacks */
         }
-    }, [isServerInfomaniak]);
+    }, [isServerInfomaniak, serverUrl]);
 
     return [isNext, onNextToggle];
 };
