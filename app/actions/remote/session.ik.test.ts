@@ -30,6 +30,39 @@ jest.mock('./entry', () => ({
     loginEntry: jest.fn(),
 }));
 
+describe('logout - removeServer default', () => {
+    const mockClient = {logout: jest.fn().mockResolvedValue({status: 'OK'})};
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        (NetworkManager.getClient as jest.Mock).mockReturnValue(mockClient);
+        (WebsocketManager.getClient as jest.Mock).mockReturnValue({close: jest.fn()});
+        DeviceEventEmitter.emit = jest.fn();
+        (getAllServerCredentials as jest.Mock).mockResolvedValue([
+            {serverUrl: 'https://server1.com'},
+        ]);
+        (getDeviceToken as jest.Mock).mockResolvedValue('token123');
+    });
+
+    it('should emit SERVER_LOGOUT with removeServer=true by default', async () => {
+        await logout('https://server1.com', undefined);
+
+        expect(DeviceEventEmitter.emit).toHaveBeenCalledWith(
+            Events.SERVER_LOGOUT,
+            expect.objectContaining({serverUrl: 'https://server1.com', removeServer: true}),
+        );
+    });
+
+    it('should allow overriding removeServer to false', async () => {
+        await logout('https://server1.com', undefined, {removeServer: false});
+
+        expect(DeviceEventEmitter.emit).toHaveBeenCalledWith(
+            Events.SERVER_LOGOUT,
+            expect.objectContaining({serverUrl: 'https://server1.com', removeServer: false}),
+        );
+    });
+});
+
 // Ik change : skip on CI, will fix later
 describe.skip('logout', () => {
     const mockClient = {logout: jest.fn()};
