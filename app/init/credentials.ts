@@ -72,6 +72,10 @@ export const setServerCredentials = (serverUrl: string, token: string) => {
         }
     } catch (e) {
         logWarning('could not set credentials', e);
+
+        // Monitor keychain errors to understand the impact of keystore issues
+        const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+        captureException(new Error(`Keychain SET failed: ${errorMessage} | serverUrl: ${serverUrl} | platform: ${Platform.OS}`));
     }
 };
 
