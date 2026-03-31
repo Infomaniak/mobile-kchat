@@ -74,4 +74,29 @@ test:unit-tests:
     - *rule-mr
     - when: never
   script:
-    - npm run test:ci
+    - mkdir -p reports
+    - npm run test:ci -- --testResultsProcessor=jest-junit --coverage --coverageReporters=text-summary --coverageReporters=cobertura --coverageDirectory=./coverage
+  artifacts:
+    expire_in: 7 days
+    paths:
+      - coverage/
+    reports:
+      junit: reports/junit-jest.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+
+code_quality:
+  stage: test-unit
+  extends: [.tests-node]
+  allow_failure: true
+  rules:
+    - *rule-mr
+    - when: never
+  script:
+    - mkdir -p reports
+    - npm run lint -- --format gitlab
+  artifacts:
+    expire_in: 7 days
+    reports:
+      codequality: gl-code-quality-report.json
