@@ -16,7 +16,19 @@ module.exports = {
     clearMocks: true,
     setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
     collectCoverageFrom: ['app/**/*.{js,jsx,ts,tsx}'],
-    coverageReporters: ['lcov', 'text-summary', 'json-summary'],
+    coverageReporters: ['lcov', 'text-summary', 'json-summary', 'cobertura'],
+    reporters: [
+        'default',
+        ['jest-junit', {
+            outputDirectory: 'reports',
+            outputName: 'junit-jest.xml',
+            ancestorSeparator: ' › ',
+            uniqueOutputName: false,
+            suiteNameTemplate: '{filepath}',
+            classNameTemplate: '{classname}',
+            titleTemplate: '{title}',
+        }],
+    ],
     testPathIgnorePatterns: ['/node_modules/'],
     coveragePathIgnorePatterns: ['/node_modules/', '/components/', '/screens/'],
     transformIgnorePatterns: [
