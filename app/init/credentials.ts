@@ -5,8 +5,9 @@ import {Platform, NativeModules} from 'react-native';
 import * as KeyChain from 'react-native-keychain';
 
 import DatabaseManager from '@database/manager';
-import {logWarning} from '@utils/log';
+import {logDebug, logWarning} from '@utils/log';
 import {getIOSAppGroupDetails} from '@utils/mattermost_managed';
+import {captureException} from '@utils/sentry';
 const {IkStorage} = NativeModules;
 
 export const getAllServerCredentials = async (): Promise<ServerCredential[]> => {
@@ -71,6 +72,10 @@ export const setServerCredentials = (serverUrl: string, token: string) => {
         }
     } catch (e) {
         logWarning('could not set credentials', e);
+
+        // Monitor keychain errors to understand the impact of keystore issues
+        const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+        captureException(new Error(`Keychain SET failed: ${errorMessage} | serverUrl: ${serverUrl} | platform: ${Platform.OS}`));
     }
 };
 
@@ -144,6 +149,18 @@ export const getServerCredentials = async (serverUrl: string): Promise<ServerCre
             preauthSecret,
         };
     } catch (e) {
+        // Monitor keychain errors and clean up corrupted credentials
+        const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+        captureException(new Error(`Keychain GET failed: ${errorMessage} | serverUrl: ${serverUrl} | platform: ${Platform.OS}`));
+
+        // Clean up corrupted credentials to force re-authentication on next launch
+        try {
+            await removeServerCredentials(serverUrl);
+            logDebug('[Credentials] Cleaned up corrupted credentials for', serverUrl);
+        } catch (cleanupError) {
+            logWarning('[Credentials] Failed to clean up corrupted credentials', cleanupError);
+        }
+
         return null;
     }
 };
