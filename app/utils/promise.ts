@@ -7,3 +7,7 @@ export const allSettled = Promise.allSettled || (<T>(promises: Array<Promise<T>>
         catch((reason) => ({status: 'rejected', reason})),
     ),
 ));
+
+export const sleep = (ms: number): Promise<void> => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+};
