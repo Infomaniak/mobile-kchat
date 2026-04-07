@@ -124,6 +124,8 @@ public class CallManager: NSObject {
   func reportCallEnded(conferenceId: String) {
     guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
 
+    CallWebSocketService.shared.disconnect(conferenceId: conferenceId)
+
     let endCallAction = CXEndCallAction(call: existingCall.localUUID)
     callController.requestTransaction(with: [endCallAction]) { error in
       if let error {
@@ -181,6 +183,16 @@ public class CallManager: NSObject {
       self.currentCalls[call.localUUID] = call
       completion()
     }
+  }
+
+  /// Called by CallWebSocketService when a `conference_deleted` Pusher event
+  /// is received. Only cancels if the call hasn't been answered yet on this device.
+  func cancelIncomingCall(conferenceId: String) {
+    guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value,
+          !existingCall.joined else { return }
+    LegacyLogger.calls.log(message: "[CallManager.cancelIncomingCall] Cancelling CallKit for \(conferenceId)")
+    reportCallEnded(conferenceId: conferenceId)
+    callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .remoteEnded)
   }
 }
 
@@ -357,16 +369,31 @@ extension CallManager: PKPushRegistryDelegate {
   }
 
   public func handleCallIncomingNotification(notificationPayload: [AnyHashable: Any], completion: @escaping () -> Void) {
-    guard let serverId = notificationPayload["server_id"] as? String,
-          let channelId = notificationPayload["channel_id"] as? String,
-          let conferenceId = notificationPayload["conference_id"] as? String,
-          let channelName = notificationPayload["channel_name"] as? String,
-          let conferenceJWT = notificationPayload["conference_jwt"] as? String else {
-      LegacyLogger.calls.log(level: .error, message: "We are not reporting a call ! This can lead to crash and errors.")
+    guard let serverId = notificationPayload["server_id"] as? String else {
+      LegacyLogger.calls.log(level: .error, message: "We are not reporting a call ! Missing server_id")
       completion()
       return
     }
-
+    guard let channelId = notificationPayload["channel_id"] as? String else {
+      LegacyLogger.calls.log(level: .error, message: "We are not reporting a call ! Missing channel_id")
+      completion()
+      return
+    }
+    guard let conferenceId = notificationPayload["conference_id"] as? String else {
+      LegacyLogger.calls.log(level: .error, message: "We are not reporting a call ! Missing conference_id")
+      completion()
+      return
+    }
+    guard let channelName = notificationPayload["channel_name"] as? String else {
+      LegacyLogger.calls.log(level: .error, message: "We are not reporting a call ! Missing channel_name")
+      completion()
+      return
+    }
+    guard let conferenceJWT = notificationPayload["conference_jwt"] as? String else {
+      LegacyLogger.calls.log(level: .error, message: "We are not reporting a call ! Missing conference_jwt")
+      completion()
+      return
+    }
     guard let serverURL = try? Database.default.getServerUrlForServer(serverId) else {
       LegacyLogger.calls.log(
         level: .error,
@@ -384,6 +411,11 @@ extension CallManager: PKPushRegistryDelegate {
       name: channelName
     )
     reportIncomingCall(call: meetCall) {
+      CallWebSocketService.shared.connect(
+        conferenceId: conferenceId,
+        channelId: channelId,
+        serverURL: serverURL
+      )
       completion()
     }
   }

@@ -126,6 +126,7 @@
 		83ABFD152C1C90D90029685B /* calls_urgent.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 83ABFD112C1C90D90029685B /* calls_urgent.mp3 */; };
 		A125DA032F6AE6D2003B0F9F /* Intents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A125DA022F6AE6D2003B0F9F /* Intents.framework */; };
 		A12CB4022E69D55E00C57BE6 /* kChat-AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = A12CB4012E69D55E00C57BE6 /* kChat-AppIcon.icon */; };
+		A15B77DE2F7EA5E200F9158E /* CallWebSocketService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A15B77DD2F7EA5E200F9158E /* CallWebSocketService.swift */; };
 		A94508A396424B2DB778AFE9 /* OpenSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E5C16B14E1CE4868886A1A00 /* OpenSans-SemiBold.ttf */; };
 		C9A107102BBD7C8700753CDC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C9A1070F2BBD7C8700753CDC /* PrivacyInfo.xcprivacy */; };
 		C9A107122BBDA00200753CDC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C9A107112BBDA00200753CDC /* PrivacyInfo.xcprivacy */; };
@@ -312,6 +313,7 @@
 		9EB3044C9E4352BCBCB94179 /* Pods-kChatNotificationService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChatNotificationService.debug.xcconfig"; path = "Target Support Files/Pods-kChatNotificationService/Pods-kChatNotificationService.debug.xcconfig"; sourceTree = "<group>"; };
 		A125DA022F6AE6D2003B0F9F /* Intents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Intents.framework; path = System/Library/Frameworks/Intents.framework; sourceTree = SDKROOT; };
 		A12CB4012E69D55E00C57BE6 /* kChat-AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = "kChat-AppIcon.icon"; sourceTree = "<group>"; };
+		A15B77DD2F7EA5E200F9158E /* CallWebSocketService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallWebSocketService.swift; sourceTree = "<group>"; };
 		A66656554C339757628D5D66 /* Pods-kChatShareExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChatShareExtension.debug.xcconfig"; path = "Target Support Files/Pods-kChatShareExtension/Pods-kChatShareExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		AB22941EB6C9E39BAB9B4783 /* Pods-kChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kChat.release.xcconfig"; path = "Target Support Files/Pods-kChat/Pods-kChat.release.xcconfig"; sourceTree = "<group>"; };
 		BC977883E2624E05975CA65B /* OpenSans-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-Regular.ttf"; path = "../assets/fonts/OpenSans-Regular.ttf"; sourceTree = "<group>"; };
@@ -456,6 +458,7 @@
 		374A99022BFCDC1D005517A1 /* Calls */ = {
 			isa = PBXGroup;
 			children = (
+				A15B77DD2F7EA5E200F9158E /* CallWebSocketService.swift */,
 				374A99032BFCDC23005517A1 /* CallManager.swift */,
 				37981AE02C33CB4D00205B36 /* Network+Calls.swift */,
 				37407E412C32BD87005FB5D3 /* CallViewController.swift */,
@@ -1242,6 +1245,7 @@
 				"${PODS_CONFIGURATION_BUILD_DIR}/GoogleSignIn/GoogleSignIn.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RCT-Folly/RCT-Folly_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RNCAsyncStorage/RNCAsyncStorage_resources.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/RNDeviceInfo/RNDeviceInfoPrivacyInfo.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RNPermissions/RNPermissionsPrivacyInfo.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RNSVG/RNSVGFilters.bundle",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf",
@@ -1290,6 +1294,7 @@
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleSignIn.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RCT-Folly_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNCAsyncStorage_resources.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNDeviceInfoPrivacyInfo.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNPermissionsPrivacyInfo.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNSVGFilters.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AntDesign.ttf",
@@ -1371,6 +1376,7 @@
 				536CC6C323E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.m in Sources */,
 				374A99042BFCDC23005517A1 /* CallManager.swift in Sources */,
 				37407E422C32BD87005FB5D3 /* CallViewController.swift in Sources */,
+				A15B77DE2F7EA5E200F9158E /* CallWebSocketService.swift in Sources */,
 				37981AE12C33CB4D00205B36 /* Network+Calls.swift in Sources */,
 				37981AE32C33D52800205B36 /* LegacyLogger.swift in Sources */,
 				37981AE52C33D86A00205B36 /* MeUserProfile.swift in Sources */,
