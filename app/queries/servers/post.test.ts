@@ -10,7 +10,7 @@ import DatabaseManager from '@database/manager';
 import ServerDataOperator from '@database/operator/server_data_operator';
 import TestHelper from '@test/test_helper';
 
-import {queryPostsWithPermalinkReferences, observeIsBoREnabled} from './post';
+import {queryPostsWithPermalinkReferences, observeIsBoREnabled, getFailedOrPendingPosts} from './post';
 
 describe('Post Queries', () => {
     const serverUrl = 'post.test.com';
@@ -365,6 +365,93 @@ describe('Post Queries', () => {
 
             const result = await firstValueFrom(observeIsBoREnabled(database));
             expect(result).toBe(false);
+        });
+    });
+
+    describe('getFailedOrPendingPosts', () => {
+        it('should return posts with pending_post_id equal to id', async () => {
+            const pendingPost = TestHelper.fakePost({
+                id: 'pending-post-1',
+                channel_id: 'channel1',
+                pending_post_id: 'pending-post-1',
+                create_at: Date.now() - 1000,
+            });
+
+            const confirmedPost = TestHelper.fakePost({
+                id: 'confirmed-post-1',
+                channel_id: 'channel1',
+                pending_post_id: '', // Empty means confirmed by server
+                create_at: Date.now(),
+            });
+
+            const models = await operator.handlePosts({
+                actionType: ActionType.POSTS.RECEIVED_NEW,
+                order: [pendingPost.id, confirmedPost.id],
+                posts: [pendingPost, confirmedPost],
+                prepareRecordsOnly: true,
+            });
+            await operator.batchRecords(models, 'test');
+
+            const result = await getFailedOrPendingPosts(database);
+
+            expect(result).toHaveLength(1);
+            expect(result[0].id).toBe(pendingPost.id);
+        });
+
+        it('should return posts in chronological order (oldest first)', async () => {
+            const post1 = TestHelper.fakePost({
+                id: 'post-1',
+                channel_id: 'channel1',
+                pending_post_id: 'post-1',
+                create_at: Date.now() - 2000,
+            });
+
+            const post2 = TestHelper.fakePost({
+                id: 'post-2',
+                channel_id: 'channel1',
+                pending_post_id: 'post-2',
+                create_at: Date.now() - 1000,
+            });
+
+            const models = await operator.handlePosts({
+                actionType: ActionType.POSTS.RECEIVED_NEW,
+                order: [post1.id, post2.id],
+                posts: [post1, post2],
+                prepareRecordsOnly: true,
+            });
+            await operator.batchRecords(models, 'test');
+
+            const result = await getFailedOrPendingPosts(database);
+
+            expect(result).toHaveLength(2);
+            expect(result[0].id).toBe(post1.id);
+            expect(result[1].id).toBe(post2.id);
+        });
+
+        it('should respect the limit parameter', async () => {
+            const posts = Array.from({length: 15}, (_, i) => TestHelper.fakePost({
+                id: `post-${i}`,
+                channel_id: 'channel1',
+                pending_post_id: `post-${i}`,
+                create_at: Date.now() - (i * 1000),
+            }));
+
+            const models = await operator.handlePosts({
+                actionType: ActionType.POSTS.RECEIVED_NEW,
+                order: posts.map((p) => p.id),
+                posts,
+                prepareRecordsOnly: true,
+            });
+            await operator.batchRecords(models, 'test');
+
+            const result = await getFailedOrPendingPosts(database, 5);
+
+            expect(result).toHaveLength(5);
+        });
+
+        it('should return empty array when no pending posts', async () => {
+            const result = await getFailedOrPendingPosts(database);
+            expect(result).toHaveLength(0);
         });
     });
 });

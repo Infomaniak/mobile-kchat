@@ -81,6 +81,27 @@ export const getPostById = async (database: Database, postId: string) => {
     }
 };
 
+export const getFailedOrPendingPosts = async (database: Database, limit = 10): Promise<PostModel[]> => {
+    try {
+        // Query posts where:
+        // 1. pending_post_id !== '' (has a pending post ID)
+        // 2. pending_post_id === id (still pending, not yet confirmed by server)
+        //
+        // Note: We use the indexed pending_post_id field for efficiency
+        // Posts with failed=true in props will have pending_post_id === id
+        const posts = await database.get<PostModel>(POST).query(
+            Q.where('pending_post_id', Q.notEq('')),
+            Q.where('pending_post_id', Q.eq(Q.column('id'))),
+            Q.sortBy('create_at', Q.asc),
+            Q.take(limit),
+        ).fetch();
+
+        return posts;
+    } catch {
+        return [];
+    }
+};
+
 export const observePost = (database: Database, postId: string) => {
     return database.get<PostModel>(POST).query(Q.where('id', postId), Q.take(1)).observe().pipe(
         switchMap((result) => (result.length ? result[0].observe() : of$(undefined))),
