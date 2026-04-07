@@ -10,6 +10,7 @@ import PushNotifications from '@init/push_notifications';
 import GlobalEventHandler from '@managers/global_event_handler';
 import {matomo} from '@managers/matomo';
 import NetworkManager from '@managers/network_manager';
+import PendingPostRetryManager from '@managers/pending_post_retry_manager';
 import SecurityManager from '@managers/security_manager';
 import SessionManager from '@managers/session_manager';
 import WebsocketManager from '@managers/websocket_manager';
@@ -72,6 +73,10 @@ export async function start() {
 
         await WebsocketManager.init(serverCredentials);
     }, 1000); // Ik: min duration for splashscreen
+
+    // Trigger retry of pending posts on cold start
+    // Fire and forget - don't block app launch
+    PendingPostRetryManager.triggerRetry();
 
     if (!__DEV__) {
         // Ik Analytics / Matomo

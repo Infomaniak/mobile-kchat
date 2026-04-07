@@ -19,6 +19,8 @@ import {toMilliseconds} from '@utils/datetime';
 import {isMainActivity} from '@utils/helpers';
 import {logError} from '@utils/log';
 
+import PendingPostRetryManager from './pending_post_retry_manager';
+
 const WAIT_TO_CLOSE = toMilliseconds({seconds: 2});
 const WAIT_UNTIL_NEXT = toMilliseconds({seconds: 5});
 
@@ -239,6 +241,8 @@ class WebsocketManagerSingleton {
     };
 
     private handleStateChange = (currentIsConnected: boolean, currentNetType: NetInfoStateType, currentIsActive: boolean) => {
+        const wasConnected = this.netConnected;
+
         if (currentIsActive === this.previousActiveState && currentIsConnected === this.netConnected && currentNetType === this.netType) {
             return;
         }
@@ -255,6 +259,11 @@ class WebsocketManagerSingleton {
         if (!currentIsConnected) {
             this.closeAll();
             return;
+        }
+
+        // Trigger retry of pending posts when connection is restored
+        if (!wasConnected && currentIsConnected) {
+            PendingPostRetryManager.triggerRetry();
         }
 
         if (switchedNetworks) {
