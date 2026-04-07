@@ -43,6 +43,22 @@ RCT_EXPORT_METHOD(reportCallStarted: (NSString*)serverURL
   resolve(@[]);
 }
 
+RCT_EXPORT_METHOD(cancelIncomingCallForChannel:(NSString*)channelId
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+  [[CallManager shared] cancelIncomingCallForChannel:channelId];
+  resolve(@[]);
+}
+
+RCT_EXPORT_METHOD(cancelIncomingCallAnsweredElsewhere:(NSString*)channelId
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+  [[CallManager shared] cancelIncomingCallAnsweredElsewhere:channelId];
+  resolve(@[]);
+}
+
 RCT_EXPORT_METHOD(reportCallEnded: (NSString*)conferenceId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)

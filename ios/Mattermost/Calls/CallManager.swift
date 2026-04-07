@@ -182,6 +182,16 @@ public class CallManager: NSObject {
       completion()
     }
   }
+
+  /// Called from JS when a `conference_deleted` WebSocket event is received.
+  /// Only cancels if the call hasn't been answered yet on this device.
+  @objc public func cancelIncomingCallForChannel(_ channelId: String) {
+    guard let existingCall = currentCalls.first(where: { $0.value.channelId == channelId })?.value,
+          !existingCall.joined else { return }
+    LegacyLogger.calls.log(message: "[CallManager.cancelIncomingCallForChannel] Cancelling CallKit for channel \(channelId)")
+    reportCallEnded(conferenceId: existingCall.conferenceId ?? "")
+    callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .remoteEnded)
+  }
 }
 
 extension CallManager: CallViewControllerDelegate {
@@ -330,30 +340,14 @@ extension CallManager: PKPushRegistryDelegate {
     handleCallIncomingNotification(notificationPayload: notificationPayload, completion: completion)
   }
 
-  @objc public func handleCallCancelled(notificationPayload: [AnyHashable: Any], completion: @escaping () -> Void) {
-    guard let conferenceId = notificationPayload["conference_id"] as? String,
-          let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else {
-      completion()
-      return
-    }
-
-    reportCallEnded(conferenceId: conferenceId)
-    callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .remoteEnded)
-    completion()
-  }
-
-  @objc public func handleJoinedCall(notificationPayload: [AnyHashable: Any], completion: @escaping () -> Void) {
-    guard let conferenceId = notificationPayload["conference_id"] as? String,
-          let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value,
-          // Only hide call UI if the user joined the call on an other device than this one
-          !existingCall.joined else {
-      completion()
-      return
-    }
-
-    reportCallEnded(conferenceId: conferenceId)
+  /// Called from JS when a `conference_user_connected` WebSocket event is received for the current user on another device.
+  @objc public func cancelIncomingCallAnsweredElsewhere(_ channelId: String) {
+    LegacyLogger.calls.log(message: "[CallManager.cancelIncomingCallAnsweredElsewhere] Called for channel \(channelId)")
+    guard let existingCall = currentCalls.first(where: { $0.value.channelId == channelId })?.value,
+          !existingCall.joined else { return }
+    LegacyLogger.calls.log(message: "[CallManager.cancelIncomingCallAnsweredElsewhere] Answering elsewhere for channel \(channelId)")
+    reportCallEnded(conferenceId: existingCall.conferenceId ?? "")
     callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .answeredElsewhere)
-    completion()
   }
 
   public func handleCallIncomingNotification(notificationPayload: [AnyHashable: Any], completion: @escaping () -> Void) {
