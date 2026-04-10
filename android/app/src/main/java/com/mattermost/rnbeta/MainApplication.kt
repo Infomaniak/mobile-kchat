@@ -18,6 +18,7 @@ import com.facebook.react.modules.network.OkHttpClientProvider
 import com.facebook.react.ReactInstanceManager
 import com.facebook.soloader.SoLoader
 import com.mattermost.call.IkCallPackage
+import com.mattermost.helpers.PostRetryPackage
 import com.mattermost.ikstorage.IkStoragePackage
 import com.oney.WebRTCModule.WebRTCModuleOptions
 
@@ -56,6 +57,7 @@ class MainApplication : NavigationApplication(), INotificationsApplication {
                         add(WatermelonDBJSIPackage())
                         add(IkStoragePackage())
                         add(IkCallPackage())
+                        add(PostRetryPackage())
                     }
 
                 override fun getJSMainModuleName(): String = "index"

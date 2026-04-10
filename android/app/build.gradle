@@ -115,7 +115,7 @@ android {
         applicationId "com.infomaniak.chat"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1_00_046_01
+        versionCode 1_00_046_02
         versionName "1.0.46"
         testBuildType System.getProperty('testBuildType', 'debug')
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
@@ -241,6 +241,9 @@ dependencies {
 
     implementation project(':reactnativenotifications')
     implementation project(':watermelondb-jsi')
+    
+    // WorkManager for background post retry
+    implementation 'androidx.work:work-runtime-ktx:2.10.0'
 
     api('io.jsonwebtoken:jjwt-api:0.12.5')
     runtimeOnly('io.jsonwebtoken:jjwt-impl:0.12.5')

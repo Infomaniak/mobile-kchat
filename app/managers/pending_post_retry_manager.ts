@@ -6,6 +6,7 @@ import DatabaseManager from '@database/manager';
 import {getFailedOrPendingPosts} from '@queries/servers/post';
 import {logDebug, logError} from '@utils/log';
 import {isPostPendingOrFailed} from '@utils/post';
+import {enqueuePostRetry} from '@utils/post_retry';
 import {sleep} from '@utils/promise';
 
 import NetworkManager from './network_manager';
@@ -22,7 +23,13 @@ class PendingPostRetryManagerSingleton {
     private processingPosts = new Set<string>();
     private processingPromise: Promise<void> | null = null;
 
-    public triggerRetry = async (): Promise<void> => {
+    public triggerRetry = async (enqueueNativeRetry = false): Promise<void> => {
+        // If requested, also queue native background retry as backup
+        // This is typically called when we know the app might be backgrounded/killed
+        if (enqueueNativeRetry) {
+            enqueuePostRetry();
+        }
+
         // Atomic check-and-set using promise chaining
         if (this.processingPromise) {
             logDebug('[PendingPostRetryManager] Already processing, waiting for current batch');
