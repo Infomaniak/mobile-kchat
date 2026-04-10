@@ -7,7 +7,7 @@ import {distinctUntilChanged, switchMap} from 'rxjs/operators';
 
 import {Permissions} from '@constants';
 import {observePermissionForTeam} from '@queries/servers/role';
-import {observeConfigBooleanValue, observePushVerificationStatus} from '@queries/servers/system';
+import {observePushVerificationStatus} from '@queries/servers/system';
 import {observeCurrentTeam} from '@queries/servers/team';
 import {observeCurrentUser} from '@queries/servers/user';
 
@@ -37,26 +37,7 @@ const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
         distinctUntilChanged(),
     );
 
-    const canAddUserToTeam = combineLatest([currentUser, team]).pipe(
-        switchMap(([u, t]) => observePermissionForTeam(database, t, u, Permissions.ADD_USER_TO_TEAM, false)),
-    );
-
-    const guestAccountsEnabled = observeConfigBooleanValue(database, 'EnableGuestAccounts');
-
-    const canInviteGuests = combineLatest([guestAccountsEnabled, currentUser, team]).pipe(
-        switchMap(([enabled, u, t]) => {
-            if (!enabled) {
-                return of$(false);
-            }
-            return observePermissionForTeam(database, t, u, Permissions.INVITE_GUEST, false);
-        }),
-        distinctUntilChanged(),
-    );
-
-    const canInvitePeople = combineLatest([canAddUserToTeam, canInviteGuests]).pipe(
-        switchMap(([add, invite]) => of$(add || invite)),
-        distinctUntilChanged(),
-    );
+    const canInvitePeople = of$(false);
 
     return {
         canCreateChannels,

@@ -316,7 +316,8 @@ describe('ChannelListHeader Index', () => {
     });
 
     describe('canInvitePeople', () => {
-        it('is true when user has ADD_USER_TO_TEAM permission', async () => {
+        // Ik change : feature disable see index.ik.test
+        it.skip('is true when user has ADD_USER_TO_TEAM permission', async () => {
             const team = TestHelper.fakeTeam({id: currentTeamId, display_name: teamDisplayName});
             const user = TestHelper.fakeUser({id: currentUserId, roles: 'system_user'});
 
@@ -346,7 +347,8 @@ describe('ChannelListHeader Index', () => {
             expect(component.props.canInvitePeople).toBe(true);
         });
 
-        it('is true when EnableGuestAccounts is true and user has INVITE_GUEST permission', async () => {
+        it.skip('is true when EnableGuestAccounts is true and user has INVITE_GUEST permission', async () => {
+            // Ik change : feature disable see index.ik.test
             const team = TestHelper.fakeTeam({id: currentTeamId, display_name: teamDisplayName});
             const user = TestHelper.fakeUser({id: currentUserId, roles: 'system_user'});
 
