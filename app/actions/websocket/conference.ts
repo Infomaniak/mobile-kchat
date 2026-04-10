@@ -2,11 +2,13 @@
 // See LICENSE.txt for license information.
 
 import {Q} from '@nozbe/watermelondb';
+import {NativeModules, Platform} from 'react-native';
 import {z} from 'zod';
 
 import {MM_TABLES} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import {queryConference} from '@queries/servers/conference';
+import {getCurrentUserId} from '@queries/servers/system';
 import {logError} from '@utils/log';
 
 import type {default as ConferenceModel, ConferenceModelFields} from '@database/models/server/conference';
@@ -125,6 +127,12 @@ export const handleConferenceDeleted = async (serverUrl: string, msg: WebSocketM
     try {
         // ConferenceGenericEvent does not contain the conferenceId
         const event = ConferenceGenericEvent.parse(msg.data);
+
+        // Cancel the native CallKit UI if an incoming call is still pending for this channel
+        if (Platform.OS === 'ios') {
+            NativeModules.CallManagerModule?.cancelIncomingCallForChannel(event.channel_id);
+        }
+
         const conferences = await database.get<ConferenceModel>(CONFERENCE).query(
             Q.and(
                 Q.where('user_id', event.user_id),
@@ -204,6 +212,20 @@ export const handleConferenceUserUpdated = async (serverUrl: string, msg: WebSoc
 };
 
 export async function handleConferenceUserConnected(serverUrl: string, msg: WebSocketMessage) {
+    if (Platform.OS === 'ios') {
+        try {
+            const database = DatabaseManager.serverDatabases[serverUrl]?.database;
+            if (database) {
+                const event = ConferenceGenericEvent.parse(msg.data);
+                const currentUserId = await getCurrentUserId(database);
+                if (event.user_id === currentUserId) {
+                    NativeModules.CallManagerModule?.cancelIncomingCallAnsweredElsewhere(event.channel_id);
+                }
+            }
+        } catch (e) {
+            logError('[handleConferenceUserConnected]', e);
+        }
+    }
     return handleConferenceUserUpdated(serverUrl, msg, {present: true, status: 'approved'});
 }
 
