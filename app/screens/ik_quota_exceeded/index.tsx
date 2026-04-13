@@ -3,8 +3,24 @@
 
 import {Button} from '@rneui/base';
 import React, {useCallback} from 'react';
-import {useIntl} from 'react-intl';
+import {defineMessages, useIntl} from 'react-intl';
 import {Text, View} from 'react-native';
+
+// Define messages for i18n extraction (used dynamically via quotaType)
+const messages = defineMessages({
+    infomaniakSizeQuotaExceededTitle: {
+        id: 'infomaniak.size_quota_exceeded.title',
+        defaultMessage: 'You have reached your storage space limit',
+    },
+    infomaniakSizeQuotaAlmostExceededTitle: {
+        id: 'infomaniak.size_quota_almost_exceeded.title',
+        defaultMessage: 'You are about to reach your storage space limit',
+    },
+    infomaniakSizeQuotaExceededDescription: {
+        id: 'infomaniak.size_quota_exceeded.description',
+        defaultMessage: 'Change your plan from the web interface to get more storage.',
+    },
+});
 
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
@@ -109,10 +125,10 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
 
                     <View>
                         <Text style={styles.title}>
-                            {intl.formatMessage({id: quotaType.title})}
+                            {intl.formatMessage({id: quotaType.title, defaultMessage: messages.infomaniakSizeQuotaExceededTitle.defaultMessage})}
                         </Text>
                         <Text style={styles.description}>
-                            {intl.formatMessage({id: quotaType.description})}
+                            {intl.formatMessage({id: quotaType.description, defaultMessage: messages.infomaniakSizeQuotaExceededDescription.defaultMessage})}
                         </Text>
                     </View>
 
