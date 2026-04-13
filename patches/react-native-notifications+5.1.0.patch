@@ -80,7 +80,7 @@ index 90969b2..3420045 100644
  
      @ReactMethod
 diff --git a/node_modules/react-native-notifications/lib/android/app/src/main/java/com/wix/reactnativenotifications/RNNotificationsPackage.java b/node_modules/react-native-notifications/lib/android/app/src/main/java/com/wix/reactnativenotifications/RNNotificationsPackage.java
-index 5b7f15f..3b5a104 100644
+index 5b7f15f..9381794 100644
 --- a/node_modules/react-native-notifications/lib/android/app/src/main/java/com/wix/reactnativenotifications/RNNotificationsPackage.java
 +++ b/node_modules/react-native-notifications/lib/android/app/src/main/java/com/wix/reactnativenotifications/RNNotificationsPackage.java
 @@ -15,6 +15,7 @@ import com.wix.reactnativenotifications.core.AppLifecycleFacade;
@@ -91,7 +91,7 @@ index 5b7f15f..3b5a104 100644
  import com.wix.reactnativenotifications.core.notification.IPushNotification;
  import com.wix.reactnativenotifications.core.notification.PushNotification;
  import com.wix.reactnativenotifications.core.notificationdrawer.IPushNotificationsDrawer;
-@@ -66,8 +67,18 @@ public class RNNotificationsPackage implements ReactPackage, AppLifecycleFacade.
+@@ -66,7 +67,11 @@ public class RNNotificationsPackage implements ReactPackage, AppLifecycleFacade.
  
      @Override
      public void onActivityStarted(Activity activity) {
@@ -102,26 +102,6 @@ index 5b7f15f..3b5a104 100644
 +        }
 +        if (!isInitialized && InitialNotificationHolder.getInstance().get() == null) {
              callOnOpenedIfNeed(activity);
-+        } else if (isInitialized) {
-+            // Warm start: fallback if notification intent is present but not yet handled
-+            Intent intent = activity.getIntent();
-+            if (NotificationIntentAdapter.canHandleIntent(intent) && !intent.getBooleanExtra("notificationHandled", false)) {
-+                callOnOpenedIfNeed(activity);
-+            }
-         }
-     }
- 
-@@ -99,9 +110,9 @@ public class RNNotificationsPackage implements ReactPackage, AppLifecycleFacade.
-             final IPushNotification pushNotification = PushNotification.get(appContext, notificationData);
-             if (pushNotification != null) {
-                 pushNotification.onOpened();
--                // Erase notification intent after using it, to avoid looping with the same notification
--                // in case the app is moved to background and opened again
--                activity.setIntent(new Intent());
-+                // Mark notification as handled to prevent double processing in warm start
-+                intent.putExtra("notificationHandled", true);
-+                activity.setIntent(intent);
-             }
          }
      }
 diff --git a/node_modules/react-native-notifications/lib/android/app/src/main/java/com/wix/reactnativenotifications/core/NotificationIntentAdapter.java b/node_modules/react-native-notifications/lib/android/app/src/main/java/com/wix/reactnativenotifications/core/NotificationIntentAdapter.java
