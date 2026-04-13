@@ -1,5 +1,29 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
+import {defineMessages} from 'react-intl';
+
+export const quotaExceededMessages = defineMessages({
+    paidPlanAdmin: {
+        id: 'file_upload.quota.exceeded.paidPlan.admin',
+        defaultMessage: 'Change your plan from the web interface to get more storage.',
+    },
+    freePlanAdmin: {
+        id: 'file_upload.quota.exceeded.freePlan.admin',
+        defaultMessage: 'Change your plan from the web interface to get more storage and new features.',
+    },
+    user: {
+        id: 'file_upload.quota.exceeded',
+        defaultMessage: 'Contact an administrator to upgrade.',
+    },
+    almostFreePlanAdmin: {
+        id: 'file_upload.quota.almost.exceeded.freePlan.admin',
+        defaultMessage: 'To continue working without interruption, change your plan from the web interface to get more storage and new features.',
+    },
+    almostPaidPlanAdmin: {
+        id: 'file_upload.quota.almost.exceeded.paidPlan.admin',
+        defaultMessage: 'To continue working without interruption, change your plan from the web interface to get more storage.',
+    },
+});
 
 export type PackName = 'ksuite_essential' | 'ksuite_standard' | 'ksuite_pro' | 'ksuite_entreprise'
 export type WcPackName = 'essential' | 'standard' | 'business' | 'entreprise';
@@ -20,7 +44,7 @@ const planOrder: PackName[] = [
 
 const quotaMessages = new Map<string, string>([
     ['admin|paid', 'file_upload.quota.exceeded.paidPlan.admin'],
-    ['admin|free', 'file_upload.quota.exceeded.admin'],
+    ['admin|free', 'file_upload.quota.exceeded.freePlan.admin'],
     ['user|_', 'file_upload.quota.exceeded'],
 ]);
 
