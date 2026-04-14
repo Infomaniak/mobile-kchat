@@ -93,7 +93,7 @@ public class NotificationReplyBroadcastReceiver extends BroadcastReceiver {
                         onReplyFailed(notificationId);
                         return;
                     }
-                    onReplySuccess(notificationId, message);
+                    onReplySuccess(notificationId);
                     TurboLog.Companion.i("ReactNative", "Reply SUCCESS");
                 } else {
                     TurboLog.Companion.i("ReactNative", "Reply FAILED resolved without value");
@@ -121,8 +121,8 @@ public class NotificationReplyBroadcastReceiver extends BroadcastReceiver {
         recreateNotification(notificationId, "Message failed to send.");
     }
 
-    protected void onReplySuccess(int notificationId, final CharSequence message) {
-        recreateNotification(notificationId, message);
+    protected void onReplySuccess(int notificationId) {
+        notificationManager.cancel(notificationId);
     }
 
     private void recreateNotification(int notificationId, final CharSequence message) {
