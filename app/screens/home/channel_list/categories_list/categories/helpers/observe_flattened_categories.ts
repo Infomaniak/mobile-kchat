@@ -65,7 +65,10 @@ const observeCategoryData = (
     locale: string,
     isTablet: boolean,
 ): Observable<CategoryData> => {
-    const categoryMyChannels = category.myChannels.observeWithColumns(['last_post_at', 'is_unread']);
+    // IK: only observe is_unread — last_post_at was added by upstream but triggers a full sidebar
+    // recalculation on every sent/received message, causing perf issues for users with many channels.
+    // The 516 build only observed is_unread and that was correct behavior.
+    const categoryMyChannels = category.myChannels.observeWithColumns(['is_unread']);
     const channelsWithMyChannel = observeCategoryChannels(category, categoryMyChannels);
     const currentChannelId = isTablet ? observeCurrentChannelId(database) : of$('');
     const lastUnreadId = isTablet ? observeLastUnreadChannelId(database) : of$(undefined);
