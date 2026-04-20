@@ -78,14 +78,13 @@ const ThemeProvider = ({currentTeamId, children, themes}: Props) => {
 
     useEffect(() => {
         const listener = Appearance.addChangeListener(() => {
+            clearThemeCache();
             const newTheme = getTheme(currentTeamId, themes);
-            if (theme !== newTheme) {
-                setTheme(newTheme);
-            }
+            setTheme(newTheme);
         });
 
         return () => listener.remove();
-    }, [currentTeamId, themes, theme]);
+    }, [currentTeamId, themes]);
 
     useEffect(() => {
         updateThemeIfNeeded(theme);
