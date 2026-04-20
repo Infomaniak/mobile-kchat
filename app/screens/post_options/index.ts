@@ -10,7 +10,7 @@ import {AppBindingLocations} from '@constants/apps';
 import {MAX_ALLOWED_REACTIONS} from '@constants/emoji';
 import {DEFAULT_LOCALE} from '@i18n';
 import AppsManager from '@managers/apps_manager';
-import {observeChannel, observeIsReadOnlyChannel, observeIsChannelAutotranslated, observeChannelInfo} from '@queries/servers/channel';
+import {observeChannel, observeIsReadOnlyChannel, observeIsChannelAutotranslated, observeChannelInfo, observeMyChannel} from '@queries/servers/channel';
 import {observeLimits} from '@queries/servers/limit';
 import {observePost, observePostSaved} from '@queries/servers/post';
 import {observeReactionsForPost} from '@queries/servers/reaction';
@@ -20,6 +20,7 @@ import {observeIsCRTEnabled, observeThreadById} from '@queries/servers/thread';
 import {observeUsage} from '@queries/servers/usage';
 import {observeCurrentUser} from '@queries/servers/user';
 import {isBoRPost, isOwnBoRPost, isUnrevealedBoRPost} from '@utils/bor';
+import {isDMorGM} from '@utils/channel';
 import {toMilliseconds} from '@utils/datetime';
 import {isMinimumServerVersion} from '@utils/helpers';
 import {getPostTranslation, isFromWebhook, isSystemMessage} from '@utils/post';
@@ -90,6 +91,11 @@ const enhanced = withObservables([], ({combinedPost, post, showAddReaction, sour
     const bindings = AppsManager.observeBindings(serverUrl, AppBindingLocations.POST_MENU_ITEM);
     const borPost = isBoRPost(post);
 
+    // Check if user is a member of the channel (for public channel search results)
+    const isChannelMember = observeMyChannel(database, post.channelId).pipe(
+        switchMap((member) => of$(Boolean(member))),
+    );
+
     const canPostPermission = combineLatest([channel, currentUser]).pipe(switchMap(([c, u]) => observePermissionForChannel(database, c, u, Permissions.CREATE_POST, false)));
     const hasAddReactionPermission = currentUser.pipe(switchMap((u) => observePermissionForPost(database, post, u, Permissions.ADD_REACTION, true)));
     const canDeletePostPermission = currentUser.pipe(switchMap((u) => {
@@ -113,18 +119,34 @@ const enhanced = withObservables([], ({combinedPost, post, showAddReaction, sour
         }),
     );
 
-    const canReply = borPost ? of$(false) : combineLatest([channelIsArchived, channelIsReadOnly, canPostPermission]).pipe(switchMap(([isArchived, isReadOnly, canPost]) => {
-        return of$(!isArchived && !isReadOnly && sourceScreen !== Screens.THREAD && !isSystemMessage(post) && canPost);
-    }));
+    // Extract observables outside of switchMap to avoid creating new instances on each emission
+    const currentTeamId$ = observeCurrentTeamId(database);
 
-    const canPin = borPost ? of$(false) : combineLatest([channelIsArchived, channelIsReadOnly]).pipe(switchMap(([isArchived, isReadOnly]) => {
-        return of$(!isSystemMessage(post) && !isArchived && !isReadOnly);
+    // For non-members, only allow reply if channel is accessible (DM/GM or same team)
+    const canReply = borPost ? of$(false) : combineLatest([channelIsArchived, channelIsReadOnly, canPostPermission, isChannelMember, channel, currentTeamId$]).pipe(
+        switchMap(([isArchived, isReadOnly, canPost, isMember, chan, currentTeamId]) => {
+            if (!isMember) {
+                // Non-members can only reply to DMs/GMs or channels in the current team
+                const canAccess = (chan && isDMorGM(chan)) || chan?.teamId === currentTeamId;
+                return of$(!isArchived && !isReadOnly && sourceScreen !== Screens.THREAD && !isSystemMessage(post) && canPost && canAccess);
+            }
+            return of$(!isArchived && !isReadOnly && sourceScreen !== Screens.THREAD && !isSystemMessage(post) && canPost);
+        }),
+    );
+
+    const canPin = borPost ? of$(false) : combineLatest([channelIsArchived, channelIsReadOnly, isChannelMember]).pipe(switchMap(([isArchived, isReadOnly, isMember]) => {
+        // Non-members can't pin posts
+        return of$(!isSystemMessage(post) && !isArchived && !isReadOnly && isMember);
     }));
 
     const isSaved = observePostSaved(database, post.id);
 
-    const canEdit = borPost ? of$(false) : combineLatest([postEditTimeLimit, isLicensed, channel, currentUser, channelIsArchived, channelIsReadOnly, canEditUntil, canPostPermission]).pipe(
-        switchMap(([lt, ls, c, u, isArchived, isReadOnly, until, canPost]) => {
+    const canEdit = borPost ? of$(false) : combineLatest([postEditTimeLimit, isLicensed, channel, currentUser, channelIsArchived, channelIsReadOnly, canEditUntil, canPostPermission, isChannelMember]).pipe(
+        switchMap(([lt, ls, c, u, isArchived, isReadOnly, until, canPost, isMember]) => {
+            // Non-members can't edit posts
+            if (!isMember) {
+                return of$(false);
+            }
             const isOwner = u?.id === post.userId;
             const canEditPostPermission = (c && u) ? observeCanEditPost(database, isOwner, post, lt, ls, c, u) : of$(false);
             const timeNotReached = (until === -1) || (until > Date.now());
@@ -135,23 +157,34 @@ const enhanced = withObservables([], ({combinedPost, post, showAddReaction, sour
         }),
     );
 
-    const canMarkAsUnread = combineLatest([currentUser, channelIsArchived]).pipe(
-        switchMap(([user, isArchived]) => of$(
-            !isArchived && (
+    const canMarkAsUnread = combineLatest([currentUser, channelIsArchived, isChannelMember]).pipe(
+        switchMap(([user, isArchived, isMember]) => of$(
+
+            // Non-members can't mark as unread
+            !isArchived && isMember && (
                 (user?.id !== post.userId && !isSystemMessage(post)) || isFromWebhook(post)
             ),
         )),
     );
 
-    const canAddReaction = combineLatest([hasAddReactionPermission, channelIsReadOnly, isUnderMaxAllowedReactions, channelIsArchived, currentUser]).pipe(
-        switchMap(([permission, readOnly, maxAllowed, isArchived, user]) => {
+    const canAddReaction = combineLatest([hasAddReactionPermission, channelIsReadOnly, isUnderMaxAllowedReactions, channelIsArchived, currentUser, isChannelMember]).pipe(
+        switchMap(([permission, readOnly, maxAllowed, isArchived, user, isMember]) => {
+            // Non-members can't add reactions
+            if (!isMember) {
+                return of$(false);
+            }
+
             // Can't react on unrevealed BoR posts of other users
             const preventBoRReaction = isUnrevealedBoRPost(post) && post.userId !== user?.id;
             return of$(!isSystemMessage(post) && permission && !readOnly && !isArchived && maxAllowed && showAddReaction && !preventBoRReaction);
         }),
     );
 
-    const canDelete = combineLatest([canDeletePostPermission, channelIsArchived, channelIsReadOnly, canPostPermission, currentUser]).pipe(switchMap(([permission, isArchived, isReadOnly, canPost, user]) => {
+    const canDelete = combineLatest([canDeletePostPermission, channelIsArchived, channelIsReadOnly, canPostPermission, currentUser, isChannelMember]).pipe(switchMap(([permission, isArchived, isReadOnly, canPost, user, isMember]) => {
+        // Non-members can't delete posts
+        if (!isMember) {
+            return of$(false);
+        }
         const canDeleteBoRPost = borPost ? post.userId === user?.id : true;
         return of$(permission && !isArchived && !isReadOnly && canPost && canDeleteBoRPost);
     }));

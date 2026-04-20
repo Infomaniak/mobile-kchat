@@ -112,8 +112,9 @@ const withPost = withObservables(
         let isLastReply = of$(true);
         let isPostAddChannelMember = of$(false);
         const isOwner = currentUser?.id === post.userId;
-        const canDelete = observePermissionForPost(database, post, currentUser, isOwner ? Permissions.DELETE_POST : Permissions.DELETE_OTHERS_POSTS, false);
         const isEphemeral = of$(isPostEphemeral(post));
+
+        const canDelete = observePermissionForPost(database, post, currentUser, isOwner ? Permissions.DELETE_POST : Permissions.DELETE_OTHERS_POSTS, false);
 
         if (post.props?.add_channel_member && isPostEphemeral(post) && currentUser) {
             isPostAddChannelMember = observeCanManageChannelMembers(database, post.channelId, currentUser);

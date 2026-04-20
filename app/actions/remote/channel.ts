@@ -545,22 +545,52 @@ export async function fetchMyChannelsForTeam(
     }
 }
 
+/**
+ * Fetches a channel and its membership for the current user.
+ *
+ * @param serverUrl - Server URL
+ * @param teamId - Team ID for error fallback
+ * @param channelId - Channel ID to fetch
+ * @param fetchOnly - If true, returns data without storing to database
+ * @param groupLabel - Optional request group label for cancellation
+ *
+ * @returns Object with channel, memberships (empty if not a member), and optional error.
+ *
+ * @remarks
+ * Design change: Historically this function threw when the user wasn't a channel member.
+ * Now it gracefully handles 404 responses from getChannelMember to support public
+ * channel search results where users can see posts without being members.
+ *
+ * Behavior:
+ * - Always stores the channel object (accessible for public channels)
+ * - Only stores membership if the user is actually a member
+ * - Empty memberships array indicates user can read but not interact
+ */
 export async function fetchMyChannel(serverUrl: string, teamId: string, channelId: string, fetchOnly = false, groupLabel?: RequestGroupLabel): Promise<MyChannelsRequest> {
     try {
         const client = NetworkManager.getClient(serverUrl);
 
-        const [channel, member] = await Promise.all([
-            client.getChannel(channelId, groupLabel),
-            client.getChannelMember(channelId, 'me', groupLabel),
-        ]);
+        const channelPromise = client.getChannel(channelId, groupLabel);
+        const memberPromise = client.getChannelMember(channelId, 'me', groupLabel).catch((error: {status_code?: number}) => {
+            // 404 from API: user is not a member (not an error for public channels)
+            if (error?.status_code === 404) {
+                return undefined;
+            }
+            throw error;
+        });
+
+        const [channel, member] = await Promise.all([channelPromise, memberPromise]);
 
         if (!fetchOnly) {
-            await storeMyChannelsForTeam(serverUrl, channel.team_id || teamId, [channel], [member]);
+            // Always store channel (for public channel visibility)
+            // Only store membership if user is actually a member
+            const memberships = member ? [member] : [];
+            await storeMyChannelsForTeam(serverUrl, channel.team_id || teamId, [channel], memberships);
         }
 
         return {
             channels: [channel],
-            memberships: [member],
+            memberships: member ? [member] : [],
         };
     } catch (error) {
         logDebug('error on fetchMyChannel', getFullErrorMessage(error));

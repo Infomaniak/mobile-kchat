@@ -5,6 +5,7 @@ import React, {useCallback, useMemo, useState} from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 
 import {switchToChannelById} from '@actions/remote/channel';
+import FormattedText from '@components/formatted_text';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
@@ -23,6 +24,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         paddingHorizontal: 8,
     },
     channelContainer: {
+        flexDirection: 'row',
         borderRadius: 4,
         overflow: 'hidden',
     },
@@ -42,16 +44,23 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         color: changeOpacity(theme.centerChannelColor, 0.72),
         marginLeft: 8,
     },
+    nonMemberText: {
+        ...typography('Body', 75, 'Regular'),
+        color: changeOpacity(theme.centerChannelColor, 0.56),
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+    },
 }));
 
 type Props = {
     channelId: ChannelModel['id'];
     channelName: ChannelModel['displayName'];
     teamName: TeamModel['displayName'];
+    isChannelMember?: boolean;
     testID?: string;
 }
 
-function ChannelInfo({channelId, channelName, teamName, testID}: Props) {
+function ChannelInfo({channelId, channelName, teamName, isChannelMember = true, testID}: Props) {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const serverUrl = useServerUrl();
@@ -97,6 +106,13 @@ function ChannelInfo({channelId, channelName, teamName, testID}: Props) {
                         {channelName}
                     </Text>
                 </TouchableWithFeedback>
+                {!isChannelMember && (
+                    <FormattedText
+                        style={styles.nonMemberText}
+                        id='search_results.channel.not_a_member'
+                        defaultMessage='(not a member)'
+                    />
+                )}
             </View>
             {Boolean(teamName) && (
                 <View style={teamContainerStyle}>
