@@ -1,15 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-// @IK-MOBILE-TEST: Tests custom pour protéger le fix du thème auto contre les merges upstream
-// Ce fichier de test a été ajouté par Ik pour valider le comportement du thème auto
-// qui doit réagir aux changements d'apparence système.
-//
-// Ce test protège spécifiquement contre la régression du bug où :
-// - Le thème en mode "auto" ne réagissait pas aux changements système
-// - Le cache n'était pas vidé quand l'apparence changeait
-// - Les illustrations changeaient sans que l'app entière ne suive
-
 import React, {useContext} from 'react';
 import {Appearance, Text, View} from 'react-native';
 
