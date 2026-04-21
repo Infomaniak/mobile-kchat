@@ -5,7 +5,7 @@ import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react
 
 import {storeGlobal, storeOnboardingViewedValue} from '@actions/app/global';
 import {cancelAllSessionNotifications, terminateSession} from '@actions/local/session';
-import {syncMultiTeam, syncServerData} from '@actions/remote/entry/ikcommon';
+import {syncMultiTeam} from '@actions/remote/entry/ikcommon';
 import {logout, scheduleSessionNotification} from '@actions/remote/session';
 import {Events, Launch} from '@constants';
 import {GLOBAL_IDENTIFIERS} from '@constants/database';
@@ -88,7 +88,6 @@ export class SessionManagerSingleton {
         switch (appState) {
             case 'active':
                 if (!EphemeralStore.isLoggingIn()) {
-                    this.syncServerData();
                     this.syncMultiTeam();
                 }
                 setTimeout(cancelAllSessionNotifications, 750);
@@ -96,14 +95,6 @@ export class SessionManagerSingleton {
             case 'background':
             case 'inactive':
                 break;
-        }
-    };
-
-    private syncServerData = async () => {
-        try {
-            await syncServerData();
-        } catch (error) {
-            // do nothing
         }
     };
 

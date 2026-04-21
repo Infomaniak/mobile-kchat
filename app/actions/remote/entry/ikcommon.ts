@@ -103,38 +103,3 @@ export const syncMultiTeam = async (accessToken: string) => {
     }
 };
 
-export const syncServerData = async () => {
-    try {
-        const activeServerUrl = await DatabaseManager.getActiveServerUrl();
-        if (!activeServerUrl) {
-            return new Error('cannot find active server url');
-        }
-
-        setTeamLoading(activeServerUrl, true);
-        const operator = DatabaseManager.serverDatabases[activeServerUrl]?.operator;
-        if (!operator) {
-            return new Error('cannot find server database');
-        }
-        const {database} = operator;
-        const lastFullSync = await getLastFullSync(database);
-        const currentTeamId = await getCurrentTeamId(database);
-        const currentChannelId = await getCurrentChannelId(database);
-        const entryData = await entry(activeServerUrl, currentTeamId, currentChannelId, lastFullSync);
-
-        if ('error' in entryData) {
-            setTeamLoading(activeServerUrl, false);
-            return new Error('Error in entry data');
-        }
-
-        const {models} = entryData;
-
-        if (models?.length) {
-            await operator.batchRecords(models, 'syncUnreadChannels');
-        }
-        setTeamLoading(activeServerUrl, false);
-
-        return models;
-    } catch (e) {
-        return e;
-    }
-};
