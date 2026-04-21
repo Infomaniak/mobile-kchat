@@ -13,11 +13,7 @@ import {PUSH_PROXY_STATUS_VERIFIED} from '@constants/push_proxy';
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials, removeServerCredentials, setServerCredentials} from '@init/credentials';
 import NetworkManager from '@managers/network_manager';
-import {getCurrentChannelId, getCurrentTeamId, getLastFullSync} from '@queries/servers/system';
 import EphemeralStore from '@store/ephemeral_store';
-import {setTeamLoading} from '@store/team_load_store';
-
-import {entry} from './common';
 
 import type {TeamServer} from '@client/rest/ikteams';
 
