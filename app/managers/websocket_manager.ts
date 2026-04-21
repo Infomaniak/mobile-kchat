@@ -19,7 +19,7 @@ import {toMilliseconds} from '@utils/datetime';
 import {isMainActivity} from '@utils/helpers';
 import {logError} from '@utils/log';
 
-const WAIT_TO_CLOSE = toMilliseconds({seconds: 2});
+const WAIT_TO_CLOSE = toMilliseconds({seconds: 15});
 const WAIT_UNTIL_NEXT = toMilliseconds({seconds: 5});
 
 class WebsocketManagerSingleton {
@@ -86,12 +86,14 @@ class WebsocketManagerSingleton {
 
         const client = new WebSocketClient(serverUrl, bearerToken);
 
-        client.setFirstConnectCallback(() => this.onFirstConnect(serverUrl));
+        const isCurrentClient = () => this.clients[serverUrl] === client;
+
+        client.setFirstConnectCallback(() => isCurrentClient() && this.onFirstConnect(serverUrl));
         client.setEventCallback((evt: WebSocketMessage) => handleWebSocketEvent(serverUrl, evt));
 
         //client.setMissedEventsCallback(() => {}) Nothing to do on missedEvents callback
-        client.setReconnectCallback(() => this.onReconnect(serverUrl));
-        client.setReliableReconnectCallback(() => this.onReliableReconnect(serverUrl));
+        client.setReconnectCallback(() => isCurrentClient() && this.onReconnect(serverUrl));
+        client.setReliableReconnectCallback(() => isCurrentClient() && this.onReliableReconnect(serverUrl));
         client.setCloseCallback((connectFailCount: number) => this.onWebsocketClose(serverUrl, connectFailCount));
 
         this.clients[serverUrl] = client;
@@ -112,7 +114,7 @@ class WebsocketManagerSingleton {
         let queued = 0;
         for await (const clientUrl of Object.keys(this.clients)) {
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
-            if (clientUrl === activeServerUrl) {
+            if (clientUrl === activeServerUrl || this.firstConnectionSynced[clientUrl]) {
                 this.initializeClient(clientUrl, groupLabel);
             } else {
                 queued += 1;
