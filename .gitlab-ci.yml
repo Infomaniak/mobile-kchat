@@ -2,6 +2,7 @@ stages:
   - install
   - check
   - test-unit
+  - .post
 
 default:
   interruptible: true
