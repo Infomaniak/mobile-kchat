@@ -2,7 +2,7 @@ stages:
   - install
   - check
   - test-unit
-  - .post
+  - sync
 
 default:
   interruptible: true
@@ -103,7 +103,7 @@ code_quality:
       codequality: gl-code-quality-report.json
 
 sync-upstream:
-  stage: .post
+  stage: sync
   image: alpine/git
   rules:
     - if: '$SYNC_UPSTREAM == "true"'
