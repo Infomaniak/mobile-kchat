@@ -100,3 +100,91 @@ code_quality:
     expire_in: 7 days
     reports:
       codequality: gl-code-quality-report.json
+
+sync-upstream:
+  stage: sync
+  image: alpine/git
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"' # Manual trigger
+  variables:
+    UPSTREAM_URL: "https://github.com/mattermost/mattermost-mobile.git"
+    UPSTREAM_BRANCH: "main"
+    TARGET_BRANCH: "develop"
+  before_script:
+    - apk add --no-cache curl jq
+    - git config user.email "sync-bot@example.com"
+    - git config user.name "Sync Bot"
+    - git remote set-url origin "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+  script:
+    - |
+      echo "==> Fetching upstream mattermost/mattermost-mobile..."
+      git remote add upstream "$UPSTREAM_URL"
+      git fetch upstream "$UPSTREAM_BRANCH"
+      git fetch origin "$TARGET_BRANCH"
+      git checkout "$TARGET_BRANCH"
+
+      # ──────────────────────────────────────────
+      # 1. Vérifie s'il y a des commits à merger
+      # ──────────────────────────────────────────
+      DIFF_COUNT=$(git rev-list HEAD..upstream/"$UPSTREAM_BRANCH" --count)
+      echo "==> $DIFF_COUNT commit(s) upstream non mergés"
+
+      if [ "$DIFF_COUNT" -eq 0 ]; then
+        echo "==> Rien de nouveau, on s'arrête là."
+        exit 0
+      fi
+
+      # ──────────────────────────────────────────
+      # 2. Vérifie si une MR de sync est déjà ouverte
+      # ──────────────────────────────────────────
+      EXISTING_MR=$(curl -s --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests?state=opened&source_branch=sync/upstream&target_branch=${TARGET_BRANCH}" \
+        | jq 'length')
+
+      if [ "$EXISTING_MR" -gt 0 ]; then
+        echo "==> Une MR de sync est déjà ouverte, on skip."
+        exit 0
+      fi
+
+      # ──────────────────────────────────────────
+      # 3. Crée la branche de sync
+      # ──────────────────────────────────────────
+      SYNC_BRANCH="sync/upstream-$(date +%Y-%m-%d)"
+      git push origin --delete "$SYNC_BRANCH" 2>/dev/null || true
+      git checkout -b "$SYNC_BRANCH"
+
+      # ──────────────────────────────────────────
+      # 4. Merge upstream → détecte les conflits
+      # ──────────────────────────────────────────
+      if git merge "upstream/$UPSTREAM_BRANCH" --no-edit; then
+        echo "==> Merge OK, pas de conflits"
+        MR_TITLE="chore: sync upstream mattermost $(date +%Y-%m-%d) ($DIFF_COUNT commits)"
+      else
+        echo "==> Conflits détectés, push pour review manuelle"
+        git add -A
+        git commit -m "chore: sync upstream mattermost $(date +%Y-%m-%d) [CONFLICTS]"
+        MR_TITLE="chore: sync upstream mattermost $(date +%Y-%m-%d) ⚠️ conflits à résoudre"
+      fi
+
+      # ──────────────────────────────────────────
+      # 5. Push la branche
+      # ──────────────────────────────────────────
+      git push origin "$SYNC_BRANCH"
+
+      # ──────────────────────────────────────────
+      # 6. Crée la MR via l'API GitLab
+      # ──────────────────────────────────────────
+      curl -s -X POST \
+        --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+        --header "Content-Type: application/json" \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests" \
+        --data "{
+          \"source_branch\": \"$SYNC_BRANCH\",
+          \"target_branch\": \"$TARGET_BRANCH\",
+          \"title\": \"$MR_TITLE\",
+          \"remove_source_branch\": true,
+          \"squash\": false
+        }" | jq '.web_url'
+
+      echo "==> MR créée !"
