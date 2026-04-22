@@ -2,11 +2,8 @@
 // See LICENSE.txt for license information.
 
 import {defineConfig} from 'eslint/config';
-import headerPlugin from "eslint-plugin-header";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import stylisticTs from "@stylistic/eslint-plugin-ts";
-
-headerPlugin.rules.header.meta.schema = false;
 
 export default defineConfig([
   {
@@ -22,7 +19,6 @@ export default defineConfig([
       },
     },
     plugins: {
-      header: headerPlugin,
       "@typescript-eslint": tseslint,
       "@stylistic/ts": stylisticTs,
     },
@@ -56,11 +52,6 @@ export default defineConfig([
       "generator-star-spacing": [2, { before: false, after: true }],
       "global-require": 2,
       "guard-for-in": 2,
-      "header/header": [
-          2,
-          "line",
-          " Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.\n See LICENSE.txt for license information."
-      ],
       "id-blacklist": 0,
       "indent": [2, 4, { SwitchCase: 0 }],
       "jsx-quotes": [2, "prefer-single"],
