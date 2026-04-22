@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">kChat</string>
+    <string name="empty_notification_message">Εισήγαγε κάτι</string>
+    <string name="callkChatDescription">Φωνητική κλήση kChat</string>
+    <plurals name="manyCallers">
+        <item quantity="one">, και %s άλλος</item>
+        <item quantity="other">, και %s άλλοι</item>
+    </plurals>
+    <string name="declineCall">Απόρριψη</string>
+    <string name="acceptCall">Αποδοχή</string>
+    <string name="notificationCallFrom">Κλήση από %1$s</string>
+    <string name="notificationChannelName">Ειδοποίηση κλήσης</string>
+    <string name="notificationChannelDescription">Εμφάνιση ειδοποίησης αν λαμβάνετε κλήση</string>
+</resources>
