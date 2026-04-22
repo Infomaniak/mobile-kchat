@@ -29,8 +29,6 @@ jobs:
             echo "environment=beta" >> "$GITHUB_OUTPUT"
             echo "track=internal" >> "$GITHUB_OUTPUT"
           fi
-          echo "Detected environment from tag $TAG: ${{ steps.env.outputs.environment }}"
-
   test:
     runs-on: [self-hosted, macOS, Android]
     needs: determine-environment
