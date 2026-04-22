@@ -105,8 +105,7 @@ sync-upstream:
   stage: .post
   image: alpine/git
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-    - if: '$CI_PIPELINE_SOURCE == "web"' # Manual trigger
+    - if: '$SYNC_UPSTREAM == "true"'
   variables:
     UPSTREAM_URL: "https://github.com/mattermost/mattermost-mobile.git"
     UPSTREAM_BRANCH: "main"
