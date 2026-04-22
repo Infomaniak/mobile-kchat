@@ -96,6 +96,13 @@ function loadTranslation(locale?: string): {[x: string]: string} {
 
                 translations = require('@assets/i18n/nl.json');
                 break;
+            case 'pl':
+                require('@formatjs/intl-pluralrules/locale-data/pl');
+                require('@formatjs/intl-numberformat/locale-data/pl');
+                require('@formatjs/intl-datetimeformat/locale-data/pl');
+
+                translations = require('@assets/i18n/pl.json');
+                break;
             default:
                 require('@formatjs/intl-pluralrules/locale-data/en');
                 require('@formatjs/intl-numberformat/locale-data/en');
