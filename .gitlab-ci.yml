@@ -102,7 +102,7 @@ code_quality:
       codequality: gl-code-quality-report.json
 
 sync-upstream:
-  stage: sync
+  stage: .post
   image: alpine/git
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
