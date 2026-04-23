@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">kChat</string>
+    <string name="empty_notification_message">Zaimportował coś</string>
+    <string name="callkChatDescription">Połączenie głosowe kChat</string>
+    <plurals name="manyCallers">
+        <item quantity="one">, i %s inna</item>
+        <item quantity="few">, i %s inne</item>
+        <item quantity="other">, i %s innych</item>
+    </plurals>
+    <string name="declineCall">Odrzuć</string>
+    <string name="acceptCall">Odbierz</string>
+    <string name="notificationCallFrom">Połączenie od %1$s</string>
+    <string name="notificationChannelName">Powiadomienie o połączeniu</string>
+    <string name="notificationChannelDescription">Wyświetl powiadomienie, gdy odbierasz połączenie</string>
+</resources>
