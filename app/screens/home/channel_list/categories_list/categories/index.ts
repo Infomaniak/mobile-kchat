@@ -24,6 +24,7 @@ const enhanced = withObservables(['isTablet'], ({database, isTablet}: Props) => 
 
     const categoriesData = currentUser.pipe(
         combineLatestWith(onlyUnreads, currentTeamId),
+
         // Only rebuild observeFlattenedCategories when meaningful params change.
         // currentUser emits for any field change (timezone, last_active_at, etc.) — guard against that.
         distinctUntilChanged(([prevUser, prevUnreads, prevTeamId], [currUser, currUnreads, currTeamId]) =>
@@ -42,6 +43,7 @@ const enhanced = withObservables(['isTablet'], ({database, isTablet}: Props) => 
                 teamId,
             );
         }),
+
         // Share a single subscription between flattenedItems and unreadChannelIds
         // to avoid executing the full chain twice.
         shareReplay(1),
