@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">kChat</string>
+    <string name="empty_notification_message">Iets geïmporteerd</string>
+    <string name="callkChatDescription">kChat spraakoproep</string>
+    <plurals name="manyCallers">
+        <item quantity="one">, en nog %s</item>
+        <item quantity="other">, en %s anderen</item>
+    </plurals>
+    <string name="declineCall">Weigeren</string>
+    <string name="acceptCall">Accepteren</string>
+    <string name="notificationCallFrom">Oproep van %1$s</string>
+    <string name="notificationChannelName">Oproepmelding</string>
+    <string name="notificationChannelDescription">Toon een melding als u een oproep ontvangt</string>
+</resources>
