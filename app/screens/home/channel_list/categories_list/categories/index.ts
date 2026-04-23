@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
-import {switchMap, combineLatestWith, map} from 'rxjs/operators';
+import {switchMap, combineLatestWith, map, distinctUntilChanged, shareReplay} from 'rxjs/operators';
 
 import {DEFAULT_LOCALE} from '@i18n';
 import {observeCurrentTeamId, observeOnlyUnreads} from '@queries/servers/system';
@@ -24,6 +24,14 @@ const enhanced = withObservables(['isTablet'], ({database, isTablet}: Props) => 
 
     const categoriesData = currentUser.pipe(
         combineLatestWith(onlyUnreads, currentTeamId),
+        // Only rebuild observeFlattenedCategories when meaningful params change.
+        // currentUser emits for any field change (timezone, last_active_at, etc.) — guard against that.
+        distinctUntilChanged(([prevUser, prevUnreads, prevTeamId], [currUser, currUnreads, currTeamId]) =>
+            prevUser?.id === currUser?.id &&
+            prevUser?.locale === currUser?.locale &&
+            prevUnreads === currUnreads &&
+            prevTeamId === currTeamId,
+        ),
         switchMap(([user, isOnlyUnreads, teamId]) => {
             return observeFlattenedCategories(
                 database,
@@ -34,6 +42,9 @@ const enhanced = withObservables(['isTablet'], ({database, isTablet}: Props) => 
                 teamId,
             );
         }),
+        // Share a single subscription between flattenedItems and unreadChannelIds
+        // to avoid executing the full chain twice.
+        shareReplay(1),
     );
 
     const flattenedItems = categoriesData.pipe(map((data) => data.items));
@@ -43,7 +54,6 @@ const enhanced = withObservables(['isTablet'], ({database, isTablet}: Props) => 
         flattenedItems,
         unreadChannelIds,
         onlyUnreads,
-        currentTeamId,
     };
 });
 

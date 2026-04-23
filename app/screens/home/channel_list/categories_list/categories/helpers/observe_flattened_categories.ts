@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {of as of$, combineLatest, type Observable} from 'rxjs';
-import {switchMap, map, distinctUntilChanged} from 'rxjs/operators';
+import {switchMap, map, distinctUntilChanged, debounceTime} from 'rxjs/operators';
 
 import {Preferences} from '@constants';
 import {DMS_CATEGORY, UNREADS_CATEGORY} from '@constants/categories';
@@ -65,7 +65,7 @@ const observeCategoryData = (
     locale: string,
     isTablet: boolean,
 ): Observable<CategoryData> => {
-    const categoryMyChannels = category.myChannels.observeWithColumns(['last_post_at', 'is_unread']);
+    const categoryMyChannels = category.myChannels.observeWithColumns(['is_unread']);
     const channelsWithMyChannel = observeCategoryChannels(category, categoryMyChannels);
     const currentChannelId = isTablet ? observeCurrentChannelId(database) : of$('');
     const lastUnreadId = isTablet ? observeLastUnreadChannelId(database) : of$(undefined);
@@ -158,7 +158,7 @@ const observeFlattenedUnreads = (
         switchMap(getC),
     ) : of$(undefined);
 
-    const myUnreadChannels = queryMyChannelUnreads(database, currentTeamId).observeWithColumns(['last_post_at', 'is_unread']);
+    const myUnreadChannels = queryMyChannelUnreads(database, currentTeamId).observeWithColumns(['is_unread']);
     const notifyProps = myUnreadChannels.pipe(switchMap((cs) => observeNotifyPropsByChannels(database, cs)));
     const channels = myUnreadChannels.pipe(switchMap((myChannels) => observeChannelsByLastPostAt(database, myChannels)));
     const channelsMap = channels.pipe(switchMap((cs) => of$(makeChannelsMap(cs))));
@@ -218,6 +218,7 @@ const observeFlattenedCategoriesNormal = (
     );
 
     return combineLatest([combineLatest(categoryDataObservables), unreadsOnTop]).pipe(
+        debounceTime(50),
         map(([categoriesData, unreadsOnTopValue]) => {
             // Collect all unread channel IDs and process categories in one pass
             const unreadChannelIds = new Set<string>();
@@ -301,7 +302,10 @@ export const observeFlattenedCategories = (
     }
 
     // Observe categories for the current team
-    const categories = queryCategoriesByTeamIds(database, [currentTeamId]).observeWithColumns(['sort_order', 'collapsed']);
+    // Only watch sort_order here — collapsed is handled per-category inside observeCategoryData.
+    // Watching 'collapsed' here causes switchMap to tear down and rebuild all N category observables
+    // on every single toggle, producing an N-emission re-subscription storm.
+    const categories = queryCategoriesByTeamIds(database, [currentTeamId]).observeWithColumns(['sort_order']);
 
     return categories.pipe(
         switchMap((cats) => observeFlattenedCategoriesNormal(sortCategories(cats), database, currentUserId, locale, isTablet)),
