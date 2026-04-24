@@ -8,6 +8,7 @@ export const AudioPlayerContext = createContext<{
     loadAudio: Function;
     pauseAudio: Function;
     playAudio: Function;
+    stopAudio: Function;
     seekTo: Function;
     storeLocalAudioURI: Function | null;
     playing: string | null;
@@ -15,15 +16,16 @@ export const AudioPlayerContext = createContext<{
     loadAudio: () => null,
     pauseAudio: () => null,
     playAudio: () => null,
+    stopAudio: () => null,
     seekTo: () => null,
     storeLocalAudioURI: null,
     playing: null,
 });
 
 export const AudioPlayerProvider = ({children}: PropsWithChildren) => {
-    const {loadAudio, pauseAudio, playAudio, seekTo, storeLocalAudioURI, playing} = useAudioPlayer();
+    const {loadAudio, pauseAudio, playAudio, stopAudio, seekTo, storeLocalAudioURI, playing} = useAudioPlayer();
     return (
-        <AudioPlayerContext.Provider value={{loadAudio, pauseAudio, playAudio, seekTo, storeLocalAudioURI, playing}}>
+        <AudioPlayerContext.Provider value={{loadAudio, pauseAudio, playAudio, stopAudio, seekTo, storeLocalAudioURI, playing}}>
             {children}
         </AudioPlayerContext.Provider>
     );

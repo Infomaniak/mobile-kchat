@@ -48,20 +48,28 @@ const useAudioPlayer = () => {
 
     const pauseAudio = async () => {
         try {
-            await player?.stopPlayer();
-            player?.removePlayBackListener();
+            await player?.pausePlayer();
         } catch (error) {
             logError(error);
         }
     };
 
     const playAudio = async () => {
-        // try {
-        //     await player?.playAsync();
-        // } catch (error) {
-        //     // eslint-disable-next-line no-console
-        //     console.warn(error);
-        // }
+        try {
+            await player?.resumePlayer();
+        } catch (error) {
+            logError(error);
+        }
+    };
+
+    const stopAudio = async () => {
+        try {
+            await player?.stopPlayer();
+            player?.removePlayBackListener();
+            setPlaying(null);
+        } catch (error) {
+            logError(error);
+        }
     };
 
     const seekTo = () => {
@@ -70,7 +78,7 @@ const useAudioPlayer = () => {
         // }
     };
 
-    return {loadAudio, pauseAudio, playAudio, seekTo, storeLocalAudioURI, playing};
+    return {loadAudio, pauseAudio, playAudio, stopAudio, seekTo, storeLocalAudioURI, playing};
 };
 
 export default useAudioPlayer;
