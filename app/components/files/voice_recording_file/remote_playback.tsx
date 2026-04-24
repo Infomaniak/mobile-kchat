@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Text, TouchableOpacity, View} from 'react-native';
 import {of as of$} from 'rxjs';
@@ -111,11 +111,12 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
     const [timing, setTiming] = useState(mmssss(width));
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState('');
-    const [status, setStatus] = useState<'stopped' | 'playing' | 'buffering'>('stopped');
+    const [status, setStatus] = useState<'stopped' | 'playing' | 'paused'>('stopped');
     const [transcript, setTranscript] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
-    const {loadAudio, pauseAudio, playing} = useAudioPlayerContext();
+    const isPausedRef = useRef(false);
+    const {loadAudio, pauseAudio, playAudio, stopAudio, playing} = useAudioPlayerContext();
     const serverUrl = useServerUrl();
 
     const isPlaying = playing === id && status === 'playing';
@@ -153,13 +154,15 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
         setTiming(mmssss(e.currentPosition));
 
         if (e.currentPosition === e.duration) {
-            pauseAudio();
+            isPausedRef.current = false;
+            stopAudio();
             setStatus('stopped');
             return;
         }
 
-        // Otherwise must be playing
-        setStatus('playing');
+        if (!isPausedRef.current) {
+            setStatus('playing');
+        }
     };
 
     const handleLoadError = () => {
@@ -213,11 +216,18 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
                     <TouchableOpacity
                         style={styles.mic}
                         onPress={preventDoubleTap(async () => {
-                            setStatus('stopped');
                             setError('');
 
                             if (isPlaying) {
+                                isPausedRef.current = true;
                                 pauseAudio();
+                                setStatus('paused');
+                                return;
+                            }
+
+                            if (status === 'paused') {
+                                isPausedRef.current = false;
+                                playAudio();
                                 return;
                             }
 

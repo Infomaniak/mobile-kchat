@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {TouchableOpacity, View} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
@@ -42,29 +42,30 @@ const LocalPlayBack = () => {
     const styles = getStyleSheet(theme);
 
     const [timing, setTiming] = useState('00:00');
-    const [status, setStatus] = useState<'stopped' | 'playing' | 'buffering'>('stopped');
+    const [status, setStatus] = useState<'stopped' | 'playing' | 'paused'>('stopped');
     const [duration, setDuration] = useState<number>(0);
     const [progress, setProgress] = useState<number>(0);
+    const isPausedRef = useRef(false);
 
-    const {loadAudio, pauseAudio, playing} = useAudioPlayerContext();
+    const {loadAudio, pauseAudio, playAudio, stopAudio, playing} = useAudioPlayerContext();
 
     const isPlaying = playing === 'draft' && status === 'playing';
 
     const listener = (e: PlayBackType) => {
-        // Set timing and ms progress for progress bar
-
         setDuration(e.duration);
         setProgress(e.currentPosition);
         setTiming(mmssss(e.currentPosition));
 
         if (e.currentPosition === e.duration) {
-            pauseAudio();
+            isPausedRef.current = false;
+            stopAudio();
             setStatus('stopped');
             return;
         }
 
-        // Otherwise must be playing
-        setStatus('playing');
+        if (!isPausedRef.current) {
+            setStatus('playing');
+        }
     };
 
     return (
@@ -75,8 +76,15 @@ const LocalPlayBack = () => {
                 style={styles.mic}
                 onPress={preventDoubleTap(() => {
                     if (isPlaying) {
+                        isPausedRef.current = true;
                         pauseAudio();
-                        setStatus('stopped');
+                        setStatus('paused');
+                        return;
+                    }
+
+                    if (status === 'paused') {
+                        isPausedRef.current = false;
+                        playAudio();
                         return;
                     }
 
