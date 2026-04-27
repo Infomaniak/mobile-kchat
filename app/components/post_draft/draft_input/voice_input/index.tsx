@@ -4,7 +4,7 @@
 import {useKeepAwake} from '@sayem314/react-native-keep-awake';
 import React, {useCallback, useEffect, useState} from 'react';
 import {TouchableOpacity, View} from 'react-native';
-import AudioRecorderPlayer, {AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption, AudioEncoderAndroidType, AudioSourceAndroidType, OutputFormatAndroidType, type AudioSet} from 'react-native-audio-recorder-player';
+import {createSound, AVEncoderAudioQualityIOSType, AudioEncoderAndroidType, AudioSourceAndroidType, OutputFormatAndroidType, type AudioSet} from 'react-native-nitro-sound';
 
 import CompassIcon from '@components/compass_icon';
 import {MIC_SIZE} from '@constants/view';
@@ -72,12 +72,12 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
     const {storeLocalAudioURI} = useAudioPlayerContext();
     const [url, setUrl] = useState<string>();
     const [timing, setTiming] = useState('00:00');
-    const [recorder, setRecorder] = useState<AudioRecorderPlayer>();
+    const [recorder, setRecorder] = useState<ReturnType<typeof createSound>>();
     const [recordData, setRecordData] = useState<Array<{ metering: number; isNew: boolean }>>([]);
 
     useEffect(() => {
         const record = async () => {
-            const audioRecorderPlayer = new AudioRecorderPlayer();
+            const audioRecorderPlayer = createSound();
 
             const audioSet: AudioSet = {
 
@@ -87,10 +87,10 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
                 AudioSourceAndroid: AudioSourceAndroidType.MIC,
 
                 // iOS
-                AVModeIOS: AVModeIOSOption.measurement,
+                AVModeIOS: 'measurement',
                 AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
                 AVNumberOfChannelsKeyIOS: 2,
-                AVFormatIDKeyIOS: AVEncodingOption.aac,
+                AVFormatIDKeyIOS: 'aac',
             };
 
             await audioRecorderPlayer.setSubscriptionDuration(0.1);

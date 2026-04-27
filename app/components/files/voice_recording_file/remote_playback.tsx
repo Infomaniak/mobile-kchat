@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Text, TouchableOpacity, View} from 'react-native';
 import {of as of$} from 'rxjs';
@@ -12,77 +12,61 @@ import {fetchPostById} from '@actions/remote/post';
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
 import Loading from '@components/loading';
-import TimeElapsed from '@components/post_draft/draft_input/voice_input/time_elapsed';
-import Slider from '@components/slider';
-import {MIC_SIZE} from '@constants/view';
-import {useAudioPlayerContext} from '@context/audio_player';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {observeFilesForPost} from '@queries/servers/file';
-import {mmssss} from '@utils/datetime';
-import {preventDoubleTap} from '@utils/tap';
-import {blendColors, changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
+import {blendColors, makeStyleSheetFromTheme} from '@utils/theme';
+
+import PlaybackControls from './playback_controls';
 
 import type {WithDatabaseArgs} from '@typings/database/database';
 import type PostModel from '@typings/database/models/servers/post';
-import type {PlayBackType} from 'react-native-audio-recorder-player';
 
-const getStyleSheet = makeStyleSheetFromTheme((theme) => {
-    return {
-        mic: {
-            borderRadius: MIC_SIZE / 2,
-            backgroundColor: changeOpacity(theme.buttonBg, 0.12),
-            height: MIC_SIZE,
-            width: MIC_SIZE,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginRight: 2,
-        },
-        playBackContainer: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-evenly',
-            position: 'relative',
-            width: '100%',
-            borderWidth: 1,
-            borderColor: blendColors(theme.centerChannelBg, theme.centerChannelColor, 0.3),
-            borderRadius: 6,
-            padding: 7,
-            marginTop: 5,
-        },
-        error: {
-            color: theme.centerChannelColor,
-            textAlign: 'left',
-            marginTop: 3,
-        },
-        transcriptText: {
-            color: theme.centerChannelColor,
-            textAlign: 'left',
-            overflow: 'hidden',
-            fontSize: 16,
-            lineHeight: 20,
-            paddingTop: 1,
-        },
-        openVoiceMessageButtonText: {
-            fontSize: 14,
-            color: theme.transcriptText,
-        },
-        centeredView: {
-            alignItems: 'flex-start',
-            justifyContent: 'center',
-        },
-        transcriptContainer: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-        openVoiceMessageButton: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingTop: 10,
-        },
-    };
-});
+const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
+    playBackContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        position: 'relative',
+        width: '100%',
+        borderWidth: 1,
+        borderColor: blendColors(theme.centerChannelBg, theme.centerChannelColor, 0.3),
+        borderRadius: 6,
+        padding: 7,
+        marginTop: 5,
+    },
+    error: {
+        color: theme.centerChannelColor,
+        textAlign: 'left',
+        marginTop: 3,
+    },
+    transcriptText: {
+        color: theme.centerChannelColor,
+        textAlign: 'left',
+        overflow: 'hidden',
+        fontSize: 16,
+        lineHeight: 20,
+        paddingTop: 1,
+    },
+    openVoiceMessageButtonText: {
+        fontSize: 14,
+        color: theme.transcriptText,
+    },
+    centeredView: {
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+    },
+    transcriptContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    openVoiceMessageButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingTop: 10,
+    },
+}));
 
 type EnhanceProps = {
     post: PostModel;
@@ -96,11 +80,7 @@ type Props = {
 const enhance = withObservables(['post'], ({database, post}: WithDatabaseArgs & EnhanceProps) => {
     const files = observeFilesForPost(database, post.id).pipe(switchMap((items) => of$(items)));
     const currentPost = post.observe();
-
-    return {
-        files,
-        currentPost,
-    };
+    return {files, currentPost};
 });
 
 const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) => {
@@ -108,18 +88,12 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
     const theme = useTheme();
     const intl = useIntl();
     const styles = getStyleSheet(theme);
-    const [timing, setTiming] = useState(mmssss(width));
-    const [progress, setProgress] = useState(0);
+    const serverUrl = useServerUrl();
+
     const [error, setError] = useState('');
-    const [status, setStatus] = useState<'stopped' | 'playing' | 'paused'>('stopped');
     const [transcript, setTranscript] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
-    const isPausedRef = useRef(false);
-    const {loadAudio, pauseAudio, playAudio, stopAudio, playing} = useAudioPlayerContext();
-    const serverUrl = useServerUrl();
-
-    const isPlaying = playing === id && status === 'playing';
 
     useEffect(() => {
         if (files[0]?.transcript?.text || isLoadingTranscript) {
@@ -131,8 +105,6 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
                 await fetchPostById(serverUrl, currentPost.id);
             } catch (err) {
                 setIsLoadingTranscript(false);
-
-                /* empty */
             }
         };
         handlePosts();
@@ -148,22 +120,6 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
         }, 1000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [files[0]?.transcript?.text]);
-
-    const listener = (e: PlayBackType) => {
-        setProgress(e.currentPosition);
-        setTiming(mmssss(e.currentPosition));
-
-        if (e.currentPosition === e.duration) {
-            isPausedRef.current = false;
-            stopAudio();
-            setStatus('stopped');
-            return;
-        }
-
-        if (!isPausedRef.current) {
-            setStatus('playing');
-        }
-    };
 
     const handleLoadError = () => {
         setError(intl.formatMessage({
@@ -190,7 +146,7 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
                         </Text>
                     </View>
                 }
-                {!isLoadingTranscript && transcript && transcript.length > 0 &&
+                {!isLoadingTranscript && transcript.length > 0 &&
                     <Text style={styles.transcriptText}>{transcript}</Text>
                 }
             </View>
@@ -213,41 +169,14 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
 
             {isOpen && (
                 <View style={styles.playBackContainer}>
-                    <TouchableOpacity
-                        style={styles.mic}
-                        onPress={preventDoubleTap(async () => {
-                            setError('');
-
-                            if (isPlaying) {
-                                isPausedRef.current = true;
-                                pauseAudio();
-                                setStatus('paused');
-                                return;
-                            }
-
-                            if (status === 'paused') {
-                                isPausedRef.current = false;
-                                playAudio();
-                                return;
-                            }
-
-                            loadAudio(id, listener, handleLoadError);
-                        })}
-                    >
-                        <CompassIcon
-                            color={theme.buttonBg}
-                            name={isPlaying ? 'pause' : 'play'}
-                            size={24}
-                        />
-                    </TouchableOpacity>
-                    <Slider
-                        value={(progress && width) ? (progress / width) * 100 : 0}
-                        width='60%'
+                    <PlaybackControls
+                        audioId={id ?? undefined}
+                        totalDuration={width}
+                        onLoadError={handleLoadError}
                     />
-                    <TimeElapsed time={timing}/>
                 </View>
             )}
-            {error && <Text style={styles.error}>{error}</Text>}
+            {error ? <Text style={styles.error}>{error}</Text> : null}
         </View>
     );
 };

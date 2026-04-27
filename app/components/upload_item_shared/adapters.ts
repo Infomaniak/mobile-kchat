@@ -20,6 +20,7 @@ export function fileInfoToUploadItemFile(file: FileInfo): UploadItemFile {
         width: file.width,
         height: file.height,
         mime_type: file.mime_type,
+        is_voice_recording: file.is_voice_recording,
     };
 }
 
