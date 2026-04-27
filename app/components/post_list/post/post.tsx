@@ -72,6 +72,7 @@ type PostProps = {
     highlight?: boolean;
     highlightPinnedOrSaved?: boolean;
     highlightReplyBar: boolean;
+    isChannelMember?: boolean;
     isConsecutivePost?: boolean;
     isCRTEnabled?: boolean;
     isEphemeral: boolean;
@@ -147,6 +148,7 @@ const Post = ({
     highlight,
     highlightPinnedOrSaved = true,
     highlightReplyBar,
+    isChannelMember = true,
     isCRTEnabled,
     isConsecutivePost,
     isEphemeral,
@@ -237,6 +239,10 @@ const Post = ({
     }, [location, isAutoResponder, isSystemPost, isEphemeral, hasBeenDeleted, isPendingOrFailed, serverUrl, post, borPost, blurAndDismissKeyboard]);
 
     const handlePress = useCallback(() => {
+        if (!isChannelMember) {
+            return;
+        }
+
         if (isBoRPost(post)) {
             return;
         }
@@ -248,7 +254,7 @@ const Post = ({
         if (post) {
             setTimeout(handlePostPress, 300);
         }
-    }, [handlePostPress, post]);
+    }, [handlePostPress, post, isChannelMember]);
 
     const handlePostponePress = useCallback(async () => {
         const postId = post.props?.post_id;
@@ -290,7 +296,7 @@ const Post = ({
         }
 
         await blurAndDismissKeyboard();
-        const passProps = {sourceScreen: location, post, showAddReaction, serverUrl};
+        const passProps = {sourceScreen: location, post, showAddReaction, serverUrl, isChannelMember};
         const title = isTablet ? intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}) : '';
 
         openAsBottomSheet({
@@ -300,7 +306,7 @@ const Post = ({
             title,
             props: passProps,
         });
-    }, [post, isSystemPost, canDelete, hasBeenDeleted, isPendingOrFailed, isEphemeral, blurAndDismissKeyboard, closeInputAccessoryView, showInputAccessoryView, location, showAddReaction, serverUrl, isTablet, intl, theme]);
+    }, [post, isSystemPost, canDelete, hasBeenDeleted, isPendingOrFailed, isEphemeral, blurAndDismissKeyboard, closeInputAccessoryView, showInputAccessoryView, location, showAddReaction, serverUrl, isTablet, intl, theme, isChannelMember]);
 
     const [, rerender] = useState(false);
     useEffect(() => {
@@ -552,7 +558,7 @@ const Post = ({
         >
             <TouchableHighlight
                 testID={itemTestID}
-                onPress={handlePress}
+                onPress={isChannelMember ? handlePress : undefined}
                 onLongPress={showPostOptions}
                 delayLongPress={200}
                 underlayColor={changeOpacity(theme.centerChannelColor, 0.1)}

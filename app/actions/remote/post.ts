@@ -13,6 +13,7 @@ import {ActionType, General, Post, ServerErrors} from '@constants';
 import DatabaseManager from '@database/manager';
 import {filterPostsInOrderedArray} from '@helpers/api/post';
 import {getNeededAtMentionedUsernames} from '@helpers/api/user';
+import ClientError from '@client/rest/error';
 import NetworkManager from '@managers/network_manager';
 import {getMyChannel, prepareMissingChannelsForAllTeams, queryAllMyChannel} from '@queries/servers/channel';
 import {queryAllCustomEmojis} from '@queries/servers/custom_emoji';
@@ -805,22 +806,41 @@ export async function fetchMissingChannelsFromPosts(serverUrl: string, posts: Po
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
 
         const channelIds = new Set(await queryAllMyChannel(database).fetchIds());
-        const channelPromises: Array<Promise<Channel>> = [];
-        const userPromises: Array<Promise<ChannelMembership>> = [];
+        const fetchPromises: Array<Promise<{channel: Channel; member?: ChannelMembership}>> = [];
 
         posts.forEach((post) => {
             const id = post.channel_id;
 
             if (!channelIds.has(id)) {
-                channelPromises.push(client.getChannel(id));
-                userPromises.push(client.getMyChannelMember(id));
+                fetchPromises.push(
+                    (async () => {
+                        const channelPromise = client.getChannel(id);
+                        const memberPromise = client.getMyChannelMember(id).catch((error: ClientError) => {
+                            if (error.status_code === 404) {
+                                return undefined;
+                            }
+                            throw error;
+                        });
+                        const channel = await channelPromise;
+                        const member = await memberPromise;
+                        return {channel, member};
+                    })(),
+                );
             }
         });
 
-        const channels = await Promise.all(channelPromises);
-        const channelMemberships = await Promise.all(userPromises);
+        const results = await Promise.all(fetchPromises);
+        const channels: Channel[] = [];
+        const channelMemberships: ChannelMembership[] = [];
 
-        if (!fetchOnly && channels.length && channelMemberships.length) {
+        results.forEach(({channel, member}) => {
+            channels.push(channel);
+            if (member) {
+                channelMemberships.push(member);
+            }
+        });
+
+        if (!fetchOnly && channels.length) {
             const isCRTEnabled = await getIsCRTEnabled(database);
             const modelPromises = prepareMissingChannelsForAllTeams(operator, channels, channelMemberships, isCRTEnabled);
             if (modelPromises.length) {
@@ -1099,7 +1119,7 @@ export async function fetchSavedPosts(serverUrl: string, teamId?: string, channe
             );
         }
 
-        if (channels?.length && channelMemberships?.length) {
+        if (channels?.length) {
             const isCRTEnabled = await getIsCRTEnabled(database);
             const channelPromises = prepareMissingChannelsForAllTeams(operator, channels, channelMemberships, isCRTEnabled);
             if (channelPromises.length) {
@@ -1175,7 +1195,7 @@ export async function fetchPinnedPosts(serverUrl: string, channelId: string) {
             );
         }
 
-        if (channels?.length && channelMemberships?.length) {
+        if (channels?.length) {
             const channelPromises = prepareMissingChannelsForAllTeams(operator, channels, channelMemberships, isCRTEnabled);
             if (channelPromises.length) {
                 promises.push(...channelPromises);

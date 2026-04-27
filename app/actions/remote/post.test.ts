@@ -99,7 +99,7 @@ const mockClient = {
     burnPostNow: jest.fn(),
     getChannel: jest.fn((_channelId: string) => ({id: _channelId, name: 'channel1', creatorId: user1.id, total_msg_count: 100})),
     getChannelMember: jest.fn((_channelId: string, userId: string) => ({id: userId + '-' + _channelId, user_id: userId, channel_id: _channelId, roles: '', msg_count: 100, mention_count: 0})),
-    getMyChannelMember: jest.fn((_channelId: string) => ({id: user1.id + '-' + _channelId, user_id: user1.id, channel_id: _channelId, roles: '', msg_count: 100, mention_count: 0})),
+    getMyChannelMember: jest.fn((_channelId: string) => Promise.resolve({id: user1.id + '-' + _channelId, user_id: user1.id, channel_id: _channelId, roles: '', msg_count: 100, mention_count: 0})),
     markPostAsUnread: jest.fn(),
     patchPost: jest.fn((message: string, postId: string) => ({...post1, id: postId, message})),
     acknowledgePost: jest.fn(() => ({acknowledged_at: acknowledgedTime})),

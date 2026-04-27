@@ -28,6 +28,7 @@ import AppBindingsPostOptions from './options/app_bindings_post_option';
 import AskAi from './options/ask_ai';
 import DeletePostOption from './options/delete_post_option';
 import EditOption from './options/edit_option';
+import JumpToPostOption from './options/jump_to_post_option';
 import MarkAsUnreadOption from './options/mark_unread_option';
 import PinChannelOption from './options/pin_channel_option';
 import ReactionBar from './reaction_bar';
@@ -49,6 +50,7 @@ type PostOptionsProps = {
     canPin: boolean;
     canReply: boolean;
     canViewTranslation: boolean;
+    isChannelMember?: boolean;
     combinedPost?: Post | PostModel;
     isSaved: boolean;
     sourceScreen: AvailableScreens;
@@ -71,6 +73,7 @@ const PostOptions = ({
     sourceScreen, post, thread, bindings, serverUrl,
     usage, limits,
     isBoRPost, showBoRReadReceipts, borReceiptData, currentUser,
+    isChannelMember = true,
 }: PostOptionsProps) => {
     const managedConfig = useManagedConfig<ManagedConfig>();
     const isTablet = useIsTablet();
@@ -102,6 +105,7 @@ const PostOptions = ({
     const snapPoints = useMemo(() => {
         const items: Array<string | number> = [1];
         const optionsCount = [
+            isChannelMember,
             canCopyPermalink, canReply, canCopyText, canDelete, canEdit,
             canMarkAsUnread, canPin, !isSystemPost, shouldRenderAi, shouldRenderFollow, canShowReminder, canTranslate, canViewTranslation,
         ].reduce((acc, v) => {
@@ -119,7 +123,7 @@ const PostOptions = ({
         }
 
         return items;
-    }, [canCopyPermalink, canReply, canCopyText, canDelete, canEdit, canMarkAsUnread, canPin, isSystemPost, shouldRenderAi, shouldRenderFollow, canShowReminder, canTranslate, canViewTranslation, shouldShowBindings, canAddReaction, shouldShowBORReadReceipts]);
+    }, [isChannelMember, canCopyPermalink, canReply, canCopyText, canDelete, canEdit, canMarkAsUnread, canPin, isSystemPost, shouldRenderAi, shouldRenderFollow, canShowReminder, canTranslate, canViewTranslation, shouldShowBindings, canAddReaction, shouldShowBORReadReceipts]);
 
     const renderContent = () => {
         return (
@@ -128,44 +132,50 @@ const PostOptions = ({
                 scrollEnabled={enabled}
                 {...panResponder.panHandlers}
             >
-                {shouldShowBORReadReceipts &&
+                {!isChannelMember &&
+                    <JumpToPostOption
+                        bottomSheetId={Screens.POST_OPTIONS}
+                        post={post}
+                    />
+                }
+                {isChannelMember && shouldShowBORReadReceipts &&
                     <BORReadReceipts
                         totalReceipts={borReceiptData.totalRecipients}
                         readReceipts={borReceiptData.revealedCount}
                     />
                 }
-                {canAddReaction &&
+                {isChannelMember && canAddReaction &&
                     <ReactionBar
                         bottomSheetId={Screens.POST_OPTIONS}
                         postId={post.id}
                     />
                 }
-                {canReply &&
+                {isChannelMember && canReply &&
                     <ReplyOption
                         bottomSheetId={Screens.POST_OPTIONS}
                         post={post}
                     />
                 }
-                {shouldRenderFollow &&
+                {isChannelMember && shouldRenderFollow &&
                     <FollowThreadOption
                         bottomSheetId={Screens.POST_OPTIONS}
                         thread={thread}
                     />
                 }
-                {shouldRenderAi &&
+                {isChannelMember && shouldRenderAi &&
                     <AskAi
                         bottomSheetId={Screens.POST_OPTIONS}
                         post={post}
                     />
                 }
-                {canMarkAsUnread && !isSystemPost &&
+                {isChannelMember && canMarkAsUnread && !isSystemPost &&
                 <MarkAsUnreadOption
                     bottomSheetId={Screens.POST_OPTIONS}
                     post={post}
                     sourceScreen={sourceScreen}
                 />
                 }
-                {canShowReminder &&
+                {isChannelMember && canShowReminder &&
                     <IKReminderOption
                         bottomSheetId={Screens.POST_OPTIONS}
                         post={post}
@@ -173,60 +183,60 @@ const PostOptions = ({
                         limits={limits}
                     />
                 }
-                {canCopyPermalink &&
+                {isChannelMember && canCopyPermalink &&
                 <CopyPermalinkOption
                     bottomSheetId={Screens.POST_OPTIONS}
                     post={post}
                     sourceScreen={sourceScreen}
                 />
                 }
-                {canViewTranslation &&
+                {isChannelMember && canViewTranslation &&
                 <ShowTranslationOption
                     bottomSheetId={Screens.POST_OPTIONS}
                     postId={post.id}
                 />
                 }
-                {canSavePost &&
+                {isChannelMember && canSavePost &&
                 <SaveOption
                     bottomSheetId={Screens.POST_OPTIONS}
                     isSaved={isSaved}
                     postId={post.id}
                 />
                 }
-                {Boolean(canCopyText && post.message) &&
+                {isChannelMember && Boolean(canCopyText && post.message) &&
                 <CopyTextOption
                     bottomSheetId={Screens.POST_OPTIONS}
                     postMessage={post.messageSource || post.message}
                     sourceScreen={sourceScreen}
                 />}
-                {canPin &&
+                {isChannelMember && canPin &&
                 <PinChannelOption
                     bottomSheetId={Screens.POST_OPTIONS}
                     isPostPinned={post.isPinned}
                     postId={post.id}
                 />
                 }
-                {canTranslate &&
+                {isChannelMember && canTranslate &&
                     <IKTranslateOption
                         bottomSheetId={Screens.POST_OPTIONS}
                         post={post}
                     />
                 }
-                {canEdit && post.type !== PostTypes.VOICE_MESSAGE &&
+                {isChannelMember && canEdit && post.type !== PostTypes.VOICE_MESSAGE &&
                 <EditOption
                     bottomSheetId={Screens.POST_OPTIONS}
                     post={post}
                     canDelete={canDelete}
                 />
                 }
-                {canDelete &&
+                {isChannelMember && canDelete &&
                 <DeletePostOption
                     bottomSheetId={Screens.POST_OPTIONS}
                     combinedPost={combinedPost}
                     post={post}
                     currentUser={currentUser}
                 />}
-                {shouldShowBindings &&
+                {isChannelMember && shouldShowBindings &&
                 <AppBindingsPostOptions
                     bottomSheetId={Screens.POST_OPTIONS}
                     post={post}
