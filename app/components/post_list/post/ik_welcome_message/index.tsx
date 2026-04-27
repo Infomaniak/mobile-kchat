@@ -1,4 +1,3 @@
-// eslint-disable-next-line header/header
 import React from 'react';
 import {useIntl} from 'react-intl';
 import {Text, View} from 'react-native';
