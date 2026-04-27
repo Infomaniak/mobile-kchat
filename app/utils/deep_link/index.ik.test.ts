@@ -111,7 +111,7 @@ describe('IK deep link: unknown server handling', () => {
     });
 
     it('should still attempt magic link login for an unregistered server', async () => {
-        jest.mocked(magicLinkLogin).mockResolvedValueOnce({error: false});
+        jest.mocked(magicLinkLogin).mockResolvedValueOnce({error: false, failed: false});
 
         const result = await parseAndHandleDeepLink(
             'https://kchat.infomaniakgroup.com/login/one_time_link?t=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
