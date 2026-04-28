@@ -37,7 +37,8 @@ describe.skip('components/channel_list/categories', () => {
     });
 });
 
-describe('performance metrics', () => {
+// Ik change : skip, we don't use performance metrics
+describe.skip('performance metrics', () => {
     let database: Database;
     const serverUrl = 'http://www.someserverurl.com';
     beforeAll(async () => {
