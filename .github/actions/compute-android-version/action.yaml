@@ -1,0 +1,48 @@
+name: compute-android-version
+description: Computes Android versionCode from Git tag (format X.Y.Z-alpha.N.android or X.Y.Z-beta.N.android)
+
+inputs:
+  tag:
+    description: The Git tag to parse
+    required: true
+    default: ${{ github.ref_name }}
+
+outputs:
+  version-code:
+    description: The computed Android versionCode (format 1_00_046_004)
+    value: ${{ steps.compute.outputs.version-code }}
+  version-name:
+    description: The version name extracted from the tag
+    value: ${{ steps.compute.outputs.version-name }}
+
+runs:
+  using: composite
+  steps:
+    - name: ci/compute-android-version
+      id: compute
+      shell: bash
+      run: |
+        TAG="${{ inputs.tag }}"
+        echo "Parsing tag: $TAG"
+
+        # Extract version parts from tag (e.g., 1.0.46-alpha.1.android or 1.0.46-beta.1.android)
+        if [[ "$TAG" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-(alpha|beta)\.([0-9]+)\.android$ ]]; then
+          MAJOR="${BASH_REMATCH[1]}"
+          MINOR="${BASH_REMATCH[2]}"
+          PATCH="${BASH_REMATCH[3]}"
+          CANDIDATE="${BASH_REMATCH[5]}"
+
+          # Format: 1_00_046_001
+          # Major: 1 digit, Minor: 2 digits zero-padded, Patch: 3 digits zero-padded, Candidate: 3 digits zero-padded
+          VERSION_CODE="${MAJOR}_$(printf '%02d' "$MINOR")_$(printf '%03d' "$PATCH")_$(printf '%03d' "$CANDIDATE")"
+          VERSION_NAME="${MAJOR}.${MINOR}.${PATCH}"
+
+          echo "version-code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+          echo "version-name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "✅ Computed versionCode: $VERSION_CODE"
+          echo "✅ Computed versionName: $VERSION_NAME"
+        else
+          echo "❌ Error: Tag format invalid. Expected: X.Y.Z-alpha.N.android or X.Y.Z-beta.N.android"
+          echo "   Got: $TAG"
+          exit 1
+        fi
