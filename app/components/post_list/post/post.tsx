@@ -239,10 +239,6 @@ const Post = ({
     }, [location, isAutoResponder, isSystemPost, isEphemeral, hasBeenDeleted, isPendingOrFailed, serverUrl, post, borPost, blurAndDismissKeyboard]);
 
     const handlePress = useCallback(() => {
-        if (!isChannelMember) {
-            return;
-        }
-
         if (isBoRPost(post)) {
             return;
         }
@@ -254,7 +250,7 @@ const Post = ({
         if (post) {
             setTimeout(handlePostPress, 300);
         }
-    }, [handlePostPress, post, isChannelMember]);
+    }, [handlePostPress, post]);
 
     const handlePostponePress = useCallback(async () => {
         const postId = post.props?.post_id;
@@ -558,7 +554,7 @@ const Post = ({
         >
             <TouchableHighlight
                 testID={itemTestID}
-                onPress={isChannelMember ? handlePress : undefined}
+                onPress={handlePress}
                 onLongPress={showPostOptions}
                 delayLongPress={200}
                 underlayColor={changeOpacity(theme.centerChannelColor, 0.1)}

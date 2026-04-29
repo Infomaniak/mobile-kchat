@@ -28,7 +28,6 @@ import AppBindingsPostOptions from './options/app_bindings_post_option';
 import AskAi from './options/ask_ai';
 import DeletePostOption from './options/delete_post_option';
 import EditOption from './options/edit_option';
-import JumpToPostOption from './options/jump_to_post_option';
 import MarkAsUnreadOption from './options/mark_unread_option';
 import PinChannelOption from './options/pin_channel_option';
 import ReactionBar from './reaction_bar';
@@ -105,7 +104,6 @@ const PostOptions = ({
     const snapPoints = useMemo(() => {
         const items: Array<string | number> = [1];
         const optionsCount = [
-            isChannelMember,
             canCopyPermalink, canReply, canCopyText, canDelete, canEdit,
             canMarkAsUnread, canPin, !isSystemPost, shouldRenderAi, shouldRenderFollow, canShowReminder, canTranslate, canViewTranslation,
         ].reduce((acc, v) => {
@@ -123,7 +121,7 @@ const PostOptions = ({
         }
 
         return items;
-    }, [isChannelMember, canCopyPermalink, canReply, canCopyText, canDelete, canEdit, canMarkAsUnread, canPin, isSystemPost, shouldRenderAi, shouldRenderFollow, canShowReminder, canTranslate, canViewTranslation, shouldShowBindings, canAddReaction, shouldShowBORReadReceipts]);
+    }, [canCopyPermalink, canReply, canCopyText, canDelete, canEdit, canMarkAsUnread, canPin, isSystemPost, shouldRenderAi, shouldRenderFollow, canShowReminder, canTranslate, canViewTranslation, shouldShowBindings, canAddReaction, shouldShowBORReadReceipts]);
 
     const renderContent = () => {
         return (
@@ -132,12 +130,6 @@ const PostOptions = ({
                 scrollEnabled={enabled}
                 {...panResponder.panHandlers}
             >
-                {!isChannelMember &&
-                    <JumpToPostOption
-                        bottomSheetId={Screens.POST_OPTIONS}
-                        post={post}
-                    />
-                }
                 {isChannelMember && shouldShowBORReadReceipts &&
                     <BORReadReceipts
                         totalReceipts={borReceiptData.totalRecipients}
@@ -183,7 +175,7 @@ const PostOptions = ({
                         limits={limits}
                     />
                 }
-                {isChannelMember && canCopyPermalink &&
+                {canCopyPermalink &&
                 <CopyPermalinkOption
                     bottomSheetId={Screens.POST_OPTIONS}
                     post={post}

@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="84" failures="1" errors="0" time="22.501">
+  <testsuite name="app/actions/remote/post.test.ts" errors="0" failures="1" skipped="82" timestamp="2026-04-27T14:00:13" time="21.633" tests="84">
+    <testcase classname="create, update &amp; delete posts" name="createPost - handle database not found" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="createPost - handle client error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="createPost - handle existing failed post" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="createPost - fail create" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="createPost - fail on deleted root post server error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="createPost - fail on town square read only server error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="createPost - fail on plugin dismissed post server error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="createPost - root" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="createPost - without reactions" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="createPost - reply" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="retryFailedPost - handle database not found" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="retryFailedPost - handle client error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="retryFailedPost - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="retryFailedPost - handle error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="retryFailedPost - fail on deleted root post server error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="retryFailedPost - fail on town square read only server error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="retryFailedPost - fail on plugin dismissed post server error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="togglePinPost - handle database not found" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="togglePinPost - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="deletePost - handle error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="deletePost - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="burnPostNow - handle error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="burnPostNow - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="burnPostNow - returns error for non-BoR posts" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="deletePost - system post" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="markPostAsUnread - handle error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="markPostAsUnread - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="markPostAsUnread - no current user" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="editPost - handle error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="editPost - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="editPost - delete files" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="editPost - should call fetchChannelStats when files are removed" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="editPost - should call fetchChannelStats when files are added" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="editPost - should NOT call fetchChannelStats when no files change" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="editPost - should call fetchChannelStats when file IDs change" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="acknowledgePost - handle error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="acknowledgePost - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="unacknowledgePost - handle error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="create, update &amp; delete posts" name="unacknowledgePost - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsForChannel - handle database not found" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsForChannel - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsForChannel - base case with since" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsForChannel - no posts with since" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsForChannel - request error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsForUnreadChannels - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPosts - handle database not found" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPosts - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPosts - no CRT" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPosts - no authors needed" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsBefore - handle database not found" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsBefore - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsBefore - no CRT" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsBefore - no authors needed" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsBefore - no posts" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsSince - handle database not found" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsSince - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostAuthors - handle database not found" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostAuthors - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostAuthors - no users to fetch" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostThread - handle database not found" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostThread - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostThread - no CRT" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostThread - no authors needed" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostThread - no posts" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsAround - handle database not found" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsAround - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsAround - no CRT" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostsAround - no authors needed" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchMissingChannelsFromPosts - handle database not found" time="0.065">
+    </testcase>
+    <testcase classname="get posts" name="fetchMissingChannelsFromPosts - base case" time="0.003">
+      <failure>Error: expect(received).toBeUndefined()
+
+Received: [TypeError: client.getMyChannelMember(...).catch is not a function]
+    at Object.toBeUndefined (/Users/aureliens/dev/mobile/app/actions/remote/post.test.ts:1090:30)
+    at Generator.next (&lt;anonymous&gt;)
+    at asyncGeneratorStep (/Users/aureliens/dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+    at _next (/Users/aureliens/dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+    at tryCallOne (/Users/aureliens/dev/mobile/node_modules/promise/lib/core.js:37:12)
+    at /Users/aureliens/dev/mobile/node_modules/promise/lib/core.js:123:15
+    at flush (/Users/aureliens/dev/mobile/node_modules/asap/raw.js:50:29)
+    at processTicksAndRejections (node:internal/process/task_queues:77:11)</failure>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostById - handle database not found" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostById - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostById - no CRT" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostById - no authors needed" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPostById - fetch only" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchSavedPosts - handle database not found" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchSavedPosts - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPinnedPosts - handle database not found" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="get posts" name="fetchPinnedPosts - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="revealBoRPost" name="revealBoRPost - handle database not found" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="revealBoRPost" name="revealBoRPost - handle client error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="revealBoRPost" name="revealBoRPost - handle error" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="revealBoRPost" name="revealBoRPost - base case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="revealBoRPost" name="revealBoRPost - post not found" time="0">
+      <skipped/>
+    </testcase>
+  </testsuite>
+</testsuites>
