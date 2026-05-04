@@ -141,110 +141,114 @@ const PostOptions = ({
                 scrollEnabled={enabled}
                 {...panResponder.panHandlers}
             >
-                {isChannelMember && shouldShowBORReadReceipts &&
-                    <BORReadReceipts
-                        totalReceipts={borReceiptData.totalRecipients}
-                        readReceipts={borReceiptData.revealedCount}
-                    />
-                }
-                {isChannelMember && canAddReaction &&
-                    <ReactionBar
-                        bottomSheetId={Screens.POST_OPTIONS}
-                        postId={post.id}
-                    />
-                }
-                {isChannelMember && canReply &&
-                    <ReplyOption
-                        bottomSheetId={Screens.POST_OPTIONS}
-                        post={post}
-                    />
-                }
-                {isChannelMember && shouldRenderFollow &&
-                    <FollowThreadOption
-                        bottomSheetId={Screens.POST_OPTIONS}
-                        thread={thread}
-                    />
-                }
-                {isChannelMember && shouldRenderAi &&
-                    <AskAi
-                        bottomSheetId={Screens.POST_OPTIONS}
-                        post={post}
-                    />
-                }
-                {isChannelMember && canMarkAsUnread && !isSystemPost &&
-                <MarkAsUnreadOption
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    post={post}
-                    sourceScreen={sourceScreen}
-                />
-                }
-                {isChannelMember && canShowReminder &&
-                    <IKReminderOption
-                        bottomSheetId={Screens.POST_OPTIONS}
-                        post={post}
-                        usage={usage}
-                        limits={limits}
-                    />
-                }
+                {isChannelMember && (
+                    <>
+                        {shouldShowBORReadReceipts &&
+                            <BORReadReceipts
+                                totalReceipts={borReceiptData.totalRecipients}
+                                readReceipts={borReceiptData.revealedCount}
+                            />
+                        }
+                        {canAddReaction &&
+                            <ReactionBar
+                                bottomSheetId={Screens.POST_OPTIONS}
+                                postId={post.id}
+                            />
+                        }
+                        {canReply &&
+                            <ReplyOption
+                                bottomSheetId={Screens.POST_OPTIONS}
+                                post={post}
+                            />
+                        }
+                        {shouldRenderFollow &&
+                            <FollowThreadOption
+                                bottomSheetId={Screens.POST_OPTIONS}
+                                thread={thread}
+                            />
+                        }
+                        {shouldRenderAi &&
+                            <AskAi
+                                bottomSheetId={Screens.POST_OPTIONS}
+                                post={post}
+                            />
+                        }
+                        {canMarkAsUnread && !isSystemPost &&
+                        <MarkAsUnreadOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            post={post}
+                            sourceScreen={sourceScreen}
+                        />
+                        }
+                        {canShowReminder &&
+                            <IKReminderOption
+                                bottomSheetId={Screens.POST_OPTIONS}
+                                post={post}
+                                usage={usage}
+                                limits={limits}
+                            />
+                        }
+                        {canViewTranslation &&
+                        <ShowTranslationOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            postId={post.id}
+                        />
+                        }
+                        {canSavePost &&
+                        <SaveOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            isSaved={isSaved}
+                            postId={post.id}
+                        />
+                        }
+                        {Boolean(canCopyText && post.message) &&
+                        <CopyTextOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            postMessage={post.messageSource || post.message}
+                            sourceScreen={sourceScreen}
+                        />}
+                        {canPin &&
+                        <PinChannelOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            isPostPinned={post.isPinned}
+                            postId={post.id}
+                        />
+                        }
+                        {canTranslate &&
+                            <IKTranslateOption
+                                bottomSheetId={Screens.POST_OPTIONS}
+                                post={post}
+                            />
+                        }
+                        {canEdit && post.type !== PostTypes.VOICE_MESSAGE &&
+                        <EditOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            post={post}
+                            canDelete={canDelete}
+                        />
+                        }
+                        {canDelete &&
+                        <DeletePostOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            combinedPost={combinedPost}
+                            post={post}
+                            currentUser={currentUser}
+                        />}
+                        {shouldShowBindings &&
+                        <AppBindingsPostOptions
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            post={post}
+                            serverUrl={serverUrl}
+                            bindings={bindings}
+                        />
+                        }
+                    </>
+                )}
                 {canCopyPermalink &&
                 <CopyPermalinkOption
                     bottomSheetId={Screens.POST_OPTIONS}
                     post={post}
                     sourceScreen={sourceScreen}
-                />
-                }
-                {isChannelMember && canViewTranslation &&
-                <ShowTranslationOption
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    postId={post.id}
-                />
-                }
-                {isChannelMember && canSavePost &&
-                <SaveOption
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    isSaved={isSaved}
-                    postId={post.id}
-                />
-                }
-                {isChannelMember && Boolean(canCopyText && post.message) &&
-                <CopyTextOption
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    postMessage={post.messageSource || post.message}
-                    sourceScreen={sourceScreen}
-                />}
-                {isChannelMember && canPin &&
-                <PinChannelOption
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    isPostPinned={post.isPinned}
-                    postId={post.id}
-                />
-                }
-                {isChannelMember && canTranslate &&
-                    <IKTranslateOption
-                        bottomSheetId={Screens.POST_OPTIONS}
-                        post={post}
-                    />
-                }
-                {isChannelMember && canEdit && post.type !== PostTypes.VOICE_MESSAGE &&
-                <EditOption
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    post={post}
-                    canDelete={canDelete}
-                />
-                }
-                {isChannelMember && canDelete &&
-                <DeletePostOption
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    combinedPost={combinedPost}
-                    post={post}
-                    currentUser={currentUser}
-                />}
-                {isChannelMember && shouldShowBindings &&
-                <AppBindingsPostOptions
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    post={post}
-                    serverUrl={serverUrl}
-                    bindings={bindings}
                 />
                 }
             </Scroll>
