@@ -104,18 +104,28 @@ const PostOptions = ({
 
     const snapPoints = useMemo(() => {
         const items: Array<string | number> = [1];
-        const optionsCount = [
-            canCopyPermalink, isChannelMember && canReply, isChannelMember && canCopyText, isChannelMember && canDelete, isChannelMember && canEdit,
-            isChannelMember && canMarkAsUnread, isChannelMember && canPin, isChannelMember && !isSystemPost, isChannelMember && shouldRenderAi, isChannelMember && shouldRenderFollow, isChannelMember && canShowReminder, isChannelMember && canTranslate, isChannelMember && canViewTranslation,
-        ].reduce((acc, v) => {
+        const commonOptions = [canCopyPermalink];
+        const memberOptions = [
+            canReply, canCopyText, canDelete, canEdit,
+            canMarkAsUnread, canPin, !isSystemPost, shouldRenderAi, shouldRenderFollow, canShowReminder, canTranslate, canViewTranslation,
+        ];
+
+        const allOptions = [...commonOptions, ...(isChannelMember ? memberOptions : [])];
+        const optionsCount = allOptions.reduce((acc, v) => {
             return v ? acc + 1 : acc;
         }, 0) + (isChannelMember && shouldShowBindings ? 0.5 : 0);
 
-        items.push(
-            bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT) +
-            (isChannelMember && canAddReaction ? REACTION_PICKER_HEIGHT + REACTION_PICKER_MARGIN : 0) +
-            (isChannelMember && shouldShowBORReadReceipts ? BOR_READ_RECEIPTS_HEIGHT : 0),
-        );
+        let extraHeight = 0;
+        if (isChannelMember) {
+            if (canAddReaction) {
+                extraHeight += REACTION_PICKER_HEIGHT + REACTION_PICKER_MARGIN;
+            }
+            if (shouldShowBORReadReceipts) {
+                extraHeight += BOR_READ_RECEIPTS_HEIGHT;
+            }
+        }
+
+        items.push(bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT) + extraHeight);
 
         if (isChannelMember && shouldShowBindings) {
             items.push('80%');

@@ -17,8 +17,8 @@ export const DEFAULT_LIMIT_AFTER = 30;
 export const PER_PAGE_DEFAULT = 60;
 
 // Prod
-export const BASE_SERVER_URL = 'https://infomaniak.kchat.staging-179247.dev.infomaniak.ch';
-export const BASE_LOGIN_URL = 'https://login.staging-179247.dev.infomaniak.ch';
+export const BASE_SERVER_URL = 'https://kchat.infomaniak.com';
+export const BASE_LOGIN_URL = 'https://login.infomaniak.com';
 
 // Preprod
 // export const BASE_SERVER_URL = 'https://kchat.preprod.dev.infomaniak.ch';
