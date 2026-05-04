@@ -2,8 +2,8 @@
 // See LICENSE.txt for license information.
 
 import {markTeamThreadsAsRead, markThreadAsViewed, processReceivedThreads, switchToThread, updateTeamThreadsSync, updateThread} from '@actions/local/thread';
-import {fetchPostThread} from '@actions/remote/post';
 import {joinChannelIfNeeded} from '@actions/remote/channel';
+import {fetchPostThread} from '@actions/remote/post';
 import {General} from '@constants';
 import DatabaseManager from '@database/manager';
 import {removeDuplicatesModels} from '@helpers/database';
@@ -62,8 +62,8 @@ export const fetchAndSwitchToThread = async (serverUrl: string, rootId: string, 
     // Mark thread as read
     const isCRTEnabled = await getIsCRTEnabled(database);
     if (isCRTEnabled) {
-        const post = await getPostById(database, rootId);
-        if (post) {
+        const postForThread = await getPostById(database, rootId);
+        if (postForThread) {
             const thread = await getThreadById(database, rootId);
             if (thread?.isFollowing) {
                 markThreadAsViewed(serverUrl, thread.id);
@@ -75,14 +75,14 @@ export const fetchAndSwitchToThread = async (serverUrl: string, rootId: string, 
 
     if (await AppsManager.isAppsEnabled(serverUrl)) {
         // Getting the post again in case we didn't had it at the beginning
-        const post = await getPostById(database, rootId);
+        const postForBindings = await getPostById(database, rootId);
         const currentChannelId = await getCurrentChannelId(database);
 
-        if (post) {
-            if (currentChannelId === post?.channelId) {
+        if (postForBindings) {
+            if (currentChannelId === postForBindings?.channelId) {
                 AppsManager.copyMainBindingsToThread(serverUrl, currentChannelId);
             } else {
-                AppsManager.fetchBindings(serverUrl, post.channelId, true, groupLabel);
+                AppsManager.fetchBindings(serverUrl, postForBindings.channelId, true, groupLabel);
             }
         }
     }

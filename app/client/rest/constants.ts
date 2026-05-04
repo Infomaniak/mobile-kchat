@@ -19,6 +19,7 @@ export const PER_PAGE_DEFAULT = 60;
 // Prod
 export const BASE_SERVER_URL = 'https://infomaniak.kchat.staging-179247.dev.infomaniak.ch';
 export const BASE_LOGIN_URL = 'https://login.staging-179247.dev.infomaniak.ch';
+
 // Preprod
 // export const BASE_SERVER_URL = 'https://kchat.preprod.dev.infomaniak.ch';
 // export const BASE_LOGIN_URL = 'https://login.preprod.dev.infomaniak.ch';

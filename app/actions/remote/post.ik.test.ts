@@ -15,7 +15,6 @@ import {fetchMissingChannelsFromPosts} from './post';
 jest.mock('@managers/network_manager');
 
 const serverUrl = 'ik-search-test.com';
-let operator: any;
 
 const user1 = TestHelper.fakeUser();
 const channel1 = TestHelper.fakeChannel({id: 'channel1'});
@@ -43,7 +42,6 @@ beforeAll(() => {
 
 beforeEach(async () => {
     await DatabaseManager.init([serverUrl]);
-    operator = DatabaseManager.serverDatabases[serverUrl]!.operator;
     jest.clearAllMocks();
 });
 
@@ -54,7 +52,8 @@ afterEach(async () => {
 describe('IK: Search in public channels without membership', () => {
     it('fetchMissingChannelsFromPosts - handles 404 on getMyChannelMember gracefully', async () => {
         // Arrange: API retourne 404 quand l'utilisateur n'est pas membre
-        mockClient.getMyChannelMember.mockRejectedValueOnce({status_code: 404, message: 'not found'});
+        mockClient.getMyChannelMember.
+            mockRejectedValueOnce({status_code: 404, message: 'not found'});
 
         // Act
         const result = await fetchMissingChannelsFromPosts(serverUrl, [post1]);
@@ -70,7 +69,8 @@ describe('IK: Search in public channels without membership', () => {
 
     it('fetchMissingChannelsFromPosts - rethrows non-404 errors', async () => {
         // Arrange: Erreur reseau (pas 404)
-        mockClient.getMyChannelMember.mockRejectedValueOnce(new Error('network error'));
+        mockClient.getMyChannelMember.
+            mockRejectedValueOnce(new Error('network error'));
 
         // Act
         const result = await fetchMissingChannelsFromPosts(serverUrl, [post1]);
@@ -81,16 +81,16 @@ describe('IK: Search in public channels without membership', () => {
 
     it('fetchMissingChannelsFromPosts - handles mixed membership results', async () => {
         // Arrange: Membre du canal 1, pas membre du canal 2
-        mockClient.getMyChannelMember
-            .mockResolvedValueOnce({
+        mockClient.getMyChannelMember.
+            mockResolvedValueOnce({
                 id: `${user1.id}-${channel1.id}`,
                 user_id: user1.id,
                 channel_id: channel1.id,
                 roles: '',
                 msg_count: 100,
                 mention_count: 0,
-            })
-            .mockRejectedValueOnce({status_code: 404, message: 'not found'});
+            }).
+            mockRejectedValueOnce({status_code: 404, message: 'not found'});
 
         // Act
         const result = await fetchMissingChannelsFromPosts(serverUrl, [post1, post2]);
@@ -104,9 +104,9 @@ describe('IK: Search in public channels without membership', () => {
 
     it('fetchMissingChannelsFromPosts - handles multiple 404s', async () => {
         // Arrange: Non-membre de plusieurs canaux
-        mockClient.getMyChannelMember
-            .mockRejectedValueOnce({status_code: 404, message: 'not found'})
-            .mockRejectedValueOnce({status_code: 404, message: 'not found'});
+        mockClient.getMyChannelMember.
+            mockRejectedValueOnce({status_code: 404, message: 'not found'}).
+            mockRejectedValueOnce({status_code: 404, message: 'not found'});
 
         // Act
         const result = await fetchMissingChannelsFromPosts(serverUrl, [post1, post2]);

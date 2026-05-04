@@ -13,7 +13,6 @@ import {ActionType, General, Post, ServerErrors} from '@constants';
 import DatabaseManager from '@database/manager';
 import {filterPostsInOrderedArray} from '@helpers/api/post';
 import {getNeededAtMentionedUsernames} from '@helpers/api/user';
-import ClientError from '@client/rest/error';
 import NetworkManager from '@managers/network_manager';
 import {getMyChannel, prepareMissingChannelsForAllTeams, queryAllMyChannel} from '@queries/servers/channel';
 import {queryAllCustomEmojis} from '@queries/servers/custom_emoji';
@@ -37,6 +36,7 @@ import {processChannelPostsByTeam} from './post.auxiliary';
 import {forceLogoutIfNecessary} from './session';
 
 import type {Client} from '@client/rest';
+import type ClientError from '@client/rest/error';
 import type Model from '@nozbe/watermelondb/Model';
 import type PostModel from '@typings/database/models/servers/post';
 
@@ -808,24 +808,24 @@ export async function fetchMissingChannelsFromPosts(serverUrl: string, posts: Po
         const channelIds = new Set(await queryAllMyChannel(database).fetchIds());
         const fetchPromises: Array<Promise<{channel: Channel; member?: ChannelMembership}>> = [];
 
+        const getChannelAndMember = async (id: string): Promise<{channel: Channel; member?: ChannelMembership}> => {
+            const channelPromise = client.getChannel(id);
+            const memberPromise = client.getMyChannelMember(id).catch((error: ClientError) => {
+                if (error.status_code === 404) {
+                    return undefined;
+                }
+                throw error;
+            });
+            const channel = await channelPromise;
+            const member = await memberPromise;
+            return {channel, member};
+        };
+
         posts.forEach((post) => {
             const id = post.channel_id;
 
             if (!channelIds.has(id)) {
-                fetchPromises.push(
-                    (async () => {
-                        const channelPromise = client.getChannel(id);
-                        const memberPromise = client.getMyChannelMember(id).catch((error: ClientError) => {
-                            if (error.status_code === 404) {
-                                return undefined;
-                            }
-                            throw error;
-                        });
-                        const channel = await channelPromise;
-                        const member = await memberPromise;
-                        return {channel, member};
-                    })(),
-                );
+                fetchPromises.push(getChannelAndMember(id));
             }
         });
 

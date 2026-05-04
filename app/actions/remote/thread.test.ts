@@ -229,7 +229,8 @@ describe('get threads', () => {
         const result = await fetchAndSwitchToThread(serverUrl, thread1.id);
         expect(result).toBeDefined();
         expect(result.error).toBeUndefined();
-        // Ne doit pas crasher mme si l'utilisateur n'est pas membre
+
+        // Should not crash even when user is not a member
     });
 });
 
