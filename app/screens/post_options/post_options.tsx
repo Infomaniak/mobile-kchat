@@ -88,8 +88,9 @@ const PostOptions = ({
     const isSystemPost = isSystemMessage(post);
 
     const canCopyBoRPostPermalink = isBoRPost ? post.userId === currentUser?.id : true;
-    const canCopyPermalink = !isSystemPost && managedConfig?.copyAndPasteProtection !== 'true' && canCopyBoRPostPermalink;
-    const canCopyText = canCopyPermalink && post.message && !isBoRPost;
+    const canShowPermalink = !isSystemPost && managedConfig?.copyAndPasteProtection !== 'true' && canCopyBoRPostPermalink;
+    const canCopyPermalink = canShowPermalink;
+    const canCopyText = canShowPermalink && post.message && !isBoRPost;
 
     const canSavePost = !isSystemPost && (!isUnrevealedBoRPost(post) || isOwnBoRPost(post, currentUser?.id));
 
@@ -104,24 +105,24 @@ const PostOptions = ({
     const snapPoints = useMemo(() => {
         const items: Array<string | number> = [1];
         const optionsCount = [
-            canCopyPermalink, canReply, canCopyText, canDelete, canEdit,
-            canMarkAsUnread, canPin, !isSystemPost, shouldRenderAi, shouldRenderFollow, canShowReminder, canTranslate, canViewTranslation,
+            canCopyPermalink, isChannelMember && canReply, isChannelMember && canCopyText, isChannelMember && canDelete, isChannelMember && canEdit,
+            isChannelMember && canMarkAsUnread, isChannelMember && canPin, isChannelMember && !isSystemPost, isChannelMember && shouldRenderAi, isChannelMember && shouldRenderFollow, isChannelMember && canShowReminder, isChannelMember && canTranslate, isChannelMember && canViewTranslation,
         ].reduce((acc, v) => {
             return v ? acc + 1 : acc;
-        }, 0) + (shouldShowBindings ? 0.5 : 0);
+        }, 0) + (isChannelMember && shouldShowBindings ? 0.5 : 0);
 
         items.push(
             bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT) +
-            (canAddReaction ? REACTION_PICKER_HEIGHT + REACTION_PICKER_MARGIN : 0) +
-            (shouldShowBORReadReceipts ? BOR_READ_RECEIPTS_HEIGHT : 0),
+            (isChannelMember && canAddReaction ? REACTION_PICKER_HEIGHT + REACTION_PICKER_MARGIN : 0) +
+            (isChannelMember && shouldShowBORReadReceipts ? BOR_READ_RECEIPTS_HEIGHT : 0),
         );
 
-        if (shouldShowBindings) {
+        if (isChannelMember && shouldShowBindings) {
             items.push('80%');
         }
 
         return items;
-    }, [canCopyPermalink, canReply, canCopyText, canDelete, canEdit, canMarkAsUnread, canPin, isSystemPost, shouldRenderAi, shouldRenderFollow, canShowReminder, canTranslate, canViewTranslation, shouldShowBindings, canAddReaction, shouldShowBORReadReceipts]);
+    }, [canCopyPermalink, isChannelMember, canReply, canCopyText, canDelete, canEdit, canMarkAsUnread, canPin, isSystemPost, shouldRenderAi, shouldRenderFollow, canShowReminder, canTranslate, canViewTranslation, shouldShowBindings, canAddReaction, shouldShowBORReadReceipts]);
 
     const renderContent = () => {
         return (

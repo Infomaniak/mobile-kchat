@@ -4,7 +4,7 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {switchMap, of as of$} from 'rxjs';
 
-import {observeChannel} from '@queries/servers/channel';
+import {observeChannel, observeMyChannel} from '@queries/servers/channel';
 import {observeTeam} from '@queries/servers/team';
 
 import ChannelInfo from './channel_info';
@@ -14,6 +14,7 @@ import type PostModel from '@typings/database/models/servers/post';
 
 const enhance = withObservables(['post'], ({post, database}: {post: PostModel} & WithDatabaseArgs) => {
     const channel = observeChannel(database, post.channelId);
+    const myChannel = observeMyChannel(database, post.channelId);
 
     return {
         channelId: channel.pipe(
@@ -25,6 +26,9 @@ const enhance = withObservables(['post'], ({post, database}: {post: PostModel} &
         teamName: channel.pipe(
             switchMap((chan) => (chan && chan.teamId ? observeTeam(database, chan.teamId) : of$(null))),
             switchMap((team) => of$(team?.displayName || null)),
+        ),
+        isChannelMember: myChannel.pipe(
+            switchMap((mc) => of$(mc !== undefined)),
         ),
     };
 });

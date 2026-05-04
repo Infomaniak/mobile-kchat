@@ -48,10 +48,11 @@ type Props = {
     channelId: ChannelModel['id'];
     channelName: ChannelModel['displayName'];
     teamName: TeamModel['displayName'];
+    isChannelMember?: boolean;
     testID?: string;
 }
 
-function ChannelInfo({channelId, channelName, teamName, testID}: Props) {
+function ChannelInfo({channelId, channelName, teamName, isChannelMember, testID}: Props) {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const serverUrl = useServerUrl();
@@ -67,10 +68,10 @@ function ChannelInfo({channelId, channelName, teamName, testID}: Props) {
     ), [isPressed, styles]);
 
     const onChannelNamePressed = useCallback(() => {
-        if (channelId) {
+        if (channelId && isChannelMember) {
             switchToChannelById(serverUrl, channelId);
         }
-    }, [serverUrl, channelId]);
+    }, [serverUrl, channelId, isChannelMember]);
 
     const togglePressed = useCallback(() => {
         setIsPressed((prevState) => !prevState);
