@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="84" failures="1" errors="0" time="22.501">
-  <testsuite name="app/actions/remote/post.test.ts" errors="0" failures="1" skipped="82" timestamp="2026-04-27T14:00:13" time="21.633" tests="84">
+<testsuites name="jest tests" tests="84" failures="0" errors="0" time="2.885">
+  <testsuite name="app/actions/remote/post.test.ts" errors="0" failures="0" skipped="82" timestamp="2026-05-04T07:07:54" time="2.683" tests="84">
     <testcase classname="create, update &amp; delete posts" name="createPost - handle database not found" time="0">
       <skipped/>
     </testcase>
@@ -205,20 +205,9 @@
     <testcase classname="get posts" name="fetchPostsAround - no authors needed" time="0">
       <skipped/>
     </testcase>
-    <testcase classname="get posts" name="fetchMissingChannelsFromPosts - handle database not found" time="0.065">
+    <testcase classname="get posts" name="fetchMissingChannelsFromPosts - handle database not found" time="0.03">
     </testcase>
     <testcase classname="get posts" name="fetchMissingChannelsFromPosts - base case" time="0.003">
-      <failure>Error: expect(received).toBeUndefined()
-
-Received: [TypeError: client.getMyChannelMember(...).catch is not a function]
-    at Object.toBeUndefined (/Users/aureliens/dev/mobile/app/actions/remote/post.test.ts:1090:30)
-    at Generator.next (&lt;anonymous&gt;)
-    at asyncGeneratorStep (/Users/aureliens/dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
-    at _next (/Users/aureliens/dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
-    at tryCallOne (/Users/aureliens/dev/mobile/node_modules/promise/lib/core.js:37:12)
-    at /Users/aureliens/dev/mobile/node_modules/promise/lib/core.js:123:15
-    at flush (/Users/aureliens/dev/mobile/node_modules/asap/raw.js:50:29)
-    at processTicksAndRejections (node:internal/process/task_queues:77:11)</failure>
     </testcase>
     <testcase classname="get posts" name="fetchPostById - handle database not found" time="0">
       <skipped/>

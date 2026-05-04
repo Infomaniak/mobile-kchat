@@ -3,12 +3,14 @@
 
 import {markTeamThreadsAsRead, markThreadAsViewed, processReceivedThreads, switchToThread, updateTeamThreadsSync, updateThread} from '@actions/local/thread';
 import {fetchPostThread} from '@actions/remote/post';
+import {joinChannelIfNeeded} from '@actions/remote/channel';
 import {General} from '@constants';
 import DatabaseManager from '@database/manager';
 import {removeDuplicatesModels} from '@helpers/database';
 import PushNotifications from '@init/push_notifications';
 import AppsManager from '@managers/apps_manager';
 import NetworkManager from '@managers/network_manager';
+import {getMyChannel} from '@queries/servers/channel';
 import {getPostById} from '@queries/servers/post';
 import {getConfigValue, getCurrentChannelId, getCurrentTeamId} from '@queries/servers/system';
 import {getIsCRTEnabled, getThreadById, getTeamThreadsSyncData} from '@queries/servers/thread';
@@ -47,6 +49,15 @@ export const fetchAndSwitchToThread = async (serverUrl: string, rootId: string, 
 
     // Load thread before we open to the thread modal
     fetchPostThread(serverUrl, rootId, undefined, false, groupLabel);
+
+    // Check if user is member of the channel, auto-join if not
+    const post = await getPostById(database, rootId);
+    if (post) {
+        const myChannel = await getMyChannel(database, post.channelId);
+        if (!myChannel) {
+            await joinChannelIfNeeded(serverUrl, post.channelId);
+        }
+    }
 
     // Mark thread as read
     const isCRTEnabled = await getIsCRTEnabled(database);
