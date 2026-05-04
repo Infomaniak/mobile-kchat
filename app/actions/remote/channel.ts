@@ -1171,20 +1171,6 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
         return {error: `${serverUrl} database not found`};
     }
 
-    try {
-        const myChannel = await getMyChannel(database, channelId);
-        if (!myChannel) {
-            logDebug('[switchToChannelById] User is not a member of channel', channelId, '- auto-joining');
-            const {error: joinError} = await joinChannel(serverUrl, teamId || '', channelId);
-            if (joinError) {
-                logError('[switchToChannelById] Failed to auto-join channel', channelId, joinError);
-                return {error: joinError};
-            }
-        }
-    } catch (error) {
-        logDebug('[switchToChannelById] Error checking/joining channel', channelId, error);
-    }
-
     DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, true);
 
     fetchPostsForChannel(serverUrl, channelId, false, false, groupLabel);

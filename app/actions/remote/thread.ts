@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {markTeamThreadsAsRead, markThreadAsViewed, processReceivedThreads, switchToThread, updateTeamThreadsSync, updateThread} from '@actions/local/thread';
-import {joinChannelIfNeeded} from '@actions/remote/channel';
 import {fetchPostThread} from '@actions/remote/post';
 import {General} from '@constants';
 import DatabaseManager from '@database/manager';
@@ -10,7 +9,6 @@ import {removeDuplicatesModels} from '@helpers/database';
 import PushNotifications from '@init/push_notifications';
 import AppsManager from '@managers/apps_manager';
 import NetworkManager from '@managers/network_manager';
-import {getMyChannel} from '@queries/servers/channel';
 import {getPostById} from '@queries/servers/post';
 import {getConfigValue, getCurrentChannelId, getCurrentTeamId} from '@queries/servers/system';
 import {getIsCRTEnabled, getThreadById, getTeamThreadsSyncData} from '@queries/servers/thread';
@@ -50,20 +48,11 @@ export const fetchAndSwitchToThread = async (serverUrl: string, rootId: string, 
     // Load thread before we open to the thread modal
     fetchPostThread(serverUrl, rootId, undefined, false, groupLabel);
 
-    // Check if user is member of the channel, auto-join if not
-    const post = await getPostById(database, rootId);
-    if (post) {
-        const myChannel = await getMyChannel(database, post.channelId);
-        if (!myChannel) {
-            await joinChannelIfNeeded(serverUrl, post.channelId);
-        }
-    }
-
     // Mark thread as read
     const isCRTEnabled = await getIsCRTEnabled(database);
     if (isCRTEnabled) {
-        const postForThread = await getPostById(database, rootId);
-        if (postForThread) {
+        const post = await getPostById(database, rootId);
+        if (post) {
             const thread = await getThreadById(database, rootId);
             if (thread?.isFollowing) {
                 markThreadAsViewed(serverUrl, thread.id);
@@ -75,14 +64,14 @@ export const fetchAndSwitchToThread = async (serverUrl: string, rootId: string, 
 
     if (await AppsManager.isAppsEnabled(serverUrl)) {
         // Getting the post again in case we didn't had it at the beginning
-        const postForBindings = await getPostById(database, rootId);
+        const post = await getPostById(database, rootId);
         const currentChannelId = await getCurrentChannelId(database);
 
-        if (postForBindings) {
-            if (currentChannelId === postForBindings?.channelId) {
+        if (post) {
+            if (currentChannelId === post?.channelId) {
                 AppsManager.copyMainBindingsToThread(serverUrl, currentChannelId);
             } else {
-                AppsManager.fetchBindings(serverUrl, postForBindings.channelId, true, groupLabel);
+                AppsManager.fetchBindings(serverUrl, post.channelId, true, groupLabel);
             }
         }
     }

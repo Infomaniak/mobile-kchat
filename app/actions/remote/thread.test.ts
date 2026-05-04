@@ -215,7 +215,7 @@ describe('get threads', () => {
         expect(result.error).toBeTruthy();
     });
 
-    it('fetchAndSwitchToThread - auto-joins channel when user is not a member', async () => {
+    it('fetchAndSwitchToThread - does not crash when user is not a member', async () => {
         await operator.handlePosts({
             actionType: ActionType.POSTS.RECEIVED_IN_CHANNEL,
             order: [post1.id],
@@ -224,13 +224,9 @@ describe('get threads', () => {
         });
         await operator.handleThreads({threads, prepareRecordsOnly: false, teamId: team.id});
 
-        // Pas de myChannel = utilisateur non-membre
-
         const result = await fetchAndSwitchToThread(serverUrl, thread1.id);
         expect(result).toBeDefined();
         expect(result.error).toBeUndefined();
-
-        // Should not crash even when user is not a member
     });
 });
 
