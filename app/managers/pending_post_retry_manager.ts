@@ -16,11 +16,14 @@ const MAX_RETRIES = 5;
 const BASE_DELAY_MS = 1000;
 const BATCH_SIZE = 10;
 const HEALTH_CHECK_TIMEOUT_MS = 10000;
+const TRIGGER_DEBOUNCE_MS = 5000; // Minimum time between retries
 
 class PendingPostRetryManagerSingleton {
     private retryAttempts = new Map<string, number>();
     private processingPosts = new Set<string>();
     private processingPromise: Promise<void> | null = null;
+    private lastTriggerTime = 0;
+    private pendingTriggerTimeout: NodeJS.Timeout | null = null;
 
     public triggerRetry = async (): Promise<void> => {
         // Atomic check-and-set using promise chaining
@@ -30,6 +33,7 @@ class PendingPostRetryManagerSingleton {
             return;
         }
 
+        this.lastTriggerTime = now;
         this.processingPromise = this.processAllServers();
 
         try {
