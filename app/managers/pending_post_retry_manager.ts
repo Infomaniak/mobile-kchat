@@ -200,6 +200,11 @@ class PendingPostRetryManagerSingleton {
         this.retryAttempts.clear();
         this.processingPosts.clear();
         this.processingPromise = null;
+        this.lastTriggerTime = 0;
+        if (this.pendingTriggerTimeout) {
+            clearTimeout(this.pendingTriggerTimeout);
+            this.pendingTriggerTimeout = null;
+        }
     };
 }
 
@@ -211,6 +216,7 @@ export const testExports = {
     BASE_DELAY_MS,
     BATCH_SIZE,
     HEALTH_CHECK_TIMEOUT_MS,
+    TRIGGER_DEBOUNCE_MS,
 };
 
 export default PendingPostRetryManager;
