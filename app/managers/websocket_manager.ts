@@ -19,6 +19,8 @@ import {toMilliseconds} from '@utils/datetime';
 import {isMainActivity} from '@utils/helpers';
 import {logError} from '@utils/log';
 
+import PendingPostRetryManager from './pending_post_retry_manager';
+
 const WAIT_TO_CLOSE = toMilliseconds({seconds: 2});
 const WAIT_UNTIL_NEXT = toMilliseconds({seconds: 5});
 
@@ -172,6 +174,7 @@ class WebsocketManagerSingleton {
     private onFirstConnect = (serverUrl: string) => {
         this.startPeriodicStatusUpdates(serverUrl);
         this.getConnectedSubject(serverUrl).next('connected');
+        PendingPostRetryManager.triggerRetry();
     };
 
     private onReconnect = async (serverUrl: string) => {
@@ -182,6 +185,7 @@ class WebsocketManagerSingleton {
         if (error) {
             this.getClient(serverUrl)?.close(false);
         }
+        PendingPostRetryManager.triggerRetry();
     };
 
     private onReliableReconnect = async (serverUrl: string) => {
@@ -271,6 +275,7 @@ class WebsocketManagerSingleton {
             this.isBackgroundTimerRunning = false;
             if (this.netConnected) {
                 this.openAll('WebSocket Reconnect');
+                PendingPostRetryManager.triggerRetry();
             }
 
             return;
