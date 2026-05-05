@@ -26,10 +26,29 @@ class PendingPostRetryManagerSingleton {
     private pendingTriggerTimeout: NodeJS.Timeout | null = null;
 
     public triggerRetry = async (): Promise<void> => {
-        // Atomic check-and-set using promise chaining
+        const now = Date.now();
+        const timeSinceLastTrigger = now - this.lastTriggerTime;
+
+        // Cancel any pending trigger
+        if (this.pendingTriggerTimeout) {
+            clearTimeout(this.pendingTriggerTimeout);
+            this.pendingTriggerTimeout = null;
+        }
+
+        // If we're already processing, the current run will handle recent posts
         if (this.processingPromise) {
-            logDebug('[PendingPostRetryManager] Already processing, waiting for current batch');
-            await this.processingPromise;
+            logDebug('[PendingPostRetryManager] Trigger ignored - already processing');
+            return;
+        }
+
+        // Debounce: if triggered too recently, schedule for later
+        if (timeSinceLastTrigger < TRIGGER_DEBOUNCE_MS) {
+            const delay = TRIGGER_DEBOUNCE_MS - timeSinceLastTrigger;
+            logDebug(`[PendingPostRetryManager] Debouncing retry for ${delay}ms`);
+            this.pendingTriggerTimeout = setTimeout(() => {
+                this.pendingTriggerTimeout = null;
+                this.triggerRetry();
+            }, delay);
             return;
         }
 
