@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {of as of$, combineLatest, type Observable} from 'rxjs';
-import {switchMap, map, distinctUntilChanged, debounceTime} from 'rxjs/operators';
+import {switchMap, map, distinctUntilChanged, debounceTime, shareReplay, tap} from 'rxjs/operators';
 
 import {Preferences} from '@constants';
 import {DMS_CATEGORY, UNREADS_CATEGORY} from '@constants/categories';
@@ -65,8 +65,29 @@ const observeCategoryData = (
     locale: string,
     isTablet: boolean,
 ): Observable<CategoryData> => {
+    // shareReplay so channelsWithMyChannel and combineLatest share one DB subscription
+    const categoryObservable = category.observe().pipe(
+        map((c) => ({sorting: c.sorting, collapsed: c.collapsed, type: c.type})),
+        distinctUntilChanged((a, b) => a.sorting === b.sorting && a.collapsed === b.collapsed && a.type === b.type),
+        shareReplay(1),
+    );
+
+    // Only is_unread for notify props — avoids re-triggering its switchMap on every new message
     const categoryMyChannels = category.myChannels.observeWithColumns(['is_unread']);
-    const channelsWithMyChannel = observeCategoryChannels(category, categoryMyChannels);
+
+    // For "recent" sort observe last_post_at too so channels re-order when a message arrives;
+    // for other sorts only is_unread is needed (no spurious re-triggers on each message)
+    const channelsWithMyChannel = categoryObservable.pipe(
+        switchMap((catData) => {
+            if (catData.sorting === 'recent') {
+                return observeCategoryChannels(
+                    category,
+                    category.myChannels.observeWithColumns(['is_unread', 'last_post_at']),
+                );
+            }
+            return observeCategoryChannels(category, categoryMyChannels);
+        }),
+    );
     const currentChannelId = isTablet ? observeCurrentChannelId(database) : of$('');
     const lastUnreadId = isTablet ? observeLastUnreadChannelId(database) : of$(undefined);
 
@@ -100,12 +121,6 @@ const observeCategoryData = (
     const autoclosePrefs = approxViewTimePrefs.pipe(
         switchMap((viewTimes) => combineLatest([of$(viewTimes), openTimePrefs])),
         map(([viewTimes, openTimes]) => viewTimes.concat(openTimes)),
-    );
-
-    // Observe category changes (especially collapsed state and sorting)
-    const categoryObservable = category.observe().pipe(
-        map((c) => ({sorting: c.sorting, collapsed: c.collapsed, type: c.type})),
-        distinctUntilChanged((a, b) => a.sorting === b.sorting && a.collapsed === b.collapsed && a.type === b.type),
     );
 
     const deactivated = (category.type === DMS_CATEGORY) ? observeDeactivatedUsers(database) : of$(undefined);

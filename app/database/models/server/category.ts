@@ -101,7 +101,6 @@ export default class CategoryModel extends Model implements CategoryInterface {
                     Q.where('category_id', this.id),
                 ),
             ),
-            Q.sortBy('last_post_at', Q.desc),
         );
 
     observeHasChannels = (canViewArchived: boolean, channelId: string) => {
