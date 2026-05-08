@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {of as of$, combineLatest, type Observable} from 'rxjs';
-import {switchMap, map, distinctUntilChanged, debounceTime, shareReplay, tap} from 'rxjs/operators';
+import {switchMap, map, distinctUntilChanged, debounceTime, shareReplay} from 'rxjs/operators';
 
 import {Preferences} from '@constants';
 import {DMS_CATEGORY, UNREADS_CATEGORY} from '@constants/categories';
