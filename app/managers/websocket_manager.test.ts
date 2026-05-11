@@ -167,7 +167,7 @@ describe('WebsocketManager', () => {
             mockAppStateChange('background');
 
             expect(BackgroundTimer.setInterval).toHaveBeenCalled();
-            expect(BackgroundTimer.setInterval).toHaveBeenCalledWith(expect.any(Function), 2000);
+            expect(BackgroundTimer.setInterval).toHaveBeenCalledWith(expect.any(Function), 15000);
         });
 
         it('should handle network state changes', () => {
