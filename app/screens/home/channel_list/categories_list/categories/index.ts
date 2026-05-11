@@ -2,61 +2,49 @@
 // See LICENSE.txt for license information.
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
-import {switchMap, combineLatestWith, map, distinctUntilChanged, shareReplay} from 'rxjs/operators';
+import {of as of$} from 'rxjs';
+import {switchMap, combineLatestWith} from 'rxjs/operators';
 
-import {DEFAULT_LOCALE} from '@i18n';
-import {observeCurrentTeamId, observeOnlyUnreads} from '@queries/servers/system';
-import {observeCurrentUser} from '@queries/servers/user';
+import {Preferences} from '@constants';
+import {getPreferenceValue} from '@helpers/api/preference';
+import {queryCategoriesByTeamIds} from '@queries/servers/categories';
+import {querySidebarPreferences} from '@queries/servers/preference';
+import {observeConfigBooleanValue, observeCurrentTeamId, observeOnlyUnreads} from '@queries/servers/system';
 
 import Categories from './categories';
-import {observeFlattenedCategories} from './helpers/observe_flattened_categories';
 
 import type {WithDatabaseArgs} from '@typings/database/database';
+import type PreferenceModel from '@typings/database/models/servers/preference';
 
-type Props = WithDatabaseArgs & {
-    isTablet: boolean;
-};
+const enhanced = withObservables(
+    [],
+    ({database}: WithDatabaseArgs) => {
+        const currentTeamId = observeCurrentTeamId(database);
+        const categories = currentTeamId.pipe(switchMap((ctid) => queryCategoriesByTeamIds(database, [ctid]).observeWithColumns(['sort_order'])));
 
-const enhanced = withObservables(['isTablet'], ({database, isTablet}: Props) => {
-    const currentTeamId = observeCurrentTeamId(database);
-    const currentUser = observeCurrentUser(database);
-    const onlyUnreads = observeOnlyUnreads(database);
-
-    const categoriesData = currentUser.pipe(
-        combineLatestWith(onlyUnreads, currentTeamId),
-
-        // Only rebuild observeFlattenedCategories when meaningful params change.
-        // currentUser emits for any field change (timezone, last_active_at, etc.) — guard against that.
-        distinctUntilChanged(([prevUser, prevUnreads, prevTeamId], [currUser, currUnreads, currTeamId]) =>
-            prevUser?.id === currUser?.id &&
-            prevUser?.locale === currUser?.locale &&
-            prevUnreads === currUnreads &&
-            prevTeamId === currTeamId,
-        ),
-        switchMap(([user, isOnlyUnreads, teamId]) => {
-            return observeFlattenedCategories(
-                database,
-                user?.id || '',
-                user?.locale || DEFAULT_LOCALE,
-                isTablet,
-                isOnlyUnreads,
-                teamId,
+        const unreadsOnTopUserPreference = querySidebarPreferences(database, Preferences.CHANNEL_SIDEBAR_GROUP_UNREADS).
+            observeWithColumns(['value']).
+            pipe(
+                switchMap((prefs: PreferenceModel[]) => of$(getPreferenceValue<string>(prefs, Preferences.CATEGORIES.SIDEBAR_SETTINGS, Preferences.CHANNEL_SIDEBAR_GROUP_UNREADS))),
             );
-        }),
 
-        // Share a single subscription between flattenedItems and unreadChannelIds
-        // to avoid executing the full chain twice.
-        shareReplay(1),
-    );
+        const unreadsOnTopServerPreference = observeConfigBooleanValue(database, 'ExperimentalGroupUnreadChannels');
 
-    const flattenedItems = categoriesData.pipe(map((data) => data.items));
-    const unreadChannelIds = categoriesData.pipe(map((data) => data.unreadChannelIds));
+        const unreadsOnTop = unreadsOnTopServerPreference.pipe(
+            combineLatestWith(unreadsOnTopUserPreference),
+            switchMap(([s, u]) => {
+                if (!u) {
+                    return of$(s);
+                }
 
-    return {
-        flattenedItems,
-        unreadChannelIds,
-        onlyUnreads,
-    };
-});
+                return of$(u !== 'false');
+            }),
+        );
+        return {
+            categories,
+            onlyUnreads: observeOnlyUnreads(database),
+            unreadsOnTop,
+        };
+    });
 
 export default withDatabase(enhanced(Categories));
