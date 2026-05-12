@@ -25,6 +25,12 @@ type PusherEvent = {[k: string]: any} | undefined;
 
 export default class WebSocketClient {
     private conn?: Pusher;
+
+    // Stable reference to the shared Pusher instance for callback cleanup.
+    // this.conn is cleared by the 'disconnected' handler, but lastPusher persists
+    // until invalidate() so we can always unbind our callbacks, even after disconnect.
+    private lastPusher?: Pusher;
+
     private connectionTimeout: NodeJS.Timeout | undefined;
     private connectionId = '';
     private token: string;
@@ -123,12 +129,15 @@ export default class WebSocketClient {
                 return;
             }
             this.conn = client;
+            this.lastPusher = client;
         } catch (error) {
             return;
         }
 
         this.bindConnection('connected', () => {
             clearTimeout(this.connectionTimeout);
+
+            logInfo('[WS-client] connected event', this.serverUrl, 'stop:', this.stop, 'conn:', !!this.conn);
 
             // No need to reset sequence number here.
             this.serverSequence = 0;
@@ -163,6 +172,7 @@ export default class WebSocketClient {
             // reliable websockets are enabled this won't trigger a new sync.
             this.shouldSkipSync = false;
 
+            logInfo('[WS-client] disconnected event', this.serverUrl, 'stop:', this.stop, 'failCount:', this.connectFailCount);
             if (this.connectFailCount === 0) {
                 logInfo('websocket closed', this.serverUrl);
             }
@@ -386,6 +396,26 @@ export default class WebSocketClient {
 
     public invalidate() {
         clearTimeout(this.connectionTimeout);
+
+        // Unbind our callbacks from the shared Pusher connection.
+        // We use lastPusher (not this.conn) because the 'disconnected' handler clears
+        // this.conn synchronously during close(), before invalidate() is ever called.
+        // lastPusher is only cleared here, so it remains valid for unbinding.
+        if (this.lastPusher) {
+            for (const eventName of ['connected', 'disconnected', 'error'] as const) {
+                const callbacks = this.lastPusher.connection.callbacks.get(eventName) as Array<{fn: Function}>;
+                const ours = callbacks.find((cb) => (cb.fn as any).fnRef === this.serverUrl);
+                if (ours) {
+                    this.lastPusher.connection.unbind(eventName, ours.fn);
+                    logInfo('[WS-client] invalidate: unbound', eventName, 'for', this.serverUrl);
+                } else {
+                    logInfo('[WS-client] invalidate: no callback to unbind for', eventName, this.serverUrl);
+                }
+            }
+            this.lastPusher = undefined;
+        } else {
+            logInfo('[WS-client] invalidate: no pusher ref to unbind from', this.serverUrl);
+        }
 
         // this.conn?.invalidate();
         this.conn = undefined;
