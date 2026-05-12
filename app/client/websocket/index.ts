@@ -137,8 +137,6 @@ export default class WebSocketClient {
         this.bindConnection('connected', () => {
             clearTimeout(this.connectionTimeout);
 
-            logInfo('[WS-client] connected event', this.serverUrl, 'stop:', this.stop, 'conn:', !!this.conn);
-
             // No need to reset sequence number here.
             this.serverSequence = 0;
 
