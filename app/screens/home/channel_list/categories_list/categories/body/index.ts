@@ -57,7 +57,7 @@ const observeCategoryChannels = (category: CategoryModel, myChannels: Observable
 };
 
 const enhanced = withObservables([], ({category, currentUserId, database, isTablet, locale}: EnhanceProps) => {
-    const categoryMyChannels = category.myChannels.observeWithColumns(['last_post_at', 'is_unread']);
+    const categoryMyChannels = category.myChannels.observeWithColumns(['is_unread']);
     const channelsWithMyChannel = observeCategoryChannels(category, categoryMyChannels);
     const currentChannelId = isTablet ? observeCurrentChannelId(database) : of$('');
     const lastUnreadId = isTablet ? observeLastUnreadChannelId(database) : of$(undefined);
@@ -79,7 +79,6 @@ const enhanced = withObservables([], ({category, currentUserId, database, isTabl
     }
 
     const notifyPropsPerChannel = categoryMyChannels.pipe(
-        // eslint-disable-next-line max-nested-callbacks
         switchMap((mc) => observeNotifyPropsByChannels(database, mc)),
     );
 
@@ -113,8 +112,8 @@ const enhanced = withObservables([], ({category, currentUserId, database, isTabl
             let channelsW = cwms;
 
             channelsW = filterArchivedChannels(channelsW, channelId);
-            channelsW = filterManuallyClosedDms(channelsW, notifyProps, manuallyClosedDms, currentUserId, unreadId);
             channelsW = filterAutoclosedDMs(category.type, maxDms, currentUserId, channelId, channelsW, autoclose, notifyProps, deactivatedUsers, unreadId);
+            channelsW = filterManuallyClosedDms(channelsW, notifyProps, manuallyClosedDms, currentUserId, unreadId);
 
             return of$(sortChannels(sorting, channelsW, notifyProps, locale));
         }),
