@@ -15,7 +15,7 @@ import NetworkManager from '@managers/network_manager';
 import {getMembersCountByChannelsId, queryChannelsByTypes} from '@queries/servers/channel';
 import {queryGroupsByNames} from '@queries/servers/group';
 import {getCurrentUserId, setCurrentUserId} from '@queries/servers/system';
-import {getCurrentUser, getUserById, prepareUsers, queryAllUsers, queryUsersById, queryUsersByIdsOrUsernames, queryUsersByUsername} from '@queries/servers/user';
+import {getAllUserIds, getCurrentUser, getUserById, prepareUsers, queryAllUsers, queryUsersById, queryUsersByIdsOrUsernames, queryUsersByUsername} from '@queries/servers/user';
 import {getFullErrorMessage} from '@utils/errors';
 import {logDebug} from '@utils/log';
 import {getDeviceTimezone} from '@utils/timezone';
@@ -649,7 +649,7 @@ export async function updateAllUsersSince(serverUrl: string, since: number, fetc
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
 
         const currentUserId = await getCurrentUserId(database);
-        const userIds = (await queryAllUsers(database).fetchIds()).filter((id) => id !== currentUserId);
+        const userIds = (await getAllUserIds(database)).filter((id) => id !== currentUserId);
         userUpdates = await client.getProfilesByIds(userIds, {since}, groupLabel);
         if (userUpdates.length && !fetchOnly) {
             const modelsToBatch: Model[] = [];

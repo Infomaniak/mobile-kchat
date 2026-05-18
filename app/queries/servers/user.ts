@@ -68,6 +68,13 @@ export const queryAllUsers = (database: Database) => {
     return database.get<UserModel>(USER).query();
 };
 
+export const getAllUserIds = async (database: Database): Promise<string[]> => {
+    const result = await database.get<UserModel>(USER).query(
+        Q.unsafeSqlQuery('SELECT id FROM User'),
+    ).unsafeFetchRaw();
+    return result.map((r: {id: string}) => r.id);
+};
+
 export const queryUsersById = (database: Database, userIds: string[]) => {
     return database.get<UserModel>(USER).query(Q.where('id', Q.oneOf(userIds)));
 };

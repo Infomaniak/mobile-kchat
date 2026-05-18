@@ -14,7 +14,7 @@ import WebSocketClient from '@client/websocket';
 import {General} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getCurrentUserId} from '@queries/servers/system';
-import {queryAllUsers} from '@queries/servers/user';
+import {getAllUserIds} from '@queries/servers/user';
 import {toMilliseconds} from '@utils/datetime';
 import {isMainActivity} from '@utils/helpers';
 import {logError} from '@utils/log';
@@ -208,7 +208,7 @@ class WebsocketManagerSingleton {
             }
 
             const currentUserId = await getCurrentUserId(database.database);
-            const userIds = (await queryAllUsers(database.database).fetchIds()).filter((id) => id !== currentUserId);
+            const userIds = (await getAllUserIds(database.database)).filter((id) => id !== currentUserId);
 
             fetchStatusByIds(serverUrl, userIds);
         };

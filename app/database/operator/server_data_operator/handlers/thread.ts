@@ -10,7 +10,7 @@ import {
     transformThreadParticipantRecord,
     transformThreadInTeamRecord,
 } from '@database/operator/server_data_operator/transformers/thread';
-import {getRawRecordPairs, getUniqueRawsBy} from '@database/operator/utils/general';
+import {getRawRecordPairs, getUniqueRawsBy, chunkArray} from '@database/operator/utils/general';
 import {sanitizeThreadParticipants} from '@database/operator/utils/thread';
 import {logWarning} from '@utils/log';
 
@@ -69,7 +69,11 @@ const ThreadHandler = <TBase extends Constructor<ServerDataOperatorBase>>(superc
 
         if (deletedThreadIds.length) {
             const database: Database = this.database;
-            const threadsToDelete = await database.get<ThreadModel>(THREAD).query(Q.where('id', Q.oneOf(deletedThreadIds))).fetch();
+            const idChunks = chunkArray(deletedThreadIds, 1000);
+            const fetchPromises = idChunks.map((ids) =>
+                database.get<ThreadModel>(THREAD).query(Q.where('id', Q.oneOf(ids))).fetch(),
+            );
+            const threadsToDelete = (await Promise.all(fetchPromises)).flat();
             if (threadsToDelete.length) {
                 await database.write(async () => {
                     const promises: Array<Promise<void>> = [];
@@ -201,10 +205,14 @@ const ThreadHandler = <TBase extends Constructor<ServerDataOperatorBase>>(superc
         const teamIds = Object.keys(threadsMap);
         for await (const teamId of teamIds) {
             const threadIds = threadsMap[teamId].map((thread) => thread.id);
-            const chunks = await (this.database as Database).get<ThreadInTeamModel>(THREADS_IN_TEAM).query(
-                Q.where('team_id', teamId),
-                Q.where('thread_id', Q.oneOf(threadIds)),
-            ).fetch();
+            const idChunks = chunkArray(threadIds, 1000);
+            const fetchPromises = idChunks.map((ids) =>
+                (this.database as Database).get<ThreadInTeamModel>(THREADS_IN_TEAM).query(
+                    Q.where('team_id', teamId),
+                    Q.where('thread_id', Q.oneOf(ids)),
+                ).fetch(),
+            );
+            const chunks = (await Promise.all(fetchPromises)).flat();
             const chunksMap = chunks.reduce((result: Record<string, ThreadInTeamModel>, chunk) => {
                 result[chunk.threadId] = chunk;
                 return result;

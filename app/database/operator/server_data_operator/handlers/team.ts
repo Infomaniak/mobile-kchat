@@ -15,7 +15,7 @@ import {
     transformTeamRecord,
     transformTeamSearchHistoryRecord,
 } from '@database/operator/server_data_operator/transformers/team';
-import {getUniqueRawsBy} from '@database/operator/utils/general';
+import {getUniqueRawsBy, chunkArray} from '@database/operator/utils/general';
 import {logWarning} from '@utils/log';
 
 import type ServerDataOperatorBase from '.';
@@ -69,9 +69,13 @@ const TeamHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         const uniqueRaws = getUniqueRawsBy({raws: memberships, key: 'id'})as TeamMembership[];
         const ids = uniqueRaws.map((t) => t.id!);
         const db: Database = this.database;
-        const existing = await db.get<TeamMembershipModel>(TEAM_MEMBERSHIP).query(
-            Q.where('id', Q.oneOf(ids)),
-        ).fetch();
+        const idChunks = chunkArray(ids, 1000);
+        const fetchPromises = idChunks.map((chunk) =>
+            db.get<TeamMembershipModel>(TEAM_MEMBERSHIP).query(
+                Q.where('id', Q.oneOf(chunk)),
+            ).fetch(),
+        );
+        const existing = (await Promise.all(fetchPromises)).flat();
         const membershipMap = new Map<String, TeamMembershipModel>(existing.map((e) => [e.id, e]));
         const createOrUpdateRawValues = uniqueRaws.reduce((res: TeamMembership[], t) => {
             const e = membershipMap.get(t.id!);
@@ -119,9 +123,13 @@ const TeamHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         const uniqueRaws = getUniqueRawsBy({raws: teams, key: 'id'}) as Team[];
         const ids = uniqueRaws.map((t) => t.id);
         const db: Database = this.database;
-        const existing = await db.get<TeamModel>(TEAM).query(
-            Q.where('id', Q.oneOf(ids)),
-        ).fetch();
+        const idChunks = chunkArray(ids, 1000);
+        const fetchPromises = idChunks.map((chunk) =>
+            db.get<TeamModel>(TEAM).query(
+                Q.where('id', Q.oneOf(chunk)),
+            ).fetch(),
+        );
+        const existing = (await Promise.all(fetchPromises)).flat();
         const teamMap = new Map<String, TeamModel>(existing.map((e) => [e.id, e]));
         const createOrUpdateRawValues = uniqueRaws.reduce((res: Team[], t) => {
             const e = teamMap.get(t.id);
@@ -224,9 +232,13 @@ const TeamHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         const uniqueRaws = getUniqueRawsBy({raws: myTeams, key: 'id'}) as MyTeam[];
         const ids = uniqueRaws.map((t) => t.id);
         const db: Database = this.database;
-        const existing = await db.get<MyTeamModel>(MY_TEAM).query(
-            Q.where('id', Q.oneOf(ids)),
-        ).fetch();
+        const idChunks = chunkArray(ids, 1000);
+        const fetchPromises = idChunks.map((chunk) =>
+            db.get<MyTeamModel>(MY_TEAM).query(
+                Q.where('id', Q.oneOf(chunk)),
+            ).fetch(),
+        );
+        const existing = (await Promise.all(fetchPromises)).flat();
         const myTeamMap = new Map<String, MyTeamModel>(existing.map((e) => [e.id, e]));
         const createOrUpdateRawValues = uniqueRaws.reduce((res: MyTeam[], mt) => {
             const e = myTeamMap.get(mt.id!);

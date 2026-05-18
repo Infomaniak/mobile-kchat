@@ -14,7 +14,7 @@ import {
     transformPostsInChannelRecord,
     transformSchedulePostsRecord,
 } from '@database/operator/server_data_operator/transformers/post';
-import {getRawRecordPairs, getUniqueRawsBy, getValidRecordsForUpdate} from '@database/operator/utils/general';
+import {getRawRecordPairs, getUniqueRawsBy, getValidRecordsForUpdate, chunkArray} from '@database/operator/utils/general';
 import {createPostsChain, getPostListEdges} from '@database/operator/utils/post';
 import {queryScheduledPostsForTeam} from '@queries/servers/scheduled_post';
 import {getCurrentTeamId} from '@queries/servers/system';
@@ -233,7 +233,11 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
     _deleteScheduledPostByIds = async (scheduledPostIds: string[], prepareRecordsOnly = false): Promise<ScheduledPostModel[]> => {
         const database: Database = this.database;
-        const scheduledPostsToDelete = await database.get<ScheduledPostModel>(SCHEDULED_POST).query(Q.where('id', Q.oneOf(scheduledPostIds))).fetch();
+        const idChunks = chunkArray(scheduledPostIds, 1000);
+        const fetchPromises = idChunks.map((ids) =>
+            database.get<ScheduledPostModel>(SCHEDULED_POST).query(Q.where('id', Q.oneOf(ids))).fetch(),
+        );
+        const scheduledPostsToDelete = (await Promise.all(fetchPromises)).flat();
 
         const preparedScheduledPosts = await this.prepareRecords({
             deleteRaws: scheduledPostsToDelete,
@@ -366,7 +370,11 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
         const database: Database = this.database;
         if (deletedPostIds.size) {
-            const postsToDelete = await database.get<PostModel>(POST).query(Q.where('id', Q.oneOf(Array.from(deletedPostIds)))).fetch();
+            const deletedIdChunks = chunkArray(Array.from(deletedPostIds), 1000);
+            const fetchPromises = deletedIdChunks.map((ids) =>
+                database.get<PostModel>(POST).query(Q.where('id', Q.oneOf(ids))).fetch(),
+            );
+            const postsToDelete = (await Promise.all(fetchPromises)).flat();
             if (postsToDelete.length) {
                 await database.write(async () => {
                     const promises = postsToDelete.map((p) => p.destroyPermanently());
@@ -413,12 +421,20 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             batch.push(...postFiles);
         }
 
-        const allFiles = await database.get<FileModel>(MM_TABLES.SERVER.FILE).query(Q.where('post_id', Q.oneOf(uniquePosts.map((p) => p.id)))).fetch();
-        allFiles.forEach((f) => {
-            if (!receivedFilesSet.has(f.id)) {
-                batch.push(f.prepareDestroyPermanently());
-            }
-        });
+        if (uniquePosts.length) {
+            const postIdChunks = chunkArray(uniquePosts.map((p) => p.id), 1000);
+            const fetchPromises = postIdChunks.map((ids) =>
+                database.get<FileModel>(MM_TABLES.SERVER.FILE).query(
+                    Q.where('post_id', Q.oneOf(ids)),
+                ).fetch(),
+            );
+            const allFiles = (await Promise.all(fetchPromises)).flat();
+            allFiles.forEach((f) => {
+                if (!receivedFilesSet.has(f.id)) {
+                    batch.push(f.prepareDestroyPermanently());
+                }
+            });
+        }
 
         if (emojis.length) {
             const postEmojis = await this.handleCustomEmojis({emojis, prepareRecordsOnly: true});

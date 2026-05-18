@@ -5,7 +5,7 @@ import {Q, Database} from '@nozbe/watermelondb';
 
 import {MM_TABLES} from '@constants/database';
 import {transformTeamThreadsSyncRecord} from '@database/operator/server_data_operator/transformers/thread';
-import {getRawRecordPairs, getUniqueRawsBy, getValidRecordsForUpdate} from '@database/operator/utils/general';
+import {getRawRecordPairs, getUniqueRawsBy, getValidRecordsForUpdate, chunkArray} from '@database/operator/utils/general';
 import {logWarning} from '@utils/log';
 
 import type ServerDataOperatorBase from '.';
@@ -29,9 +29,13 @@ const TeamThreadsSyncHandler = <TBase extends Constructor<ServerDataOperatorBase
 
         const uniqueRaws = getUniqueRawsBy({raws: data, key: 'id'}) as TeamThreadsSync[];
         const ids = uniqueRaws.map((item) => item.id);
-        const chunks = await (this.database as Database).get<TeamThreadsSyncModel>(TEAM_THREADS_SYNC).query(
-            Q.where('id', Q.oneOf(ids)),
-        ).fetch();
+        const idChunks = chunkArray(ids, 1000);
+        const fetchPromises = idChunks.map((chunk) =>
+            (this.database as Database).get<TeamThreadsSyncModel>(TEAM_THREADS_SYNC).query(
+                Q.where('id', Q.oneOf(chunk)),
+            ).fetch(),
+        );
+        const chunks = (await Promise.all(fetchPromises)).flat();
         const chunksMap = chunks.reduce((result: Record<string, TeamThreadsSyncModel>, chunk) => {
             result[chunk.id] = chunk;
             return result;

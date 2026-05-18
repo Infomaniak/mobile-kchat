@@ -168,6 +168,7 @@ type QueryThreadsInTeamOptions = {
     isFollowing?: boolean;
     sort?: boolean;
     earliest?: number;
+    limit?: number;
 };
 
 export const queryThreadsInTeam = (database: Database, teamId: string, {
@@ -176,6 +177,7 @@ export const queryThreadsInTeam = (database: Database, teamId: string, {
     isFollowing,
     sort,
     earliest,
+    limit = 100,
 }: QueryThreadsInTeamOptions): Query<ThreadModel> => {
     const query: Q.Clause[] = [
         Q.experimentalNestedJoin(POST, CHANNEL),
@@ -205,6 +207,8 @@ export const queryThreadsInTeam = (database: Database, teamId: string, {
     if (earliest) {
         query.push(Q.where('last_reply_at', Q.gte(earliest)));
     }
+
+    query.push(Q.take(limit));
 
     return database.get<ThreadModel>(THREAD).query(...query);
 };

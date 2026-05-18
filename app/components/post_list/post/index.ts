@@ -35,10 +35,11 @@ type PropsInput = WithDatabaseArgs & {
 }
 
 function observeShouldHighlightReplyBar(database: Database, currentUser: UserModel, post: PostModel, postsInThread: PostsInThreadModel) {
-    const myPostsCount = queryPostsBetween(database, postsInThread.earliest, postsInThread.latest, null, currentUser.id, '', post.rootId || post.id).observeCount();
+    const myPostsCount = queryPostsBetween(database, postsInThread.earliest, postsInThread.latest, null, currentUser.id, '', post.rootId || post.id, 1).observeCount();
     const root = observePost(database, post.rootId);
 
     return combineLatest([myPostsCount, root]).pipe(
+        distinctUntilChanged(),
         switchMap(([mpc, r]) => {
             const threadRepliedToByCurrentUser = mpc > 0;
             let threadCreatedByCurrentUser = false;

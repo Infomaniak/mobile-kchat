@@ -16,7 +16,7 @@ import {
     transformMyChannelRecord,
     transformMyChannelSettingsRecord,
 } from '@database/operator/server_data_operator/transformers/channel';
-import {getUniqueRawsBy} from '@database/operator/utils/general';
+import {getUniqueRawsBy, chunkArray} from '@database/operator/utils/general';
 import {getIsCRTEnabled} from '@queries/servers/thread';
 import ChannelBookmarkModel from '@typings/database/models/servers/channel_bookmark';
 import {logWarning} from '@utils/log';
@@ -66,9 +66,13 @@ const ChannelHandler = <TBase extends Constructor<ServerDataOperatorBase>>(super
         const uniqueRaws = getUniqueRawsBy({raws: channels, key: 'id'});
         const keys = uniqueRaws.map((c) => c.id);
         const db: Database = this.database;
-        const existing = await db.get<ChannelModel>(CHANNEL).query(
-            Q.where('id', Q.oneOf(keys)),
-        ).fetch();
+        const keyChunks = chunkArray(keys, 1000);
+        const fetchPromises = keyChunks.map((chunk) =>
+            db.get<ChannelModel>(CHANNEL).query(
+                Q.where('id', Q.oneOf(chunk)),
+            ).fetch(),
+        );
+        const existing = (await Promise.all(fetchPromises)).flat();
         const channelMap = new Map<string, ChannelModel>(existing.map((c) => [c.id, c]));
         const createOrUpdateRawValues = uniqueRaws.reduce((res: Channel[], c) => {
             const e = channelMap.get(c.id);
@@ -116,9 +120,13 @@ const ChannelHandler = <TBase extends Constructor<ServerDataOperatorBase>>(super
         const uniqueRaws = getUniqueRawsBy({raws: settings, key: 'id'});
         const keys = uniqueRaws.map((c) => c.channel_id);
         const db: Database = this.database;
-        const existing = await db.get<MyChannelSettingsModel>(MY_CHANNEL_SETTINGS).query(
-            Q.where('id', Q.oneOf(keys)),
-        ).fetch();
+        const keyChunks = chunkArray(keys, 1000);
+        const fetchPromises = keyChunks.map((chunk) =>
+            db.get<MyChannelSettingsModel>(MY_CHANNEL_SETTINGS).query(
+                Q.where('id', Q.oneOf(chunk)),
+            ).fetch(),
+        );
+        const existing = (await Promise.all(fetchPromises)).flat();
         const channelMap = new Map<string, MyChannelSettingsModel>(existing.map((c) => [c.id, c]));
         const createOrUpdateRawValues = uniqueRaws.reduce((res: ChannelMembership[], c) => {
             const e = channelMap.get(c.channel_id);
@@ -176,9 +184,13 @@ const ChannelHandler = <TBase extends Constructor<ServerDataOperatorBase>>(super
         });
         const keys = uniqueRaws.map((ci) => ci.id);
         const db: Database = this.database;
-        const existing = await db.get<ChannelInfoModel>(CHANNEL_INFO).query(
-            Q.where('id', Q.oneOf(keys)),
-        ).fetch();
+        const keyChunks = chunkArray(keys, 1000);
+        const fetchPromises = keyChunks.map((chunk) =>
+            db.get<ChannelInfoModel>(CHANNEL_INFO).query(
+                Q.where('id', Q.oneOf(chunk)),
+            ).fetch(),
+        );
+        const existing = (await Promise.all(fetchPromises)).flat();
         const channelMap = new Map<string, ChannelInfoModel>(existing.map((ci) => [ci.id, ci]));
         const createOrUpdateRawValues = uniqueRaws.reduce((res: ChannelInfo[], ci) => {
             const e = channelMap.get(ci.id);
@@ -264,9 +276,13 @@ const ChannelHandler = <TBase extends Constructor<ServerDataOperatorBase>>(super
         });
         const ids = uniqueRaws.map((cm: ChannelMembership) => cm.channel_id);
         const db: Database = this.database;
-        const existing = await db.get<MyChannelModel>(MY_CHANNEL).query(
-            Q.where('id', Q.oneOf(ids)),
-        ).fetch();
+        const idChunks = chunkArray(ids, 1000);
+        const fetchPromises = idChunks.map((chunk) =>
+            db.get<MyChannelModel>(MY_CHANNEL).query(
+                Q.where('id', Q.oneOf(chunk)),
+            ).fetch(),
+        );
+        const existing = (await Promise.all(fetchPromises)).flat();
         const membershipMap = new Map<string, MyChannelModel>(existing.map((member) => [member.id, member]));
         const createOrUpdateRawValues = uniqueRaws.reduce((res: ChannelMembership[], my) => {
             const e = membershipMap.get(my.channel_id);
@@ -325,9 +341,13 @@ const ChannelHandler = <TBase extends Constructor<ServerDataOperatorBase>>(super
         const uniqueRaws = getUniqueRawsBy({raws: memberships, key: 'id'});
         const ids = uniqueRaws.map((cm: ChannelMember) => `${cm.channel_id}-${cm.user_id}`);
         const db: Database = this.database;
-        const existing = await db.get<ChannelMembershipModel>(CHANNEL_MEMBERSHIP).query(
-            Q.where('id', Q.oneOf(ids)),
-        ).fetch();
+        const idChunks = chunkArray(ids, 1000);
+        const fetchPromises = idChunks.map((chunk) =>
+            db.get<ChannelMembershipModel>(CHANNEL_MEMBERSHIP).query(
+                Q.where('id', Q.oneOf(chunk)),
+            ).fetch(),
+        );
+        const existing = (await Promise.all(fetchPromises)).flat();
         const membershipMap = new Map<string, ChannelMembershipModel>(existing.map((member) => [member.channelId, member]));
         const createOrUpdateRawValues = uniqueRaws.reduce((res: ChannelMember[], cm) => {
             const e = membershipMap.get(cm.channel_id);
@@ -375,9 +395,13 @@ const ChannelHandler = <TBase extends Constructor<ServerDataOperatorBase>>(super
         const uniqueRaws = getUniqueRawsBy({raws: bookmarks, key: 'id'});
         const keys = uniqueRaws.map((c) => c.id);
         const db: Database = this.database;
-        const existing = await db.get<ChannelBookmarkModel>(CHANNEL_BOOKMARK).query(
-            Q.where('id', Q.oneOf(keys)),
-        ).fetch();
+        const keyChunks = chunkArray(keys, 1000);
+        const fetchPromises = keyChunks.map((chunk) =>
+            db.get<ChannelBookmarkModel>(CHANNEL_BOOKMARK).query(
+                Q.where('id', Q.oneOf(chunk)),
+            ).fetch(),
+        );
+        const existing = (await Promise.all(fetchPromises)).flat();
         const bookmarkMap = new Map<string, ChannelBookmarkModel>(existing.map((b) => [b.id, b]));
         const files: FileInfo[] = [];
         const raws = uniqueRaws.reduce<{createOrUpdateRaws: ChannelBookmarkWithFileInfo[]; deleteRaws: ChannelBookmarkWithFileInfo[]}>((res, b) => {

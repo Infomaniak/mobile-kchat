@@ -10,6 +10,7 @@ import {
     getRangeOfValues,
     getValidRecordsForUpdate,
     retrieveRecords,
+    chunkArray,
 } from '@database/operator/utils/general';
 import {logWarning} from '@utils/log';
 
@@ -62,11 +63,15 @@ export default class BaseDataOperator {
                 return [];
             }
 
-            const existingRecords = await retrieveRecords<T>({
-                database: this.database,
-                tableName,
-                condition: Q.where(String(fieldName), Q.oneOf(columnValues)),
-            });
+            const chunks = chunkArray(columnValues, 1000);
+            const fetchPromises = chunks.map((chunk) =>
+                retrieveRecords<T>({
+                    database: this.database,
+                    tableName,
+                    condition: Q.where(String(fieldName), Q.oneOf(chunk)),
+                }),
+            );
+            const existingRecords = (await Promise.all(fetchPromises)).flat();
 
             return existingRecords;
         };

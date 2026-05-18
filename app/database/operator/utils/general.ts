@@ -10,6 +10,14 @@ import type {IdenticalRecordArgs, RangeOfValueArgs, RecordPair, RetrieveRecordsA
 
 const {CHANNEL, POST, TEAM, USER} = MM_TABLES.SERVER;
 
+export const chunkArray = <T>(array: T[], size: number): T[][] => {
+    const chunks: T[][] = [];
+    for (let i = 0; i < array.length; i += size) {
+        chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
+};
+
 /**
  * getValidRecordsForUpdate: Database Operations on some tables are expensive.  As such, we would like to operate if and only if we are
  * 100% sure that the records are actually different from what we already have in the database.
@@ -124,11 +132,16 @@ export const prepareDestroyPermanentlyChildrenAssociatedRecords = async (records
             map(async ([associationName, associated]) => {
                 const preparedRecords: Model[] = [];
                 const child = associated as HasManyAssociation; // this is a guard as we know that we are in a has_many association
-                const relatedRecords = await retrieveRecords({
-                    database: groupedRecords[0].database,
-                    tableName: String(associationName),
-                    condition: Q.where(child.foreignKey, Q.oneOf(groupedRecords.map((r) => r.id))),
-                });
+                const recordIds = groupedRecords.map((r) => r.id);
+                const idChunks = chunkArray(recordIds, 1000);
+                const fetchPromises = idChunks.map((ids) =>
+                    retrieveRecords({
+                        database: groupedRecords[0].database,
+                        tableName: String(associationName),
+                        condition: Q.where(child.foreignKey, Q.oneOf(ids)),
+                    }),
+                );
+                const relatedRecords = (await Promise.all(fetchPromises)).flat();
 
                 const childPreparedRecords = await prepareDestroyPermanentlyChildrenAssociatedRecords(relatedRecords);
                 preparedRecords.push(...childPreparedRecords);

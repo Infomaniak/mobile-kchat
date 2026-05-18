@@ -3,6 +3,7 @@
 import {Q} from '@nozbe/watermelondb';
 
 import {MM_TABLES} from '@constants/database';
+import {chunkArray} from '@database/operator/utils/general';
 
 import type {Clause} from '@nozbe/watermelondb/QueryDescription';
 import type {RecordPair, SanitizeThreadParticipantsArgs} from '@typings/database/database';
@@ -24,11 +25,16 @@ export const sanitizeThreadParticipants = async ({database, skipSync, thread_id,
 
     // Check if we already have the participants
     if (skipSync) {
-        clauses.push(
-            Q.where('user_id', Q.oneOf(
-                rawParticipants.map((participant) => participant.id),
-            )),
+        const participantIds = rawParticipants.map((participant) => participant.id);
+        const idChunks = chunkArray(participantIds, 1000);
+        const chunkClauses: Clause[] = idChunks.map((ids) =>
+            Q.where('user_id', Q.oneOf(ids)),
         );
+        if (chunkClauses.length > 1) {
+            clauses.push(Q.or(...chunkClauses));
+        } else if (chunkClauses.length === 1) {
+            clauses.push(chunkClauses[0]);
+        }
     }
     const participants = (await database.collections.
         get<ThreadParticipantModel>(THREAD_PARTICIPANT).

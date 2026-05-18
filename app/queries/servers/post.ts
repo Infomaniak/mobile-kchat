@@ -201,7 +201,7 @@ export const queryPostsByType = (database: Database, type: string) => {
     return database.get<PostModel>(POST).query(...clauses);
 };
 
-export const queryPostsBetween = (database: Database, earliest: number, latest: number, sort: Q.SortOrder | null, userId?: string, channelId?: string, rootId?: string) => {
+export const queryPostsBetween = (database: Database, earliest: number, latest: number, sort: Q.SortOrder | null, userId?: string, channelId?: string, rootId?: string, limit?: number) => {
     const andClauses = [Q.where('create_at', Q.between(earliest, latest))];
     if (channelId) {
         andClauses.push(Q.where('channel_id', channelId));
@@ -219,6 +219,11 @@ export const queryPostsBetween = (database: Database, earliest: number, latest: 
     if (sort != null) {
         clauses.push(Q.sortBy('create_at', sort));
     }
+
+    if (limit) {
+        clauses.push(Q.take(limit));
+    }
+
     return database.get<PostModel>(POST).query(...clauses);
 };
 

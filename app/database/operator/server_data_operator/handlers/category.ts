@@ -8,7 +8,7 @@ import {
     transformCategoryChannelRecord,
     transformCategoryRecord,
 } from '@database/operator/server_data_operator/transformers/category';
-import {getUniqueRawsBy} from '@database/operator/utils/general';
+import {getUniqueRawsBy, chunkArray} from '@database/operator/utils/general';
 import {logWarning} from '@utils/log';
 
 import type ServerDataOperatorBase from '.';
@@ -55,9 +55,13 @@ const CategoryHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supe
         const uniqueRaws = getUniqueRawsBy({raws: categoriesWithSortOrder, key: 'id'}) as Category[];
         const ids = uniqueRaws.map((c) => c.id);
         const db: Database = this.database;
-        const exists = await db.get<CategoryModel>(CATEGORY).query(
-            Q.where('id', Q.oneOf(ids)),
-        ).fetch();
+        const idChunks = chunkArray(ids, 1000);
+        const fetchPromises = idChunks.map((chunk) =>
+            db.get<CategoryModel>(CATEGORY).query(
+                Q.where('id', Q.oneOf(chunk)),
+            ).fetch(),
+        );
+        const exists = (await Promise.all(fetchPromises)).flat();
         const categoryMap = new Map<string, CategoryModel>(exists.map((c) => [c.id, c]));
         const createOrUpdateRawValues = uniqueRaws.reduce((res: Category[], c) => {
             const e = categoryMap.get(c.id);
@@ -108,9 +112,13 @@ const CategoryHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supe
         const uniqueRaws = getUniqueRawsBy({raws: categoryChannels, key: 'id'}) as CategoryChannel[];
         const ids = uniqueRaws.map((c) => c.id).filter((id): id is string => id !== undefined);
         const db: Database = this.database;
-        const exists = await db.get<CategoryChannelModel>(CATEGORY_CHANNEL).query(
-            Q.where('id', Q.oneOf(ids)),
-        ).fetch();
+        const idChunks = chunkArray(ids, 1000);
+        const fetchPromises = idChunks.map((chunk) =>
+            db.get<CategoryChannelModel>(CATEGORY_CHANNEL).query(
+                Q.where('id', Q.oneOf(chunk)),
+            ).fetch(),
+        );
+        const exists = (await Promise.all(fetchPromises)).flat();
         const categoryChannelMap = new Map<string, CategoryChannelModel>(exists.map((c) => [c.id, c]));
         const createOrUpdateRawValues = uniqueRaws.reduce((res: CategoryChannel[], c) => {
             if (!c.id) {
