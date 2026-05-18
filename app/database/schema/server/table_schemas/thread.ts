@@ -13,7 +13,7 @@ export const tableSchemaSpec: TableSchemaSpec = {
     name: THREAD,
     columns: [
         {name: 'is_following', type: 'boolean'},
-        {name: 'last_reply_at', type: 'number'},
+        {name: 'last_reply_at', type: 'number', isIndexed: true},
         {name: 'last_viewed_at', type: 'number'},
         {name: 'reply_count', type: 'number'},
         {name: 'unread_mentions', type: 'number'},

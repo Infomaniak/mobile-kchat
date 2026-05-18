@@ -38,6 +38,35 @@ const {PLAYBOOK_RUN, PLAYBOOK_CHECKLIST, PLAYBOOK_CHECKLIST_ITEM} = PLAYBOOK_TAB
 export default schemaMigrations({
     migrations: [
         {
+            toVersion: 11,
+            steps: [
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Post_create_at ON Post (create_at);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Post_delete_at ON Post (delete_at);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Post_root_id ON Post (root_id);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Channel_delete_at ON Channel (delete_at);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Channel_type ON Channel (type);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Thread_last_reply_at ON Thread (last_reply_at);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS User_username ON User (username);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS User_email ON User (email);',
+                ),
+            ],
+        },
+        {
             toVersion: 10,
             steps: [
                 addColumns({
