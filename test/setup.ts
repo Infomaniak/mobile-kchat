@@ -1,3 +1,4 @@
+/* eslint-disable max-nested-callbacks */
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
@@ -615,6 +616,26 @@ console.debug = filterStackTrace(colors.blue, '🐞 Debug:');
 // Silence warnings about missing EXPO_OS environment variable
 // on tests
 process.env.EXPO_OS = 'ios'; // eslint-disable-line no-process-env
+
+jest.mock('react-native-nitro-sound', () => ({
+    createSound: jest.fn(() => ({
+        startPlayer: jest.fn(() => Promise.resolve()),
+        stopPlayer: jest.fn(() => Promise.resolve()),
+        pausePlayer: jest.fn(() => Promise.resolve()),
+        resumePlayer: jest.fn(() => Promise.resolve()),
+        seekToPlayer: jest.fn(() => Promise.resolve()),
+        setPlaybackSpeed: jest.fn(() => Promise.resolve()),
+        setSubscriptionDuration: jest.fn(() => Promise.resolve()),
+        addPlayBackListener: jest.fn(),
+        removePlayBackListener: jest.fn(),
+        startRecorder: jest.fn(() => Promise.resolve('file://test.m4a')),
+        stopRecorder: jest.fn(() => Promise.resolve()),
+        resumeRecorder: jest.fn(() => Promise.resolve()),
+        pauseRecorder: jest.fn(() => Promise.resolve()),
+        addRecordBackListener: jest.fn(),
+        removeRecordBackListener: jest.fn(),
+    })),
+}));
 
 // IK MOCKS
 
