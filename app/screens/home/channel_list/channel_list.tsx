@@ -11,6 +11,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {refetchCurrentUser} from '@actions/remote/user';
 import AlmostFullStorageAnnouncementBar from '@components/almost_full_storage_announcement_bar';
 import AnnouncementBanner from '@components/announcement_banner';
+import ConnectionBanner from '@components/connection_banner';
 import FullStorageAnnouncementBar from '@components/ik_full_annoucement_banner';
 import TeamSidebar from '@components/team_sidebar';
 import {Navigation as NavigationConstants, Screens} from '@constants';
@@ -192,6 +193,7 @@ const ChannelListScreen = (props: ChannelProps) => {
                 style={[styles.flex, styles.background]}
                 testID='channel_list.screen'
             >
+                <ConnectionBanner/>
                 {props.isLicensed &&
                     <AnnouncementBanner/>
                 }
