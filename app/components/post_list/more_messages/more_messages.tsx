@@ -149,7 +149,7 @@ const MoreMessages = ({
                     adjustedTop,
                 ],
                 'clamp',
-            ), {damping: 15}),
+            ), {mass: 1, stiffness: 100, damping: 14}),
         }],
     }), [adjustedTop]);
 

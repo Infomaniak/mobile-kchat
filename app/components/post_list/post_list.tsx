@@ -7,6 +7,7 @@ import {DeviceEventEmitter, type ListRenderItemInfo, Platform, type StyleProp, S
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import {KeyboardState, useAnimatedKeyboard, useKeyboardState as useControllerKeyboardState} from 'react-native-keyboard-controller';
 import Animated, {scrollTo, useAnimatedProps, useAnimatedReaction, useAnimatedStyle, type AnimatedStyle} from 'react-native-reanimated';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {scheduleOnRN, scheduleOnUI} from 'react-native-worklets';
 
 import {removePost} from '@actions/local/post';
@@ -23,6 +24,7 @@ import {PostTypes} from '@constants/post';
 import {useKeyboardState} from '@context/keyboard_state';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import {useDefaultHeaderHeight} from '@hooks/header';
 import {useInputAccessoryViewGesture} from '@hooks/use_input_accessory_view_gesture';
 import EphemeralStore from '@store/ephemeral_store';
 import {logDebug} from '@utils/log';
@@ -129,6 +131,8 @@ const PostList = ({
 }: Props) => {
     const firstIdInPosts = posts[0]?.id;
     const {panGesture: emojiPickerGesture} = useInputAccessoryViewGesture();
+    const insets = useSafeAreaInsets();
+    const defaultHeaderHeight = useDefaultHeaderHeight();
 
     const {stateContext, onScroll: onScrollProp, postInputContainerHeight, stateMachine, listRef, isEmojiSearchFocused} = useKeyboardState();
     const {postInputTranslateY, inputAccessoryHeight} = stateContext;
@@ -312,10 +316,10 @@ const PostList = ({
         listRef?.current?.scrollToIndex({
             animated,
             index,
-            viewOffset: applyOffset ? Platform.select({ios: -45, default: 0}) : 0,
-            viewPosition: 1,
+            viewOffset: applyOffset ? -(insets.top + defaultHeaderHeight) : 0,
+            viewPosition: 1, // 0 is at bottom
         });
-    }, [listRef]);
+    }, [defaultHeaderHeight, insets.top, listRef]);
 
     const scrollToHighlightedIndex = useCallback((index: number, animated = true) => {
         if (index < 0 || !listRef?.current) {
