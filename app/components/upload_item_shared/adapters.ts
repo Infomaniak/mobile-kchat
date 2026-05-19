@@ -39,5 +39,6 @@ export function sharedItemToUploadItemFile(item: SharedItem): UploadItemFile {
         width: item.width,
         height: item.height,
         mime_type: item.type,
+        is_voice_recording: undefined,
     };
 }
