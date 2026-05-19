@@ -5,6 +5,7 @@ import RNUtils from '@mattermost/rnutils';
 import {AppState, type AppStateStatus} from 'react-native';
 import performance from 'react-native-performance';
 
+import {CollectNetworkMetrics} from '@assets/config.json';
 import {logDebug, logInfo, logWarning} from '@utils/log';
 
 import Batcher from './performance_metrics_batcher';
@@ -66,6 +67,9 @@ class PerformanceMetricsManagerSingleton {
     }
 
     private finishLoadWithRetries(location: Target, serverUrl: string, retries: number) {
+        if (!CollectNetworkMetrics) {
+            return;
+        }
         if (this.target !== location || RNUtils.getHasRegisteredLoad().hasRegisteredLoad) {
             return;
         }
@@ -105,6 +109,9 @@ class PerformanceMetricsManagerSingleton {
             return;
         }
 
+        if (!CollectNetworkMetrics) {
+            return;
+        }
         let duration = 0;
         if (marks.length === 1) {
             const measureName = `measure_${metricName}`;
@@ -126,7 +133,6 @@ class PerformanceMetricsManagerSingleton {
             }
             logInfo(`${'Total:'.padEnd(15, ' ')}${duration.toFixed(2).padStart(8, ' ')}ms`);
         }
-
         this.ensureBatcher(serverUrl).addToBatch({
             metric: metricName,
             value: duration,
@@ -153,6 +159,9 @@ class PerformanceMetricsManagerSingleton {
     }
 
     public collectNetworkRequestData = (name: NetworkRequestMetrics, value: number, {serverUrl, groupLabel}: NetworkRequestDataOtherInfo) => {
+        if (!CollectNetworkMetrics) {
+            return;
+        }
         this.ensureBatcher(serverUrl).addToBatch({
             metric: name,
             value,
