@@ -21,7 +21,7 @@ import {storeDeviceToken} from '@actions/app/global';
 import {markChannelAsViewed} from '@actions/local/channel';
 import {updateThread} from '@actions/local/thread';
 import {backgroundNotification, openNotification} from '@actions/remote/notifications';
-import {Device, Events, Navigation, PushNotification, Screens} from '@constants';
+import {Device, Navigation, PushNotification, Screens} from '@constants';
 import DatabaseManager from '@database/manager';
 import {DEFAULT_LOCALE, getLocalizedMessage} from '@i18n';
 import {getServerDisplayName} from '@queries/app/servers';
@@ -32,7 +32,7 @@ import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {isBetaApp} from '@utils/general';
 import {isMainActivity, isTablet} from '@utils/helpers';
-import {logDebug, logInfo} from '@utils/log';
+import {logDebug} from '@utils/log';
 import {convertToNotificationData} from '@utils/notification';
 
 const messages = defineMessages({
@@ -198,20 +198,6 @@ class PushNotificationsSingleton {
         }
     };
 
-    handleSessionNotification = async (notification: NotificationWithData) => {
-        logInfo('Session expired notification');
-
-        const serverUrl = await this.getServerUrlFromNotification(notification);
-
-        if (serverUrl) {
-            if (notification.userInteraction) {
-                DeviceEventEmitter.emit(Events.SESSION_EXPIRED, serverUrl);
-            } else {
-                DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl});
-            }
-        }
-    };
-
     processNotification = async (notification: NotificationWithData) => {
         const {payload} = notification;
 
@@ -222,9 +208,6 @@ class PushNotificationsSingleton {
                     break;
                 case PushNotification.NOTIFICATION_TYPE.MESSAGE:
                     this.handleMessageNotification(notification);
-                    break;
-                case PushNotification.NOTIFICATION_TYPE.SESSION:
-                    this.handleSessionNotification(notification);
                     break;
             }
         }

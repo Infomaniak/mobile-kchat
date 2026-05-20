@@ -1,16 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import moment from 'moment-timezone';
 import {type IntlShape} from 'react-intl';
 import {Alert, DeviceEventEmitter} from 'react-native';
 
 import {Events} from '@constants';
 import {NOTIFICATION_TYPE} from '@constants/push_notification';
-import {DEFAULT_LOCALE} from '@i18n';
-import PushNotifications from '@init/push_notifications';
 import {popToRoot} from '@screens/navigation';
-import {getIntlShape} from '@utils/general';
 
 export const convertToNotificationData = (notification: Notification, tapped = true): NotificationWithData => {
     if (!notification.payload) {
@@ -91,45 +87,4 @@ export const emitNotificationError = (type: 'Team' | 'Channel' | 'Post' | 'Conne
         DeviceEventEmitter.emit(Events.NOTIFICATION_ERROR, type);
         clearTimeout(req);
     }, 500);
-};
-
-export const scheduleExpiredNotification = (serverUrl: string, session: Session, serverName: string, locale = DEFAULT_LOCALE) => {
-    const expiresAt = session?.expires_at || 0;
-    const expiresInHours = Math.ceil(Math.abs(moment.duration(moment().diff(moment(expiresAt))).asHours()));
-    const expiresInDays = Math.floor(expiresInHours / 24); // Calculate expiresInDays
-    const remainingHours = expiresInHours % 24; // Calculate remaining hours
-    const intl = getIntlShape(locale);
-    let body = '';
-    if (expiresInDays === 0) {
-        body = intl.formatMessage({
-            id: 'mobile.session_expired_hrs',
-            defaultMessage: 'Please log in to continue receiving notifications. Sessions for {siteName} are configured to expire every {hoursCount, number} {hoursCount, plural, one {hour} other {hours}}.',
-        }, {siteName: serverName, hoursCount: remainingHours});
-    } else if (expiresInHours === 0) {
-        body = intl.formatMessage({
-            id: 'mobile.session_expired_days',
-            defaultMessage: 'Please log in to continue receiving notifications. Sessions for {siteName} are configured to expire every {daysCount, number} {daysCount, plural, one {day} other {days}}.',
-        }, {siteName: serverName, daysCount: expiresInDays});
-    } else {
-        body = intl.formatMessage({
-            id: 'mobile.session_expired_days_hrs',
-            defaultMessage: 'Please log in to continue receiving notifications. Sessions for {siteName} are configured to expire every {daysCount, number} {daysCount, plural, one {day} other {days}} and {hoursCount, number} {hoursCount, plural, one {hour} other {hours}}.',
-        }, {siteName: serverName, daysCount: expiresInDays, hoursCount: remainingHours});
-    }
-    const title = intl.formatMessage({id: 'mobile.session_expired.title', defaultMessage: 'Session Expired'});
-
-    if (expiresAt) {
-        return PushNotifications.scheduleNotification({
-            fireDate: expiresAt,
-            body,
-            title,
-
-            // @ts-expect-error need to be included in the notification payload
-            ack_id: serverUrl,
-            server_url: serverUrl,
-            type: 'session',
-        });
-    }
-
-    return 0;
 };
