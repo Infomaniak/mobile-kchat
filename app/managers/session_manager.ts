@@ -37,7 +37,6 @@ export class SessionManagerSingleton {
     }
 
     init() {
-
         let updateToMigrationDone = false;
         queryGlobalValue(GLOBAL_IDENTIFIERS.CACHE_MIGRATION)?.fetch().then((records) => {
             const cacheMigrationDone = Boolean(records?.[0]?.value);
