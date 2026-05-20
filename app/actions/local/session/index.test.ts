@@ -17,7 +17,7 @@ import {getCurrentUser} from '@queries/servers/user';
 import {deleteFileCache, deleteFileCacheByDir} from '@utils/file';
 import {clearCookiesForServer, getCSRFFromCookie, urlSafeBase64Encode} from '@utils/security';
 
-import {cancelAllSessionNotifications, cancelSessionNotification, findSession, terminateSession} from './index';
+import {terminateSession} from './index';
 
 import type ServerDataOperator from '@database/operator/server_data_operator';
 import type {Database} from '@nozbe/watermelondb';
