@@ -4,8 +4,6 @@
 import React, {type ReactNode} from 'react';
 import {View} from 'react-native';
 
-import SecurityManager from '@managers/security_manager';
-
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
@@ -14,7 +12,7 @@ type Props = {
 }
 
 const Overlay = ({children, componentId}: Props) => {
-    return (<View nativeID={SecurityManager.getShieldScreenId(componentId)}>{children}</View>);
+    return (<View nativeID={`${componentId}.screen`}>{children}</View>);
 };
 
 export default Overlay;

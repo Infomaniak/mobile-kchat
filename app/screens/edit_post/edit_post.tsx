@@ -23,7 +23,6 @@ import useDidUpdate from '@hooks/did_update';
 import {useInputPropagation} from '@hooks/input';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import DraftEditPostUploadManager from '@managers/draft_upload_manager';
-import SecurityManager from '@managers/security_manager';
 import PostError from '@screens/edit_post/post_error';
 import {buildNavigationButton, dismissModal, setButtons} from '@screens/navigation';
 import {fileMaxWarning, fileSizeWarning, uploadDisabledWarning} from '@utils/file';
@@ -432,7 +431,7 @@ const EditPost = ({
         return (
             <View
                 style={styles.loader}
-                nativeID={SecurityManager.getShieldScreenId(componentId)}
+                nativeID={`${componentId}.screen`}
             >
                 <Loading color={theme.buttonBg}/>
             </View>
@@ -450,7 +449,7 @@ const EditPost = ({
                 style={styles.container}
                 edges={safeAreaEdges}
                 onLayout={onLayout}
-                nativeID={SecurityManager.getShieldScreenId(componentId)}
+                nativeID={`${componentId}.screen`}
             >
                 {Platform.OS === 'ios' ? (
                     <KeyboardProvider>

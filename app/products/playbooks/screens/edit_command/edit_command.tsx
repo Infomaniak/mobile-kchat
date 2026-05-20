@@ -8,7 +8,6 @@ import {Keyboard, StyleSheet, View} from 'react-native';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import SecurityManager from '@managers/security_manager';
 import {buildNavigationButton, popTopScreen, setButtons} from '@screens/navigation';
 
 import EditCommandForm from './edit_command_form';
@@ -84,7 +83,7 @@ const CreateOrEditChannel = ({
 
     return (
         <View
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
             style={styles.container}
         >
             <EditCommandForm

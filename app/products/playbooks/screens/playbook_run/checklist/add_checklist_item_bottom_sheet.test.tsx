@@ -8,7 +8,6 @@ import {Keyboard, View} from 'react-native';
 import {Preferences} from '@constants';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import SecurityManager from '@managers/security_manager';
 import {buildNavigationButton, popTopScreen, setButtons} from '@screens/navigation';
 import {renderWithIntlAndTheme} from '@test/intl-test-helper';
 import {getLastCall, getLastCallForButton} from '@test/mock_helpers';
@@ -31,9 +30,6 @@ jest.mock('react-native', () => {
 
 jest.mock('@hooks/navigation_button_pressed', () => jest.fn());
 jest.mock('@hooks/android_back_handler', () => jest.fn());
-jest.mock('@managers/security_manager', () => ({
-    getShieldScreenId: jest.fn((id) => `shield-${id}`),
-}));
 
 describe('AddChecklistItemBottomSheet', () => {
     const componentId = 'test-component-id' as any;
@@ -343,18 +339,6 @@ describe('AddChecklistItemBottomSheet', () => {
         expect(Keyboard.dismiss).toHaveBeenCalled();
         expect(popTopScreen).toHaveBeenCalledWith(componentId);
         expect(mockOnSave).not.toHaveBeenCalled();
-    });
-
-    it('should apply shield screen ID to container', () => {
-        const props = getBaseProps();
-        const renderResult = renderWithIntlAndTheme(<AddChecklistItemBottomSheet {...props}/>);
-        const getAllByType = renderResult.UNSAFE_getAllByType;
-
-        const views = getAllByType(View);
-        const container = views.find((view: any) => view.props.nativeID === `shield-${componentId}`);
-        expect(container).toBeTruthy();
-        expect(container?.props.nativeID).toBe(`shield-${componentId}`);
-        expect(SecurityManager.getShieldScreenId).toHaveBeenCalledWith(componentId);
     });
 
     it('should update navigation button when canSave changes', () => {

@@ -8,7 +8,6 @@ import Animated from 'react-native-reanimated';
 import {Events} from '@constants';
 import {GALLERY_FOOTER_HEIGHT} from '@constants/gallery';
 import {useServerUrl} from '@context/server';
-import SecurityManager from '@managers/security_manager';
 import {changeOpacity} from '@utils/theme';
 import {ensureString} from '@utils/types';
 import {displayUsername} from '@utils/user';
@@ -95,7 +94,7 @@ const Footer = ({
         if (item.type === 'file') {
             location = 'FilesApp';
         }
-        return canDownloadFiles && SecurityManager.canSaveToLocation(serverUrl, location);
+        return canDownloadFiles && true;
     }, [canDownloadFiles, item.type, serverUrl]);
 
     useEffect(() => {

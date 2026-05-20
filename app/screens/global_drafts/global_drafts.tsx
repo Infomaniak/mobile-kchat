@@ -14,7 +14,6 @@ import {DRAFT_SCREEN_TAB_DRAFTS, type DraftScreenTab} from '@constants/draft';
 import {useIsTablet} from '@hooks/device';
 import {useDefaultHeaderHeight} from '@hooks/header';
 import {useTeamSwitch} from '@hooks/team_switch';
-import SecurityManager from '@managers/security_manager';
 import TabbedContents from '@screens/global_drafts/components/tabbed_contents';
 
 import {popTopScreen} from '../navigation';
@@ -87,7 +86,7 @@ const GlobalDraftsAndScheduledPosts = ({componentId, scheduledPostsEnabled, init
             mode='margin'
             style={styles.flex}
             testID='global_drafts.screen'
-            nativeID={SecurityManager.getShieldScreenId(componentId || Screens.GLOBAL_DRAFTS)}
+            nativeID={`${componentId || Screens.GLOBAL_DRAFTS}.screen`}
         >
             <NavigationHeader
                 showBackButton={!isTablet}
