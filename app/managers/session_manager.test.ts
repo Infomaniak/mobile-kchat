@@ -11,7 +11,6 @@ import DatabaseManager from '@database/manager';
 import {getAllServerCredentials, removeServerCredentials} from '@init/credentials';
 import {relaunchApp} from '@init/launch';
 import PushNotifications from '@init/push_notifications';
-import IntuneManager from '@managers/intune_manager';
 import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {queryGlobalValue} from '@queries/app/global';
@@ -190,7 +189,6 @@ describe.skip('SessionManager', () => {
             expect(PushNotifications.removeServerNotifications).toHaveBeenCalledWith(mockServerUrl);
             expect(NetworkManager.invalidateClient).toHaveBeenCalledWith(mockServerUrl);
             expect(WebsocketManager.invalidateClient).toHaveBeenCalledWith(mockServerUrl);
-            expect(IntuneManager.unenrollServer).toHaveBeenCalledWith(mockServerUrl, false);
         });
 
         it('should handle session expiration', async () => {
@@ -199,7 +197,6 @@ describe.skip('SessionManager', () => {
             await TestHelper.wait(50);
 
             expect(logout).toHaveBeenCalledWith(mockServerUrl, undefined, {skipEvents: true, skipServerLogout: true});
-            expect(IntuneManager.unenrollServer).toHaveBeenCalledWith(mockServerUrl, true);
             expect(relaunchApp).toHaveBeenCalled();
         });
     });

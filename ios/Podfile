@@ -25,12 +25,6 @@ setup_permissions([
   "PhotoLibrary"
 ])
 
-# Conditional Intune MAM support
-intune_enabled = ENV['INTUNE_ENABLED'] == 'true' || ENV['INTUNE_ENABLED'] == '1'
-
-if intune_enabled
-  puts "🔐 Intune MAM features enabled"
-end
 
 config = use_native_modules!
 
@@ -54,11 +48,7 @@ target 'kChat' do
   pod 'CocoaLumberjack', :modular_headers => true
   pod 'TurboLogIOSNative', :git => 'https://github.com/larkox/react-native-turbo-log-ios-native.git', :modular_headers => true
   pod 'JitsiMeetSDKLite', :git => 'https://github.com/jitsi/jitsi-meet-ios-sdk-releases.git', :tag => '11.3.1-lite'
-
-  # Conditional Intune MAM pod (internal builds only)
-  if intune_enabled
-    pod 'mattermost-intune', :path => '../libraries/@mattermost/intune'
-  end
+  
 end
 
 target 'kChatNotificationService' do

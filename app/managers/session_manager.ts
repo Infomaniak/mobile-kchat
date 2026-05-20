@@ -12,7 +12,6 @@ import {GLOBAL_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials} from '@init/credentials';
 import {relaunchApp} from '@init/launch';
-import IntuneManager from '@managers/intune_manager';
 import {queryGlobalValue} from '@queries/app/global';
 import {getAllServers, getServerDisplayName} from '@queries/app/servers';
 import {getThemeFromState} from '@screens/navigation';
@@ -119,8 +118,6 @@ export class SessionManagerSingleton {
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
             const activeServerDisplayName = await DatabaseManager.getActiveServerDisplayName();
 
-            // We do not unenroll with Wipe as we already removed all the data during terminateSession
-            await IntuneManager.unenrollServer(serverUrl, false);
             await terminateSession(serverUrl, removeServer);
 
             if (activeServerUrl === serverUrl) {
@@ -157,7 +154,6 @@ export class SessionManagerSingleton {
             await logout(serverUrl, undefined, {skipServerLogout: true, skipEvents: true});
 
             await terminateSession(serverUrl, false);
-            await IntuneManager.unenrollServer(serverUrl, true);
 
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
             const serverDisplayName = await getServerDisplayName(serverUrl);
