@@ -14,7 +14,6 @@ import {
 } from '@actions/websocket/burn_on_read';
 import * as scheduledPost from '@actions/websocket/scheduled_post';
 import {WebsocketEvents} from '@constants';
-import {handlePlaybookEvents} from '@playbooks/actions/websocket/events';
 
 import * as category from './category';
 import * as channel from './channel';
@@ -312,6 +311,5 @@ export async function handleWebSocketEvent(serverUrl: string, msg: WebSocketMess
 
             break;
     }
-    handlePlaybookEvents(serverUrl, msg);
     handleAgentsEvents(serverUrl, msg);
 }

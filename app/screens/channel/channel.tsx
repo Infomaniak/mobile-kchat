@@ -58,8 +58,6 @@ const Channel = ({
     channelType,
     currentUserId,
     hasGMasDMFeature,
-
-    // includeBookmarkBar,
     includeChannelBanner,
     scheduledPostCount,
 }: ChannelProps) => {

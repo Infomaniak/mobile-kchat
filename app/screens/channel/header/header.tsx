@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {useAgentsConfig} from '@agents/store/agents_config';
-import React, {useCallback, useEffect, useMemo} from 'react';
+import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, Platform, Text, View} from 'react-native';
 
@@ -19,11 +19,9 @@ import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import {useDefaultHeaderHeight} from '@hooks/header';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {fetchPlaybookRunsForChannel} from '@playbooks/actions/remote/runs';
 import {BOTTOM_SHEET_ANDROID_OFFSET} from '@screens/bottom_sheet';
 import ChannelBanner from '@screens/channel/header/channel_banner';
 import {bottomSheet, popTopScreen, showModal} from '@screens/navigation';
-import EphemeralStore from '@store/ephemeral_store';
 import {isTypeDMorGM} from '@utils/channel';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -53,8 +51,6 @@ type ChannelProps = {
     isTabletView?: boolean;
     shouldRenderBookmarks: boolean;
     shouldRenderChannelBanner: boolean;
-    hasPlaybookRuns: boolean;
-    isPlaybooksEnabled?: boolean;
     isChannelAutotranslated: boolean;
 };
 
@@ -101,8 +97,6 @@ const ChannelHeader = ({
     isTabletView,
     shouldRenderBookmarks,
     shouldRenderChannelBanner,
-    hasPlaybookRuns,
-    isPlaybooksEnabled,
     isChannelAutotranslated,
 }: ChannelProps) => {
     const intl = useIntl();
@@ -177,7 +171,7 @@ const ChannelHeader = ({
         if (callsAvailable && !isDMorGM) {
             items += 1;
         }
-        if (hasPlaybookRuns && !isDMorGM) {
+        if (!isDMorGM) {
             items += 1;
         }
         if (agentsEnabled) {
@@ -205,7 +199,7 @@ const ChannelHeader = ({
             theme,
             closeButtonId: 'close-channel-quick-actions',
         });
-    }, [isTablet, callsAvailable, isDMorGM, hasPlaybookRuns, agentsEnabled, theme, onTitlePress, channelId]);
+    }, [isTablet, callsAvailable, isDMorGM, , agentsEnabled, theme, onTitlePress, channelId]);
 
     // const openPlaybooksRuns = useCallback(() => {
     //     // If no active runs, create a new one instead
@@ -310,15 +304,6 @@ const ChannelHeader = ({
         }
         return undefined;
     }, [isChannelAutotranslated, theme.sidebarHeaderTextColor]);
-
-    useEffect(() => {
-        const asyncEffect = async () => {
-            if (isPlaybooksEnabled && !EphemeralStore.getChannelPlaybooksSynced(serverUrl, channelId)) {
-                await fetchPlaybookRunsForChannel(serverUrl, channelId);
-            }
-        };
-        asyncEffect();
-    }, [channelId, serverUrl, isPlaybooksEnabled]);
 
     const showBookmarkBar = isBookmarksEnabled && hasBookmarks && shouldRenderBookmarks;
 

@@ -3,8 +3,6 @@
 
 import AGENTS_SCREENS from '@agents/constants/screens';
 
-import PLAYBOOKS_SCREENS from '@playbooks/constants/screens';
-
 export const ABOUT = 'About';
 export const ACCOUNT = 'Account';
 export const AI_OPTIONS = 'AiOptions';
@@ -207,7 +205,6 @@ export default {
     INFOMANIAK_EVOLVE,
     TRANSCRIPTION,
     SHOW_TRANSLATION,
-    ...PLAYBOOKS_SCREENS,
     ...AGENTS_SCREENS,
 } as const;
 
