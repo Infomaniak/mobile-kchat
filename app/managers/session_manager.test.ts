@@ -13,7 +13,6 @@ import {relaunchApp} from '@init/launch';
 import PushNotifications from '@init/push_notifications';
 import IntuneManager from '@managers/intune_manager';
 import NetworkManager from '@managers/network_manager';
-import SecurityManager from '@managers/security_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {queryGlobalValue} from '@queries/app/global';
 import {getAllServers, getServerDisplayName} from '@queries/app/servers';
@@ -65,7 +64,6 @@ jest.mock('@managers/intune_manager', () => ({
     },
 }));
 jest.mock('@managers/network_manager');
-jest.mock('@managers/security_manager');
 jest.mock('@managers/websocket_manager');
 jest.mock('@queries/app/global', () => ({
     queryGlobalValue: jest.fn(),
@@ -192,7 +190,6 @@ describe.skip('SessionManager', () => {
             expect(PushNotifications.removeServerNotifications).toHaveBeenCalledWith(mockServerUrl);
             expect(NetworkManager.invalidateClient).toHaveBeenCalledWith(mockServerUrl);
             expect(WebsocketManager.invalidateClient).toHaveBeenCalledWith(mockServerUrl);
-            expect(SecurityManager.removeServer).toHaveBeenCalledWith(mockServerUrl);
             expect(IntuneManager.unenrollServer).toHaveBeenCalledWith(mockServerUrl, false);
         });
 
@@ -202,7 +199,6 @@ describe.skip('SessionManager', () => {
             await TestHelper.wait(50);
 
             expect(logout).toHaveBeenCalledWith(mockServerUrl, undefined, {skipEvents: true, skipServerLogout: true});
-            expect(SecurityManager.removeServer).toHaveBeenCalledWith(mockServerUrl);
             expect(IntuneManager.unenrollServer).toHaveBeenCalledWith(mockServerUrl, true);
             expect(relaunchApp).toHaveBeenCalled();
         });

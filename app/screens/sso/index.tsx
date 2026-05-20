@@ -14,7 +14,6 @@ import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {useScreenTransitionAnimation} from '@hooks/screen_transition_animation';
 import NetworkManager from '@managers/network_manager';
-import SecurityManager from '@managers/security_manager';
 import Background from '@screens/background';
 import {dismissModal, popTopScreen, resetToHome} from '@screens/navigation';
 import {getFullErrorMessage, isErrorWithUrl} from '@utils/errors';
@@ -59,7 +58,7 @@ const SSO = ({
     if (!serverUrl) {
         return (
             <View
-                nativeID={SecurityManager.getShieldScreenId(componentId, false, true)}
+                nativeID={`${componentId}.screen`}
                 style={styles.flex}
             >
                 <Background theme={theme}/>
@@ -218,7 +217,7 @@ const SSO = ({
 
     return (
         <View
-            nativeID={SecurityManager.getShieldScreenId(componentId, false, true)}
+            nativeID={`${componentId}.screen`}
             style={styles.flex}
         >
             <Background theme={theme}/>

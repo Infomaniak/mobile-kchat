@@ -10,7 +10,6 @@ import Animated from 'react-native-reanimated';
 import FileIcon from '@components/files/file_icon';
 import {Events, Preferences} from '@constants';
 import {useServerUrl} from '@context/server';
-import SecurityManager from '@managers/security_manager';
 import DownloadWithAction from '@screens/gallery/footer/download_with_action';
 import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {isDocument, isPdf} from '@utils/file';
@@ -88,7 +87,7 @@ const DocumentRenderer = ({canDownloadFiles, enableSecureFilePreview, item, hide
     }, [canDownloadFiles, enableSecureFilePreview, file, isSupported]);
 
     const optionText = useMemo(() => {
-        const allowSaveToLocation = SecurityManager.canSaveToLocation(serverUrl, 'FilesApp');
+        const allowSaveToLocation = true;
         if (enableSecureFilePreview && !isPdf(file)) {
             return formatMessage(messages.onlyPdf);
         } else if (!isSupported && allowSaveToLocation) {

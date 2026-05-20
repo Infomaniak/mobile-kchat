@@ -18,7 +18,6 @@ import {storeOnboardingViewedValue} from '@actions/app/global';
 import {Screens} from '@constants';
 import useDidMount from '@hooks/did_mount';
 import {useScreenTransitionAnimation} from '@hooks/screen_transition_animation';
-import SecurityManager from '@managers/security_manager';
 import Background from '@screens/background';
 import {goToScreen, loginAnimationOptions} from '@screens/navigation';
 
@@ -111,7 +110,7 @@ const Onboarding = ({
         <View
             style={styles.onBoardingContainer}
             testID='onboarding.screen'
-            nativeID={SecurityManager.getShieldScreenId(componentId, false, true)}
+            nativeID={`${componentId}.screen`}
         >
             <Background theme={theme}/>
             <AnimatedSafeArea

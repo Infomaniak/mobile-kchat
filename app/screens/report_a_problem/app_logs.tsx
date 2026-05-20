@@ -10,7 +10,6 @@ import Share from 'react-native-share';
 import Button from '@components/button';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
-import SecurityManager from '@managers/security_manager';
 import {deleteFile, pathWithPrefix} from '@utils/file';
 import {logDebug} from '@utils/log';
 import {makeStyleSheetFromTheme} from '@utils/theme';
@@ -62,7 +61,7 @@ const AppLogs = () => {
                     url: pathWithPrefix('file://', zipFilePath),
 
                     // If Allowing to save to Files app, save it there, otherwise show share dialog
-                    saveToFiles: SecurityManager.canSaveToLocation(serverUrl, 'FilesApp'),
+                    saveToFiles: true,
                 });
             }
         } catch (error) {

@@ -17,7 +17,6 @@ import {useIsTablet} from '@hooks/device';
 import {useDefaultHeaderHeight} from '@hooks/header';
 import {useTeamSwitch} from '@hooks/team_switch';
 import useTabs, {type TabDefinition} from '@hooks/use_tabs';
-import SecurityManager from '@managers/security_manager';
 import {popTopScreen} from '@screens/navigation';
 
 import ThreadsList from './threads_list';
@@ -116,7 +115,7 @@ const GlobalThreads = ({componentId, globalThreadsTab, hasUnreads, teamId}: Prop
             mode='margin'
             style={styles.flex}
             testID='global_threads.screen'
-            nativeID={SecurityManager.getShieldScreenId(componentId || Screens.GLOBAL_THREADS)}
+            nativeID={`${componentId || Screens.GLOBAL_THREADS}.screen`}
         >
             <NavigationHeader
                 showBackButton={!isTablet}

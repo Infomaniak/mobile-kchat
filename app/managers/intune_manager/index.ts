@@ -39,7 +39,6 @@ if (Platform.OS === 'ios') {
  * IntuneManager - Thin wrapper for Microsoft Intune MAM integration
  *
  * Provides helper methods for enrollment, policy access, and identity management.
- * Event handling is delegated to SecurityManager via subscription methods.
  */
 export class IntuneManagerSingleton {
 
@@ -133,7 +132,6 @@ export class IntuneManagerSingleton {
 
     /**
      * Cleanup storage and MSAL account after selective wipe completes
-     * This is called by SecurityManager after wipe operations complete successfully
      * to remove the OID-to-serverUrl mappings from keychain and delete the MSAL account.
      * @param oid - The Object ID (OID) to cleanup
      */

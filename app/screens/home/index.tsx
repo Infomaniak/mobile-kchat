@@ -16,7 +16,6 @@ import {Events, Launch, Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {useAppState} from '@hooks/device';
 import useDidMount from '@hooks/did_mount';
-import SecurityManager from '@managers/security_manager';
 import {getAllServers} from '@queries/app/servers';
 import {findChannels, popToRoot} from '@screens/navigation';
 import NavigationStore from '@store/navigation_store';
@@ -72,7 +71,6 @@ export function HomeScreen(props: HomeProps) {
     const [isEmojiSearchFocused, setIsEmojiSearchFocused] = React.useState(false);
 
     useEffect(() => {
-        SecurityManager.start();
     }, []);
 
     useEffect(() => {
@@ -179,7 +177,7 @@ export function HomeScreen(props: HomeProps) {
 
         <View
             style={styles.flex}
-            nativeID={SecurityManager.getShieldScreenId(Screens.HOME, true)}
+            nativeID={`${Screens.HOME}.screen`}
         >
             <NavigationContainer
                 theme={{

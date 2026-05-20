@@ -15,7 +15,6 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useDidMount from '@hooks/did_mount';
-import SecurityManager from '@managers/security_manager';
 import {fetchPlaybooks} from '@playbooks/actions/remote/playbooks';
 import {fetchPlaybookRunsForChannel} from '@playbooks/actions/remote/runs';
 import {
@@ -308,7 +307,7 @@ function SelectPlaybook({
 
     return (
         <SafeAreaView
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
             style={style.container}
         >
             <View
