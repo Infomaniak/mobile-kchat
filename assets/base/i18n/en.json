@@ -750,7 +750,6 @@
   "mobile.managed.blocked_by": "Blocked by {vendor}",
   "mobile.managed.exit": "Exit",
   "mobile.managed.jailbreak": "Jailbroken or rooted devices are not trusted by {vendor}.",
-  "mobile.managed.jailbreak.emm": "Jailbroken or rooted devices are not trusted by {vendor}.\n\nThe app will now close.",
   "mobile.managed.logout": "Logout",
   "mobile.managed.not_secured.android": "This device must be secured with a screen lock to use Mattermost.",
   "mobile.managed.not_secured.android.vendor": "This device must be secured with a screen lock to use {vendor}.",
