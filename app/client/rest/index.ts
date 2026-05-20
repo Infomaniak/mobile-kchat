@@ -8,7 +8,6 @@ import IKClientCalls, {type IKClientCallsMix} from '@client/rest/ikcalls';
 import IKClientCustomActions, {type IKClientCustomActionsMix} from '@client/rest/ikcustomactions';
 import IKClientMultiTeam, {type IKClientMultiTeamMix} from '@client/rest/ikteams';
 import ClientPlugins, {type ClientPluginsMix} from '@client/rest/plugins';
-import ClientPlaybooks, {type ClientPlaybooksMix} from '@playbooks/client/rest';
 import mix from '@utils/mix';
 
 import ClientApps, {type ClientAppsMix} from './apps';
@@ -58,8 +57,7 @@ interface Client extends ClientBase,
     IKClientMultiTeamMix,
     IKClientCallsMix,
     IKClientCustomActionsMix,
-    ClientCustomAttributesMix,
-    ClientPlaybooksMix
+    ClientCustomAttributesMix
 {
     setClientCredentials: (token: string, preauthSecret?: string) => void;
     setCSRFToken: (csrfToken: string) => void;
@@ -91,7 +89,6 @@ class Client extends mix(ClientBase).with(
     IKClientCustomActions,
     ClientCustomAttributes,
     ClientScheduledPost,
-    ClientPlaybooks,
 ) {
     // eslint-disable-next-line no-useless-constructor
     constructor(apiClient: APIClientInterface, serverUrl: string, bearerToken?: string, csrfToken?: string, preauthSecret?: string) {

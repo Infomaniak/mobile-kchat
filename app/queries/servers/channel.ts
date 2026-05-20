@@ -199,14 +199,6 @@ export const prepareDeleteChannel = async (serverUrl: string, channel: ChannelMo
         }
     }
 
-    const playbookRuns = await channel.playbookRuns?.fetch();
-    if (playbookRuns?.length) {
-        for await (const run of playbookRuns) {
-            const preparedRun = await run.prepareDestroyWithRelations();
-            preparedModels.push(...preparedRun);
-        }
-    }
-
     return preparedModels;
 };
 

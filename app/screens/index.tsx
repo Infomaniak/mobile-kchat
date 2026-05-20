@@ -12,7 +12,6 @@ import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-contex
 import {Screens} from '@constants';
 import {withServerDatabase} from '@database/components';
 import {DEFAULT_LOCALE, getTranslations} from '@i18n';
-import {loadPlaybooksScreen} from '@playbooks/screens';
 import {logDebug} from '@utils/log';
 import {useTopInsetShared} from '@utils/top_inset_shared';
 
@@ -334,10 +333,6 @@ Navigation.setLazyComponentRegistrator((screenName) => {
 
     if (!screen) {
         screen = loadAgentsScreen(screenName);
-    }
-
-    if (!screen) {
-        screen = loadPlaybooksScreen(screenName);
     }
 
     if (!screen) {

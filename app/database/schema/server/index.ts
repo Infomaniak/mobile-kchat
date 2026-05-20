@@ -4,8 +4,6 @@
 import {AiBotSchema, AiThreadSchema} from '@agents/database/schema';
 import {type AppSchema, appSchema} from '@nozbe/watermelondb';
 
-import {PlaybookRunSchema, PlaybookChecklistSchema, PlaybookChecklistItemSchema, PlaybookRunAttributeSchema, PlaybookRunAttributeValueSchema} from '@playbooks/database/schema';
-
 import {
     CategorySchema,
     CategoryChannelSchema,
@@ -54,11 +52,6 @@ export const serverSchema: AppSchema = appSchema({
     tables: [
         AiBotSchema,
         AiThreadSchema,
-        PlaybookRunSchema,
-        PlaybookChecklistSchema,
-        PlaybookChecklistItemSchema,
-        PlaybookRunAttributeSchema,
-        PlaybookRunAttributeValueSchema,
         CustomProfileFieldSchema,
         CustomProfileAttributeSchema,
         ChannelBookmarkSchema,

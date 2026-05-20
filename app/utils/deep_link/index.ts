@@ -16,10 +16,6 @@ import DeepLinkType from '@constants/deep_linking';
 import DatabaseManager from '@database/manager';
 import {DEFAULT_LOCALE} from '@i18n';
 import WebsocketManager from '@managers/websocket_manager';
-import {fetchPlaybookRun} from '@playbooks/actions/remote/runs';
-import {getPlaybookRunById} from '@playbooks/database/queries/run';
-import {fetchIsPlaybooksEnabled} from '@playbooks/database/queries/version';
-import {goToPlaybookRun} from '@playbooks/screens/navigation';
 import {getActiveServerUrl} from '@queries/app/servers';
 import {getCurrentUser, queryUsersByUsername} from '@queries/servers/user';
 import {dismissAllModalsAndPopToRoot} from '@screens/navigation';
@@ -145,38 +141,6 @@ export async function handleDeepLink(deepLink: DeepLinkWithData, intlShape?: Int
                         text: intl.formatMessage({id: 'playbooks.retrospective_not_available.ok', defaultMessage: 'OK'}),
                     }],
                 );
-                break;
-            }
-            case DeepLink.PlaybookRuns: {
-                const deepLinkData = deepLink.data as DeepLinkPlaybookRuns;
-                const playbookEnabled = await fetchIsPlaybooksEnabled(database);
-                if (playbookEnabled) {
-                    // Go to playbook Run
-                    const playbook = await getPlaybookRunById(database, deepLinkData.playbookRunId);
-                    if (!playbook) {
-                        const {error} = await fetchPlaybookRun(existingServerUrl, deepLinkData.playbookRunId);
-                        if (error) {
-                            Alert.alert(
-                                intl.formatMessage({id: 'playbooks.fetch_error.title', defaultMessage: 'Unable to open Checklist'}),
-                                intl.formatMessage({id: 'playbooks.fetch_error.description', defaultMessage: "You don't have permission to view this, or it may no longer exist."}),
-                                [{
-                                    text: intl.formatMessage({id: 'playbooks.fetch_error.OK', defaultMessage: 'Okay'}),
-                                }],
-                            );
-                            break;
-                        }
-                    }
-                    goToPlaybookRun(intl, deepLinkData.playbookRunId);
-                } else {
-                    // Alert playbooks not enabled or version not supported
-                    Alert.alert(
-                        intl.formatMessage({id: 'playbooks.not_enabled_or_unsupported.title', defaultMessage: 'Playbooks not available'}),
-                        intl.formatMessage({id: 'playbooks.not_enabled_or_unsupported.description', defaultMessage: 'Playbooks are either not enabled on this server or the Playbooks version is not supported. Please contact your system administrator.'}),
-                        [{
-                            text: intl.formatMessage({id: 'playbooks.not_enabled_or_unsupported.OK', defaultMessage: 'OK'}),
-                        }],
-                    );
-                }
                 break;
             }
             case DeepLink.MagicLink: {

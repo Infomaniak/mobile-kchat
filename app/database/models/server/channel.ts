@@ -5,11 +5,9 @@ import {children, field, immutableRelation, json} from '@nozbe/watermelondb/deco
 import Model, {type Associations} from '@nozbe/watermelondb/Model';
 
 import {MM_TABLES} from '@constants/database';
-import {PLAYBOOK_TABLES} from '@playbooks/constants/database';
 import {safeParseJSON} from '@utils/helpers';
 
 import type {Query, Relation} from '@nozbe/watermelondb';
-import type PlaybookRunModel from '@playbooks/types/database/models/playbook_run';
 import type CategoryChannelModel from '@typings/database/models/servers/category_channel';
 import type ChannelModelInterface from '@typings/database/models/servers/channel';
 import type ChannelBookmarkModel from '@typings/database/models/servers/channel_bookmark';
@@ -37,8 +35,6 @@ const {
     TEAM,
     USER,
 } = MM_TABLES.SERVER;
-
-const {PLAYBOOK_RUN} = PLAYBOOK_TABLES;
 
 /**
  * The Channel model represents a channel in the Mattermost app.
@@ -86,8 +82,6 @@ export default class ChannelModel extends Model implements ChannelModelInterface
         /** A CHANNEL is associated with one CHANNEL_INFO**/
         [CHANNEL_INFO]: {type: 'has_many', foreignKey: 'id'},
 
-        /** A CHANNEL can be associated with multiple PLAYBOOK_RUN (relationship is 1:N) */
-        [PLAYBOOK_RUN]: {type: 'has_many', foreignKey: 'channel_id'},
     };
 
     /** create_at : The creation date for this channel */
@@ -143,9 +137,6 @@ export default class ChannelModel extends Model implements ChannelModelInterface
 
     /** postsInChannel : a section of the posts for that channel bounded by a range */
     @children(POSTS_IN_CHANNEL) postsInChannel!: Query<PostsInChannelModel>;
-
-    /** playbookRuns : All playbook runs for this channel */
-    @children(PLAYBOOK_RUN) playbookRuns!: Query<PlaybookRunModel>;
 
     /** team : The TEAM to which this CHANNEL belongs */
     @immutableRelation(TEAM, 'team_id') team!: Relation<TeamModel>;
