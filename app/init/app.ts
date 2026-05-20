@@ -17,7 +17,6 @@ import {registerScreens} from '@screens/index';
 import {registerNavigationListeners} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
-import {withMinDuration} from '@utils/timing';
 
 // Controls whether the main initialization (database, etc...) is done, either on app launch
 // or on the Share Extension, for example.
@@ -58,20 +57,18 @@ export async function initialize() {
 }
 
 export async function start() {
-    await withMinDuration(async () => {
-        NavigationStore.reset();
-        EphemeralStore.setCurrentThreadId('');
-        EphemeralStore.setProcessingNotification('');
+    NavigationStore.reset();
+    EphemeralStore.setCurrentThreadId('');
+    EphemeralStore.setProcessingNotification('');
 
-        await initialize();
+    await initialize();
 
-        PushNotifications.init(serverCredentials.length > 0);
+    PushNotifications.init(serverCredentials.length > 0);
 
-        registerNavigationListeners();
-        registerScreens();
+    registerNavigationListeners();
+    registerScreens();
 
-        await WebsocketManager.init(serverCredentials);
-    }, 1000); // Ik: min duration for splashscreen
+    await WebsocketManager.init(serverCredentials);
 
     if (!__DEV__) {
         // Ik Analytics / Matomo
@@ -79,5 +76,4 @@ export async function start() {
     }
 
     initialLaunch();
-
 }
