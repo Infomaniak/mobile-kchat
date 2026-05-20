@@ -150,6 +150,18 @@ const ThreadHandler = <TBase extends Constructor<ServerDataOperatorBase>>(superc
         const batchRecords: ThreadParticipantModel[] = [];
 
         // NOTE: Participants list can also be an empty array
+        const threadIds = threadsParticipants.map((tp) => tp.thread_id);
+        const allParticipants = await this.database.get<ThreadParticipantModel>(THREAD_PARTICIPANT).query(
+            Q.where('thread_id', Q.oneOf(threadIds)),
+        ).fetch();
+        const participantsByThreadId = allParticipants.reduce((acc, participant) => {
+            if (!acc[participant.threadId]) {
+                acc[participant.threadId] = [];
+            }
+            acc[participant.threadId].push(participant);
+            return acc;
+        }, {} as Record<string, ThreadParticipantModel[]>);
+
         for await (const threadParticipant of threadsParticipants) {
             const {thread_id, participants} = threadParticipant;
             const rawValues = getUniqueRawsBy({raws: participants, key: 'id'}) as ThreadParticipant[];
@@ -161,6 +173,7 @@ const ThreadHandler = <TBase extends Constructor<ServerDataOperatorBase>>(superc
                 thread_id,
                 rawParticipants: rawValues,
                 skipSync,
+                existingParticipants: participantsByThreadId[thread_id] || [],
             });
 
             if (createParticipants?.length) {
@@ -199,19 +212,25 @@ const ThreadHandler = <TBase extends Constructor<ServerDataOperatorBase>>(superc
 
         const create: ThreadInTeam[] = [];
         const teamIds = Object.keys(threadsMap);
-        for await (const teamId of teamIds) {
-            const threadIds = threadsMap[teamId].map((thread) => thread.id);
-            const chunks = await (this.database as Database).get<ThreadInTeamModel>(THREADS_IN_TEAM).query(
-                Q.where('team_id', teamId),
-                Q.where('thread_id', Q.oneOf(threadIds)),
-            ).fetch();
-            const chunksMap = chunks.reduce((result: Record<string, ThreadInTeamModel>, chunk) => {
-                result[chunk.threadId] = chunk;
-                return result;
-            }, {});
+        const allThreadIds: string[] = [];
+        teamIds.forEach((teamId) => {
+            threadsMap[teamId].forEach((thread) => {
+                allThreadIds.push(thread.id);
+            });
+        });
 
+        const chunks = await (this.database as Database).get<ThreadInTeamModel>(THREADS_IN_TEAM).query(
+            Q.where('team_id', Q.oneOf(teamIds)),
+            Q.where('thread_id', Q.oneOf(allThreadIds)),
+        ).fetch();
+        const chunksMap = chunks.reduce((result: Record<string, ThreadInTeamModel>, chunk) => {
+            result[`${chunk.teamId}-${chunk.threadId}`] = chunk;
+            return result;
+        }, {});
+
+        for await (const teamId of teamIds) {
             for (const thread of threadsMap[teamId]) {
-                const chunk = chunksMap[thread.id];
+                const chunk = chunksMap[`${teamId}-${thread.id}`];
 
                 // Create if the chunk is not found
                 if (!chunk) {
