@@ -71,9 +71,6 @@ export function HomeScreen(props: HomeProps) {
     const [isEmojiSearchFocused, setIsEmojiSearchFocused] = React.useState(false);
 
     useEffect(() => {
-    }, []);
-
-    useEffect(() => {
         // Hide tab bar when keyboard opens, show when it closes
         DeviceEventEmitter.emit(Events.TAB_BAR_VISIBLE, !keyboardState.isVisible);
     }, [keyboardState.isVisible]);
