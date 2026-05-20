@@ -250,7 +250,14 @@ class PushNotificationsSingleton {
             return;
         }
         const notification = convertToNotificationData(incoming, false);
-        this.processNotification(notification);
+        const timeoutPromise = new Promise<void>((resolve) => {
+            setTimeout(() => resolve(), 25000);
+        });
+
+        await Promise.race([
+            this.processNotification(notification),
+            timeoutPromise,
+        ]);
 
         completion(NotificationBackgroundFetchResult.NEW_DATA);
     };

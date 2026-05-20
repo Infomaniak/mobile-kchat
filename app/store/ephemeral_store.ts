@@ -57,6 +57,9 @@ class EphemeralStoreSingleton {
     // We limit this to avoid overwhelming the device.
     private runningTranslations = new Set<string>();
 
+    private activeTimeouts: NodeJS.Timeout[] = [];
+    private readonly maxTimeouts = 100;
+
     addRunningTranslation = (postId: string) => {
         this.runningTranslations.add(postId);
     };
@@ -119,10 +122,11 @@ class EphemeralStoreSingleton {
         const serverEditing = this.websocketEditingPost[serverUrl]!;
 
         if (lastEdit?.timeout) {
+            this.removeTimeout(lastEdit.timeout);
             clearTimeout(lastEdit.timeout);
         }
 
-        const timeout = setTimeout(() => {
+        const timeout = this.createTimeout(() => {
             delete serverEditing[post.id];
         }, TIME_TO_CLEAR_WEBSOCKET_ACTIONS);
 
@@ -135,6 +139,7 @@ class EphemeralStoreSingleton {
         }
 
         if (this.websocketEditingPost[serverUrl]?.[postId]) {
+            this.removeTimeout(this.websocketEditingPost[serverUrl]![postId]!.timeout);
             clearTimeout(this.websocketEditingPost[serverUrl]![postId]!.timeout);
             delete this.websocketEditingPost[serverUrl]![postId];
         }
@@ -143,11 +148,33 @@ class EphemeralStoreSingleton {
             this.websocketRemovingPost[serverUrl] = new Set();
         }
 
-        setTimeout(() => {
+        this.createTimeout(() => {
             this.websocketRemovingPost[serverUrl]?.delete(postId);
         }, TIME_TO_CLEAR_WEBSOCKET_ACTIONS);
 
         this.websocketRemovingPost[serverUrl]?.add(postId);
+    };
+
+    private createTimeout = (callback: () => void, delay: number): NodeJS.Timeout => {
+        if (this.activeTimeouts.length >= this.maxTimeouts) {
+            const toClear = this.activeTimeouts.shift();
+            if (toClear) {
+                clearTimeout(toClear);
+            }
+        }
+        const timeout = setTimeout(() => {
+            this.removeTimeout(timeout);
+            callback();
+        }, delay);
+        this.activeTimeouts.push(timeout);
+        return timeout;
+    };
+
+    private removeTimeout = (timeout: NodeJS.Timeout): void => {
+        const index = this.activeTimeouts.indexOf(timeout);
+        if (index !== -1) {
+            this.activeTimeouts.splice(index, 1);
+        }
     };
 
     getLastPostWebsocketEvent = (serverUrl: string, postId: string) => {

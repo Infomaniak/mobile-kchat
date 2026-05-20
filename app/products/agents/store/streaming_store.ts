@@ -255,8 +255,23 @@ class StreamingPostStore {
             return;
         }
 
-        // Signal end to subscribers, but keep subject alive for potential reuse
         subject.next(undefined);
+        subject.complete();
+        this.streamingSubjects.delete(postId);
+    }
+
+    cleanup(): void {
+        const toRemove: string[] = [];
+        for (const [postId, subject] of this.streamingSubjects.entries()) {
+            const state = subject.value;
+            if (!state || !state.generating) {
+                subject.complete();
+                toRemove.push(postId);
+            }
+        }
+        for (const postId of toRemove) {
+            this.streamingSubjects.delete(postId);
+        }
     }
 
     /**

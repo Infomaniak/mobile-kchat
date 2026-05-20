@@ -9,17 +9,17 @@ import {distinctUntilChanged} from 'rxjs/operators';
 
 import {fetchStatusByIds} from '@actions/remote/user';
 import {handleFirstConnect, handleReconnect} from '@actions/websocket';
-import {handleWebSocketEvent} from '@actions/websocket/event';
 import WebSocketClient from '@client/websocket';
 import {General} from '@constants';
 import DatabaseManager from '@database/manager';
+import {WebSocketEventQueue} from '@managers/websocket_queue';
 import {getCurrentUserId} from '@queries/servers/system';
 import {queryAllUsers} from '@queries/servers/user';
 import {toMilliseconds} from '@utils/datetime';
 import {isMainActivity} from '@utils/helpers';
 import {logError} from '@utils/log';
 
-const WAIT_TO_CLOSE = toMilliseconds({seconds: 15});
+const WAIT_TO_CLOSE = toMilliseconds({seconds: 2});
 const WAIT_UNTIL_NEXT = toMilliseconds({seconds: 5});
 
 class WebsocketManagerSingleton {
@@ -34,6 +34,7 @@ class WebsocketManagerSingleton {
     private statusUpdatesIntervalIDs: Record<string, NodeJS.Timeout> = {};
     private backgroundIntervalId: number | undefined;
     private firstConnectionSynced: Record<string, boolean> = {};
+    private eventQueue = new WebSocketEventQueue();
 
     private appStateSubscription: NativeEventSubscription | undefined;
     private netStateSubscription: NetInfoSubscription | undefined;
@@ -70,13 +71,7 @@ class WebsocketManagerSingleton {
         clearTimeout(this.connectionTimerIDs[serverUrl]);
         delete this.clients[serverUrl];
         delete this.firstConnectionSynced[serverUrl];
-
-        // We don't remove the connected subject so any potential client invalidation
-        // and subsequent creation of the client can still be observed by the component.
-        // Being purist, this is a memory leak, since we never clean any server url,
-        // but since this information lives in memory and we don't expect many servers
-        // to be added and removed in one single session, this should be fine.
-        this.getConnectedSubject(serverUrl).next('not_connected');
+        delete this.connectedSubjects[serverUrl];
     };
 
     public createClient = (serverUrl: string, bearerToken: string) => {
@@ -86,14 +81,12 @@ class WebsocketManagerSingleton {
 
         const client = new WebSocketClient(serverUrl, bearerToken);
 
-        const isCurrentClient = () => this.clients[serverUrl] === client;
-
-        client.setFirstConnectCallback(() => isCurrentClient() && this.onFirstConnect(serverUrl));
-        client.setEventCallback((evt: WebSocketMessage) => handleWebSocketEvent(serverUrl, evt));
+        client.setFirstConnectCallback(() => this.onFirstConnect(serverUrl));
+        client.setEventCallback((evt: WebSocketMessage) => this.eventQueue.push(serverUrl, evt));
 
         //client.setMissedEventsCallback(() => {}) Nothing to do on missedEvents callback
-        client.setReconnectCallback(() => isCurrentClient() && this.onReconnect(serverUrl));
-        client.setReliableReconnectCallback(() => isCurrentClient() && this.onReliableReconnect(serverUrl));
+        client.setReconnectCallback(() => this.onReconnect(serverUrl));
+        client.setReliableReconnectCallback(() => this.onReliableReconnect(serverUrl));
         client.setCloseCallback((connectFailCount: number) => this.onWebsocketClose(serverUrl, connectFailCount));
 
         this.clients[serverUrl] = client;
@@ -107,6 +100,7 @@ class WebsocketManagerSingleton {
             client.close(true);
             client.invalidate();
             this.getConnectedSubject(url).next('not_connected');
+            delete this.connectedSubjects[url];
         }
     };
 
@@ -114,7 +108,7 @@ class WebsocketManagerSingleton {
         let queued = 0;
         for await (const clientUrl of Object.keys(this.clients)) {
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
-            if (clientUrl === activeServerUrl || this.firstConnectionSynced[clientUrl]) {
+            if (clientUrl === activeServerUrl) {
                 this.initializeClient(clientUrl, groupLabel);
             } else {
                 queued += 1;
