@@ -8,7 +8,6 @@ import {View, Text, ActivityIndicator, Platform} from 'react-native';
 import Share from 'react-native-share';
 
 import Button from '@components/button';
-import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {deleteFile, pathWithPrefix} from '@utils/file';
 import {logDebug} from '@utils/log';
@@ -32,7 +31,6 @@ const AppLogs = () => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const intl = useIntl();
-    const serverUrl = useServerUrl();
 
     const [logFiles, setLogFiles] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -75,7 +73,7 @@ const AppLogs = () => {
                 logDebug('Failed to delete zip file', error);
             }
         }
-    }, [logFiles, serverUrl]);
+    }, [logFiles]);
 
     const hasLogs = logFiles.length > 0;
 

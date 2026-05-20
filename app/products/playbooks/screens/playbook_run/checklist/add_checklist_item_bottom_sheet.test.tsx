@@ -3,7 +3,7 @@
 
 import {act, fireEvent} from '@testing-library/react-native';
 import React from 'react';
-import {Keyboard, View} from 'react-native';
+import {Keyboard} from 'react-native';
 
 import {Preferences} from '@constants';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
