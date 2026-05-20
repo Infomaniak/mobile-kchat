@@ -4,8 +4,7 @@
 import CookieManager from '@react-native-cookies/cookies';
 import {AppState, DeviceEventEmitter, Platform} from 'react-native';
 
-import {cancelAllSessionNotifications} from '@actions/local/session';
-import {logout, scheduleSessionNotification} from '@actions/remote/session';
+import {logout} from '@actions/remote/session';
 import {Events} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials, removeServerCredentials} from '@init/credentials';
@@ -131,11 +130,6 @@ describe.skip('SessionManager', () => {
     });
 
     describe('initialization', () => {
-        it('should initialize correctly', async () => {
-            SessionManager.init();
-            expect(cancelAllSessionNotifications).toHaveBeenCalled();
-        });
-
         it('should delete legacy cache on first init', async () => {
             // Mock cache migration as not done
             jest.mocked(queryGlobalValue).mockReturnValueOnce({
@@ -199,7 +193,6 @@ describe.skip('SessionManager', () => {
             if (appStateCallback) {
                 jest.useFakeTimers();
                 appStateCallback('active');
-                expect(cancelAllSessionNotifications).toHaveBeenCalled();
                 jest.useRealTimers();
             }
         });
@@ -209,7 +202,6 @@ describe.skip('SessionManager', () => {
             if (appStateCallback) {
                 appStateCallback('inactive');
                 await TestHelper.wait(50);
-                expect(scheduleSessionNotification).toHaveBeenCalled();
             }
         });
     });

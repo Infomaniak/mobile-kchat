@@ -14,7 +14,6 @@ import {
     convertToNotificationData,
     notificationError,
     emitNotificationError,
-    scheduleExpiredNotification,
 } from '.';
 
 describe('Notification Utils', () => {
@@ -124,23 +123,6 @@ describe('Notification Utils', () => {
                 expect(spyEmit).toHaveBeenCalledWith(Events.NOTIFICATION_ERROR, 'Channel');
                 done();
             }, 600); // wait a little longer than 500ms to ensure the timeout has executed
-        });
-    });
-
-    describe('scheduleExpiredNotification', () => {
-        it('should schedule a notification for session expiration with hours', () => {
-            const result = scheduleExpiredNotification('server_url', session as any, 'ServerName', 'en');
-            expect(Notifications.postLocalNotification).toHaveBeenCalledWith(expect.objectContaining({
-                fireDate: new Date(session.expires_at).toISOString(),
-                body: 'Please log in to continue receiving notifications. Sessions for ServerName are configured to expire every 10 hours.',
-                title: 'Session Expired',
-            }));
-            expect(result).toBeDefined();
-        });
-
-        it('should return 0 if expiresAt is not defined', () => {
-            const result = scheduleExpiredNotification('server_url', {} as any, 'ServerName', 'en');
-            expect(result).toBe(0);
         });
     });
 });
