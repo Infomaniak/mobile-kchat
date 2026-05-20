@@ -59,10 +59,6 @@ jest.mocked(SafeAreaProvider).mockImplementation((props) => (
     />
 ));
 
-jest.mock('@mattermost/react-native-emm', () => ({
-    Provider: jest.fn(),
-}));
-
 jest.mock('@database/components', () => ({
     withServerDatabase: jest.fn(),
 }));

@@ -23,17 +23,6 @@ import type ServerDataOperator from '@database/operator/server_data_operator';
 import type {Database, Query} from '@nozbe/watermelondb';
 import type ServersModel from '@typings/database/models/app/servers';
 
-jest.mock('@mattermost/react-native-emm', () => ({
-    __esModule: true,
-    default: {
-        exitApp: jest.fn(),
-        openSecuritySettings: jest.fn(),
-        removeBlurEffect: jest.fn(),
-        addListener: jest.fn(),
-        getManagedConfig: jest.fn(() => ({})),
-        setAppGroupId: jest.fn(),
-    },
-}));
 jest.mock('@actions/remote/session');
 jest.mock('@actions/app/server');
 jest.mock('@database/manager', () => ({
