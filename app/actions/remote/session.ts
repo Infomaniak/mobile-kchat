@@ -12,7 +12,6 @@ import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials} from '@init/credentials';
 import PushNotifications from '@init/push_notifications';
-import IntuneManager from '@managers/intune_manager';
 import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {getDeviceToken} from '@queries/app/global';
@@ -403,69 +402,6 @@ export const ssoLoginWithCodeExchange = async (serverUrl: string, serverDisplayN
 
     const result = await completeSSOLogin(serverUrl, serverDisplayName, serverIdentifier, client);
     return result;
-};
-
-export const nativeEntraLogin = async (serverUrl: string, serverDisplayName: string, serverIdentifier: string, intuneScope: string): Promise<LoginActionResponse> => {
-    try {
-        // Step 1: Acquire MSAL tokens with IntuneScope
-        const tokens = await IntuneManager.login(serverUrl, [intuneScope]);
-        const {accessToken, identity} = tokens;
-
-        // Step 2: POST accessToken to /oauth/intune to exchange for session token
-        const client = NetworkManager.getClient(serverUrl);
-        const deviceToken = await getDeviceToken();
-        let csrfToken: string;
-        let userData: UserProfile | undefined;
-
-        try {
-            userData = await client.loginByIntune(accessToken, deviceToken);
-            csrfToken = await getCSRFFromCookie(serverUrl);
-        } catch (error) {
-            if (isErrorWithStatusCode(error)) {
-                switch (error.status_code) {
-                    case 401: {
-                        // Token expired/invalid - try refreshing
-                        logDebug('nativeEntraLogin: Token expired, retrying');
-                        const refreshedTokens = await IntuneManager.login(serverUrl, [intuneScope]);
-                        userData = await client.loginByIntune(refreshedTokens.accessToken, deviceToken);
-                        csrfToken = await getCSRFFromCookie(serverUrl);
-                        break;
-                    }
-                    default:
-                        // 400: LDAP user missing
-                        // 409: User locked/disabled
-                        // 428: Account creation blocked
-                        // All other errors - throw for i18n handling
-                        throw error;
-                }
-            } else {
-                throw error;
-            }
-        }
-
-        client.setCSRFToken(csrfToken);
-
-        // Step 3: Complete SSO login flow (sets up database, etc.)
-        const result = await completeSSOLogin(serverUrl, serverDisplayName, serverIdentifier, client, userData, true);
-
-        // Step 4: Enroll in MAM if not already enrolled (if 412 was not triggered)
-        if (result && !result.failed) {
-            try {
-                const isManaged = await IntuneManager.isManagedServer(serverUrl);
-                if (!isManaged) {
-                    await IntuneManager.enrollServer(serverUrl, identity);
-                }
-            } catch (error) {
-                logWarning('Intune MAM enrollment failed, MAM protection may not be configured properly', error);
-                throw error;
-            }
-        }
-
-        return result;
-    } catch (error) {
-        logError('nativeEntraLogin failed', error);
-        return {error, failed: true};
-    }
 };
 
 export const getUserLoginType = async (serverUrl: string, loginId: string) => {

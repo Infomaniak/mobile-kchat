@@ -31,9 +31,6 @@ jest.mock('react-native', () => {
 
 jest.mock('@hooks/navigation_button_pressed', () => jest.fn());
 jest.mock('@hooks/android_back_handler', () => jest.fn());
-jest.mock('@managers/security_manager', () => ({
-    getShieldScreenId: jest.fn((id) => `shield-${id}`),
-}));
 jest.mock('@playbooks/actions/remote/runs', () => ({
     updatePlaybookRun: jest.fn(),
 }));

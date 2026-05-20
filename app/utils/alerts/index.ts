@@ -11,7 +11,6 @@ import {Preferences} from '@constants';
 import DatabaseManager from '@database/manager';
 import {DEFAULT_LOCALE, getTranslations} from '@i18n';
 import {getServerCredentials} from '@init/credentials';
-import {IntuneAuthRequiredReasons} from '@managers/intune_manager/types';
 import {queryAllActiveServers} from '@queries/app/servers';
 import {getConfigValue} from '@queries/servers/system';
 import {logError} from '@utils/log';
@@ -352,16 +351,8 @@ export const showAuthenticationRequiredAlert = async (reason?: string, locale?: 
     const translations = getTranslations(locale || DEFAULT_LOCALE);
 
     // Customize message based on reason
-    let title = translations[messages.authentication_required_title.id];
-    let message = translations[messages.authentication_required_message.id];
-
-    if (reason === IntuneAuthRequiredReasons.CONSENT_DENIED) {
-        title = translations[messages.consent_denied_title.id];
-        message = translations[messages.consent_denied_message.id];
-    } else if (reason === IntuneAuthRequiredReasons.AUTH_FAILED) {
-        title = translations[messages.authentication_failed_title.id];
-        message = translations[messages.authentication_failed_message.id];
-    }
+    const title = translations[messages.authentication_required_title.id];
+    const message = translations[messages.authentication_required_message.id];
 
     Alert.alert(title, message, [{text: translations[messages.okay.id], onPress: callback}], {cancelable: false});
 };
