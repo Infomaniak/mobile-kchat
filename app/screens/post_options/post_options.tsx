@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {BottomSheetScrollView} from '@gorhom/bottom-sheet';
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import React, {useMemo} from 'react';
 import {ScrollView} from 'react-native';
 
@@ -74,7 +73,6 @@ const PostOptions = ({
     isBoRPost, showBoRReadReceipts, borReceiptData, currentUser,
     isChannelMember = true,
 }: PostOptionsProps) => {
-    const managedConfig = useManagedConfig<ManagedConfig>();
     const isTablet = useIsTablet();
     const {enabled, panResponder} = useBottomSheetListsFix();
     const Scroll = useMemo(() => (isTablet ? ScrollView : BottomSheetScrollView), [isTablet]);
@@ -88,7 +86,7 @@ const PostOptions = ({
     const isSystemPost = isSystemMessage(post);
 
     const canCopyBoRPostPermalink = isBoRPost ? post.userId === currentUser?.id : true;
-    const canShowPermalink = !isSystemPost && managedConfig?.copyAndPasteProtection !== 'true' && canCopyBoRPostPermalink;
+    const canShowPermalink = !isSystemPost && canCopyBoRPostPermalink;
     const canCopyPermalink = canShowPermalink;
     const canCopyText = canShowPermalink && post.message && !isBoRPost;
 

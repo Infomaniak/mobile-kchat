@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import Clipboard from '@react-native-clipboard/clipboard';
 import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
@@ -43,7 +42,6 @@ const style = StyleSheet.create({
 const PublicPrivate = ({displayName, purpose}: Props) => {
     const intl = useIntl();
     const theme = useTheme();
-    const managedConfig = useManagedConfig<ManagedConfig>();
 
     const styles = getStyleSheet(theme);
     const publicPrivateTestId = 'channel_info.title.public_private';
@@ -57,38 +55,37 @@ const PublicPrivate = ({displayName, purpose}: Props) => {
     }, [purpose]);
 
     const handleLongPress = useCallback(() => {
-        if (managedConfig?.copyAndPasteProtection !== 'true') {
-            const renderContent = () => {
-                return (
-                    <View style={style.bottomsheet}>
-                        <SlideUpPanelItem
-                            leftIcon='content-copy'
-                            onPress={onCopy}
-                            testID={`${publicPrivateTestId}.bottom_sheet.copy_purpose`}
-                            text={intl.formatMessage({id: 'channel_info.copy_purpose_text', defaultMessage: 'Copy Purpose Text'})}
-                        />
-                        <SlideUpPanelItem
-                            destructive={true}
-                            leftIcon='cancel'
-                            onPress={() => {
-                                dismissBottomSheet();
-                            }}
-                            testID={`${publicPrivateTestId}.bottom_sheet.cancel`}
-                            text={intl.formatMessage({id: 'mobile.post.cancel', defaultMessage: 'Cancel'})}
-                        />
-                    </View>
-                );
-            };
+        const renderContent = () => {
+            return (
+                <View style={style.bottomsheet}>
+                    <SlideUpPanelItem
+                        leftIcon='content-copy'
+                        onPress={onCopy}
+                        testID={`${publicPrivateTestId}.bottom_sheet.copy_purpose`}
+                        text={intl.formatMessage({id: 'channel_info.copy_purpose_text', defaultMessage: 'Copy Purpose Text'})}
+                    />
+                    <SlideUpPanelItem
+                        destructive={true}
+                        leftIcon='cancel'
+                        onPress={() => {
+                            dismissBottomSheet();
+                        }}
+                        testID={`${publicPrivateTestId}.bottom_sheet.cancel`}
+                        text={intl.formatMessage({id: 'mobile.post.cancel', defaultMessage: 'Cancel'})}
+                    />
+                </View>
+            );
+        };
 
-            bottomSheet({
-                closeButtonId: 'close-mardown-link',
-                renderContent,
-                snapPoints: [1, bottomSheetSnapPoint(2, ITEM_HEIGHT)],
-                title: intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}),
-                theme,
-            });
-        }
-    }, [managedConfig?.copyAndPasteProtection, intl, theme, onCopy]);
+        bottomSheet({
+            closeButtonId: 'close-mardown-link',
+            renderContent,
+            snapPoints: [1, bottomSheetSnapPoint(2, ITEM_HEIGHT)],
+            title: intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}),
+            theme,
+        });
+
+    }, [intl, theme, onCopy]);
 
     return (
         <>

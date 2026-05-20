@@ -1,6 +1,5 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import {Provider as EMMProvider} from '@mattermost/react-native-emm';
 import {render} from '@testing-library/react-native';
 import React from 'react';
 import {IntlProvider} from 'react-intl';
@@ -63,12 +62,6 @@ jest.mocked(SafeAreaProvider).mockImplementation((props) => (
 jest.mock('@mattermost/react-native-emm', () => ({
     Provider: jest.fn(),
 }));
-jest.mocked(EMMProvider).mockImplementation((props) => (
-    <View
-        {...props}
-        testID='EMMProvider'
-    />
-));
 
 jest.mock('@database/components', () => ({
     withServerDatabase: jest.fn(),

@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import React, {useCallback, useMemo, useRef} from 'react';
 import {useIntl} from 'react-intl';
 import {Text, View} from 'react-native';
@@ -49,8 +48,7 @@ function Header() {
     const styles = getStyleSheet(theme);
     const serverDisplayName = useServerDisplayName();
     const serverUrl = useServerUrl();
-    const managedConfig = useManagedConfig<ManagedConfig>();
-    const canAddOtherServers = managedConfig?.allowOtherServers !== 'false';
+    const canAddOtherServers = true;
     const serverButtonRef = useRef<ServersRef>(null);
 
     const headerStyle = useMemo(() => ({...styles.header, marginLeft: canAddOtherServers ? MARGIN_WITH_SERVER_ICON : undefined}), [canAddOtherServers, styles]);

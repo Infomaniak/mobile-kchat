@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import Clipboard from '@react-native-clipboard/clipboard';
 import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
@@ -60,7 +59,6 @@ const AtMention = ({
     theme,
 }: AtMentionProps) => {
     const intl = useIntl();
-    const managedConfig = useManagedConfig<ManagedConfig>();
     const serverUrl = useServerUrl();
 
     const user = useMemoMentionedUser(users, mentionName);
@@ -118,49 +116,48 @@ const AtMention = ({
     };
 
     const handleLongPress = useCallback(() => {
-        if (managedConfig?.copyAndPasteProtection !== 'true') {
-            const renderContent = () => {
-                return (
-                    <View
-                        testID='at_mention.bottom_sheet'
-                        style={style.bottomSheet}
-                    >
-                        <SlideUpPanelItem
-                            leftIcon='content-copy'
-                            onPress={() => {
-                                dismissBottomSheet();
-                                let username = mentionName;
-                                if (user?.username) {
-                                    username = user.username;
-                                }
+        const renderContent = () => {
+            return (
+                <View
+                    testID='at_mention.bottom_sheet'
+                    style={style.bottomSheet}
+                >
+                    <SlideUpPanelItem
+                        leftIcon='content-copy'
+                        onPress={() => {
+                            dismissBottomSheet();
+                            let username = mentionName;
+                            if (user?.username) {
+                                username = user.username;
+                            }
 
-                                Clipboard.setString(`@${username}`);
-                            }}
-                            testID='at_mention.bottom_sheet.copy_mention'
-                            text={intl.formatMessage({id: 'mobile.mention.copy_mention', defaultMessage: 'Copy Mention'})}
-                        />
-                        <SlideUpPanelItem
-                            destructive={true}
-                            leftIcon='cancel'
-                            onPress={() => {
-                                dismissBottomSheet();
-                            }}
-                            testID='at_mention.bottom_sheet.cancel'
-                            text={intl.formatMessage({id: 'mobile.post.cancel', defaultMessage: 'Cancel'})}
-                        />
-                    </View>
-                );
-            };
+                            Clipboard.setString(`@${username}`);
+                        }}
+                        testID='at_mention.bottom_sheet.copy_mention'
+                        text={intl.formatMessage({id: 'mobile.mention.copy_mention', defaultMessage: 'Copy Mention'})}
+                    />
+                    <SlideUpPanelItem
+                        destructive={true}
+                        leftIcon='cancel'
+                        onPress={() => {
+                            dismissBottomSheet();
+                        }}
+                        testID='at_mention.bottom_sheet.cancel'
+                        text={intl.formatMessage({id: 'mobile.post.cancel', defaultMessage: 'Cancel'})}
+                    />
+                </View>
+            );
+        };
 
-            bottomSheet({
-                closeButtonId: 'close-at-mention',
-                renderContent,
-                snapPoints: [1, bottomSheetSnapPoint(2, ITEM_HEIGHT)],
-                title: intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}),
-                theme,
-            });
-        }
-    }, [managedConfig?.copyAndPasteProtection, intl, theme, mentionName, user?.username]);
+        bottomSheet({
+            closeButtonId: 'close-at-mention',
+            renderContent,
+            snapPoints: [1, bottomSheetSnapPoint(2, ITEM_HEIGHT)],
+            title: intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}),
+            theme,
+        });
+
+    }, [intl, theme, mentionName, user?.username]);
 
     const mentionTextStyle: StyleProp<TextStyle> = [];
 

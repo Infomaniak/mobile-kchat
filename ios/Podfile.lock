@@ -1426,27 +1426,6 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-emm (1.6.2):
-    - DoubleConversion
-    - glog
-    - RCT-Folly (= 2024.11.18.00)
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - Yoga
   - react-native-get-random-values (1.11.0):
     - React-Core
   - react-native-image-picker (8.2.0):
@@ -2418,7 +2397,6 @@ DEPENDENCIES:
   - react-native-color-matrix-image-filters (from `../node_modules/react-native-color-matrix-image-filters`)
   - "react-native-cookies (from `../node_modules/@react-native-cookies/cookies`)"
   - react-native-document-picker (from `../node_modules/react-native-document-picker`)
-  - "react-native-emm (from `../node_modules/@mattermost/react-native-emm`)"
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - "react-native-keep-awake (from `../node_modules/@sayem314/react-native-keep-awake`)"
@@ -2657,8 +2635,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-cookies/cookies"
   react-native-document-picker:
     :path: "../node_modules/react-native-document-picker"
-  react-native-emm:
-    :path: "../node_modules/@mattermost/react-native-emm"
   react-native-get-random-values:
     :path: "../node_modules/react-native-get-random-values"
   react-native-image-picker:
@@ -2908,7 +2884,6 @@ SPEC CHECKSUMS:
   react-native-color-matrix-image-filters: ac6b7d1f964e4d158d183c1cf71b6a26e9a0c339
   react-native-cookies: d648ab7025833b977c0b19e142503034f5f29411
   react-native-document-picker: b25a7e3d6de8023d6a5bf522d6f20d42b047e3c6
-  react-native-emm: f6703906a39f9f6c3eed2de8a8e98dfd6e366bd7
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
   react-native-image-picker: ed4d6351125d1253fc98a09a79fff140d78653e9
   react-native-keep-awake: 03b74eebe4f2bb5e8478fc8f420651a92463b6f8

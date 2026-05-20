@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import Emm from '@mattermost/react-native-emm';
 import {createIntl, defineMessages} from 'react-intl';
 import {Alert, Platform, type AlertButton} from 'react-native';
 
@@ -229,9 +228,6 @@ export const buildSecurityAlertOptions = async (
         buttons.push({
             text: translations[messages.exit.id],
             style: 'destructive',
-            onPress: () => {
-                Emm.exitApp();
-            },
         });
     }
 
@@ -282,9 +278,6 @@ export const showNotSecuredAlert = async (server: string, siteName: string | und
     if (Platform.OS === 'android') {
         buttons.push({
             text: translations[messages.androidSettings.id],
-            onPress: () => {
-                Emm.openSecuritySettings();
-            },
         });
     }
 
@@ -323,9 +316,7 @@ export const showBiometricFailureAlert = async (server: string, blurOnAuthentica
     const translations = getTranslations(locale || DEFAULT_LOCALE);
 
     const buttons = await buildSecurityAlertOptions(server, translations, () => {
-        if (blurOnAuthenticate) {
-            Emm.removeBlurEffect();
-        }
+        if (blurOnAuthenticate) { /* empty */ }
     }, retryCallback);
     const securedBy = siteName || serverSiteName || 'Mattermost';
 

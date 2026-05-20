@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import Clipboard from '@react-native-clipboard/clipboard';
 import moment from 'moment';
 import React, {useCallback, useMemo} from 'react';
@@ -107,7 +106,6 @@ const onCopy = async (text: string, isLink?: boolean) => {
 const Extra = ({channelId, createdAt, createdBy, customStatus, header, isCustomStatusEnabled}: Props) => {
     const intl = useIntl();
     const theme = useTheme();
-    const managedConfig = useManagedConfig<ManagedConfig>();
 
     const styles = getStyleSheet(theme);
     const created = useMemo(() => ({
@@ -121,61 +119,60 @@ const Extra = ({channelId, createdAt, createdBy, customStatus, header, isCustomS
     }), [createdAt, createdBy, styles.created]);
 
     const handleLongPress = useCallback((url?: string) => {
-        if (managedConfig?.copyAndPasteProtection !== 'true') {
 
-            const cleanUrl = url?.replace(/^mailto:/, '') || '';
-            const isEmailLink = isEmail(cleanUrl);
+        const cleanUrl = url?.replace(/^mailto:/, '') || '';
+        const isEmailLink = isEmail(cleanUrl);
 
-            const renderContent = () => (
-                <View
-                    testID={`${headerTestId}.bottom_sheet`}
-                    style={style.bottomSheet}
-                >
+        const renderContent = () => (
+            <View
+                testID={`${headerTestId}.bottom_sheet`}
+                style={style.bottomSheet}
+            >
+                <SlideUpPanelItem
+                    leftIcon='content-copy'
+                    onPress={() => {
+                        onCopy(header!);
+                    }}
+                    testID={`${headerTestId}.bottom_sheet.copy_header_text`}
+                    text={intl.formatMessage({
+                        id: 'mobile.markdown.copy_header',
+                        defaultMessage: 'Copy header text',
+                    })}
+                />
+                {Boolean(url) && (
                     <SlideUpPanelItem
-                        leftIcon='content-copy'
+                        leftIcon='link-variant'
                         onPress={() => {
-                            onCopy(header!);
+                            onCopy(cleanUrl, true);
                         }}
-                        testID={`${headerTestId}.bottom_sheet.copy_header_text`}
-                        text={intl.formatMessage({
-                            id: 'mobile.markdown.copy_header',
-                            defaultMessage: 'Copy header text',
-                        })}
+                        testID={`${headerTestId}.bottom_sheet.copy_url`}
+                        text={intl.formatMessage(isEmailLink ? messages.copyEmail : messages.copyURL)}
                     />
-                    {Boolean(url) && (
-                        <SlideUpPanelItem
-                            leftIcon='link-variant'
-                            onPress={() => {
-                                onCopy(cleanUrl, true);
-                            }}
-                            testID={`${headerTestId}.bottom_sheet.copy_url`}
-                            text={intl.formatMessage(isEmailLink ? messages.copyEmail : messages.copyURL)}
-                        />
-                    )}
-                    <SlideUpPanelItem
-                        destructive={true}
-                        leftIcon='cancel'
-                        onPress={() => {
-                            dismissBottomSheet();
-                        }}
-                        testID={`${headerTestId}.bottom_sheet.cancel`}
-                        text={intl.formatMessage({
-                            id: 'mobile.post.cancel',
-                            defaultMessage: 'Cancel',
-                        })}
-                    />
-                </View>
-            );
+                )}
+                <SlideUpPanelItem
+                    destructive={true}
+                    leftIcon='cancel'
+                    onPress={() => {
+                        dismissBottomSheet();
+                    }}
+                    testID={`${headerTestId}.bottom_sheet.cancel`}
+                    text={intl.formatMessage({
+                        id: 'mobile.post.cancel',
+                        defaultMessage: 'Cancel',
+                    })}
+                />
+            </View>
+        );
 
-            bottomSheet({
-                closeButtonId: 'close-markdown-link',
-                renderContent,
-                snapPoints: [1, bottomSheetSnapPoint(url ? 3 : 2, ITEM_HEIGHT)],
-                title: intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}),
-                theme,
-            });
-        }
-    }, [managedConfig?.copyAndPasteProtection, intl, theme, header]);
+        bottomSheet({
+            closeButtonId: 'close-markdown-link',
+            renderContent,
+            snapPoints: [1, bottomSheetSnapPoint(url ? 3 : 2, ITEM_HEIGHT)],
+            title: intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}),
+            theme,
+        });
+
+    }, [intl, theme, header]);
 
     const touchableHandleLongPress = useCallback(() => handleLongPress(), [handleLongPress]);
 
