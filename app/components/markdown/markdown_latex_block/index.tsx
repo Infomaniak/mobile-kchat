@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import Clipboard from '@react-native-clipboard/clipboard';
 import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
@@ -89,7 +88,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 
 const LatexCodeBlock = ({content, theme}: Props) => {
     const intl = useIntl();
-    const managedConfig = useManagedConfig<ManagedConfig>();
     const styles = getStyleSheet(theme);
     const languageDisplayName = getHighlightLanguageName('latex');
 
@@ -129,42 +127,40 @@ const LatexCodeBlock = ({content, theme}: Props) => {
     }, [content, intl, languageDisplayName]));
 
     const handleLongPress = useCallback(() => {
-        if (managedConfig?.copyAndPasteProtection !== 'true') {
-            const renderContent = () => {
-                return (
-                    <View
-                        testID='at_mention.bottom_sheet'
-                        style={styles.bottomSheet}
-                    >
-                        <SlideUpPanelItem
-                            leftIcon='content-copy'
-                            onPress={() => {
-                                dismissBottomSheet();
-                                Clipboard.setString(content);
-                            }}
-                            testID='at_mention.bottom_sheet.copy_code'
-                            text={intl.formatMessage({id: 'mobile.markdown.code.copy_code', defaultMessage: 'Copy Code'})}
-                        />
-                        <SlideUpPanelItem
-                            destructive={true}
-                            leftIcon='cancel'
-                            onPress={dismissBottomSheet}
-                            testID='at_mention.bottom_sheet.cancel'
-                            text={intl.formatMessage({id: 'mobile.post.cancel', defaultMessage: 'Cancel'})}
-                        />
-                    </View>
-                );
-            };
+        const renderContent = () => {
+            return (
+                <View
+                    testID='at_mention.bottom_sheet'
+                    style={styles.bottomSheet}
+                >
+                    <SlideUpPanelItem
+                        leftIcon='content-copy'
+                        onPress={() => {
+                            dismissBottomSheet();
+                            Clipboard.setString(content);
+                        }}
+                        testID='at_mention.bottom_sheet.copy_code'
+                        text={intl.formatMessage({id: 'mobile.markdown.code.copy_code', defaultMessage: 'Copy Code'})}
+                    />
+                    <SlideUpPanelItem
+                        destructive={true}
+                        leftIcon='cancel'
+                        onPress={dismissBottomSheet}
+                        testID='at_mention.bottom_sheet.cancel'
+                        text={intl.formatMessage({id: 'mobile.post.cancel', defaultMessage: 'Cancel'})}
+                    />
+                </View>
+            );
+        };
 
-            bottomSheet({
-                closeButtonId: 'close-code-block',
-                renderContent,
-                snapPoints: [1, bottomSheetSnapPoint(2, ITEM_HEIGHT)],
-                title: intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}),
-                theme,
-            });
-        }
-    }, [managedConfig?.copyAndPasteProtection, intl, theme, styles.bottomSheet, content]);
+        bottomSheet({
+            closeButtonId: 'close-code-block',
+            renderContent,
+            snapPoints: [1, bottomSheetSnapPoint(2, ITEM_HEIGHT)],
+            title: intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}),
+            theme,
+        });
+    }, [intl, theme, styles.bottomSheet, content]);
 
     const onRenderErrorMessage = useCallback(({error}: {error: Error}) => {
         return <Text style={styles.errorText}>{'Render error: ' + error.message}</Text>;

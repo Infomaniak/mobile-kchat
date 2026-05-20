@@ -540,22 +540,6 @@ jest.mock('@screens/navigation', () => ({
     bottomSheet: jest.fn(),
 }));
 
-jest.mock('@mattermost/react-native-emm', () => ({
-    addListener: jest.fn(),
-    authenticate: async () => {
-        return true;
-    },
-    getManagedConfig: <T>() => ({} as T),
-    isDeviceSecured: async () => {
-        return true;
-    },
-    openSecuritySettings: () => jest.fn(),
-    setAppGroupId: () => {
-        return '';
-    },
-    useManagedConfig: () => ({}),
-}));
-
 jest.mock('@react-native-clipboard/clipboard', () => ({}));
 
 jest.mock('react-native-document-picker', () => ({}));

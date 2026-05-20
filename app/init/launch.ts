@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import Emm from '@mattermost/react-native-emm';
 import {Alert, AppState, DeviceEventEmitter, Linking, Platform} from 'react-native';
 import {Notifications} from 'react-native-notifications';
 
@@ -154,7 +153,6 @@ export const launchApp = async (props: LaunchProps) => {
                             onPress: async () => {
                                 await DatabaseManager.destroyServerDatabase(serverUrl!);
                                 await removeServerCredentials(serverUrl!);
-                                Emm.exitApp();
                             },
                         }],
                     );

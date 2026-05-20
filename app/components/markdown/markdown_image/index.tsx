@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import Clipboard from '@react-native-clipboard/clipboard';
 import React, {useCallback, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
@@ -87,7 +86,6 @@ const MarkdownImage = ({
     const intl = useIntl();
     const isTablet = useIsTablet();
     const style = getStyleSheet(theme);
-    const managedConfig = useManagedConfig<ManagedConfig>();
     const sourceKey = removeImageProxyForKey(source);
 
     // Pattern suggested in https://react.dev/reference/react/useRef#avoiding-recreating-the-ref-contents
@@ -156,44 +154,43 @@ const MarkdownImage = ({
     }, [intl, linkDestination]);
 
     const handleLinkLongPress = useCallback(() => {
-        if (managedConfig?.copyAndPasteProtection !== 'true') {
-            const renderContent = () => {
-                return (
-                    <View
-                        testID='at_mention.bottom_sheet'
-                        style={style.bottomSheet}
-                    >
-                        <SlideUpPanelItem
-                            leftIcon='content-copy'
-                            onPress={() => {
-                                dismissBottomSheet();
-                                Clipboard.setString(linkDestination || source);
-                            }}
-                            testID='at_mention.bottom_sheet.copy_url'
-                            text={intl.formatMessage({id: 'mobile.markdown.link.copy_url', defaultMessage: 'Copy URL'})}
-                        />
-                        <SlideUpPanelItem
-                            destructive={true}
-                            leftIcon='cancel'
-                            onPress={() => {
-                                dismissBottomSheet();
-                            }}
-                            testID='at_mention.bottom_sheet.cancel'
-                            text={intl.formatMessage({id: 'mobile.post.cancel', defaultMessage: 'Cancel'})}
-                        />
-                    </View>
-                );
-            };
+        const renderContent = () => {
+            return (
+                <View
+                    testID='at_mention.bottom_sheet'
+                    style={style.bottomSheet}
+                >
+                    <SlideUpPanelItem
+                        leftIcon='content-copy'
+                        onPress={() => {
+                            dismissBottomSheet();
+                            Clipboard.setString(linkDestination || source);
+                        }}
+                        testID='at_mention.bottom_sheet.copy_url'
+                        text={intl.formatMessage({id: 'mobile.markdown.link.copy_url', defaultMessage: 'Copy URL'})}
+                    />
+                    <SlideUpPanelItem
+                        destructive={true}
+                        leftIcon='cancel'
+                        onPress={() => {
+                            dismissBottomSheet();
+                        }}
+                        testID='at_mention.bottom_sheet.cancel'
+                        text={intl.formatMessage({id: 'mobile.post.cancel', defaultMessage: 'Cancel'})}
+                    />
+                </View>
+            );
+        };
 
-            bottomSheet({
-                closeButtonId: 'close-mardown-image',
-                renderContent,
-                snapPoints: [1, bottomSheetSnapPoint(2, ITEM_HEIGHT)],
-                title: intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}),
-                theme,
-            });
-        }
-    }, [managedConfig?.copyAndPasteProtection, intl, theme, style.bottomSheet, linkDestination, source]);
+        bottomSheet({
+            closeButtonId: 'close-mardown-image',
+            renderContent,
+            snapPoints: [1, bottomSheetSnapPoint(2, ITEM_HEIGHT)],
+            title: intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}),
+            theme,
+        });
+
+    }, [intl, theme, style.bottomSheet, linkDestination, source]);
 
     const handleOnError = useCallback(() => {
         setFailed(true);

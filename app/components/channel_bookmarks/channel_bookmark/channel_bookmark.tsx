@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import {Button} from '@rneui/base';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useIntl} from 'react-intl';
@@ -58,12 +57,11 @@ const ChannelBookmark = ({
     file, galleryIdentifier, index, onPress, publicLinkEnabled, siteURL,
 }: Props) => {
     const theme = useTheme();
-    const managedConfig = useManagedConfig<ManagedConfig>();
     const serverUrl = useServerUrl();
     const intl = useIntl();
     const [action, setAction] = useState<GalleryAction>('none');
     const isDocumentFile = useMemo(() => isDocument(file), [file]);
-    const canCopyPublicLink = !enableSecureFilePreview && Boolean((bookmark.type === 'link' || (file?.id && publicLinkEnabled)) && managedConfig.copyAndPasteProtection !== 'true');
+    const canCopyPublicLink = !enableSecureFilePreview && Boolean((bookmark.type === 'link' || (file?.id && publicLinkEnabled)));
 
     const handlePress = useCallback(() => {
         if (bookmark.linkUrl) {

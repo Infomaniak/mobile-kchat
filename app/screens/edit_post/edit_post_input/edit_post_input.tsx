@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import PasteInput, {type PasteInputRef} from '@mattermost/react-native-paste-input';
 import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
@@ -63,8 +62,7 @@ const EditPostInput = ({
     const intl = useIntl();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
-    const managedConfig = useManagedConfig<ManagedConfig>();
-    const disableCopyAndPaste = managedConfig.copyAndPasteProtection === 'true';
+    const disableCopyAndPaste = false;
     const focus = useCallback(() => {
         inputRef.current?.focus();
     }, [inputRef]);
