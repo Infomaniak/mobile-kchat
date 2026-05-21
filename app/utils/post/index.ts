@@ -53,7 +53,7 @@ export function isEdited(post: PostModel): boolean {
 }
 
 export function isPostEphemeral(post: PostModel): boolean {
-    return post.type === Post.POST_TYPES.EPHEMERAL || post.type === Post.POST_TYPES.EPHEMERAL_ADD_TO_CHANNEL || post.deleteAt > 0;
+    return post.type === Post.POST_TYPES.EPHEMERAL || post.type === Post.POST_TYPES.EPHEMERAL_ADD_TO_CHANNEL;
 }
 
 export function isPostFailed(post: PostModel): boolean {
