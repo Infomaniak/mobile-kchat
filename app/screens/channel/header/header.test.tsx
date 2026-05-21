@@ -38,7 +38,6 @@ describe.skip('ChannelHeader', () => {
             channelType: 'O' as ChannelType,
             displayName: 'Test Channel',
             teamId: 'team-id',
-            hasPlaybookRuns: false,
             callsEnabledInChannel: false,
             isBookmarksEnabled: false,
             canAddBookmarks: false,
@@ -48,7 +47,6 @@ describe.skip('ChannelHeader', () => {
             isCustomStatusExpired: false,
             isOwnDirectMessage: false,
             shouldRenderChannelBanner: false,
-            isPlaybooksEnabled: true,
             isChannelAutotranslated: false,
         };
     }
