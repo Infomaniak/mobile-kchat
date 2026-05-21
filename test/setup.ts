@@ -95,29 +95,6 @@ jest.mock('@nozbe/watermelondb/react/withObservables/garbageCollector', () => {
 /* eslint-disable no-console */
 jest.mock('@database/manager');
 
-jest.mock('@managers/intune_manager', () => ({
-    __esModule: true,
-    default: {
-        init: jest.fn(),
-        login: jest.fn(),
-        enrollServer: jest.fn(),
-        unenrollServer: jest.fn(),
-        setCurrentIdentity: jest.fn(),
-        cleanupAfterWipe: jest.fn(),
-        reportWipeComplete: jest.fn(),
-        getPendingWipes: jest.fn(() => Promise.resolve([])),
-        getPolicy: jest.fn(() => Promise.resolve(null)),
-        isIntuneMAMEnabledForServer: jest.fn(() => Promise.resolve(false)),
-        isManagedServer: jest.fn(() => Promise.resolve(false)),
-        subscribeToPolicyChanges: jest.fn(() => ({remove: jest.fn()})),
-        subscribeToEnrollmentChanges: jest.fn(() => ({remove: jest.fn()})),
-        subscribeToWipeRequests: jest.fn(() => ({remove: jest.fn()})),
-        subscribeToAuthRequired: jest.fn(() => ({remove: jest.fn()})),
-        subscribeToConditionalLaunchBlocked: jest.fn(() => ({remove: jest.fn()})),
-        subscribeToIdentitySwitchRequired: jest.fn(() => ({remove: jest.fn()})),
-    },
-}));
-
 jest.doMock('react-native', () => {
     const {
         AppState: RNAppState,
