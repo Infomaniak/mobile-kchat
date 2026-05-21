@@ -17,7 +17,6 @@ import {prepareChannels,
     prepareMissingChannelsForAllTeams,
     prepareMyChannelsForTeam,
     prepareDeleteChannel,
-    prepareDeleteBookmarks,
     queryAllChannels,
     queryAllChannelsForTeam,
     queryAllChannelsInfo,
@@ -73,7 +72,6 @@ import {getCurrentChannelId, observeCurrentChannelId, observeCurrentUserId} from
 import {observeTeammateNameDisplay} from './user';
 
 import type ChannelModel from '@typings/database/models/servers/channel';
-import type ChannelBookmarkModel from '@typings/database/models/servers/channel_bookmark';
 import type ChannelInfoModel from '@typings/database/models/servers/channel_info';
 import type ChannelMembershipModel from '@typings/database/models/servers/channel_membership';
 
@@ -359,10 +357,6 @@ describe('prepareDeleteChannel', () => {
         const postModels = [
             TestHelper.fakePostModel({id: 'post1', prepareDestroyPermanently: jest.fn().mockReturnValue({id: 'post'})}),
         ];
-        const bookmarkModels = [
-            TestHelper.fakeChannelBookmarkModel({id: 'bookmark1', prepareDestroyPermanently: jest.fn().mockReturnValue({id: 'bookmark'})}),
-        ];
-
         jest.mocked(channel.membership.fetch).mockResolvedValue(membershipModel);
         jest.mocked(channel.info.fetch).mockResolvedValue(infoModel);
         jest.mocked(channel.categoryChannel.fetch).mockResolvedValue(categoryChannelModel);
@@ -370,7 +364,6 @@ describe('prepareDeleteChannel', () => {
         jest.mocked(channel.drafts.fetch).mockResolvedValue(draftModels);
         jest.mocked(channel.postsInChannel.fetch).mockResolvedValue(postsInChannelModels);
         jest.mocked(channel.posts.fetch).mockResolvedValue(postModels);
-        jest.mocked(channel.bookmarks.fetch).mockResolvedValue(bookmarkModels);
 
         const result = await prepareDeleteChannel(serverUrl, channel);
 
@@ -383,7 +376,6 @@ describe('prepareDeleteChannel', () => {
             {id: 'draft'},
             {id: 'postsInChannel'},
             {id: 'post'},
-            {id: 'bookmark'},
             expect.objectContaining({id: 'playbookRun'}),
         ]);
         expect(channel.prepareDestroyPermanently).toHaveBeenCalled();
@@ -394,7 +386,6 @@ describe('prepareDeleteChannel', () => {
         expect(channel.drafts.fetch).toHaveBeenCalled();
         expect(channel.postsInChannel.fetch).toHaveBeenCalled();
         expect(channel.posts.fetch).toHaveBeenCalled();
-        expect(channel.bookmarks.fetch).toHaveBeenCalled();
     });
 
     it('should handle errors gracefully', async () => {
@@ -406,50 +397,6 @@ describe('prepareDeleteChannel', () => {
 
         expect(result).toEqual([{}]);
         expect(channel.prepareDestroyPermanently).toHaveBeenCalled();
-    });
-});
-
-describe('prepareDeleteBookmarks', () => {
-    let bookmark: ChannelBookmarkModel;
-
-    beforeEach(() => {
-        bookmark = TestHelper.fakeChannelBookmarkModel({
-            prepareDestroyPermanently: jest.fn().mockReturnValue({}),
-            fileId: 'file_id',
-        });
-    });
-
-    it('should prepare bookmark and associated file for deletion', async () => {
-        const fileModel = TestHelper.fakeFileModel({prepareDestroyPermanently: jest.fn().mockReturnValue({})});
-
-        jest.mocked(bookmark.file.fetch).mockResolvedValue(fileModel);
-
-        const result = await prepareDeleteBookmarks(bookmark);
-
-        expect(result).toEqual([{}, {}]);
-        expect(bookmark.prepareDestroyPermanently).toHaveBeenCalled();
-        expect(bookmark.file.fetch).toHaveBeenCalled();
-        expect(fileModel.prepareDestroyPermanently).toHaveBeenCalled();
-    });
-
-    it('should handle errors gracefully when fetching associated file', async () => {
-        jest.mocked(bookmark.file.fetch).mockRejectedValue(new Error('Test error'));
-
-        const result = await prepareDeleteBookmarks(bookmark);
-
-        expect(result).toEqual([{}]);
-        expect(bookmark.prepareDestroyPermanently).toHaveBeenCalled();
-        expect(bookmark.file.fetch).toHaveBeenCalled();
-    });
-
-    it('should prepare only the bookmark for deletion if no associated file', async () => {
-        bookmark.fileId = undefined;
-
-        const result = await prepareDeleteBookmarks(bookmark);
-
-        expect(result).toEqual([{}]);
-        expect(bookmark.prepareDestroyPermanently).toHaveBeenCalled();
-        expect(bookmark.file.fetch).not.toHaveBeenCalled();
     });
 });
 

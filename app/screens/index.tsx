@@ -93,9 +93,6 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.CHANNEL:
             screen = withServerDatabase(require('@screens/channel').default);
             break;
-        case Screens.CHANNEL_BOOKMARK:
-            screen = withServerDatabase(require('@screens/channel_bookmark').default);
-            break;
         case Screens.CHANNEL_NOTIFICATION_PREFERENCES:
             screen = withServerDatabase(require('@screens/channel_notification_preferences').default);
             break;

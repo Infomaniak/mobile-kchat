@@ -15,7 +15,6 @@ import {MM_TABLES} from '@constants/database';
 
 const {
     CHANNEL,
-    CHANNEL_BOOKMARK,
     CONFERENCE,
     CONFERENCE_PARTICIPANT,
     FILE,
@@ -130,7 +129,7 @@ export default schemaMigrations({
             toVersion: 7, // Ik: equivalent of version 12 of MM
             steps: [
                 createTable({
-                    name: CHANNEL_BOOKMARK,
+                    name: 'ChannelBookmark',
                     columns: [
                         {name: 'create_at', type: 'number'},
                         {name: 'update_at', type: 'number'},

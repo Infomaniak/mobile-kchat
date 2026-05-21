@@ -9,10 +9,8 @@ import {observeIsCallsEnabledInChannel} from '@calls/observers';
 import {General, Permissions} from '@constants';
 import {withServerUrl} from '@context/server';
 import {observeChannelAutotranslation, observeCurrentChannel} from '@queries/servers/channel';
-import {observeCanAddBookmarks} from '@queries/servers/channel_bookmark';
 import {observeCanManageChannelAutotranslations, observeCanManageChannelMembers, observeCanManageChannelSettings, observePermissionForChannel, observePermissionForTeam} from '@queries/servers/role';
 import {
-    observeConfigBooleanValue,
     observeConfigValue,
     observeCurrentChannelId,
 } from '@queries/servers/system';
@@ -159,14 +157,6 @@ const enhanced = withObservables([], ({serverUrl, database}: Props) => {
         distinctUntilChanged(),
     );
 
-    const isBookmarksEnabled = observeConfigBooleanValue(database, 'FeatureFlagChannelBookmarks');
-
-    const canAddBookmarks = channelId.pipe(
-        switchMap((cId) => {
-            return observeCanAddBookmarks(database, cId);
-        }),
-    );
-
     const isAutotranslationEnabledForThisChannel = channelId.pipe(
         switchMap((cId) => observeChannelAutotranslation(database, cId)),
     );
@@ -174,9 +164,7 @@ const enhanced = withObservables([], ({serverUrl, database}: Props) => {
     return {
         type,
         isCallsEnabledInChannel,
-        canAddBookmarks,
         canManageMembers,
-        isBookmarksEnabled,
         isCRTEnabled: observeIsCRTEnabled(database),
         hasChannelSettingsActions: observeHasChannelSettingsActions(database, serverUrl, channelId, channel, currentUser, type),
         isAutotranslationEnabledForThisChannel,

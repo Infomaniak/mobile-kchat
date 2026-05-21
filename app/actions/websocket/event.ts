@@ -6,7 +6,6 @@
 import {handleAgentPostUpdate} from '@agents/actions/websocket';
 import {handleAgentsEvents} from '@agents/actions/websocket/events';
 
-import * as bookmark from '@actions/local/channel_bookmark';
 import {
     handleBoRPostAllRevealed,
     handleBoRPostBurnedEvent,
@@ -208,18 +207,6 @@ export async function handleWebSocketEvent(serverUrl: string, msg: WebSocketMess
         case WebsocketEvents.PLUGIN_DISABLED:
             // IK change: agents feature not available on our server
             // checkIsAgentsPluginEnabled(serverUrl);
-            break;
-
-        // bookmarks
-        case WebsocketEvents.CHANNEL_BOOKMARK_CREATED:
-        case WebsocketEvents.CHANNEL_BOOKMARK_DELETED:
-            bookmark.handleBookmarkAddedOrDeleted(serverUrl, msg);
-            break;
-        case WebsocketEvents.CHANNEL_BOOKMARK_UPDATED:
-            bookmark.handleBookmarkEdited(serverUrl, msg);
-            break;
-        case WebsocketEvents.CHANNEL_BOOKMARK_SORTED:
-            bookmark.handleBookmarkSorted(serverUrl, msg);
             break;
 
         // scheduled posts

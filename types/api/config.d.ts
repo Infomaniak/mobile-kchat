@@ -129,7 +129,6 @@ interface ClientConfig {
     FeatureFlagCollapsedThreads?: string;
     FeatureFlagPostPriority?: string;
     FeatureFlagEnableVoiceMessages?: string;
-    FeatureFlagChannelBookmarks?: string;
     FeatureFlagCustomProfileAttributes?: string;
     FeatureFlagInteractiveDialogAppsForm?: string;
     ForgotPasswordLink?: string;
