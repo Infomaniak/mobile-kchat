@@ -75,7 +75,7 @@ export default class BaseDataOperator {
         const updateRaws: Array<RecordPair<T, R>> = [];
 
         // for delete flow
-        const deleteRaws = existingRecords || await getRecords(deleteRawValues);
+        const deleteRaws = deleteRawValues.length ? await getRecords(deleteRawValues) : [];
 
         // for create or update flow
         const createOrUpdateRaws = existingRecords || await getRecords(createOrUpdateRawValues);

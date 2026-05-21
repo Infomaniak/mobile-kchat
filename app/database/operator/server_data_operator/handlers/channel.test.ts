@@ -62,6 +62,7 @@ describe('*** Operator: Channel Handlers tests ***', () => {
             createOrUpdateRawValues: channels,
             tableName: 'Channel',
             prepareRecordsOnly: false,
+            existingRecords: [],
             transformer: transformChannelRecord,
         }, 'handleChannel');
     });
@@ -101,6 +102,7 @@ describe('*** Operator: Channel Handlers tests ***', () => {
             createOrUpdateRawValues: settings,
             tableName: 'MyChannelSettings',
             prepareRecordsOnly: false,
+            existingRecords: [],
             buildKeyRecordBy: buildMyChannelKey,
             transformer: transformMyChannelSettingsRecord,
         }, 'handleMyChannelSettings');
@@ -133,6 +135,7 @@ describe('*** Operator: Channel Handlers tests ***', () => {
             createOrUpdateRawValues: channelInfos,
             tableName: 'ChannelInfo',
             prepareRecordsOnly: false,
+            existingRecords: [],
             transformer: transformChannelInfoRecord,
         }, 'handleChannelInfo');
     });
@@ -193,6 +196,7 @@ describe('*** Operator: Channel Handlers tests ***', () => {
             createOrUpdateRawValues: myChannels,
             tableName: 'MyChannel',
             prepareRecordsOnly: true,
+            existingRecords: [],
             buildKeyRecordBy: buildMyChannelKey,
             transformer: transformMyChannelRecord,
         }, 'handleMyChannel');
@@ -312,6 +316,7 @@ describe('*** Operator: Channel Handlers tests ***', () => {
             createOrUpdateRawValues: channelMemberships,
             tableName: 'ChannelMembership',
             prepareRecordsOnly: false,
+            existingRecords: [],
             buildKeyRecordBy: buildChannelMembershipKey,
             transformer: transformChannelMembershipRecord,
         }, 'handleChannelMembership');
