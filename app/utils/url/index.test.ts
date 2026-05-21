@@ -27,6 +27,10 @@ import {
     tryOpenURL,
 } from './index';
 
+jest.mock('@mattermost/react-native-network-client', () => ({
+    head: jest.fn(),
+}));
+
 const mockedOpenURL = jest.spyOn(Linking, 'openURL');
 
 describe('safeDecodeURIComponent', () => {
