@@ -1,10 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import moment from 'moment-timezone';
 import {createIntl} from 'react-intl';
 import {Alert, DeviceEventEmitter} from 'react-native';
-import {Notifications} from 'react-native-notifications';
 
 import {Events} from '@constants';
 import {DEFAULT_LOCALE, getTranslations} from '@i18n';
@@ -43,10 +41,6 @@ describe('Notification Utils', () => {
             data: {},
         },
         body: 'body',
-    };
-
-    const session = {
-        expires_at: moment().add(10, 'hours').valueOf(),
     };
 
     afterEach(() => {
