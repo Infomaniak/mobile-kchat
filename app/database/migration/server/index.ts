@@ -41,13 +41,22 @@ export default schemaMigrations({
             toVersion: 11,
             steps: [
                 unsafeExecuteSql(
-                    'CREATE INDEX IF NOT EXISTS Post_create_at ON Post (create_at);',
-                ),
-                unsafeExecuteSql(
                     'CREATE INDEX IF NOT EXISTS Post_delete_at ON Post (delete_at);',
                 ),
                 unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Post_channel_id_create_at ON Post (channel_id, create_at DESC);',
+                ),
+                unsafeExecuteSql(
                     'CREATE INDEX IF NOT EXISTS Post_root_id ON Post (root_id);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS MyChannel_last_post_at ON MyChannel (last_post_at);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS MyChannel_last_viewed_at ON MyChannel (last_viewed_at);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Preference_category_name ON Preference (category, name);',
                 ),
                 unsafeExecuteSql(
                     'CREATE INDEX IF NOT EXISTS Channel_delete_at ON Channel (delete_at);',

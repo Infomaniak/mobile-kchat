@@ -316,8 +316,8 @@ describe('*** Test schema for SERVER database ***', () => {
                     unsafeSql: undefined,
                     columns: {
                         is_unread: {name: 'is_unread', type: 'boolean'},
-                        last_post_at: {name: 'last_post_at', type: 'number'},
-                        last_viewed_at: {name: 'last_viewed_at', type: 'number'},
+                        last_post_at: {name: 'last_post_at', type: 'number', isIndexed: true},
+                        last_viewed_at: {name: 'last_viewed_at', type: 'number', isIndexed: true},
                         manually_unread: {name: 'manually_unread', type: 'boolean'},
                         mentions_count: {name: 'mentions_count', type: 'number'},
                         message_count: {name: 'message_count', type: 'number'},
@@ -329,8 +329,8 @@ describe('*** Test schema for SERVER database ***', () => {
                     },
                     columnArray: [
                         {name: 'is_unread', type: 'boolean'},
-                        {name: 'last_post_at', type: 'number'},
-                        {name: 'last_viewed_at', type: 'number'},
+                        {name: 'last_post_at', type: 'number', isIndexed: true},
+                        {name: 'last_viewed_at', type: 'number', isIndexed: true},
                         {name: 'manually_unread', type: 'boolean'},
                         {name: 'mentions_count', type: 'number'},
                         {name: 'message_count', type: 'number'},
@@ -678,7 +678,7 @@ describe('*** Test schema for SERVER database ***', () => {
                     unsafeSql: undefined,
                     columns: {
                         channel_id: {name: 'channel_id', type: 'string', isIndexed: true},
-                        create_at: {name: 'create_at', type: 'number', isIndexed: true},
+                        create_at: {name: 'create_at', type: 'number'},
                         delete_at: {name: 'delete_at', type: 'number', isIndexed: true},
                         edit_at: {name: 'edit_at', type: 'number'},
                         is_pinned: {name: 'is_pinned', type: 'boolean'},
@@ -696,7 +696,7 @@ describe('*** Test schema for SERVER database ***', () => {
                     },
                     columnArray: [
                         {name: 'channel_id', type: 'string', isIndexed: true},
-                        {name: 'create_at', type: 'number', isIndexed: true},
+                        {name: 'create_at', type: 'number'},
                         {name: 'delete_at', type: 'number', isIndexed: true},
                         {name: 'edit_at', type: 'number'},
                         {name: 'is_pinned', type: 'boolean'},
@@ -718,13 +718,13 @@ describe('*** Test schema for SERVER database ***', () => {
                     unsafeSql: undefined,
                     columns: {
                         category: {name: 'category', type: 'string', isIndexed: true},
-                        name: {name: 'name', type: 'string'},
+                        name: {name: 'name', type: 'string', isIndexed: true},
                         user_id: {name: 'user_id', type: 'string', isIndexed: true},
                         value: {name: 'value', type: 'string'},
                     },
                     columnArray: [
                         {name: 'category', type: 'string', isIndexed: true},
-                        {name: 'name', type: 'string'},
+                        {name: 'name', type: 'string', isIndexed: true},
                         {name: 'user_id', type: 'string', isIndexed: true},
                         {name: 'value', type: 'string'},
                     ],
