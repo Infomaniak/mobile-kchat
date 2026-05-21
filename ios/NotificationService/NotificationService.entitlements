@@ -10,9 +10,5 @@
 	<array>
 		<string>$(AppIdentifierPrefix)com.infomaniak.chat</string>
 	</array>
-	<key>com.apple.developer.associated-domains</key>
-	<array>
-		<string>applinks:*.kchat.infomaniak.com</string>
-	</array>
 </dict>
 </plist>
