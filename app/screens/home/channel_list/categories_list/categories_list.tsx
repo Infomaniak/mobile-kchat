@@ -39,7 +39,6 @@ type ChannelListProps = {
     lastChannelId?: string;
     scheduledPostsEnabled?: boolean;
     agentsEnabled?: boolean;
-    showPlaybooksButton?: boolean;
 };
 
 const getTabletWidth = (moreThanOneTeam: boolean) => {

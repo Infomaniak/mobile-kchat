@@ -17,8 +17,6 @@ jest.mock('@components/navigation_header', () => ({
 jest.mocked(NavigationHeader).mockImplementation((props) => React.createElement('NavigationHeader', {testID: 'navigation-header', ...props}));
 
 jest.mock('@screens/navigation');
-jest.mock('@playbooks/screens/navigation');
-jest.mock('@playbooks/actions/remote/runs');
 
 jest.mock('@calls/state', () => ({
     getCallsConfig: jest.fn().mockReturnValue({

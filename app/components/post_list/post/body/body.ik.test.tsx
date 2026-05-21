@@ -56,11 +56,6 @@ jest.mock('./reactions', () => ({
     default: jest.fn(() => null),
 }));
 
-jest.mock('@playbooks/components/status_update_post', () => ({
-    __esModule: true,
-    default: jest.fn(() => null),
-}));
-
 const baseProps = {
     appsEnabled: false,
     hasFiles: false,

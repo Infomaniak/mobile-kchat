@@ -46,8 +46,6 @@ jest.mock('@utils/helpers', () => ({
     isTablet: jest.fn().mockReturnValue(false),
 }));
 
-jest.mock('@playbooks/actions/websocket/reconnect');
-
 describe.skip('WebSocket Index Actions', () => {
     // IK change : skipped on CI temporarily, will fix later
     const serverUrl = 'baseHandler.test.com';

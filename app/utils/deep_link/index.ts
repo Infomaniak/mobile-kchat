@@ -122,27 +122,6 @@ export async function handleDeepLink(deepLink: DeepLinkWithData, intlShape?: Int
                 });
                 break;
             }
-            case DeepLink.Playbooks: {
-                // Alert that playbooks should be access from the webapp or desktop app
-                Alert.alert(
-                    intl.formatMessage({id: 'playbooks.only_runs_available.title', defaultMessage: 'Playbooks not available'}),
-                    intl.formatMessage({id: 'playbooks.only_runs_available.description', defaultMessage: 'Only Playbook Checklists are available on mobile. To access the Playbook, please use the desktop or web app.'}),
-                    [{
-                        text: intl.formatMessage({id: 'playbooks.only_runs_available.ok', defaultMessage: 'OK'}),
-                    }],
-                );
-                break;
-            }
-            case DeepLink.PlaybookRunsRetrospective: {
-                Alert.alert(
-                    intl.formatMessage({id: 'playbooks.retrospective_not_available.title', defaultMessage: 'Playbooks Retrospective not available'}),
-                    intl.formatMessage({id: 'playbooks.retrospective_not_available.description', defaultMessage: 'Only Playbook Checklists are available on mobile. To fill the Run Retrospective, please use the desktop or web app.'}),
-                    [{
-                        text: intl.formatMessage({id: 'playbooks.retrospective_not_available.ok', defaultMessage: 'OK'}),
-                    }],
-                );
-                break;
-            }
             case DeepLink.MagicLink: {
                 Alert.alert(
                     intl.formatMessage({id: 'magic_link.already_logged_in_error.title', defaultMessage: 'Already logged in'}),
@@ -176,25 +155,6 @@ type ChannelPathParams = {
 
 const CHANNEL_PATH = '*serverUrl/:teamName/:path/:identifier';
 export const matchChannelDeeplink = match<ChannelPathParams>(CHANNEL_PATH);
-
-type PlaybooksPathParams = {
-    serverUrl: string[];
-    playbookId: string;
-};
-
-const PLAYBOOKS_PATH = '*serverUrl/playbooks/playbooks/:playbookId';
-export const matchPlaybooksDeeplink = match<PlaybooksPathParams>(PLAYBOOKS_PATH);
-
-type PlaybookRunsPathParams = {
-    serverUrl: string[];
-    playbookRunId: string;
-};
-
-const PLAYBOOK_RUNS_PATH = '*serverUrl/playbooks/runs/:playbookRunId';
-export const matchPlaybookRunsDeeplink = match<PlaybookRunsPathParams>(PLAYBOOK_RUNS_PATH);
-
-const PLAYBOOK_RUNS_RETROSPECTIVE = '*serverUrl/playbooks/runs/:playbookRunId/retrospective';
-export const matchPlaybookRunsRetrospectiveDeeplink = match<PlaybookRunsPathParams>(PLAYBOOK_RUNS_RETROSPECTIVE);
 
 type MagicLinkPathParams = {
     serverUrl: string[];
@@ -327,24 +287,6 @@ export function parseDeepLink(deepLinkUrl: string, asServer = false): DeepLinkWi
         if (permalinkMatch && isValidTeamName(permalinkMatch.params.teamName) && isValidId(permalinkMatch.params.postId)) {
             const {params: {serverUrl, teamName, postId}} = permalinkMatch;
             return {type: DeepLink.Permalink, url: deepLinkUrl, data: {serverUrl: serverUrl.join('/'), teamName, postId}};
-        }
-
-        const playbooksMatch = matchPlaybooksDeeplink(url);
-        if (playbooksMatch && isValidId(playbooksMatch.params.playbookId)) {
-            const {params: {serverUrl, playbookId}} = playbooksMatch;
-            return {type: DeepLink.Playbooks, url: deepLinkUrl, data: {serverUrl: serverUrl.join('/'), playbookId}};
-        }
-
-        const playbooksRunsRetrospectiveMatch = matchPlaybookRunsRetrospectiveDeeplink(url);
-        if (playbooksRunsRetrospectiveMatch && isValidId(playbooksRunsRetrospectiveMatch.params.playbookRunId)) {
-            const {params: {serverUrl, playbookRunId}} = playbooksRunsRetrospectiveMatch;
-            return {type: DeepLink.PlaybookRunsRetrospective, url: deepLinkUrl, data: {serverUrl: serverUrl.join('/'), playbookRunId}};
-        }
-
-        const playbooksRunsMatch = matchPlaybookRunsDeeplink(url);
-        if (playbooksRunsMatch && isValidId(playbooksRunsMatch.params.playbookRunId)) {
-            const {params: {serverUrl, playbookRunId}} = playbooksRunsMatch;
-            return {type: DeepLink.PlaybookRuns, url: deepLinkUrl, data: {serverUrl: serverUrl.join('/'), playbookRunId}};
         }
 
         const magicLinkMatch = matchMagicLinkDeeplink(url);

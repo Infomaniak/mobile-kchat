@@ -33,7 +33,6 @@ export const SNACK_BAR_TYPE = keyMirror({
     SCHEDULED_POST_CREATION_ERROR: null,
     RESCHEDULED_POST: null,
     DELETE_SCHEDULED_POST_ERROR: null,
-    PLAYBOOK_ERROR: null,
     ENABLE_TRANSLATION: null,
     BOR_POST_EXPIRED: null,
 });
@@ -135,10 +134,6 @@ const messages = defineMessages({
     PLUGIN_TOAST: {
         id: 'snack.bar.plugin.toast',
         defaultMessage: 'Notification',
-    },
-    PLAYBOOK_ERROR: {
-        id: 'snack.bar.playbook.error',
-        defaultMessage: 'Unable to perform action. Please try again later.',
     },
     LEAVE_PRIVATE_CHANNEL: {
         id: 'snack.bar.leave.private.channel',
@@ -269,12 +264,6 @@ export const SNACK_BAR_CONFIG: Record<string, SnackBarConfig> = {
         iconName: 'information-outline',
         hasAction: false,
         type: MESSAGE_TYPE.DEFAULT,
-    },
-    PLAYBOOK_ERROR: {
-        message: messages.PLAYBOOK_ERROR,
-        iconName: 'alert-outline',
-        hasAction: false,
-        type: MESSAGE_TYPE.ERROR,
     },
     ENABLE_TRANSLATION: {
         message: messages.ENABLE_TRANSLATION,

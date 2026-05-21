@@ -81,11 +81,6 @@ jest.mock('@i18n', () => ({
     t: jest.fn((id) => id),
 }));
 
-jest.mock('@playbooks/database/queries/version');
-jest.mock('@playbooks/database/queries/run');
-jest.mock('@playbooks/actions/remote/runs');
-jest.mock('@playbooks/screens/navigation');
-
 // Ik change : skip on CI, will fix later
 describe.skip('extractServerUrl', () => {
     it('should extract the sanitized server url', () => {

@@ -201,38 +201,8 @@ const ChannelHeader = ({
         });
     }, [isTablet, callsAvailable, isDMorGM, , agentsEnabled, theme, onTitlePress, channelId]);
 
-    // const openPlaybooksRuns = useCallback(() => {
-    //     // If no active runs, create a new one instead
-    //     if (playbooksActiveRuns === 0) {
-    //         goToCreateQuickChecklist(
-    //             intl,
-    //             channelId,
-    //             displayName,
-    //             currentUserId,
-    //             teamId,
-    //             serverUrl,
-    //         );
-    //         return;
-    //     }
-
-    //     if (activeRunId) {
-    //         goToPlaybookRun(intl, activeRunId);
-    //         return;
-    //     }
-    //     goToPlaybookRuns(intl, channelId, displayName);
-    // }, [playbooksActiveRuns, activeRunId, channelId, displayName, intl, currentUserId, teamId, serverUrl]);
-
     const rightButtons = useMemo(() => {
         const buttons: HeaderRightButton[] = [];
-
-        // if (isPlaybooksEnabled && !isDMorGM) {
-        //     buttons.push({
-        //         iconName: 'product-playbooks',
-        //         onPress: openPlaybooksRuns,
-        //         buttonType: 'opacity',
-        //         count: playbooksActiveRuns || '+',
-        //     });
-        // }
 
         buttons.push({
             iconName: Platform.select({android: 'dots-vertical', default: 'dots-horizontal'}),

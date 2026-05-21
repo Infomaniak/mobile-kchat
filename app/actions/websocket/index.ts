@@ -91,17 +91,6 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
     const license = await getLicense(database);
     const config = await getConfig(database);
 
-    // handlePlaybookReconnect(serverUrl);
-    // IK change: agents feature not available on our server
-    // handleAgentsReconnect(serverUrl);
-
-    // if (isSupportedServerCalls(config?.Version)) {
-    //     loadConfigAndCalls(serverUrl, currentUserId, groupLabel);
-    // }
-
-    // IK change: agents feature not available on our server
-    // checkIsAgentsPluginEnabled(serverUrl);
-
     await deferredAppEntryActions(serverUrl, lastFullSync, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, meData, initialTeamId, undefined, groupLabel);
 
     await setLastFullSync(operator, now);
