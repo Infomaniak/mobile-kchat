@@ -10,9 +10,7 @@ import type {Clause} from '@nozbe/watermelondb/QueryDescription';
 import type {Class} from '@nozbe/watermelondb/types';
 import type {CustomProfileField, CustomProfileAttribute} from '@typings/api/custom_profile_attributes';
 import type {CloudUsage, Limits} from '@typings/components/cloud';
-import type ReactionModel from '@typings/database/models/servers/reaction';
 import type System from '@typings/database/models/servers/system';
-import type ThreadParticipantModel from '@typings/database/models/servers/thread_participant';
 
 export type SyncStatus = 'synced' | 'pending' | 'failed';
 
@@ -117,19 +115,17 @@ export type HandleTeamThreadsSyncArgs = {
 };
 
 export type SanitizeReactionsArgs = {
-    database: Database;
-    post_id: string;
-    rawReactions: Reaction[];
-    skipSync?: boolean;
-    existingReactions?: ReactionModel[];
+  database: Database;
+  post_id: string;
+  rawReactions: Reaction[];
+  skipSync?: boolean;
 };
 
 export type SanitizeThreadParticipantsArgs = {
-    database: Database;
-    skipSync?: boolean;
-    thread_id: $ID<Thread>;
-    rawParticipants: ThreadParticipant[];
-    existingParticipants?: ThreadParticipantModel[];
+  database: Database;
+  skipSync?: boolean;
+  thread_id: $ID<Thread>;
+  rawParticipants: ThreadParticipant[];
 }
 
 export type ChainPostsArgs = {
@@ -160,9 +156,8 @@ export type ProcessRecordsArgs<T extends Model, R extends RawValue> = {
   deleteRawValues?: R[];
   tableName: string;
   buildClauseFromRawValues?: (rawValues: R[]) => Q.Clause | null;
-    matchRecord?: (existingRecord: T, newRaw: R) => boolean;
-    shouldUpdate?: (existingRecord: T, newRaw: R) => boolean;
-    existingRecords?: T[];
+  matchRecord?: (existingRecord: T, newRaw: R) => boolean;
+  shouldUpdate?: (existingRecord: T, newRaw: R) => boolean;
 } & ({
   fieldName: keyof R;
   buildKeyRecordBy: (obj: T | R) => string | number;

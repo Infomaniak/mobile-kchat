@@ -365,6 +365,15 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         }, new Set<string>());
 
         const database: Database = this.database;
+        if (deletedPostIds.size) {
+            const postsToDelete = await database.get<PostModel>(POST).query(Q.where('id', Q.oneOf(Array.from(deletedPostIds)))).fetch();
+            if (postsToDelete.length) {
+                await database.write(async () => {
+                    const promises = postsToDelete.map((p) => p.destroyPermanently());
+                    await Promise.all(promises);
+                });
+            }
+        }
 
         // Process the posts to get which ones need to be created and which updated
         const processedPosts = (await this.processRecords({
@@ -391,13 +400,6 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
         // Add the models to be batched here
         const batch: Model[] = [...preparedPosts];
-
-        if (deletedPostIds.size) {
-            const postsToDelete = await database.get<PostModel>(POST).query(Q.where('id', Q.oneOf(Array.from(deletedPostIds)))).fetch();
-            if (postsToDelete.length) {
-                batch.push(...postsToDelete.map((p) => p.prepareDestroyPermanently()));
-            }
-        }
 
         if (postsReactions.length) {
             // calls handler for Reactions
@@ -752,22 +754,15 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         const update: Array<RecordPair<PostsInThreadModel, PostsInThread>> = [];
         const create: PostsInThread[] = [];
         const ids = Object.keys(postsMap);
-        const allChunks = (await this.database.get<PostsInThreadModel>(POSTS_IN_THREAD).query(
-            Q.where('root_id', Q.oneOf(ids)),
-            Q.sortBy('latest', Q.desc),
-        ).fetch());
-        const chunksByRootId = allChunks.reduce((acc, chunk) => {
-            if (!acc[chunk.rootId]) {
-                acc[chunk.rootId] = chunk;
-            }
-            return acc;
-        }, {} as Record<string, PostsInThreadModel>);
-
         for await (const rootId of ids) {
             const {firstPost, lastPost} = getPostListEdges(postsMap[rootId]);
-            const chunk = chunksByRootId[rootId];
+            const chunks = (await this.database.get<PostsInThreadModel>(POSTS_IN_THREAD).query(
+                Q.where('root_id', rootId),
+                Q.sortBy('latest', Q.desc),
+            ).fetch());
 
-            if (chunk) {
+            if (chunks.length) {
+                const chunk = chunks[0];
                 const newValue = {
                     root_id: rootId,
                     earliest: Math.min(chunk.earliest, firstPost.create_at),

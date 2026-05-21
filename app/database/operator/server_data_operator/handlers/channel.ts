@@ -94,7 +94,6 @@ const ChannelHandler = <TBase extends Constructor<ServerDataOperatorBase>>(super
             prepareRecordsOnly,
             createOrUpdateRawValues,
             tableName: CHANNEL,
-            existingRecords: existing,
         }, 'handleChannel');
     };
 
@@ -152,7 +151,6 @@ const ChannelHandler = <TBase extends Constructor<ServerDataOperatorBase>>(super
             prepareRecordsOnly,
             createOrUpdateRawValues,
             tableName: MY_CHANNEL_SETTINGS,
-            existingRecords: existing,
         }, 'handleMyChannelSettings');
     };
 
@@ -213,7 +211,6 @@ const ChannelHandler = <TBase extends Constructor<ServerDataOperatorBase>>(super
             prepareRecordsOnly,
             createOrUpdateRawValues,
             tableName: CHANNEL_INFO,
-            existingRecords: existing,
         }, 'handleChannelInfo');
     };
 
@@ -301,7 +298,6 @@ const ChannelHandler = <TBase extends Constructor<ServerDataOperatorBase>>(super
             prepareRecordsOnly,
             createOrUpdateRawValues,
             tableName: MY_CHANNEL,
-            existingRecords: existing,
         }, 'handleMyChannel');
     };
 
@@ -358,7 +354,6 @@ const ChannelHandler = <TBase extends Constructor<ServerDataOperatorBase>>(super
             prepareRecordsOnly,
             createOrUpdateRawValues,
             tableName: CHANNEL_MEMBERSHIP,
-            existingRecords: existing,
         }, 'handleChannelMembership');
     };
 
