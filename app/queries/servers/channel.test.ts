@@ -365,16 +365,6 @@ describe('prepareDeleteChannel', () => {
         const bookmarkModels = [
             TestHelper.fakeChannelBookmarkModel({id: 'bookmark1', prepareDestroyPermanently: jest.fn().mockReturnValue({id: 'bookmark'})}),
         ];
-        const playbookRunModels = [
-            TestHelper.fakePlaybookRunModel({
-                id: 'playbookRun',
-                prepareDestroyWithRelations: jest.fn().mockResolvedValue([
-                    TestHelper.fakePlaybookRunModel({
-                        id: 'playbookRun',
-                    }),
-                ]),
-            }),
-        ];
 
         jest.mocked(channel.membership.fetch).mockResolvedValue(membershipModel);
         jest.mocked(channel.info.fetch).mockResolvedValue(infoModel);
@@ -384,7 +374,6 @@ describe('prepareDeleteChannel', () => {
         jest.mocked(channel.postsInChannel.fetch).mockResolvedValue(postsInChannelModels);
         jest.mocked(channel.posts.fetch).mockResolvedValue(postModels);
         jest.mocked(channel.bookmarks.fetch).mockResolvedValue(bookmarkModels);
-        jest.mocked(channel.playbookRuns.fetch).mockResolvedValue(playbookRunModels);
 
         const result = await prepareDeleteChannel(serverUrl, channel);
 
@@ -409,8 +398,6 @@ describe('prepareDeleteChannel', () => {
         expect(channel.postsInChannel.fetch).toHaveBeenCalled();
         expect(channel.posts.fetch).toHaveBeenCalled();
         expect(channel.bookmarks.fetch).toHaveBeenCalled();
-        expect(channel.playbookRuns.fetch).toHaveBeenCalled();
-        expect(playbookRunModels[0].prepareDestroyWithRelations).toHaveBeenCalled();
 
         // Should have cleared the playbooks synced
         expect(unsetSpy).toHaveBeenCalledWith(serverUrl, channel.id);

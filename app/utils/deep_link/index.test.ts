@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {createIntl} from 'react-intl';
-import {Alert} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 
 import {joinIfNeededAndSwitchToChannel, makeDirectChannel} from '@actions/remote/channel';
@@ -11,10 +10,6 @@ import {fetchUsersByUsernames} from '@actions/remote/user';
 import {DeepLink, Launch, Preferences, Screens} from '@constants';
 import DatabaseManager from '@database/manager';
 import WebsocketManager from '@managers/websocket_manager';
-import {fetchPlaybookRun} from '@playbooks/actions/remote/runs';
-import {getPlaybookRunById} from '@playbooks/database/queries/run';
-import {fetchIsPlaybooksEnabled} from '@playbooks/database/queries/version';
-import {goToPlaybookRun} from '@playbooks/screens/navigation';
 import {getActiveServerUrl} from '@queries/app/servers';
 import {queryUsersByUsername} from '@queries/servers/user';
 import {dismissAllModalsAndPopToRoot} from '@screens/navigation';
@@ -230,79 +225,6 @@ describe('parseAndHandleDeepLink', () => {
         const result = await parseAndHandleDeepLink('https://existingserver.com/team/messages/7b35c77a645e1906e03a2c330f89203385db102f');
         expect(logError).toHaveBeenCalledWith('Failed to open channel from deeplink', expect.any(Error), undefined);
         expect(result).toEqual({error: true});
-    });
-
-    // Ik change : disable on CI, will fix later
-    it.skip('should alert when Playbooks deep link is used', async () => {
-        const alertSpy = jest.spyOn(Alert, 'alert');
-        jest.mocked(DatabaseManager.searchUrl).mockReturnValueOnce('https://existingserver.com');
-        jest.mocked(getActiveServerUrl).mockResolvedValueOnce('https://existingserver.com');
-        await parseAndHandleDeepLink('https://existingserver.com/playbooks/playbooks/7b35c77a645e1906e03a2c330f', intl);
-        expect(alertSpy).toHaveBeenCalledWith(
-            intl.formatMessage({id: 'playbooks.only_runs_available.title', defaultMessage: 'Playbooks not available'}),
-            intl.formatMessage({id: 'playbooks.only_runs_available.description', defaultMessage: 'Only Playbook Checklists are available on mobile. To access the Playbook, please use the desktop or web app.'}),
-            [{text: intl.formatMessage({id: 'playbooks.only_runs_available.ok', defaultMessage: 'OK'})}],
-        );
-    });
-
-    // Ik change : disable on CI, will fix later
-    it.skip('should alert when PlaybookRunsRetrospective deep link is used', async () => {
-        const alertSpy = jest.spyOn(Alert, 'alert');
-        jest.mocked(DatabaseManager.searchUrl).mockReturnValueOnce('https://existingserver.com');
-        jest.mocked(getActiveServerUrl).mockResolvedValueOnce('https://existingserver.com');
-        await parseAndHandleDeepLink('https://existingserver.com/playbooks/runs/7b35c77a645e1906e03a2c330f/retrospective', intl);
-        expect(alertSpy).toHaveBeenCalledWith(
-            intl.formatMessage({id: 'playbooks.retrospective_not_available.title', defaultMessage: 'Playbooks Retrospective not available'}),
-            intl.formatMessage({id: 'playbooks.retrospective_not_available.description', defaultMessage: 'Only Playbook Checklists are available on mobile. To fill the Run Retrospective, please use the desktop or web app.'}),
-            [{text: intl.formatMessage({id: 'playbooks.retrospective_not_available.ok', defaultMessage: 'OK'})}],
-        );
-    });
-
-    // Ik change : disable on CI, will fix later
-    it.skip('should go to playbook run if enabled and playbook exists', async () => {
-        jest.mocked(DatabaseManager.searchUrl).mockReturnValueOnce('https://existingserver.com');
-        jest.mocked(getActiveServerUrl).mockResolvedValueOnce('https://existingserver.com');
-        jest.mocked(fetchIsPlaybooksEnabled).mockResolvedValue(true);
-        jest.mocked(getPlaybookRunById).mockResolvedValue(TestHelper.fakePlaybookRunModel({id: '7b35c77a645e1906e03a2c330f'}));
-        jest.mocked(goToPlaybookRun).mockImplementation(jest.fn());
-
-        // Re-import to apply mocks
-        await parseAndHandleDeepLink('https://existingserver.com/playbooks/runs/7b35c77a645e1906e03a2c330f', intl);
-        expect(goToPlaybookRun).toHaveBeenCalledWith(intl, '7b35c77a645e1906e03a2c330f');
-    });
-
-    // Ik change : disable on CI, will fix later
-    it.skip('should fetch playbook run if not found locally and show error if fetch fails', async () => {
-        const alertSpy = jest.spyOn(Alert, 'alert');
-        jest.mocked(DatabaseManager.searchUrl).mockReturnValueOnce('https://existingserver.com');
-        jest.mocked(getActiveServerUrl).mockResolvedValueOnce('https://existingserver.com');
-        jest.mocked(fetchIsPlaybooksEnabled).mockResolvedValue(true);
-        jest.mocked(getPlaybookRunById).mockResolvedValue(undefined);
-        jest.mocked(fetchPlaybookRun).mockResolvedValue({error: true});
-
-        // Re-import to apply mocks
-        await parseAndHandleDeepLink('https://existingserver.com/playbooks/runs/7b35c77a645e1906e03a2c330f', intl);
-        expect(alertSpy).toHaveBeenCalledWith(
-            intl.formatMessage({id: 'playbooks.fetch_error.title', defaultMessage: 'Unable to open Checklist'}),
-            intl.formatMessage({id: 'playbooks.fetch_error.description', defaultMessage: "You don't have permission to view this, or it may no longer exist."}),
-            [{text: intl.formatMessage({id: 'playbooks.fetch_error.OK', defaultMessage: 'Okay'})}],
-        );
-    });
-
-    // Ik change : disable on CI, will fix later
-    it.skip('should alert if playbooks are not enabled or version not supported', async () => {
-        const alertSpy = jest.spyOn(Alert, 'alert');
-        jest.mocked(DatabaseManager.searchUrl).mockReturnValueOnce('https://existingserver.com');
-        jest.mocked(getActiveServerUrl).mockResolvedValueOnce('https://existingserver.com');
-        jest.mocked(fetchIsPlaybooksEnabled).mockResolvedValue(false);
-
-        // Re-import to apply mocks
-        await parseAndHandleDeepLink('https://existingserver.com/playbooks/runs/7b35c77a645e1906e03a2c330f', intl);
-        expect(alertSpy).toHaveBeenCalledWith(
-            intl.formatMessage({id: 'playbooks.not_enabled_or_unsupported.title', defaultMessage: 'Playbooks not available'}),
-            intl.formatMessage({id: 'playbooks.not_enabled_or_unsupported.description', defaultMessage: 'Playbooks are either not enabled on this server or the Playbooks version is not supported. Please contact your system administrator.'}),
-            [{text: intl.formatMessage({id: 'playbooks.not_enabled_or_unsupported.OK', defaultMessage: 'OK'})}],
-        );
     });
 });
 

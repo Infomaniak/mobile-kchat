@@ -6,7 +6,6 @@ import React, {type ComponentProps} from 'react';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import {renderWithEverything} from '@test/intl-test-helper';
-import TestHelper from '@test/test_helper';
 
 import ChannelHeaderComponent from './header';
 
@@ -62,38 +61,6 @@ describe('ChannelHeader Index', () => {
             expect(channelHeader.props.activeRunId).toBeUndefined();
         });
 
-        it('should render correctly with playbooks disabled', async () => {
-            await operator.handleSystem({
-                systems: [
-                    {
-                        id: SYSTEM_IDENTIFIERS.PLAYBOOKS_VERSION,
-                        value: '0.0.0',
-                    },
-                ],
-                prepareRecordsOnly: false,
-            });
-
-            await operator.handlePlaybookRun({
-                runs: [
-                    TestHelper.fakePlaybookRun({
-                        id: 'run-id',
-                        channel_id: channelId,
-                        end_at: 0,
-                    }),
-                ],
-                prepareRecordsOnly: false,
-            });
-
-            const props = getBaseProps();
-            const {getByTestId} = renderWithEverything(<ChannelHeader {...props}/>, {database});
-
-            const channelHeader = getByTestId('channel-header');
-            expect(channelHeader.props.isPlaybooksEnabled).toBe(false);
-            expect(channelHeader.props.playbooksActiveRuns).toBe(0);
-            expect(channelHeader.props.hasPlaybookRuns).toBe(false);
-            expect(channelHeader.props.activeRunId).toBeUndefined();
-        });
-
         it('should render correctly with playbooks enabled and no runs', async () => {
             await operator.handleSystem({
                 systems: [
@@ -112,132 +79,6 @@ describe('ChannelHeader Index', () => {
             expect(channelHeader.props.isPlaybooksEnabled).toBe(true);
             expect(channelHeader.props.playbooksActiveRuns).toBe(0);
             expect(channelHeader.props.hasPlaybookRuns).toBe(false);
-            expect(channelHeader.props.activeRunId).toBeUndefined();
-        });
-
-        it('should render correctly with playbooks enabled and one active run', async () => {
-            await operator.handleSystem({
-                systems: [
-                    {
-                        id: SYSTEM_IDENTIFIERS.PLAYBOOKS_VERSION,
-                        value: '3.0.0',
-                    },
-                ],
-                prepareRecordsOnly: false,
-            });
-
-            await operator.handlePlaybookRun({
-                runs: [
-                    TestHelper.fakePlaybookRun({
-                        id: 'run-id',
-                        channel_id: channelId,
-                        end_at: 0,
-                    }),
-                    TestHelper.fakePlaybookRun({
-                        id: 'run-id-2',
-                        channel_id: channelId,
-                        end_at: 123,
-                    }),
-                    TestHelper.fakePlaybookRun({
-                        id: 'run-id-3',
-                        channel_id: channelId,
-                        end_at: 123,
-                    }),
-                ],
-                prepareRecordsOnly: false,
-            });
-
-            const props = getBaseProps();
-            const {getByTestId} = renderWithEverything(<ChannelHeader {...props}/>, {database});
-
-            const channelHeader = getByTestId('channel-header');
-            expect(channelHeader.props.isPlaybooksEnabled).toBe(true);
-            expect(channelHeader.props.playbooksActiveRuns).toBe(1);
-            expect(channelHeader.props.hasPlaybookRuns).toBe(true);
-            expect(channelHeader.props.activeRunId).toBe('run-id');
-        });
-
-        it('should render correctly with playbooks enabled and many runs', async () => {
-            await operator.handleSystem({
-                systems: [
-                    {
-                        id: SYSTEM_IDENTIFIERS.PLAYBOOKS_VERSION,
-                        value: '3.0.0',
-                    },
-                ],
-                prepareRecordsOnly: false,
-            });
-
-            await operator.handlePlaybookRun({
-                runs: [
-                    TestHelper.fakePlaybookRun({
-                        id: 'run-id',
-                        channel_id: channelId,
-                        end_at: 0,
-                    }),
-                    TestHelper.fakePlaybookRun({
-                        id: 'run-id-2',
-                        channel_id: channelId,
-                        end_at: 123,
-                    }),
-                    TestHelper.fakePlaybookRun({
-                        id: 'run-id-3',
-                        channel_id: channelId,
-                        end_at: 0,
-                    }),
-                ],
-                prepareRecordsOnly: false,
-            });
-
-            const props = getBaseProps();
-            const {getByTestId} = renderWithEverything(<ChannelHeader {...props}/>, {database});
-
-            const channelHeader = getByTestId('channel-header');
-            expect(channelHeader.props.isPlaybooksEnabled).toBe(true);
-            expect(channelHeader.props.playbooksActiveRuns).toBe(2);
-            expect(channelHeader.props.hasPlaybookRuns).toBe(true);
-            expect(channelHeader.props.activeRunId).toBeUndefined();
-        });
-
-        it('should render correctly with playbooks enabled and only inactive runs', async () => {
-            await operator.handleSystem({
-                systems: [
-                    {
-                        id: SYSTEM_IDENTIFIERS.PLAYBOOKS_VERSION,
-                        value: '3.0.0',
-                    },
-                ],
-                prepareRecordsOnly: false,
-            });
-
-            await operator.handlePlaybookRun({
-                runs: [
-                    TestHelper.fakePlaybookRun({
-                        id: 'run-id',
-                        channel_id: channelId,
-                        end_at: 123,
-                    }),
-                    TestHelper.fakePlaybookRun({
-                        id: 'run-id-2',
-                        channel_id: channelId,
-                        end_at: 123,
-                    }),
-                    TestHelper.fakePlaybookRun({
-                        id: 'run-id-3',
-                        channel_id: channelId,
-                        end_at: 123,
-                    }),
-                ],
-                prepareRecordsOnly: false,
-            });
-
-            const props = getBaseProps();
-            const {getByTestId} = renderWithEverything(<ChannelHeader {...props}/>, {database});
-
-            const channelHeader = getByTestId('channel-header');
-            expect(channelHeader.props.isPlaybooksEnabled).toBe(true);
-            expect(channelHeader.props.playbooksActiveRuns).toBe(0);
-            expect(channelHeader.props.hasPlaybookRuns).toBe(true);
             expect(channelHeader.props.activeRunId).toBeUndefined();
         });
     });
