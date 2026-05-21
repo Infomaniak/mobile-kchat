@@ -50,11 +50,6 @@ jest.mock('@i18n', () => ({
     getTranslations: jest.fn(() => ({})),
 }));
 
-jest.mock('@playbooks/database/queries/version');
-jest.mock('@playbooks/database/queries/run');
-jest.mock('@playbooks/actions/remote/runs');
-jest.mock('@playbooks/screens/navigation');
-
 // These are required by handleDeepLink even if not exercised in these tests.
 jest.mock('@actions/remote/channel', () => ({
     makeDirectChannel: jest.fn(),

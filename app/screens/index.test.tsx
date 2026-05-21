@@ -82,21 +82,6 @@ jest.mock('@screens/in_app_notification', () => ({
 }));
 jest.mocked(InAppNotification).mockImplementation((props) => <Text {...props}>{Screens.IN_APP_NOTIFICATION}</Text>);
 
-jest.mock('@playbooks/screens/playbooks_runs', () => ({
-    __esModule: true,
-    default: jest.fn(),
-}));
-
-jest.mock('@playbooks/screens/playbook_run', () => ({
-    __esModule: true,
-    default: jest.fn(),
-}));
-
-jest.mock('@playbooks/screens/edit_command', () => ({
-    __esModule: true,
-    default: jest.fn(),
-}));
-
 describe.skip('Screen Registration', () => {
     // IK change : skipped on CI temporarily, will fix later
     let registrator: (screenName: string) => void;

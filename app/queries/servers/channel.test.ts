@@ -10,7 +10,6 @@ import {General, Permissions} from '@constants';
 import {MM_TABLES} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import ServerDataOperator from '@database/operator/server_data_operator';
-import EphemeralStore from '@store/ephemeral_store';
 import TestHelper from '@test/test_helper';
 import {hasPermission} from '@utils/role';
 
@@ -349,8 +348,6 @@ describe('prepareDeleteChannel', () => {
     });
 
     it.skip('should prepare models for deletion', async () => {
-        const unsetSpy = jest.spyOn(EphemeralStore, 'unsetChannelPlaybooksSynced');
-
         const membershipModel = TestHelper.fakeMyChannelModel({prepareDestroyPermanently: jest.fn().mockReturnValue({id: 'membership'})});
         const infoModel = TestHelper.fakeChannelInfoModel({prepareDestroyPermanently: jest.fn().mockReturnValue({id: 'info'})});
         const categoryChannelModel = TestHelper.fakeCategoryChannelModel({prepareDestroyPermanently: jest.fn().mockReturnValue({id: 'category'})});
@@ -398,9 +395,6 @@ describe('prepareDeleteChannel', () => {
         expect(channel.postsInChannel.fetch).toHaveBeenCalled();
         expect(channel.posts.fetch).toHaveBeenCalled();
         expect(channel.bookmarks.fetch).toHaveBeenCalled();
-
-        // Should have cleared the playbooks synced
-        expect(unsetSpy).toHaveBeenCalledWith(serverUrl, channel.id);
     });
 
     it('should handle errors gracefully', async () => {
