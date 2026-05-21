@@ -191,9 +191,7 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             break;
         case Screens.IN_APP_NOTIFICATION: {
             const notificationScreen = require('@screens/in_app_notification').default;
-            Navigation.registerComponent(Screens.IN_APP_NOTIFICATION, () =>
-                withSafeAreaInsets(notificationScreen),
-            );
+            Navigation.registerComponent(Screens.IN_APP_NOTIFICATION, () => notificationScreen);
             return;
         }
         case Screens.JOIN_TEAM:
