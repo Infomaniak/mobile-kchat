@@ -50,18 +50,6 @@ jest.mock('@actions/local/session', () => {
 jest.mock('@init/credentials');
 jest.mock('@init/launch');
 jest.mock('@init/push_notifications');
-jest.mock('@managers/intune_manager', () => ({
-    __esModule: true,
-    default: {
-        unenrollServer: jest.fn().mockResolvedValue(undefined),
-        subscribeToPolicyChanges: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToEnrollmentChanges: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToWipeRequests: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToAuthRequired: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToConditionalLaunchBlocked: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToIdentitySwitchRequired: jest.fn().mockReturnValue({remove: jest.fn()}),
-    },
-}));
 jest.mock('@managers/network_manager');
 jest.mock('@managers/websocket_manager');
 jest.mock('@queries/app/global', () => ({
