@@ -57,7 +57,7 @@ const {
 describe('*** Test schema for SERVER database ***', () => {
     it('=> The SERVER SCHEMA should strictly match', () => {
         expect(serverSchema).toEqual({
-            version: 10, // IK change to match our schema version
+            version: 11, // IK change to match our schema version
             unsafeSql: undefined,
             tables: {
                 [AI_BOT]: {

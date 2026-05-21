@@ -35,6 +35,16 @@ const {
 export default schemaMigrations({
     migrations: [
         {
+            toVersion: 11,
+            steps: [
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRun;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookChecklist;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookChecklistItem;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRunAttribute;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRunAttributeValue;'),
+            ],
+        },
+        {
             toVersion: 10,
             steps: [
                 addColumns({
