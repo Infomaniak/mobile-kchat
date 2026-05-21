@@ -585,6 +585,7 @@ export const observeAllMyChannelNotifyProps = (database: Database) => {
             obj[setting.id] = setting.notifyProps;
             return obj;
         }, {})),
+        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
     );
 };
 
@@ -595,6 +596,7 @@ export const observeNotifyPropsByChannels = (database: Database, channels: Chann
             obj[setting.id] = setting.notifyProps;
             return obj;
         }, {})),
+        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
     );
 };
 

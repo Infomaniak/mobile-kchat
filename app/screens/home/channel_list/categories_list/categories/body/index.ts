@@ -3,7 +3,7 @@
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$, Observable} from 'rxjs';
-import {switchMap, combineLatestWith, distinctUntilChanged} from 'rxjs/operators';
+import {switchMap, combineLatestWith, distinctUntilChanged, shareReplay} from 'rxjs/operators';
 
 import {Preferences} from '@constants';
 import {DMS_CATEGORY} from '@constants/categories';
@@ -53,19 +53,22 @@ const observeCategoryChannels = (category: CategoryModel, myChannels: Observable
                 return result;
             }, []));
         }),
+        distinctUntilChanged(),
+        shareReplay({bufferSize: 1, refCount: true}),
     );
 };
 
 const enhanced = withObservables([], ({category, currentUserId, database, isTablet, locale}: EnhanceProps) => {
     const categoryMyChannels = category.myChannels.observeWithColumns(['is_unread']);
     const channelsWithMyChannel = observeCategoryChannels(category, categoryMyChannels);
-    const currentChannelId = isTablet ? observeCurrentChannelId(database) : of$('');
-    const lastUnreadId = isTablet ? observeLastUnreadChannelId(database) : of$(undefined);
+    const currentChannelId = isTablet ? observeCurrentChannelId(database).pipe(distinctUntilChanged()) : of$('');
+    const lastUnreadId = isTablet ? observeLastUnreadChannelId(database).pipe(distinctUntilChanged()) : of$(undefined);
 
     const unreadsOnTop = querySidebarPreferences(database, Preferences.CHANNEL_SIDEBAR_GROUP_UNREADS).
         observeWithColumns(['value']).
         pipe(
             switchMap((prefs: PreferenceModel[]) => of$(getSidebarPreferenceAsBool(prefs, Preferences.CHANNEL_SIDEBAR_GROUP_UNREADS))),
+            distinctUntilChanged(),
         );
 
     let limit = of$(Preferences.CHANNEL_SIDEBAR_LIMIT_DMS_DEFAULT);
@@ -117,6 +120,7 @@ const enhanced = withObservables([], ({category, currentUserId, database, isTabl
 
             return of$(sortChannels(sorting, channelsW, notifyProps, locale));
         }),
+        distinctUntilChanged(),
     );
 
     const unreadIds = channelsWithMyChannel.pipe(

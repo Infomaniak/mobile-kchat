@@ -2,13 +2,20 @@
 // See LICENSE.txt for license information.
 
 import {Database, Q} from '@nozbe/watermelondb';
+import {distinctUntilChanged} from 'rxjs/operators';
 
 import {MM_TABLES} from '@constants/database';
 
 import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji';
 
 export const queryAllCustomEmojis = (database: Database) => {
-    return database.get<CustomEmojiModel>(MM_TABLES.SERVER.CUSTOM_EMOJI).query();
+    return database.get<CustomEmojiModel>(MM_TABLES.SERVER.CUSTOM_EMOJI).query(Q.take(500));
+};
+
+export const observeAllCustomEmojis = (database: Database) => {
+    return queryAllCustomEmojis(database).observeWithColumns(['name']).pipe(
+        distinctUntilChanged(),
+    );
 };
 
 export const queryCustomEmojisByName = (database: Database, names: string[]) => {

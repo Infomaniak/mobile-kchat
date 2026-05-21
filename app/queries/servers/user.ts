@@ -142,6 +142,18 @@ export const observeDeactivatedUsers = (database: Database) => {
         switchMap((users) => {
             return of$(new Map(users.map((u) => [u.id, u])));
         }),
+        distinctUntilChanged((prev, curr) => {
+            if (prev.size !== curr.size) {
+                return false;
+            }
+            for (const [key, value] of prev) {
+                const currValue = curr.get(key);
+                if (!currValue || currValue.id !== value.id) {
+                    return false;
+                }
+            }
+            return true;
+        }),
     );
 };
 

@@ -3,7 +3,7 @@
 
 import {Q} from '@nozbe/watermelondb';
 import {map as map$, Subscription} from 'rxjs';
-import {combineLatestWith} from 'rxjs/operators';
+import {combineLatestWith, distinctUntilChanged} from 'rxjs/operators';
 
 import {MM_TABLES} from '@constants/database';
 import DatabaseManager from '@database/manager';
@@ -43,6 +43,7 @@ export const subscribeServerUnreadAndMentions = (serverUrl: string, observer: Un
                 combineLatestWith(observeAllMyChannelNotifyProps(server.database)),
                 combineLatestWith(observeUnreadsAndMentions(server.database, {includeDmGm: true})),
                 map$(([[myChannels, settings], {unreads, mentions}]) => ({myChannels, settings, threadUnreads: unreads, threadMentionCount: mentions})),
+                distinctUntilChanged(),
             ).
             subscribe(observer);
     }
@@ -59,12 +60,13 @@ export const subscribeMentionsByServer = (serverUrl: string, observer: ServerUnr
             get<MyChannelModel>(MY_CHANNEL).
             query(
                 Q.on(CHANNEL, Q.where('delete_at', Q.eq(0))),
-                Q.on(MY_CHANNEL_SETTINGS, Q.where('notify_props', Q.notLike('%"mark_unread":"mention"%'))),
+                Q.on(MY_CHANNEL_SETTINGS, Q.where('notify_props', Q.notLike('"%mark_unread%":"mention"%'))),
             ).
             observeWithColumns(['mentions_count']).
             pipe(
                 combineLatestWith(observeThreadMentionCount(server.database, {includeDmGm: true})),
                 map$(([myChannels, threadMentionCount]) => ({myChannels, threadMentionCount})),
+                distinctUntilChanged(),
             ).
             subscribe(observer.bind(undefined, serverUrl));
     }
@@ -84,6 +86,7 @@ export const subscribeUnreadAndMentionsByServer = (serverUrl: string, observer: 
                 combineLatestWith(observeAllMyChannelNotifyProps(server.database)),
                 combineLatestWith(observeUnreadsAndMentions(server.database, {includeDmGm: true})),
                 map$(([[myChannels, settings], {unreads, mentions}]) => ({myChannels, settings, threadUnreads: unreads, threadMentionCount: mentions})),
+                distinctUntilChanged(),
             ).
             subscribe(observer.bind(undefined, serverUrl));
     }

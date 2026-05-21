@@ -33,7 +33,7 @@ const enhanced = withObservables([], ({database}: EnhanceProps) => {
     const channel = observeCurrentChannel(database);
     const channelId = observeCurrentChannelId(database);
     const dismissedGMasDMNotice = queryPreferencesByCategoryAndName(database, Preferences.CATEGORIES.SYSTEM_NOTICE, Preferences.NOTICES.GM_AS_DM).observe();
-    const channelType = channel.pipe(switchMap((c) => of$(c?.type)));
+    const channelType = channel.pipe(switchMap((c) => of$(c?.type)), distinctUntilChanged());
     const currentUserId = observeCurrentUserId(database);
     const hasGMasDMFeature = observeHasGMasDMFeature(database);
     const isBookmarksEnabled = observeConfigBooleanValue(database, 'FeatureFlagChannelBookmarks');
@@ -56,6 +56,7 @@ const enhanced = withObservables([], ({database}: EnhanceProps) => {
     const bannerInfo = channelId.pipe(
         switchMap((cId) => observeChannel(database, cId)),
         switchMap((chan) => of$(chan?.bannerInfo)),
+        distinctUntilChanged(),
     );
 
     const includeChannelBanner = channelType.pipe(
@@ -69,6 +70,7 @@ const enhanced = withObservables([], ({database}: EnhanceProps) => {
 
     const scheduledPostCount = combineLatest([channelId, isCRTEnabled]).pipe(
         switchMap(([cid, isCRT]) => observeScheduledPostCountForChannel(database, cid, isCRT)),
+        distinctUntilChanged(),
     );
 
     return {
