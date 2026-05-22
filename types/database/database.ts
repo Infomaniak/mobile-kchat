@@ -117,19 +117,19 @@ export type HandleTeamThreadsSyncArgs = {
 };
 
 export type SanitizeReactionsArgs = {
-    database: Database;
-    post_id: string;
-    rawReactions: Reaction[];
-    skipSync?: boolean;
-    existingReactions?: ReactionModel[];
+  database: Database;
+  post_id: string;
+  rawReactions: Reaction[];
+  skipSync?: boolean;
+  existingReactions?: ReactionModel[];
 };
 
 export type SanitizeThreadParticipantsArgs = {
-    database: Database;
-    skipSync?: boolean;
-    thread_id: $ID<Thread>;
-    rawParticipants: ThreadParticipant[];
-    existingParticipants?: ThreadParticipantModel[];
+  database: Database;
+  skipSync?: boolean;
+  thread_id: $ID<Thread>;
+  rawParticipants: ThreadParticipant[];
+  existingParticipants?: ThreadParticipantModel[];
 }
 
 export type ChainPostsArgs = {

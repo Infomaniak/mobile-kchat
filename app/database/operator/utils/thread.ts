@@ -20,20 +20,26 @@ const {THREAD_PARTICIPANT} = MM_TABLES.SERVER;
  * @returns {Promise<{createParticipants: ThreadParticipant[],  deleteParticipants: ThreadParticipantModel[]}>}
  */
 export const sanitizeThreadParticipants = async ({database, skipSync, thread_id, rawParticipants, existingParticipants}: SanitizeThreadParticipantsArgs) => {
-    const clauses: Clause[] = [Q.where('thread_id', thread_id)];
+    let participants: ThreadParticipantModel[];
 
-    // Check if we already have the participants
-    if (skipSync) {
-        clauses.push(
-            Q.where('user_id', Q.oneOf(
-                rawParticipants.map((participant) => participant.id),
-            )),
-        );
+    if (existingParticipants) {
+        participants = existingParticipants;
+    } else {
+        const clauses: Clause[] = [Q.where('thread_id', thread_id)];
+
+        // Check if we already have the participants
+        if (skipSync) {
+            clauses.push(
+                Q.where('user_id', Q.oneOf(
+                    rawParticipants.map((participant) => participant.id),
+                )),
+            );
+        }
+        participants = await database.collections.
+            get<ThreadParticipantModel>(THREAD_PARTICIPANT).
+            query(...clauses).
+            fetch();
     }
-    const participants = existingParticipants ?? await database.collections.
-        get<ThreadParticipantModel>(THREAD_PARTICIPANT).
-        query(...clauses).
-        fetch();
 
     // similarObjects: Contains objects that are in both the RawParticipant array and in the ThreadParticipant table
     const similarObjects = new Set<ThreadParticipantModel>();

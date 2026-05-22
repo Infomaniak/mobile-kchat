@@ -162,12 +162,13 @@ const ThreadHandler = <TBase extends Constructor<ServerDataOperatorBase>>(superc
             return acc;
         }, {} as Record<string, ThreadParticipantModel[]>);
 
-        for await (const threadParticipant of threadsParticipants) {
+        for (const threadParticipant of threadsParticipants) {
             const {thread_id, participants} = threadParticipant;
             const rawValues = getUniqueRawsBy({raws: participants, key: 'id'}) as ThreadParticipant[];
             const {
                 createParticipants,
                 deleteParticipants,
+            // eslint-disable-next-line no-await-in-loop
             } = await sanitizeThreadParticipants({
                 database: this.database,
                 thread_id,
@@ -178,6 +179,7 @@ const ThreadHandler = <TBase extends Constructor<ServerDataOperatorBase>>(superc
 
             if (createParticipants?.length) {
                 // Prepares record for model ThreadParticipants
+                // eslint-disable-next-line no-await-in-loop
                 const participantsRecords = (await this.prepareRecords({
                     createRaws: createParticipants,
                     transformer: transformThreadParticipantRecord,
@@ -228,7 +230,7 @@ const ThreadHandler = <TBase extends Constructor<ServerDataOperatorBase>>(superc
             return result;
         }, {});
 
-        for await (const teamId of teamIds) {
+        for (const teamId of teamIds) {
             for (const thread of threadsMap[teamId]) {
                 const chunk = chunksMap[`${teamId}-${thread.id}`];
 
