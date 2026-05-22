@@ -255,14 +255,26 @@ class StreamingPostStore {
             return;
         }
 
-        // Signal end to subscribers, but keep subject alive for potential reuse
         subject.next(undefined);
+        subject.complete();
+        this.streamingSubjects.delete(postId);
+    }
+
+    cleanup(): void {
+        // Remove completed subjects to free memory
+        for (const [postId, subject] of this.streamingSubjects.entries()) {
+            if (subject.closed) {
+                this.streamingSubjects.delete(postId);
+            }
+        }
     }
 
     /**
      * Clear all streaming state (e.g., on logout)
      */
     clear(): void {
+        this.cleanup();
+
         // Complete all subjects before clearing
         for (const subject of this.streamingSubjects.values()) {
             subject.next(undefined);

@@ -8,6 +8,10 @@ import {Events} from '@constants';
 import {toMilliseconds} from '@utils/datetime';
 
 const TIME_TO_CLEAR_WEBSOCKET_ACTIONS = toMilliseconds({seconds: 30});
+
+// Limits to prevent unbounded memory growth in ephemeral stores
+const MAX_REJECTED_FILES = 500;
+const MAX_LOADING_MESSAGES_PER_SERVER = 100;
 import type {KSuiteLimit} from '@components/post_list/limited_messages/limited_messages';
 
 class EphemeralStoreSingleton {
@@ -87,6 +91,17 @@ class EphemeralStoreSingleton {
     addLoadingMessagesForChannel = (serverUrl: string, channelId: string) => {
         if (!this.loadingMessagesForChannel[serverUrl]) {
             this.loadingMessagesForChannel[serverUrl] = new Set();
+        }
+
+        const set = this.loadingMessagesForChannel[serverUrl];
+
+        // Enforce limit: remove oldest entries when limit is reached
+        if (set && set.size >= MAX_LOADING_MESSAGES_PER_SERVER) {
+            const toRemove = (set.size - MAX_LOADING_MESSAGES_PER_SERVER) + 1;
+            const entries = Array.from(set);
+            for (let i = 0; i < toRemove; i++) {
+                set.delete(entries[i]);
+            }
         }
 
         DeviceEventEmitter.emit(Events.LOADING_CHANNEL_POSTS, {serverUrl, channelId, value: true});
@@ -357,6 +372,14 @@ class EphemeralStoreSingleton {
 
     // Ephemeral control for rejected files
     addRejectedFile = (fileId: string, rejectionReason?: string) => {
+        // Enforce limit: remove oldest entries when limit is reached
+        while (this.rejectedFiles.size >= MAX_REJECTED_FILES) {
+            const firstKey = this.rejectedFiles.keys().next().value;
+            if (firstKey) {
+                this.rejectedFiles.delete(firstKey);
+            }
+        }
+
         this.rejectedFiles.set(fileId, rejectionReason || '');
 
         // Emit event so components can re-render with the updated rejection status
