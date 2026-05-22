@@ -24,7 +24,7 @@ import {DEFAULT_INPUT_ACCESSORY_HEIGHT} from '@hooks/useInputAccessoryView';
 import EphemeralStore from '@store/ephemeral_store';
 import {getDateForDateLine, preparePostList} from '@utils/post_list';
 
-import {INITIAL_BATCH_TO_RENDER, SCROLL_POSITION_CONFIG, VIEWABILITY_CONFIG} from './config';
+import {INITIAL_BATCH_TO_RENDER, MAX_TO_RENDER_PER_BATCH, SCROLL_POSITION_CONFIG, VIEWABILITY_CONFIG, WINDOW_SIZE} from './config';
 import MoreMessages from './more_messages';
 import ScrollToEndView from './scroll_to_end_view';
 
@@ -403,12 +403,22 @@ const PostList = ({
         }
     }, [appsEnabled, currentTimezone, currentUsername, customEmojiNames, highlightPinnedOrSaved, highlightedId, isCRTEnabled, isChannelAutotranslated, isPostAcknowledgementEnabled, location, rootId, shouldRenderReplyButton, shouldShowJoinLeaveMessages, testID, theme]);
 
+    const postIndexMap = useMemo(() => {
+        const map = new Map();
+        orderedPosts.forEach((item, idx) => {
+            if (item.type === 'post') {
+                map.set(item.value.currentPost.id, idx);
+            }
+        });
+        return map;
+    }, [orderedPosts]);
+
     useEffect(() => {
         const t = setTimeout(() => {
             if (highlightedId && orderedPosts && !scrolledToHighlighted.current) {
                 scrolledToHighlighted.current = true;
                 // eslint-disable-next-line max-nested-callbacks
-                const index = orderedPosts.findIndex((p) => p.type === 'post' && p.value.currentPost.id === highlightedId);
+                const index = postIndexMap.get(highlightedId);
                 if (index >= 0 && listRef?.current) {
                     listRef.current?.scrollToIndex({
                         animated: true,
@@ -474,7 +484,8 @@ const PostList = ({
                 ListHeaderComponent={header}
                 ListFooterComponent={footer}
                 maintainVisibleContentPosition={SCROLL_POSITION_CONFIG}
-                maxToRenderPerBatch={10}
+                windowSize={WINDOW_SIZE}
+                maxToRenderPerBatch={MAX_TO_RENDER_PER_BATCH}
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.9}
                 onScroll={onScrollProp}
