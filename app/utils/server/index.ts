@@ -4,7 +4,7 @@
 import {Alert, type AlertButton} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
-import {Screens, Sso, SupportedServer, Launch} from '@constants';
+import {Screens, SupportedServer, Launch} from '@constants';
 import {dismissBottomSheet, showModal} from '@screens/navigation';
 import {getErrorMessage} from '@utils/errors';
 import {isMinimumServerVersion} from '@utils/helpers';
@@ -57,38 +57,11 @@ export async function addNewServer(theme: Theme, serverUrl?: string, displayName
 
 export function loginOptions(config: ClientConfig, license: ClientLicense) {
     const isLicensed = license.IsLicensed === 'true';
-    const samlEnabled = config.EnableSaml === 'true' && isLicensed && license.SAML === 'true';
-    const gitlabEnabled = config.EnableSignUpWithGitLab === 'true';
-    const isMinServerVersionForCloudOAuthChanges = isMinimumServerVersion(config.Version, 7, 6);
-    let googleEnabled = false;
-    let o365Enabled = false;
-    let openIdEnabled = false;
-    if (isMinServerVersionForCloudOAuthChanges) {
-        googleEnabled = config.EnableSignUpWithGoogle === 'true';
-        o365Enabled = config.EnableSignUpWithOffice365 === 'true';
-        openIdEnabled = config.EnableSignUpWithOpenId === 'true';
-    } else {
-        googleEnabled = config.EnableSignUpWithGoogle === 'true' && isLicensed;
-        o365Enabled = config.EnableSignUpWithOffice365 === 'true' && isLicensed && license.Office365OAuth === 'true';
-        openIdEnabled = config.EnableSignUpWithOpenId === 'true' && isLicensed;
-    }
     const ldapEnabled = isLicensed && config.EnableLdap === 'true' && license.LDAP === 'true';
     const hasLoginForm = config.EnableSignInWithEmail === 'true' || config.EnableSignInWithUsername === 'true' || ldapEnabled;
-    const ssoOptions: SsoWithOptions = {
-        [Sso.SAML]: {enabled: samlEnabled, text: config.SamlLoginButtonText},
-        [Sso.GITLAB]: {enabled: gitlabEnabled},
-        [Sso.GOOGLE]: {enabled: googleEnabled},
-        [Sso.OFFICE365]: {enabled: o365Enabled},
-        [Sso.OPENID]: {enabled: openIdEnabled, text: config.OpenIdButtonText},
-    };
-    const enabledSSOs = Object.keys(ssoOptions).filter((key) => ssoOptions[key]);
-    const numberSSOs = enabledSSOs.length;
 
     return {
-        enabledSSOs,
         hasLoginForm,
-        numberSSOs,
-        ssoOptions,
     };
 }
 
