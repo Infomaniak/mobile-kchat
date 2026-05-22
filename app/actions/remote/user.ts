@@ -620,22 +620,116 @@ export const searchProfiles = async (serverUrl: string, term: string, options: S
     }
 };
 
-export const fetchMissingProfilesByIds = async (serverUrl: string, userIds: string[]) => {
-    const {users} = await fetchUsersByIds(serverUrl, userIds);
-    if (users) {
-        const statusToLoad = users.map((u) => u.id);
-        fetchStatusByIds(serverUrl, statusToLoad);
+const BATCH_DEBOUNCE = 50;
+
+// Shared batching state for fetchMissingProfilesByIds
+let pendingProfilesIdsBatch: {
+    serverUrl: string;
+    userIds: string[];
+    timer: NodeJS.Timeout;
+    resolver: (value: {users?: UserProfile[] | undefined}) => void;
+} | undefined;
+
+const executePendingProfilesIdsBatch = async () => {
+    if (!pendingProfilesIdsBatch) {
+        return;
     }
-    return {users};
+    const {serverUrl, userIds, resolver} = pendingProfilesIdsBatch;
+    pendingProfilesIdsBatch = undefined;
+    try {
+        const {users} = await fetchUsersByIds(serverUrl, userIds);
+        if (users) {
+            const statusToLoad = users.map((u) => u.id);
+            fetchStatusByIds(serverUrl, statusToLoad);
+        }
+        resolver({users});
+    } catch {
+        resolver({users: undefined});
+    }
+};
+
+// Shared batching state for fetchMissingProfilesByUsernames
+let pendingProfilesUsernamesBatch: {
+    serverUrl: string;
+    usernames: string[];
+    timer: NodeJS.Timeout;
+    resolver: (value: {users?: UserProfile[] | undefined}) => void;
+} | undefined;
+
+const executePendingProfilesUsernamesBatch = async () => {
+    if (!pendingProfilesUsernamesBatch) {
+        return;
+    }
+    const {serverUrl, usernames, resolver} = pendingProfilesUsernamesBatch;
+    pendingProfilesUsernamesBatch = undefined;
+    try {
+        const {users} = await fetchUsersByUsernames(serverUrl, usernames);
+        if (users) {
+            const statusToLoad = users.map((u) => u.id);
+            fetchStatusByIds(serverUrl, statusToLoad);
+        }
+        resolver({users});
+    } catch {
+        resolver({users: undefined});
+    }
+};
+
+export const fetchMissingProfilesByIds = async (serverUrl: string, userIds: string[]) => {
+    if (!userIds.length) {
+        return {users: []};
+    }
+    if (pendingProfilesIdsBatch?.serverUrl !== serverUrl) {
+        await executePendingProfilesIdsBatch();
+    }
+    if (pendingProfilesIdsBatch) {
+        pendingProfilesIdsBatch.userIds = [...new Set([...pendingProfilesIdsBatch.userIds, ...userIds])];
+        clearTimeout(pendingProfilesIdsBatch.timer);
+        pendingProfilesIdsBatch.timer = setTimeout(executePendingProfilesIdsBatch, BATCH_DEBOUNCE);
+        return new Promise<{users?: UserProfile[] | undefined}>((resolve) => {
+            const originalResolver = pendingProfilesIdsBatch!.resolver;
+            pendingProfilesIdsBatch!.resolver = (value) => {
+                originalResolver(value);
+                resolve(value);
+            };
+        });
+    }
+    return new Promise<{users?: UserProfile[] | undefined}>((resolve) => {
+        pendingProfilesIdsBatch = {
+            serverUrl,
+            ids: [...userIds],
+            timer: setTimeout(executePendingProfilesIdsBatch, BATCH_DEBOUNCE),
+            resolver: resolve,
+        };
+    });
 };
 
 export const fetchMissingProfilesByUsernames = async (serverUrl: string, usernames: string[]) => {
-    const {users} = await fetchUsersByUsernames(serverUrl, usernames);
-    if (users) {
-        const statusToLoad = users.map((u) => u.id);
-        fetchStatusByIds(serverUrl, statusToLoad);
+    if (!usernames.length) {
+        return {users: []};
     }
-    return {users};
+    if (pendingProfilesUsernamesBatch?.serverUrl !== serverUrl) {
+        await executePendingProfilesUsernamesBatch();
+    }
+    if (pendingProfilesUsernamesBatch) {
+        pendingProfilesUsernamesBatch.usernames = [...new Set([...pendingProfilesUsernamesBatch.usernames, ...usernames])];
+        clearTimeout(pendingProfilesUsernamesBatch.timer);
+        pendingProfilesUsernamesBatch.timer = setTimeout(executePendingProfilesUsernamesBatch, BATCH_DEBOUNCE);
+        return new Promise<{users?: UserProfile[] | undefined}>((resolve) => {
+            const originalResolver = pendingProfilesUsernamesBatch!.resolver;
+            pendingProfilesUsernamesBatch!.resolver = (value) => {
+                originalResolver(value);
+                resolve(value);
+            };
+        });
+    }
+    return new Promise<{users?: UserProfile[] | undefined}>((resolve) => {
+        pendingProfilesUsernamesBatch = {
+            serverUrl,
+            usernames: [...usernames],
+            timer: setTimeout(executePendingProfilesUsernamesBatch, BATCH_DEBOUNCE),
+            resolver: resolve,
+        };
+    });
 };
 
 export async function updateAllUsersSince(serverUrl: string, since: number, fetchOnly = false, groupLabel?: RequestGroupLabel) {
