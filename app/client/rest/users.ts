@@ -48,7 +48,6 @@ export interface ClientUsersMix {
     unsetCustomStatus: () => Promise<{status: string}>;
     removeRecentCustomStatus: (customStatus: UserCustomStatus) => Promise<{status: string}>;
     getUsersInGroup: (groupId: string, page?: number, perPage?: number, sort?: string) => Promise<UserProfile[]>;
-    exchangeSsoLoginCode: (loginCode: string, codeVerifier: string, state: string) => Promise<{token: string; csrf: string}>;
     getUserLoginType: (loginId: string, deviceId?: string) => Promise<{auth_service: LoginType; is_deactivated: boolean}>;
 }
 
@@ -442,24 +441,6 @@ const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
             })}`,
             {method: 'get'},
         );
-    };
-
-    exchangeSsoLoginCode = async (loginCode: string, codeVerifier: string, state: string) => {
-        const body = {
-            login_code: loginCode,
-            code_verifier: codeVerifier,
-            state,
-        };
-
-        // Intentionally no-cache
-        const resp = await this.doFetch(
-            `${this.getUsersRoute()}/login/sso/code-exchange`,
-            {method: 'post', body, headers: {'Cache-Control': 'no-store'}},
-            false,
-        );
-
-        // Expected shape: { token: string, csrf: string }
-        return resp?.data || resp;
     };
 };
 
