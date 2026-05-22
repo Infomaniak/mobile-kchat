@@ -7,7 +7,6 @@ import {doPing} from '@actions/remote/general';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
 import {Screens} from '@constants';
 import DatabaseManager from '@database/manager';
-import {getPreauthSecret} from '@init/credentials';
 import WebsocketManager from '@managers/websocket_manager';
 import {getServer, getServerByIdentifier} from '@queries/app/servers';
 import {logError} from '@utils/log';
@@ -39,10 +38,7 @@ export async function switchToServerAndLogin(serverUrl: string, theme: Theme, in
         return;
     }
 
-    // Retrieve pre-auth secret from keychain if it exists
-    const preauthSecret = await getPreauthSecret(server.url);
-
-    const result = await doPing(server.url, true, 5000, preauthSecret);
+    const result = await doPing(server.url, true, 5000);
     if (result.error) {
         alertServerError(intl, result.error);
         callback?.();

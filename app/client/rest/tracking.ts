@@ -73,15 +73,8 @@ export default class ClientTracking {
         this.apiClient = apiClient;
     }
 
-    setClientCredentials(bearerToken: string, preauthSecret?: string) {
+    setClientCredentials(bearerToken: string) {
         this.requestHeaders[ClientConstants.HEADER_AUTH] = `${ClientConstants.HEADER_BEARER} ${bearerToken}`;
-
-        if (preauthSecret) {
-            this.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET] = preauthSecret;
-        } else {
-            // Remove shared password header when undefined
-            delete this.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET];
-        }
 
         setServerCredentials(this.apiClient.baseUrl, bearerToken);
     }
@@ -427,8 +420,7 @@ export default class ClientTracking {
 
         const bearerToken = headers[ClientConstants.HEADER_TOKEN] || headers[ClientConstants.HEADER_TOKEN.toLowerCase()];
         if (bearerToken) {
-            const existingSharedPassword = this.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET];
-            this.setClientCredentials(bearerToken, existingSharedPassword);
+            this.setClientCredentials(bearerToken);
         }
 
         if (response.ok) {

@@ -53,7 +53,6 @@ const PostButton = ({theme}: Props) => {
                 files,
                 message: text,
                 userId,
-                preauthSecret: credentials.preauthSecret,
             });
         }
     }, [serverUrl, channelId, userId, message, linkPreviewUrl, closeExtension, files]);

@@ -9,7 +9,6 @@ import {
     getServerCredentials,
     setServerCredentials,
     removeServerCredentials,
-    removePreauthSecret,
 } from './credentials';
 
 jest.mock('react-native-keychain', () => ({
@@ -24,9 +23,6 @@ jest.mock('react-native-keychain', () => ({
     setInternetCredentials: jest.fn(),
     getInternetCredentials: jest.fn(),
     resetInternetCredentials: jest.fn(),
-    setGenericPassword: jest.fn(),
-    getGenericPassword: jest.fn(),
-    resetGenericPassword: jest.fn(),
     getAllInternetPasswordServers: jest.fn(),
     getAllGenericPasswordServices: jest.fn(),
 }));
@@ -46,14 +42,13 @@ describe.skip('credentials', () => {
     const mockServerUrl = 'https://example.com';
     const mockToken = 'test-token-123';
     const mockUserId = 'user-id-123';
-    const mockPreauthSecret = 'preauth-secret-123';
 
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
     describe('setServerCredentials', () => {
-        it('should store credentials with pre-auth secret', () => {
+        it('should store credentials', () => {
             setServerCredentials(mockServerUrl, mockToken);
 
             expect(KeyChain.setInternetCredentials).toHaveBeenCalledWith(
@@ -62,32 +57,6 @@ describe.skip('credentials', () => {
                 mockToken,
                 expect.objectContaining({
                     securityLevel: KeyChain.SECURITY_LEVEL.SECURE_SOFTWARE,
-                }),
-            );
-
-            expect(KeyChain.setGenericPassword).toHaveBeenCalledWith(
-                'preshared_secret',
-                mockPreauthSecret,
-                expect.objectContaining({
-                    server: mockServerUrl,
-                    securityLevel: KeyChain.SECURITY_LEVEL.SECURE_SOFTWARE,
-                }),
-            );
-        });
-
-        it('should store credentials without pre-auth secret', () => {
-            setServerCredentials(mockServerUrl, mockToken);
-
-            expect(KeyChain.setInternetCredentials).toHaveBeenCalledWith(
-                mockServerUrl,
-                mockToken,
-                mockToken,
-                expect.any(Object),
-            );
-
-            expect(KeyChain.resetGenericPassword).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    server: mockServerUrl,
                 }),
             );
         });
@@ -96,14 +65,12 @@ describe.skip('credentials', () => {
             setServerCredentials('', mockToken);
 
             expect(KeyChain.setInternetCredentials).not.toHaveBeenCalled();
-            expect(KeyChain.setGenericPassword).not.toHaveBeenCalled();
         });
 
         it('should not store credentials when token is missing', () => {
             setServerCredentials(mockServerUrl, '');
 
             expect(KeyChain.setInternetCredentials).not.toHaveBeenCalled();
-            expect(KeyChain.setGenericPassword).not.toHaveBeenCalled();
         });
 
         it('should use iOS app group on iOS platform', () => {
@@ -138,17 +105,10 @@ describe.skip('credentials', () => {
     });
 
     describe('getServerCredentials', () => {
-        it('should retrieve credentials with pre-auth secret', async () => {
+        it('should retrieve credentials', async () => {
             jest.mocked(KeyChain.getInternetCredentials).mockResolvedValue({
                 username: mockUserId,
                 password: mockToken,
-                service: mockServerUrl,
-                storage: 'keychain' as any,
-            });
-
-            jest.mocked(KeyChain.getGenericPassword).mockResolvedValue({
-                username: 'preshared_secret',
-                password: mockPreauthSecret,
                 service: mockServerUrl,
                 storage: 'keychain' as any,
             });
@@ -159,27 +119,6 @@ describe.skip('credentials', () => {
                 serverUrl: mockServerUrl,
                 userId: mockUserId,
                 token: mockToken,
-                preauthSecret: mockPreauthSecret,
-            });
-        });
-
-        it('should retrieve credentials without pre-auth secret', async () => {
-            jest.mocked(KeyChain.getInternetCredentials).mockResolvedValue({
-                username: mockUserId,
-                password: mockToken,
-                service: mockServerUrl,
-                storage: 'keychain' as any,
-            });
-
-            jest.mocked(KeyChain.getGenericPassword).mockResolvedValue(false);
-
-            const result = await getServerCredentials(mockServerUrl);
-
-            expect(result).toEqual({
-                serverUrl: mockServerUrl,
-                userId: mockUserId,
-                token: mockToken,
-                preauthSecret: undefined,
             });
         });
 
@@ -191,15 +130,12 @@ describe.skip('credentials', () => {
                 storage: 'keychain' as any,
             });
 
-            jest.mocked(KeyChain.getGenericPassword).mockResolvedValue(false);
-
             const result = await getServerCredentials(mockServerUrl);
 
             expect(result).toEqual({
                 serverUrl: mockServerUrl,
                 userId: 'user-id-456',
                 token: mockToken,
-                preauthSecret: undefined,
             });
         });
 
@@ -224,27 +160,7 @@ describe.skip('credentials', () => {
             expect(result).toBeNull();
         });
 
-        it('should gracefully handle errors when retrieving pre-auth secret', async () => {
-            jest.mocked(KeyChain.getInternetCredentials).mockResolvedValue({
-                username: mockUserId,
-                password: mockToken,
-                service: mockServerUrl,
-                storage: 'keychain' as any,
-            });
-
-            jest.mocked(KeyChain.getGenericPassword).mockRejectedValue(new Error('Keychain error'));
-
-            const result = await getServerCredentials(mockServerUrl);
-
-            expect(result).toEqual({
-                serverUrl: mockServerUrl,
-                userId: mockUserId,
-                token: mockToken,
-                preauthSecret: undefined,
-            });
-        });
-
-        it('should return null on error retrieving main credentials', async () => {
+        it('should return null on error retrieving credentials', async () => {
             jest.mocked(KeyChain.getInternetCredentials).mockRejectedValue(new Error('Keychain error'));
 
             const result = await getServerCredentials(mockServerUrl);
@@ -254,33 +170,10 @@ describe.skip('credentials', () => {
     });
 
     describe('removeServerCredentials', () => {
-        it('should remove internet credentials only', async () => {
+        it('should remove credentials', async () => {
             await removeServerCredentials(mockServerUrl);
 
             expect(KeyChain.resetInternetCredentials).toHaveBeenCalledWith({
-                server: mockServerUrl,
-            });
-
-            // Should NOT remove pre-auth secret
-            expect(KeyChain.resetGenericPassword).not.toHaveBeenCalled();
-        });
-    });
-
-    describe('removePreauthSecret', () => {
-        it('should remove pre-auth secret', async () => {
-            await removePreauthSecret(mockServerUrl);
-
-            expect(KeyChain.resetGenericPassword).toHaveBeenCalledWith({
-                server: mockServerUrl,
-            });
-        });
-
-        it('should gracefully handle errors when pre-auth secret does not exist', async () => {
-            jest.mocked(KeyChain.resetGenericPassword).mockRejectedValue(new Error('Not found'));
-
-            await expect(removePreauthSecret(mockServerUrl)).resolves.not.toThrow();
-
-            expect(KeyChain.resetGenericPassword).toHaveBeenCalledWith({
                 server: mockServerUrl,
             });
         });
@@ -318,8 +211,6 @@ describe.skip('credentials', () => {
                 return false;
             });
 
-            jest.mocked(KeyChain.getGenericPassword).mockResolvedValue(false);
-
             const result = await getAllServerCredentials();
 
             expect(result).toHaveLength(2);
@@ -327,13 +218,11 @@ describe.skip('credentials', () => {
                 serverUrl: 'https://server1.com',
                 userId: 'user1',
                 token: 'token1',
-                preauthSecret: undefined,
             });
             expect(result[1]).toEqual({
                 serverUrl: 'https://server2.com',
                 userId: 'user2',
                 token: 'token2',
-                preauthSecret: undefined,
             });
         });
 
@@ -350,8 +239,6 @@ describe.skip('credentials', () => {
                 service: 'https://server1.com',
                 storage: 'keychain' as any,
             });
-
-            jest.mocked(KeyChain.getGenericPassword).mockResolvedValue(false);
 
             const result = await getAllServerCredentials();
 
@@ -379,8 +266,6 @@ describe.skip('credentials', () => {
                 }
                 return false;
             });
-
-            jest.mocked(KeyChain.getGenericPassword).mockResolvedValue(false);
 
             const result = await getAllServerCredentials();
 

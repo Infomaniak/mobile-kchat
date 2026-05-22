@@ -33,9 +33,6 @@ import java.security.cert.X509Certificate
 import java.util.Objects
 
 class ShareWorker(private val context: Context, workerParameters: WorkerParameters) : Worker(context, workerParameters) {
-    companion object {
-        private const val HEADER_X_MATTERMOST_PREAUTH_SECRET = "X-Mattermost-Preauth-Secret"
-    }
     private val jsonType: MediaType? = "application/json; charset=utf-8".toMediaTypeOrNull()
     private val okHttpClient: OkHttpClient
         get() {
@@ -93,18 +90,14 @@ class ShareWorker(private val context: Context, workerParameters: WorkerParamete
             val files = if (jsonObject.has("files")) jsonObject.getJSONArray("files") else null
             val serverUrl = jsonObject.getString("serverUrl")
             val token = jsonObject.getString("token")
-            val preauthSecret = if (jsonObject.has("preauthSecret") && !jsonObject.isNull("preauthSecret")) {
-                val secret = jsonObject.getString("preauthSecret")
-                if (secret.isNotEmpty()) secret else null
-            } else null
             val postData = buildPostObject(jsonObject)
 
             if (files != null && files.length() > 0) {
                 setForegroundAsync(createForegroundInfo())
-                return uploadFiles(serverUrl, token, preauthSecret, files, postData)
+                return uploadFiles(serverUrl, token, files, postData)
             } else {
                 try {
-                    return post(serverUrl, token, preauthSecret, postData)
+                    return post(serverUrl, token, postData)
                 } catch (e: IOException) {
                     Log.e(MattermostShareImpl.NAME, "Error sending the post", e)
                     return Result.failure()
@@ -131,16 +124,12 @@ class ShareWorker(private val context: Context, workerParameters: WorkerParamete
     }
 
     @Throws(IOException::class)
-    private fun post(serverUrl: String, token: String, preauthSecret: String?, postData: JSONObject): Result {
+    private fun post(serverUrl: String, token: String, postData: JSONObject): Result {
         val body = postData.toString().toRequestBody(jsonType)
         val requestBuilder = Request.Builder()
                 .header("Authorization", "BEARER $token")
                 .url("$serverUrl/api/v4/posts")
                 .post(body)
-
-        if (preauthSecret != null) {
-            requestBuilder.header(HEADER_X_MATTERMOST_PREAUTH_SECRET, preauthSecret)
-        }
 
         val request = requestBuilder.build()
 
@@ -150,7 +139,7 @@ class ShareWorker(private val context: Context, workerParameters: WorkerParamete
         return Result.success()
     }
 
-    private fun uploadFiles(serverUrl: String, token: String, preauthSecret: String?, files: JSONArray, postData: JSONObject): Result {
+    private fun uploadFiles(serverUrl: String, token: String, files: JSONArray, postData: JSONObject): Result {
         try {
             val builder = MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
@@ -174,10 +163,6 @@ class ShareWorker(private val context: Context, workerParameters: WorkerParamete
                     .url("$serverUrl/api/v4/files")
                     .post(body)
 
-            if (preauthSecret != null) {
-                requestBuilder.header(HEADER_X_MATTERMOST_PREAUTH_SECRET, preauthSecret)
-            }
-
             val request = requestBuilder.build()
 
             try {
@@ -196,7 +181,7 @@ class ShareWorker(private val context: Context, workerParameters: WorkerParamete
                             fileIds.put(fileInfo.getString("id"))
                         }
                         postData.put("file_ids", fileIds)
-                        return post(serverUrl, token, preauthSecret, postData)
+                        return post(serverUrl, token, postData)
                     }
                     return Result.failure()
                 }

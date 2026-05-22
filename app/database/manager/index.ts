@@ -27,7 +27,6 @@ import ServerDataOperator from '@database/operator/server_data_operator';
 import {schema as appSchema} from '@database/schema/app';
 import {serverSchema} from '@database/schema/server';
 import {beforeUpgrade} from '@helpers/database/upgrade';
-import {removePreauthSecret} from '@init/credentials';
 import {getActiveServer, getServer, getServerByIdentifier} from '@queries/app/servers';
 import {logDebug, logError} from '@utils/log';
 import {deleteIOSDatabase, getIOSAppGroupDetails, renameIOSDatabase} from '@utils/mattermost_managed';
@@ -432,9 +431,6 @@ class DatabaseManagerSingleton {
 
                 delete this.serverDatabases[serverUrl];
                 this.deleteServerDatabaseFiles(serverUrl);
-
-                // Remove pre-auth secret when server is destroyed
-                await removePreauthSecret(serverUrl);
             }
         }
     };
