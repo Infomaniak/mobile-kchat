@@ -15,7 +15,6 @@ import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useDidMount from '@hooks/did_mount';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import SecurityManager from '@managers/security_manager';
 import {dismissModal} from '@screens/navigation';
 import {logDebug} from '@utils/log';
 import {alertTeamAddError} from '@utils/navigation';
@@ -157,7 +156,7 @@ export default function JoinTeam({
 
     return (
         <View
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
             style={styles.container}
         >
             {body}

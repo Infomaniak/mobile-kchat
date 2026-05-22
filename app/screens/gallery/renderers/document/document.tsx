@@ -9,8 +9,6 @@ import Animated from 'react-native-reanimated';
 
 import FileIcon from '@components/files/file_icon';
 import {Events, Preferences} from '@constants';
-import {useServerUrl} from '@context/server';
-import SecurityManager from '@managers/security_manager';
 import DownloadWithAction from '@screens/gallery/footer/download_with_action';
 import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {isDocument, isPdf} from '@utils/file';
@@ -72,7 +70,6 @@ const messages = defineMessages({
 
 const DocumentRenderer = ({canDownloadFiles, enableSecureFilePreview, item, hideHeaderAndFooter}: Props) => {
     const {formatMessage} = useIntl();
-    const serverUrl = useServerUrl();
     const file = useMemo(() => galleryItemToFileInfo(item), [item]);
     const [enabled, setEnabled] = useState(true);
     const isSupported = useMemo(() => isDocument(file), [file]);
@@ -88,7 +85,7 @@ const DocumentRenderer = ({canDownloadFiles, enableSecureFilePreview, item, hide
     }, [canDownloadFiles, enableSecureFilePreview, file, isSupported]);
 
     const optionText = useMemo(() => {
-        const allowSaveToLocation = SecurityManager.canSaveToLocation(serverUrl, 'FilesApp');
+        const allowSaveToLocation = true;
         if (enableSecureFilePreview && !isPdf(file)) {
             return formatMessage(messages.onlyPdf);
         } else if (!isSupported && allowSaveToLocation) {
@@ -97,7 +94,7 @@ const DocumentRenderer = ({canDownloadFiles, enableSecureFilePreview, item, hide
             return formatMessage(messages.unsupportedAndBlockedDownload);
         }
         return formatMessage(messages.openFile);
-    }, [enableSecureFilePreview, file, formatMessage, isSupported, serverUrl]);
+    }, [enableSecureFilePreview, file, formatMessage, isSupported]);
 
     const setGalleryAction = useCallback((action: GalleryAction) => {
         DeviceEventEmitter.emit(Events.GALLERY_ACTIONS, action);

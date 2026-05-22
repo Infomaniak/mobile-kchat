@@ -11,9 +11,7 @@ import DatabaseManager from '@database/manager';
 import {getAllServerCredentials, removeServerCredentials} from '@init/credentials';
 import {relaunchApp} from '@init/launch';
 import PushNotifications from '@init/push_notifications';
-import IntuneManager from '@managers/intune_manager';
 import NetworkManager from '@managers/network_manager';
-import SecurityManager from '@managers/security_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {queryGlobalValue} from '@queries/app/global';
 import {getAllServers, getServerDisplayName} from '@queries/app/servers';
@@ -52,20 +50,7 @@ jest.mock('@actions/local/session', () => {
 jest.mock('@init/credentials');
 jest.mock('@init/launch');
 jest.mock('@init/push_notifications');
-jest.mock('@managers/intune_manager', () => ({
-    __esModule: true,
-    default: {
-        unenrollServer: jest.fn().mockResolvedValue(undefined),
-        subscribeToPolicyChanges: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToEnrollmentChanges: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToWipeRequests: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToAuthRequired: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToConditionalLaunchBlocked: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToIdentitySwitchRequired: jest.fn().mockReturnValue({remove: jest.fn()}),
-    },
-}));
 jest.mock('@managers/network_manager');
-jest.mock('@managers/security_manager');
 jest.mock('@managers/websocket_manager');
 jest.mock('@queries/app/global', () => ({
     queryGlobalValue: jest.fn(),
@@ -192,8 +177,6 @@ describe.skip('SessionManager', () => {
             expect(PushNotifications.removeServerNotifications).toHaveBeenCalledWith(mockServerUrl);
             expect(NetworkManager.invalidateClient).toHaveBeenCalledWith(mockServerUrl);
             expect(WebsocketManager.invalidateClient).toHaveBeenCalledWith(mockServerUrl);
-            expect(SecurityManager.removeServer).toHaveBeenCalledWith(mockServerUrl);
-            expect(IntuneManager.unenrollServer).toHaveBeenCalledWith(mockServerUrl, false);
         });
 
         it('should handle session expiration', async () => {
@@ -202,8 +185,6 @@ describe.skip('SessionManager', () => {
             await TestHelper.wait(50);
 
             expect(logout).toHaveBeenCalledWith(mockServerUrl, undefined, {skipEvents: true, skipServerLogout: true});
-            expect(SecurityManager.removeServer).toHaveBeenCalledWith(mockServerUrl);
-            expect(IntuneManager.unenrollServer).toHaveBeenCalledWith(mockServerUrl, true);
             expect(relaunchApp).toHaveBeenCalled();
         });
     });

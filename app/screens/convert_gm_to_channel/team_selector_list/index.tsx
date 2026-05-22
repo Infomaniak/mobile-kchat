@@ -8,7 +8,6 @@ import SearchBar from '@components/search';
 import TeamList from '@components/team_list';
 import {useTheme} from '@context/theme';
 import {useDebounce, usePreventDoubleTap} from '@hooks/utils';
-import SecurityManager from '@managers/security_manager';
 import {popTopScreen} from '@screens/navigation';
 import {changeOpacity, getKeyboardAppearanceFromTheme} from '@utils/theme';
 
@@ -49,7 +48,7 @@ const TeamSelectorList = ({componentId, teams, selectTeam}: Props) => {
 
     return (
         <View
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
             style={styles.container}
         >
             <SearchBar

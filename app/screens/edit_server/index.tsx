@@ -13,7 +13,6 @@ import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {getServerCredentials, setServerCredentials} from '@init/credentials';
 import NetworkManager from '@managers/network_manager';
-import SecurityManager from '@managers/security_manager';
 import {getServerByDisplayName} from '@queries/app/servers';
 import Background from '@screens/background';
 import {dismissModal} from '@screens/navigation';
@@ -216,7 +215,7 @@ const EditServer = ({closeButtonId, componentId, server, theme}: ServerProps) =>
     return (
         <View
             style={styles.flex}
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
         >
             <Background theme={theme}/>
             <SafeAreaView

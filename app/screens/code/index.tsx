@@ -13,7 +13,6 @@ import {SNACK_BAR_TYPE} from '@constants/snack_bar';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import SecurityManager from '@managers/security_manager';
 import {popTopScreen, setButtons} from '@screens/navigation';
 import {showSnackBar} from '@utils/snack_bar';
 
@@ -65,7 +64,7 @@ const Code = ({code, componentId, language, textStyle}: Props) => {
         <SafeAreaView
             edges={edges}
             style={styles.flex}
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
         >
             <SyntaxHiglight
                 code={code}

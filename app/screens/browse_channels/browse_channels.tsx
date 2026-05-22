@@ -14,7 +14,6 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import SecurityManager from '@managers/security_manager';
 import {dismissModal, goToScreen, setButtons} from '@screens/navigation';
 import {alertErrorWithFallback} from '@utils/draft';
 import {changeOpacity, getKeyboardAppearanceFromTheme} from '@utils/theme';
@@ -234,7 +233,7 @@ export default function BrowseChannels(props: Props) {
     return (
         <SafeAreaView
             style={style.container}
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
         >
             {content}
         </SafeAreaView>

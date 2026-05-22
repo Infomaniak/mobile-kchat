@@ -9,7 +9,6 @@ import FloatingTextInput from '@components/floating_input/floating_text_input_la
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import SecurityManager from '@managers/security_manager';
 import {buildNavigationButton, popTopScreen, setButtons} from '@screens/navigation';
 
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -87,7 +86,7 @@ const RenameChecklistBottomSheet = ({
 
     return (
         <View
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
             style={styles.container}
         >
             <FloatingTextInput

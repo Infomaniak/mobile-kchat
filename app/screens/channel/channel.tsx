@@ -17,7 +17,6 @@ import {useIsTablet} from '@hooks/device';
 import {useDefaultHeaderHeight} from '@hooks/header';
 import {useTeamSwitch} from '@hooks/team_switch';
 import {useIsScreenVisible} from '@hooks/use_screen_visibility';
-import SecurityManager from '@managers/security_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {popTopScreen} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
@@ -144,7 +143,7 @@ const Channel = ({
                 edges={safeAreaViewEdges}
                 testID='channel.screen'
                 onLayout={onLayout}
-                nativeID={componentId ? SecurityManager.getShieldScreenId(componentId) : undefined}
+                nativeID={componentId ? `${componentId}.screen` : undefined}
             >
                 <ChannelHeader
                     channelId={channelId}

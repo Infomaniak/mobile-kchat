@@ -20,7 +20,6 @@ import {useAccessControlAttributes} from '@hooks/access_control_attributes';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useDidMount from '@hooks/did_mount';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import SecurityManager from '@managers/security_manager';
 import {openAsBottomSheet, popTopScreen, setButtons} from '@screens/navigation';
 import NavigationStore from '@store/navigation_store';
 import {showRemoveChannelUserSnackbar} from '@utils/snack_bar';
@@ -319,7 +318,7 @@ export default function ManageChannelMembers({
         <SafeAreaView
             style={styles.container}
             testID={`${TEST_ID}.screen`}
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
         >
             {channelAbacPolicyEnforced && (
                 <SectionNotice

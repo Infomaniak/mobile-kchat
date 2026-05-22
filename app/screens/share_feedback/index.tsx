@@ -14,7 +14,6 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useBackNavigation from '@hooks/navigate_back';
-import SecurityManager from '@managers/security_manager';
 import {dismissOverlay} from '@screens/navigation';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -136,7 +135,7 @@ const ShareFeedback = ({
 
     return (
         <View
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
             style={styles.root}
         >
             <View

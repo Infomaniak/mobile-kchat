@@ -21,7 +21,6 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useDidMount from '@hooks/did_mount';
-import SecurityManager from '@managers/security_manager';
 import {dismissOverlay} from '@screens/navigation';
 import NavigationStore from '@store/navigation_store';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -290,7 +289,7 @@ const TermsOfService = ({
     return (
         <View
             style={styles.root}
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
         >
             <View style={containerStyle}>
                 <View style={styles.wrapper}>
