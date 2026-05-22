@@ -1,22 +1,17 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {View} from 'react-native';
 
-import {removePost} from '@actions/local/post';
-import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
 import FormattedTime from '@components/formatted_time';
-import ExpiryTimer from '@components/post_list/post/header/expiry_timer';
 import PostPriorityLabel from '@components/post_priority/post_priority_label';
 import {PostPriorityType} from '@constants/post';
 import {CHANNEL, THREAD} from '@constants/screens';
-import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {DEFAULT_LOCALE} from '@i18n';
-import {isUnrevealedBoRPost} from '@utils/bor';
 import {getPostTranslation, postUserDisplayName} from '@utils/post';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {ensureString} from '@utils/types';
@@ -142,7 +137,6 @@ const Header = ({
     ): undefined;
     const customStatus = getUserCustomStatus(author);
     const [isTranscriptAvailable, setIsTranscriptAvailable] = useState(false);
-
     const showCustomStatusEmoji =
     Boolean(
         isCustomStatusEnabled &&
@@ -155,18 +149,6 @@ const Header = ({
     const userIconOverride = ensureString(post.props?.override_icon_url);
     const usernameOverride = ensureString(post.props?.override_username);
     const intl = useIntl();
-
-    // We need to depend on the expire_at directly,
-    // since changes in it may not be reflected in the post object
-    // (it is still the same object reference).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const showBoRIcon = useMemo(() => isUnrevealedBoRPost(post), [post, post.metadata?.expire_at]);
-    const borExpireAt = post.metadata?.expire_at;
-    const serverUrl = useServerUrl();
-
-    const onBoRPostExpiry = useCallback(async () => {
-        await removePost(serverUrl, post);
-    }, [post, serverUrl]);
 
     const translation = getPostTranslation(post, intl.locale);
 
@@ -224,25 +206,12 @@ const Header = ({
                     {showPostPriority && post.metadata?.priority?.priority && (
                         <PostPriorityLabel label={post.metadata.priority.priority}/>
                     )}
-                    {showBoRIcon && (
-                        <CompassIcon
-                            name='fire'
-                            size={16}
-                            color={theme.dndIndicator}
-                        />
-                    )}
                     {isTranscriptAvailable && post.type === 'voice' && (
                         <View style={style.postPriority}>
                             <PostPriorityLabel
                                 label={PostPriorityType.TRANSCRIPT}
                             />
                         </View>
-                    )}
-                    {Boolean(borExpireAt) && (
-                        <ExpiryTimer
-                            expiryTime={borExpireAt as number}
-                            onExpiry={onBoRPostExpiry}
-                        />
                     )}
                     {!isCRTEnabled && showReply && commentCount > 0 && (
                         <HeaderReply

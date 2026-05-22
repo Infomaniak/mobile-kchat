@@ -5,7 +5,6 @@ import {Q} from '@nozbe/watermelondb';
 
 import {ActionType} from '@constants';
 import {MM_TABLES} from '@constants/database';
-import {PostTypes} from '@constants/post';
 import {buildDraftKey} from '@database/operator/server_data_operator/comparators';
 import {
     transformDraftRecord,
@@ -20,7 +19,6 @@ import {queryScheduledPostsForTeam} from '@queries/servers/scheduled_post';
 import {getCurrentTeamId} from '@queries/servers/system';
 import FileModel from '@typings/database/models/servers/file';
 import ScheduledPostModel from '@typings/database/models/servers/scheduled_post';
-import {isUnrevealedBoRPost} from '@utils/bor';
 import {safeParseJSON} from '@utils/helpers';
 import {logWarning} from '@utils/log';
 
@@ -112,22 +110,7 @@ const mergePostInChannelChunks = async (newChunk: PostsInChannelModel, existingC
 
 export const exportedForTest = {
     mergePostInChannelChunks,
-    shouldUpdateForBoRPost,
 };
-
-function shouldUpdateForBoRPost(e: PostModel, n: Post): boolean {
-    const bothBoRPost = e.type === PostTypes.BURN_ON_READ && n.type === PostTypes.BURN_ON_READ;
-    if (!bothBoRPost) {
-        return false;
-    }
-
-    const borPostGotRevealed = isUnrevealedBoRPost(e) && !isUnrevealedBoRPost(n);
-    const borPostGotReadByAll = e.metadata?.expire_at === undefined && n.metadata?.expire_at !== undefined;
-
-    // Since a user can't un-see a BoR post, we consider an update if the recipients list length has changed
-    const borRecipientsUpdated = (e.metadata?.recipients || []).length !== (n.metadata?.recipients || []).length;
-    return borPostGotRevealed || borRecipientsUpdated || borPostGotReadByAll;
-}
 
 const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(superclass: TBase) => class extends superclass {
     /**
@@ -382,10 +365,6 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
             tableName,
             fieldName: 'id',
             shouldUpdate: (e: PostModel, n: Post) => {
-                if (shouldUpdateForBoRPost(e, n)) {
-                    return true;
-                }
-
                 return n.update_at > e.updateAt;
             },
         }));

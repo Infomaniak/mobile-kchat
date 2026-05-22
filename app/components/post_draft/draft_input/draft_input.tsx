@@ -45,9 +45,7 @@ export type Props = {
 
     // Post Props
     postPriority: PostPriority;
-    postBoRConfig?: PostBoRConfig;
     updatePostPriority: (postPriority: PostPriority) => void;
-    updatePostBoRStatus: (config: PostBoRConfig) => void;
     persistentNotificationInterval: number;
     persistentNotificationMaxRecipients: number;
 
@@ -151,7 +149,6 @@ function DraftInput({
     persistentNotificationMaxRecipients,
     setIsFocused,
     scheduledPostsEnabled,
-    postBoRConfig,
 }: Props) {
     const [recording, setRecording] = useState(false);
     const intl = useIntl();
@@ -306,7 +303,6 @@ function DraftInput({
                     <Header
                         noMentionsError={noMentionsError}
                         postPriority={postPriority}
-                        postBoRConfig={postBoRConfig}
                     />
 
                     {recording && (

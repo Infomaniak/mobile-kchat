@@ -2,8 +2,7 @@
 // See LICENSE.txt for license information.
 
 type PostTypesUserCreatable =
-    | ''
-    | 'burn_on_read';
+    | '';
 
 type PostType = PostTypesUserCreatable
     | 'system_add_remove'
@@ -91,9 +90,6 @@ type PostMetadata = {
     images?: Dictionary<PostImage | undefined>;
     reactions?: Reaction[];
     priority?: PostPriority;
-    expire_at?: number;
-    borConfig?: PostBoRConfig;
-    recipients?: string[];
     translations?: Record<string, PostTranslation>;
 };
 
@@ -205,8 +201,3 @@ type FetchPaginatedThreadOptions = {
     fromPost?: string;
 }
 
-type PostBoRConfig = {
-    enabled: boolean;
-    borDurationSeconds: number;
-    borMaximumTimeToLiveSeconds: number;
-}

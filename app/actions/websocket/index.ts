@@ -6,7 +6,7 @@
 // import {handleAgentsReconnect} from '@agents/actions/websocket/reconnect';
 
 import {markChannelAsViewed} from '@actions/local/channel';
-import {dataRetentionCleanup, expiredBoRPostCleanup} from '@actions/local/systems';
+import {dataRetentionCleanup} from '@actions/local/systems';
 import {markChannelAsRead} from '@actions/remote/channel';
 import {
     entry,
@@ -99,8 +99,6 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
     openAllUnreadChannels(serverUrl, groupLabel);
 
     dataRetentionCleanup(serverUrl);
-
-    expiredBoRPostCleanup(serverUrl);
 
     AppsManager.refreshAppBindings(serverUrl, groupLabel);
     return undefined;

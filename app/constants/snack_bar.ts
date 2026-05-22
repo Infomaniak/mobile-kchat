@@ -34,7 +34,6 @@ export const SNACK_BAR_TYPE = keyMirror({
     RESCHEDULED_POST: null,
     DELETE_SCHEDULED_POST_ERROR: null,
     ENABLE_TRANSLATION: null,
-    BOR_POST_EXPIRED: null,
 });
 
 export const MESSAGE_TYPE = {
@@ -142,10 +141,6 @@ const messages = defineMessages({
     ENABLE_TRANSLATION: {
         id: 'snack.bar.enable.translation',
         defaultMessage: 'Enable auto-translation?',
-    },
-    BOR_POST_EXPIRED: {
-        id: 'snack.bar.bor_post_expired.error',
-        defaultMessage: 'This burn-on-read post has expired and can no longer be revealed.',
     },
 });
 
@@ -269,12 +264,6 @@ export const SNACK_BAR_CONFIG: Record<string, SnackBarConfig> = {
         message: messages.ENABLE_TRANSLATION,
         iconName: 'globe',
         hasAction: true,
-    },
-    BOR_POST_EXPIRED: {
-        message: messages.BOR_POST_EXPIRED,
-        iconName: 'alert-outline',
-        hasAction: false,
-        type: MESSAGE_TYPE.ERROR,
     },
 };
 
