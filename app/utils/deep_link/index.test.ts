@@ -143,7 +143,8 @@ describe('parseAndHandleDeepLink', () => {
         expect(result).toEqual({error: false});
     });
 
-    it('should update the server url in the server url screen', async () => {
+    it.skip('should update the server url in the server url screen', async () => {
+        // IK change: Screens.SERVER is not registered in kChat — unknown-server flow returns error instead
         jest.mocked(getActiveServerUrl).mockResolvedValueOnce('https://currentserver.com');
         jest.mocked(DatabaseManager.searchUrl).mockReturnValueOnce(undefined);
 
@@ -154,7 +155,8 @@ describe('parseAndHandleDeepLink', () => {
         expect(result).toEqual({error: false});
     });
 
-    it('should not display the new server modal if the server screen is on the stack but not as the visible screen', async () => {
+    it.skip('should not display the new server modal if the server screen is on the stack but not as the visible screen', async () => {
+        // IK change: Screens.SERVER is not registered in kChat — unknown-server flow returns error instead
         jest.mocked(getActiveServerUrl).mockResolvedValueOnce('https://currentserver.com');
         jest.mocked(DatabaseManager.searchUrl).mockReturnValueOnce(undefined);
 

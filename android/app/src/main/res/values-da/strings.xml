@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">kChat</string>
+    <string name="empty_notification_message">Importerede noget</string>
+    <string name="callkChatDescription">kChat stemmeopkald</string>
+    <plurals name="manyCallers">
+        <item quantity="one">, og %s anden</item>
+        <item quantity="other">, og %s andre</item>
+    </plurals>
+    <string name="declineCall">Afvis</string>
+    <string name="acceptCall">Accepter</string>
+    <string name="notificationCallFrom">Opkald fra %1$s</string>
+    <string name="notificationChannelName">Opkaldsnotifikation</string>
+    <string name="notificationChannelDescription">Vis en notifikation, hvis du modtager et opkald</string>
+</resources>

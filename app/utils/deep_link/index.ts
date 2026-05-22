@@ -4,7 +4,6 @@
 import {match} from 'path-to-regexp';
 import {defineMessage, type IntlShape} from 'react-intl';
 import {Alert} from 'react-native';
-import {Navigation} from 'react-native-navigation';
 import urlParse from 'url-parse';
 
 import {joinIfNeededAndSwitchToChannel, makeDirectChannel} from '@actions/remote/channel';
@@ -14,7 +13,6 @@ import {magicLinkLogin} from '@actions/remote/session';
 import {fetchUsersByUsernames} from '@actions/remote/user';
 import {DeepLink, Launch, Screens} from '@constants';
 import DeepLinkType from '@constants/deep_linking';
-import {getDefaultThemeByAppearance} from '@context/theme';
 import DatabaseManager from '@database/manager';
 import {DEFAULT_LOCALE} from '@i18n';
 import WebsocketManager from '@managers/websocket_manager';
@@ -25,13 +23,11 @@ import {goToPlaybookRun} from '@playbooks/screens/navigation';
 import {getActiveServerUrl} from '@queries/app/servers';
 import {getCurrentUser, queryUsersByUsername} from '@queries/servers/user';
 import {dismissAllModalsAndPopToRoot} from '@screens/navigation';
-import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {alertErrorWithFallback, errorBadChannel, errorUnkownUser} from '@utils/draft';
 import {getIntlShape} from '@utils/general';
 import {logError} from '@utils/log';
 import {escapeRegex} from '@utils/markdown';
-import {addNewServer} from '@utils/server';
 import {removeProtocol, stripTrailingSlashes} from '@utils/url';
 import {
     TEAM_NAME_PATH_PATTERN,
@@ -56,8 +52,6 @@ export async function handleDeepLink(deepLink: DeepLinkWithData, intlShape?: Int
 
         // After checking the server for http & https then we add it
         if (!existingServerUrl) {
-            const theme = EphemeralStore.theme || getDefaultThemeByAppearance();
-
             if (deepLink.type === DeepLink.MagicLink && 'token' in deepLink.data) {
                 const result = await magicLinkLogin(deepLink.data.serverUrl, deepLink.data.token);
                 if (result.error) {
@@ -66,12 +60,10 @@ export async function handleDeepLink(deepLink: DeepLinkWithData, intlShape?: Int
                 }
                 return {error: false};
             }
-            if (NavigationStore.getVisibleScreen() === Screens.SERVER) {
-                Navigation.updateProps(Screens.SERVER, {serverUrl: deepLink.data.serverUrl});
-            } else if (!NavigationStore.getScreensInStack().includes(Screens.SERVER)) {
-                addNewServer(theme, deepLink.data.serverUrl, undefined, deepLink);
-            }
-            return {error: false};
+
+            // The kChat app does not support the add-server flow (Screens.SERVER is not
+            // registered). Report the link as unhandled so the caller shows an alert.
+            return {error: true};
         }
 
         if (existingServerUrl !== currentServerUrl && NavigationStore.getVisibleScreen()) {

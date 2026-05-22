@@ -216,6 +216,9 @@ jest.doMock('react-native', () => {
         },
         Appearance: {
             getColorScheme: jest.fn().mockReturnValue('light'),
+            addChangeListener: jest.fn(() => ({
+                remove: jest.fn(),
+            })),
         },
         RNUtils: {
             getConstants: () => ({

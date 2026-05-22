@@ -2,8 +2,8 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {Animated, DeviceEventEmitter} from 'react-native';
-import {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
+import {DeviceEventEmitter} from 'react-native';
+import Animated, {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 
 import FormattedText from '@components/formatted_text';
 import {Events} from '@constants';

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">kChat</string>
+    <string name="empty_notification_message">Toi jotain</string>
+    <string name="callkChatDescription">kChat äänipuhelu</string>
+    <plurals name="manyCallers">
+        <item quantity="one">, ja %s muu</item>
+        <item quantity="other">, ja %s muuta</item>
+    </plurals>
+    <string name="declineCall">Hylkää</string>
+    <string name="acceptCall">Hyväksy</string>
+    <string name="notificationCallFrom">Puhelu henkilöltä %1$s</string>
+    <string name="notificationChannelName">Puheluilmoitus</string>
+    <string name="notificationChannelDescription">Näytä ilmoitus, jos sinulle soitetaan</string>
+</resources>

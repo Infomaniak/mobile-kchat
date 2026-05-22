@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">kChat</string>
+    <string name="empty_notification_message">Importerade något</string>
+    <string name="callkChatDescription">kChat röstsamtal</string>
+    <plurals name="manyCallers">
+        <item quantity="one">, och %s till</item>
+        <item quantity="other">, och %s till</item>
+    </plurals>
+    <string name="declineCall">Avvisa</string>
+    <string name="acceptCall">Acceptera</string>
+    <string name="notificationCallFrom">Samtal från %1$s</string>
+    <string name="notificationChannelName">Samtalsavisering</string>
+    <string name="notificationChannelDescription">Visa ett meddelande om du får ett samtal</string>
+</resources>
