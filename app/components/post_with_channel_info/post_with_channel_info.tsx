@@ -14,7 +14,6 @@ import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
     appsEnabled: boolean;
-    isChannelMember?: boolean;
     customEmojiNames: string[];
     isCRTEnabled: boolean;
     post: PostModel;
@@ -41,7 +40,6 @@ function PostWithChannelInfo({
     appsEnabled,
     customEmojiNames,
     isCRTEnabled,
-    isChannelMember,
     post,
     location,
     testID,
@@ -61,7 +59,6 @@ function PostWithChannelInfo({
                     appsEnabled={appsEnabled}
                     customEmojiNames={customEmojiNames}
                     isCRTEnabled={isCRTEnabled}
-                    isChannelMember={isChannelMember}
                     post={post}
                     location={location}
                     highlightPinnedOrSaved={!skipSavedPostsHighlight}

@@ -48,7 +48,7 @@ type Props = {
     channelId: ChannelModel['id'];
     channelName: ChannelModel['displayName'];
     teamName: TeamModel['displayName'];
-    isChannelMember?: boolean;
+    isChannelMember: boolean;
     testID?: string;
 }
 
