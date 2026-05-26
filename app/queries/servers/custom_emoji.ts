@@ -9,7 +9,7 @@ import {MM_TABLES} from '@constants/database';
 import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji';
 
 export const queryAllCustomEmojis = (database: Database) => {
-    return database.get<CustomEmojiModel>(MM_TABLES.SERVER.CUSTOM_EMOJI).query(Q.take(500));
+    return database.get<CustomEmojiModel>(MM_TABLES.SERVER.CUSTOM_EMOJI).query();
 };
 
 export const observeAllCustomEmojis = (database: Database) => {
