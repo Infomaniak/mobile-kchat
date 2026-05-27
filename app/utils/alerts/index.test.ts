@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import Emm from '@mattermost/react-native-emm';
 import {Alert, Platform, type AlertButton} from 'react-native';
 
 import {switchToServer} from '@actions/app/server';
@@ -24,17 +23,6 @@ import type ServerDataOperator from '@database/operator/server_data_operator';
 import type {Database, Query} from '@nozbe/watermelondb';
 import type ServersModel from '@typings/database/models/app/servers';
 
-jest.mock('@mattermost/react-native-emm', () => ({
-    __esModule: true,
-    default: {
-        exitApp: jest.fn(),
-        openSecuritySettings: jest.fn(),
-        removeBlurEffect: jest.fn(),
-        addListener: jest.fn(),
-        getManagedConfig: jest.fn(() => ({})),
-        setAppGroupId: jest.fn(),
-    },
-}));
 jest.mock('@actions/remote/session');
 jest.mock('@actions/app/server');
 jest.mock('@database/manager', () => ({
@@ -199,20 +187,6 @@ describe('buildSecurityAlertOptions', () => {
         expect(buttons).toHaveLength(1);
         expect(buttons[0].text).toBe('Exit');
         expect(buttons[0].style).toBe('destructive');
-    });
-
-    it('should call Emm.exitApp when exit button is pressed', async () => {
-        jest.mocked(getServerCredentials).mockResolvedValue(null);
-        jest.mocked(queryAllActiveServers).mockReturnValue({
-            fetch: jest.fn().mockResolvedValue([]),
-        } as unknown as Query<ServersModel>);
-        jest.mocked(DatabaseManager.getActiveServerUrl).mockResolvedValue('');
-
-        const buttons = await buildSecurityAlertOptions(serverUrl, mockTranslations);
-
-        buttons[0].onPress?.();
-
-        expect(Emm.exitApp).toHaveBeenCalled();
     });
 
     it('should handle logout and retry buttons together', async () => {
@@ -435,18 +409,6 @@ describe('showNotSecuredAlert', () => {
         expect(settingsButton).toBeDefined();
     });
 
-    it('should call Emm.openSecuritySettings when Android settings button is pressed', async () => {
-        Platform.OS = 'android';
-
-        await showNotSecuredAlert(serverUrl, undefined, 'en');
-
-        const buttons = (Alert.alert as jest.Mock).mock.calls[0][2];
-        const settingsButton = buttons.find((b: AlertButton) => b.text === 'Go to settings');
-        settingsButton?.onPress();
-
-        expect(Emm.openSecuritySettings).toHaveBeenCalled();
-    });
-
     it('should not add Android settings button on iOS platform', async () => {
         Platform.OS = 'ios';
 
@@ -525,44 +487,6 @@ describe('showBiometricFailureAlert', () => {
         retryButton?.onPress();
 
         expect(mockRetryCallback).toHaveBeenCalled();
-    });
-
-    it('should remove blur effect when callback is invoked with blurOnAuthenticate=true', async () => {
-        jest.mocked(getServerCredentials).mockResolvedValue({
-            serverUrl,
-            token: 'token',
-            userId: 'user_id',
-        } as ServerCredential);
-        jest.mocked(queryAllActiveServers).mockReturnValue({
-            fetch: jest.fn().mockResolvedValue([{url: serverUrl}]),
-        } as unknown as Query<ServersModel>);
-
-        await showBiometricFailureAlert(serverUrl, true, undefined, 'en');
-
-        const buttons = (Alert.alert as jest.Mock).mock.calls[0][2];
-        const logoutButton = buttons.find((b: AlertButton) => b.text === 'Logout');
-        await logoutButton?.onPress();
-
-        expect(Emm.removeBlurEffect).toHaveBeenCalled();
-    });
-
-    it('should not remove blur effect when blurOnAuthenticate=false', async () => {
-        jest.mocked(getServerCredentials).mockResolvedValue({
-            serverUrl,
-            token: 'token',
-            userId: 'user_id',
-        } as ServerCredential);
-        jest.mocked(queryAllActiveServers).mockReturnValue({
-            fetch: jest.fn().mockResolvedValue([{url: serverUrl}]),
-        } as unknown as Query<ServersModel>);
-
-        await showBiometricFailureAlert(serverUrl, false, undefined, 'en');
-
-        const buttons = (Alert.alert as jest.Mock).mock.calls[0][2];
-        const logoutButton = buttons.find((b: AlertButton) => b.text === 'Logout');
-        await logoutButton?.onPress();
-
-        expect(Emm.removeBlurEffect).not.toHaveBeenCalled();
     });
 
     it('should use site name from server config when not provided', async () => {

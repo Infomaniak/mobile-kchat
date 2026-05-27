@@ -10,7 +10,6 @@ import ErrorBoundary from '@components/error_boundary';
 import MathView from '@components/math_view';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import SecurityManager from '@managers/security_manager';
 import {popTopScreen} from '@screens/navigation';
 import {splitLatexCodeInLines} from '@utils/markdown/latex';
 import {makeStyleSheetFromTheme} from '@utils/theme';
@@ -85,7 +84,7 @@ const Latex = ({componentId, content}: Props) => {
         <SafeAreaView
             edges={edges}
             style={style.scrollContainer}
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
         >
             <ScrollView
                 style={style.scrollContainer}

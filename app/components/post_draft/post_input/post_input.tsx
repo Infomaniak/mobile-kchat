@@ -3,7 +3,6 @@
 
 import {useRewrite} from '@agents/hooks';
 import {useHardwareKeyboardEvents} from '@mattermost/hardware-keyboard';
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import PasteableTextInput, {type PastedFile, type PasteInputRef} from '@mattermost/react-native-paste-input';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {defineMessage, type IntlShape, useIntl} from 'react-intl';
@@ -125,7 +124,6 @@ export default function PostInput({
     const theme = useTheme();
     const style = getStyleSheet(theme);
     const serverUrl = useServerUrl();
-    const managedConfig = useManagedConfig<ManagedConfig>();
 
     const {
         setShowInputAccessoryView,
@@ -188,8 +186,6 @@ export default function PostInput({
         focusTimeoutRef,
         isManuallyFocusingAfterEmojiDismiss,
     } = useFocusAfterEmojiDismiss(inputRef, focusInput);
-
-    const disableCopyAndPaste = managedConfig.copyAndPasteProtection === 'true';
     const maxHeight = isTablet ? 150 : 88;
     const pasteInputStyle = useMemo(() => {
         return {...style.input, maxHeight};
@@ -546,7 +542,7 @@ export default function PostInput({
         <Animated.View style={pulsingAnimatedStyle}>
             <PasteableTextInput
                 allowFontScaling={true}
-                disableCopyPaste={disableCopyAndPaste}
+                disableCopyPaste={false}
                 disableFullscreenUI={true}
                 keyboardAppearance={getKeyboardAppearanceFromTheme(theme)}
                 multiline={true}

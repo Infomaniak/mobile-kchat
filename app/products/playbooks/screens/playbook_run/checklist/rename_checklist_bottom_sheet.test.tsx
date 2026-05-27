@@ -21,9 +21,6 @@ jest.mock('@screens/navigation', () => ({
 
 jest.mock('@hooks/navigation_button_pressed', () => jest.fn());
 jest.mock('@hooks/android_back_handler', () => jest.fn());
-jest.mock('@managers/security_manager', () => ({
-    getShieldScreenId: jest.fn((id) => `shield-${id}`),
-}));
 
 describe('RenameChecklistBottomSheet', () => {
     const componentId = 'test-component-id' as any;

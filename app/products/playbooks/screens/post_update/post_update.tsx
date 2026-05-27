@@ -17,7 +17,6 @@ import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useAvoidKeyboard} from '@hooks/device';
 import useDidMount from '@hooks/did_mount';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import SecurityManager from '@managers/security_manager';
 import {fetchPlaybookRun, fetchPlaybookRunMetadata, postStatusUpdate} from '@playbooks/actions/remote/runs';
 import {buildNavigationButton, popTopScreen, setButtons} from '@screens/navigation';
 import {toSeconds} from '@utils/datetime';
@@ -287,7 +286,7 @@ const PostUpdate = ({
         <KeyboardAwareScrollView
             contentContainerStyle={styles.container}
             ref={keyboardAwareRef}
-            nativeID={SecurityManager.getShieldScreenId(componentId, false, true)}
+            nativeID={`${componentId}.screen`}
             style={styles.flex}
         >
             <Text style={styles.introMessage}>{introMessage}</Text>

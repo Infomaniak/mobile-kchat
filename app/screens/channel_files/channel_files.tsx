@@ -15,7 +15,6 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import DatabaseManager from '@database/manager';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import SecurityManager from '@managers/security_manager';
 import {popTopScreen} from '@screens/navigation';
 import {type FileFilter, FileFilters, filterFileExtensions} from '@utils/file';
 import {changeOpacity, getKeyboardAppearanceFromTheme} from '@utils/theme';
@@ -145,7 +144,7 @@ function ChannelFiles({
     return (
         <View
             style={styles.flex}
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
         >
             <SafeAreaView
                 edges={edges}

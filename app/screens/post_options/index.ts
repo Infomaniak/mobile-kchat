@@ -81,7 +81,7 @@ const withPost = withObservables([], ({post, database}: {post: Post | PostModel}
 const enhanced = withObservables([], ({combinedPost, post, showAddReaction, sourceScreen, database, serverUrl}: EnhancedProps) => {
     const channel = observeChannel(database, post.channelId);
     const channelInfo = observeChannelInfo(database, post.channelId);
-    const channelIsArchived = channel.pipe(switchMap((ch: ChannelModel) => of$(ch.deleteAt !== 0)));
+    const channelIsArchived = channel.pipe(switchMap((ch: ChannelModel | undefined) => of$(ch ? ch.deleteAt !== 0 : false)));
     const currentUser = observeCurrentUser(database);
     const isLicensed = observeLicense(database).pipe(switchMap((lcs) => of$(lcs?.IsLicensed === 'true')));
     const allowEditPost = observeConfigValue(database, 'AllowEditPost');

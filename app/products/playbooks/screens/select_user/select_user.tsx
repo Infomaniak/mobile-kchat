@@ -14,7 +14,6 @@ import {General, Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import SecurityManager from '@managers/security_manager';
 import {
     popTopScreen,
 } from '@screens/navigation';
@@ -221,7 +220,7 @@ function SelectUser({
 
     return (
         <SafeAreaView
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
             style={style.container}
         >
             <View

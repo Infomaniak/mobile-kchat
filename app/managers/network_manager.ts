@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import Emm from '@mattermost/react-native-emm';
 import {
     type APIClientErrorEvent,
     type APIClientErrorEventHandler,
@@ -21,7 +20,6 @@ import * as ClientConstants from '@client/rest/constants';
 import {BASE_SERVER_URL} from '@client/rest/constants';
 import ClientError from '@client/rest/error';
 import {CERTIFICATE_ERRORS} from '@constants/network';
-import ManagedApp from '@init/managed_app';
 import {toMilliseconds} from '@utils/datetime';
 import {getIntlShape} from '@utils/general';
 import {logDebug, logError} from '@utils/log';
@@ -148,7 +146,6 @@ class NetworkManagerSingleton {
 
     private buildConfig = async (preauthSecret?: string) => {
         const userAgent = `Mattermost Mobile/${nativeApplicationVersion}+${nativeBuildVersion} (${osName}; ${osVersion}; ${modelName})`;
-        const managedConfig = ManagedApp.enabled ? Emm.getManagedConfig<ManagedConfig>() : undefined;
         const headers: Record<string, string> = {
             [ClientConstants.HEADER_USER_AGENT]: userAgent,
             ...(preauthSecret ? {[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET]: preauthSecret} : {}),
@@ -159,9 +156,9 @@ class NetworkManagerSingleton {
             ...this.DEFAULT_CONFIG,
             sessionConfiguration: {
                 ...this.DEFAULT_CONFIG.sessionConfiguration,
-                timeoutIntervalForRequest: managedConfig?.timeout ? parseInt(managedConfig.timeout, 10) : this.DEFAULT_CONFIG.sessionConfiguration?.timeoutIntervalForRequest,
-                timeoutIntervalForResource: managedConfig?.timeoutVPN ? parseInt(managedConfig.timeoutVPN, 10) : this.DEFAULT_CONFIG.sessionConfiguration?.timeoutIntervalForResource,
-                waitsForConnectivity: managedConfig?.useVPN === 'true',
+                timeoutIntervalForRequest: this.DEFAULT_CONFIG.sessionConfiguration?.timeoutIntervalForRequest,
+                timeoutIntervalForResource: this.DEFAULT_CONFIG.sessionConfiguration?.timeoutIntervalForResource,
+                waitsForConnectivity: this.DEFAULT_CONFIG.sessionConfiguration?.waitsForConnectivity,
                 collectMetrics: true,
             },
             headers,
