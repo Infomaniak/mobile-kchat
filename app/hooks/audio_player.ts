@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import RNFS from 'react-native-fs';
 import {createSound} from 'react-native-nitro-sound';
 
@@ -33,21 +33,42 @@ export type PlaybackSpeed = typeof SPEEDS[number];
 
 const useAudioPlayer = () => {
     const playerRef = useRef(createSound());
-    const player = playerRef.current;
-
     const [localAudioURI, storeLocalAudioURI] = useState<string | undefined>();
     const [playing, setPlaying] = useState<string | null>(null);
     const [playbackStatus, setPlaybackStatus] = useState<PlaybackStatus>('stopped');
     const [currentPosition, setCurrentPosition] = useState(0);
     const [duration, setDuration] = useState(0);
     const [speed, setSpeedState] = useState<PlaybackSpeed>(1);
+    const [isLoading, setIsLoading] = useState(false);
     const isPausedRef = useRef(false);
 
     const serverUrl = useServerUrl();
     const client = NetworkManager.getClient(serverUrl);
+    const player = playerRef.current;
+
+    const cleanupPlayback = useCallback(() => {
+        isPausedRef.current = false;
+        player.removePlayBackListener();
+        player.removePlaybackEndListener();
+        setPlaying(null);
+        setPlaybackStatus('stopped');
+        setCurrentPosition(0);
+        setSpeedState(1);
+        setIsLoading(false);
+    }, [player]);
+
+    useEffect(() => {
+        return () => {
+            player.stopPlayer().catch(logError);
+            cleanupPlayback();
+            player.dispose();
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const loadAudio = async (audioId?: string, onLoadError?: () => void) => {
         try {
+            setIsLoading(true);
             const token = client.getCurrentBearerToken();
             const headers = {Authorization: token};
             let uri = audioId ? buildFileUrl(serverUrl, audioId) : localAudioURI!;
@@ -58,6 +79,7 @@ const useAudioPlayer = () => {
                 if (!exist.ok) {
                     onLoadError?.();
                     logInfo(`File with id : ${audioId} does not exist`);
+                    setIsLoading(false);
                     return;
                 }
 
@@ -74,26 +96,27 @@ const useAudioPlayer = () => {
                 setCurrentPosition(e.currentPosition);
                 setDuration(e.duration);
 
-                if (e.currentPosition === e.duration) {
-                    isPausedRef.current = false;
-                    player.removePlayBackListener();
-                    player.stopPlayer().catch(logError);
-                    setPlaying(null);
-                    setPlaybackStatus('stopped');
-                    setCurrentPosition(0);
-                    setSpeedState(1);
-                    return;
-                }
-
                 if (!isPausedRef.current) {
                     setPlaybackStatus('playing');
                 }
+            });
+
+            player.addPlaybackEndListener(() => {
+                isPausedRef.current = false;
+                player.removePlayBackListener();
+                player.stopPlayer().catch(logError);
+                setPlaying(null);
+                setPlaybackStatus('stopped');
+                setCurrentPosition(0);
+                setSpeedState(1);
             });
 
             setPlaying(audioId ?? 'draft');
             setPlaybackStatus('playing');
         } catch (error) {
             logError('[useAudioPlayer.loadAudio]', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -120,11 +143,7 @@ const useAudioPlayer = () => {
         try {
             isPausedRef.current = false;
             await player.stopPlayer();
-            player.removePlayBackListener();
-            setPlaying(null);
-            setPlaybackStatus('stopped');
-            setCurrentPosition(0);
-            setSpeedState(1);
+            cleanupPlayback();
         } catch (error) {
             logError('[useAudioPlayer.stopAudio]', error);
         }
@@ -155,6 +174,7 @@ const useAudioPlayer = () => {
         currentPosition,
         duration,
         speed,
+        isLoading,
         loadAudio,
         pauseAudio,
         playAudio,

@@ -6,6 +6,7 @@ import React, {useCallback} from 'react';
 import {Pressable, Text} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
+import Loading from '@components/loading';
 import TimeElapsed from '@components/post_draft/draft_input/voice_input/time_elapsed';
 import {MIC_SIZE} from '@constants/view';
 import {useAudioPlayerContext} from '@context/audio_player';
@@ -50,7 +51,7 @@ const PlaybackControls = ({audioId, totalDuration, onLoadError}: Props) => {
     const styles = getStyleSheet(theme);
     const {
         loadAudio, pauseAudio, playAudio, seekTo, cycleSpeed,
-        playing, playbackStatus, currentPosition, duration, speed,
+        playing, playbackStatus, currentPosition, duration, speed, isLoading,
     } = useAudioPlayerContext();
 
     const activeId = audioId ?? 'draft';
@@ -80,11 +81,21 @@ const PlaybackControls = ({audioId, totalDuration, onLoadError}: Props) => {
         }
     }, [isThisActive, effectiveDuration, seekTo]);
 
+    if (isLoading && !isPlaying && !isPaused) {
+        return (
+            <Loading
+                color={theme.buttonBg}
+                size='small'
+            />
+        );
+    }
+
     return (
         <>
             <Pressable
-                style={({pressed}) => [styles.mic, pressed && {opacity: 0.7}]}
+                style={({pressed}) => [styles.mic, pressed && {opacity: 0.72}]}
                 onPress={onPressPlay}
+                disabled={isLoading}
             >
                 <CompassIcon
                     color={theme.buttonBg}
@@ -101,12 +112,11 @@ const PlaybackControls = ({audioId, totalDuration, onLoadError}: Props) => {
                 maximumTrackTintColor={changeOpacity(theme.buttonBg, 0.3)}
                 thumbTintColor={theme.buttonBg}
                 onSlidingComplete={onSeek}
-                disabled={!isThisActive}
-
+                disabled={!isThisActive || isLoading}
             />
             <TimeElapsed time={displayTime}/>
             <Pressable
-                style={({pressed}) => [styles.speedButton, pressed && {opacity: 0.7}]}
+                style={({pressed}) => [styles.speedButton, pressed && {opacity: 0.72}]}
                 onPress={cycleSpeed}
             >
                 <Text style={styles.speedText}>{`${speed}x`}</Text>

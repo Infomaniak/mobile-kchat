@@ -12,6 +12,7 @@ const AudioPlayerContext = createContext<AudioPlayerContextValue>({
     currentPosition: 0,
     duration: 0,
     speed: 1,
+    isLoading: false,
     loadAudio: async () => undefined,
     pauseAudio: async () => undefined,
     playAudio: async () => undefined,
