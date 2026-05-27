@@ -29,7 +29,6 @@ import {TABLET_SIDEBAR_WIDTH} from '@constants/view';
 import {useTheme} from '@context/theme';
 import {useIsTablet, useWindowDimensions} from '@hooks/device';
 import useDidMount from '@hooks/did_mount';
-import SecurityManager from '@managers/security_manager';
 import {dismissOverlay} from '@screens/navigation';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -290,7 +289,7 @@ const SnackBar = ({
             <GestureDetector gesture={gesture}>
                 <Animated.View
                     style={animatedMotion}
-                    nativeID={SecurityManager.getShieldScreenId(componentId)}
+                    nativeID={`${componentId}.screen`}
                 >
                     <Animated.View
                         entering={FadeIn.duration(300)}

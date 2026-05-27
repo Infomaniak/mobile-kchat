@@ -21,7 +21,6 @@ export interface ClientUsersMix {
     loginById: (id: string, password: string, token?: string, deviceId?: string) => Promise<UserProfile>;
     logout: (deviceToken?: string) => Promise<any>;
     loginByMagicLinkLogin: (token: string, deviceId?: string) => Promise<UserProfile>;
-    loginByIntune: (accessToken: string, deviceId?: string) => Promise<UserProfile>;
     getProfiles: (page?: number, perPage?: number, options?: Record<string, any>) => Promise<UserProfile[]>;
     getProfilesByIds: (userIds: string[], options?: Record<string, any>, groupLabel?: RequestGroupLabel) => Promise<UserProfile[]>;
     getProfilesByUsernames: (usernames: string[], groupLabel?: RequestGroupLabel) => Promise<UserProfile[]>;
@@ -178,25 +177,6 @@ const ClientUsers = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
 
         return response;
 
-    };
-
-    loginByIntune = async (accessToken: string, deviceId = '') => {
-        const body = {
-            device_id: deviceId,
-            access_token: accessToken,
-        };
-
-        const resp = await this.doFetch(
-            '/oauth/intune',
-            {
-                method: 'post',
-                body,
-                headers: {'Cache-Control': 'no-store'},
-            },
-            false,
-        );
-
-        return resp?.data;
     };
 
     loginByMagicLinkLogin = async (token: string, deviceId = '') => {
