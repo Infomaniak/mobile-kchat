@@ -10,6 +10,7 @@ import {setServerCredentials} from '@init/credentials';
 import NetworkPerformanceManager from '@managers/network_performance_manager';
 import PerformanceMetricsManager from '@managers/performance_metrics_manager';
 import {NetworkRequestMetrics} from '@managers/performance_metrics_manager/constant';
+import PerformanceMonitor from '@managers/performance_monitor';
 import {isErrorWithStatusCode} from '@utils/errors';
 import {getFormattedFileSize} from '@utils/file';
 import {logDebug, logInfo} from '@utils/log';
@@ -385,12 +386,15 @@ export default class ClientTracking {
         }
 
         const performanceRequestId = NetworkPerformanceManager.startRequestTracking(this.apiClient.baseUrl, url);
+        const perfMonitorId = `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+        PerformanceMonitor.startNetworkCall(perfMonitorId);
 
-        let response: ClientResponse;
+        let response!: ClientResponse;
         try {
             response = await request!(url, this.buildRequestOptions(options));
         } catch (error) {
             NetworkPerformanceManager.cancelRequestTracking(this.apiClient.baseUrl, performanceRequestId);
+            PerformanceMonitor.endNetworkCall(perfMonitorId, url);
             const response_error = error as ClientError;
             const status_code = isErrorWithStatusCode(error) ? error.status_code : undefined;
             throw new ClientError(this.apiClient.baseUrl, {
@@ -414,6 +418,7 @@ export default class ClientTracking {
             this.trackRequest(groupLabel, url, response.metrics);
         }
         NetworkPerformanceManager.completeRequestTracking(this.apiClient.baseUrl, performanceRequestId, response.metrics);
+        PerformanceMonitor.endNetworkCall(perfMonitorId, url);
         const serverVersion = semverFromServerVersion(
             headers[ClientConstants.HEADER_X_VERSION_ID] || headers[ClientConstants.HEADER_X_VERSION_ID.toLowerCase()],
         );

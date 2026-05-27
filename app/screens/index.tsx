@@ -321,6 +321,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.INFOMANIAK_REMINDER:
             screen = withServerDatabase(require('@screens/ik_reminder').default);
             break;
+        case Screens.DEBUG_PERFORMANCE:
+            screen = withServerDatabase(require('@screens/debug_performance').default);
+            break;
         case Screens.SCHEDULED_POST_OPTIONS:
             screen = withServerDatabase(require('@screens/scheduled_post_options').default);
             break;

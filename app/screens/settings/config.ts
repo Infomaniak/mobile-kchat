@@ -102,6 +102,10 @@ const messages = defineMessages({
         defaultMessage: 'Timezone',
         id: 'mobile.display_settings.timezone',
     },
+    performance_debug: {
+        defaultMessage: 'Performance Monitor',
+        id: 'general_settings.performance_debug',
+    },
 });
 
 export const SettingOptionConfig: Record<string, SettingConfigDetails> = {
@@ -206,6 +210,12 @@ export const DisplayOptionConfig: Record<string, SettingConfigDetails> = {
         defaultMessage: messages.feedback.defaultMessage,
         i18nId: messages.feedback.id,
         testID: messages.feedback.id,
+    },
+    performance_debug: {
+        defaultMessage: messages.performance_debug.defaultMessage,
+        i18nId: messages.performance_debug.id,
+        icon: 'chart-line',
+        testID: messages.performance_debug.id,
     },
 };
 

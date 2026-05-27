@@ -354,6 +354,7 @@
   "general_settings.display": "Pantalla",
   "general_settings.help": "Ayuda",
   "general_settings.notifications": "Notificaciones",
+  "general_settings.performance_debug": "Performance Monitor",
   "general_settings.report_problem": "Notificar un problema",
   "get_post_link_modal.title": "Copiar Enlace",
   "global_threads.allThreads": "Todos tus hilos",
