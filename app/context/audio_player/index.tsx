@@ -2,28 +2,30 @@
 // See LICENSE.txt for license information.
 import React, {createContext, useContext, type PropsWithChildren} from 'react';
 
-import useAudioPlayer from '@hooks/audio_player';
+import useAudioPlayer, {type PlaybackStatus} from '@hooks/audio_player';
 
-export const AudioPlayerContext = createContext<{
-    loadAudio: Function;
-    pauseAudio: Function;
-    playAudio: Function;
-    seekTo: Function;
-    storeLocalAudioURI: Function | null;
-    playing: string | null;
-}>({
-    loadAudio: () => null,
-    pauseAudio: () => null,
-    playAudio: () => null,
-    seekTo: () => null,
-    storeLocalAudioURI: null,
+type AudioPlayerContextValue = ReturnType<typeof useAudioPlayer>;
+
+const AudioPlayerContext = createContext<AudioPlayerContextValue>({
     playing: null,
+    playbackStatus: 'stopped' as PlaybackStatus,
+    currentPosition: 0,
+    duration: 0,
+    speed: 1,
+    isLoading: false,
+    loadAudio: async () => undefined,
+    pauseAudio: async () => undefined,
+    playAudio: async () => undefined,
+    stopAudio: async () => undefined,
+    seekTo: async () => undefined,
+    cycleSpeed: async () => undefined,
+    storeLocalAudioURI: () => undefined,
 });
 
 export const AudioPlayerProvider = ({children}: PropsWithChildren) => {
-    const {loadAudio, pauseAudio, playAudio, seekTo, storeLocalAudioURI, playing} = useAudioPlayer();
+    const value = useAudioPlayer();
     return (
-        <AudioPlayerContext.Provider value={{loadAudio, pauseAudio, playAudio, seekTo, storeLocalAudioURI, playing}}>
+        <AudioPlayerContext.Provider value={value}>
             {children}
         </AudioPlayerContext.Provider>
     );

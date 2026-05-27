@@ -4,14 +4,16 @@
 import {useKeepAwake} from '@sayem314/react-native-keep-awake';
 import React, {useCallback, useEffect, useState} from 'react';
 import {TouchableOpacity, View} from 'react-native';
-import AudioRecorderPlayer, {AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption, AudioEncoderAndroidType, AudioSourceAndroidType, OutputFormatAndroidType, type AudioSet} from 'react-native-audio-recorder-player';
+import {createSound, AVEncoderAudioQualityIOSType, AudioEncoderAndroidType, AudioSourceAndroidType, OutputFormatAndroidType, type AudioSet} from 'react-native-nitro-sound';
 
 import CompassIcon from '@components/compass_icon';
+import Loading from '@components/loading';
 import {MIC_SIZE} from '@constants/view';
 import {useAudioPlayerContext} from '@context/audio_player';
 import {useTheme} from '@context/theme';
 import {mmssss} from '@utils/datetime';
 import {deleteDeviceFile, extractFileInfo} from '@utils/file';
+import {logError} from '@utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import AnimatedMicrophone from './animated_microphone';
@@ -72,12 +74,14 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
     const {storeLocalAudioURI} = useAudioPlayerContext();
     const [url, setUrl] = useState<string>();
     const [timing, setTiming] = useState('00:00');
-    const [recorder, setRecorder] = useState<AudioRecorderPlayer>();
+    const [isLoading, setIsLoading] = useState(false);
+    const [recorder, setRecorder] = useState<ReturnType<typeof createSound>>();
     const [recordData, setRecordData] = useState<Array<{ metering: number; isNew: boolean }>>([]);
 
     useEffect(() => {
+        setIsLoading(true);
         const record = async () => {
-            const audioRecorderPlayer = new AudioRecorderPlayer();
+            const audioRecorderPlayer = createSound();
 
             const audioSet: AudioSet = {
 
@@ -87,49 +91,66 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
                 AudioSourceAndroid: AudioSourceAndroidType.MIC,
 
                 // iOS
-                AVModeIOS: AVModeIOSOption.measurement,
+                AVModeIOS: 'measurement',
                 AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
                 AVNumberOfChannelsKeyIOS: 2,
-                AVFormatIDKeyIOS: AVEncodingOption.aac,
+                AVFormatIDKeyIOS: 'aac',
             };
 
-            await audioRecorderPlayer.setSubscriptionDuration(0.1);
-            const audioPath = await audioRecorderPlayer.startRecorder(undefined, audioSet, true);
+            try {
+                await audioRecorderPlayer.setSubscriptionDuration(0.1);
+                const audioPath = await audioRecorderPlayer.startRecorder(undefined, audioSet, true);
 
-            audioRecorderPlayer.addRecordBackListener((e) => {
-                setTiming(mmssss(
-                    Math.floor(e.currentPosition),
-                ));
-                // eslint-disable-next-line max-nested-callbacks
-                setRecordData((data) => [...(data.map((i) => ({...i, isNew: false}))), {metering: e.currentMetering ?? -160, isNew: true}].slice(-50));
-            });
+                audioRecorderPlayer.addRecordBackListener((e) => {
+                    setTiming(mmssss(
+                        Math.floor(e.currentPosition),
+                    ));
+                    // eslint-disable-next-line max-nested-callbacks
+                    setRecordData((data) => [...(data.map((i) => ({...i, isNew: false}))), {metering: e.currentMetering ?? -160, isNew: true}].slice(-50));
+                });
 
-            setUrl(audioPath);
-            setRecording(true);
-            setRecorder(audioRecorderPlayer);
+                setUrl(audioPath);
+                setRecording(true);
+                setRecorder(audioRecorderPlayer);
+            } catch (error) {
+                logError('[VoiceInput] Failed to start recording', error);
+            } finally {
+                setIsLoading(false);
+            }
         };
 
         record();
+
+        return () => {
+            setIsLoading(false);
+        };
     }, [setRecording]);
 
     const disableRecord = useCallback(async (shouldDelete = false) => {
+        setIsLoading(true);
         setRecording(false);
         setRecorder(undefined);
-        await recorder?.stopRecorder();
-        recorder?.removeRecordBackListener();
-
-        if (shouldDelete && url) {
-            deleteDeviceFile(url);
+        try {
+            await recorder?.stopRecorder();
+        } catch (error) {
+            logError('[VoiceInput] Failed to stop recording', error);
+        } finally {
+            recorder?.removeRecordBackListener();
+            recorder?.dispose();
+            if (shouldDelete && url) {
+                deleteDeviceFile(url);
+            }
+            setIsLoading(false);
         }
     }, [recorder, setRecording, url]);
 
     const cancelRecording = useCallback(async () => {
-        disableRecord(true);
+        await disableRecord(true);
         onClose();
     }, [disableRecord, onClose]);
 
     const endRecording = useCallback(async () => {
-        disableRecord();
+        await disableRecord();
         onClose();
         if (recorder && url) {
             storeLocalAudioURI?.(url);
@@ -149,26 +170,37 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
                 amplitudes={recordData}
             />
             <TimeElapsed time={timing}/>
-            <TouchableOpacity
-                style={styles.close}
-                onPress={cancelRecording}
-            >
-                <CompassIcon
+            {isLoading ? (
+                <Loading
                     color={theme.buttonBg}
-                    name='close'
-                    size={24}
+                    size='small'
                 />
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={styles.check}
-                onPress={endRecording}
-            >
-                <CompassIcon
-                    color={theme.buttonColor}
-                    name='check'
-                    size={24}
-                />
-            </TouchableOpacity>
+            ) : (
+                <>
+                    <TouchableOpacity
+                        style={styles.close}
+                        onPress={cancelRecording}
+                        disabled={isLoading}
+                    >
+                        <CompassIcon
+                            color={theme.buttonBg}
+                            name='close'
+                            size={24}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.check}
+                        onPress={endRecording}
+                        disabled={isLoading}
+                    >
+                        <CompassIcon
+                            color={theme.buttonColor}
+                            name='check'
+                            size={24}
+                        />
+                    </TouchableOpacity>
+                </>
+            )}
         </View>
     );
 };
