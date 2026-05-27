@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 
@@ -31,8 +30,7 @@ const Actions = ({
     enablePublicLinks, fileId,
     onCopyPublicLink, onDownload, onShare,
 }: Props) => {
-    const managedConfig = useManagedConfig<ManagedConfig>();
-    const canCopyPublicLink = !fileId.startsWith('uid') && enablePublicLinks && managedConfig.copyAndPasteProtection !== 'true';
+    const canCopyPublicLink = !fileId.startsWith('uid') && enablePublicLinks;
 
     return (
         <View style={styles.container}>

@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import React, {useMemo} from 'react';
 import {View} from 'react-native';
 
@@ -96,18 +95,14 @@ const ThreadOptions = ({
         />,
     ];
 
-    const managedConfig = useManagedConfig<ManagedConfig>();
-    const canCopyLink = managedConfig?.copyAndPasteProtection !== 'true';
-    if (canCopyLink) {
-        options.push(
-            <CopyPermalinkOption
-                bottomSheetId={Screens.THREAD_OPTIONS}
-                key='copy-link'
-                post={post}
-                sourceScreen={Screens.THREAD_OPTIONS}
-            />,
-        );
-    }
+    options.push(
+        <CopyPermalinkOption
+            bottomSheetId={Screens.THREAD_OPTIONS}
+            key='copy-link'
+            post={post}
+            sourceScreen={Screens.THREAD_OPTIONS}
+        />,
+    );
 
     const snapPoint = useMemo(() => TITLE_HEIGHT + bottomSheetSnapPoint(options.length, ITEM_HEIGHT), [options.length]);
 

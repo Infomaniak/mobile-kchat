@@ -5,7 +5,6 @@ import DatabaseManager from '@database/manager';
 import {getAllServerCredentials} from '@init/credentials';
 import ImageCacheMigration from '@init/image_cache_migration';
 import {initialLaunch} from '@init/launch';
-import ManagedApp from '@init/managed_app';
 import PushNotifications from '@init/push_notifications';
 import GlobalEventHandler from '@managers/global_event_handler';
 import {matomo} from '@managers/matomo';
@@ -50,7 +49,6 @@ export async function initialize() {
         await ImageCacheMigration.init();
 
         GlobalEventHandler.init();
-        ManagedApp.init();
         SessionManager.init();
     }
 }
