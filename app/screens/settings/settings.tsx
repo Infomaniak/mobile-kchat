@@ -11,6 +11,7 @@ import CompassIcon from '@components/compass_icon';
 import SettingContainer from '@components/settings/container';
 import SettingItem from '@components/settings/item';
 import {Screens} from '@constants';
+import {ENABLE_PERF_MONITOR} from '@constants/dev_config';
 import {SNACK_BAR_TYPE} from '@constants/snack_bar';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
@@ -127,6 +128,11 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
         gotoSettingsScreen(screen, title);
     });
 
+    const goToPerformanceDebug = preventDoubleTap(() => {
+        const screen = Screens.DEBUG_PERFORMANCE;
+        goToScreen(screen, 'Performance Monitor');
+    });
+
     const openHelp = usePreventDoubleTap(useCallback(() => {
         if (helpLink) {
             const onError = () => {
@@ -185,6 +191,13 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
                     info={intl.formatMessage(timezone.useAutomaticTimezone ? TIMEZONE_FORMAT[0] : TIMEZONE_FORMAT[1])}
                     testID='display_settings.timezone.option'
                 />
+                {ENABLE_PERF_MONITOR && (
+                    <SettingItem
+                        optionName='performance_debug'
+                        onPress={goToPerformanceDebug}
+                        testID='settings.performance_debug.option'
+                    />
+                )}
                 {Platform.OS === 'android' && <View style={styles.helpGroup}/>}
                 {showHelp &&
                 <SettingItem
