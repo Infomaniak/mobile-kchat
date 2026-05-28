@@ -661,7 +661,6 @@ platform :ios do
         plist["AppGroupIdentifier"] = app_group_id
       end
     )
-    end
 
     # Sync the provisioning profiles using match
     if ENV['SYNC_PROVISIONING_PROFILES'] == 'true'
