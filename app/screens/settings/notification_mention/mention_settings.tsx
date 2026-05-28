@@ -1,14 +1,10 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {defineMessage, useIntl} from 'react-intl';
 import {Text, View} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-
-// import SettingOption from '@components/settings/option';
-// import SettingSeparator from '@components/settings/separator';
-// import ReplySettings from '@screens/settings/notification_mention/reply_settings';
 
 import {updateMe} from '@actions/remote/user';
 import FloatingTextChipsInput from '@components/floating_input/floating_text_chips_input';
@@ -43,8 +39,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         },
         containerStyle: {
             marginTop: 5,
-            alignSelf: 'center',
-            paddingHorizontal: 18.5,
+            width: '100%',
             paddingTop: 10,
         },
         keywordLabelStyle: {
@@ -86,23 +81,12 @@ export function getMentionProps(currentUser?: UserModel) {
 }
 
 export type CanSaveSettings = {
-
-    // channelMentionOn: boolean;
-    // replyNotificationType: string;
-    // firstNameMentionOn: boolean;
     mentionKeywords: string[];
-
-    // usernameMentionOn: boolean;
     mentionProps: ReturnType<typeof getMentionProps>;
 }
 
 export function canSaveSettings({mentionKeywords, mentionProps}: CanSaveSettings) {
-    // const channelChanged = channelMentionOn !== mentionProps.channel;
-    // const replyChanged = replyNotificationType !== mentionProps.comments;
-    // const firstNameChanged = firstNameMentionOn !== mentionProps.first_name;
-    // const userNameChanged = usernameMentionOn !== mentionProps.usernameMention;
     const mentionKeywordsChanged = !areBothStringArraysEqual(mentionKeywords, mentionProps.mentionKeywords);
-
     return mentionKeywordsChanged;
 }
 
@@ -125,12 +109,6 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
 
     const [mentionKeywords, setMentionKeywords] = useState(mentionProps.mentionKeywords);
     const [mentionKeywordsInput, setMentionKeywordsInput] = useState('');
-
-    // const [channelMentionOn, setChannelMentionOn] = useState(mentionProps.channel);
-    // const [firstNameMentionOn, setFirstNameMentionOn] = useState(mentionProps.first_name);
-    // const [usernameMentionOn, setUsernameMentionOn] = useState(mentionProps.usernameMention);
-
-    // const [replyNotificationType, setReplyNotificationType] = useState(mentionProps.comments);
     const [isInputVisible, setIsInputVisible] = useState(false);
     const [isSwitchOn, setIsSwitchOn] = useState(false);
 
@@ -138,53 +116,54 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
     const styles = getStyleSheet(theme);
     const intl = useIntl();
 
+    const inputRef = useRef(mentionKeywordsInput);
+    const keywordsRef = useRef(mentionKeywords);
+
+    useEffect(() => {
+        inputRef.current = mentionKeywordsInput;
+    }, [mentionKeywordsInput]);
+
+    useEffect(() => {
+        keywordsRef.current = mentionKeywords;
+    }, [mentionKeywords]);
+
+    const doSave = useCallback(() => {
+        if (!currentUser) {
+            return;
+        }
+
+        const currentKeywords = keywordsRef.current;
+        const currentInput = inputRef.current;
+
+        const finalKeywords = currentInput.length > 0? getUniqueKeywordsFromInput(currentInput, currentKeywords): currentKeywords;
+
+        const canSave = canSaveSettings({
+            mentionKeywords: finalKeywords,
+            mentionProps,
+        });
+
+        if (canSave) {
+            const mention_keys = [...finalKeywords];
+            const notify_props: UserNotifyProps = {
+                ...notifyProps,
+                mention_keys: mention_keys.join(','),
+            };
+            updateMe(serverUrl, {notify_props});
+        }
+    }, [currentUser, mentionProps, notifyProps, serverUrl]);
+
+    useEffect(() => {
+        return () => {
+            doSave();
+        };
+    }, [doSave]);
+
     useEffect(() => {
         if (mentionKeywords.length > 0) {
             setIsInputVisible(true);
             setIsSwitchOn(true);
         }
     }, [mentionKeywords]);
-
-    // const close = () => popTopScreen(componentId);
-
-    const saveMention = useCallback(() => {
-        if (!currentUser) {
-            return;
-        }
-
-        const canSave = canSaveSettings({
-
-            // channelMentionOn,
-            // replyNotificationType,
-            // firstNameMentionOn,
-            // usernameMentionOn,
-            mentionKeywords,
-            mentionProps,
-        });
-
-        if (canSave) {
-            let mention_keys = [];
-
-            // if (usernameMentionOn) {
-            //     mention_keys.push(`${currentUser.username}`);
-            // }
-
-            mention_keys = [...mentionKeywords];
-
-            const notify_props: UserNotifyProps = {
-                ...notifyProps,
-
-                // first_name: firstNameMentionOn ? 'true' : 'false',
-                // channel: channelMentionOn ? 'true' : 'false',
-                mention_keys: mention_keys.join(','),
-
-                // comments: replyNotificationType,
-            };
-            updateMe(serverUrl, {notify_props});
-        }
-
-        popTopScreen(componentId);
-    }, [currentUser, mentionKeywords, mentionProps, componentId, notifyProps, serverUrl]);
 
     const toggleInputVisibility = useCallback(() => {
         setIsInputVisible((prev) => !prev);
@@ -197,12 +176,7 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
                 setMentionKeywords([]);
                 const notify_props: UserNotifyProps = {
                     ...notifyProps,
-
-                    // first_name: firstNameMentionOn ? 'true' : 'false',
-                    // channel: channelMentionOn ? 'true' : 'false',
                     mention_keys: '',
-
-                    // comments: replyNotificationType,
                 };
                 updateMe(serverUrl, {notify_props});
             }
@@ -210,18 +184,6 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
         });
         toggleInputVisibility();
     }, [toggleInputVisibility, notifyProps, serverUrl]);
-
-    // const handleFirstNameToggle = useCallback(() => {
-    //     setFirstNameMentionOn((prev) => !prev);
-    // }, []);
-
-    // const handleUsernameToggle = useCallback(() => {
-    //     setUsernameMentionOn((prev) => !prev);
-    // }, []);
-
-    // const handleChannelToggle = useCallback(() => {
-    //     setChannelMentionOn((prev) => !prev);
-    // }, []);
 
     function appendKeywordsAndClearInput(key: string, list: string[]) {
         const keyAppendedToList = getUniqueKeywordsFromInput(key, list);
@@ -255,9 +217,15 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
         setMentionKeywords(mentionKeywords.filter((item) => item !== keyword));
     }, [mentionKeywords]);
 
-    useBackNavigation(saveMention);
+    useBackNavigation(() => {
+        doSave();
+        popTopScreen(componentId);
+    });
 
-    useAndroidHardwareBackHandler(componentId, saveMention);
+    useAndroidHardwareBackHandler(componentId, () => {
+        doSave();
+        popTopScreen(componentId);
+    });
 
     return (
         <KeyboardAwareScrollView
@@ -276,39 +244,6 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
                 isSwitchOn={isSwitchOn}
                 toggleSwitch={toggleSwitch}
             >
-                {/* {Boolean(currentUser?.firstName) && (
-                    <>
-                        <SettingOption
-                            action={handleFirstNameToggle}
-                            description={intl.formatMessage({id: 'notification_settings.mentions.sensitiveName', defaultMessage: 'Your case sensitive first name'})}
-                            label={currentUser!.firstName}
-                            selected={firstNameMentionOn}
-                            testID='mention_notification_settings.case_sensitive_first_name.option'
-                            type='toggle'
-                        />
-                        <SettingSeparator/>
-                    </>
-                )}
-                {Boolean(currentUser?.username) && (
-                    <SettingOption
-                        action={handleUsernameToggle}
-                        description={intl.formatMessage({id: 'notification_settings.mentions.sensitiveUsername', defaultMessage: 'Your non-case sensitive username'})}
-                        label={currentUser!.username}
-                        selected={usernameMentionOn}
-                        testID='mention_notification_settings.non_case_sensitive_username.option'
-                        type='toggle'
-                    />
-                )}
-                <SettingSeparator/>
-                <SettingOption
-                    action={handleChannelToggle}
-                    description={intl.formatMessage({id: 'notification_settings.mentions.channelWide', defaultMessage: 'Channel-wide mentions'})}
-                    label='@channel, @all, @here'
-                    selected={channelMentionOn}
-                    testID='mention_notification_settings.channel_wide_mentions.option'
-                    type='radio'
-                />
-                <SettingSeparator/> */}
                 {isInputVisible && (
                     <>
                         <View style={styles.containerStyle}>

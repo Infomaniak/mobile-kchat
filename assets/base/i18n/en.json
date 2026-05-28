@@ -822,6 +822,7 @@
   "notification_settings.email.never": "Never",
   "notification_settings.email.send": "Send email notifications",
   "notification_settings.mention.reply": "Send reply notifications for",
+  "notification_settings.keywords": "Keywords",
   "notification_settings.mentions": "Mentions",
   "notification_settings.mentions_replies": "Mentions and Replies",
   "notification_settings.mentions.keywords": "Enter other keywords",

@@ -9,7 +9,6 @@ import {
     type LayoutChangeEvent,
     type StyleProp,
     Text,
-    TouchableWithoutFeedback,
     View,
     type ViewStyle,
     Pressable,
@@ -192,45 +191,44 @@ const FloatingInputContainer = ({
     }, [styles, theme, focusedLabel, hasValue, shouldShowError, positions]);
 
     return (
-        <TouchableWithoutFeedback
+        <View
+            style={styles.container}
             onLayout={onLayout}
         >
-            <View style={styles.container}>
-                <Pressable onPress={handlePressOnContainer}>
-                    <Animated.Text
-                        style={[styles.label, textAnimatedTextStyle]}
-                        suppressHighlighting={true}
-                        numberOfLines={1}
+            <Pressable onPress={handlePressOnContainer}>
+                <Animated.Text
+                    style={[styles.label, textAnimatedTextStyle]}
+                    suppressHighlighting={true}
+                    numberOfLines={1}
+                >
+                    {label}
+                </Animated.Text>
+                <View style={combinedTextInputContainerStyle}>
+                    {children}
+                </View>
+            </Pressable>
+            {Boolean(error) && (
+                <View style={styles.errorContainer}>
+                    {!hideErrorIcon && errorIcon &&
+                    <CompassIcon
+                        name={errorIcon}
+                        style={styles.errorIcon}
+                    />
+                    }
+                    <Text
+                        style={styles.errorText}
+                        testID={`${testID}.error`}
                     >
-                        {label}
-                    </Animated.Text>
-                    <View style={combinedTextInputContainerStyle}>
-                        {children}
-                    </View>
-                </Pressable>
-                {Boolean(error) && (
-                    <View style={styles.errorContainer}>
-                        {!hideErrorIcon && errorIcon &&
-                        <CompassIcon
-                            name={errorIcon}
-                            style={styles.errorIcon}
-                        />
-                        }
-                        <Text
-                            style={styles.errorText}
-                            testID={`${testID}.error`}
-                        >
-                            {error}
-                        </Text>
-                    </View>
-                )}
-                {Boolean(helpText) && (
-                    <Text style={styles.helpText}>
-                        {helpText}
+                        {error}
                     </Text>
-                )}
-            </View>
-        </TouchableWithoutFeedback>
+                </View>
+            )}
+            {Boolean(helpText) && (
+                <Text style={styles.helpText}>
+                    {helpText}
+                </Text>
+            )}
+        </View>
     );
 };
 
