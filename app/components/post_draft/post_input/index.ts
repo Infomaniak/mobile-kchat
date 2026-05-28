@@ -30,8 +30,8 @@ const enhanced = withObservables(['channelId'], ({database, channelId}: WithData
     );
 
     const membersInChannel = channel.pipe(
-        switchMap((c) => (c ? observeChannelInfo(database, c.id) : of$({memberCount: 0}))),
-        switchMap((i: ChannelInfoModel) => of$(i.memberCount)),
+        switchMap((c) => (c ? observeChannelInfo(database, c.id) : of$(undefined))),
+        switchMap((i: ChannelInfoModel | undefined) => of$(i?.memberCount ?? 0)),
         distinctUntilChanged(),
     );
 
