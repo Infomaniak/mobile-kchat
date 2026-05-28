@@ -1,29 +1,23 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import NetInfo from '@react-native-community/netinfo';
 import {defineMessages, type IntlShape} from 'react-intl';
 import {Alert, DeviceEventEmitter, type AlertButton} from 'react-native';
 
-import {findSession} from '@actions/local/session';
 import {doPing} from '@actions/remote/general';
 import {Database, Events} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials} from '@init/credentials';
-import PushNotifications from '@init/push_notifications';
 import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {getDeviceToken} from '@queries/app/global';
-import {getServerDisplayName} from '@queries/app/servers';
-import {getCurrentUserId, getExpiredSession} from '@queries/servers/system';
-import {getCurrentUser} from '@queries/servers/user';
+import {getCurrentUserId} from '@queries/servers/system';
 import {resetToHome} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import {getFullErrorMessage, isErrorWithStatusCode, isErrorWithUrl} from '@utils/errors';
 import {getIntlShape} from '@utils/general';
 import {logWarning, logError, logDebug} from '@utils/log';
-import {scheduleExpiredNotification} from '@utils/notification';
 import {canReceiveNotifications} from '@utils/push_proxy';
 import {type SAMLChallenge} from '@utils/saml_challenge';
 import {getCSRFFromCookie} from '@utils/security';
@@ -264,66 +258,6 @@ export const logout = async (
     }
 
     return {data: true};
-};
-
-export const cancelSessionNotification = async (serverUrl: string) => {
-    try {
-        const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const expiredSession = await getExpiredSession(database);
-        const rechable = (await NetInfo.fetch()).isInternetReachable;
-
-        if (expiredSession?.notificationId && rechable) {
-            PushNotifications.cancelScheduleNotification(parseInt(expiredSession.notificationId, 10));
-            operator.handleSystem({
-                systems: [{
-                    id: SYSTEM_IDENTIFIERS.SESSION_EXPIRATION,
-                    value: '',
-                }],
-                prepareRecordsOnly: false,
-            });
-        }
-
-        return {};
-    } catch (e) {
-        logError('cancelSessionNotification', e);
-        return {error: e};
-    }
-};
-
-export const scheduleSessionNotification = async (serverUrl: string) => {
-    try {
-        const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const sessions = await fetchSessions(serverUrl, 'me');
-        const user = await getCurrentUser(database);
-        const serverName = await getServerDisplayName(serverUrl);
-
-        await cancelSessionNotification(serverUrl);
-
-        if (sessions) {
-            const session = await findSession(serverUrl, sessions);
-
-            if (session) {
-                const sessionId = session.id;
-                const notificationId = scheduleExpiredNotification(serverUrl, session, serverName, user?.locale);
-                operator.handleSystem({
-                    systems: [{
-                        id: SYSTEM_IDENTIFIERS.SESSION_EXPIRATION,
-                        value: {
-                            id: sessionId,
-                            notificationId,
-                            expiresAt: session.expires_at,
-                        },
-                    }],
-                    prepareRecordsOnly: false,
-                });
-            }
-        }
-        return {};
-    } catch (e) {
-        logError('scheduleExpiredNotification', e);
-        await forceLogoutIfNecessary(serverUrl, e);
-        return {error: e};
-    }
 };
 
 export const sendPasswordResetEmail = async (serverUrl: string, email: string) => {

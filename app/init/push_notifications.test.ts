@@ -7,7 +7,7 @@ import {storeDeviceToken} from '@actions/app/global';
 import {markChannelAsViewed} from '@actions/local/channel';
 import {updateThread} from '@actions/local/thread';
 import {openNotification} from '@actions/remote/notifications';
-import {Device, Events, PushNotification} from '@constants';
+import {Device, PushNotification} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getCurrentChannelId} from '@queries/servers/system';
 import {getIsCRTEnabled, getThreadById} from '@queries/servers/thread';
@@ -404,43 +404,10 @@ describe('PushNotifications', () => {
         });
     });
 
-    describe('handleSessionNotification', () => {
-        beforeEach(() => {
-            jest.spyOn(DeviceEventEmitter, 'emit');
-        });
-
-        it('should emit session expired event on user interaction', async () => {
-            const notification = {
-                payload: {
-                    server_url: 'http://test.com',
-                },
-                userInteraction: true,
-            };
-
-            await pushNotifications.handleSessionNotification(notification as any);
-
-            expect(DeviceEventEmitter.emit).toHaveBeenCalledWith(Events.SESSION_EXPIRED, 'http://test.com');
-        });
-
-        it('should emit server logout event without user interaction', async () => {
-            const notification = {
-                payload: {
-                    server_url: 'http://test.com',
-                },
-                userInteraction: false,
-            };
-
-            await pushNotifications.handleSessionNotification(notification as any);
-
-            expect(DeviceEventEmitter.emit).toHaveBeenCalledWith(Events.SERVER_LOGOUT, {serverUrl: 'http://test.com'});
-        });
-    });
-
     describe('processNotification', () => {
         beforeEach(() => {
             jest.spyOn(pushNotifications, 'handleClearNotification');
             jest.spyOn(pushNotifications, 'handleMessageNotification');
-            jest.spyOn(pushNotifications, 'handleSessionNotification');
         });
 
         it('should handle clear notification', async () => {
@@ -467,18 +434,6 @@ describe('PushNotifications', () => {
             expect(pushNotifications.handleMessageNotification).toHaveBeenCalledWith(notification);
         });
 
-        it('should handle session notification', async () => {
-            const notification = {
-                payload: {
-                    type: PushNotification.NOTIFICATION_TYPE.SESSION,
-                },
-            };
-
-            await pushNotifications.processNotification(notification as any);
-
-            expect(pushNotifications.handleSessionNotification).toHaveBeenCalledWith(notification);
-        });
-
         it('should not process notification without payload', async () => {
             const notification = {} as any;
 
@@ -486,7 +441,6 @@ describe('PushNotifications', () => {
 
             expect(pushNotifications.handleClearNotification).not.toHaveBeenCalled();
             expect(pushNotifications.handleMessageNotification).not.toHaveBeenCalled();
-            expect(pushNotifications.handleSessionNotification).not.toHaveBeenCalled();
         });
     });
 
