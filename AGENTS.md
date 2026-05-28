@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 ## Project Overview
 
@@ -318,7 +318,8 @@ Located at `libraries/@mattermost/`:
 - Don't set style properties to their default values (e.g., `marginBottom: 0`) — it's dead code
 
 ### Localization (i18n)
-- **CRITICAL**: Only update `en.json` - never modify other language files or Weblate gets corrupted
+- **Sync All Languages:** Whenever you add or update a translation key in **any** language file, you must immediately translate and add that key to **all other language files**.
+- **Location:** All translation files are located in `assets/base/i18n`.
 - **Adding new strings**: Define the message ID and defaultMessage in code using `defineMessages()`, then run `npm run i18n-extract` to automatically add them to `en.json`
 - Default messages in code must match JSON translations exactly, including newlines
 - Translation IDs should be descriptive enough for translators to understand context
