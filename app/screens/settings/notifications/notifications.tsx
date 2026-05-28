@@ -1,16 +1,21 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {defineMessages, useIntl} from 'react-intl';
+import {Notifications as RNNotifications} from 'react-native-notifications';
 
 import SettingContainer from '@components/settings/container';
 import SettingItem from '@components/settings/item';
 import {General, Screens} from '@constants';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
+import {useAppState} from '@hooks/device';
 import useNotificationProps from '@hooks/notification_props';
 import {popTopScreen} from '@screens/navigation';
 import {gotoSettingsScreen} from '@screens/settings/config';
+import {logError} from '@utils/log';
+
+import NotificationsDisabledNotice from './notifications_disabled_notice';
 
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -41,6 +46,31 @@ const Notifications = ({
     const intl = useIntl();
 
     const notifyProps = useNotificationProps(currentUser);
+    const [isRegistered, setIsRegistered] = useState(true);
+
+    const appState = useAppState();
+
+    useEffect(() => {
+        let isCurrent = true;
+        if (appState === 'active') {
+            const checkNotificationStatus = async () => {
+                try {
+                    const registered = await RNNotifications.isRegisteredForRemoteNotifications();
+                    if (isCurrent) {
+                        setIsRegistered(registered);
+                    }
+                } catch (error) {
+                    if (isCurrent) {
+                        logError('Error checking notification registration status:', error);
+                    }
+                }
+            };
+            checkNotificationStatus();
+        }
+        return () => {
+            isCurrent = false;
+        };
+    }, [appState]);
 
     const goToNotificationSettingsMentions = useCallback(() => {
         const screen = Screens.SETTINGS_NOTIFICATION_MENTION;
@@ -77,6 +107,10 @@ const Notifications = ({
 
     return (
         <SettingContainer testID='notification_settings'>
+            {!isRegistered &&
+            <NotificationsDisabledNotice
+                testID='notifications-disabled-notice'
+            />}
             <SettingItem
                 optionName='push_notification'
                 onPress={goToNotificationSettingsPush}
