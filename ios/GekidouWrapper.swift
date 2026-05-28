@@ -8,15 +8,11 @@
 
 import Foundation
 import Gekidou
-import react_native_emm
 import TurboLogIOSNative
 
 @objc class GekidouWrapper: NSObject {
   @objc public static let `default` = GekidouWrapper()
 
-  override init() {
-    ScreenCaptureManager.startTrackingScreens()
-  }
 
   @objc func configureTurboLogForGekidou() {
     GekidouLogger.shared.setLogHandler { level, message in

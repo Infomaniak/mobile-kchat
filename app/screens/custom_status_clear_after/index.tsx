@@ -14,7 +14,6 @@ import {
 } from 'react-native-navigation';
 
 import {CustomStatusDurationEnum} from '@constants/custom_status';
-import SecurityManager from '@managers/security_manager';
 import {observeCurrentUser} from '@queries/servers/user';
 import {dismissModal, popTopScreen} from '@screens/navigation';
 import NavigationStore from '@store/navigation_store';
@@ -188,7 +187,7 @@ class ClearAfterModal extends NavigationComponent<Props, State> {
             <SafeAreaView
                 style={style.container}
                 testID='custom_status_clear_after.screen'
-                nativeID={SecurityManager.getShieldScreenId(componentId)}
+                nativeID={`${componentId}.screen`}
             >
                 <KeyboardAwareScrollView bounces={false}>
                     <View style={style.scrollView}>

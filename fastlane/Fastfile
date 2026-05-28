@@ -632,28 +632,12 @@ platform :ios do
 
     ########################
 
-    # Configure Intune
-    intune_enabled = ENV['INTUNE_ENABLED'] == 'true' || ENV['INTUNE_ENABLED'] == '1'
-    if intune_enabled
-      intune_client_id = ENV['INTUNE_CLIENT_ID']
-      intune_redirect_uri = "msauth.#{app_bundle_id}://auth"
-
     update_info_plist(
       xcodeproj: './ios/kChat.xcodeproj',
       plist_path: 'Mattermost/Info.plist',
       block: proc do |plist|
         plist["AppGroupIdentifier"] = app_group_id
-
-        plist["IntuneMAMSettings"] = {
-              "AppGroupIdentifiers" => [ENV['IOS_APP_GROUP'] || 'group.com.mattermost.rnbeta'],
-              "MAMTelemetryDisabled" => true,
-              "MultiIdentity" => true,
-              "ADALLogOverrideDisabled" => true,
-              "HooksAlwaysEnabled" => true,
-              "ADALClientId" => intune_client_id,
-              "ADALRedirectUri" => intune_redirect_uri,
-              "MaxFileProtectionLevel" => "NSFileProtectionCompleteUntilFirstUserAuthentication"
-            }
+  
       end
     )
 

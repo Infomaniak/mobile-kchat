@@ -4,23 +4,18 @@
 import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react-native';
 
 import {storeGlobal, storeOnboardingViewedValue} from '@actions/app/global';
-import {cancelAllSessionNotifications, terminateSession} from '@actions/local/session';
+import {terminateSession} from '@actions/local/session';
 import {syncMultiTeam} from '@actions/remote/entry/ikcommon';
-import {logout, scheduleSessionNotification} from '@actions/remote/session';
 import {Events, Launch} from '@constants';
 import {GLOBAL_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials} from '@init/credentials';
 import {relaunchApp} from '@init/launch';
-import IntuneManager from '@managers/intune_manager';
-import SecurityManager from '@managers/security_manager';
 import {queryGlobalValue} from '@queries/app/global';
-import {getAllServers, getServerDisplayName} from '@queries/app/servers';
-import {getThemeFromState} from '@screens/navigation';
+import {getAllServers} from '@queries/app/servers';
 import EphemeralStore from '@store/ephemeral_store';
 import {deleteFileCacheByDir} from '@utils/file';
 import {isMainActivity} from '@utils/helpers';
-import {addNewServer} from '@utils/server';
 
 import type {LaunchType} from '@typings/launch';
 
@@ -31,21 +26,17 @@ type LogoutCallbackArg = {
 
 export class SessionManagerSingleton {
     private previousAppState: AppStateStatus;
-    private scheduling = false;
     private terminatingSessionUrl = new Set<string>();
 
     constructor() {
         AppState.addEventListener('change', this.onAppStateChange);
 
         DeviceEventEmitter.addListener(Events.SERVER_LOGOUT, this.onLogout);
-        DeviceEventEmitter.addListener(Events.SESSION_EXPIRED, this.onSessionExpired);
 
         this.previousAppState = AppState.currentState;
     }
 
     init() {
-        cancelAllSessionNotifications();
-
         let updateToMigrationDone = false;
         queryGlobalValue(GLOBAL_IDENTIFIERS.CACHE_MIGRATION)?.fetch().then((records) => {
             const cacheMigrationDone = Boolean(records?.[0]?.value);
@@ -65,20 +56,6 @@ export class SessionManagerSingleton {
         });
     }
 
-    private scheduleAllSessionNotifications = async () => {
-        if (!this.scheduling) {
-            this.scheduling = true;
-            const serverCredentials = await getAllServerCredentials();
-            const promises: Array<Promise<{error: unknown} | {error?: undefined}>> = [];
-            for (const {serverUrl} of serverCredentials) {
-                promises.push(scheduleSessionNotification(serverUrl));
-            }
-
-            await Promise.all(promises);
-            this.scheduling = false;
-        }
-    };
-
     private onAppStateChange = async (appState: AppStateStatus) => {
         if (appState === this.previousAppState || !isMainActivity()) {
             return;
@@ -90,7 +67,6 @@ export class SessionManagerSingleton {
                 if (!EphemeralStore.isLoggingIn()) {
                     this.syncMultiTeam();
                 }
-                setTimeout(cancelAllSessionNotifications, 750);
                 break;
             case 'background':
             case 'inactive':
@@ -120,10 +96,7 @@ export class SessionManagerSingleton {
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
             const activeServerDisplayName = await DatabaseManager.getActiveServerDisplayName();
 
-            // We do not unenroll with Wipe as we already removed all the data during terminateSession
-            await IntuneManager.unenrollServer(serverUrl, false);
             await terminateSession(serverUrl, removeServer);
-            SecurityManager.removeServer(serverUrl);
 
             if (activeServerUrl === serverUrl) {
                 let displayName = '';
@@ -150,31 +123,6 @@ export class SessionManagerSingleton {
         }
     };
 
-    private onSessionExpired = async (serverUrl: string) => {
-        this.terminatingSessionUrl.add(serverUrl);
-
-        try {
-        // logout is not doing anything in this scenario, but we keep it
-        // to keep the same flow as other logout scenarios.
-            await logout(serverUrl, undefined, {skipServerLogout: true, skipEvents: true});
-
-            await terminateSession(serverUrl, false);
-            SecurityManager.removeServer(serverUrl);
-            await IntuneManager.unenrollServer(serverUrl, true);
-
-            const activeServerUrl = await DatabaseManager.getActiveServerUrl();
-            const serverDisplayName = await getServerDisplayName(serverUrl);
-
-            await relaunchApp({launchType: Launch.Normal, serverUrl, displayName: serverDisplayName});
-            if (activeServerUrl) {
-                addNewServer(getThemeFromState(), serverUrl, serverDisplayName);
-            } else {
-                EphemeralStore.theme = undefined;
-            }
-        } finally {
-            this.terminatingSessionUrl.delete(serverUrl);
-        }
-    };
 }
 
 const SessionManager = new SessionManagerSingleton();

@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 /* eslint-disable max-lines */
 
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import {Parser, Node} from 'commonmark';
 import Renderer from 'commonmark-react-renderer';
 import React, {type ReactElement, useCallback, useMemo, useRef} from 'react';
@@ -185,7 +184,6 @@ const Markdown = ({
     const style = getStyleSheet(theme);
     const blockStyles = useMemo<MarkdownBlockStyles>(() => getMarkdownBlockStyles(theme), [theme]);
     const textStyles = useMemo<MarkdownTextStyles>(() => getMarkdownTextStyles(theme), [theme]);
-    const managedConfig = useManagedConfig<ManagedConfig>();
     const serverUrl = useServerUrl();
 
     const renderText = useCallback(({context, literal}: MarkdownBaseRenderer) => {
@@ -205,7 +203,7 @@ const Markdown = ({
             });
         };
 
-        const selectable = (managedConfig.copyAndPasteProtection !== 'true') && context.includes('table_cell');
+        const selectable = context.includes('table_cell');
         if (context.indexOf('image') !== -1) {
             // If this text is displayed, it will be styled by the image component
             return (
@@ -244,7 +242,7 @@ const Markdown = ({
                 {transformedText}
             </Text>
         );
-    }, [baseTextStyle, disableHeading, managedConfig.copyAndPasteProtection, style.bold, textStyles, theme.mentionHighlightBg]);
+    }, [baseTextStyle, disableHeading, style.bold, textStyles, theme.mentionHighlightBg]);
 
     //  const renderText = ({context, literal}: MarkdownBaseRenderer) => {
     //     const selectable = (managedConfig.copyAndPasteProtection !== 'true') && context.includes('table_cell');

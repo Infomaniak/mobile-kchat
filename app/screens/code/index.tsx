@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import Clipboard from '@react-native-clipboard/clipboard';
 import React, {useCallback, useEffect} from 'react';
 import {StyleSheet, type TextStyle} from 'react-native';
@@ -13,7 +12,6 @@ import {SNACK_BAR_TYPE} from '@constants/snack_bar';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import SecurityManager from '@managers/security_manager';
 import {popTopScreen, setButtons} from '@screens/navigation';
 import {showSnackBar} from '@utils/snack_bar';
 
@@ -36,7 +34,6 @@ const styles = StyleSheet.create({
 
 const Code = ({code, componentId, language, textStyle}: Props) => {
     const theme = useTheme();
-    const managedConfig = useManagedConfig<ManagedConfig>();
     useAndroidHardwareBackHandler(componentId, popTopScreen);
 
     const copyToClipboard = useCallback(() => {
@@ -65,12 +62,12 @@ const Code = ({code, componentId, language, textStyle}: Props) => {
         <SafeAreaView
             edges={edges}
             style={styles.flex}
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
         >
             <SyntaxHiglight
                 code={code}
                 language={language}
-                selectable={managedConfig.copyAndPasteProtection !== 'true'}
+                selectable={false}
                 textStyle={textStyle}
             />
         </SafeAreaView>

@@ -1,8 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import Emm from '@mattermost/react-native-emm';
-import {Alert, AppState, DeviceEventEmitter, Linking, Platform} from 'react-native';
+import {Alert, AppState, Linking, Platform} from 'react-native';
 import {Notifications} from 'react-native-notifications';
 
 import {removePost} from '@actions/local/post';
@@ -10,7 +9,7 @@ import {switchToChannelById} from '@actions/remote/channel';
 import {appEntry, pushNotificationEntry, upgradeEntry} from '@actions/remote/entry';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
 import LocalConfig from '@assets/config.json';
-import {DeepLink, Events, Launch, PushNotification} from '@constants';
+import {DeepLink, Launch, PushNotification} from '@constants';
 import {PostTypes} from '@constants/post';
 import DatabaseManager from '@database/manager';
 import {getActiveServerUrl, getServerCredentials, removeServerCredentials} from '@init/credentials';
@@ -31,7 +30,7 @@ import {removeProtocol} from '@utils/url';
 
 import type {DeepLinkWithData, LaunchProps} from '@typings/launch';
 
-const initialNotificationTypes = [PushNotification.NOTIFICATION_TYPE.MESSAGE, PushNotification.NOTIFICATION_TYPE.SESSION];
+const initialNotificationTypes = [PushNotification.NOTIFICATION_TYPE.MESSAGE];
 
 export const initialLaunch = async () => {
     const deepLinkUrl = await Linking.getInitialURL();
@@ -107,12 +106,6 @@ export const launchApp = async (props: LaunchProps) => {
             break;
         case Launch.Notification: {
             serverUrl = props.serverUrl;
-            const extra = props.extra as NotificationWithData;
-            const sessionExpiredNotification = Boolean(props.serverUrl && extra.payload?.type === PushNotification.NOTIFICATION_TYPE.SESSION);
-            if (sessionExpiredNotification) {
-                DeviceEventEmitter.emit(Events.SESSION_EXPIRED, serverUrl);
-                return '';
-            }
             break;
         }
         default:
@@ -154,7 +147,6 @@ export const launchApp = async (props: LaunchProps) => {
                             onPress: async () => {
                                 await DatabaseManager.destroyServerDatabase(serverUrl!);
                                 await removeServerCredentials(serverUrl!);
-                                Emm.exitApp();
                             },
                         }],
                     );

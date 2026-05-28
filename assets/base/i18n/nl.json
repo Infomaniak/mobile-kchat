@@ -470,6 +470,7 @@
     "general_settings.download_logs": "App-logboeken downloaden",
     "general_settings.help": "Hulp",
     "general_settings.notifications": "Meldingen",
+    "general_settings.performance_debug": "Performance Monitor",
     "general_settings.report_problem": "Meld een probleem",
     "generic.back": "Terug",
     "get_post_link_modal.title": "Link kopiëren",

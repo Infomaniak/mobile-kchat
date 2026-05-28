@@ -16,7 +16,6 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useDidUpdate from '@hooks/did_update';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import SecurityManager from '@managers/security_manager';
 import {filterEmptyOptions} from '@utils/apps';
 import {mapAppFieldTypeToDialogType, getDataSourceForAppFieldType} from '@utils/dialog_utils';
 import {checkDialogElementForError, checkIfErrorsMatchElements} from '@utils/integrations';
@@ -447,7 +446,7 @@ function AppsFormComponent({
         <SafeAreaView
             testID='interactive_dialog.screen'
             style={style.container}
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
         >
             <ScrollView
                 ref={scrollView}

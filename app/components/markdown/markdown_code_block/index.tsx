@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import Clipboard from '@react-native-clipboard/clipboard';
 import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
@@ -68,7 +67,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
 
 const MarkdownCodeBlock = ({language = '', content, textStyle, theme}: MarkdownCodeBlockProps) => {
     const intl = useIntl();
-    const managedConfig = useManagedConfig<ManagedConfig>();
     const style = getStyleSheet(theme);
     const SyntaxHighlighter = useMemo(() => {
         if (!syntaxHighlighter) {
@@ -112,44 +110,43 @@ const MarkdownCodeBlock = ({language = '', content, textStyle, theme}: MarkdownC
     }, [content, intl, language, textStyle]));
 
     const handleLongPress = useCallback(() => {
-        if (managedConfig?.copyAndPasteProtection !== 'true') {
-            const renderContent = () => {
-                return (
-                    <View
-                        testID='at_mention.bottom_sheet'
-                        style={style.bottomSheet}
-                    >
-                        <SlideUpPanelItem
-                            leftIcon='content-copy'
-                            onPress={() => {
-                                dismissBottomSheet();
-                                Clipboard.setString(content);
-                            }}
-                            testID='at_mention.bottom_sheet.copy_code'
-                            text={intl.formatMessage({id: 'mobile.markdown.code.copy_code', defaultMessage: 'Copy Code'})}
-                        />
-                        <SlideUpPanelItem
-                            destructive={true}
-                            leftIcon='cancel'
-                            onPress={() => {
-                                dismissBottomSheet();
-                            }}
-                            testID='at_mention.bottom_sheet.cancel'
-                            text={intl.formatMessage({id: 'mobile.post.cancel', defaultMessage: 'Cancel'})}
-                        />
-                    </View>
-                );
-            };
+        const renderContent = () => {
+            return (
+                <View
+                    testID='at_mention.bottom_sheet'
+                    style={style.bottomSheet}
+                >
+                    <SlideUpPanelItem
+                        leftIcon='content-copy'
+                        onPress={() => {
+                            dismissBottomSheet();
+                            Clipboard.setString(content);
+                        }}
+                        testID='at_mention.bottom_sheet.copy_code'
+                        text={intl.formatMessage({id: 'mobile.markdown.code.copy_code', defaultMessage: 'Copy Code'})}
+                    />
+                    <SlideUpPanelItem
+                        destructive={true}
+                        leftIcon='cancel'
+                        onPress={() => {
+                            dismissBottomSheet();
+                        }}
+                        testID='at_mention.bottom_sheet.cancel'
+                        text={intl.formatMessage({id: 'mobile.post.cancel', defaultMessage: 'Cancel'})}
+                    />
+                </View>
+            );
+        };
 
-            bottomSheet({
-                closeButtonId: 'close-code-block',
-                renderContent,
-                snapPoints: [1, bottomSheetSnapPoint(2, ITEM_HEIGHT)],
-                title: intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}),
-                theme,
-            });
-        }
-    }, [managedConfig?.copyAndPasteProtection, intl, theme, style.bottomSheet, content]);
+        bottomSheet({
+            closeButtonId: 'close-code-block',
+            renderContent,
+            snapPoints: [1, bottomSheetSnapPoint(2, ITEM_HEIGHT)],
+            title: intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}),
+            theme,
+        });
+
+    }, [intl, theme, style.bottomSheet, content]);
 
     const trimContent = (text: string) => {
         const lines = text.split('\n');

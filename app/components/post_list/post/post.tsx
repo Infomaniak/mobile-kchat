@@ -72,6 +72,7 @@ type PostProps = {
     highlight?: boolean;
     highlightPinnedOrSaved?: boolean;
     highlightReplyBar: boolean;
+    isChannelMember?: boolean;
     isConsecutivePost?: boolean;
     isCRTEnabled?: boolean;
     isEphemeral: boolean;
@@ -147,6 +148,7 @@ const Post = ({
     highlight,
     highlightPinnedOrSaved = true,
     highlightReplyBar,
+    isChannelMember = true,
     isCRTEnabled,
     isConsecutivePost,
     isEphemeral,
@@ -290,7 +292,7 @@ const Post = ({
         }
 
         await blurAndDismissKeyboard();
-        const passProps = {sourceScreen: location, post, showAddReaction, serverUrl};
+        const passProps = {sourceScreen: location, post, showAddReaction, serverUrl, isChannelMember};
         const title = isTablet ? intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}) : '';
 
         openAsBottomSheet({
@@ -300,7 +302,7 @@ const Post = ({
             title,
             props: passProps,
         });
-    }, [post, isSystemPost, canDelete, hasBeenDeleted, isPendingOrFailed, isEphemeral, blurAndDismissKeyboard, closeInputAccessoryView, showInputAccessoryView, location, showAddReaction, serverUrl, isTablet, intl, theme]);
+    }, [post, isSystemPost, canDelete, hasBeenDeleted, isPendingOrFailed, isEphemeral, blurAndDismissKeyboard, closeInputAccessoryView, showInputAccessoryView, location, showAddReaction, serverUrl, isTablet, intl, theme, isChannelMember]);
 
     const [, rerender] = useState(false);
     useEffect(() => {

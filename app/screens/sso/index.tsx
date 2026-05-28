@@ -2,24 +2,23 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useState} from 'react';
-import {useIntl} from 'react-intl';
 import {Platform, StyleSheet, View} from 'react-native';
 import Animated from 'react-native-reanimated';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
-import {nativeEntraLogin, ssoLogin, ssoLoginWithCodeExchange} from '@actions/remote/session';
+import {ssoLogin, ssoLoginWithCodeExchange} from '@actions/remote/session';
 import {Screens, Sso} from '@constants';
 import License from '@constants/license';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {useScreenTransitionAnimation} from '@hooks/screen_transition_animation';
 import NetworkManager from '@managers/network_manager';
-import SecurityManager from '@managers/security_manager';
 import Background from '@screens/background';
 import {dismissModal, popTopScreen, resetToHome} from '@screens/navigation';
 import {getFullErrorMessage, isErrorWithUrl} from '@utils/errors';
 import {isMinimumLicenseTier} from '@utils/helpers';
-import {getIntuneErrorMessage} from '@utils/intune_errors';
+
+// import {getIntuneErrorMessage} from '@utils/intune_errors';
 
 import SSOAuthentication from './sso_authentication';
 import SSOAuthenticationWithExternalBrowser from './sso_authentication_with_external_browser';
@@ -52,14 +51,13 @@ const SSO = ({
     launchError, launchType, license, serverDisplayName,
     serverPreauthSecret, serverUrl, ssoType, theme,
 }: SSOProps) => {
-    const intl = useIntl();
     const [loginError, setLoginError] = useState<string>('');
 
     // Validate serverUrl is provided
     if (!serverUrl) {
         return (
             <View
-                nativeID={SecurityManager.getShieldScreenId(componentId, false, true)}
+                nativeID={`${componentId}.screen`}
                 style={styles.flex}
             >
                 <Background theme={theme}/>
@@ -108,8 +106,8 @@ const SSO = ({
 
         // For Entra login errors, use intune error mapping
         if (isEntraLogin) {
-            const errorMessage = getIntuneErrorMessage(e, intl);
-            setLoginError(errorMessage);
+            // const errorMessage = getIntuneErrorMessage(e, intl);
+            // setLoginError(errorMessage);
             return;
         }
 
@@ -118,7 +116,7 @@ const SSO = ({
             errorMessage += `\nURL: ${e.url}`;
         }
         setLoginError(errorMessage);
-    }, [intl]);
+    }, []);
 
     const doSSOLogin = async (bearerToken: string, csrfToken: string) => {
         const result: LoginActionResponse = await ssoLogin(serverUrl, serverDisplayName, config.DiagnosticId!, bearerToken, csrfToken, serverPreauthSecret);
@@ -144,20 +142,20 @@ const SSO = ({
     }, [extra, launchError, launchType, serverUrl]);
 
     const doEntraLogin = useCallback(async () => {
-        const result = await nativeEntraLogin(
-            serverUrl,
-            serverDisplayName,
-            config.DiagnosticId!,
-            config.IntuneScope!,
-        );
+        // const result = await nativeEntraLogin(
+        //     serverUrl,
+        //     serverDisplayName,
+        //     config.DiagnosticId!,
+        //     config.IntuneScope!,
+        // );
 
-        if (result?.error && result.failed) {
-            onLoadEndError(result.error, true);
-            return false;
-        }
+        // if (result?.error && result.failed) {
+        //     onLoadEndError(result.error, true);
+        //     return false;
+        // }
         goToHome();
         return true;
-    }, [serverUrl, serverDisplayName, config.DiagnosticId, config.IntuneScope, goToHome, onLoadEndError]);
+    }, [goToHome]);
 
     const dismiss = useCallback(() => {
         if (serverUrl) {
@@ -218,7 +216,7 @@ const SSO = ({
 
     return (
         <View
-            nativeID={SecurityManager.getShieldScreenId(componentId, false, true)}
+            nativeID={`${componentId}.screen`}
             style={styles.flex}
         >
             <Background theme={theme}/>

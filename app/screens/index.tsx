@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {loadAgentsScreen} from '@agents/screens';
-import {Provider as EMMProvider} from '@mattermost/react-native-emm';
 import React, {type ComponentType} from 'react';
 import {IntlProvider} from 'react-intl';
 import {Platform} from 'react-native';
@@ -72,16 +71,6 @@ export const withSafeAreaInsets = (Screen: React.ComponentType) => {
     };
 
     return SafeAreaInsetsWrapper;
-};
-
-const withManagedConfig = (Screen: React.ComponentType) => {
-    return function EmmProvider(props: any) {
-        return (
-            <EMMProvider>
-                <Screen {...props}/>
-            </EMMProvider>
-        );
-    };
 };
 
 Navigation.setLazyComponentRegistrator((screenName) => {
@@ -332,6 +321,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.INFOMANIAK_REMINDER:
             screen = withServerDatabase(require('@screens/ik_reminder').default);
             break;
+        case Screens.DEBUG_PERFORMANCE:
+            screen = withServerDatabase(require('@screens/debug_performance').default);
+            break;
         case Screens.SCHEDULED_POST_OPTIONS:
             screen = withServerDatabase(require('@screens/scheduled_post_options').default);
             break;
@@ -353,17 +345,17 @@ Navigation.setLazyComponentRegistrator((screenName) => {
     }
 
     if (screen) {
-        Navigation.registerComponent(screenName, () => withGestures(withSafeAreaInsets(withManagedConfig(screen))));
+        Navigation.registerComponent(screenName, () => withGestures(withSafeAreaInsets(screen)));
     }
 });
 
 export function registerScreens() {
     const homeScreen = require('@screens/home').default;
     const onboardingScreen = require('@screens/onboarding').default;
-    Navigation.registerComponent(Screens.ONBOARDING, () => withGestures(withIntl(withManagedConfig(onboardingScreen))));
-    Navigation.registerComponent(Screens.HOME, () => withGestures(withSafeAreaInsets(withServerDatabase(withManagedConfig(homeScreen)))));
+    Navigation.registerComponent(Screens.ONBOARDING, () => withGestures(withIntl(onboardingScreen)));
+    Navigation.registerComponent(Screens.HOME, () => withGestures(withSafeAreaInsets(withServerDatabase(homeScreen))));
     const infomaniakLoginScreen = require('@screens/ik_login').default;
     const infomaniakNoTeams = require('@screens/ik_no_teams').default;
-    Navigation.registerComponent(Screens.INFOMANIAK_LOGIN, () => withGestures(withIntl(withManagedConfig(infomaniakLoginScreen))));
-    Navigation.registerComponent(Screens.INFOMANIAK_NO_TEAMS, () => withGestures(withIntl(withManagedConfig(infomaniakNoTeams))));
+    Navigation.registerComponent(Screens.INFOMANIAK_LOGIN, () => withGestures(withIntl(infomaniakLoginScreen)));
+    Navigation.registerComponent(Screens.INFOMANIAK_NO_TEAMS, () => withGestures(withIntl(infomaniakNoTeams)));
 }

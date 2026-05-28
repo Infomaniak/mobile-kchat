@@ -1,3 +1,4 @@
+/* eslint-disable max-nested-callbacks */
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
@@ -94,29 +95,6 @@ jest.mock('@nozbe/watermelondb/react/withObservables/garbageCollector', () => {
 
 /* eslint-disable no-console */
 jest.mock('@database/manager');
-
-jest.mock('@managers/intune_manager', () => ({
-    __esModule: true,
-    default: {
-        init: jest.fn(),
-        login: jest.fn(),
-        enrollServer: jest.fn(),
-        unenrollServer: jest.fn(),
-        setCurrentIdentity: jest.fn(),
-        cleanupAfterWipe: jest.fn(),
-        reportWipeComplete: jest.fn(),
-        getPendingWipes: jest.fn(() => Promise.resolve([])),
-        getPolicy: jest.fn(() => Promise.resolve(null)),
-        isIntuneMAMEnabledForServer: jest.fn(() => Promise.resolve(false)),
-        isManagedServer: jest.fn(() => Promise.resolve(false)),
-        subscribeToPolicyChanges: jest.fn(() => ({remove: jest.fn()})),
-        subscribeToEnrollmentChanges: jest.fn(() => ({remove: jest.fn()})),
-        subscribeToWipeRequests: jest.fn(() => ({remove: jest.fn()})),
-        subscribeToAuthRequired: jest.fn(() => ({remove: jest.fn()})),
-        subscribeToConditionalLaunchBlocked: jest.fn(() => ({remove: jest.fn()})),
-        subscribeToIdentitySwitchRequired: jest.fn(() => ({remove: jest.fn()})),
-    },
-}));
 
 jest.doMock('react-native', () => {
     const {
@@ -563,22 +541,6 @@ jest.mock('@screens/navigation', () => ({
     bottomSheet: jest.fn(),
 }));
 
-jest.mock('@mattermost/react-native-emm', () => ({
-    addListener: jest.fn(),
-    authenticate: async () => {
-        return true;
-    },
-    getManagedConfig: <T>() => ({} as T),
-    isDeviceSecured: async () => {
-        return true;
-    },
-    openSecuritySettings: () => jest.fn(),
-    setAppGroupId: () => {
-        return '';
-    },
-    useManagedConfig: () => ({}),
-}));
-
 jest.mock('@react-native-clipboard/clipboard', () => ({}));
 
 jest.mock('react-native-document-picker', () => ({}));
@@ -654,6 +616,26 @@ console.debug = filterStackTrace(colors.blue, '🐞 Debug:');
 // Silence warnings about missing EXPO_OS environment variable
 // on tests
 process.env.EXPO_OS = 'ios'; // eslint-disable-line no-process-env
+
+jest.mock('react-native-nitro-sound', () => ({
+    createSound: jest.fn(() => ({
+        startPlayer: jest.fn(() => Promise.resolve()),
+        stopPlayer: jest.fn(() => Promise.resolve()),
+        pausePlayer: jest.fn(() => Promise.resolve()),
+        resumePlayer: jest.fn(() => Promise.resolve()),
+        seekToPlayer: jest.fn(() => Promise.resolve()),
+        setPlaybackSpeed: jest.fn(() => Promise.resolve()),
+        setSubscriptionDuration: jest.fn(() => Promise.resolve()),
+        addPlayBackListener: jest.fn(),
+        removePlayBackListener: jest.fn(),
+        startRecorder: jest.fn(() => Promise.resolve('file://test.m4a')),
+        stopRecorder: jest.fn(() => Promise.resolve()),
+        resumeRecorder: jest.fn(() => Promise.resolve()),
+        pauseRecorder: jest.fn(() => Promise.resolve()),
+        addRecordBackListener: jest.fn(),
+        removeRecordBackListener: jest.fn(),
+    })),
+}));
 
 // IK MOCKS
 

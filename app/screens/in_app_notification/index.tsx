@@ -14,7 +14,6 @@ import DatabaseManager from '@database/manager';
 import {useIsTablet} from '@hooks/device';
 import useDidMount from '@hooks/did_mount';
 import {usePreventDoubleTap} from '@hooks/utils';
-import SecurityManager from '@managers/security_manager';
 import {dismissOverlay} from '@screens/navigation';
 import {changeOpacity} from '@utils/theme';
 import {secureGetFromRecord} from '@utils/types';
@@ -151,7 +150,7 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
                 <Animated.View
                     style={[styles.container, isTablet ? styles.tablet : undefined, animatedStyle]}
                     testID='in_app_notification.screen'
-                    nativeID={SecurityManager.getShieldScreenId(componentId)}
+                    nativeID={`${componentId}.screen`}
                 >
                     <View style={styles.flex}>
                         <TouchableOpacity

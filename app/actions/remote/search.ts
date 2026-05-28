@@ -92,7 +92,7 @@ export const searchPosts = async (serverUrl: string, teamId: string, params: Pos
                 );
             }
 
-            if (channels?.length && channelMemberships?.length) {
+            if (channels?.length) {
                 const channelPromises = prepareMissingChannelsForAllTeams(operator, channels, channelMemberships, isCRTEnabled);
                 if (channelPromises.length) {
                     promises.push(...channelPromises);

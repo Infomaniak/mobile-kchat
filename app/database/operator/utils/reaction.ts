@@ -19,11 +19,11 @@ const {REACTION} = MM_TABLES.SERVER;
  * @param {RawReaction[]} sanitizeReactions.rawReactions
  * @returns {Promise<{createReactions: RawReaction[],  deleteReactions: Reaction[]}>}
  */
-export const sanitizeReactions = async ({database, post_id, rawReactions, skipSync}: SanitizeReactionsArgs) => {
-    const reactions = (await database.
+export const sanitizeReactions = async ({database, post_id, rawReactions, skipSync, existingReactions}: SanitizeReactionsArgs) => {
+    const reactions = existingReactions ?? await database.
         get<ReactionModel>(REACTION).
         query(Q.where('post_id', post_id)).
-        fetch());
+        fetch();
 
     // similarObjects: Contains objects that are in both the RawReaction array and in the Reaction table
     const similarObjects = new Set<ReactionModel>();

@@ -16,7 +16,6 @@ import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useAvoidKeyboard} from '@hooks/device';
 import {useScreenTransitionAnimation} from '@hooks/screen_transition_animation';
 import {usePreventDoubleTap} from '@hooks/utils';
-import SecurityManager from '@managers/security_manager';
 import Background from '@screens/background';
 import {popTopScreen} from '@screens/navigation';
 import {getErrorMessage} from '@utils/errors';
@@ -132,7 +131,7 @@ const MFA = ({componentId, config, goToHome, license, loginId, password, serverD
 
     return (
         <View
-            nativeID={SecurityManager.getShieldScreenId(componentId, false, true)}
+            nativeID={`${componentId}.screen`}
             style={styles.flex}
         >
             <Background theme={theme}/>

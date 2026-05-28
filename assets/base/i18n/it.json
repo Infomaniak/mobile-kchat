@@ -352,6 +352,7 @@
   "general_settings.display": "Display",
   "general_settings.help": "Aiuto",
   "general_settings.notifications": "Notifiche",
+  "general_settings.performance_debug": "Performance Monitor",
   "general_settings.report_problem": "Segnala un problema",
   "generic.back": "Indietro",
   "get_post_link_modal.title": "Copia collegamento",

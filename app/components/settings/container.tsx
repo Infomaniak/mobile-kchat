@@ -6,7 +6,6 @@ import {ScrollView} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {useTheme} from '@context/theme';
-import SecurityManager from '@managers/security_manager';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -40,7 +39,7 @@ const SettingContainer = ({children, testID}: SettingContainerProps) => {
             edges={edges}
             style={styles.container}
             testID={`${testID}.screen`}
-            nativeID={SecurityManager.getShieldScreenId(`${testID}.screen` as AvailableScreens)}
+            nativeID={`${`${testID}.screen` as AvailableScreens}.screen`}
         >
             <ScrollView
                 contentContainerStyle={styles.contentContainerStyle}
