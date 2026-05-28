@@ -1049,5 +1049,6 @@
   "send_feedback.type.feature": "Funzionalità",
   "send_feedback.files.max_size": "Dimensione max file: 32 MB",
   "send_feedback.files.too_many": "Puoi allegare fino a 5 file.",
-  "send_feedback.files.too_large": "Uno o più file superano il limite di 32 MB."
+  "send_feedback.files.too_large": "Uno o più file superano il limite di 32 MB.",
+  "notification_settings.keywords": "Parole chiave"
 }

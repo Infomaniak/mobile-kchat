@@ -1549,7 +1549,8 @@
     "send_feedback.priority.immediate": "Välittömästi",
     "send_feedback.type.bug": "Virhe",
     "send_feedback.type.feature": "Ominaisuus",
-  "send_feedback.files.max_size": "Tiedoston enimmäiskoko: 32 MB",
-  "send_feedback.files.too_many": "Voit liittää enintään 5 tiedostoa.",
-  "send_feedback.files.too_large": "Yksi tai useampi tiedosto ylittää 32 MB:n rajan."
+    "send_feedback.files.max_size": "Tiedoston enimmäiskoko: 32 MB",
+    "send_feedback.files.too_many": "Voit liittää enintään 5 tiedostoa.",
+    "send_feedback.files.too_large": "Yksi tai useampi tiedosto ylittää 32 MB:n rajan.",
+    "notification_settings.keywords": "Avainsanat"
 }

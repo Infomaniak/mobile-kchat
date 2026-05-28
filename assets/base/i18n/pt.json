@@ -1549,7 +1549,8 @@
     "send_feedback.priority.immediate": "Imediata",
     "send_feedback.type.bug": "Erro",
     "send_feedback.type.feature": "Funcionalidade",
-  "send_feedback.files.max_size": "Tamanho máximo do ficheiro: 32 MB",
-  "send_feedback.files.too_many": "Pode anexar até 5 ficheiros.",
-  "send_feedback.files.too_large": "Um ou mais ficheiros excedem o limite de 32 MB."
+    "send_feedback.files.max_size": "Tamanho máximo do ficheiro: 32 MB",
+    "send_feedback.files.too_many": "Pode anexar até 5 ficheiros.",
+    "send_feedback.files.too_large": "Um ou mais ficheiros excedem o limite de 32 MB.",
+    "notification_settings.keywords": "Palavras-chave"
 }
