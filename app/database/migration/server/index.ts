@@ -36,6 +36,7 @@ export default schemaMigrations({
         {
             toVersion: 11,
             steps: [
+                unsafeExecuteSql('DROP TABLE IF EXISTS ChannelBookmark;'),
                 unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRun;'),
                 unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookChecklist;'),
                 unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookChecklistItem;'),
