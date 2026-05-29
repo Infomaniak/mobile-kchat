@@ -470,6 +470,7 @@
     "general_settings.download_logs": "Λήψη αρχείων καταγραφής εφαρμογών",
     "general_settings.help": "Βοήθεια",
     "general_settings.notifications": "Ειδοποιήσεις",
+    "general_settings.performance_debug": "Performance Monitor",
     "general_settings.report_problem": "Αναφέρετε ένα πρόβλημα",
     "generic.back": "Επιστροφή",
     "get_post_link_modal.title": "Αντιγραφή συνδέσμου",

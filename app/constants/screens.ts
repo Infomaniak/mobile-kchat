@@ -100,8 +100,9 @@ export const INFOMANIAK_NO_TEAMS = 'InfomaniakNoTeams';
 export const INFOMANIAK_QUOTA_EXCEEDED = 'InfomaniakQuotaExceeded';
 
 export const INFOMANIAK_REMINDER = 'InfomaniakReminder';
-export const TRANSCRIPTION = 'Transcription';
 export const INFOMANIAK_EVOLVE = 'InfomaniakEvolve';
+export const TRANSCRIPTION = 'Transcription';
+export const DEBUG_PERFORMANCE = 'DebugPerformance';
 export const SHOW_TRANSLATION = 'ShowTranslation';
 
 export default {
@@ -202,6 +203,7 @@ export default {
     INFOMANIAK_REMINDER,
     INFOMANIAK_EVOLVE,
     TRANSCRIPTION,
+    DEBUG_PERFORMANCE,
     SHOW_TRANSLATION,
     ...AGENTS_SCREENS,
 } as const;

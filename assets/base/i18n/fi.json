@@ -470,6 +470,7 @@
     "general_settings.download_logs": "Lataa sovelluksen lokitiedostot",
     "general_settings.help": "Ohje",
     "general_settings.notifications": "Ilmoitukset",
+    "general_settings.performance_debug": "Performance Monitor",
     "general_settings.report_problem": "Ilmoita ongelmasta",
     "generic.back": "Takaisin",
     "get_post_link_modal.title": "Kopioi linkki",

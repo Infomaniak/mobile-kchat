@@ -470,6 +470,7 @@
     "general_settings.download_logs": "Ladda ner apploggar",
     "general_settings.help": "Hjälp",
     "general_settings.notifications": "Aviseringar",
+    "general_settings.performance_debug": "Performance Monitor",
     "general_settings.report_problem": "Rapportera ett problem",
     "generic.back": "Tillbaka",
     "get_post_link_modal.title": "Kopiera länk",

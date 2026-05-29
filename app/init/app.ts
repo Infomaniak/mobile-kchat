@@ -46,6 +46,7 @@ export async function initialize() {
 
         await DatabaseManager.init(serverUrls);
         await NetworkManager.init(serverCredentials);
+
         await ImageCacheMigration.init();
 
         GlobalEventHandler.init();

@@ -1155,8 +1155,10 @@ describe('updateDmGmDisplayName', () => {
         expect(error).toBeUndefined();
         expect(channels).toBeDefined();
         expect(channels?.length).toBe(2);
-        expect((channels![0] as ChannelModel).displayName).toBe(user2.username);
-        expect((channels![1] as ChannelModel).displayName).toBe(`${user2.username}, ${user3.username}`);
+        const dm = channels!.find((c) => c.type === 'D') as ChannelModel;
+        const gm = channels!.find((c) => c.type === 'G') as ChannelModel;
+        expect(dm.displayName).toBe(user2.username);
+        expect(gm.displayName).toBe(`${user2.username}, ${user3.username}`);
     });
 });
 

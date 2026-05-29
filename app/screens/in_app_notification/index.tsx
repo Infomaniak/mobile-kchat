@@ -6,7 +6,7 @@ import {DeviceEventEmitter, StyleSheet, Text, TouchableOpacity, View} from 'reac
 import {GestureDetector, Gesture, GestureHandlerRootView} from 'react-native-gesture-handler';
 import {Navigation} from 'react-native-navigation';
 import Animated, {runOnJS, useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {initialWindowMetrics} from 'react-native-safe-area-context';
 
 import {openNotification} from '@actions/remote/notifications';
 import {Navigation as NavigationTypes} from '@constants';
@@ -74,7 +74,7 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
     const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
     const initial = useSharedValue(-130);
     const isTablet = useIsTablet();
-    const insets = useSafeAreaInsets();
+    const insetTop = initialWindowMetrics?.insets.top ?? 0;
     const tapped = useRef<boolean>(false);
 
     const animateDismissOverlay = () => {
@@ -134,11 +134,10 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
         const translateY = animate ? withTiming(-130, {duration: 300}) : withTiming(initial.value, {duration: 300});
 
         return {
-
-            marginTop: insets.top,
+            marginTop: insetTop,
             transform: [{translateY}],
         };
-    }, [animate, insets.top]);
+    }, [animate, insetTop]);
 
     const message = notification.payload?.body || notification.payload?.message;
     const gesture = Gesture.Pan().activeOffsetY(-20).onStart(() => runOnJS(animateDismissOverlay)());

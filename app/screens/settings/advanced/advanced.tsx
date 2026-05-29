@@ -107,9 +107,7 @@ const AdvancedSettings = ({
                 <SettingSeparator/>
             </TouchableOpacity>
             {isDevMode && (
-                <TouchableOpacity
-                    onPress={onPressComponentLibrary}
-                >
+                <TouchableOpacity onPress={onPressComponentLibrary}>
                     <SettingOption
                         label={intl.formatMessage({id: 'settings.advanced.component_library', defaultMessage: 'Component library'})}
                         testID='advanced_settings.component_library.option'
