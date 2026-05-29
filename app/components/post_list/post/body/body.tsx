@@ -13,8 +13,6 @@ import ErrorBoundary from '@components/markdown/error_boundary';
 import {Screens} from '@constants';
 import {PostTypes} from '@constants/post';
 import {THREAD} from '@constants/screens';
-import StatusUpdatePost from '@playbooks/components/status_update_post';
-import {PLAYBOOKS_UPDATE_STATUS_POST_TYPE} from '@playbooks/constants/plugin';
 import {isEdited as postEdited, isPostFailed} from '@utils/post';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
@@ -162,14 +160,6 @@ const Body = ({
                 style={style.message}
                 id='post_body.deleted'
                 defaultMessage='(message deleted)'
-            />
-        );
-    } else if (post.type === PLAYBOOKS_UPDATE_STATUS_POST_TYPE && post.props != null) {
-        message = (
-            <StatusUpdatePost
-                location={location}
-                post={post}
-                theme={theme}
             />
         );
     } else if (isPostAddChannelMember) {

@@ -10,7 +10,6 @@ import {General, Permissions} from '@constants';
 import {MM_TABLES} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import ServerDataOperator from '@database/operator/server_data_operator';
-import EphemeralStore from '@store/ephemeral_store';
 import TestHelper from '@test/test_helper';
 import {hasPermission} from '@utils/role';
 
@@ -349,8 +348,6 @@ describe('prepareDeleteChannel', () => {
     });
 
     it.skip('should prepare models for deletion', async () => {
-        const unsetSpy = jest.spyOn(EphemeralStore, 'unsetChannelPlaybooksSynced');
-
         const membershipModel = TestHelper.fakeMyChannelModel({prepareDestroyPermanently: jest.fn().mockReturnValue({id: 'membership'})});
         const infoModel = TestHelper.fakeChannelInfoModel({prepareDestroyPermanently: jest.fn().mockReturnValue({id: 'info'})});
         const categoryChannelModel = TestHelper.fakeCategoryChannelModel({prepareDestroyPermanently: jest.fn().mockReturnValue({id: 'category'})});
@@ -365,16 +362,6 @@ describe('prepareDeleteChannel', () => {
         const bookmarkModels = [
             TestHelper.fakeChannelBookmarkModel({id: 'bookmark1', prepareDestroyPermanently: jest.fn().mockReturnValue({id: 'bookmark'})}),
         ];
-        const playbookRunModels = [
-            TestHelper.fakePlaybookRunModel({
-                id: 'playbookRun',
-                prepareDestroyWithRelations: jest.fn().mockResolvedValue([
-                    TestHelper.fakePlaybookRunModel({
-                        id: 'playbookRun',
-                    }),
-                ]),
-            }),
-        ];
 
         jest.mocked(channel.membership.fetch).mockResolvedValue(membershipModel);
         jest.mocked(channel.info.fetch).mockResolvedValue(infoModel);
@@ -384,7 +371,6 @@ describe('prepareDeleteChannel', () => {
         jest.mocked(channel.postsInChannel.fetch).mockResolvedValue(postsInChannelModels);
         jest.mocked(channel.posts.fetch).mockResolvedValue(postModels);
         jest.mocked(channel.bookmarks.fetch).mockResolvedValue(bookmarkModels);
-        jest.mocked(channel.playbookRuns.fetch).mockResolvedValue(playbookRunModels);
 
         const result = await prepareDeleteChannel(serverUrl, channel);
 
@@ -409,11 +395,6 @@ describe('prepareDeleteChannel', () => {
         expect(channel.postsInChannel.fetch).toHaveBeenCalled();
         expect(channel.posts.fetch).toHaveBeenCalled();
         expect(channel.bookmarks.fetch).toHaveBeenCalled();
-        expect(channel.playbookRuns.fetch).toHaveBeenCalled();
-        expect(playbookRunModels[0].prepareDestroyWithRelations).toHaveBeenCalled();
-
-        // Should have cleared the playbooks synced
-        expect(unsetSpy).toHaveBeenCalledWith(serverUrl, channel.id);
     });
 
     it('should handle errors gracefully', async () => {

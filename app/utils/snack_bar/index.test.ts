@@ -3,19 +3,9 @@
 
 import {showOverlay} from '@screens/navigation';
 
-import {showBoRPostErrorSnackbar, showPlaybookErrorSnackbar} from '.';
+import {showBoRPostErrorSnackbar} from '.';
 
 describe('snack bar', () => {
-    describe('showPlaybookErrorSnackbar', () => {
-        it('should show snackbar', () => {
-            showPlaybookErrorSnackbar();
-
-            expect(showOverlay).toHaveBeenCalledWith('SnackBar', {
-                barType: 'PLAYBOOK_ERROR',
-            });
-        });
-    });
-
     describe('showBoRPostErrorSnackbar', () => {
         it('should show snackbar', () => {
             showBoRPostErrorSnackbar();

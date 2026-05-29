@@ -3,11 +3,9 @@
 
 import {observeIsAgentsEnabled} from '@agents/database/queries/version';
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
-import {combineLatest, of} from 'rxjs';
+import {of} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
-import {observeHasRunningPlaybookRunsInTeam} from '@playbooks/database/queries/run';
-import {observeIsPlaybooksEnabled} from '@playbooks/database/queries/version';
 import {observeDraftCount} from '@queries/servers/drafts';
 import {observeScheduledPostEnabled, observeScheduledPostsForTeam} from '@queries/servers/scheduled_post';
 import {observeCurrentTeamId} from '@queries/servers/system';
@@ -31,13 +29,6 @@ const enchanced = withObservables([], ({database}: WithDatabaseArgs) => {
     );
     const scheduledPostsEnabled = observeScheduledPostEnabled(database);
     const agentsEnabled = observeIsAgentsEnabled(database);
-    const showPlaybooksButton = currentTeamId.pipe(
-        switchMap((teamId) => combineLatest([
-            observeIsPlaybooksEnabled(database),
-            observeHasRunningPlaybookRunsInTeam(database, teamId),
-        ])),
-        switchMap(([enabled, hasRunningRuns]) => of(enabled && hasRunningRuns)),
-    );
 
     return {
         lastChannelId,
@@ -46,7 +37,6 @@ const enchanced = withObservables([], ({database}: WithDatabaseArgs) => {
         scheduledPostHasError,
         scheduledPostsEnabled,
         agentsEnabled,
-        showPlaybooksButton,
     };
 });
 

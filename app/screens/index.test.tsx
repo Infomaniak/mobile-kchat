@@ -10,9 +10,6 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 import {Screens} from '@constants';
 import {withServerDatabase} from '@database/components';
-import EditCommand from '@playbooks/screens/edit_command';
-import PlaybookRun from '@playbooks/screens/playbook_run';
-import PlaybooksRuns from '@playbooks/screens/playbooks_runs';
 import {logDebug} from '@utils/log';
 
 import EditServer from './edit_server';
@@ -85,24 +82,6 @@ jest.mock('@screens/in_app_notification', () => ({
 }));
 jest.mocked(InAppNotification).mockImplementation((props) => <Text {...props}>{Screens.IN_APP_NOTIFICATION}</Text>);
 
-jest.mock('@playbooks/screens/playbooks_runs', () => ({
-    __esModule: true,
-    default: jest.fn(),
-}));
-jest.mocked(PlaybooksRuns).mockImplementation((props) => <Text {...props}>{Screens.PLAYBOOKS_RUNS}</Text>);
-
-jest.mock('@playbooks/screens/playbook_run', () => ({
-    __esModule: true,
-    default: jest.fn(),
-}));
-jest.mocked(PlaybookRun).mockImplementation((props) => <Text {...props}>{Screens.PLAYBOOK_RUN}</Text>);
-
-jest.mock('@playbooks/screens/edit_command', () => ({
-    __esModule: true,
-    default: jest.fn(),
-}));
-jest.mocked(EditCommand).mockImplementation((props) => <Text {...props}>{Screens.PLAYBOOK_EDIT_COMMAND}</Text>);
-
 describe.skip('Screen Registration', () => {
     // IK change : skipped on CI temporarily, will fix later
     let registrator: (screenName: string) => void;
@@ -166,39 +145,6 @@ describe.skip('Screen Registration', () => {
                 withManagedConfig: false,
                 withIntl: false,
                 platform: 'android',
-            },
-        ],
-        [
-            Screens.PLAYBOOKS_RUNS,
-            {
-                withServerDatabase: false,
-                withGestures: true,
-                withSafeAreaInsets: true,
-                withManagedConfig: true,
-                withIntl: true,
-                platform: undefined,
-            },
-        ],
-        [
-            Screens.PLAYBOOK_RUN,
-            {
-                withServerDatabase: false,
-                withGestures: true,
-                withSafeAreaInsets: true,
-                withManagedConfig: true,
-                withIntl: true,
-                platform: undefined,
-            },
-        ],
-        [
-            Screens.PLAYBOOK_EDIT_COMMAND,
-            {
-                withServerDatabase: false,
-                withGestures: true,
-                withSafeAreaInsets: true,
-                withManagedConfig: true,
-                withIntl: true,
-                platform: undefined,
             },
         ],
     ];

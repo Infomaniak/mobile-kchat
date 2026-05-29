@@ -80,7 +80,6 @@ export const SYSTEM_IDENTIFIERS = {
     SESSION_EXPIRATION: 'sessionExpiration',
     TEAM_HISTORY: 'teamHistory',
     WEBSOCKET: 'WebSocket',
-    PLAYBOOKS_VERSION: 'playbooks_version',
     AGENTS_VERSION: 'agents_version',
     LAST_BOR_POST_CLEANUP_RUN: 'lastBoRPostCleanupRun',
 };

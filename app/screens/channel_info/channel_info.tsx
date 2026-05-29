@@ -30,8 +30,6 @@ type Props = {
     type?: ChannelType;
     isBookmarksEnabled: boolean;
     isCallsEnabledInChannel: boolean;
-    isPlaybooksEnabled: boolean;
-    groupCallsAllowed: boolean;
     canManageMembers: boolean;
     isCRTEnabled: boolean;
     isGuestUser: boolean;
@@ -64,11 +62,6 @@ const ChannelInfo = ({
     componentId,
     isBookmarksEnabled,
     isCallsEnabledInChannel,
-
-    // isConvertGMFeatureAvailable,
-    // isPlaybooksEnabled,
-
-    // groupCallsAllowed,
     isCRTEnabled,
     type,
     hasChannelSettingsActions,
@@ -130,27 +123,10 @@ const ChannelInfo = ({
                         callsEnabled={isCallsEnabledInChannel}
                         canManageMembers={canManageMembers}
                         isCRTEnabled={isCRTEnabled}
-
-                        // isPlaybooksEnabled={isPlaybooksEnabled}
                         hasChannelSettingsActions={hasChannelSettingsActions}
                         isAutotranslationEnabledForThisChannel={isAutotranslationEnabledForThisChannel}
                     />
                     <View style={styles.separator}/>
-                    {/* {convertGMOptionAvailable &&
-                    <>
-                        <ConvertToChannelLabel channelId={channelId}/>
-                        <View style={styles.separator}/>
-                    </>
-                    } */}
-                    {/* {canEnableDisableCalls &&
-                        <>
-                            <ChannelInfoEnableCalls
-                                channelId={channelId}
-                                enabled={isCallsEnabledInChannel}
-                            />
-                            <View style={styles.separator}/>
-                        </>
-                    } */}
                     <ChannelInfoAppBindings
                         channelId={channelId}
                         serverUrl={serverUrl}

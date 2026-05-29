@@ -16,10 +16,6 @@ import DeepLinkType from '@constants/deep_linking';
 import DatabaseManager from '@database/manager';
 import {DEFAULT_LOCALE} from '@i18n';
 import WebsocketManager from '@managers/websocket_manager';
-import {fetchPlaybookRun} from '@playbooks/actions/remote/runs';
-import {getPlaybookRunById} from '@playbooks/database/queries/run';
-import {fetchIsPlaybooksEnabled} from '@playbooks/database/queries/version';
-import {goToPlaybookRun} from '@playbooks/screens/navigation';
 import {getActiveServerUrl} from '@queries/app/servers';
 import {getCurrentUser, queryUsersByUsername} from '@queries/servers/user';
 import {dismissAllModalsAndPopToRoot} from '@screens/navigation';
@@ -36,7 +32,7 @@ import {
     TOKEN_PATH_PATTERN,
 } from '@utils/url/path';
 
-import type {DeepLinkChannel, DeepLinkConference, DeepLinkDM, DeepLinkGM, DeepLinkPermalink, DeepLinkPlaybookRuns, DeepLinkWithData, LaunchProps} from '@typings/launch';
+import type {DeepLinkChannel, DeepLinkConference, DeepLinkDM, DeepLinkGM, DeepLinkPermalink, DeepLinkWithData, LaunchProps} from '@typings/launch';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 const deepLinkScreens: AvailableScreens[] = [Screens.HOME, Screens.CHANNEL, Screens.GLOBAL_THREADS, Screens.THREAD];
@@ -126,59 +122,6 @@ export async function handleDeepLink(deepLink: DeepLinkWithData, intlShape?: Int
                 });
                 break;
             }
-            case DeepLink.Playbooks: {
-                // Alert that playbooks should be access from the webapp or desktop app
-                Alert.alert(
-                    intl.formatMessage({id: 'playbooks.only_runs_available.title', defaultMessage: 'Playbooks not available'}),
-                    intl.formatMessage({id: 'playbooks.only_runs_available.description', defaultMessage: 'Only Playbook Checklists are available on mobile. To access the Playbook, please use the desktop or web app.'}),
-                    [{
-                        text: intl.formatMessage({id: 'playbooks.only_runs_available.ok', defaultMessage: 'OK'}),
-                    }],
-                );
-                break;
-            }
-            case DeepLink.PlaybookRunsRetrospective: {
-                Alert.alert(
-                    intl.formatMessage({id: 'playbooks.retrospective_not_available.title', defaultMessage: 'Playbooks Retrospective not available'}),
-                    intl.formatMessage({id: 'playbooks.retrospective_not_available.description', defaultMessage: 'Only Playbook Checklists are available on mobile. To fill the Run Retrospective, please use the desktop or web app.'}),
-                    [{
-                        text: intl.formatMessage({id: 'playbooks.retrospective_not_available.ok', defaultMessage: 'OK'}),
-                    }],
-                );
-                break;
-            }
-            case DeepLink.PlaybookRuns: {
-                const deepLinkData = deepLink.data as DeepLinkPlaybookRuns;
-                const playbookEnabled = await fetchIsPlaybooksEnabled(database);
-                if (playbookEnabled) {
-                    // Go to playbook Run
-                    const playbook = await getPlaybookRunById(database, deepLinkData.playbookRunId);
-                    if (!playbook) {
-                        const {error} = await fetchPlaybookRun(existingServerUrl, deepLinkData.playbookRunId);
-                        if (error) {
-                            Alert.alert(
-                                intl.formatMessage({id: 'playbooks.fetch_error.title', defaultMessage: 'Unable to open Checklist'}),
-                                intl.formatMessage({id: 'playbooks.fetch_error.description', defaultMessage: "You don't have permission to view this, or it may no longer exist."}),
-                                [{
-                                    text: intl.formatMessage({id: 'playbooks.fetch_error.OK', defaultMessage: 'Okay'}),
-                                }],
-                            );
-                            break;
-                        }
-                    }
-                    goToPlaybookRun(intl, deepLinkData.playbookRunId);
-                } else {
-                    // Alert playbooks not enabled or version not supported
-                    Alert.alert(
-                        intl.formatMessage({id: 'playbooks.not_enabled_or_unsupported.title', defaultMessage: 'Playbooks not available'}),
-                        intl.formatMessage({id: 'playbooks.not_enabled_or_unsupported.description', defaultMessage: 'Playbooks are either not enabled on this server or the Playbooks version is not supported. Please contact your system administrator.'}),
-                        [{
-                            text: intl.formatMessage({id: 'playbooks.not_enabled_or_unsupported.OK', defaultMessage: 'OK'}),
-                        }],
-                    );
-                }
-                break;
-            }
             case DeepLink.MagicLink: {
                 Alert.alert(
                     intl.formatMessage({id: 'magic_link.already_logged_in_error.title', defaultMessage: 'Already logged in'}),
@@ -212,25 +155,6 @@ type ChannelPathParams = {
 
 const CHANNEL_PATH = '*serverUrl/:teamName/:path/:identifier';
 export const matchChannelDeeplink = match<ChannelPathParams>(CHANNEL_PATH);
-
-type PlaybooksPathParams = {
-    serverUrl: string[];
-    playbookId: string;
-};
-
-const PLAYBOOKS_PATH = '*serverUrl/playbooks/playbooks/:playbookId';
-export const matchPlaybooksDeeplink = match<PlaybooksPathParams>(PLAYBOOKS_PATH);
-
-type PlaybookRunsPathParams = {
-    serverUrl: string[];
-    playbookRunId: string;
-};
-
-const PLAYBOOK_RUNS_PATH = '*serverUrl/playbooks/runs/:playbookRunId';
-export const matchPlaybookRunsDeeplink = match<PlaybookRunsPathParams>(PLAYBOOK_RUNS_PATH);
-
-const PLAYBOOK_RUNS_RETROSPECTIVE = '*serverUrl/playbooks/runs/:playbookRunId/retrospective';
-export const matchPlaybookRunsRetrospectiveDeeplink = match<PlaybookRunsPathParams>(PLAYBOOK_RUNS_RETROSPECTIVE);
 
 type MagicLinkPathParams = {
     serverUrl: string[];
@@ -363,24 +287,6 @@ export function parseDeepLink(deepLinkUrl: string, asServer = false): DeepLinkWi
         if (permalinkMatch && isValidTeamName(permalinkMatch.params.teamName) && isValidId(permalinkMatch.params.postId)) {
             const {params: {serverUrl, teamName, postId}} = permalinkMatch;
             return {type: DeepLink.Permalink, url: deepLinkUrl, data: {serverUrl: serverUrl.join('/'), teamName, postId}};
-        }
-
-        const playbooksMatch = matchPlaybooksDeeplink(url);
-        if (playbooksMatch && isValidId(playbooksMatch.params.playbookId)) {
-            const {params: {serverUrl, playbookId}} = playbooksMatch;
-            return {type: DeepLink.Playbooks, url: deepLinkUrl, data: {serverUrl: serverUrl.join('/'), playbookId}};
-        }
-
-        const playbooksRunsRetrospectiveMatch = matchPlaybookRunsRetrospectiveDeeplink(url);
-        if (playbooksRunsRetrospectiveMatch && isValidId(playbooksRunsRetrospectiveMatch.params.playbookRunId)) {
-            const {params: {serverUrl, playbookRunId}} = playbooksRunsRetrospectiveMatch;
-            return {type: DeepLink.PlaybookRunsRetrospective, url: deepLinkUrl, data: {serverUrl: serverUrl.join('/'), playbookRunId}};
-        }
-
-        const playbooksRunsMatch = matchPlaybookRunsDeeplink(url);
-        if (playbooksRunsMatch && isValidId(playbooksRunsMatch.params.playbookRunId)) {
-            const {params: {serverUrl, playbookRunId}} = playbooksRunsMatch;
-            return {type: DeepLink.PlaybookRuns, url: deepLinkUrl, data: {serverUrl: serverUrl.join('/'), playbookRunId}};
         }
 
         const magicLinkMatch = matchMagicLinkDeeplink(url);

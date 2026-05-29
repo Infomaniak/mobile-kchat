@@ -13,7 +13,6 @@ import {AGENTS, CHANNEL, DRAFT, THREAD} from '@constants/screens';
 import {TABLET_SIDEBAR_WIDTH, TEAM_SIDEBAR_WIDTH} from '@constants/view';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
-import PlaybooksButton from '@playbooks/components/playbooks_button';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import Categories from './categories';
@@ -40,7 +39,6 @@ type ChannelListProps = {
     lastChannelId?: string;
     scheduledPostsEnabled?: boolean;
     agentsEnabled?: boolean;
-    showPlaybooksButton?: boolean;
 };
 
 const getTabletWidth = (moreThanOneTeam: boolean) => {
@@ -60,7 +58,6 @@ const CategoriesList = ({
     lastChannelId,
     scheduledPostsEnabled,
     agentsEnabled,
-    showPlaybooksButton,
 }: ChannelListProps) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
@@ -142,16 +139,6 @@ const CategoriesList = ({
         );
     }, [agentsEnabled, activeScreen]);
 
-    const playbooksButtonComponent = useMemo(() => {
-        if (!showPlaybooksButton) {
-            return null;
-        }
-
-        return (
-            <PlaybooksButton/>
-        );
-    }, [showPlaybooksButton]);
-
     const content = useMemo(() => {
         if (!hasChannels) {
             return (<LoadChannelsError/>);
@@ -163,11 +150,10 @@ const CategoriesList = ({
                 {threadButtonComponent}
                 {draftsButtonComponent}
                 {agentsButtonComponent}
-                {playbooksButtonComponent}
                 <Categories/>
             </>
         );
-    }, [agentsButtonComponent, draftsButtonComponent, hasChannels, playbooksButtonComponent, threadButtonComponent]);
+    }, [agentsButtonComponent, draftsButtonComponent, hasChannels, threadButtonComponent]);
 
     return (
         <Animated.View style={[styles.container, tabletStyle]}>

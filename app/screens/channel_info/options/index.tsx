@@ -23,8 +23,6 @@ type Props = {
     callsEnabled: boolean;
     canManageMembers: boolean;
     isCRTEnabled: boolean;
-
-    // isPlaybooksEnabled: boolean;
     hasChannelSettingsActions: boolean;
     isAutotranslationEnabledForThisChannel: boolean;
 }
@@ -35,8 +33,6 @@ const Options = ({
     callsEnabled,
     canManageMembers,
     isCRTEnabled,
-
-    // isPlaybooksEnabled,
     hasChannelSettingsActions,
     isAutotranslationEnabledForThisChannel,
 }: Props) => {
@@ -61,13 +57,6 @@ const Options = ({
             )}
             <PinnedMessages channelId={channelId}/>
             <ChannelFiles channelId={channelId}/>
-
-            {/* {isPlaybooksEnabled && !isDMorGM &&
-            <PlaybookRunsOption
-                channelId={channelId}
-                location='channel_actions'
-            />
-            } */}
             {type !== General.DM_CHANNEL &&
                 <Members channelId={channelId}/>
             }

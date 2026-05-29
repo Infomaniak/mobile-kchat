@@ -12,7 +12,6 @@ import {
 } from '@nozbe/watermelondb/Schema/migrations';
 
 import {MM_TABLES} from '@constants/database';
-import {PLAYBOOK_TABLES} from '@playbooks/constants/database';
 
 const {
     CHANNEL,
@@ -32,8 +31,6 @@ const {
     LIMIT,
     TEAM,
 } = MM_TABLES.SERVER;
-
-const {PLAYBOOK_RUN, PLAYBOOK_CHECKLIST, PLAYBOOK_CHECKLIST_ITEM} = PLAYBOOK_TABLES;
 
 export default schemaMigrations({
     migrations: [
@@ -73,6 +70,11 @@ export default schemaMigrations({
                 unsafeExecuteSql(
                     'CREATE INDEX IF NOT EXISTS User_email ON User (email);',
                 ),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRun;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookChecklist;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookChecklistItem;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRunAttribute;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRunAttributeValue;'),
             ],
         },
         {
@@ -177,60 +179,6 @@ export default schemaMigrations({
                         {name: 'type', type: 'string'},
                         {name: 'original_id', type: 'string', isOptional: true},
                         {name: 'parent_id', type: 'string', isOptional: true},
-                    ],
-                }),
-                createTable({
-                    name: PLAYBOOK_RUN,
-                    columns: [
-                        {name: 'playbook_id', type: 'string'},
-                        {name: 'name', type: 'string'},
-                        {name: 'description', type: 'string'},
-                        {name: 'is_active', type: 'boolean', isIndexed: true},
-                        {name: 'owner_user_id', type: 'string'},
-                        {name: 'team_id', type: 'string'},
-                        {name: 'channel_id', type: 'string', isIndexed: true},
-                        {name: 'post_id', type: 'string', isOptional: true},
-                        {name: 'create_at', type: 'number'},
-                        {name: 'end_at', type: 'number'},
-                        {name: 'active_stage', type: 'number'},
-                        {name: 'active_stage_title', type: 'string'},
-                        {name: 'participant_ids', type: 'string'}, // JSON string
-                        {name: 'summary', type: 'string'},
-                        {name: 'current_status', type: 'string', isIndexed: true},
-                        {name: 'last_status_update_at', type: 'number'},
-                        {name: 'previous_reminder', type: 'number'},
-                        {name: 'items_order', type: 'string'},
-                        {name: 'retrospective_enabled', type: 'boolean'},
-                        {name: 'retrospective', type: 'string'},
-                        {name: 'retrospective_published_at', type: 'number'},
-                        {name: 'update_at', type: 'number'},
-                    ],
-                }),
-                createTable({
-                    name: PLAYBOOK_CHECKLIST,
-                    columns: [
-                        {name: 'run_id', type: 'string', isIndexed: true},
-                        {name: 'items_order', type: 'string'},
-                        {name: 'title', type: 'string'},
-                        {name: 'update_at', type: 'number'},
-                    ],
-                }),
-                createTable({
-                    name: PLAYBOOK_CHECKLIST_ITEM,
-                    columns: [
-                        {name: 'checklist_id', type: 'string', isIndexed: true},
-                        {name: 'title', type: 'string'},
-                        {name: 'state', type: 'string', isIndexed: true},
-                        {name: 'state_modified', type: 'number'},
-                        {name: 'assignee_id', type: 'string', isOptional: true},
-                        {name: 'assignee_modified', type: 'number'},
-                        {name: 'command', type: 'string', isOptional: true},
-                        {name: 'command_last_run', type: 'number'},
-                        {name: 'description', type: 'string'},
-                        {name: 'due_date', type: 'number'},
-                        {name: 'completed_at', type: 'number'},
-                        {name: 'task_actions', type: 'string', isOptional: true}, // JSON string
-                        {name: 'update_at', type: 'number'},
                     ],
                 }),
                 addColumns({
