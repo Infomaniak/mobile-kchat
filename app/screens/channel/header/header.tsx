@@ -160,6 +160,9 @@ const ChannelHeader = ({
         if (callsAvailable && !isDMorGM) {
             items += 1;
         }
+        if (!isDMorGM) {
+            items += 1;
+        }
         if (agentsEnabled) {
             items += 1;
         }

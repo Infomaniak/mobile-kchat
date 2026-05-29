@@ -75,6 +75,11 @@ export default schemaMigrations({
                 unsafeExecuteSql(
                     'CREATE INDEX IF NOT EXISTS User_email ON User (email);',
                 ),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRun;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookChecklist;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookChecklistItem;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRunAttribute;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRunAttributeValue;'),
             ],
         },
         {
