@@ -19,7 +19,6 @@ type Props = {
     fileCount: number;
     isAgentsEnabled: boolean;
     isPostPriorityEnabled: boolean;
-    isBoREnabled: boolean;
     canShowPostPriority?: boolean;
     canShowSlashCommands?: boolean;
     canShowEmojiPicker?: boolean;
@@ -33,8 +32,6 @@ type Props = {
     addFiles: (file: FileInfo[]) => void;
     postPriority: PostPriority;
     updatePostPriority: (postPriority: PostPriority) => void;
-    postBoRConfig?: PostBoRConfig;
-    updatePostBoRStatus?: (config: PostBoRConfig) => void;
     focus: () => void;
 }
 

@@ -87,7 +87,6 @@ export const SETTINGS_NOTIFICATION_PUSH = 'SettingsNotificationPush';
 export const SETTINGS_NOTIFICATION_CALL = 'SettingsNotificationCall';
 export const SHARE_FEEDBACK = 'ShareFeedback';
 export const SNACK_BAR = 'SnackBar';
-export const SSO = 'SSO';
 export const TABLE = 'Table';
 export const TEAM_SELECTOR_LIST = 'TeamSelectorList';
 export const TERMS_OF_SERVICE = 'TermsOfService';
@@ -189,7 +188,6 @@ export default {
     SETTINGS_NOTIFICATION_CALL,
     SHARE_FEEDBACK,
     SNACK_BAR,
-    SSO,
     TABLE,
     TEAM_SELECTOR_LIST,
     TERMS_OF_SERVICE,

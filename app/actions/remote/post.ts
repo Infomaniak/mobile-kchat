@@ -23,7 +23,6 @@ import {getIsCRTEnabled, prepareThreadsFromReceivedPosts} from '@queries/servers
 import {queryAllUsers} from '@queries/servers/user';
 import EphemeralStore from '@store/ephemeral_store';
 import {setFetchingThreadState} from '@store/fetching_thread_store';
-import {isBoRPost} from '@utils/bor';
 import {getValidEmojis, matchEmoticons} from '@utils/emoji/helpers';
 import {getFullErrorMessage, isServerError} from '@utils/errors';
 import {hasArrayChanged} from '@utils/helpers';
@@ -958,24 +957,6 @@ export const deletePost = async (serverUrl: string, postToDelete: PostModel | Po
     }
 };
 
-export const burnPostNow = async (serverUrl: string, postToBurn: PostModel | Post) => {
-    if (!isBoRPost(postToBurn)) {
-        return {error: 'Post is not a Burn-on-Read post'};
-    }
-
-    try {
-        const client = NetworkManager.getClient(serverUrl);
-        await client.burnPostNow(postToBurn.id);
-
-        const post = await removePost(serverUrl, postToBurn);
-        return {post};
-    } catch (error) {
-        logDebug('error on burnPostNow', getFullErrorMessage(error));
-        forceLogoutIfNecessary(serverUrl, error);
-        return {error};
-    }
-};
-
 export const markPostAsUnread = async (serverUrl: string, postId: string) => {
     try {
         const client = NetworkManager.getClient(serverUrl);
@@ -1056,32 +1037,6 @@ export const editPost = async (serverUrl: string, postId: string, postMessage: s
         return {post};
     } catch (error) {
         logDebug('error on editPost', getFullErrorMessage(error));
-        forceLogoutIfNecessary(serverUrl, error);
-        return {error};
-    }
-};
-
-export const revealBoRPost = async (serverUrl: string, postId: string) => {
-    try {
-        const client = NetworkManager.getClient(serverUrl);
-        const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-
-        const post = await getPostById(database, postId);
-        if (!post) {
-            return {post: undefined};
-        }
-
-        const revealedPost = await client.revealBoRPost(postId);
-        await operator.handlePosts({
-            actionType: ActionType.POSTS.RECEIVED_IN_CHANNEL,
-            order: [revealedPost.id],
-            posts: [revealedPost],
-            prepareRecordsOnly: false,
-        });
-
-        return {post};
-    } catch (error) {
-        logDebug('error on revealBoRPost', getFullErrorMessage(error));
         forceLogoutIfNecessary(serverUrl, error);
         return {error};
     }

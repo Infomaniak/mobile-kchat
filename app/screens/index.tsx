@@ -279,9 +279,6 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             );
             break;
         }
-        case Screens.SSO:
-            screen = withIntl(require('@screens/sso').default);
-            break;
         case Screens.TABLE:
             screen = withServerDatabase(require('@screens/table').default);
             break;

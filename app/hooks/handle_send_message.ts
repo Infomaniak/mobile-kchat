@@ -56,7 +56,6 @@ type Props = {
     channelIsReadOnly?: boolean;
     deactivatedChannel?: boolean;
     onPostCreated?: (postId: string) => void;
-    postBoRConfig?: PostBoRConfig;
 }
 
 export const useHandleSendMessage = ({
@@ -80,7 +79,6 @@ export const useHandleSendMessage = ({
     deactivatedChannel,
     clearDraft,
     onPostCreated,
-    postBoRConfig,
 }: Props) => {
     const intl = useIntl();
     const serverUrl = useServerUrl();
@@ -130,10 +128,6 @@ export const useHandleSendMessage = ({
             post.metadata = {
                 priority: postPriority,
             };
-        }
-
-        if (postBoRConfig?.enabled) {
-            post.type = 'burn_on_read';
         }
 
         let response: CreateResponse;
@@ -188,7 +182,7 @@ export const useHandleSendMessage = ({
 
         setSendingMessage(false);
         DeviceEventEmitter.emit(Events.POST_LIST_SCROLL_TO_BOTTOM, rootId ? Screens.THREAD : Screens.CHANNEL);
-    }, [files, currentUserId, channelId, rootId, value, postPriority, postBoRConfig?.enabled, isFromDraftView, serverUrl, intl, canPost, channelIsArchived, channelIsReadOnly, deactivatedChannel, clearDraft, onPostCreated]);
+    }, [files, currentUserId, channelId, rootId, value, postPriority, isFromDraftView, serverUrl, intl, canPost, channelIsArchived, channelIsReadOnly, deactivatedChannel, clearDraft, onPostCreated]);
 
     const showSendToAllOrChannelOrHereAlert = useCallback((calculatedMembersCount: number, atHere: boolean, schedulingInfo?: SchedulingInfo) => {
         const notifyAllMessage = DraftUtils.buildChannelWideMentionMessage(intl, calculatedMembersCount, channelTimezoneCount, atHere);

@@ -6,11 +6,6 @@
 import {handleAgentPostUpdate} from '@agents/actions/websocket';
 import {handleAgentsEvents} from '@agents/actions/websocket/events';
 
-import {
-    handleBoRPostAllRevealed,
-    handleBoRPostBurnedEvent,
-    handleBoRPostRevealedEvent,
-} from '@actions/websocket/burn_on_read';
 import * as scheduledPost from '@actions/websocket/scheduled_post';
 import {WebsocketEvents} from '@constants';
 
@@ -269,17 +264,6 @@ export async function handleWebSocketEvent(serverUrl: string, msg: WebSocketMess
         case WebsocketEvents.AGENTS_POST_UPDATE:
         case WebsocketEvents.AGENTS_TOOL_CALL_STATUS:
             handleAgentPostUpdate(msg);
-            break;
-
-        // Burn on Read Events
-        case WebsocketEvents.BOR_POST_REVEALED:
-            handleBoRPostRevealedEvent(serverUrl, msg);
-            break;
-        case WebsocketEvents.BOR_POST_BURNED:
-            handleBoRPostBurnedEvent(serverUrl, msg);
-            break;
-        case WebsocketEvents.BURN_ON_READ_ALL_REVEALED:
-            handleBoRPostAllRevealed(serverUrl, msg);
             break;
 
         // Autotranslation

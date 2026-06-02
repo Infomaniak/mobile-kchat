@@ -61,13 +61,6 @@ const enhanced = withObservables(['channelId', 'rootId', 'draftType'], (ownProps
         distinctUntilChanged(),
     );
 
-    const postBoRConfig = metadata.pipe(
-        switchMap((m) => {
-            return of$(m?.borConfig || null);
-        }),
-        distinctUntilChanged(),
-    );
-
     const enableConfirmNotificationsToChannel = observeConfigBooleanValue(database, 'EnableConfirmNotificationsToChannel');
     const maxMessageLength = observeConfigIntValue(database, 'MaxPostSize', MAX_MESSAGE_LENGTH_FALLBACK);
     const persistentNotificationInterval = observeConfigIntValue(database, 'PersistentNotificationIntervalMinutes');
@@ -107,7 +100,6 @@ const enhanced = withObservables(['channelId', 'rootId', 'draftType'], (ownProps
         persistentNotificationInterval,
         persistentNotificationMaxRecipients,
         postPriority,
-        postBoRConfig,
     };
 });
 
