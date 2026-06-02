@@ -6,7 +6,6 @@ import {ScrollView, View} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import ChannelActions from '@components/channel_actions';
-import ChannelBookmarks from '@components/channel_bookmarks';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
@@ -23,16 +22,13 @@ import Title from './title';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
-    canAddBookmarks: boolean;
     channelId: string;
     closeButtonId: string;
     componentId: AvailableScreens;
     type?: ChannelType;
-    isBookmarksEnabled: boolean;
     isCallsEnabledInChannel: boolean;
     canManageMembers: boolean;
     isCRTEnabled: boolean;
-    isGuestUser: boolean;
     hasChannelSettingsActions: boolean;
     isAutotranslationEnabledForThisChannel: boolean;
 }
@@ -55,12 +51,10 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 }));
 
 const ChannelInfo = ({
-    canAddBookmarks,
     canManageMembers,
     channelId,
     closeButtonId,
     componentId,
-    isBookmarksEnabled,
     isCallsEnabledInChannel,
     isCRTEnabled,
     type,
@@ -102,13 +96,6 @@ const ChannelInfo = ({
                         channelId={channelId}
                         type={type}
                     />
-                    {isBookmarksEnabled &&
-                        <ChannelBookmarks
-                            channelId={channelId}
-                            canAddBookmarks={canAddBookmarks}
-                            showInInfo={true}
-                        />
-                    }
                     <ChannelActions
                         channelId={channelId}
                         inModal={true}

@@ -4,7 +4,6 @@
 export {default as CategoryModel} from './category';
 export {default as CategoryChannelModel} from './category_channel';
 export {default as ChannelModel} from './channel';
-export {default as ChannelBookmarkModel} from './channel_bookmark';
 export {default as ChannelInfoModel} from './channel_info';
 export {default as ChannelMembershipModel} from './channel_membership';
 export {default as ConferenceModel} from './conference';

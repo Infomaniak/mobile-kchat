@@ -15,7 +15,6 @@ import {MM_TABLES} from '@constants/database';
 
 const {
     CHANNEL,
-    CHANNEL_BOOKMARK,
     CONFERENCE,
     CONFERENCE_PARTICIPANT,
     FILE,
@@ -37,6 +36,12 @@ export default schemaMigrations({
         {
             toVersion: 11,
             steps: [
+                unsafeExecuteSql('DROP TABLE IF EXISTS ChannelBookmark;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRun;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookChecklist;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookChecklistItem;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRunAttribute;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRunAttributeValue;'),
                 unsafeExecuteSql(
                     'CREATE INDEX IF NOT EXISTS Post_delete_at ON Post (delete_at);',
                 ),
@@ -163,7 +168,7 @@ export default schemaMigrations({
             toVersion: 7, // Ik: equivalent of version 12 of MM
             steps: [
                 createTable({
-                    name: CHANNEL_BOOKMARK,
+                    name: 'ChannelBookmark',
                     columns: [
                         {name: 'create_at', type: 'number'},
                         {name: 'update_at', type: 'number'},

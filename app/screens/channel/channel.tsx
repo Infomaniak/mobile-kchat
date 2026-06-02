@@ -38,7 +38,6 @@ type ChannelProps = {
     currentUserId: string;
     channelType: ChannelType;
     hasGMasDMFeature: boolean;
-    includeBookmarkBar?: boolean;
     includeChannelBanner: boolean;
     scheduledPostCount: number;
 };
@@ -148,7 +147,6 @@ const Channel = ({
                     componentId={componentId}
                     callsEnabledInChannel={isCallsEnabledInChannel}
                     isTabletView={isTabletView}
-                    shouldRenderBookmarks={shouldRender}
                     shouldRenderChannelBanner={includeChannelBanner}
                 />
                 {Platform.OS === 'ios' ? (
