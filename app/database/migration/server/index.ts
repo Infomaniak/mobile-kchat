@@ -36,6 +36,12 @@ export default schemaMigrations({
         {
             toVersion: 11,
             steps: [
+                unsafeExecuteSql('DROP TABLE IF EXISTS ChannelBookmark;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRun;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookChecklist;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookChecklistItem;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRunAttribute;'),
+                unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRunAttributeValue;'),
                 unsafeExecuteSql(
                     'CREATE INDEX IF NOT EXISTS Post_delete_at ON Post (delete_at);',
                 ),

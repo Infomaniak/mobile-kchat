@@ -9,7 +9,6 @@ import PushNotifications from '@init/push_notifications';
 import GlobalEventHandler from '@managers/global_event_handler';
 import {matomo} from '@managers/matomo';
 import NetworkManager from '@managers/network_manager';
-import '@managers/performance_monitor';
 import SessionManager from '@managers/session_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {registerScreens} from '@screens/index';
