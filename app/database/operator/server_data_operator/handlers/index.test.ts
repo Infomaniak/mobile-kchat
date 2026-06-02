@@ -8,6 +8,7 @@ import {
     transformRoleRecord,
     transformSystemRecord,
 } from '@database/operator/server_data_operator/transformers/general';
+import * as GeneralUtils from '@database/operator/utils/general';
 
 import type ServerDataOperator from '@database/operator/server_data_operator/index';
 
@@ -251,5 +252,20 @@ describe('*** DataOperator: Base Handlers tests ***', () => {
                 prepareRecordsOnly: false,
             }, 'test'),
         ).rejects.toThrow(Error);
+    });
+
+    it('=> existingRecords should skip retrieveRecords call', async () => {
+        const spyRetrieve = jest.spyOn(GeneralUtils, 'retrieveRecords');
+        await operator.handleRecords({
+            createOrUpdateRawValues: [{id: 'existing-role-id', name: 'existing-role-1', permissions: ['test-permission']}],
+            tableName: 'Role',
+            fieldName: 'id',
+            transformer: transformRoleRecord,
+            prepareRecordsOnly: true,
+            existingRecords: [],
+        }, 'test');
+
+        expect(spyRetrieve).not.toHaveBeenCalled();
+        spyRetrieve.mockRestore();
     });
 });

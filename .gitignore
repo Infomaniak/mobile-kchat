@@ -134,3 +134,7 @@ libraries/@mattermost/intune/*
 node_modules/@mattermost/intune
 # Claude Code
 .claude/settings.local.json
+
+# Jest reports
+reports/
+junit-jest.xml

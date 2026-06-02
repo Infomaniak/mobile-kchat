@@ -31,13 +31,13 @@ Channel
 id PK string FK - CategoryChannel.channel_id # server-generated
 create_at string
 creator_id string INDEX FK >- User.id
-delete_at number
+delete_at number INDEX
 display_name string
 is_group_constrained bool
 name string INDEX
 shared bool
 team_id string INDEX FK >- Team.id
-type string
+type string INDEX
 update_at number
 banner_info string
 abac_policy_enforced boolean
@@ -273,8 +273,8 @@ Post
 -
 id PK string # server generated
 channel_id string INDEX FK >- Channel.id
-create_at number
-delete_at number
+create_at number INDEX
+delete_at number INDEX
 edit_at number
 is_pinned boolean
 message string
@@ -377,7 +377,7 @@ Thread
 -
 id PK string FK - Post.id # similar to Post.id but for root post only
 is_following boolean
-last_reply_at number
+last_reply_at number INDEX
 last_viewed_at number
 reply_count number
 unread_mentions number
@@ -405,7 +405,7 @@ User
 id PK string # server generated
 auth_service string
 delete_at number
-email string
+email string INDEX
 first_name string
 is_bot boolean
 is_guest boolean
@@ -421,7 +421,7 @@ roles string
 status string
 timezone string
 update_at number
-username string
+username string INDEX
 
 
 AiBot

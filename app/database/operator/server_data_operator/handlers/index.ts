@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {Q, type Model} from '@nozbe/watermelondb';
+
 import {MM_TABLES} from '@constants/database';
 import BaseDataOperator from '@database/operator/base_data_operator';
 import {shouldUpdateFileRecord} from '@database/operator/server_data_operator/comparators/files';
@@ -18,7 +20,6 @@ import {logWarning} from '@utils/log';
 import {sanitizeReactions} from '../../utils/reaction';
 import {transformReactionRecord} from '../transformers/reaction';
 
-import type {Model} from '@nozbe/watermelondb';
 import type {HandleConfigArgs, HandleCustomEmojiArgs, HandleFilesArgs, HandleReactionsArgs, HandleRoleArgs, HandleSystemArgs, OperationArgs} from '@typings/database/database';
 import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji';
 import type FileModel from '@typings/database/models/servers/file';
@@ -127,6 +128,18 @@ export default class ServerDataOperatorBase extends BaseDataOperator {
             return [];
         }
 
+        const postIds = postsReactions.map((pr) => pr.post_id);
+        const allReactions = await this.database.get<ReactionModel>(REACTION).query(
+            Q.where('post_id', Q.oneOf(postIds)),
+        ).fetch();
+        const reactionsByPostId = allReactions.reduce((acc, reaction) => {
+            if (!acc[reaction.postId]) {
+                acc[reaction.postId] = [];
+            }
+            acc[reaction.postId].push(reaction);
+            return acc;
+        }, {} as Record<string, ReactionModel[]>);
+
         for await (const postReactions of postsReactions) {
             const {post_id, reactions} = postReactions;
             const {
@@ -137,6 +150,7 @@ export default class ServerDataOperatorBase extends BaseDataOperator {
                 post_id,
                 rawReactions: reactions,
                 skipSync,
+                existingReactions: reactionsByPostId[post_id] || [],
             });
 
             if (createReactions?.length) {

@@ -9,6 +9,7 @@ import Animated from 'react-native-reanimated';
 import ExpoImage from '@components/expo_image';
 import FileIcon from '@components/files/file_icon';
 import ImageFile from '@components/files/image_file';
+import VoiceRecordingFile from '@components/files/voice_recording_file';
 import UploadRetry from '@components/post_draft/uploads/upload_item/upload_retry';
 import ProgressBar from '@components/progress_bar';
 import {useTheme} from '@context/theme';
@@ -29,6 +30,7 @@ export interface UploadItemFile {
     width?: number;
     height?: number;
     mime_type?: string;
+    is_voice_recording?: boolean;
 }
 
 export interface UploadItemProps {
@@ -192,6 +194,7 @@ export default function UploadItemShared({
     } as FileInfo), [file.name, file.extension, file.mime_type]);
 
     const isImageFile = useMemo(() => isImage(fileForCheck), [fileForCheck]);
+    const isVoiceMessage = file.is_voice_recording;
 
     const imageFileData = useMemo(() => ({
         ...fileForCheck,
@@ -219,6 +222,7 @@ export default function UploadItemShared({
                     </View>
                 );
             }
+
             return (
                 <View style={style.imageOnlyThumbnail}>
                     <ImageFile
@@ -230,6 +234,15 @@ export default function UploadItemShared({
                 </View>
             );
         }
+
+        if (isVoiceMessage) {
+            return (
+                <VoiceRecordingFile
+                    uploading={loading}
+                />
+            );
+        }
+
         return (
             <View style={style.iconContainer}>
                 <FileIcon
@@ -238,7 +251,7 @@ export default function UploadItemShared({
                 />
             </View>
         );
-    }, [isImageFile, style.iconContainer, style.imageOnlyThumbnail, style.imageOnlyImage, fileForCheck, isShareExtension, imageFileData, forwardRef, inViewPort, file.uri]);
+    }, [isImageFile, isVoiceMessage, style.iconContainer, style.imageOnlyThumbnail, style.imageOnlyImage, fileForCheck, isShareExtension, imageFileData, forwardRef, inViewPort, file, loading]);
 
     const fileExtension = file.extension?.toUpperCase() || file.name?.split('.').pop()?.toUpperCase() || '';
     const formattedSize = getFormattedFileSize(file.size || 0);

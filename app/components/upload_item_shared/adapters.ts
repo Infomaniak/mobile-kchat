@@ -20,6 +20,7 @@ export function fileInfoToUploadItemFile(file: FileInfo): UploadItemFile {
         width: file.width,
         height: file.height,
         mime_type: file.mime_type,
+        is_voice_recording: file.is_voice_recording,
     };
 }
 
@@ -38,5 +39,6 @@ export function sharedItemToUploadItemFile(item: SharedItem): UploadItemFile {
         width: item.width,
         height: item.height,
         mime_type: item.type,
+        is_voice_recording: undefined,
     };
 }

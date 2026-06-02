@@ -45,6 +45,7 @@ type PostOptionsProps = {
     canPin: boolean;
     canReply: boolean;
     canViewTranslation: boolean;
+    isChannelMember?: boolean;
     combinedPost?: Post | PostModel;
     isSaved: boolean;
     sourceScreen: AvailableScreens;
@@ -64,6 +65,7 @@ const PostOptions = ({
     sourceScreen, post, thread, bindings, serverUrl,
     usage, limits,
     currentUser,
+    isChannelMember = true,
 }: PostOptionsProps) => {
     const isTablet = useIsTablet();
     const {enabled, panResponder} = useBottomSheetListsFix();
@@ -77,8 +79,9 @@ const PostOptions = ({
 
     const isSystemPost = isSystemMessage(post);
 
-    const canCopyPermalink = !isSystemPost;
-    const canCopyText = canCopyPermalink && Boolean(post.message);
+    const canShowPermalink = !isSystemPost;
+    const canCopyPermalink = canShowPermalink;
+    const canCopyText = canShowPermalink && post.message;
 
     const canSavePost = !isSystemPost;
 
@@ -90,24 +93,36 @@ const PostOptions = ({
 
     const snapPoints = useMemo(() => {
         const items: Array<string | number> = [1];
-        const optionsCount = [
-            canCopyPermalink, canReply, canCopyText, canDelete, canEdit,
+        const commonOptions = [canCopyPermalink];
+        const memberOptions = [
+            canReply, canCopyText, canDelete, canEdit,
             canMarkAsUnread, canPin, !isSystemPost, shouldRenderAi, shouldRenderFollow, canShowReminder, canTranslate, canViewTranslation,
-        ].reduce((acc, v) => {
+        ];
+
+        const allOptions = [...commonOptions, ...(isChannelMember ? memberOptions : [])];
+        const optionsCount = allOptions.reduce((acc, v) => {
             return v ? acc + 1 : acc;
-        }, 0) + (shouldShowBindings ? 0.5 : 0);
+        }, 0) + (isChannelMember && shouldShowBindings ? 0.5 : 0);
 
         items.push(
             bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT) +
             (canAddReaction ? REACTION_PICKER_HEIGHT + REACTION_PICKER_MARGIN : 0),
         );
+        let extraHeight = 0;
+        if (isChannelMember) {
+            if (canAddReaction) {
+                extraHeight += REACTION_PICKER_HEIGHT + REACTION_PICKER_MARGIN;
+            }
+        }
 
-        if (shouldShowBindings) {
+        items.push(bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT) + extraHeight);
+
+        if (isChannelMember && shouldShowBindings) {
             items.push('80%');
         }
 
         return items;
-    }, [canCopyPermalink, canReply, canCopyText, canDelete, canEdit, canMarkAsUnread, canPin, isSystemPost, shouldRenderAi, shouldRenderFollow, canShowReminder, canTranslate, canViewTranslation, shouldShowBindings, canAddReaction]);
+    }, [canCopyPermalink, isChannelMember, canReply, canCopyText, canDelete, canEdit, canMarkAsUnread, canPin, isSystemPost, shouldRenderAi, shouldRenderFollow, canShowReminder, canTranslate, canViewTranslation, shouldShowBindings, canAddReaction]);
 
     const renderContent = () => {
         return (
@@ -116,104 +131,108 @@ const PostOptions = ({
                 scrollEnabled={enabled}
                 {...panResponder.panHandlers}
             >
-                {canAddReaction &&
-                    <ReactionBar
-                        bottomSheetId={Screens.POST_OPTIONS}
-                        postId={post.id}
-                    />
-                }
-                {canReply &&
-                    <ReplyOption
-                        bottomSheetId={Screens.POST_OPTIONS}
-                        post={post}
-                    />
-                }
-                {shouldRenderFollow &&
-                    <FollowThreadOption
-                        bottomSheetId={Screens.POST_OPTIONS}
-                        thread={thread}
-                    />
-                }
-                {shouldRenderAi &&
-                    <AskAi
-                        bottomSheetId={Screens.POST_OPTIONS}
-                        post={post}
-                    />
-                }
-                {canMarkAsUnread && !isSystemPost &&
-                <MarkAsUnreadOption
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    post={post}
-                    sourceScreen={sourceScreen}
-                />
-                }
-                {canShowReminder &&
-                    <IKReminderOption
-                        bottomSheetId={Screens.POST_OPTIONS}
-                        post={post}
-                        usage={usage}
-                        limits={limits}
-                    />
-                }
+                {isChannelMember && (
+                    <>
+                        {canAddReaction &&
+                            <ReactionBar
+                                bottomSheetId={Screens.POST_OPTIONS}
+                                postId={post.id}
+                            />
+                        }
+                        {canReply &&
+                            <ReplyOption
+                                bottomSheetId={Screens.POST_OPTIONS}
+                                post={post}
+                            />
+                        }
+                        {shouldRenderFollow &&
+                            <FollowThreadOption
+                                bottomSheetId={Screens.POST_OPTIONS}
+                                thread={thread}
+                            />
+                        }
+                        {shouldRenderAi &&
+                            <AskAi
+                                bottomSheetId={Screens.POST_OPTIONS}
+                                post={post}
+                            />
+                        }
+                        {canMarkAsUnread && !isSystemPost &&
+                        <MarkAsUnreadOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            post={post}
+                            sourceScreen={sourceScreen}
+                        />
+                        }
+                        {canShowReminder &&
+                            <IKReminderOption
+                                bottomSheetId={Screens.POST_OPTIONS}
+                                post={post}
+                                usage={usage}
+                                limits={limits}
+                            />
+                        }
+                        {canViewTranslation &&
+                        <ShowTranslationOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            postId={post.id}
+                        />
+                        }
+                        {canSavePost &&
+                        <SaveOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            isSaved={isSaved}
+                            postId={post.id}
+                        />
+                        }
+                        {Boolean(canCopyText && post.message) &&
+                        <CopyTextOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            postMessage={post.messageSource || post.message}
+                            sourceScreen={sourceScreen}
+                        />}
+                        {canPin &&
+                        <PinChannelOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            isPostPinned={post.isPinned}
+                            postId={post.id}
+                        />
+                        }
+                        {canTranslate &&
+                            <IKTranslateOption
+                                bottomSheetId={Screens.POST_OPTIONS}
+                                post={post}
+                            />
+                        }
+                        {canEdit && post.type !== PostTypes.VOICE_MESSAGE &&
+                        <EditOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            post={post}
+                            canDelete={canDelete}
+                        />
+                        }
+                        {canDelete &&
+                        <DeletePostOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            combinedPost={combinedPost}
+                            post={post}
+                            currentUser={currentUser}
+                        />}
+                        {shouldShowBindings &&
+                        <AppBindingsPostOptions
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            post={post}
+                            serverUrl={serverUrl}
+                            bindings={bindings}
+                        />
+                        }
+                    </>
+                )}
                 {canCopyPermalink &&
                 <CopyPermalinkOption
                     bottomSheetId={Screens.POST_OPTIONS}
                     post={post}
                     sourceScreen={sourceScreen}
-                />
-                }
-                {canViewTranslation &&
-                <ShowTranslationOption
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    postId={post.id}
-                />
-                }
-                {canSavePost &&
-                <SaveOption
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    isSaved={isSaved}
-                    postId={post.id}
-                />
-                }
-                {Boolean(canCopyText && post.message) &&
-                <CopyTextOption
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    postMessage={post.messageSource || post.message}
-                    sourceScreen={sourceScreen}
-                />}
-                {canPin &&
-                <PinChannelOption
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    isPostPinned={post.isPinned}
-                    postId={post.id}
-                />
-                }
-                {canTranslate &&
-                    <IKTranslateOption
-                        bottomSheetId={Screens.POST_OPTIONS}
-                        post={post}
-                    />
-                }
-                {canEdit && post.type !== PostTypes.VOICE_MESSAGE &&
-                <EditOption
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    post={post}
-                    canDelete={canDelete}
-                />
-                }
-                {canDelete &&
-                <DeletePostOption
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    combinedPost={combinedPost}
-                    post={post}
-                    currentUser={currentUser}
-                />}
-                {shouldShowBindings &&
-                <AppBindingsPostOptions
-                    bottomSheetId={Screens.POST_OPTIONS}
-                    post={post}
-                    serverUrl={serverUrl}
-                    bindings={bindings}
                 />
                 }
             </Scroll>

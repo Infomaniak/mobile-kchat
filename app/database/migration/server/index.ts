@@ -36,6 +36,39 @@ export default schemaMigrations({
         {
             toVersion: 11,
             steps: [
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Post_delete_at ON Post (delete_at);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Post_channel_id_create_at ON Post (channel_id, create_at DESC);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Post_root_id ON Post (root_id);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS MyChannel_last_post_at ON MyChannel (last_post_at);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS MyChannel_last_viewed_at ON MyChannel (last_viewed_at);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Preference_category_name ON Preference (category, name);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Channel_delete_at ON Channel (delete_at);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Channel_type ON Channel (type);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS Thread_last_reply_at ON Thread (last_reply_at);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS User_username ON User (username);',
+                ),
+                unsafeExecuteSql(
+                    'CREATE INDEX IF NOT EXISTS User_email ON User (email);',
+                ),
                 unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookRun;'),
                 unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookChecklist;'),
                 unsafeExecuteSql('DROP TABLE IF EXISTS PlaybookChecklistItem;'),

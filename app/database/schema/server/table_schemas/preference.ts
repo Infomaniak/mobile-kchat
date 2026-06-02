@@ -11,7 +11,7 @@ export default tableSchema({
     name: PREFERENCE,
     columns: [
         {name: 'category', type: 'string', isIndexed: true},
-        {name: 'name', type: 'string'},
+        {name: 'name', type: 'string', isIndexed: true},
         {name: 'user_id', type: 'string', isIndexed: true},
         {name: 'value', type: 'string'},
     ],

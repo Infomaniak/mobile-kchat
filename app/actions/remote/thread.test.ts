@@ -215,7 +215,7 @@ describe('get threads', () => {
         expect(result.error).toBeTruthy();
     });
 
-    it('fetchAndSwitchToThread - base case', async () => {
+    it('fetchAndSwitchToThread - does not crash when user is not a member', async () => {
         await operator.handlePosts({
             actionType: ActionType.POSTS.RECEIVED_IN_CHANNEL,
             order: [post1.id],

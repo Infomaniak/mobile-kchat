@@ -198,6 +198,51 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - NitroModules (0.35.5):
+    - DoubleConversion
+    - glog
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-callinvoker
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - NitroSound (0.2.13):
+    - DoubleConversion
+    - glog
+    - NitroModules
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-callinvoker
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - ObjectiveDropboxOfficial (6.2.3)
   - OpenGraph (1.4.1)
   - RCT-Folly (2024.11.18.00):
@@ -1948,8 +1993,6 @@ PODS:
     - React-CoreModules
     - React-RCTImage
     - React-RCTText
-  - RNAudioRecorderPlayer (3.6.14):
-    - React-Core
   - RNCalendarEvents (2.2.0):
     - React-Core
   - RNCAsyncStorage (1.23.1):
@@ -2359,6 +2402,8 @@ DEPENDENCIES:
   - "mattermost-hardware-keyboard (from `../node_modules/@mattermost/hardware-keyboard`)"
   - "mattermost-react-native-turbo-log (from `../node_modules/@mattermost/react-native-turbo-log`)"
   - "mattermost-rnutils (from `../node_modules/@mattermost/rnutils`)"
+  - NitroModules (from `../node_modules/react-native-nitro-modules`)
+  - NitroSound (from `../node_modules/react-native-nitro-sound`)
   - OpenGraph (= 1.4.1)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
@@ -2446,7 +2491,6 @@ DEPENDENCIES:
   - ReactNativeExceptionHandler (from `../node_modules/react-native-exception-handler`)
   - ReactNativeIncallManager (from `../node_modules/react-native-incall-manager`)
   - ReactNativeNavigation (from `../node_modules/react-native-navigation`)
-  - RNAudioRecorderPlayer (from `../node_modules/react-native-audio-recorder-player`)
   - RNCalendarEvents (from `../node_modules/react-native-calendar-events`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
@@ -2565,6 +2609,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@mattermost/react-native-turbo-log"
   mattermost-rnutils:
     :path: "../node_modules/@mattermost/rnutils"
+  NitroModules:
+    :path: "../node_modules/react-native-nitro-modules"
+  NitroSound:
+    :path: "../node_modules/react-native-nitro-sound"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -2733,8 +2781,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-incall-manager"
   ReactNativeNavigation:
     :path: "../node_modules/react-native-navigation"
-  RNAudioRecorderPlayer:
-    :path: "../node_modules/react-native-audio-recorder-player"
   RNCalendarEvents:
     :path: "../node_modules/react-native-calendar-events"
   RNCAsyncStorage:
@@ -2847,6 +2893,8 @@ SPEC CHECKSUMS:
   mattermost-hardware-keyboard: c34d122f4dfb4342cd5770fb9d9f8f8fd5b73b28
   mattermost-react-native-turbo-log: aa271112608b6dc5c1d65227534b29208acbc96f
   mattermost-rnutils: 70efb35bc7afc07a9bbac873caaf29bda9befca8
+  NitroModules: 60e732ea9b1ec9be0d536711ec1117fe37708bd0
+  NitroSound: 42eab68bcbf642cf9e754a8212ef561efc575058
   ObjectiveDropboxOfficial: fe206ce8c0bc49976c249d472db7fdbc53ebbd53
   OpenGraph: 596722bb7f112d2dabcdb284cb817f01341a7540
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
@@ -2933,7 +2981,6 @@ SPEC CHECKSUMS:
   ReactNativeExceptionHandler: a23922ca00122b050ae9412f960061791c232c47
   ReactNativeIncallManager: ef7b845e166f04cf8ddf433d8a23227b01cef87a
   ReactNativeNavigation: 6cef83673a08a51d426ff041c015da7c2a178a77
-  RNAudioRecorderPlayer: b5ed41ccfe72a211a870bfe09ab36c046eb27d2a
   RNCalendarEvents: 62e1ac89d3afbfa77cf2dafa8727af93fa70825f
   RNCAsyncStorage: aa75595c1aefa18f868452091fa0c411a516ce11
   RNCClipboard: 7c3e3b5f71d84ef61690ad377b6c50cf27864ff5

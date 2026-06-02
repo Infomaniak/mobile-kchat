@@ -165,7 +165,7 @@ describe('*** Test schema for SERVER database ***', () => {
                     columns: {
                         create_at: {name: 'create_at', type: 'number'},
                         creator_id: {name: 'creator_id', type: 'string', isIndexed: true},
-                        delete_at: {name: 'delete_at', type: 'number'},
+                        delete_at: {name: 'delete_at', type: 'number', isIndexed: true},
                         display_name: {name: 'display_name', type: 'string'},
                         is_group_constrained: {
                             name: 'is_group_constrained',
@@ -174,7 +174,7 @@ describe('*** Test schema for SERVER database ***', () => {
                         name: {name: 'name', type: 'string', isIndexed: true},
                         shared: {name: 'shared', type: 'boolean'},
                         team_id: {name: 'team_id', type: 'string', isIndexed: true},
-                        type: {name: 'type', type: 'string'},
+                        type: {name: 'type', type: 'string', isIndexed: true},
                         update_at: {name: 'update_at', type: 'number'},
                         banner_info: {name: 'banner_info', type: 'string', isOptional: true},
                         abac_policy_enforced: {name: 'abac_policy_enforced', type: 'boolean', isOptional: true},
@@ -183,13 +183,13 @@ describe('*** Test schema for SERVER database ***', () => {
                     columnArray: [
                         {name: 'create_at', type: 'number'},
                         {name: 'creator_id', type: 'string', isIndexed: true},
-                        {name: 'delete_at', type: 'number'},
+                        {name: 'delete_at', type: 'number', isIndexed: true},
                         {name: 'display_name', type: 'string'},
                         {name: 'is_group_constrained', type: 'boolean'},
                         {name: 'name', type: 'string', isIndexed: true},
                         {name: 'shared', type: 'boolean'},
                         {name: 'team_id', type: 'string', isIndexed: true},
-                        {name: 'type', type: 'string'},
+                        {name: 'type', type: 'string', isIndexed: true},
                         {name: 'update_at', type: 'number'},
                         {name: 'banner_info', type: 'string', isOptional: true},
                         {name: 'abac_policy_enforced', type: 'boolean', isOptional: true},
@@ -275,8 +275,8 @@ describe('*** Test schema for SERVER database ***', () => {
                     unsafeSql: undefined,
                     columns: {
                         is_unread: {name: 'is_unread', type: 'boolean'},
-                        last_post_at: {name: 'last_post_at', type: 'number'},
-                        last_viewed_at: {name: 'last_viewed_at', type: 'number'},
+                        last_post_at: {name: 'last_post_at', type: 'number', isIndexed: true},
+                        last_viewed_at: {name: 'last_viewed_at', type: 'number', isIndexed: true},
                         manually_unread: {name: 'manually_unread', type: 'boolean'},
                         mentions_count: {name: 'mentions_count', type: 'number'},
                         message_count: {name: 'message_count', type: 'number'},
@@ -288,8 +288,8 @@ describe('*** Test schema for SERVER database ***', () => {
                     },
                     columnArray: [
                         {name: 'is_unread', type: 'boolean'},
-                        {name: 'last_post_at', type: 'number'},
-                        {name: 'last_viewed_at', type: 'number'},
+                        {name: 'last_post_at', type: 'number', isIndexed: true},
+                        {name: 'last_viewed_at', type: 'number', isIndexed: true},
                         {name: 'manually_unread', type: 'boolean'},
                         {name: 'mentions_count', type: 'number'},
                         {name: 'message_count', type: 'number'},
@@ -476,7 +476,7 @@ describe('*** Test schema for SERVER database ***', () => {
                     columns: {
                         channel_id: {name: 'channel_id', type: 'string', isIndexed: true},
                         create_at: {name: 'create_at', type: 'number'},
-                        delete_at: {name: 'delete_at', type: 'number'},
+                        delete_at: {name: 'delete_at', type: 'number', isIndexed: true},
                         edit_at: {name: 'edit_at', type: 'number'},
                         is_pinned: {name: 'is_pinned', type: 'boolean'},
                         message: {name: 'message', type: 'string'},
@@ -494,7 +494,7 @@ describe('*** Test schema for SERVER database ***', () => {
                     columnArray: [
                         {name: 'channel_id', type: 'string', isIndexed: true},
                         {name: 'create_at', type: 'number'},
-                        {name: 'delete_at', type: 'number'},
+                        {name: 'delete_at', type: 'number', isIndexed: true},
                         {name: 'edit_at', type: 'number'},
                         {name: 'is_pinned', type: 'boolean'},
                         {name: 'message', type: 'string'},
@@ -515,13 +515,13 @@ describe('*** Test schema for SERVER database ***', () => {
                     unsafeSql: undefined,
                     columns: {
                         category: {name: 'category', type: 'string', isIndexed: true},
-                        name: {name: 'name', type: 'string'},
+                        name: {name: 'name', type: 'string', isIndexed: true},
                         user_id: {name: 'user_id', type: 'string', isIndexed: true},
                         value: {name: 'value', type: 'string'},
                     },
                     columnArray: [
                         {name: 'category', type: 'string', isIndexed: true},
-                        {name: 'name', type: 'string'},
+                        {name: 'name', type: 'string', isIndexed: true},
                         {name: 'user_id', type: 'string', isIndexed: true},
                         {name: 'value', type: 'string'},
                     ],
@@ -688,7 +688,7 @@ describe('*** Test schema for SERVER database ***', () => {
                     unsafeSql: undefined,
                     columns: {
                         is_following: {name: 'is_following', type: 'boolean'},
-                        last_reply_at: {name: 'last_reply_at', type: 'number'},
+                        last_reply_at: {name: 'last_reply_at', type: 'number', isIndexed: true},
                         last_viewed_at: {name: 'last_viewed_at', type: 'number'},
                         reply_count: {name: 'reply_count', type: 'number'},
                         unread_mentions: {name: 'unread_mentions', type: 'number'},
@@ -698,7 +698,7 @@ describe('*** Test schema for SERVER database ***', () => {
                     },
                     columnArray: [
                         {name: 'is_following', type: 'boolean'},
-                        {name: 'last_reply_at', type: 'number'},
+                        {name: 'last_reply_at', type: 'number', isIndexed: true},
                         {name: 'last_viewed_at', type: 'number'},
                         {name: 'reply_count', type: 'number'},
                         {name: 'unread_mentions', type: 'number'},
@@ -749,7 +749,7 @@ describe('*** Test schema for SERVER database ***', () => {
                     columns: {
                         auth_service: {name: 'auth_service', type: 'string'},
                         delete_at: {name: 'delete_at', type: 'number'},
-                        email: {name: 'email', type: 'string'},
+                        email: {name: 'email', type: 'string', isIndexed: true},
                         first_name: {name: 'first_name', type: 'string'},
                         is_bot: {name: 'is_bot', type: 'boolean'},
                         is_guest: {name: 'is_guest', type: 'boolean'},
@@ -765,7 +765,7 @@ describe('*** Test schema for SERVER database ***', () => {
                         status: {name: 'status', type: 'string'},
                         timezone: {name: 'timezone', type: 'string'},
                         update_at: {name: 'update_at', type: 'number'},
-                        username: {name: 'username', type: 'string'},
+                        username: {name: 'username', type: 'string', isIndexed: true},
                         terms_of_service_create_at: {name: 'terms_of_service_create_at', type: 'number'},
                         terms_of_service_id: {name: 'terms_of_service_id', type: 'string'},
 
@@ -773,7 +773,7 @@ describe('*** Test schema for SERVER database ***', () => {
                     columnArray: [
                         {name: 'auth_service', type: 'string'},
                         {name: 'delete_at', type: 'number'},
-                        {name: 'email', type: 'string'},
+                        {name: 'email', type: 'string', isIndexed: true},
                         {name: 'first_name', type: 'string'},
                         {name: 'is_bot', type: 'boolean'},
                         {name: 'is_guest', type: 'boolean'},
@@ -789,7 +789,7 @@ describe('*** Test schema for SERVER database ***', () => {
                         {name: 'status', type: 'string'},
                         {name: 'timezone', type: 'string'},
                         {name: 'update_at', type: 'number'},
-                        {name: 'username', type: 'string'},
+                        {name: 'username', type: 'string', isIndexed: true},
                         {name: 'terms_of_service_id', type: 'string'},
                         {name: 'terms_of_service_create_at', type: 'number'},
                     ],
