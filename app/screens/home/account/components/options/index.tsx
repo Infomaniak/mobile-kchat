@@ -9,6 +9,7 @@ import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import CustomStatus from './custom_status';
 import Logout from './logout';
 import Next from './next';
+import SendFeedback from './send_feedback';
 import Settings from './settings';
 import UserPresence from './user_presence';
 import YourProfile from './your_profile';
@@ -71,6 +72,7 @@ const AccountOptions = ({user, enableCustomUserStatuses, isTablet, theme}: Accou
             <View style={styles.divider}/>
             <View style={styles.group}>
                 <Next/>
+                <SendFeedback/>
                 <Logout/>
             </View>
         </View>
