@@ -16,6 +16,7 @@ import useDidMount from '@hooks/did_mount';
 import useDidUpdate from '@hooks/did_update';
 import {useDebounce} from '@hooks/utils';
 import EphemeralStore from '@store/ephemeral_store';
+import {captureMessage, captureException} from '@utils/sentry';
 
 import Intro from './intro';
 
@@ -53,13 +54,36 @@ const ChannelPostList = ({
     const [fetchingPosts, setFetchingPosts] = useState(EphemeralStore.isLoadingMessagesForChannel(serverUrl, channelId));
     const oldPostsCount = useRef<number>(posts.length);
 
+    const onEndReachedCallCount = useRef(0);
+
     const onEndReached = useDebounce(useCallback(async () => {
+        onEndReachedCallCount.current += 1;
+
         if (!fetchingPosts && canLoadPostsBefore.current && posts.length) {
+            const postsBefore = posts.length;
             const lastPost = posts[posts.length - 1];
             const result = await fetchPostsBefore(serverUrl, channelId, lastPost?.id || '');
             canLoadPostsBefore.current = false;
-            if (!('error' in result)) {
-                canLoadPostsBefore.current = (result.posts?.length ?? 0) > 0;
+
+            if ('error' in result) {
+                // Error already captured in fetchPostsBefore catch block
+                canLoadPostsBefore.current = true; // Allow retry on error
+            } else {
+                const returnedPosts = result.posts?.length ?? 0;
+                canLoadPostsBefore.current = returnedPosts > 0;
+
+                if (returnedPosts === 0) {
+                    captureMessage(`fetchPostsBefore returned 0 posts - scroll likely stuck | channelId=${channelId} | lastPostId=${lastPost?.id} | postsBefore=${postsBefore} | calls=${onEndReachedCallCount.current}`);
+                } else if (returnedPosts < 5) {
+                    captureMessage(`fetchPostsBefore returned few posts (${returnedPosts}) - possible short list causing re-trigger | channelId=${channelId} | postsBefore=${postsBefore}`);
+                }
+
+                if (returnedPosts > 0 && postsBefore === posts.length) {
+                    // Posts returned but list didn't grow - potential DB/persistence issue
+                    captureException(
+                        new Error(`Posts returned but list did not grow: returned=${returnedPosts}, postsBefore=${postsBefore}, postsAfter=${posts.length}, channelId=${channelId}`),
+                    );
+                }
             }
         }
     }, [fetchingPosts, serverUrl, channelId, posts]), 500);

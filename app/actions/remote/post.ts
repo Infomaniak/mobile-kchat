@@ -31,6 +31,7 @@ import {logDebug, logError} from '@utils/log';
 import {processPostsFetched} from '@utils/post';
 import {getPostIdsForCombinedUserActivityPost} from '@utils/post_list';
 import {allSettled} from '@utils/promise';
+import {captureException} from '@utils/sentry';
 
 import {processChannelPostsByTeam} from './post.auxiliary';
 import {forceLogoutIfNecessary} from './session';
@@ -507,7 +508,9 @@ export async function fetchPostsBefore(serverUrl: string, channelId: string, pos
         }
         return result;
     } catch (error) {
-        logDebug('error on fetchPostsBefore', getFullErrorMessage(error));
+        const msg = getFullErrorMessage(error);
+        captureException(new Error(`fetchPostsBefore API failed: ${msg} | serverUrl=${serverUrl} | channelId=${channelId} | postId=${postId}`));
+        logDebug('error on fetchPostsBefore', msg);
         forceLogoutIfNecessary(serverUrl, error as ClientErrorProps);
         return {error};
     } finally {
