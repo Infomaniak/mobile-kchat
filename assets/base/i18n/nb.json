@@ -4,6 +4,7 @@
     "account.server_prod": "Bytt til STABIL versjon",
     "account.settings": "Innstillinger",
     "account.send_feedback": "Send tilbakemelding",
+    "send_feedback.description.label": "Beskrivelse",
     "send_feedback.files.label": "Filer",
     "send_feedback.files.remove": "Fjern",
     "send_feedback.files.select": "Velg filer",

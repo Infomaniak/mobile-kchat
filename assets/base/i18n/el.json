@@ -4,6 +4,7 @@
     "account.server_prod": "Μετάβαση στην ΣΤΑΘΕΡΗ έκδοση",
     "account.settings": "Ρυθμίσεις",
     "account.send_feedback": "Αποστολή σχολίου",
+    "send_feedback.description.label": "Περιγραφή",
     "send_feedback.files.label": "Αρχεία",
     "send_feedback.files.remove": "Κατάργηση",
     "send_feedback.files.select": "Επιλογή αρχείων",

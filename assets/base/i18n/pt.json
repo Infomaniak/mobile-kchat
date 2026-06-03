@@ -4,6 +4,7 @@
     "account.server_prod": "Mudar para a versão ESTÁVEL",
     "account.settings": "Configurações",
     "account.send_feedback": "Enviar feedback",
+    "send_feedback.description.label": "Descrição",
     "send_feedback.files.label": "Ficheiros",
     "send_feedback.files.remove": "Remover",
     "send_feedback.files.select": "Selecionar ficheiros",

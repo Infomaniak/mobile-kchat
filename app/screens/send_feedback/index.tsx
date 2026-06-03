@@ -1,9 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useState} from 'react';
+import {useDatabase} from '@nozbe/watermelondb/react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {
+    ActivityIndicator,
     Platform,
     ScrollView,
     Text,
@@ -11,18 +13,22 @@ import {
 } from 'react-native';
 import {type Asset, type ImagePickerResponse, launchImageLibrary} from 'react-native-image-picker';
 
+import {sendFeedback} from '@actions/remote/feedback/send_feedback';
 import Button from '@components/button';
 import FloatingTextInput from '@components/floating_input/floating_text_input_label';
 import MenuDivider from '@components/menu_divider';
+import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
+import {getCurrentUser} from '@queries/servers/user';
 import {popTopScreen} from '@screens/navigation';
-import {logDebug} from '@utils/log';
+import {logDebug, logError} from '@utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 import FeedbackSelector from './feedback_selector';
 
+import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type FeedbackType = 'bug' | 'feature';
@@ -39,6 +45,16 @@ const PriorityOptions = [
     {text: 'Urgent', value: 'urgent'},
     {text: 'Immediate', value: 'immediate'},
 ] as const;
+
+const PriorityValueMap: Record<Priority, number> = {
+    low: 1,
+    normal: 2,
+    high: 3,
+    urgent: 4,
+    immediate: 5,
+};
+
+const BUCKET_IDENTIFIER = 'kchat';
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     container: {
@@ -125,11 +141,24 @@ const SendFeedback = ({componentId}: Props) => {
     const intl = useIntl();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
+    const database = useDatabase();
+    const serverUrl = useServerUrl();
 
     const [feedbackType, setFeedbackType] = useState<FeedbackType>('bug');
     const [priority, setPriority] = useState<Priority>('normal');
     const [subject, setSubject] = useState('');
+    const [description, setDescription] = useState('');
     const [files, setFiles] = useState<Asset[]>([]);
+    const [currentUser, setCurrentUser] = useState<UserModel | undefined>();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (database) {
+            getCurrentUser(database).then(setCurrentUser).catch(() => {
+                // silently ignore
+            });
+        }
+    }, [database]);
 
     const handleClose = useCallback(() => {
         popTopScreen(componentId);
@@ -156,18 +185,51 @@ const SendFeedback = ({componentId}: Props) => {
         });
     }, []);
 
-    const handleSubmit = useCallback(() => {
+    const handleSubmit = useCallback(async () => {
+        if (!currentUser || !serverUrl) {
+            return;
+        }
+
         const prefix = Platform.OS === 'android' ? '[Android]' : '[iOS]';
         const fullSubject = `${prefix}: ${subject}`;
 
-        logDebug('Feedback submitted:', {
-            type: feedbackType,
-            priority,
+        setIsSubmitting(true);
+        const result = await sendFeedback({
+            serverUrl,
+            bucketIdentifier: BUCKET_IDENTIFIER,
+            type: feedbackType === 'bug' ? 'bugs' : 'features',
             subject: fullSubject,
-            filesCount: files.length,
+            description,
+            priorityValue: PriorityValueMap[priority],
+            priorityLabel: PriorityOptions.find((p) => p.value === priority)?.text || priority,
+            files: files.map((f) => ({uri: f.uri!, type: f.type, fileName: f.fileName})),
+            extra: {
+                project: 'kchat',
+                userAgent: `kchat-mobile/${Platform.OS}`,
+                userId: currentUser.id,
+                userMail: currentUser.email,
+                userDisplayName: currentUser.firstName || currentUser.lastName ? `${currentUser.firstName} ${currentUser.lastName}`.trim() : currentUser.username,
+                pageLink: serverUrl,
+            },
         });
-        handleClose();
-    }, [feedbackType, priority, subject, files.length, handleClose]);
+        setIsSubmitting(false);
+
+        if (result.error) {
+            logError('SendFeedback', result.error);
+        } else {
+            logDebug('Feedback submitted, URL:', result.data);
+            handleClose();
+        }
+    }, [currentUser, serverUrl, subject, description, feedbackType, priority, files, handleClose]);
+
+    const canSubmit = subject.trim().length > 0 && !isSubmitting;
+
+    const submitIcon = isSubmitting ? (
+        <ActivityIndicator
+            size='small'
+            color={theme.buttonColor}
+        />
+    ) : undefined;
 
     return (
         <View style={styles.container}>
@@ -209,6 +271,19 @@ const SendFeedback = ({componentId}: Props) => {
                     <MenuDivider/>
                     <View>
                         <Text style={styles.sectionTitle}>
+                            {intl.formatMessage({id: 'send_feedback.description.label', defaultMessage: 'Description'})}
+                        </Text>
+                        <FloatingTextInput
+                            label={intl.formatMessage({id: 'send_feedback.description.label', defaultMessage: 'Description'})}
+                            value={description}
+                            onChangeText={setDescription}
+                            theme={theme}
+                            multiline={true}
+                        />
+                    </View>
+                    <MenuDivider/>
+                    <View>
+                        <Text style={styles.sectionTitle}>
                             {intl.formatMessage({id: 'send_feedback.files.label', defaultMessage: 'Files'})}
                         </Text>
                         <Button
@@ -233,9 +308,11 @@ const SendFeedback = ({componentId}: Props) => {
             <View style={styles.buttonContainer}>
                 <Button
                     theme={theme}
-                    text={intl.formatMessage({id: 'send_feedback.submit', defaultMessage: 'Send'})}
+                    text={isSubmitting ? intl.formatMessage({id: 'generic.loading', defaultMessage: 'Loading'}) : intl.formatMessage({id: 'send_feedback.submit', defaultMessage: 'Send'})}
                     onPress={handleSubmit}
                     size='lg'
+                    icon={submitIcon}
+                    disabled={!canSubmit}
                 />
             </View>
         </View>

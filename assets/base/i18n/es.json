@@ -3,6 +3,7 @@
   "account.logout_from": "Desconectar de {serverName}",
   "account.settings": "Ajustes",
   "account.send_feedback": "Enviar comentarios",
+  "send_feedback.description.label": "Descripción",
   "send_feedback.files.label": "Archivos",
   "send_feedback.files.remove": "Eliminar",
   "send_feedback.files.select": "Seleccionar archivos",

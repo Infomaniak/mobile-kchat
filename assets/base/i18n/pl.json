@@ -4,6 +4,7 @@
     "account.server_prod": "Przejdź do wersji STABILNEJ",
     "account.settings": "Ustawienia",
     "account.send_feedback": "Wyślij opinię",
+    "send_feedback.description.label": "Opis",
     "send_feedback.files.label": "Pliki",
     "send_feedback.files.remove": "Usuń",
     "send_feedback.files.select": "Wybierz pliki",

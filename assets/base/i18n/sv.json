@@ -4,6 +4,7 @@
     "account.server_prod": "Växla till STABIL version",
     "account.settings": "Inställningar",
     "account.send_feedback": "Skicka feedback",
+    "send_feedback.description.label": "Beskrivning",
     "send_feedback.files.label": "Filer",
     "send_feedback.files.remove": "Ta bort",
     "send_feedback.files.select": "Välj filer",

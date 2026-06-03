@@ -4,6 +4,7 @@
     "account.server_prod": "Schakel over naar de STABIELE versie",
     "account.settings": "Instellingen",
     "account.send_feedback": "Feedback versturen",
+    "send_feedback.description.label": "Beschrijving",
     "send_feedback.files.label": "Bestanden",
     "send_feedback.files.remove": "Verwijderen",
     "send_feedback.files.select": "Bestanden selecteren",

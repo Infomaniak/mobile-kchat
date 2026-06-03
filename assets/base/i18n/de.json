@@ -3,6 +3,7 @@
   "account.logout_from": "Abmelden von {serverName}",
   "account.settings": "Einstellungen",
   "account.send_feedback": "Feedback senden",
+  "send_feedback.description.label": "Beschreibung",
   "send_feedback.files.label": "Dateien",
   "send_feedback.files.remove": "Entfernen",
   "send_feedback.files.select": "Dateien auswählen",

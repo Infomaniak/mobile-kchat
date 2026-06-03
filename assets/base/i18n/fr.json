@@ -5,6 +5,7 @@
   "account.server_prod": "Passer à la version STABLE",
   "account.settings": "Paramètres",
   "account.send_feedback": "Envoyer un feedback",
+  "send_feedback.description.label": "Description",
   "send_feedback.files.label": "Fichiers",
   "send_feedback.files.remove": "Supprimer",
   "send_feedback.files.select": "Sélectionner des fichiers",

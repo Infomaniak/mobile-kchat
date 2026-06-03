@@ -1176,6 +1176,7 @@
   "select_team.no_team.description": "To join a team, ask a team admin for an invite, or create your own team. You may also want to check your email inbox for an invitation.",
   "select_team.no_team.title": "No teams are available to join",
   "select_team.title": "Select a team",
+  "send_feedback.description.label": "Description",
   "send_feedback.files.label": "Files",
   "send_feedback.files.remove": "Remove",
   "send_feedback.files.select": "Select Files",
