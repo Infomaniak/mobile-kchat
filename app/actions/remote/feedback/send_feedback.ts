@@ -1,8 +1,10 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+/* global FormData, fetch */
+
 import {getServerCredentials} from '@init/credentials';
-import {logError} from '@utils/log';
+import {logError, logDebug} from '@utils/log';
 
 const WEB_COMPONENTS_API = 'https://welcome.infomaniak.com/api/web-components/1';
 
@@ -22,10 +24,13 @@ export const sendFeedback = async (params: SendFeedbackParams) => {
     try {
         const credentials = await getServerCredentials(params.serverUrl);
         if (!credentials?.token) {
-            return {error: new Error('No OAuth token available') as any};
+            return {error: new Error('No auth token available') as any};
         }
 
-        const formData = new FormData();
+        logDebug('[sendFeedback] Using token (first 10 chars):', credentials.token.substring(0, 10) + '...');
+        logDebug('[sendFeedback] User ID:', credentials.userId);
+
+        const formData = new FormData(); // eslint-disable-line no-undef
         formData.append('bucket_identifier', params.bucketIdentifier);
         formData.append('type', params.type);
         formData.append('subject', params.subject);
@@ -45,22 +50,30 @@ export const sendFeedback = async (params: SendFeedbackParams) => {
             } as any);
         });
 
-        const response = await fetch(`${WEB_COMPONENTS_API}/report`, {
+        const url = `${WEB_COMPONENTS_API}/report`;
+        logDebug('[sendFeedback] POST', url);
+
+        const response = await fetch(url, { // eslint-disable-line no-undef
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${credentials.token}`,
+                'X-Requested-With': 'XMLHttpRequest',
             },
             body: formData,
         });
 
+        logDebug('[sendFeedback] Response status:', response.status);
+
         if (!response.ok) {
-            return {error: new Error(`HTTP ${response.status}: ${response.statusText}`), data: undefined};
+            const bodyText = await response.text();
+            logDebug('[sendFeedback] Response body:', bodyText);
+            return {error: new Error(`HTTP ${response.status}: ${bodyText || response.statusText}`), data: null};
         }
 
         const result = await response.json() as { data?: { url: string } };
-        return {data: result.data?.url, error: undefined};
+        return {data: result.data?.url, error: null};
     } catch (error) {
         logError('[sendFeedback]', error);
-        return {error, data: undefined};
+        return {error, data: null};
     }
 };

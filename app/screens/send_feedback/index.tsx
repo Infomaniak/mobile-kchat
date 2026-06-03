@@ -194,31 +194,36 @@ const SendFeedback = ({componentId}: Props) => {
         const fullSubject = `${prefix}: ${subject}`;
 
         setIsSubmitting(true);
-        const result = await sendFeedback({
-            serverUrl,
-            bucketIdentifier: BUCKET_IDENTIFIER,
-            type: feedbackType === 'bug' ? 'bugs' : 'features',
-            subject: fullSubject,
-            description,
-            priorityValue: PriorityValueMap[priority],
-            priorityLabel: PriorityOptions.find((p) => p.value === priority)?.text || priority,
-            files: files.map((f) => ({uri: f.uri!, type: f.type, fileName: f.fileName})),
-            extra: {
-                project: 'kchat',
-                userAgent: `kchat-mobile/${Platform.OS}`,
-                userId: currentUser.id,
-                userMail: currentUser.email,
-                userDisplayName: currentUser.firstName || currentUser.lastName ? `${currentUser.firstName} ${currentUser.lastName}`.trim() : currentUser.username,
-                pageLink: serverUrl,
-            },
-        });
-        setIsSubmitting(false);
+        try {
+            const result = await sendFeedback({
+                serverUrl,
+                bucketIdentifier: BUCKET_IDENTIFIER,
+                type: feedbackType === 'bug' ? 'bugs' : 'features',
+                subject: fullSubject,
+                description,
+                priorityValue: PriorityValueMap[priority],
+                priorityLabel: PriorityOptions.find((p) => p.value === priority)?.text || priority,
+                files: files.map((f) => ({uri: f.uri!, type: f.type, fileName: f.fileName})),
+                extra: {
+                    project: 'kchat',
+                    userAgent: `kchat-mobile/${Platform.OS}`,
+                    userId: currentUser.id,
+                    userMail: currentUser.email,
+                    userDisplayName: currentUser.firstName || currentUser.lastName ? `${currentUser.firstName} ${currentUser.lastName}`.trim() : currentUser.username,
+                    pageLink: serverUrl,
+                },
+            });
 
-        if (result.error) {
-            logError('SendFeedback', result.error);
-        } else {
+            if (result.error) {
+                throw result.error;
+            }
+
             logDebug('Feedback submitted, URL:', result.data);
             handleClose();
+        } catch (error) {
+            logError('SendFeedback', error);
+        } finally {
+            setIsSubmitting(false);
         }
     }, [currentUser, serverUrl, subject, description, feedbackType, priority, files, handleClose]);
 
