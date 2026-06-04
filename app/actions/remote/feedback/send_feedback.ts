@@ -3,10 +3,14 @@
 
 /* global FormData, fetch */
 
+import {BASE_SERVER_URL} from '@client/rest/constants';
 import {getServerCredentials} from '@init/credentials';
 import {logError, logDebug} from '@utils/log';
 
-const WEB_COMPONENTS_API = 'https://welcome.infomaniak.com/api/web-components/1';
+const isPreprod = BASE_SERVER_URL.includes('preprod');
+const WEB_COMPONENTS_API = isPreprod
+    ? 'https://welcome.preprod.dev.infomaniak.ch/api/web-components/1'
+    : 'https://welcome.infomaniak.com/api/web-components/1';
 
 export type SendFeedbackParams = {
     serverUrl: string;
@@ -27,9 +31,38 @@ export const sendFeedback = async (params: SendFeedbackParams) => {
             return {error: new Error('No auth token available') as any};
         }
 
-        logDebug('[sendFeedback] Using token (first 10 chars):', credentials.token.substring(0, 10) + '...');
+        logDebug('[sendFeedback] === START ===');
+        logDebug('[sendFeedback] Token:', credentials.token); // Full token for curl testing
+        logDebug('[sendFeedback] Token length:', credentials.token.length);
         logDebug('[sendFeedback] User ID:', credentials.userId);
+        logDebug('[sendFeedback] Server URL:', params.serverUrl);
+        logDebug('[sendFeedback] API URL:', WEB_COMPONENTS_API);
+        logDebug('[sendFeedback] Bucket identifier:', params.bucketIdentifier);
+        logDebug('[sendFeedback] Type:', params.type);
+        logDebug('[sendFeedback] Subject:', params.subject);
+        logDebug('[sendFeedback] Description:', params.description);
+        logDebug('[sendFeedback] Priority value:', params.priorityValue);
+        logDebug('[sendFeedback] Priority label:', params.priorityLabel);
+        logDebug('[sendFeedback] Extra:', JSON.stringify(params.extra));
+        logDebug('[sendFeedback] Files count:', params.files.length);
 
+        // D'abord testons le GET buckets pour voir si l'auth marche
+        const bucketsUrl = `${WEB_COMPONENTS_API}/report?route=kchat&project=kchat`;
+        logDebug('[sendFeedback] Test GET:', bucketsUrl);
+        
+        const testResponse = await fetch(bucketsUrl, { // eslint-disable-line no-undef
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${credentials.token}`,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+        
+        const testBody = await testResponse.text();
+        logDebug('[sendFeedback] GET status:', testResponse.status);
+        logDebug('[sendFeedback] GET body:', testBody);
+
+        // Maintenant le POST
         const formData = new FormData(); // eslint-disable-line no-undef
         formData.append('bucket_identifier', params.bucketIdentifier);
         formData.append('type', params.type);
@@ -42,16 +75,9 @@ export const sendFeedback = async (params: SendFeedbackParams) => {
             formData.append(`extra[${key}]`, value);
         }
 
-        params.files.forEach((file, index) => {
-            formData.append(`file_${index}`, {
-                uri: file.uri,
-                type: file.type || 'application/octet-stream',
-                name: file.fileName || `file_${index}`,
-            } as any);
-        });
-
         const url = `${WEB_COMPONENTS_API}/report`;
-        logDebug('[sendFeedback] POST', url);
+        
+        logDebug('[sendFeedback] POST:', url);
 
         const response = await fetch(url, { // eslint-disable-line no-undef
             method: 'POST',
@@ -62,18 +88,21 @@ export const sendFeedback = async (params: SendFeedbackParams) => {
             body: formData,
         });
 
-        logDebug('[sendFeedback] Response status:', response.status);
+        logDebug('[sendFeedback] POST status:', response.status, response.statusText);
+        
+        const bodyText = await response.text();
+        logDebug('[sendFeedback] POST body:', bodyText);
 
         if (!response.ok) {
-            const bodyText = await response.text();
-            logDebug('[sendFeedback] Response body:', bodyText);
             return {error: new Error(`HTTP ${response.status}: ${bodyText || response.statusText}`), data: null};
         }
 
-        const result = await response.json() as { data?: { url: string } };
+        const result = JSON.parse(bodyText) as { data?: { url: string } };
         return {data: result.data?.url, error: null};
     } catch (error) {
-        logError('[sendFeedback]', error);
+        logError('[sendFeedback] Exception:', error);
         return {error, data: null};
+    } finally {
+        logDebug('[sendFeedback] === END ===');
     }
 };
