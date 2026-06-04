@@ -4,7 +4,7 @@
 /* global FormData, fetch */
 
 import {BASE_SERVER_URL} from '@client/rest/constants';
-import {getServerCredentials} from '@init/credentials';
+import {getOAuthToken} from '@init/credentials';
 import {logError, logDebug} from '@utils/log';
 
 const isPreprod = BASE_SERVER_URL.includes('preprod');
@@ -26,15 +26,14 @@ export type SendFeedbackParams = {
 
 export const sendFeedback = async (params: SendFeedbackParams) => {
     try {
-        const credentials = await getServerCredentials(params.serverUrl);
-        if (!credentials?.token) {
-            return {error: new Error('No auth token available') as any};
+        const token = await getOAuthToken();
+        if (!token) {
+            return {error: new Error('No OAuth token available') as any};
         }
 
         logDebug('[sendFeedback] === START ===');
-        logDebug('[sendFeedback] Token:', credentials.token); // Full token for curl testing
-        logDebug('[sendFeedback] Token length:', credentials.token.length);
-        logDebug('[sendFeedback] User ID:', credentials.userId);
+        logDebug('[sendFeedback] Token (first 20):', token.substring(0, 20) + '...');
+        logDebug('[sendFeedback] Token length:', token.length);
         logDebug('[sendFeedback] Server URL:', params.serverUrl);
         logDebug('[sendFeedback] API URL:', WEB_COMPONENTS_API);
         logDebug('[sendFeedback] Bucket identifier:', params.bucketIdentifier);
@@ -53,7 +52,7 @@ export const sendFeedback = async (params: SendFeedbackParams) => {
         const testResponse = await fetch(bucketsUrl, { // eslint-disable-line no-undef
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${credentials.token}`,
+                Authorization: `Bearer ${token}`,
                 'X-Requested-With': 'XMLHttpRequest',
             },
         });
@@ -82,7 +81,7 @@ export const sendFeedback = async (params: SendFeedbackParams) => {
         const response = await fetch(url, { // eslint-disable-line no-undef
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${credentials.token}`,
+                Authorization: `Bearer ${token}`,
                 'X-Requested-With': 'XMLHttpRequest',
             },
             body: formData,

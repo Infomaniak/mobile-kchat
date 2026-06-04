@@ -11,7 +11,7 @@ import {Events} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import {PUSH_PROXY_STATUS_VERIFIED} from '@constants/push_proxy';
 import DatabaseManager from '@database/manager';
-import {getAllServerCredentials, removeServerCredentials, setServerCredentials} from '@init/credentials';
+import {getAllServerCredentials, removeServerCredentials, setServerCredentials, setOAuthToken} from '@init/credentials';
 import NetworkManager from '@managers/network_manager';
 import EphemeralStore from '@store/ephemeral_store';
 
@@ -65,6 +65,9 @@ const configureServer = async (teamServer: TeamServer, accessToken: string) => {
 };
 
 export const syncMultiTeam = async (accessToken: string) => {
+    // Store OAuth token for external Infomaniak APIs
+    setOAuthToken(accessToken);
+    
     try {
         const client = await NetworkManager.createGlobalClient(accessToken);
         const teamServers = await client.getMultiTeams();
