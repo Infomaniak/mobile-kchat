@@ -37,6 +37,33 @@ import NavigationStore from '@store/navigation_store';
 import {setTeamLoading} from '@store/team_load_store';
 import {isTablet} from '@utils/helpers';
 import {logDebug, logInfo} from '@utils/log';
+import {captureMessage} from '@utils/sentry';
+
+import type {Model} from '@nozbe/watermelondb';
+
+const SLOW_RECONNECT_BATCH_THRESHOLD = 5000;
+
+function getModelsByTable(models: Model[]) {
+    const counts = models.reduce<Record<string, number>>((acc, model) => {
+        acc[model.table] = (acc[model.table] || 0) + 1;
+        return acc;
+    }, {});
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+}
+
+function captureSlowReconnectBatch(serverUrl: string, groupLabel: BaseRequestGroupLabel | undefined, models: Model[], duration: number) {
+    if (duration < SLOW_RECONNECT_BATCH_THRESHOLD) {
+        return;
+    }
+
+    captureMessage(`Slow websocket reconnect batch: ${JSON.stringify({
+        serverUrl,
+        groupLabel,
+        duration,
+        models: models.length,
+        tables: getModelsByTable(models),
+    })}`);
+}
 
 export async function handleFirstConnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel) {
     setExtraSessionProps(serverUrl, groupLabel);
@@ -83,7 +110,9 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
         await operator.batchRecords(models, 'doReconnect');
     }
 
-    logInfo('WEBSOCKET RECONNECT MODELS BATCHING TOOK', `${Date.now() - dt}ms`);
+    const batchDuration = Date.now() - dt;
+    captureSlowReconnectBatch(serverUrl, groupLabel, models || [], batchDuration);
+    logInfo('WEBSOCKET RECONNECT MODELS BATCHING TOOK', `${batchDuration}ms`);
 
     await fetchPostDataIfNeeded(serverUrl, groupLabel);
 

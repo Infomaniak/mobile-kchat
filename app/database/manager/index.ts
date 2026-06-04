@@ -36,6 +36,8 @@ import {removeProtocol} from '@utils/url';
 import LimitsModel from '../models/server/limits';
 import CloudUsageModel from '../models/server/usage';
 
+import {instrumentAdapter} from './instrument_adapter';
+
 import type {AppDatabase, CreateServerDatabaseArgs, RegisterServerDatabaseArgs, Models, ServerDatabase, ServerDatabases} from '@typings/database/database';
 
 const {SERVERS} = MM_TABLES.APP;
@@ -143,6 +145,7 @@ class DatabaseManagerSingleton {
                 jsi: true,
                 schema,
             });
+            instrumentAdapter(adapter);
 
             const database = new Database({adapter, modelClasses});
             const operator = new AppDataOperator(database);
@@ -185,6 +188,7 @@ class DatabaseManagerSingleton {
                     jsi: true,
                     schema,
                 });
+                instrumentAdapter(adapter);
 
                 // Registers the new server connection into the DEFAULT database
                 await this.addServerToAppDatabase({

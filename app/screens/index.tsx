@@ -176,9 +176,7 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             break;
         case Screens.IN_APP_NOTIFICATION: {
             const notificationScreen = require('@screens/in_app_notification').default;
-            Navigation.registerComponent(Screens.IN_APP_NOTIFICATION, () =>
-                withSafeAreaInsets(notificationScreen),
-            );
+            Navigation.registerComponent(Screens.IN_APP_NOTIFICATION, () => notificationScreen);
             return;
         }
         case Screens.JOIN_TEAM:
@@ -315,6 +313,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             break;
         case Screens.INFOMANIAK_REMINDER:
             screen = withServerDatabase(require('@screens/ik_reminder').default);
+            break;
+        case Screens.DEBUG_PERFORMANCE:
+            screen = withServerDatabase(require('@screens/debug_performance').default);
             break;
         case Screens.SCHEDULED_POST_OPTIONS:
             screen = withServerDatabase(require('@screens/scheduled_post_options').default);

@@ -12,7 +12,7 @@ export default tableSchema({
     columns: [
         {name: 'channel_id', type: 'string', isIndexed: true},
         {name: 'create_at', type: 'number'},
-        {name: 'delete_at', type: 'number'},
+        {name: 'delete_at', type: 'number', isIndexed: true},
         {name: 'edit_at', type: 'number'},
         {name: 'is_pinned', type: 'boolean'},
         {name: 'message', type: 'string'},

@@ -443,6 +443,7 @@
   "general_settings.download_logs": "Download app logs",
   "general_settings.help": "Help",
   "general_settings.notifications": "Notifications",
+  "general_settings.performance_debug": "Performance Monitor",
   "general_settings.report_problem": "Report a problem",
   "generic.back": "Back",
   "get_post_link_modal.title": "Copy Link",
