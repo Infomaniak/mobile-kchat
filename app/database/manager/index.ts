@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {AiBotModel, AiThreadModel} from '@agents/database/models';
 import {Database, Q} from '@nozbe/watermelondb';
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 import logger from '@nozbe/watermelondb/utils/common/logger';
@@ -91,8 +90,6 @@ class DatabaseManagerSingleton {
             ThreadInTeamModel,
             TeamThreadsSyncModel,
             UserModel,
-            AiBotModel,
-            AiThreadModel,
             LimitsModel,
             CloudUsageModel,
         ];

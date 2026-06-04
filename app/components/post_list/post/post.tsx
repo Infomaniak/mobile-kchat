@@ -1,8 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import AgentPost from '@agents/components/agent_post';
-import {isAgentPost} from '@agents/utils';
 import React, {Fragment, type ReactNode, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Platform, type StyleProp, View, type ViewStyle, TouchableHighlight, type LayoutChangeEvent, TouchableOpacity} from 'react-native';
@@ -186,7 +184,6 @@ const Post = ({
     const isSystemPost = isSystemMessage(post);
     const isMailAttachment = isMailAttachmentMessage(post);
     const isCallsPost = isCallsCustomMessage(post);
-    const isAgentPostType = isAgentPost(post);
     const hasBeenDeleted = (post.deleteAt !== 0);
     const isWebHook = isFromWebhook(post);
     const isVoiceMessage = post.type === PostTypes.VOICE_MESSAGE;
@@ -479,14 +476,6 @@ const Post = ({
     } else if (isCallsPost && !hasBeenDeleted) {
         body = <IkCallsCustomMessage post={post}/>;
 
-    } else if (isAgentPostType && !hasBeenDeleted) {
-        body = (
-            <AgentPost
-                post={post}
-                currentUserId={currentUser?.id}
-                location={location}
-            />
-        );
     } else {
         body = (
             <Body
