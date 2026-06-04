@@ -10,5 +10,4 @@
  * before building.
  */
 
-// eslint-disable-next-line no-process-env
-export const ENABLE_PERF_MONITOR = __DEV__ || Boolean(process.env.ENABLE_PERF_MONITOR);
+export const ENABLE_PERF_MONITOR = true;
