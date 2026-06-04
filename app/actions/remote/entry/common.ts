@@ -300,6 +300,11 @@ export const setExtraSessionProps = async (serverUrl: string, groupLabel?: Reque
         const serverVersion = await getConfigValue(database, 'Version');
         const deviceToken = await getDeviceToken();
 
+        if (!deviceToken) {
+            logDebug('setExtraSessionProps skipped: missing device token');
+            return {};
+        }
+
         //IK: kmeet token
         let pushKitToken: string | undefined;
         if (Platform.OS === 'ios') {
@@ -307,15 +312,12 @@ export const setExtraSessionProps = async (serverUrl: string, groupLabel?: Reque
             pushKitToken = pushKitTokenResult;
         }
 
-        // For new servers, we want to send all the information.
-        // For old servers, we only want to send the information when there
-        // is a device token. Sending the rest of the information should not
-        // create any issue.
+        // For new servers, we want to send all the information once a device token is available.
         if (isMinimumServerVersion(serverVersion, 10, 1, 0) || deviceToken) {
             const res = await checkNotifications();
             const granted = res.status === RESULTS.GRANTED || res.status === RESULTS.LIMITED;
             const client = NetworkManager.getClient(serverUrl);
-            client.setExtraSessionProps(deviceToken, !granted, nativeApplicationVersion, groupLabel, pushKitToken);
+            await client.setExtraSessionProps(deviceToken, !granted, nativeApplicationVersion, groupLabel, pushKitToken);
         }
         return {};
     } catch (error) {
