@@ -4,7 +4,7 @@
 /* global FormData, fetch */
 
 import {getServerCredentials} from '@init/credentials';
-import {logError, logDebug} from '@utils/log';
+import {logError, logInfo} from '@utils/log';
 
 const WEB_COMPONENTS_API = 'https://welcome.infomaniak.com/api/web-components/1';
 
@@ -24,22 +24,11 @@ export const sendFeedback = async (params: SendFeedbackParams) => {
     try {
         const credentials = await getServerCredentials(params.serverUrl);
         if (!credentials?.token) {
+            logError('[sendFeedback] No auth token available');
             return {error: new Error('No auth token available') as any};
         }
 
         const apiUrl = WEB_COMPONENTS_API;
-
-        logDebug('[sendFeedback] === START ===');
-        logDebug('[sendFeedback] Token length:', credentials.token.length);
-        logDebug('[sendFeedback] Server URL:', params.serverUrl);
-        logDebug('[sendFeedback] API URL:', apiUrl);
-        logDebug('[sendFeedback] Extra:', JSON.stringify(params.extra));
-
-        // Now POST
-        logDebug('[sendFeedback] Subject:', params.subject);
-        logDebug('[sendFeedback] Type:', params.type);
-        logDebug('[sendFeedback] Priority:', params.priorityLabel);
-        logDebug('[sendFeedback] Files count:', params.files.length);
 
         const formData = new FormData();
         formData.append('bucket_identifier', params.bucketIdentifier);
@@ -62,7 +51,7 @@ export const sendFeedback = async (params: SendFeedbackParams) => {
         });
 
         const url = `${apiUrl}/report`;
-        logDebug('[sendFeedback] POST:', url);
+        logInfo('[sendFeedback] Sending feedback report...');
 
         const response = await fetch(url, {
             method: 'POST',
@@ -73,17 +62,16 @@ export const sendFeedback = async (params: SendFeedbackParams) => {
             body: formData,
         });
 
-        logDebug('[sendFeedback] POST status:', response.status, response.statusText);
-
         const bodyText = await response.text();
-        logDebug('[sendFeedback] POST body:', bodyText);
 
         if (!response.ok) {
+            logError(`[sendFeedback] HTTP ${response.status}: ${bodyText || response.statusText}`);
             return {error: new Error(`HTTP ${response.status}: ${bodyText || response.statusText}`), data: null};
         }
 
         try {
             const result = JSON.parse(bodyText) as { data?: { url: string } };
+            logInfo('[sendFeedback] Feedback sent successfully:', result.data?.url || 'no URL');
             return {data: result.data?.url, error: null};
         } catch (parseError) {
             logError('[sendFeedback] Failed to parse response:', parseError);
@@ -92,7 +80,5 @@ export const sendFeedback = async (params: SendFeedbackParams) => {
     } catch (error) {
         logError('[sendFeedback] Exception:', error);
         return {error, data: null};
-    } finally {
-        logDebug('[sendFeedback] === END ===');
     }
 };
