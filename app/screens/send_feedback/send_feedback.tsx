@@ -1,8 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useDatabase} from '@nozbe/watermelondb/react';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {
     ActivityIndicator,
@@ -22,7 +21,6 @@ import MenuDivider from '@components/menu_divider';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import {getCurrentUser} from '@queries/servers/user';
 import {popTopScreen} from '@screens/navigation';
 import {logDebug, logError} from '@utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -128,6 +126,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 
 type Props = {
     componentId: AvailableScreens;
+    currentUser: UserModel | undefined;
 };
 
 type FileItemProps = {
@@ -167,11 +166,10 @@ const FileItem = ({file, index, onRemove}: FileItemProps) => {
     );
 };
 
-const SendFeedback = ({componentId}: Props) => {
+const SendFeedback = ({componentId, currentUser}: Props) => {
     const intl = useIntl();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
-    const database = useDatabase();
     const serverUrl = useServerUrl();
     const insets = useSafeAreaInsets();
 
@@ -180,17 +178,8 @@ const SendFeedback = ({componentId}: Props) => {
     const [subject, setSubject] = useState('');
     const [description, setDescription] = useState('');
     const [files, setFiles] = useState<Asset[]>([]);
-    const [currentUser, setCurrentUser] = useState<UserModel | undefined>();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
-
-    useEffect(() => {
-        if (database) {
-            getCurrentUser(database).then(setCurrentUser).catch(() => {
-                // silently ignore
-            });
-        }
-    }, [database]);
 
     const handleClose = useCallback(() => {
         popTopScreen(componentId);
