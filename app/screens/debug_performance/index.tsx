@@ -2,17 +2,19 @@
 // See LICENSE.txt for license information.
 
 import {useDatabase} from '@nozbe/watermelondb/react';
-import React, {useCallback, useEffect} from 'react';
-import {ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {Alert, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import CompassIcon from '@components/compass_icon';
+import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {usePreventDoubleTap} from '@hooks/utils';
 import PerformanceMonitor from '@managers/performance_monitor';
 import {popTopScreen} from '@screens/navigation';
 import {PerformanceProvider, usePerformanceData} from '@store/performance_store';
+import {clearPerfPostsAndThreads, injectPerfPostsAndThreads} from '@utils/perf_data_injection';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
@@ -124,6 +126,75 @@ function MetricsSummary({componentId}: MetricsSummaryProps) {
     const handleClear = usePreventDoubleTap(useCallback(() => {
         PerformanceMonitor.clearAll();
     }, []));
+
+    const [injectionStatus, setInjectionStatus] = useState<string>('');
+    const [isInjecting, setIsInjecting] = useState(false);
+    const serverUrl = useServerUrl();
+    const isPreprod = serverUrl?.includes('preprod.dev.infomaniak.ch') ?? false;
+
+    const handleInjectData = useCallback(() => {
+        if (isInjecting) {
+            return;
+        }
+        Alert.alert(
+            'Inject Performance Data',
+            'This will insert 200,000 posts and threads. This operation is irreversible. Continue?',
+            [
+                {text: 'Cancel', style: 'cancel'},
+                {
+                    text: 'Inject',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setIsInjecting(true);
+                        setInjectionStatus('Injecting...');
+                        try {
+                            const result = await injectPerfPostsAndThreads(serverUrl, 200000);
+                            setInjectionStatus(`Injected ${result.postsInserted} rows in ${result.durationMs.toFixed(0)}ms`);
+                            await refreshDbCounts();
+                        } catch (err: any) {
+                            const message = err?.message ?? String(err);
+                            setInjectionStatus(`Error: ${message}`);
+                        } finally {
+                            setIsInjecting(false);
+                        }
+                    },
+                },
+            ],
+            {cancelable: true},
+        );
+    }, [isInjecting, serverUrl, refreshDbCounts]);
+
+    const handleClearPerfData = useCallback(() => {
+        if (isInjecting) {
+            return;
+        }
+        Alert.alert(
+            'Clear Performance Data',
+            'This will remove all perf-test posts and threads. Continue?',
+            [
+                {text: 'Cancel', style: 'cancel'},
+                {
+                    text: 'Clear',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setIsInjecting(true);
+                        setInjectionStatus('Clearing...');
+                        try {
+                            await clearPerfPostsAndThreads(serverUrl);
+                            setInjectionStatus('Cleared perf data');
+                            await refreshDbCounts();
+                        } catch (err: any) {
+                            const message = err?.message ?? String(err);
+                            setInjectionStatus(`Error: ${message}`);
+                        } finally {
+                            setIsInjecting(false);
+                        }
+                    },
+                },
+            ],
+            {cancelable: true},
+        );
+    }, [isInjecting, serverUrl, refreshDbCounts]);
 
     if (!PerformanceMonitor.isEnabled()) {
         return (
@@ -291,6 +362,38 @@ function MetricsSummary({componentId}: MetricsSummaryProps) {
                         ))}
                     </View>
                 )}
+
+                {/* Perf Data Injection */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>{'Perf Data Injection'}</Text>
+                    {!isPreprod && (
+                        <Text style={[styles.metricLabel, {textAlign: 'center', marginBottom: 8}]}>
+                            {'This action is only available in preprod environments.'}
+                        </Text>
+                    )}
+                    {isInjecting && (
+                        <Text style={[styles.metricLabel, {textAlign: 'center', marginBottom: 8}]}>
+                            {'Loading...'}
+                        </Text>
+                    )}
+                    <TouchableOpacity
+                        style={[styles.button, (!isPreprod || isInjecting) && {opacity: 0.5}]}
+                        onPress={isPreprod && !isInjecting ? handleInjectData : undefined}
+                        testID='debug_performance.inject.button'
+                    >
+                        <Text style={styles.buttonText}>{'Inject 200k Posts + Threads'}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.button, {marginTop: 8}, (!isPreprod || isInjecting) && {opacity: 0.5}]}
+                        onPress={isPreprod && !isInjecting ? handleClearPerfData : undefined}
+                        testID='debug_performance.clear_perf.button'
+                    >
+                        <Text style={styles.buttonText}>{'Clear Perf Data'}</Text>
+                    </TouchableOpacity>
+                    {injectionStatus !== '' && (
+                        <Text style={[styles.metricLabel, {textAlign: 'center', marginTop: 8}]}>{injectionStatus}</Text>
+                    )}
+                </View>
 
                 <TouchableOpacity
                     style={styles.button}
