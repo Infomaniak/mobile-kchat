@@ -3,13 +3,12 @@
 
 import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
-import {Platform} from 'react-native';
 
 import OptionItem from '@components/option_item';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {goToScreen, showModal} from '@screens/navigation';
+import {goToScreen} from '@screens/navigation';
 
 const SendFeedback = () => {
     const intl = useIntl();
@@ -18,11 +17,7 @@ const SendFeedback = () => {
 
     const openSendFeedback = usePreventDoubleTap(useCallback(() => {
         const title = intl.formatMessage({id: 'account.send_feedback', defaultMessage: 'Send Feedback'});
-        if (Platform.OS === 'ios') {
-            showModal(Screens.SEND_FEEDBACK, title);
-        } else {
-            goToScreen(Screens.SEND_FEEDBACK, title);
-        }
+        goToScreen(Screens.SEND_FEEDBACK, title);
     }, [intl]));
 
     return isServerInfomaniak ? (

@@ -13,6 +13,7 @@ import {
     View,
 } from 'react-native';
 import {type Asset, type ImagePickerResponse, launchImageLibrary} from 'react-native-image-picker';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {sendFeedback} from '@actions/remote/feedback/send_feedback';
 import Button from '@components/button';
@@ -172,6 +173,7 @@ const SendFeedback = ({componentId}: Props) => {
     const styles = getStyleSheet(theme);
     const database = useDatabase();
     const serverUrl = useServerUrl();
+    const insets = useSafeAreaInsets();
 
     const [feedbackType, setFeedbackType] = useState<FeedbackType>('bug');
     const [priority, setPriority] = useState<Priority>('normal');
@@ -356,7 +358,7 @@ const SendFeedback = ({componentId}: Props) => {
                     </View>
                 </View>
             </ScrollView>
-            <View style={styles.buttonContainer}>
+            <View style={[styles.buttonContainer, {paddingBottom: insets.bottom}]}>
                 {errorMessage ? (
                     <Text style={styles.errorText}>{errorMessage}</Text>
                 ) : null}

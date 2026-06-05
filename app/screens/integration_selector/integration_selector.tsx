@@ -121,6 +121,7 @@ export type Props = {
     selected: SelectedDialogValue;
     theme: Theme;
     componentId: AvailableScreens;
+    showSearch?: boolean;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -176,7 +177,7 @@ const messages = defineMessages({
 
 function IntegrationSelector(
     {dataSource, data, isMultiselect = false, selected, handleSelect,
-        currentTeamId, componentId, getDynamicOptions, options}: Props) {
+        currentTeamId, componentId, getDynamicOptions, options, showSearch = true}: Props) {
     const serverUrl = useServerUrl();
     const theme = useTheme();
     const searchTimeoutId = useRef<NodeJS.Timeout | null>(null);
@@ -608,21 +609,23 @@ function IntegrationSelector(
             nativeID={`${componentId}.screen`}
             style={style.container}
         >
-            <View
-                testID='integration_selector.screen'
-                style={style.searchBar}
-            >
-                <SearchBar
-                    testID='selector.search_bar'
-                    placeholder={intl.formatMessage({id: 'search_bar.search', defaultMessage: 'Search'})}
-                    inputStyle={style.searchBarInput}
-                    placeholderTextColor={changeOpacity(theme.centerChannelColor, 0.5)}
-                    onChangeText={onSearch}
-                    autoCapitalize='none'
-                    keyboardAppearance={getKeyboardAppearanceFromTheme(theme)}
-                    value={term}
-                />
-            </View>
+            {showSearch && (
+                <View
+                    testID='integration_selector.screen'
+                    style={style.searchBar}
+                >
+                    <SearchBar
+                        testID='selector.search_bar'
+                        placeholder={intl.formatMessage({id: 'search_bar.search', defaultMessage: 'Search'})}
+                        inputStyle={style.searchBarInput}
+                        placeholderTextColor={changeOpacity(theme.centerChannelColor, 0.5)}
+                        onChangeText={onSearch}
+                        autoCapitalize='none'
+                        keyboardAppearance={getKeyboardAppearanceFromTheme(theme)}
+                        value={term}
+                    />
+                </View>
+            )}
 
             {selectedOptionsComponent}
 
