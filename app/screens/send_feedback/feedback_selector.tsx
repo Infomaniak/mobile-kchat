@@ -14,6 +14,7 @@ import {
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import CompassIcon from '@components/compass_icon';
+import OptionItem from '@components/option_item';
 import {useTheme} from '@context/theme';
 import {usePreventDoubleTap} from '@hooks/utils';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -61,29 +62,11 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         paddingVertical: 16,
         borderBottomWidth: 1,
         borderBottomColor: changeOpacity(theme.centerChannelColor, 0.1),
+        marginBottom: 8,
     },
     modalTitle: {
-        ...typography('Heading', 300, 'SemiBold'),
+        ...typography('Heading', 600, 'SemiBold'),
         color: theme.centerChannelColor,
-    },
-    optionItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: changeOpacity(theme.centerChannelColor, 0.06),
-    },
-    optionText: {
-        ...typography('Body', 200),
-        flex: 1,
-        color: theme.centerChannelColor,
-    },
-    optionTextSelected: {
-        color: theme.buttonBg,
-    },
-    checkmark: {
-        marginLeft: 8,
     },
 }));
 
@@ -163,26 +146,13 @@ const FeedbackSelector = ({options, selected, onSelected}: Props) => {
                             {options.map((option) => {
                                 const isSelected = option.value === selected;
                                 return (
-                                    <Pressable
+                                    <OptionItem
                                         key={option.value}
-                                        style={({pressed}) => [
-                                            styles.optionItem,
-                                            pressed && {opacity: 0.7},
-                                        ]}
-                                        onPress={() => handleSelect(option.value)}
-                                    >
-                                        <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>
-                                            {option.text}
-                                        </Text>
-                                        {isSelected && (
-                                            <CompassIcon
-                                                name='check'
-                                                size={20}
-                                                color={theme.buttonBg}
-                                                style={styles.checkmark}
-                                            />
-                                        )}
-                                    </Pressable>
+                                        action={() => handleSelect(option.value)}
+                                        label={option.text}
+                                        type={isSelected ? 'select' : 'default'}
+                                        testID={`feedback_selector.option.${option.value}`}
+                                    />
                                 );
                             })}
                         </ScrollView>
