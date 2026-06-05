@@ -7,11 +7,14 @@ import {Platform} from 'react-native';
 
 import OptionItem from '@components/option_item';
 import {Screens} from '@constants';
+import {useServerUrl} from '@context/server';
 import {usePreventDoubleTap} from '@hooks/utils';
 import {goToScreen, showModal} from '@screens/navigation';
 
 const SendFeedback = () => {
     const intl = useIntl();
+    const serverUrl = useServerUrl();
+    const isServerInfomaniak = (/https?:\/\/infomaniak\.kchat/).test(serverUrl);
 
     const openSendFeedback = usePreventDoubleTap(useCallback(() => {
         const title = intl.formatMessage({id: 'account.send_feedback', defaultMessage: 'Send Feedback'});
@@ -22,7 +25,7 @@ const SendFeedback = () => {
         }
     }, [intl]));
 
-    return (
+    return isServerInfomaniak ? (
         <OptionItem
             action={openSendFeedback}
             icon='message-text-outline'
@@ -30,7 +33,7 @@ const SendFeedback = () => {
             testID='account.send_feedback.option'
             type='default'
         />
-    );
+    ) : null;
 };
 
 export default SendFeedback;

@@ -9,6 +9,7 @@ import {
     Platform,
     ScrollView,
     Text,
+    TextInput,
     View,
 } from 'react-native';
 import {type Asset, type ImagePickerResponse, launchImageLibrary} from 'react-native-image-picker';
@@ -54,7 +55,7 @@ const PriorityValueMap: Record<Priority, number> = {
     immediate: 5,
 };
 
-const BUCKET_IDENTIFIER = 'kchat';
+const BUCKET_IDENTIFIER = 'kchat-web_bucket';
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     container: {
@@ -78,6 +79,28 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         borderTopWidth: 1,
         borderColor: changeOpacity(theme.centerChannelColor, 0.08),
     },
+    inputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: changeOpacity(theme.centerChannelColor, 0.16),
+        borderRadius: 4,
+        backgroundColor: theme.centerChannelBg,
+        minHeight: 48,
+    },
+    inputPrefix: {
+        ...typography('Body', 200),
+        color: changeOpacity(theme.centerChannelColor, 0.56),
+        paddingLeft: 12,
+        paddingRight: 4,
+    },
+    inputWithPrefix: {
+        flex: 1,
+        borderWidth: 0,
+        backgroundColor: 'transparent',
+        color: theme.centerChannelColor,
+        ...typography('Body', 200),
+    },
     fileList: {
         marginTop: 8,
     },
@@ -93,6 +116,12 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         ...typography('Body', 200, 'Regular'),
         color: theme.centerChannelColor,
         flex: 1,
+    },
+    errorText: {
+        ...typography('Body', 200, 'Regular'),
+        color: theme.errorTextColor || '#d24a4a',
+        marginBottom: 12,
+        textAlign: 'center',
     },
 }));
 
@@ -151,6 +180,7 @@ const SendFeedback = ({componentId}: Props) => {
     const [files, setFiles] = useState<Asset[]>([]);
     const [currentUser, setCurrentUser] = useState<UserModel | undefined>();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
 
     useEffect(() => {
         if (database) {
@@ -173,8 +203,9 @@ const SendFeedback = ({componentId}: Props) => {
             includeBase64: false,
         });
 
-        if (result.assets) {
-            setFiles((prev) => [...prev, ...result.assets!]);
+        const selectedAssets = result.assets;
+        if (selectedAssets && selectedAssets.length > 0) {
+            setFiles((prev) => [...prev, ...selectedAssets]);
         }
     }, []);
 
@@ -186,13 +217,19 @@ const SendFeedback = ({componentId}: Props) => {
     }, []);
 
     const handleSubmit = useCallback(async () => {
-        if (!currentUser || !serverUrl) {
+        if (!currentUser) {
+            setErrorMessage(intl.formatMessage({id: 'send_feedback.error.no_user', defaultMessage: 'User information not available. Please try again later.'}));
+            return;
+        }
+        if (!serverUrl) {
+            setErrorMessage(intl.formatMessage({id: 'send_feedback.error.no_server', defaultMessage: 'Not connected to a server. Please try again later.'}));
             return;
         }
 
         const prefix = Platform.OS === 'android' ? '[Android]' : '[iOS]';
         const fullSubject = `${prefix}: ${subject}`;
 
+        setErrorMessage('');
         setIsSubmitting(true);
         try {
             const result = await sendFeedback({
@@ -202,10 +239,11 @@ const SendFeedback = ({componentId}: Props) => {
                 subject: fullSubject,
                 description,
                 priorityValue: PriorityValueMap[priority],
-                priorityLabel: PriorityOptions.find((p) => p.value === priority)?.text || priority,
+                priorityLabel: 'Priorité: ' + (PriorityOptions.find((p) => p.value === priority)?.text || priority),
                 files: files.map((f) => ({uri: f.uri!, type: f.type, fileName: f.fileName})),
                 extra: {
                     project: 'kchat',
+                    route: 'null',
                     userAgent: `kchat-mobile/${Platform.OS}`,
                     userId: currentUser.id,
                     userMail: currentUser.email,
@@ -221,13 +259,15 @@ const SendFeedback = ({componentId}: Props) => {
             logDebug('Feedback submitted, URL:', result.data);
             handleClose();
         } catch (error) {
+            const msg = error instanceof Error ? error.message : String(error);
+            setErrorMessage(intl.formatMessage({id: 'send_feedback.error.generic', defaultMessage: 'Failed to send feedback: {error}'}, {error: msg}));
             logError('SendFeedback', error);
         } finally {
             setIsSubmitting(false);
         }
-    }, [currentUser, serverUrl, subject, description, feedbackType, priority, files, handleClose]);
+    }, [currentUser, serverUrl, subject, description, feedbackType, priority, files, handleClose, intl]);
 
-    const canSubmit = subject.trim().length > 0 && !isSubmitting;
+    const canSubmit = subject.trim().length > 0 && !isSubmitting && currentUser && serverUrl;
 
     const submitIcon = isSubmitting ? (
         <ActivityIndicator
@@ -266,12 +306,18 @@ const SendFeedback = ({componentId}: Props) => {
                         <Text style={styles.sectionTitle}>
                             {intl.formatMessage({id: 'send_feedback.subject.label', defaultMessage: 'Subject'})}
                         </Text>
-                        <FloatingTextInput
-                            label={intl.formatMessage({id: 'send_feedback.subject.label', defaultMessage: 'Subject'})}
-                            value={subject}
-                            onChangeText={setSubject}
-                            theme={theme}
-                        />
+                        <View style={styles.inputRow}>
+                            <Text style={styles.inputPrefix}>
+                                {Platform.OS === 'android' ? '[Android]: ' : '[iOS]: '}
+                            </Text>
+                            <TextInput
+                                value={subject}
+                                onChangeText={setSubject}
+                                placeholder={intl.formatMessage({id: 'send_feedback.subject.placeholder', defaultMessage: 'Enter your subject'})}
+                                style={styles.inputWithPrefix}
+                                placeholderTextColor={changeOpacity(theme.centerChannelColor, 0.4)}
+                            />
+                        </View>
                     </View>
                     <MenuDivider/>
                     <View>
@@ -311,6 +357,9 @@ const SendFeedback = ({componentId}: Props) => {
                 </View>
             </ScrollView>
             <View style={styles.buttonContainer}>
+                {errorMessage ? (
+                    <Text style={styles.errorText}>{errorMessage}</Text>
+                ) : null}
                 <Button
                     theme={theme}
                     text={isSubmitting ? intl.formatMessage({id: 'generic.loading', defaultMessage: 'Loading'}) : intl.formatMessage({id: 'send_feedback.submit', defaultMessage: 'Send'})}

@@ -164,37 +164,3 @@ export const getServerCredentials = async (serverUrl: string): Promise<ServerCre
         return null;
     }
 };
-
-// Store OAuth token separately for external Infomaniak APIs (e.g., web-components)
-const OAUTH_TOKEN_KEY = 'infomaniak_oauth_token';
-
-export const setOAuthToken = (token: string) => {
-    try {
-        let accessGroup;
-        if (Platform.OS === 'ios') {
-            const appGroup = getIOSAppGroupDetails();
-            accessGroup = appGroup.appGroupIdentifier;
-        }
-
-        const options: KeyChain.SetOptions = {
-            accessGroup,
-            securityLevel: KeyChain.SECURITY_LEVEL.SECURE_SOFTWARE,
-            service: OAUTH_TOKEN_KEY,
-        };
-
-        KeyChain.setGenericPassword(OAUTH_TOKEN_KEY, token, options);
-    } catch (e) {
-        logWarning('could not set OAuth token', e);
-    }
-};
-
-export const getOAuthToken = async (): Promise<string|null> => {
-    try {
-        const credentials = await KeyChain.getGenericPassword({
-            service: OAUTH_TOKEN_KEY,
-        });
-        return credentials ? credentials.password : null;
-    } catch (e) {
-        return null;
-    }
-};
