@@ -272,6 +272,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.SEND_FEEDBACK:
             screen = withServerDatabase(require('@screens/send_feedback').default);
             break;
+        case Screens.FEEDBACK_OPTIONS:
+            screen = withServerDatabase(require('@screens/feedback_options').default);
+            break;
         case Screens.SHARE_FEEDBACK:
             screen = withServerDatabase(require('@screens/share_feedback').default);
             break;

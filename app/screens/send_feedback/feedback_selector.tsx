@@ -1,22 +1,15 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useMemo, useState} from 'react';
+import React, {useMemo} from 'react';
 import {useIntl} from 'react-intl';
-import {
-    Modal,
-    Pressable,
-    Text,
-    View,
-    ScrollView,
-    StyleSheet,
-} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {DeviceEventEmitter, Pressable, Text} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
-import OptionItem from '@components/option_item';
+import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {usePreventDoubleTap} from '@hooks/utils';
+import {openAsBottomSheet} from '@screens/navigation';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
@@ -40,34 +33,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         ...typography('Body', 200),
         color: changeOpacity(theme.centerChannelColor, 0.5),
     },
-    modalOverlay: {
-        flex: 1,
-        justifyContent: 'flex-end',
-    },
-    modalBackdrop: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.4)',
-    },
-    modalSheet: {
-        backgroundColor: theme.centerChannelBg,
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
-        paddingBottom: 20,
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: changeOpacity(theme.centerChannelColor, 0.1),
-        marginBottom: 8,
-    },
-    modalTitle: {
-        ...typography('Heading', 600, 'SemiBold'),
-        color: theme.centerChannelColor,
-    },
 }));
 
 type Option = {
@@ -85,81 +50,46 @@ const FeedbackSelector = ({options, selected, onSelected}: Props) => {
     const intl = useIntl();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
-    const [visible, setVisible] = useState(false);
 
     const selectedText = useMemo(() => {
         return options.find((opt) => opt.value === selected)?.text || '';
     }, [options, selected]);
 
     const handleOpen = usePreventDoubleTap(() => {
-        setVisible(true);
+        const eventName = `feedback-selector-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const listener = DeviceEventEmitter.addListener(eventName, (value: string) => {
+            listener.remove();
+            onSelected(value);
+        });
+
+        openAsBottomSheet({
+            closeButtonId: 'close-feedback-options',
+            screen: Screens.FEEDBACK_OPTIONS,
+            theme,
+            title: '',
+            props: {
+                options: options.map((o) => ({text: o.text, value: o.value})),
+                selected,
+                eventName,
+                title: intl.formatMessage({id: 'mobile.action_menu.select', defaultMessage: 'Select an option'}),
+            },
+        });
     });
 
-    const handleSelect = useMemo(() => (value: string) => {
-        onSelected(value);
-        setVisible(false);
-    }, [onSelected]);
-
     return (
-        <>
-            <Pressable
-                style={styles.container}
-                onPress={handleOpen}
-            >
-                <Text style={selectedText ? styles.text : styles.placeholder}>
-                    {selectedText || intl.formatMessage({id: 'mobile.action_menu.select', defaultMessage: 'Select an option'})}
-                </Text>
-                <CompassIcon
-                    name='chevron-down'
-                    size={24}
-                    color={changeOpacity(theme.centerChannelColor, 0.5)}
-                />
-            </Pressable>
-            <Modal
-                animationType='slide'
-                transparent={true}
-                visible={visible}
-                onRequestClose={() => setVisible(false)}
-            >
-                <View style={styles.modalOverlay}>
-                    <Pressable
-                        style={styles.modalBackdrop}
-                        onPress={() => setVisible(false)}
-                    />
-                    <SafeAreaView style={styles.modalSheet}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>
-                                {intl.formatMessage({id: 'mobile.action_menu.select', defaultMessage: 'Select an option'})}
-                            </Text>
-                            <Pressable
-                                onPress={() => setVisible(false)}
-                                hitSlop={12}
-                            >
-                                <CompassIcon
-                                    name='close'
-                                    size={24}
-                                    color={changeOpacity(theme.centerChannelColor, 0.5)}
-                                />
-                            </Pressable>
-                        </View>
-                        <ScrollView>
-                            {options.map((option) => {
-                                const isSelected = option.value === selected;
-                                return (
-                                    <OptionItem
-                                        key={option.value}
-                                        action={() => handleSelect(option.value)}
-                                        label={option.text}
-                                        type={isSelected ? 'select' : 'default'}
-                                        testID={`feedback_selector.option.${option.value}`}
-                                    />
-                                );
-                            })}
-                        </ScrollView>
-                    </SafeAreaView>
-                </View>
-            </Modal>
-        </>
+        <Pressable
+            style={styles.container}
+            onPress={handleOpen}
+        >
+            <Text style={selectedText ? styles.text : styles.placeholder}>
+                {selectedText || intl.formatMessage({id: 'mobile.action_menu.select', defaultMessage: 'Select an option'})}
+            </Text>
+            <CompassIcon
+                name='chevron-down'
+                size={24}
+                color={changeOpacity(theme.centerChannelColor, 0.5)}
+            />
+        </Pressable>
     );
 };
 
