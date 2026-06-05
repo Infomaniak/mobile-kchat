@@ -130,7 +130,7 @@ export const getRecentPostsInThread = async (database: Database, rootId: string)
         const recent = chunks[0];
         const post = await getPostById(database, rootId);
         if (post) {
-            return queryPostsChunk(database, post.channelId, recent.earliest, recent.latest, false, false, 100).fetch();
+            return queryPostsChunk(database, post.channelId, recent.earliest, recent.latest, false, false, undefined).fetch();
         }
     }
     return [];
@@ -179,7 +179,7 @@ export const getRecentPostsInChannel = async (database: Database, channelId: str
     const chunks = await queryPostsInChannel(database, channelId).fetch();
     if (chunks.length) {
         const recent = chunks[0];
-        return queryPostsChunk(database, channelId, recent.earliest, recent.latest, false, includeDeleted, 100).fetch();
+        return queryPostsChunk(database, channelId, recent.earliest, recent.latest, false, includeDeleted, undefined).fetch();
     }
     return [];
 };
