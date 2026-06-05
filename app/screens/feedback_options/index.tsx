@@ -3,10 +3,9 @@
 
 import {BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import React from 'react';
-import {DeviceEventEmitter, View} from 'react-native';
+import {DeviceEventEmitter, Text, View} from 'react-native';
 
 import {BaseOption} from '@components/common_post_options';
-import FormattedText from '@components/formatted_text';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import BottomSheet from '@screens/bottom_sheet';
@@ -38,10 +37,11 @@ const FeedbackOptions = ({options, selected, eventName, title}: Props) => {
         <BottomSheet
             renderContent={() => (
                 <BottomSheetScrollView bounces={false}>
-                    <FormattedText
+                    <Text
                         style={{...typography('Heading', 600, 'SemiBold'), color: theme.centerChannelColor}}
-                        defaultMessage={title}
-                    />
+                    >
+                        {title}
+                    </Text>
                     <View style={{marginTop: 8}}>
                         {options.map((option) => (
                             <BaseOption
