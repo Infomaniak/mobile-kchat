@@ -11,7 +11,7 @@ export default tableSchema({
     name: POST,
     columns: [
         {name: 'channel_id', type: 'string', isIndexed: true},
-        {name: 'create_at', type: 'number'},
+        {name: 'create_at', type: 'number', isIndexed: true},
         {name: 'delete_at', type: 'number', isIndexed: true},
         {name: 'edit_at', type: 'number'},
         {name: 'is_pinned', type: 'boolean'},
@@ -22,9 +22,9 @@ export default tableSchema({
         {name: 'pending_post_id', type: 'string', isIndexed: true},
         {name: 'previous_post_id', type: 'string'},
         {name: 'props', type: 'string'},
-        {name: 'root_id', type: 'string'},
+        {name: 'root_id', type: 'string', isIndexed: true},
         {name: 'type', type: 'string', isIndexed: true},
-        {name: 'update_at', type: 'number'},
+        {name: 'update_at', type: 'number', isIndexed: true},
         {name: 'user_id', type: 'string', isIndexed: true},
     ],
 });
