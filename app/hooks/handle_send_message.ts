@@ -140,7 +140,7 @@ export const useHandleSendMessage = ({
                     type: MESSAGE_TYPE.ERROR,
                 });
             } else {
-                clearDraft();
+                setTimeout(clearDraft, 50);
             }
         } else if (isFromDraftView) {
             const shouldClearDraft = await canPostDraftInChannelOrThread({
@@ -164,7 +164,7 @@ export const useHandleSendMessage = ({
                     onPostCreated(threadRootId);
                 }
             });
-            clearDraft();
+            setTimeout(clearDraft, 50);
 
             // Early return to avoid calling DeviceEventEmitter.emit
             return;
@@ -177,7 +177,7 @@ export const useHandleSendMessage = ({
                     onPostCreated(threadRootId);
                 }
             });
-            clearDraft();
+            setTimeout(clearDraft, 50);
         }
 
         setSendingMessage(false);

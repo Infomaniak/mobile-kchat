@@ -11,7 +11,7 @@ export default tableSchema({
     name: POSTS_IN_CHANNEL,
     columns: [
         {name: 'channel_id', type: 'string', isIndexed: true},
-        {name: 'earliest', type: 'number'},
-        {name: 'latest', type: 'number'},
+        {name: 'earliest', type: 'number', isIndexed: true},
+        {name: 'latest', type: 'number', isIndexed: true},
     ],
 });

@@ -12,12 +12,12 @@ const {THREAD} = MM_TABLES.SERVER;
 export const tableSchemaSpec: TableSchemaSpec = {
     name: THREAD,
     columns: [
-        {name: 'is_following', type: 'boolean'},
+        {name: 'is_following', type: 'boolean', isIndexed: true},
         {name: 'last_reply_at', type: 'number', isIndexed: true},
         {name: 'last_viewed_at', type: 'number'},
-        {name: 'reply_count', type: 'number'},
-        {name: 'unread_mentions', type: 'number'},
-        {name: 'unread_replies', type: 'number'},
+        {name: 'reply_count', type: 'number', isIndexed: true},
+        {name: 'unread_mentions', type: 'number', isIndexed: true},
+        {name: 'unread_replies', type: 'number', isIndexed: true},
         {name: 'viewed_at', type: 'number'},
         {name: 'last_fetched_at', type: 'number', isIndexed: true},
     ],

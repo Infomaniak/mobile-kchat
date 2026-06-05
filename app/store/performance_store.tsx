@@ -151,8 +151,8 @@ export function PerformanceProvider({children, database}: {children: React.React
                 DB_TABLES.map(async (table) => {
                     try {
                         const collection = database.get(table);
-                        const records = await collection.query().fetch();
-                        return {table, count: records.length};
+                        const count = await collection.query().fetchCount();
+                        return {table, count};
                     } catch {
                         return {table, count: 0};
                     }

@@ -7,6 +7,7 @@ import React from 'react';
 import {combineLatest, of as of$} from 'rxjs';
 import {switchMap, distinctUntilChanged} from 'rxjs/operators';
 
+import {PER_PAGE_DEFAULT} from '@client/rest/constants';
 import {Preferences} from '@constants';
 import {getAdvanceSettingPreferenceAsBool} from '@helpers/api/preference';
 import {observeMyChannel} from '@queries/servers/channel';
@@ -35,7 +36,7 @@ const enhanced = withObservables(['channelId'], ({database, channelId}: {channel
                 }
 
                 const {earliest, latest} = postsInChannel[0];
-                return queryPostsBetween(database, earliest, latest, Q.desc, '', channelId, isCRTEnabled ? '' : undefined).observe();
+                return queryPostsBetween(database, earliest, latest, Q.desc, '', channelId, isCRTEnabled ? '' : undefined, PER_PAGE_DEFAULT * 4).observe();
             }),
         ),
         shouldShowJoinLeaveMessages: queryAdvanceSettingsPreferences(database, Preferences.ADVANCED_FILTER_JOIN_LEAVE).

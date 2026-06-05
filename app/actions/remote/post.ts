@@ -130,11 +130,13 @@ export async function createPost(serverUrl: string, post: Partial<Post>, files: 
     });
     initialPostModels.push(...postModels);
 
-    const customEmojis = await queryAllCustomEmojis(database).fetch();
     const emojisInMessage = matchEmoticons(newPost.message);
-    const reactionModels = await addRecentReaction(serverUrl, getValidEmojis(emojisInMessage, customEmojis), true);
-    if (!('error' in reactionModels) && reactionModels.length) {
-        initialPostModels.push(...reactionModels);
+    if (emojisInMessage.length > 0) {
+        const customEmojis = await queryAllCustomEmojis(database).fetch();
+        const reactionModels = await addRecentReaction(serverUrl, getValidEmojis(emojisInMessage, customEmojis), true);
+        if (!('error' in reactionModels) && reactionModels.length) {
+            initialPostModels.push(...reactionModels);
+        }
     }
 
     await operator.batchRecords(initialPostModels, 'createPost - initial');
