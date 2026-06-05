@@ -4,7 +4,7 @@
 import {useKeepAwake} from '@sayem314/react-native-keep-awake';
 import React, {useCallback, useEffect, useState} from 'react';
 import {TouchableOpacity, View} from 'react-native';
-import {createSound, AVEncoderAudioQualityIOSType, AudioEncoderAndroidType, AudioSourceAndroidType, OutputFormatAndroidType, type AudioSet} from 'react-native-nitro-sound';
+import {createSound, AudioEncoderAndroidType, AudioSourceAndroidType, OutputFormatAndroidType, type AudioSet} from 'react-native-nitro-sound';
 
 import CompassIcon from '@components/compass_icon';
 import Loading from '@components/loading';
@@ -90,10 +90,11 @@ const VoiceInput = ({onClose, addFiles, setRecording}: VoiceInputProps) => {
                 OutputFormatAndroid: OutputFormatAndroidType.MPEG_4,
                 AudioSourceAndroid: AudioSourceAndroidType.MIC,
 
-                // iOS
+                // iOS - Use default 'high' preset (48000 Hz, 2ch)
+                // Do NOT override AVSampleRateKeyIOS/AVNumberOfChannelsKeyIOS
+                // 44100 Hz causes crash in Release builds on native 192kHz hardware
+                // See: https://github.com/hyochan/react-native-nitro-sound/issues/766
                 AVModeIOS: 'measurement',
-                AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
-                AVNumberOfChannelsKeyIOS: 2,
                 AVFormatIDKeyIOS: 'aac',
             };
 
