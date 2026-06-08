@@ -13,7 +13,6 @@ export const MM_TABLES = {
         CATEGORY: 'Category',
         CATEGORY_CHANNEL: 'CategoryChannel',
         CHANNEL: 'Channel',
-        CHANNEL_BOOKMARK: 'ChannelBookmark',
         CHANNEL_INFO: 'ChannelInfo',
         CHANNEL_MEMBERSHIP: 'ChannelMembership',
         CONFERENCE: 'Conference',
@@ -81,7 +80,6 @@ export const SYSTEM_IDENTIFIERS = {
     TEAM_HISTORY: 'teamHistory',
     WEBSOCKET: 'WebSocket',
     AGENTS_VERSION: 'agents_version',
-    LAST_BOR_POST_CLEANUP_RUN: 'lastBoRPostCleanupRun',
 };
 
 export const GLOBAL_IDENTIFIERS = {

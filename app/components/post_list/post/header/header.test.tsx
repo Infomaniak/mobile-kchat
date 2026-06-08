@@ -1,12 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {screen} from '@testing-library/react-native';
 import React from 'react';
 
 import CompassIcon from '@components/compass_icon';
-import ExpiryCountdown from '@components/post_list/post/header/expiry_timer';
-import {PostTypes} from '@constants/post';
 import {renderWithIntlAndTheme} from '@test/intl-test-helper';
 import TestHelper from '@test/test_helper';
 
@@ -18,14 +15,6 @@ jest.mock('@components/compass_icon', () => ({
 }));
 jest.mocked(CompassIcon).mockImplementation(
     (props) => React.createElement('CompassIcon', {testID: `compass-icon${props.name ? '-' + props.name : ''}`, ...props}) as any,
-);
-
-jest.mock('@components/post_list/post/header/expiry_timer', () => ({
-    __esModule: true,
-    default: jest.fn(),
-}));
-jest.mocked(ExpiryCountdown).mockImplementation(
-    (props) => React.createElement('ExpiryCountdown', {testID: 'expiry-timer', ...props}) as any,
 );
 
 describe('Header', () => {
@@ -50,42 +39,18 @@ describe('Header', () => {
         files: [],
     };
 
-    it('Should show BoR icon for own BoR post', () => {
-        const ownBoRPost = TestHelper.fakePostModel({
-            type: PostTypes.BURN_ON_READ,
+    it('Should render header for a regular post', () => {
+        const post = TestHelper.fakePostModel({
             userId: currentUser.id,
-            metadata: {
-
-                // missing expire_at key indicates unrevealed BoR post
-            },
         });
 
-        renderWithIntlAndTheme(
+        const {toJSON} = renderWithIntlAndTheme(
             <Header
                 {...defaultProps}
-                post={ownBoRPost}
+                post={post}
             />,
         );
 
-        expect(screen.queryByTestId('compass-icon-fire')).toBeVisible();
-        expect(screen.queryByTestId('expiry-timer')).not.toBeVisible();
-    });
-
-    it('Should show BoR countdown for revealed BoR post', () => {
-        const ownBoRPost = TestHelper.fakePostModel({
-            type: PostTypes.BURN_ON_READ,
-            metadata: {
-                expire_at: Date.now() + 60000,
-            },
-        });
-
-        renderWithIntlAndTheme(
-            <Header
-                {...defaultProps}
-                post={ownBoRPost}
-            />,
-        );
-
-        expect(screen.queryByTestId('expiry-timer')).toBeVisible();
+        expect(toJSON()).toBeDefined();
     });
 });

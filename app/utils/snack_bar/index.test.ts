@@ -3,25 +3,14 @@
 
 import {showOverlay} from '@screens/navigation';
 
-import {showBoRPostErrorSnackbar} from '.';
+import {showSnackBar} from '.';
 
 describe('snack bar', () => {
-    describe('showBoRPostErrorSnackbar', () => {
-        it('should show snackbar', () => {
-            showBoRPostErrorSnackbar();
+    describe('showSnackBar', () => {
+        it('should show snackbar with barType', () => {
+            showSnackBar({barType: 'MUTE_CHANNEL'});
 
-            expect(showOverlay).toHaveBeenCalledWith('SnackBar', {
-                barType: 'BOR_POST_EXPIRED',
-            });
-        });
-
-        it('should show custom message when provided', () => {
-            showBoRPostErrorSnackbar('custom message');
-
-            expect(showOverlay).toHaveBeenCalledWith('SnackBar', {
-                barType: 'BOR_POST_EXPIRED',
-                customMessage: 'custom message',
-            });
+            expect(showOverlay).toHaveBeenCalledWith('SnackBar', {barType: 'MUTE_CHANNEL'});
         });
     });
 });

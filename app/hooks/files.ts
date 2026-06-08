@@ -2,13 +2,12 @@
 // See LICENSE.txt for license information.
 
 import {deleteAsync} from 'expo-file-system';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Platform, StatusBar, type StatusBarStyle} from 'react-native';
 import FileViewer from 'react-native-file-viewer';
 import tinyColor from 'tinycolor2';
 
-import {getLocalFileInfo} from '@actions/local/file';
 import {buildFilePreviewUrl, buildFileUrl, downloadFile} from '@actions/remote/file';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
@@ -16,50 +15,10 @@ import EphemeralStore from '@store/ephemeral_store';
 import {alertDownloadFailed, alertFailedToOpenDocument, alertOnlyPDFSupported} from '@utils/document';
 import {getFullErrorMessage, isErrorWithMessage} from '@utils/errors';
 import {fileExists, getLocalFilePathFromFile, isAudio, isGif, isImage, isPdf, isVideo} from '@utils/file';
-import {getImageSize} from '@utils/gallery';
 import {logDebug} from '@utils/log';
 import {previewPdf} from '@utils/navigation';
 
 import type {ClientResponse, ProgressPromise} from '@mattermost/react-native-network-client';
-import type ChannelBookmarkModel from '@typings/database/models/servers/channel_bookmark';
-
-const getFileInfo = async (serverUrl: string, bookmarks: ChannelBookmarkModel[], cb: (files: FileInfo[]) => void) => {
-    const fileInfos: FileInfo[] = [];
-    for await (const b of bookmarks) {
-        if (b.fileId) {
-            const res = await getLocalFileInfo(serverUrl, b.fileId);
-            if (res.file) {
-                const fileInfo = res.file.toFileInfo(b.ownerId);
-                const imageFile = isImage(fileInfo);
-                const videoFile = isVideo(fileInfo);
-
-                let uri;
-                if (imageFile || videoFile) {
-                    if (fileInfo.localPath) {
-                        uri = fileInfo.localPath;
-                    } else {
-                        uri = (isGif(fileInfo) || (imageFile && !fileInfo.has_preview_image) || videoFile) ? buildFileUrl(serverUrl, fileInfo.id!) : buildFilePreviewUrl(serverUrl, fileInfo.id!);
-                    }
-                } else {
-                    uri = fileInfo.localPath || buildFileUrl(serverUrl, fileInfo.id!);
-                }
-
-                let {width, height} = fileInfo;
-                if (imageFile && !width) {
-                    const size = await getImageSize(serverUrl, uri, b.fileId);
-                    width = size.width;
-                    height = size.height;
-                }
-
-                fileInfos.push({...fileInfo, uri, width, height});
-            }
-        }
-    }
-
-    if (fileInfos.length) {
-        cb(fileInfos);
-    }
-};
 
 export const useImageAttachments = (filesInfo: FileInfo[]) => {
     const serverUrl = useServerUrl();
@@ -91,17 +50,6 @@ export const useImageAttachments = (filesInfo: FileInfo[]) => {
             return {images, nonImages};
         }, {images: [], nonImages: []});
     }, [filesInfo, serverUrl]);
-};
-
-export const useChannelBookmarkFiles = (bookmarks: ChannelBookmarkModel[]) => {
-    const serverUrl = useServerUrl();
-    const [files, setFiles] = useState<FileInfo[]>([]);
-
-    useEffect(() => {
-        getFileInfo(serverUrl, bookmarks, setFiles);
-    }, [serverUrl, bookmarks]);
-
-    return files;
 };
 
 export const useDownloadFileAndPreview = (enableSecureFilePreview: boolean) => {

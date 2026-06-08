@@ -43,7 +43,6 @@ const loginFlowScreens = new Set<AvailableScreens>([
     Screens.ONBOARDING,
     Screens.SERVER,
     Screens.LOGIN,
-    Screens.SSO,
     Screens.MFA,
     Screens.FORGOT_PASSWORD,
 ]);
@@ -339,7 +338,6 @@ export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}
 
     if (!passProps.coldStart && (passProps.launchType === Launch.AddServer || passProps.launchType === Launch.AddServerFromDeepLink)) {
         dismissModal({componentId: Screens.SERVER});
-        dismissModal({componentId: Screens.SSO});
         dismissModal({componentId: Screens.BOTTOM_SHEET});
         if (passProps.launchType === Launch.AddServerFromDeepLink) {
             Navigation.updateProps(Screens.HOME, {launchType: Launch.DeepLink, extra: passProps.extra});

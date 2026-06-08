@@ -22,7 +22,6 @@ import type {APIClientInterface} from '@mattermost/react-native-network-client';
 import type {Model, Query, Relation} from '@nozbe/watermelondb';
 import type CategoryChannelModel from '@typings/database/models/servers/category_channel';
 import type ChannelModel from '@typings/database/models/servers/channel';
-import type ChannelBookmarkModel from '@typings/database/models/servers/channel_bookmark';
 import type ChannelInfoModel from '@typings/database/models/servers/channel_info';
 import type ChannelMembershipModel from '@typings/database/models/servers/channel_membership';
 import type CustomProfileAttributeModel from '@typings/database/models/servers/custom_profile_attribute';
@@ -604,7 +603,6 @@ class TestHelperSingleton {
             autotranslation: false,
             members: this.fakeQuery([]),
             drafts: this.fakeQuery([]),
-            bookmarks: this.fakeQuery([]),
             posts: this.fakeQuery([]),
             postsInChannel: this.fakeQuery([]),
             team: this.fakeRelation(),
@@ -666,26 +664,6 @@ class TestHelperSingleton {
             earliest: 0,
             latest: 0,
             channel: this.fakeRelation(),
-            ...overwrite,
-        };
-    };
-
-    fakeChannelBookmarkModel = (overwrite?: Partial<ChannelBookmarkModel>): ChannelBookmarkModel => {
-        return {
-            ...this.fakeModel(),
-            channelId: this.generateId(),
-            ownerId: this.generateId(),
-            fileId: this.generateId(),
-            displayName: this.generateId(),
-            createAt: 0,
-            updateAt: 0,
-            deleteAt: 0,
-            sortOrder: 0,
-            type: 'file',
-            channel: this.fakeRelation(),
-            owner: this.fakeRelation(),
-            file: this.fakeRelation(),
-            toApi: jest.fn(),
             ...overwrite,
         };
     };

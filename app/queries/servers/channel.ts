@@ -23,7 +23,6 @@ import {observeCurrentUser, observeTeammateNameDisplay} from './user';
 import type ServerDataOperator from '@database/operator/server_data_operator';
 import type {Clause} from '@nozbe/watermelondb/QueryDescription';
 import type ChannelModel from '@typings/database/models/servers/channel';
-import type ChannelBookmarkModel from '@typings/database/models/servers/channel_bookmark';
 import type ChannelInfoModel from '@typings/database/models/servers/channel_info';
 import type ChannelMembershipModel from '@typings/database/models/servers/channel_membership';
 import type MyChannelModel from '@typings/database/models/servers/my_channel';
@@ -191,27 +190,6 @@ export const prepareDeleteChannel = async (serverUrl: string, channel: ChannelMo
         }
     }
 
-    const bookmarks = await channel.bookmarks?.fetch();
-    if (bookmarks?.length) {
-        for await (const bookmark of bookmarks) {
-            const prepareBookmarks = await prepareDeleteBookmarks(bookmark);
-            preparedModels.push(...prepareBookmarks);
-        }
-    }
-
-    return preparedModels;
-};
-
-export const prepareDeleteBookmarks = async (bookmark: ChannelBookmarkModel) => {
-    const preparedModels: Model[] = [bookmark.prepareDestroyPermanently()];
-    try {
-        if (bookmark.fileId) {
-            const file = await bookmark.file.fetch();
-            preparedModels.push(file.prepareDestroyPermanently());
-        }
-    } catch {
-        // Record not found, do nothing
-    }
     return preparedModels;
 };
 

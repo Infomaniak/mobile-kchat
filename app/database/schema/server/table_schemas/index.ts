@@ -4,7 +4,6 @@
 export {default as CategorySchema} from './category';
 export {default as CategoryChannelSchema} from './category_channel';
 export {default as ChannelSchema} from './channel';
-export {default as ChannelBookmarkSchema} from './channel_bookmark';
 export {default as ChannelInfoSchema} from './channel_info';
 export {default as ChannelMembershipSchema} from './channel_membership';
 export {default as ConferenceSchema} from './conference';

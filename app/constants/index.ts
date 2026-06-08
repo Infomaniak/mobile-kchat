@@ -33,7 +33,6 @@ import PushProxy from './push_proxy';
 import Screens from './screens';
 import ServerErrors from './server_errors';
 import SnackBar from './snack_bar';
-import Sso from './sso';
 import SupportedServer from './supported_server';
 import Team from './team';
 import Tutorial from './tutorial';
@@ -73,7 +72,6 @@ export {
     Screens,
     ServerErrors,
     SnackBar,
-    Sso,
     SupportedServer,
     Team,
     Tutorial,

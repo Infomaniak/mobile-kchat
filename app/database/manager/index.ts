@@ -14,7 +14,7 @@ import {DatabaseType, MIGRATION_EVENTS, MM_TABLES} from '@constants/database';
 import AppDatabaseMigrations from '@database/migration/app';
 import ServerDatabaseMigrations from '@database/migration/server';
 import {InfoModel, GlobalModel, ServersModel} from '@database/models/app';
-import {CategoryModel, CategoryChannelModel, ChannelModel, ChannelBookmarkModel, ChannelInfoModel, ChannelMembershipModel, CustomEmojiModel, CustomProfileFieldModel, CustomProfileAttributeModel, DraftModel, FileModel,
+import {CategoryModel, CategoryChannelModel, ChannelModel, ChannelInfoModel, ChannelMembershipModel, CustomEmojiModel, CustomProfileFieldModel, CustomProfileAttributeModel, DraftModel, FileModel,
     GroupModel, GroupChannelModel, GroupTeamModel, GroupMembershipModel, MyChannelModel, MyChannelSettingsModel, MyTeamModel,
     PostModel, PostsInChannelModel, PostsInThreadModel, PreferenceModel, ReactionModel, RoleModel,
     ScheduledPostModel, SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
@@ -57,7 +57,6 @@ class DatabaseManagerSingleton {
             CategoryModel,
             CategoryChannelModel,
             ChannelModel,
-            ChannelBookmarkModel,
             ChannelInfoModel,
             ChannelMembershipModel,
             ConfigModel,

@@ -27,21 +27,17 @@ import {bottomSheetSnapPoint} from '@utils/helpers';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import ChannelHeaderBookmarks from './bookmarks';
 import QuickActions, {MARGIN, SEPARATOR_HEIGHT} from './quick_actions';
 
 import type {HeaderRightButton} from '@components/navigation_header/header';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type ChannelProps = {
-    canAddBookmarks: boolean;
     channelId: string;
     channelType: ChannelType;
     customStatus?: UserCustomStatus;
-    isBookmarksEnabled: boolean;
     isCustomStatusEnabled: boolean;
     isCustomStatusExpired: boolean;
-    hasBookmarks: boolean;
     componentId?: AvailableScreens;
     displayName: string;
     isOwnDirectMessage: boolean;
@@ -49,7 +45,6 @@ type ChannelProps = {
     teamId: string;
     callsEnabledInChannel: boolean;
     isTabletView?: boolean;
-    shouldRenderBookmarks: boolean;
     shouldRenderChannelBanner: boolean;
     isChannelAutotranslated: boolean;
 };
@@ -80,14 +75,11 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 }));
 
 const ChannelHeader = ({
-    canAddBookmarks,
     channelId,
     channelType,
     componentId,
     customStatus,
     displayName,
-    hasBookmarks,
-    isBookmarksEnabled,
     isCustomStatusEnabled,
     isCustomStatusExpired,
     isOwnDirectMessage,
@@ -95,7 +87,6 @@ const ChannelHeader = ({
     teamId,
     callsEnabledInChannel,
     isTabletView,
-    shouldRenderBookmarks,
     shouldRenderChannelBanner,
     isChannelAutotranslated,
 }: ChannelProps) => {
@@ -106,7 +97,6 @@ const ChannelHeader = ({
     const defaultHeight = useDefaultHeaderHeight();
     const serverUrl = useServerUrl();
 
-    // const callsConfig = getCallsConfig(serverUrl);
     const {pluginEnabled: agentsEnabled} = useAgentsConfig(serverUrl);
 
     // NOTE: callsEnabledInChannel will be true/false (not undefined) based on explicit state + the DefaultEnabled system setting
@@ -166,7 +156,6 @@ const ChannelHeader = ({
             return;
         }
 
-        // When calls is enabled, we need space to move the "Copy Link" from a button to an option
         let items = 2;
         if (callsAvailable && !isDMorGM) {
             items += 1;
@@ -175,7 +164,7 @@ const ChannelHeader = ({
             items += 1;
         }
         if (agentsEnabled) {
-            items += 1; // Ask Agents action (shown in all channel types)
+            items += 1;
         }
         let height = CHANNEL_ACTIONS_OPTIONS_HEIGHT + SEPARATOR_HEIGHT + MARGIN + (items * ITEM_HEIGHT);
         if (Platform.OS === 'android') {
@@ -199,7 +188,7 @@ const ChannelHeader = ({
             theme,
             closeButtonId: 'close-channel-quick-actions',
         });
-    }, [isTablet, callsAvailable, isDMorGM, , agentsEnabled, theme, onTitlePress, channelId]);
+    }, [isTablet, callsAvailable, isDMorGM, agentsEnabled, theme, onTitlePress, channelId]);
 
     const rightButtons = useMemo(() => {
         const buttons: HeaderRightButton[] = [];
@@ -275,8 +264,6 @@ const ChannelHeader = ({
         return undefined;
     }, [isChannelAutotranslated, theme.sidebarHeaderTextColor]);
 
-    const showBookmarkBar = isBookmarksEnabled && hasBookmarks && shouldRenderBookmarks;
-
     return (
         <>
             <NavigationHeader
@@ -294,17 +281,10 @@ const ChannelHeader = ({
             <View style={contextStyle}>
                 <RoundedHeaderContext/>
             </View>
-            {showBookmarkBar &&
-            <ChannelHeaderBookmarks
-                canAddBookmarks={canAddBookmarks}
-                channelId={channelId}
-            />
-            }
-            {
-                shouldRenderChannelBanner &&
+            {shouldRenderChannelBanner &&
                 <ChannelBanner
                     channelId={channelId}
-                    isTopItem={!showBookmarkBar}
+                    isTopItem={true}
                 />
             }
         </>

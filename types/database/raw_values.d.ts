@@ -108,7 +108,6 @@ type RawValue =
   | Category
   | CategoryChannel
   | Channel
-  | ChannelBookmark
   | ChannelInfo
   | ChannelMember
   | ChannelMembership

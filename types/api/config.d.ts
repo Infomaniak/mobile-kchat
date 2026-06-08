@@ -22,8 +22,6 @@ interface ClientConfig {
     BuildHash: string;
     BuildHashEnterprise: string;
     BuildNumber: string;
-    BurnOnReadMaximumTimeToLiveSeconds: string;
-    BurnOnReadDurationSeconds: string;
     CloseUnusedDirectMessages: string;
     CollapsedThreads: string;
     CustomBrandText: string;
@@ -48,7 +46,6 @@ interface ClientConfig {
     EmailNotificationContentsType: string;
     EnableBanner: string;
     EnableBotAccountCreation: string;
-    EnableBurnOnRead: string;
     EnableChannelViewedMessages: string;
     EnableClientMetrics?: string;
     EnableCluster: string;
@@ -129,7 +126,6 @@ interface ClientConfig {
     FeatureFlagCollapsedThreads?: string;
     FeatureFlagPostPriority?: string;
     FeatureFlagEnableVoiceMessages?: string;
-    FeatureFlagChannelBookmarks?: string;
     FeatureFlagCustomProfileAttributes?: string;
     FeatureFlagInteractiveDialogAppsForm?: string;
     ForgotPasswordLink?: string;
@@ -217,7 +213,6 @@ interface ClientConfig {
     WebsocketPort: string;
     WebsocketSecurePort: string;
     WebsocketURL: string;
-    BurnOnReadDurationSeconds: string;
 
     // Autotranslations
     AutoTranslationLanguages: string;

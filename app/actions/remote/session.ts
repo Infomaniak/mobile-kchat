@@ -19,14 +19,12 @@ import {getFullErrorMessage, isErrorWithStatusCode, isErrorWithUrl} from '@utils
 import {getIntlShape} from '@utils/general';
 import {logWarning, logError, logDebug} from '@utils/log';
 import {canReceiveNotifications} from '@utils/push_proxy';
-import {type SAMLChallenge} from '@utils/saml_challenge';
 import {getCSRFFromCookie} from '@utils/security';
 import {captureException} from '@utils/sentry';
 import {getServerUrlAfterRedirect} from '@utils/url';
 
 import {loginEntry} from './entry';
 
-import type {Client} from '@client/rest';
 import type {LoginArgs} from '@typings/database/database';
 
 const HTTP_UNAUTHORIZED = 401;
@@ -269,73 +267,6 @@ export const sendPasswordResetEmail = async (serverUrl: string, email: string) =
         logDebug('error on sendPasswordResetEmail', getFullErrorMessage(error));
         return {error};
     }
-};
-
-const completeSSOLogin = async (serverUrl: string, serverDisplayName: string, serverIdentifier: string, client: Client, userData?: UserProfile, skipChecks = false): Promise<LoginActionResponse> => {
-    const database = DatabaseManager.appDatabase?.database;
-    if (!database) {
-        return {error: 'App database not found', failed: true};
-    }
-
-    try {
-        // Setting up active database for this SSO login flow
-        const server = await DatabaseManager.createServerDatabase({
-            config: {
-                dbName: serverUrl,
-                serverUrl,
-                identifier: serverIdentifier,
-                displayName: serverDisplayName,
-            },
-        });
-
-        const user = userData || await client.getMe();
-
-        await server?.operator.handleUsers({users: [user], prepareRecordsOnly: false});
-        await server?.operator.handleSystem({
-            systems: [{
-                id: Database.SYSTEM_IDENTIFIERS.CURRENT_USER_ID,
-                value: user.id,
-            }],
-            prepareRecordsOnly: false,
-        });
-    } catch (error) {
-        logDebug('error on ssoLogin', getFullErrorMessage(error));
-        return {error, failed: true};
-    }
-
-    try {
-        await addPushProxyVerificationStateFromLogin(serverUrl);
-        const {error} = await loginEntry({serverUrl});
-        await DatabaseManager.setActiveServerDatabase(serverUrl, {
-            skipMAMEnrollmentCheck: skipChecks,
-            skipJailbreakCheck: skipChecks,
-            skipBiometricCheck: skipChecks,
-        });
-        return {error, failed: false};
-    } catch (error) {
-        return {error, failed: false};
-    }
-};
-
-export const ssoLogin = async (serverUrl: string, serverDisplayName: string, serverIdentifier: string, bearerToken: string, csrfToken: string, preauthSecret?: string): Promise<LoginActionResponse> => {
-    const client = NetworkManager.getClient(serverUrl);
-
-    client.setClientCredentials(bearerToken, preauthSecret);
-    client.setCSRFToken(csrfToken);
-
-    const result = await completeSSOLogin(serverUrl, serverDisplayName, serverIdentifier, client);
-    return result;
-};
-
-export const ssoLoginWithCodeExchange = async (serverUrl: string, serverDisplayName: string, serverIdentifier: string, loginCode: string, samlChallenge: Pick<SAMLChallenge, 'codeVerifier' | 'state'>, preauthSecret?: string): Promise<LoginActionResponse> => {
-    const client = NetworkManager.getClient(serverUrl);
-    const {token, csrf} = await client.exchangeSsoLoginCode(loginCode, samlChallenge.codeVerifier, samlChallenge.state);
-
-    client.setClientCredentials(token, preauthSecret);
-    client.setCSRFToken(csrf);
-
-    const result = await completeSSOLogin(serverUrl, serverDisplayName, serverIdentifier, client);
-    return result;
 };
 
 export const getUserLoginType = async (serverUrl: string, loginId: string) => {

@@ -105,10 +105,6 @@ const WebsocketEvents = {
     CONFERENCE_USER_CONNECTED: 'conference_user_connected',
     CONFERENCE_USER_DENIED: 'conference_user_denied',
     CONFERENCE_USER_DISCONNECTED: 'conference_user_disconnected',
-    CHANNEL_BOOKMARK_CREATED: 'channel_bookmark_created',
-    CHANNEL_BOOKMARK_UPDATED: 'channel_bookmark_updated',
-    CHANNEL_BOOKMARK_SORTED: 'channel_bookmark_sorted',
-    CHANNEL_BOOKMARK_DELETED: 'channel_bookmark_deleted',
     SCHEDULED_POST_CREATED: 'scheduled_post_created',
     SCHEDULED_POST_UPDATED: 'scheduled_post_updated',
     SCHEDULED_POST_DELETED: 'scheduled_post_deleted',
@@ -121,11 +117,6 @@ const WebsocketEvents = {
     // Agents
     AGENTS_POST_UPDATE: 'custom_mattermost-ai_postupdate',
     AGENTS_TOOL_CALL_STATUS: 'custom_mattermost-ai_tool_call_status_updated',
-
-    // Burn on Read
-    BOR_POST_REVEALED: 'post_revealed',
-    BOR_POST_BURNED: 'post_burned',
-    BURN_ON_READ_ALL_REVEALED: 'burn_on_read_all_revealed',
 
     // File access control
     FILE_DOWNLOAD_REJECTED: 'file_download_rejected',
