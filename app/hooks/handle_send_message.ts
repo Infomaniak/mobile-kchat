@@ -163,9 +163,8 @@ export const useHandleSendMessage = ({
                     const threadRootId = createdPost.root_id || createdPost.id;
                     onPostCreated(threadRootId);
                 }
-            }).finally(() => {
-                clearDraft();
             });
+            clearDraft();
 
             // Early return to avoid calling DeviceEventEmitter.emit
             return;
@@ -177,9 +176,9 @@ export const useHandleSendMessage = ({
                     const threadRootId = createdPost.root_id || createdPost.id;
                     onPostCreated(threadRootId);
                 }
-            }).finally(() => {
-                clearDraft();
             });
+            clearDraft();
+
         }
 
         setSendingMessage(false);
