@@ -32,6 +32,7 @@ type Props = {
     listRef: React.RefObject<FlatList<string | PostModel>>;
     onTouchMove?: (event: GestureResponderEvent) => void;
     onTouchEnd?: () => void;
+    requestMorePosts?: () => void;
 }
 
 const edges: Edge[] = [];
@@ -44,6 +45,7 @@ const ChannelPostList = ({
     channelId, contentContainerStyle, isCRTEnabled,
     lastViewedAt, posts, shouldShowJoinLeaveMessages,
     listRef, onTouchMove, onTouchEnd,
+    requestMorePosts,
 }: Props) => {
     const appState = useAppState();
     const isTablet = useIsTablet();
@@ -55,6 +57,7 @@ const ChannelPostList = ({
 
     const onEndReached = useDebounce(useCallback(async () => {
         if (!fetchingPosts && canLoadPostsBefore.current && posts.length) {
+            requestMorePosts?.();
             const lastPost = posts[posts.length - 1];
             const result = await fetchPostsBefore(serverUrl, channelId, lastPost?.id || '');
             canLoadPostsBefore.current = false;
@@ -62,7 +65,7 @@ const ChannelPostList = ({
                 canLoadPostsBefore.current = (result.posts?.length ?? 0) > 0;
             }
         }
-    }, [fetchingPosts, serverUrl, channelId, posts]), 500);
+    }, [fetchingPosts, serverUrl, channelId, posts, requestMorePosts]), 500);
 
     useDidUpdate(() => {
         setFetchingPosts(EphemeralStore.isLoadingMessagesForChannel(serverUrl, channelId));
