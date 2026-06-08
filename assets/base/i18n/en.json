@@ -1137,8 +1137,11 @@
   "send_feedback.error.no_server": "Not connected to a server. Please try again later.",
   "send_feedback.error.no_user": "User information not available. Please try again later.",
   "send_feedback.files.label": "Files",
+  "send_feedback.files.max_size": "Max file size: 32 MB",
   "send_feedback.files.remove": "Remove",
   "send_feedback.files.select": "Select Files",
+  "send_feedback.files.too_large": "One or more files exceed the 32 MB limit.",
+  "send_feedback.files.too_many": "You can attach up to 5 files.",
   "send_feedback.priority.high": "High",
   "send_feedback.priority.immediate": "Immediate",
   "send_feedback.priority.label": "Priority",
@@ -1350,8 +1353,5 @@
   "video.failed_description": "An error occurred while trying to play the video.",
   "video.normal": "Normal",
   "video.playback_speed": "Playback Speed",
-  "your.servers": "Your organizations",
-  "send_feedback.files.max_size": "Max file size: 32 MB",
-  "send_feedback.files.too_many": "You can attach up to 5 files.",
-  "send_feedback.files.too_large": "One or more files exceed the 32 MB limit."
+  "your.servers": "Your organizations"
 }
