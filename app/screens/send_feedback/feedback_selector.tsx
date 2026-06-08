@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useMemo} from 'react';
+import React, {useEffect, useMemo, useRef} from 'react';
 import {useIntl} from 'react-intl';
 import {DeviceEventEmitter, Pressable, Text} from 'react-native';
 
@@ -55,10 +55,21 @@ const FeedbackSelector = ({options, selected, onSelected}: Props) => {
         return options.find((opt) => opt.value === selected)?.text || '';
     }, [options, selected]);
 
+    const listenerRef = useRef<ReturnType<typeof DeviceEventEmitter.addListener> | null>(null);
+
+    useEffect(() => {
+        return () => {
+            listenerRef.current?.remove();
+        };
+    }, []);
+
     const handleOpen = usePreventDoubleTap(() => {
+        listenerRef.current?.remove();
+
         const eventName = `feedback-selector-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-        const listener = DeviceEventEmitter.addListener(eventName, (value: string) => {
-            listener.remove();
+        listenerRef.current = DeviceEventEmitter.addListener(eventName, (value: string) => {
+            listenerRef.current?.remove();
+            listenerRef.current = null;
             onSelected(value);
         });
 
