@@ -1540,5 +1540,13 @@
     "video.failed_description": "Er is een fout opgetreden tijdens het afspelen van de video.",
     "video.normal": "Normaal",
     "video.playback_speed": "Afspeelsnelheid",
-    "your.servers": "Uw organisaties"
+    "your.servers": "Uw organisaties",
+    "send_feedback.priority.label_format": "Prioriteit: {text}",
+    "send_feedback.priority.low": "Laag",
+    "send_feedback.priority.normal": "Normaal",
+    "send_feedback.priority.high": "Hoog",
+    "send_feedback.priority.urgent": "Urgent",
+    "send_feedback.priority.immediate": "Onmiddellijk",
+    "send_feedback.type.bug": "Bug",
+    "send_feedback.type.feature": "Functie"
 }

@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {
     ActivityIndicator,
@@ -32,19 +32,7 @@ import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type FeedbackType = 'bug' | 'feature';
-const FeedbackTypeOptions = [
-    {text: 'Bug', value: 'bug'},
-    {text: 'Feature', value: 'feature'},
-] as const;
-
 type Priority = 'low' | 'normal' | 'high' | 'urgent' | 'immediate';
-const PriorityOptions = [
-    {text: 'Low', value: 'low'},
-    {text: 'Normal', value: 'normal'},
-    {text: 'High', value: 'high'},
-    {text: 'Urgent', value: 'urgent'},
-    {text: 'Immediate', value: 'immediate'},
-] as const;
 
 const PriorityValueMap: Record<Priority, number> = {
     low: 1,
@@ -181,6 +169,19 @@ const SendFeedback = ({componentId, currentUser}: Props) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
 
+    const feedbackTypeOptions = useMemo(() => [
+        {text: intl.formatMessage({id: 'send_feedback.type.bug', defaultMessage: 'Bug'}), value: 'bug'},
+        {text: intl.formatMessage({id: 'send_feedback.type.feature', defaultMessage: 'Feature'}), value: 'feature'},
+    ], [intl]);
+
+    const priorityOptions = useMemo(() => [
+        {text: intl.formatMessage({id: 'send_feedback.priority.low', defaultMessage: 'Low'}), value: 'low'},
+        {text: intl.formatMessage({id: 'send_feedback.priority.normal', defaultMessage: 'Normal'}), value: 'normal'},
+        {text: intl.formatMessage({id: 'send_feedback.priority.high', defaultMessage: 'High'}), value: 'high'},
+        {text: intl.formatMessage({id: 'send_feedback.priority.urgent', defaultMessage: 'Urgent'}), value: 'urgent'},
+        {text: intl.formatMessage({id: 'send_feedback.priority.immediate', defaultMessage: 'Immediate'}), value: 'immediate'},
+    ], [intl]);
+
     const handleClose = useCallback(() => {
         popTopScreen(componentId);
     }, [componentId]);
@@ -230,7 +231,10 @@ const SendFeedback = ({componentId, currentUser}: Props) => {
                 subject: fullSubject,
                 description,
                 priorityValue: PriorityValueMap[priority],
-                priorityLabel: 'Priorité: ' + (PriorityOptions.find((p) => p.value === priority)?.text || priority),
+                priorityLabel: intl.formatMessage(
+                    {id: 'send_feedback.priority.label_format', defaultMessage: 'Priority: {text}'},
+                    {text: priorityOptions.find((p) => p.value === priority)?.text || priority},
+                ),
                 files: files.map((f) => ({uri: f.uri!, type: f.type, fileName: f.fileName})),
                 extra: {
                     project: 'kchat',
@@ -256,7 +260,7 @@ const SendFeedback = ({componentId, currentUser}: Props) => {
         } finally {
             setIsSubmitting(false);
         }
-    }, [currentUser, serverUrl, subject, description, feedbackType, priority, files, handleClose, intl]);
+    }, [currentUser, serverUrl, subject, description, feedbackType, priority, files, handleClose, intl, priorityOptions]);
 
     const canSubmit = subject.trim().length > 0 && !isSubmitting && currentUser && serverUrl;
 
@@ -276,7 +280,7 @@ const SendFeedback = ({componentId, currentUser}: Props) => {
                             {intl.formatMessage({id: 'send_feedback.type.label', defaultMessage: 'Type'})}
                         </Text>
                         <FeedbackSelector
-                            options={FeedbackTypeOptions}
+                            options={feedbackTypeOptions}
                             selected={feedbackType}
                             onSelected={(value: string) => setFeedbackType(value as FeedbackType)}
                         />
@@ -287,7 +291,7 @@ const SendFeedback = ({componentId, currentUser}: Props) => {
                             {intl.formatMessage({id: 'send_feedback.priority.label', defaultMessage: 'Priority'})}
                         </Text>
                         <FeedbackSelector
-                            options={PriorityOptions}
+                            options={priorityOptions}
                             selected={priority}
                             onSelected={(value: string) => setPriority(value as Priority)}
                         />

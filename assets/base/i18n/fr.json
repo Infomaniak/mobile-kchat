@@ -1134,5 +1134,13 @@
   "video.download_description": "Cette vidéo doit être téléchargée pour être lue.",
   "video.failed_description": "Une erreur s'est produite lors de la tentative de lecture de la vidéo.",
   "your.servers": "Vos organisations",
-  "your.teams": "Vos équipes"
+  "your.teams": "Vos équipes",
+  "send_feedback.priority.label_format": "Priorité : {text}",
+  "send_feedback.priority.low": "Basse",
+  "send_feedback.priority.normal": "Normale",
+  "send_feedback.priority.high": "Haute",
+  "send_feedback.priority.urgent": "Urgente",
+  "send_feedback.priority.immediate": "Immédiate",
+  "send_feedback.type.bug": "Bug",
+  "send_feedback.type.feature": "Fonctionnalité"
 }

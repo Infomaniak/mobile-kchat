@@ -1540,5 +1540,13 @@
     "video.failed_description": "Ocorreu um erro ao tentar reproduzir o vídeo.",
     "video.normal": "Normal",
     "video.playback_speed": "Velocidade de reprodução",
-    "your.servers": "Suas organizações"
+    "your.servers": "Suas organizações",
+    "send_feedback.priority.label_format": "Prioridade: {text}",
+    "send_feedback.priority.low": "Baixa",
+    "send_feedback.priority.normal": "Normal",
+    "send_feedback.priority.high": "Alta",
+    "send_feedback.priority.urgent": "Urgente",
+    "send_feedback.priority.immediate": "Imediata",
+    "send_feedback.type.bug": "Erro",
+    "send_feedback.type.feature": "Funcionalidade"
 }

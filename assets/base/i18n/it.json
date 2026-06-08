@@ -1038,5 +1038,13 @@
   "video.download_description": "Questo video deve essere scaricato per poter essere riprodotto.",
   "video.failed_description": "Si è verificato un errore durante il tentativo di riproduzione del video.",
   "your.servers": "Le tue organizzazioni",
-  "your.teams": "I tuoi team"
+  "your.teams": "I tuoi team",
+  "send_feedback.priority.label_format": "Priorità: {text}",
+  "send_feedback.priority.low": "Bassa",
+  "send_feedback.priority.normal": "Normale",
+  "send_feedback.priority.high": "Alta",
+  "send_feedback.priority.urgent": "Urgente",
+  "send_feedback.priority.immediate": "Immediata",
+  "send_feedback.type.bug": "Bug",
+  "send_feedback.type.feature": "Funzionalità"
 }

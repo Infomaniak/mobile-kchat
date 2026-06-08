@@ -1540,5 +1540,13 @@
     "video.failed_description": "Wystąpił błąd podczas próby odtworzenia filmu.",
     "video.normal": "Normalny",
     "video.playback_speed": "Prędkość odtwarzania",
-    "your.servers": "Twoje organizacje"
+    "your.servers": "Twoje organizacje",
+    "send_feedback.priority.label_format": "Priorytet: {text}",
+    "send_feedback.priority.low": "Niski",
+    "send_feedback.priority.normal": "Normalny",
+    "send_feedback.priority.high": "Wysoki",
+    "send_feedback.priority.urgent": "Pilny",
+    "send_feedback.priority.immediate": "Natychmiastowy",
+    "send_feedback.type.bug": "Błąd",
+    "send_feedback.type.feature": "Funkcja"
 }

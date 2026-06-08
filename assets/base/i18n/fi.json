@@ -1540,5 +1540,13 @@
     "video.failed_description": "Videon toistossa tapahtui virhe.",
     "video.normal": "Normaali",
     "video.playback_speed": "Toistonopeus",
-    "your.servers": "Organisaatiosi"
+    "your.servers": "Organisaatiosi",
+    "send_feedback.priority.label_format": "Prioriteetti: {text}",
+    "send_feedback.priority.low": "Matala",
+    "send_feedback.priority.normal": "Normaali",
+    "send_feedback.priority.high": "Korkea",
+    "send_feedback.priority.urgent": "Kiireellinen",
+    "send_feedback.priority.immediate": "Välittömästi",
+    "send_feedback.type.bug": "Virhe",
+    "send_feedback.type.feature": "Ominaisuus"
 }

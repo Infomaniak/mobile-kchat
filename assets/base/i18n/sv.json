@@ -1540,5 +1540,13 @@
     "video.failed_description": "Ett fel uppstod när videon försökte spelas upp.",
     "video.normal": "Normal",
     "video.playback_speed": "Uppspelningshastighet",
-    "your.servers": "Dina organisationer"
+    "your.servers": "Dina organisationer",
+    "send_feedback.priority.label_format": "Prioritet: {text}",
+    "send_feedback.priority.low": "Låg",
+    "send_feedback.priority.normal": "Normal",
+    "send_feedback.priority.high": "Hög",
+    "send_feedback.priority.urgent": "Brådskande",
+    "send_feedback.priority.immediate": "Omedelbar",
+    "send_feedback.type.bug": "Fel",
+    "send_feedback.type.feature": "Funktion"
 }

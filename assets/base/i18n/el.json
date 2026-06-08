@@ -1540,5 +1540,13 @@
     "video.failed_description": "Παρουσιάστηκε ένα σφάλμα κατά την προσπάθεια αναπαραγωγής του βίντεο.",
     "video.normal": "Κανονικό",
     "video.playback_speed": "Ταχύτητα αναπαραγωγής",
-    "your.servers": "Οι οργανισμοί σας"
+    "your.servers": "Οι οργανισμοί σας",
+    "send_feedback.priority.label_format": "Προτεραιότητα: {text}",
+    "send_feedback.priority.low": "Χαμηλή",
+    "send_feedback.priority.normal": "Κανονική",
+    "send_feedback.priority.high": "Υψηλή",
+    "send_feedback.priority.urgent": "Επείγουσα",
+    "send_feedback.priority.immediate": "Άμεση",
+    "send_feedback.type.bug": "Σφάλμα",
+    "send_feedback.type.feature": "Χαρακτηριστικό"
 }

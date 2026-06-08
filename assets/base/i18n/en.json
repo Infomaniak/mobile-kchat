@@ -1342,5 +1342,13 @@
   "video.failed_description": "An error occurred while trying to play the video.",
   "video.normal": "Normal",
   "video.playback_speed": "Playback Speed",
-  "your.servers": "Your organizations"
+  "your.servers": "Your organizations",
+  "send_feedback.priority.label_format": "Priority: {text}",
+  "send_feedback.priority.low": "Low",
+  "send_feedback.priority.normal": "Normal",
+  "send_feedback.priority.high": "High",
+  "send_feedback.priority.urgent": "Urgent",
+  "send_feedback.priority.immediate": "Immediate",
+  "send_feedback.type.bug": "Bug",
+  "send_feedback.type.feature": "Feature"
 }

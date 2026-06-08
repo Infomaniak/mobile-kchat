@@ -1526,5 +1526,13 @@
   "video.normal": "Normal",
   "video.playback_speed": "Wiedergabegeschwindigkeit",
   "your.servers": "Deine Organisationen",
-  "your.teams": "Deine Teams"
+  "your.teams": "Deine Teams",
+  "send_feedback.priority.label_format": "Priorität: {text}",
+  "send_feedback.priority.low": "Niedrig",
+  "send_feedback.priority.normal": "Normal",
+  "send_feedback.priority.high": "Hoch",
+  "send_feedback.priority.urgent": "Dringend",
+  "send_feedback.priority.immediate": "Sofort",
+  "send_feedback.type.bug": "Bug",
+  "send_feedback.type.feature": "Funktion"
 }

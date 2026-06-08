@@ -1540,5 +1540,13 @@
     "video.failed_description": "Der opstod en fejl under forsøget på at afspille videoen.",
     "video.normal": "Normal",
     "video.playback_speed": "Afspilningshastighed",
-    "your.servers": "Dine organisationer"
+    "your.servers": "Dine organisationer",
+    "send_feedback.priority.label_format": "Prioritet: {text}",
+    "send_feedback.priority.low": "Lav",
+    "send_feedback.priority.normal": "Normal",
+    "send_feedback.priority.high": "Høj",
+    "send_feedback.priority.urgent": "Haster",
+    "send_feedback.priority.immediate": "Øjeblikkelig",
+    "send_feedback.type.bug": "Fejl",
+    "send_feedback.type.feature": "Funktion"
 }

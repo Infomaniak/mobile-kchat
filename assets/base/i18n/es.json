@@ -1020,5 +1020,13 @@
   "video.download_description": "Para poder ver el vídeo, es necesario descargarlo.",
   "video.failed_description": "Ocurrió un error al intentar reproducir el video.",
   "your.servers": "Tus organizaciones",
-  "your.teams": "Tus equipos"
+  "your.teams": "Tus equipos",
+  "send_feedback.priority.label_format": "Prioridad: {text}",
+  "send_feedback.priority.low": "Baja",
+  "send_feedback.priority.normal": "Normal",
+  "send_feedback.priority.high": "Alta",
+  "send_feedback.priority.urgent": "Urgente",
+  "send_feedback.priority.immediate": "Inmediata",
+  "send_feedback.type.bug": "Error",
+  "send_feedback.type.feature": "Funcionalidad"
 }
