@@ -534,6 +534,7 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
         let sinceCursor: number | undefined = since;
         let afterCursor: string | undefined;
         let hasMore = true;
+        let totalPostsFetched = 0;
 
         while (hasMore) {
             // eslint-disable-next-line no-await-in-loop
@@ -551,9 +552,10 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
             if (result.posts?.length) {
                 allPosts.push(...result.posts);
                 allOrder.push(...(result.order || []));
+                totalPostsFetched += result.posts.length;
             }
 
-            if (data.next_post_id) {
+            if (data.next_post_id && totalPostsFetched < General.MAX_POSTS_SINCE) {
                 afterCursor = data.next_post_id;
                 sinceCursor = undefined;
             } else {
