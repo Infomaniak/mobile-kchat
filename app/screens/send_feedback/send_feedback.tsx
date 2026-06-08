@@ -42,6 +42,8 @@ const PriorityValueMap: Record<Priority, number> = {
     immediate: 5,
 };
 
+const MAX_FILE_SIZE = 32 * 1024 * 1024;
+
 const BUCKET_IDENTIFIER = 'kchat-web_bucket';
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
@@ -89,6 +91,11 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         ...typography('Body', 200),
     },
     fileList: {
+        marginTop: 8,
+    },
+    fileSizeHint: {
+        ...typography('Body', 75),
+        color: changeOpacity(theme.centerChannelColor, 0.56),
         marginTop: 8,
     },
     fileItem: {
@@ -196,10 +203,28 @@ const SendFeedback = ({componentId, currentUser}: Props) => {
         });
 
         const selectedAssets = result.assets;
-        if (selectedAssets && selectedAssets.length > 0) {
-            setFiles((prev) => [...prev, ...selectedAssets]);
+        if (!selectedAssets || selectedAssets.length === 0) {
+            return;
         }
-    }, []);
+
+        if (files.length + selectedAssets.length > 5) {
+            setErrorMessage(intl.formatMessage(
+                {id: 'send_feedback.files.too_many', defaultMessage: 'You can attach up to 5 files.'},
+            ));
+            return;
+        }
+
+        const oversized = selectedAssets.some((asset) => asset.fileSize && asset.fileSize > MAX_FILE_SIZE);
+        if (oversized) {
+            setErrorMessage(intl.formatMessage(
+                {id: 'send_feedback.files.too_large', defaultMessage: 'One or more files exceed the 32 MB limit.'},
+            ));
+            return;
+        }
+
+        setErrorMessage('');
+        setFiles((prev) => [...prev, ...selectedAssets]);
+    }, [files.length, intl]);
 
     const handleRemoveFile = useCallback((index: number) => {
         setFiles((prev) => {
@@ -338,6 +363,9 @@ const SendFeedback = ({componentId, currentUser}: Props) => {
                             onPress={handleSelectFiles}
                             size='lg'
                         />
+                        <Text style={styles.fileSizeHint}>
+                            {intl.formatMessage({id: 'send_feedback.files.max_size', defaultMessage: 'Max file size: 32 MB'})}
+                        </Text>
                         <View style={styles.fileList}>
                             {files.map((file, index) => (
                                 <FileItem

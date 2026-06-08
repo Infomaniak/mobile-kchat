@@ -1548,5 +1548,8 @@
     "send_feedback.priority.urgent": "Haster",
     "send_feedback.priority.immediate": "Umiddelbar",
     "send_feedback.type.bug": "Feil",
-    "send_feedback.type.feature": "Funksjon"
+    "send_feedback.type.feature": "Funksjon",
+  "send_feedback.files.max_size": "Maks filstørrelse: 32 MB",
+  "send_feedback.files.too_many": "Du kan legge ved opptil 5 filer.",
+  "send_feedback.files.too_large": "En eller flere filer overstiger grensen på 32 MB."
 }

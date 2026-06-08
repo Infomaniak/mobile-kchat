@@ -1142,5 +1142,8 @@
   "send_feedback.priority.urgent": "Urgente",
   "send_feedback.priority.immediate": "Immédiate",
   "send_feedback.type.bug": "Bug",
-  "send_feedback.type.feature": "Fonctionnalité"
+  "send_feedback.type.feature": "Fonctionnalité",
+  "send_feedback.files.max_size": "Taille maximale du fichier : 32 Mo",
+  "send_feedback.files.too_many": "Vous pouvez joindre jusqu'à 5 fichiers.",
+  "send_feedback.files.too_large": "Un ou plusieurs fichiers dépassent la limite de 32 Mo."
 }

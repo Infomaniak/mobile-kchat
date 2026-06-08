@@ -1548,5 +1548,8 @@
     "send_feedback.priority.urgent": "Urgent",
     "send_feedback.priority.immediate": "Onmiddellijk",
     "send_feedback.type.bug": "Bug",
-    "send_feedback.type.feature": "Functie"
+    "send_feedback.type.feature": "Functie",
+  "send_feedback.files.max_size": "Max. bestandsgrootte: 32 MB",
+  "send_feedback.files.too_many": "Je kunt maximaal 5 bestanden bijvoegen.",
+  "send_feedback.files.too_large": "Eén of meer bestanden overschrijden de limiet van 32 MB."
 }

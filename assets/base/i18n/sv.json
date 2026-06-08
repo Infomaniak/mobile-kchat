@@ -1548,5 +1548,8 @@
     "send_feedback.priority.urgent": "Brådskande",
     "send_feedback.priority.immediate": "Omedelbar",
     "send_feedback.type.bug": "Fel",
-    "send_feedback.type.feature": "Funktion"
+    "send_feedback.type.feature": "Funktion",
+  "send_feedback.files.max_size": "Max filstorlek: 32 MB",
+  "send_feedback.files.too_many": "Du kan bifoga upp till 5 filer.",
+  "send_feedback.files.too_large": "En eller flera filer överskrider gränsen på 32 MB."
 }

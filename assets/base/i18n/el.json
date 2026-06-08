@@ -1548,5 +1548,8 @@
     "send_feedback.priority.urgent": "Επείγουσα",
     "send_feedback.priority.immediate": "Άμεση",
     "send_feedback.type.bug": "Σφάλμα",
-    "send_feedback.type.feature": "Χαρακτηριστικό"
+    "send_feedback.type.feature": "Χαρακτηριστικό",
+  "send_feedback.files.max_size": "Μέγιστο μέγεθος αρχείου: 32 MB",
+  "send_feedback.files.too_many": "Μπορείτε να επισυνάψετε έως 5 αρχεία.",
+  "send_feedback.files.too_large": "Ένα ή περισσότερα αρχεία υπερβαίνουν το όριο των 32 MB."
 }

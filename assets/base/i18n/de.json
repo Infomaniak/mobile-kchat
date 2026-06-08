@@ -1534,5 +1534,8 @@
   "send_feedback.priority.urgent": "Dringend",
   "send_feedback.priority.immediate": "Sofort",
   "send_feedback.type.bug": "Bug",
-  "send_feedback.type.feature": "Funktion"
+  "send_feedback.type.feature": "Funktion",
+  "send_feedback.files.max_size": "Max. Dateigröße: 32 MB",
+  "send_feedback.files.too_many": "Sie können bis zu 5 Dateien anhängen.",
+  "send_feedback.files.too_large": "Eine oder mehrere Dateien überschreiten das Limit von 32 MB."
 }
