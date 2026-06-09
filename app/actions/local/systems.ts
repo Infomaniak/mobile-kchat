@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Q} from '@nozbe/watermelondb';
+import {Q, type Database} from '@nozbe/watermelondb';
 import deepEqual from 'deep-equal';
 import {DeviceEventEmitter} from 'react-native';
 
@@ -19,14 +19,28 @@ import {
     getIsDataRetentionEnabled,
 } from '@queries/servers/system';
 import PostModel from '@typings/database/models/servers/post';
-import {logError} from '@utils/log';
+import ReactionModel from '@typings/database/models/servers/reaction';
+import ThreadModel from '@typings/database/models/servers/thread';
+import ThreadParticipantModel from '@typings/database/models/servers/thread_participant';
+import {logDebug, logError} from '@utils/log';
 
 import {deletePostsForChannelsWithAutotranslation} from './channel';
 import {deletePosts} from './post';
 
 import type {DataRetentionPoliciesRequest} from '@actions/remote/systems';
 
-const {SERVER: {POST}} = MM_TABLES;
+const {SERVER: {POST, REACTION, THREAD, THREAD_PARTICIPANT, THREADS_IN_TEAM}} = MM_TABLES;
+
+// Thresholds for volume-based cleanup
+const POST_VOLUME_THRESHOLD = 100_000;
+const POST_VOLUME_TARGET = 80_000;
+const REACTION_VOLUME_THRESHOLD = 25_000;
+const REACTION_VOLUME_TARGET = 20_000;
+const THREAD_VOLUME_THRESHOLD = 100_000;
+const THREAD_VOLUME_TARGET = 80_000;
+const THREAD_PARTICIPANT_VOLUME_THRESHOLD = 20_000;
+const THREAD_PARTICIPANT_VOLUME_TARGET = 12_000;
+const CLEANUP_BATCH_SIZE = 5_000;
 
 export async function storeConfigAndLicense(serverUrl: string, config: ClientConfig, license: ClientLicense) {
     try {
@@ -329,6 +343,146 @@ export async function dismissAnnouncement(serverUrl: string, announcementText: s
     } catch (error) {
         logError('An error occurred while dismissing an announcement', error);
         return {error};
+    }
+}
+
+export async function volumeBasedCleanup(serverUrl: string) {
+    try {
+        const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+
+        // Cleanup posts first. This cascades to threads/reactions/participants via deletePosts().
+        await cleanupPostsByVolume(serverUrl, database);
+
+        // After post cascade cleanup, check the other tables for excess volume.
+        await cleanupReactionsByVolume(database);
+        await cleanupThreadsByVolume(database);
+        await cleanupThreadParticipantsByVolume(database);
+
+        return {error: undefined};
+    } catch (error) {
+        logError('[volumeBasedCleanup] Failed', error);
+        return {error};
+    }
+}
+
+async function cleanupPostsByVolume(serverUrl: string, database: Database) {
+    let count = await database.get<PostModel>(POST).query().fetchCount();
+    logDebug('[cleanupPostsByVolume] Current count:', count);
+
+    while (count > POST_VOLUME_THRESHOLD) {
+        const toDelete = Math.min(count - POST_VOLUME_TARGET, CLEANUP_BATCH_SIZE);
+        logDebug(`[cleanupPostsByVolume] Deleting ${toDelete} oldest posts (current: ${count}, target: ${POST_VOLUME_TARGET})`);
+
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup; each iteration depends on updated count
+        const postIds = await database.get<PostModel>(POST).query(
+            Q.sortBy('create_at', Q.asc),
+            Q.take(toDelete),
+        ).fetchIds();
+
+        if (!postIds.length) {
+            break;
+        }
+
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup
+        const {error} = await dataRetentionCleanPosts(serverUrl, postIds);
+        if (error) {
+            logError('[cleanupPostsByVolume] Error deleting posts batch', error);
+            break;
+        }
+
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup
+        count = await database.get<PostModel>(POST).query().fetchCount();
+    }
+}
+
+async function cleanupReactionsByVolume(database: Database) {
+    let count = await database.get<ReactionModel>(REACTION).query().fetchCount();
+
+    while (count > REACTION_VOLUME_THRESHOLD) {
+        const toDelete = Math.min(count - REACTION_VOLUME_TARGET, CLEANUP_BATCH_SIZE);
+
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup; each iteration depends on updated count
+        const reactionIds = await database.get<ReactionModel>(REACTION).query(
+            Q.sortBy('create_at', Q.asc),
+            Q.take(toDelete),
+        ).fetchIds();
+
+        if (!reactionIds.length) {
+            break;
+        }
+
+        logDebug(`[cleanupReactionsByVolume] Deleting ${reactionIds.length} oldest reactions (current: ${count})`);
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup
+        await database.write(() => {
+            return database.adapter.unsafeExecute({
+                sqls: [[`DELETE FROM ${REACTION} WHERE id IN ('${reactionIds.join("','")}')`, []]],
+            });
+        });
+
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup
+        count = await database.get<ReactionModel>(REACTION).query().fetchCount();
+    }
+}
+
+async function cleanupThreadsByVolume(database: Database) {
+    let count = await database.get<ThreadModel>(THREAD).query().fetchCount();
+
+    while (count > THREAD_VOLUME_THRESHOLD) {
+        const toDelete = Math.min(count - THREAD_VOLUME_TARGET, CLEANUP_BATCH_SIZE);
+
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup; each iteration depends on updated count
+        const threadIds = await database.get<ThreadModel>(THREAD).query(
+            Q.sortBy('id', Q.asc), // thread.id = root_post.id, roughly chronological
+            Q.take(toDelete),
+        ).fetchIds();
+
+        if (!threadIds.length) {
+            break;
+        }
+
+        logDebug(`[cleanupThreadsByVolume] Deleting ${threadIds.length} oldest threads (current: ${count})`);
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup
+        await database.write(() => {
+            return database.adapter.unsafeExecute({
+                sqls: [
+                    [`DELETE FROM ${THREADS_IN_TEAM} WHERE thread_id IN ('${threadIds.join("','")}')`, []],
+                    [`DELETE FROM ${THREAD_PARTICIPANT} WHERE thread_id IN ('${threadIds.join("','")}')`, []],
+                    [`DELETE FROM ${THREAD} WHERE id IN ('${threadIds.join("','")}')`, []],
+                ],
+            });
+        });
+
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup
+        count = await database.get<ThreadModel>(THREAD).query().fetchCount();
+    }
+}
+
+async function cleanupThreadParticipantsByVolume(database: Database) {
+    let count = await database.get<ThreadParticipantModel>(THREAD_PARTICIPANT).query().fetchCount();
+
+    while (count > THREAD_PARTICIPANT_VOLUME_THRESHOLD) {
+        const toDelete = Math.min(count - THREAD_PARTICIPANT_VOLUME_TARGET, CLEANUP_BATCH_SIZE);
+
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup; each iteration depends on updated count
+        const participantIds = await database.get<ThreadParticipantModel>(THREAD_PARTICIPANT).query(
+            Q.sortBy('thread_id', Q.asc),
+            Q.take(toDelete),
+        ).fetchIds();
+
+        if (!participantIds.length) {
+            break;
+        }
+
+        logDebug(`[cleanupThreadParticipantsByVolume] Deleting ${participantIds.length} oldest thread participants (current: ${count})`);
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup
+        await database.write(() => {
+            return database.adapter.unsafeExecute({
+                sqls: [[`DELETE FROM ${THREAD_PARTICIPANT} WHERE id IN ('${participantIds.join("','")}')`, []]],
+            });
+        });
+
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup
+        count = await database.get<ThreadParticipantModel>(THREAD_PARTICIPANT).query().fetchCount();
     }
 }
 
