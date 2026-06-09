@@ -220,7 +220,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - NitroSound (0.2.13):
+  - NitroSound (0.2.8):
     - DoubleConversion
     - glog
     - NitroModules
@@ -2894,7 +2894,7 @@ SPEC CHECKSUMS:
   mattermost-react-native-turbo-log: aa271112608b6dc5c1d65227534b29208acbc96f
   mattermost-rnutils: 70efb35bc7afc07a9bbac873caaf29bda9befca8
   NitroModules: 60e732ea9b1ec9be0d536711ec1117fe37708bd0
-  NitroSound: 42eab68bcbf642cf9e754a8212ef561efc575058
+  NitroSound: d69cdafbdc4839f52d76c8ea40e29b63409bb417
   ObjectiveDropboxOfficial: fe206ce8c0bc49976c249d472db7fdbc53ebbd53
   OpenGraph: 596722bb7f112d2dabcdb284cb817f01341a7540
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
@@ -3019,6 +3019,6 @@ SPEC CHECKSUMS:
   WatermelonDB: 4c846c8cb94eef3cba90fa034d15310163226703
   Yoga: 2b02f3f767761bb4ffd25b1bb56fd264be57bd6b
 
-PODFILE CHECKSUM: 6ce9ad1756a725e4fc905fbcb7653e70d23ea648
+PODFILE CHECKSUM: a1fa90515606e0b4ba6e9aa6b3bbd2277d89cd9e
 
 COCOAPODS: 1.16.1
