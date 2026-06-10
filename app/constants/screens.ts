@@ -70,6 +70,8 @@ export const SAVED_MESSAGES = 'SavedMessages';
 export const SCHEDULED_POST_OPTIONS = 'ScheduledPostOptions';
 export const SEARCH = 'Search';
 export const SELECT_TEAM = 'SelectTeam';
+export const SEND_FEEDBACK = 'SendFeedback';
+export const FEEDBACK_OPTIONS = 'FeedbackOptions';
 export const SERVER = 'Server';
 export const SETTINGS = 'Settings';
 export const SETTINGS_ADVANCED = 'SettingsAdvanced';
@@ -171,6 +173,8 @@ export default {
     SCHEDULED_POST_OPTIONS,
     SEARCH,
     SELECT_TEAM,
+    SEND_FEEDBACK,
+    FEEDBACK_OPTIONS,
     SERVER,
     SETTINGS,
     SETTINGS_ADVANCED,
