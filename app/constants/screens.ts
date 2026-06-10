@@ -1,12 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import AGENTS_SCREENS from '@agents/constants/screens';
+import {AGENTS_REWRITE_OPTIONS} from '@agents/constants/screens';
 
 export const ABOUT = 'About';
 export const ACCOUNT = 'Account';
 export const AI_OPTIONS = 'AiOptions';
-export const AGENTS = 'Agents';
 export const APPS_FORM = 'AppForm';
 export const ATTACHMENT_OPTIONS = 'AttachmentOptions';
 export const BOTTOM_SHEET = 'BottomSheet';
@@ -110,7 +109,6 @@ export default {
     ABOUT,
     ACCOUNT,
     AI_OPTIONS,
-    AGENTS,
     APPS_FORM,
     ATTACHMENT_OPTIONS,
     BOTTOM_SHEET,
@@ -207,7 +205,7 @@ export default {
     TRANSCRIPTION,
     DEBUG_PERFORMANCE,
     SHOW_TRANSLATION,
-    ...AGENTS_SCREENS,
+    AGENTS_REWRITE_OPTIONS,
 } as const;
 
 export const MODAL_SCREENS_WITHOUT_BACK = new Set<string>([
@@ -237,8 +235,7 @@ export const SCREENS_WITH_TRANSPARENT_BACKGROUND = new Set<string>([
 ]);
 
 export const SCREENS_AS_BOTTOM_SHEET = new Set<string>([
-    AGENTS_SCREENS.AGENTS_SELECTOR,
-    AGENTS_SCREENS.AGENTS_REWRITE_OPTIONS,
+    AGENTS_REWRITE_OPTIONS,
     ATTACHMENT_OPTIONS,
     BOTTOM_SHEET,
     DRAFT_SCHEDULED_POST_OPTIONS,

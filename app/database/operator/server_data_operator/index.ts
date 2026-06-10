@@ -1,8 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import AgentsHandler, {type AgentsHandlerMix} from '@agents/database/operators/handlers';
-
 import ServerDataOperatorBase from '@database/operator/server_data_operator/handlers';
 import CategoryHandler, {type CategoryHandlerMix} from '@database/operator/server_data_operator/handlers/category';
 import ChannelHandler, {type ChannelHandlerMix} from '@database/operator/server_data_operator/handlers/channel';
@@ -19,7 +17,6 @@ import mix from '@utils/mix';
 import type {Database} from '@nozbe/watermelondb';
 
 interface ServerDataOperator extends
-    AgentsHandlerMix,
     CategoryHandlerMix,
     ChannelHandlerMix,
     ConferenceHandlerMix,
@@ -34,7 +31,6 @@ interface ServerDataOperator extends
 {}
 
 class ServerDataOperator extends mix(ServerDataOperatorBase).with(
-    AgentsHandler,
     CategoryHandler,
     ChannelHandler,
     ConferenceHandler,

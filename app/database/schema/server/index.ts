@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {AiBotSchema, AiThreadSchema} from '@agents/database/schema';
 import {type AppSchema, appSchema} from '@nozbe/watermelondb';
 
 import {
@@ -49,8 +48,6 @@ import {
 export const serverSchema: AppSchema = appSchema({
     version: 11,
     tables: [
-        AiBotSchema,
-        AiThreadSchema,
         CustomProfileFieldSchema,
         CustomProfileAttributeSchema,
         CategoryChannelSchema,

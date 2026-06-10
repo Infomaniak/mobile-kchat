@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {AiBotModel, AiThreadModel} from '@agents/database/models';
 import {Database, Q} from '@nozbe/watermelondb';
 import LokiJSAdapter from '@nozbe/watermelondb/adapters/lokijs';
 import logger from '@nozbe/watermelondb/utils/common/logger';
@@ -55,7 +54,6 @@ class DatabaseManagerSingleton {
             PostModel, PostsInChannelModel, PostsInThreadModel, PreferenceModel, ReactionModel, RoleModel,
             ScheduledPostModel, SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
             ThreadModel, ThreadParticipantModel, ThreadInTeamModel, TeamThreadsSyncModel, UserModel,
-            AiBotModel, AiThreadModel,
         ];
         this.databaseDirectory = '';
     }

@@ -3,8 +3,6 @@
 
 // IK change: agents feature not available on our server
 // import {checkIsAgentsPluginEnabled} from '@agents/actions/remote/agents_status';
-import {handleAgentPostUpdate} from '@agents/actions/websocket';
-import {handleAgentsEvents} from '@agents/actions/websocket/events';
 
 import * as scheduledPost from '@actions/websocket/scheduled_post';
 import {WebsocketEvents} from '@constants';
@@ -260,12 +258,6 @@ export async function handleWebSocketEvent(serverUrl: string, msg: WebSocketMess
             handleLimitationChanged(serverUrl);
             break;
 
-        // Agents
-        case WebsocketEvents.AGENTS_POST_UPDATE:
-        case WebsocketEvents.AGENTS_TOOL_CALL_STATUS:
-            handleAgentPostUpdate(msg);
-            break;
-
         // Autotranslation
         case WebsocketEvents.POST_TRANSLATION_UPDATED:
             handlePostTranslationUpdatedEvent(serverUrl, msg);
@@ -282,5 +274,4 @@ export async function handleWebSocketEvent(serverUrl: string, msg: WebSocketMess
 
             break;
     }
-    handleAgentsEvents(serverUrl, msg);
 }

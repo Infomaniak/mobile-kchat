@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {loadAgentsScreen} from '@agents/screens';
 import React, {type ComponentType} from 'react';
 import {IntlProvider} from 'react-intl';
 import {Platform} from 'react-native';
@@ -329,10 +328,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.INFOMANIAK_EVOLVE:
             screen = withServerDatabase(require('@screens/ik_evolve').default);
             break;
-    }
-
-    if (!screen) {
-        screen = loadAgentsScreen(screenName);
+        case Screens.AGENTS_REWRITE_OPTIONS:
+            screen = withServerDatabase(require('@agents/screens/rewrite_options').default);
+            break;
     }
 
     if (!screen) {

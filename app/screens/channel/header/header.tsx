@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useAgentsConfig} from '@agents/store/agents_config';
 import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, Platform, Text, View} from 'react-native';
@@ -14,7 +13,6 @@ import {ITEM_HEIGHT} from '@components/option_item';
 import OtherMentionsBadge from '@components/other_mentions_badge';
 import RoundedHeaderContext from '@components/rounded_header_context';
 import {General, Screens} from '@constants';
-import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import {useDefaultHeaderHeight} from '@hooks/header';
@@ -95,9 +93,6 @@ const ChannelHeader = ({
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const defaultHeight = useDefaultHeaderHeight();
-    const serverUrl = useServerUrl();
-
-    const {pluginEnabled: agentsEnabled} = useAgentsConfig(serverUrl);
 
     // NOTE: callsEnabledInChannel will be true/false (not undefined) based on explicit state + the DefaultEnabled system setting
     //   which ultimately comes from channel/index.tsx, and observeIsCallsEnabledInChannel
@@ -163,9 +158,6 @@ const ChannelHeader = ({
         if (!isDMorGM) {
             items += 1;
         }
-        if (agentsEnabled) {
-            items += 1;
-        }
         let height = CHANNEL_ACTIONS_OPTIONS_HEIGHT + SEPARATOR_HEIGHT + MARGIN + (items * ITEM_HEIGHT);
         if (Platform.OS === 'android') {
             height += BOTTOM_SHEET_ANDROID_OFFSET;
@@ -188,7 +180,7 @@ const ChannelHeader = ({
             theme,
             closeButtonId: 'close-channel-quick-actions',
         });
-    }, [isTablet, callsAvailable, isDMorGM, agentsEnabled, theme, onTitlePress, channelId]);
+    }, [isTablet, callsAvailable, isDMorGM, theme, onTitlePress, channelId]);
 
     const rightButtons = useMemo(() => {
         const buttons: HeaderRightButton[] = [];
