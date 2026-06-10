@@ -202,6 +202,7 @@ continueUserActivity: (nonnull NSUserActivity *)userActivity
 
 -(void)applicationDidBecomeActive:(UIApplication *)application {
   [[GekidouWrapper default] setPreference:@"true" forKey:@"ApplicationIsForeground"];
+  [self endDatabaseLockProtection];
 }
 
 -(void)applicationWillResignActive:(UIApplication *)application {
@@ -210,11 +211,13 @@ continueUserActivity: (nonnull NSUserActivity *)userActivity
 
 -(void)applicationDidEnterBackground:(UIApplication *)application {
   [[GekidouWrapper default] setPreference:@"false" forKey:@"ApplicationIsForeground"];
+  [self beginDatabaseLockProtection];
 }
 
 -(void)applicationWillTerminate:(UIApplication *)application {
   [[GekidouWrapper default] setPreference:@"false" forKey:@"ApplicationIsForeground"];
   [[GekidouWrapper default] setPreference:@"false" forKey:@"ApplicationIsRunning"];
+  [self endDatabaseLockProtection];
 }
 
 - (UIInterfaceOrientationMask)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window {
@@ -269,6 +272,23 @@ continueUserActivity: (nonnull NSUserActivity *)userActivity
 
 - (void)sendFindChannels:(UIKeyCommand *)sender {
   [MattermostHardwareKeyboardWrapper findChannels];
+}
+
+// MARK: - Database lock protection (prevents RUNNINGBOARD 0xdead10cc)
+
+- (void)beginDatabaseLockProtection {
+  if (self.databaseLockBackgroundTask != UIBackgroundTaskInvalid) return;
+  self.databaseLockBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithName:@"MMDatabaseLockProtection" expirationHandler:^{
+    [self endDatabaseLockProtection];
+  }];
+  [TurboLog writeWithLogLevel:TurboLogLevelInfo message:@[@"MMDatabaseLockProtection: begin taskId", @(self.databaseLockBackgroundTask)]];
+}
+
+- (void)endDatabaseLockProtection {
+  if (self.databaseLockBackgroundTask == UIBackgroundTaskInvalid) return;
+  [TurboLog writeWithLogLevel:TurboLogLevelInfo message:@[@"MMDatabaseLockProtection: end taskId", @(self.databaseLockBackgroundTask)]];
+  [[UIApplication sharedApplication] endBackgroundTask:self.databaseLockBackgroundTask];
+  self.databaseLockBackgroundTask = UIBackgroundTaskInvalid;
 }
 
 @end
