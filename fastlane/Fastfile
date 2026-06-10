@@ -152,6 +152,28 @@ lane :set_app_version_build do
   set_app_build_number
 end
 
+desc 'Set Android versionCode and versionName from environment variables'
+lane :set_android_version_from_env do
+  version_code = ENV['ANDROID_VERSION_CODE']
+  version_name = ENV['VERSION_NUMBER']
+  
+  unless version_code.nil? || version_code.empty?
+    UI.success("Setting Android versionCode to #{version_code}")
+    android_set_version_code(
+        gradle_file: './android/app/build.gradle',
+        version_code: version_code
+    )
+  end
+  
+  unless version_name.nil? || version_name.empty?
+    UI.success("Setting Android versionName to #{version_name}")
+    android_set_version_name(
+        gradle_file: './android/app/build.gradle',
+        version_name: version_name
+    )
+  end
+end
+
 desc 'Configure the app before building'
 lane :configure do
   json = load_config_json('../dist/assets/config.json')
