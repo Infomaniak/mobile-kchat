@@ -4,7 +4,7 @@
 import {addRecentReaction} from '@actions/local/reactions';
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
-import {getRecentPostsInChannel, getRecentPostsInThread} from '@queries/servers/post';
+import {getLastPostInChannel, getLastPostInThread} from '@queries/servers/post';
 import {queryReaction} from '@queries/servers/reaction';
 import {getCurrentChannelId, getCurrentUserId} from '@queries/servers/system';
 import {getEmojiFirstAlias} from '@utils/emoji/helpers';
@@ -120,18 +120,22 @@ export const removeReaction = async (serverUrl: string, postId: string, emojiNam
 export const handleReactionToLatestPost = async (serverUrl: string, emojiName: string, add: boolean, rootId?: string) => {
     try {
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        let posts: PostModel[];
+        let post: PostModel | undefined;
         if (rootId) {
-            posts = await getRecentPostsInThread(database, rootId);
+            post = await getLastPostInThread(database, rootId);
         } else {
             const channelId = await getCurrentChannelId(database);
-            posts = await getRecentPostsInChannel(database, channelId);
+            post = await getLastPostInChannel(database, channelId);
+        }
+
+        if (!post) {
+            return {error: 'No posts found'};
         }
 
         if (add) {
-            return addReaction(serverUrl, posts[0].id, emojiName);
+            return addReaction(serverUrl, post.id, emojiName);
         }
-        return removeReaction(serverUrl, posts[0].id, emojiName);
+        return removeReaction(serverUrl, post.id, emojiName);
     } catch (error) {
         return {error};
     }

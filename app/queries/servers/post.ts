@@ -124,18 +124,6 @@ export const queryPostReplies = (database: Database, rootId: string, excludeDele
     return database.get<PostModel>(POST).query(...clauses);
 };
 
-export const getRecentPostsInThread = async (database: Database, rootId: string) => {
-    const chunks = await queryPostsInThread(database, rootId, true, true).fetch();
-    if (chunks.length) {
-        const recent = chunks[0];
-        const post = await getPostById(database, rootId);
-        if (post) {
-            return queryPostsChunk(database, post.channelId, recent.earliest, recent.latest, false, false, 100).fetch();
-        }
-    }
-    return [];
-};
-
 export const getLastPostInThread = async (database: Database, rootId: string) => {
     const chunks = await queryPostsInThread(database, rootId, true, true).fetch();
     if (chunks.length) {
@@ -175,13 +163,14 @@ export const queryPostsChunk = (database: Database, id: string, earliest: number
     return database.get<PostModel>(POST).query(...clauses);
 };
 
-export const getRecentPostsInChannel = async (database: Database, channelId: string, includeDeleted = false) => {
+export const getLastPostInChannel = async (database: Database, channelId: string, includeDeleted = false) => {
     const chunks = await queryPostsInChannel(database, channelId).fetch();
     if (chunks.length) {
         const recent = chunks[0];
-        return queryPostsChunk(database, channelId, recent.earliest, recent.latest, false, includeDeleted, 100).fetch();
+        const posts = await queryPostsChunk(database, channelId, recent.earliest, recent.latest, false, includeDeleted, 1).fetch();
+        return posts[0];
     }
-    return [];
+    return undefined;
 };
 
 export const queryPostsById = (database: Database, postIds: string[], sort?: Q.SortOrder) => {

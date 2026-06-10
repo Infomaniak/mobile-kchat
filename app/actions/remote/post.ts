@@ -17,7 +17,7 @@ import NetworkManager from '@managers/network_manager';
 import {getMyChannel, prepareMissingChannelsForAllTeams, queryAllMyChannel} from '@queries/servers/channel';
 import {queryAllCustomEmojis} from '@queries/servers/custom_emoji';
 import {getFilesByIds, queryFilesForPost} from '@queries/servers/file';
-import {getPostById, getRecentPostsInChannel} from '@queries/servers/post';
+import {getPostById, getLastPostInChannel} from '@queries/servers/post';
 import {getCurrentUserId} from '@queries/servers/system';
 import {getIsCRTEnabled, prepareThreadsFromReceivedPosts} from '@queries/servers/thread';
 import {queryAllUsers} from '@queries/servers/user';
@@ -298,8 +298,8 @@ export async function fetchPostsForChannel(serverUrl: string, channelId: string,
         let deletedPostAction: Promise<string[]>|undefined;
         let actionType: string|undefined;
         const myChannel = await getMyChannel(database, channelId);
-        const postsInChannel = await getRecentPostsInChannel(database, channelId);
-        const since = myChannel?.lastFetchedAt || postsInChannel?.[0]?.createAt || 0;
+        const lastPost = await getLastPostInChannel(database, channelId);
+        const since = myChannel?.lastFetchedAt || lastPost?.createAt || 0;
 
         if (since) {
             postAction = fetchPostsSince(serverUrl, channelId, since, true, groupLabel);
