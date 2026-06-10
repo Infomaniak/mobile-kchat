@@ -32,14 +32,15 @@ runs:
           PATCH="${BASH_REMATCH[3]}"
           CANDIDATE="${BASH_REMATCH[5]}"
 
-          # Format: 1_00_046_001
-          # Major: 1 digit, Minor: 2 digits zero-padded, Patch: 3 digits zero-padded, Candidate: 3 digits zero-padded
-          VERSION_CODE="${MAJOR}_$(printf '%02d' "$MINOR")_$(printf '%03d' "$PATCH")_$(printf '%03d' "$CANDIDATE")"
+          # Format: 100046001 (Android requires pure integer)
+          # For display: 1_00_046_001 (Major: 1, Minor: 2 digits, Patch: 3 digits, Candidate: 3 digits)
+          VERSION_CODE="${MAJOR}$(printf '%02d' "$MINOR")$(printf '%03d' "$PATCH")$(printf '%03d' "$CANDIDATE")"
+          DISPLAY_VERSION_CODE="${MAJOR}_$(printf '%02d' "$MINOR")_$(printf '%03d' "$PATCH")_$(printf '%03d' "$CANDIDATE")"
           VERSION_NAME="${MAJOR}.${MINOR}.${PATCH}"
 
           echo "version-code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
           echo "version-name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
-          echo "✅ Computed versionCode: $VERSION_CODE"
+          echo "✅ Computed versionCode: $VERSION_CODE (readable: $DISPLAY_VERSION_CODE)"
           echo "✅ Computed versionName: $VERSION_NAME"
         else
           echo "❌ Error: Tag format invalid. Expected: X.Y.Z-alpha.N.android or X.Y.Z-beta.N.android"
