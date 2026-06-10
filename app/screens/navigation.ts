@@ -650,7 +650,10 @@ export function goToScreen(name: AvailableScreens, title: string, passProps = {}
 
     if (NavigationStore.getScreensInStack().includes(name)) {
         Navigation.updateProps(name, passProps);
-        return Navigation.popTo(name, merge(defaultOptions, options));
+        if (NavigationStore.getVisibleScreen() !== name) {
+            return Navigation.popTo(name, merge(defaultOptions, options));
+        }
+        return '';
     }
 
     return Navigation.push(componentId, {
