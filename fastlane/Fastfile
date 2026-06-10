@@ -161,7 +161,7 @@ lane :set_android_version_from_env do
     UI.success("Setting Android versionCode to #{version_code}")
     android_set_version_code(
         gradle_file: './android/app/build.gradle',
-        version_code: version_code
+        version_code: version_code.to_i
     )
   end
   
