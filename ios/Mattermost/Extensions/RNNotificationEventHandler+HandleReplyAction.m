@@ -83,7 +83,6 @@ static void sendReplyUsingMattermost(UNNotificationResponse *response,
 
   NSDictionary *credentials = [[Keychain default] getCredentialsObjcFor:serverUrl];
   NSString *sessionToken = credentials[@"token"];
-  NSString *preauthSecret = credentials[@"preauthSecret"];
   if (sessionToken.length == 0) {
     postLocalFailureNotification(nil);
     callCompletionOnMain(completion);
@@ -133,9 +132,6 @@ static void sendReplyUsingMattermost(UNNotificationResponse *response,
   req.HTTPMethod = @"POST";
   [req setValue:[NSString stringWithFormat:@"Bearer %@", sessionToken] forHTTPHeaderField:@"Authorization"];
   [req setValue:@"application/json; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
-  if ([preauthSecret isKindOfClass:NSString.class] && preauthSecret.length > 0) {
-    [req setValue:preauthSecret forHTTPHeaderField:@"X-Mattermost-Preauth-Secret"];
-  }
   req.HTTPBody = postData;
 
   NSURLSession *session = [NSURLSession sessionWithConfiguration:NSURLSessionConfiguration.ephemeralSessionConfiguration];

@@ -9,7 +9,6 @@ import Foundation
 
 public struct ServerCredentials {
     public let token: String?
-    public let preauthSecret: String?
 }
 
 enum KeychainError: Error {
@@ -105,17 +104,13 @@ public class Keychain: NSObject {
     @objc public func getCredentialsObjc(for serverUrl: String) -> NSDictionary? {
         guard let credentials = try? getCredentials(for: serverUrl) else { return nil }
         return [
-            "token": credentials.token as Any,
-            "preauthSecret": credentials.preauthSecret as Any
+            "token": credentials.token as Any
         ]
     }
 
     public func getCredentials(for serverUrl: String) throws -> ServerCredentials? {
-        // Get main token from serverUrl key
         let token = try getMainToken(for: serverUrl)
-        let preauthSecret = try? getPreauthSecret(for: serverUrl)
-
-        return ServerCredentials(token: token, preauthSecret: preauthSecret)
+        return ServerCredentials(token: token)
     }
 
     private func getMainToken(for serverUrl: String) throws -> String? {
@@ -129,22 +124,6 @@ public class Keychain: NSObject {
            let data = result as? Data,
            let token = String(data: data, encoding: .utf8) {
             return token
-        }
-
-        return nil
-    }
-
-    private func getPreauthSecret(for serverUrl: String) throws -> String? {
-        var attributes = try buildGenericPasswordAttributes(for: serverUrl, account: "preshared_secret")
-        attributes[kSecMatchLimit] = kSecMatchLimitOne
-        attributes[kSecReturnData] = kCFBooleanTrue
-
-        var result: AnyObject?
-        let status = SecItemCopyMatching(attributes as CFDictionary, &result)
-        if status == errSecSuccess,
-           let data = result as? Data,
-           let preauthSecret = String(data: data, encoding: .utf8) {
-            return preauthSecret
         }
 
         return nil

@@ -38,7 +38,7 @@ const messages = defineMessages({
     },
     invalidSslDescription: {
         id: 'server.invalid.certificate.description',
-        defaultMessage: 'The certificate for this server is invalid.\nYou might be connecting to a server that is pretending to be “{hostname}” which could put your confidential information at risk.',
+        defaultMessage: 'The certificate for this server is invalid.\nYou might be connecting to a server that is pretending to be "{hostname}" which could put your confidential information at risk.',
     },
     invalidPinningTitle: {
         id: 'server.invalid.pinning.title',
@@ -76,9 +76,9 @@ class NetworkManagerSingleton {
     };
 
     public init = async (serverCredentials: ServerCredential[]) => {
-        for await (const {serverUrl, token, preauthSecret} of serverCredentials) {
+        for await (const {serverUrl, token} of serverCredentials) {
             try {
-                await this.createClient(serverUrl, token, preauthSecret);
+                await this.createClient(serverUrl, token);
             } catch (error) {
                 logError('NetworkManager init error', error);
             }
@@ -103,21 +103,20 @@ class NetworkManagerSingleton {
         return client;
     };
 
-    public createClient = async (serverUrl: string, bearerToken?: string, preauthSecret?: string) => {
-        const config = await this.buildConfig(preauthSecret);
+    public createClient = async (serverUrl: string, bearerToken?: string) => {
+        const config = await this.buildConfig();
 
         try {
             const {client} = await getOrCreateAPIClient(serverUrl, config, this.clientErrorEventHandler);
             const csrfToken = await getCSRFFromCookie(serverUrl);
 
-            // Pass preauthSecret explicitly to constructor to match ClientBase behavior
-            this.clients[serverUrl] = new Client(client, serverUrl, bearerToken, csrfToken, preauthSecret);
+            this.clients[serverUrl] = new Client(client, serverUrl, bearerToken, csrfToken);
         } catch (error) {
             throw new ClientError(serverUrl, {
-                message: 'Can’t find this server. Check spelling and URL format.',
+                message: 'Cannot find this server. Check spelling and URL format.',
                 intl: {
                     id: 'apps.error.network.no_server',
-                    defaultMessage: 'Can’t find this server. Check spelling and URL format.',
+                    defaultMessage: 'Cannot find this server. Check spelling and URL format.',
                 },
                 url: serverUrl,
                 details: error,
@@ -136,7 +135,7 @@ class NetworkManagerSingleton {
             this.clients[serverUrl] = new Client(client, serverUrl, accessToken, csrfToken);
         } catch (error) {
             throw new ClientError(serverUrl, {
-                message: 'Can’t create global client.',
+                message: 'Cannot create global client.',
                 url: serverUrl,
             });
         }
@@ -144,11 +143,10 @@ class NetworkManagerSingleton {
         return this.clients[serverUrl];
     };
 
-    private buildConfig = async (preauthSecret?: string) => {
+    private buildConfig = async () => {
         const userAgent = `Mattermost Mobile/${nativeApplicationVersion}+${nativeBuildVersion} (${osName}; ${osVersion}; ${modelName})`;
         const headers: Record<string, string> = {
             [ClientConstants.HEADER_USER_AGENT]: userAgent,
-            ...(preauthSecret ? {[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET]: preauthSecret} : {}),
             ...this.DEFAULT_CONFIG.headers,
         };
 

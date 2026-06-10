@@ -57,7 +57,7 @@ interface Client extends ClientBase,
     IKClientCustomActionsMix,
     ClientCustomAttributesMix
 {
-    setClientCredentials: (token: string, preauthSecret?: string) => void;
+    setClientCredentials: (token: string) => void;
     setCSRFToken: (csrfToken: string) => void;
 }
 
@@ -88,8 +88,8 @@ class Client extends mix(ClientBase).with(
     ClientScheduledPost,
 ) {
     // eslint-disable-next-line no-useless-constructor
-    constructor(apiClient: APIClientInterface, serverUrl: string, bearerToken?: string, csrfToken?: string, preauthSecret?: string) {
-        super(apiClient, serverUrl, bearerToken, csrfToken, preauthSecret);
+    constructor(apiClient: APIClientInterface, serverUrl: string, bearerToken?: string, csrfToken?: string) {
+        super(apiClient, serverUrl, bearerToken, csrfToken);
     }
 }
 
