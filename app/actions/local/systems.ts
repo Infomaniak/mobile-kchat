@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Q} from '@nozbe/watermelondb';
+import {Q, type Database} from '@nozbe/watermelondb';
 import deepEqual from 'deep-equal';
 import {DeviceEventEmitter} from 'react-native';
 
@@ -9,17 +9,14 @@ import {Events} from '@constants';
 import {MM_TABLES, SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import {getServerCredentials} from '@init/credentials';
-import {queryAllChannelsForTeam} from '@queries/servers/channel';
 import {
     getConfig,
     getLicense,
-    getGlobalDataRetentionPolicy,
-    getGranularDataRetentionPolicies,
     getLastGlobalDataRetentionRun,
-    getIsDataRetentionEnabled,
 } from '@queries/servers/system';
 import PostModel from '@typings/database/models/servers/post';
-import {logError} from '@utils/log';
+import {logDebug, logError, logInfo} from '@utils/log';
+import {captureMessage} from '@utils/sentry';
 
 import {deletePostsForChannelsWithAutotranslation} from './channel';
 import {deletePosts} from './post';
@@ -27,6 +24,11 @@ import {deletePosts} from './post';
 import type {DataRetentionPoliciesRequest} from '@actions/remote/systems';
 
 const {SERVER: {POST}} = MM_TABLES;
+
+// Thresholds for volume-based cleanup
+const POST_VOLUME_THRESHOLD = 100_000;
+const POST_VOLUME_TARGET = 80_000;
+const CLEANUP_BATCH_SIZE = 5_000;
 
 export async function storeConfigAndLicense(serverUrl: string, config: ClientConfig, license: ClientLicense) {
     try {
@@ -158,8 +160,8 @@ export async function dataRetentionCleanup(serverUrl: string) {
             return {error: undefined};
         }
 
-        const isDataRetentionEnabled = await getIsDataRetentionEnabled(database);
-        const result = await (isDataRetentionEnabled ? dataRetentionPolicyCleanup(serverUrl) : dataRetentionWithoutPolicyCleanup(serverUrl));
+        const result = await dataRetentionWithoutPolicyCleanup(serverUrl);
+        await volumeBasedCleanup(serverUrl);
 
         if (!result.error) {
             await updateLastDataRetentionRun(serverUrl);
@@ -170,72 +172,6 @@ export async function dataRetentionCleanup(serverUrl: string) {
         return result;
     } catch (error) {
         logError('An error occurred while performing data retention cleanup', error);
-        return {error};
-    }
-}
-
-async function dataRetentionPolicyCleanup(serverUrl: string) {
-    try {
-        const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const globalPolicy = await getGlobalDataRetentionPolicy(database);
-        const granularPoliciesData = await getGranularDataRetentionPolicies(database);
-
-        // Get global data retention cutoff
-        let globalRetentionCutoff = 0;
-        if (globalPolicy?.message_deletion_enabled) {
-            globalRetentionCutoff = globalPolicy.message_retention_cutoff;
-        }
-
-        // Get Granular data retention policies
-        let teamPolicies: TeamDataRetentionPolicy[] = [];
-        let channelPolicies: ChannelDataRetentionPolicy[] = [];
-        if (granularPoliciesData) {
-            teamPolicies = granularPoliciesData.team;
-            channelPolicies = granularPoliciesData.channel;
-        }
-
-        const channelsCutoffs: {[key: string]: number} = {};
-
-        // Get channel level cutoff from team policies
-        for await (const teamPolicy of teamPolicies) {
-            const {team_id, post_duration} = teamPolicy;
-            const channelIds = await queryAllChannelsForTeam(database, team_id).fetchIds();
-            if (channelIds.length) {
-                const cutoff = getDataRetentionPolicyCutoff(post_duration);
-                channelIds.forEach((channelId) => {
-                    channelsCutoffs[channelId] = cutoff;
-                });
-            }
-        }
-
-        // Get channel level cutoff from channel policies
-        channelPolicies.forEach(({channel_id, post_duration}) => {
-            channelsCutoffs[channel_id] = getDataRetentionPolicyCutoff(post_duration);
-        });
-
-        const conditions = [];
-
-        const channelIds = Object.keys(channelsCutoffs);
-        if (channelIds.length) {
-            // Fetch posts by channel level cutoff
-            for (const channelId of channelIds) {
-                const cutoff = channelsCutoffs[channelId];
-                conditions.push(`(channel_id='${channelId}' AND create_at < ${cutoff})`);
-            }
-
-            // Fetch posts by global cutoff which are not already fetched by channel level cutoff
-            conditions.push(`(channel_id NOT IN ('${channelIds.join("','")}') AND create_at < ${globalRetentionCutoff})`);
-        } else {
-            conditions.push(`create_at < ${globalRetentionCutoff}`);
-        }
-
-        const postIds = await database.get<PostModel>(POST).query(
-            Q.unsafeSqlQuery(`SELECT * FROM ${POST} where ${conditions.join(' OR ')}`),
-        ).fetchIds();
-
-        return dataRetentionCleanPosts(serverUrl, postIds);
-    } catch (error) {
-        logError('An error occurred while performing data retention policy cleanup', error);
         return {error};
     }
 }
@@ -329,6 +265,73 @@ export async function dismissAnnouncement(serverUrl: string, announcementText: s
     } catch (error) {
         logError('An error occurred while dismissing an announcement', error);
         return {error};
+    }
+}
+
+const SLOW_CLEANUP_THRESHOLD = 5000;
+
+function captureSlowCleanup(serverUrl: string, duration: number) {
+    if (duration < SLOW_CLEANUP_THRESHOLD) {
+        return;
+    }
+
+    captureMessage(`Slow volume-based cleanup: ${JSON.stringify({
+        serverUrl,
+        duration,
+    })}`);
+}
+
+export async function volumeBasedCleanup(serverUrl: string) {
+    const start = Date.now();
+    let duration = 0;
+
+    try {
+        const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+
+        // Cleanup posts first. This cascades to threads/reactions/participants via deletePosts().
+        await cleanupPostsByVolume(serverUrl, database);
+
+        duration = Date.now() - start;
+        captureSlowCleanup(serverUrl, duration);
+        logInfo('VOLUME BASED CLEANUP TOOK', `${duration}ms`);
+
+        return {error: undefined};
+    } catch (error) {
+        duration = Date.now() - start;
+        captureSlowCleanup(serverUrl, duration);
+        logInfo('VOLUME BASED CLEANUP TOOK', `${duration}ms`);
+        logError('[volumeBasedCleanup] Failed', error);
+        return {error};
+    }
+}
+
+async function cleanupPostsByVolume(serverUrl: string, database: Database) {
+    let count = await database.get<PostModel>(POST).query().fetchCount();
+    logDebug('[cleanupPostsByVolume] Current count:', count);
+
+    while (count > POST_VOLUME_THRESHOLD) {
+        const toDelete = Math.min(count - POST_VOLUME_TARGET, CLEANUP_BATCH_SIZE);
+        logDebug(`[cleanupPostsByVolume] Deleting ${toDelete} oldest posts (current: ${count}, target: ${POST_VOLUME_TARGET})`);
+
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup; each iteration depends on updated count
+        const postIds = await database.get<PostModel>(POST).query(
+            Q.sortBy('create_at', Q.asc),
+            Q.take(toDelete),
+        ).fetchIds();
+
+        if (!postIds.length) {
+            break;
+        }
+
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup
+        const {error} = await dataRetentionCleanPosts(serverUrl, postIds);
+        if (error) {
+            logError('[cleanupPostsByVolume] Error deleting posts batch', error);
+            break;
+        }
+
+        // eslint-disable-next-line no-await-in-loop -- sequential batch cleanup
+        count = await database.get<PostModel>(POST).query().fetchCount();
     }
 }
 
