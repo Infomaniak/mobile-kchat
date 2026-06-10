@@ -198,7 +198,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - NitroModules (0.35.5):
+  - NitroModules (0.34.1):
     - DoubleConversion
     - glog
     - RCT-Folly (= 2024.11.18.00)
@@ -2893,7 +2893,7 @@ SPEC CHECKSUMS:
   mattermost-hardware-keyboard: c34d122f4dfb4342cd5770fb9d9f8f8fd5b73b28
   mattermost-react-native-turbo-log: aa271112608b6dc5c1d65227534b29208acbc96f
   mattermost-rnutils: 70efb35bc7afc07a9bbac873caaf29bda9befca8
-  NitroModules: 60e732ea9b1ec9be0d536711ec1117fe37708bd0
+  NitroModules: da63c7e9f5bf490dc1672eeb8e212b8ac872b947
   NitroSound: d69cdafbdc4839f52d76c8ea40e29b63409bb417
   ObjectiveDropboxOfficial: fe206ce8c0bc49976c249d472db7fdbc53ebbd53
   OpenGraph: 596722bb7f112d2dabcdb284cb817f01341a7540
