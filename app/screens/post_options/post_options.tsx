@@ -211,13 +211,6 @@ const PostOptions = ({
                             canDelete={canDelete}
                         />
                         }
-                        {canDelete &&
-                        <DeletePostOption
-                            bottomSheetId={Screens.POST_OPTIONS}
-                            combinedPost={combinedPost}
-                            post={post}
-                            currentUser={currentUser}
-                        />}
                         {shouldShowBindings &&
                         <AppBindingsPostOptions
                             bottomSheetId={Screens.POST_OPTIONS}
@@ -228,6 +221,7 @@ const PostOptions = ({
                         }
                     </>
                 )}
+
                 {canCopyPermalink &&
                 <CopyPermalinkOption
                     bottomSheetId={Screens.POST_OPTIONS}
@@ -235,6 +229,17 @@ const PostOptions = ({
                     sourceScreen={sourceScreen}
                 />
                 }
+                {isChannelMember && (
+                    <>
+                        {canDelete &&
+                        <DeletePostOption
+                            bottomSheetId={Screens.POST_OPTIONS}
+                            combinedPost={combinedPost}
+                            post={post}
+                            currentUser={currentUser}
+                        />}
+                    </>
+                )}
             </Scroll>
         );
     };
