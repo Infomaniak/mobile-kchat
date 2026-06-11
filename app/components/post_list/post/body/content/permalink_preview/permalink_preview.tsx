@@ -99,7 +99,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             ...typography('Body', 100),
             lineHeight: 20,
         },
-
         channelContext: {
             marginTop: 8,
             color: changeOpacity(theme.centerChannelColor, 0.64),
@@ -110,7 +109,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             ...typography('Body', 75, 'SemiBold'),
         },
         contentContainer: {
-            overflow: 'hidden',
             position: 'relative',
         },
         gradientOverlay: {
@@ -219,6 +217,8 @@ const PermalinkPreview = ({
 
     const hasFiles = filesInfo.length > 0;
 
+    const hasAttachments = Array.isArray(embedPost?.props?.attachments) && embedPost.props.attachments.length > 0;
+
     const handlePress = usePreventDoubleTap(useCallback(() => {
         const teamName = embedData.team_name;
         const postId = embedData.post_id;
@@ -230,9 +230,9 @@ const PermalinkPreview = ({
 
     const handleContentLayout = useCallback((event: LayoutChangeEvent) => {
         const {height, width} = event.nativeEvent.layout;
-        setShowGradient(height >= maxPermalinkHeight);
+        setShowGradient(!hasAttachments && height >= maxPermalinkHeight);
         setLayoutWidth(width);
-    }, [maxPermalinkHeight]);
+    }, [maxPermalinkHeight, hasAttachments]);
 
     // We need to memoize this value because it is actually a getter that returns a new list
     // on every render. We need to trust that changes in the currentUser will trigger the recalculation.
@@ -254,7 +254,12 @@ const PermalinkPreview = ({
             onPress={handlePress}
             testID='permalink-preview-container'
         >
-            <View style={[styles.contentContainer, {maxHeight: maxPermalinkHeight}]}>
+            <View
+                style={[
+                    styles.contentContainer,
+                    !hasAttachments && {maxHeight: maxPermalinkHeight, overflow: 'hidden'},
+                ]}
+            >
                 <View onLayout={handleContentLayout}>
                     <View style={styles.header}>
                         <ProfilePicture
@@ -334,7 +339,7 @@ const PermalinkPreview = ({
                     )}
                 </View>
 
-                {showGradient && (
+                {showGradient && !hasAttachments && (
                     <LinearGradient
                         colors={[changeOpacity(theme.centerChannelBg, 0), theme.centerChannelBg]}
                         style={styles.gradientOverlay}
