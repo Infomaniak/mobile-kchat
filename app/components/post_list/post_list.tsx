@@ -150,6 +150,7 @@ const PostList = ({
     const theme = useTheme();
     const serverUrl = useServerUrl();
     const {isVisible: isKeyboardVisible} = useKeyboardState();
+    const internalRef = useRef<FlatList<string | PostModel>>(null);
 
     // Update progressViewOffset to position RefreshControl correctly when keyboard-aware props are applied.
     // Only update when keyboard state changes (fully open ↔ fully closed) to prevent flickering during animation.
@@ -189,7 +190,7 @@ const PostList = ({
         const activeHeight = Math.max(keyboardHeight.value, inputAccessoryViewAnimatedHeight.value);
         const targetOffset = -activeHeight;
 
-        listRef?.current?.scrollToOffset({offset: targetOffset, animated: true});
+        (listRef || internalRef)?.current?.scrollToOffset({offset: targetOffset, animated: true});
 
         setShowScrollToEndBtn(false);
     }, [inputAccessoryViewAnimatedHeight, keyboardHeight, listRef]);
@@ -250,7 +251,7 @@ const PostList = ({
             return;
         }
 
-        listRef.current.scrollToIndex({
+        (listRef || internalRef)?.current?.scrollToIndex({
             animated,
             index,
             viewOffset: applyOffset ? Platform.select({ios: -45, default: 0}) : 0,
@@ -409,8 +410,8 @@ const PostList = ({
                 scrolledToHighlighted.current = true;
                 // eslint-disable-next-line max-nested-callbacks
                 const index = orderedPosts.findIndex((p) => p.type === 'post' && p.value.currentPost.id === highlightedId);
-                if (index >= 0 && listRef?.current) {
-                    listRef.current?.scrollToIndex({
+                if (index >= 0 && (listRef || internalRef)?.current) {
+                    (listRef || internalRef)?.current?.scrollToIndex({
                         animated: true,
                         index,
                         viewOffset: 0,
@@ -482,7 +483,7 @@ const PostList = ({
                 onScrollToIndexFailed={onScrollToIndexFailed}
                 onViewableItemsChanged={onViewableItemsChanged}
                 progressViewOffset={progressViewOffset}
-                ref={listRef}
+                ref={listRef || internalRef}
                 removeClippedSubviews={true}
                 renderItem={renderItem}
                 scrollEventThrottle={SCROLL_EVENT_THROTTLE}
