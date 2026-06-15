@@ -6,7 +6,7 @@ import {toMilliseconds} from '@utils/datetime';
 export default {
     PAGE_SIZE_DEFAULT: 60,
     POST_CHUNK_SIZE: 60,
-    MAX_POSTS_SINCE: 500,
+    MAX_POSTS_SINCE: 3000,
     POST_AROUND_CHUNK_SIZE: 10,
     CHANNELS_CHUNK_SIZE: 50,
     CHANNEL_MEMBERS_CHUNK_SIZE: 200,
