@@ -474,7 +474,7 @@ const PostList = ({
                 ListHeaderComponent={header}
                 ListFooterComponent={footer}
                 maintainVisibleContentPosition={SCROLL_POSITION_CONFIG}
-                maxToRenderPerBatch={5}
+                maxToRenderPerBatch={10}
                 windowSize={10}
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.9}
@@ -484,7 +484,7 @@ const PostList = ({
                 onViewableItemsChanged={onViewableItemsChanged}
                 progressViewOffset={progressViewOffset}
                 ref={listRef}
-                removeClippedSubviews={true}
+                removeClippedSubviews={Platform.OS === 'android'}
                 renderItem={renderItem}
                 scrollEventThrottle={SCROLL_EVENT_THROTTLE}
                 style={styles.flex}
