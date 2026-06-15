@@ -18,6 +18,8 @@ import ChannelPostList from './channel_post_list';
 
 import type {WithDatabaseArgs} from '@typings/database/database';
 
+const MAX_POSTS_LIMIT = 3000;
+
 const enhanced = withObservables(['channelId', 'postsLimit'], ({database, channelId, postsLimit}: {
     channelId: string;
     postsLimit: number;
@@ -66,7 +68,7 @@ const ChannelPostListWrapper = ({channelId, ...otherProps}: ChannelPostListWrapp
     }, [channelId]);
 
     const requestMorePosts = useCallback(() => {
-        setPostsLimit((prev: number) => prev + General.POST_CHUNK_SIZE);
+        setPostsLimit((prev: number) => Math.min(prev + General.POST_CHUNK_SIZE, MAX_POSTS_LIMIT));
     }, []);
 
     return createElement(ObservableChannelPostList, {
