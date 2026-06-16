@@ -151,6 +151,7 @@ const PostList = ({
     const serverUrl = useServerUrl();
     const {isVisible: isKeyboardVisible} = useKeyboardState();
     const internalRef = useRef<FlatList<string | PostModel>>(null);
+    const flatListRef = listRef || internalRef;
 
     // Update progressViewOffset to position RefreshControl correctly when keyboard-aware props are applied.
     // Only update when keyboard state changes (fully open ↔ fully closed) to prevent flickering during animation.
@@ -190,10 +191,10 @@ const PostList = ({
         const activeHeight = Math.max(keyboardHeight.value, inputAccessoryViewAnimatedHeight.value);
         const targetOffset = -activeHeight;
 
-        (listRef || internalRef)?.current?.scrollToOffset({offset: targetOffset, animated: true});
+        flatListRef?.current?.scrollToOffset({offset: targetOffset, animated: true});
 
         setShowScrollToEndBtn(false);
-    }, [inputAccessoryViewAnimatedHeight, keyboardHeight, listRef]);
+    }, [inputAccessoryViewAnimatedHeight, keyboardHeight, flatListRef]);
 
     useEffect(() => {
         const t = setTimeout(() => {
@@ -247,17 +248,17 @@ const PostList = ({
     }, [disablePullToRefresh, location, channelId, rootId, posts, serverUrl]);
 
     const scrollToIndex = useCallback((index: number, animated = true, applyOffset = true) => {
-        if (index < 0 || !listRef?.current) {
+        if (index < 0 || !flatListRef?.current) {
             return;
         }
 
-        (listRef || internalRef)?.current?.scrollToIndex({
+        flatListRef?.current?.scrollToIndex({
             animated,
             index,
             viewOffset: applyOffset ? Platform.select({ios: -45, default: 0}) : 0,
             viewPosition: 1, // 0 is at bottom
         });
-    }, [listRef]);
+    }, [flatListRef]);
 
     const internalOnScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const {y} = event.nativeEvent.contentOffset;
@@ -410,8 +411,8 @@ const PostList = ({
                 scrolledToHighlighted.current = true;
                 // eslint-disable-next-line max-nested-callbacks
                 const index = orderedPosts.findIndex((p) => p.type === 'post' && p.value.currentPost.id === highlightedId);
-                if (index >= 0 && (listRef || internalRef)?.current) {
-                    (listRef || internalRef)?.current?.scrollToIndex({
+                if (index >= 0 && flatListRef?.current) {
+                    flatListRef?.current?.scrollToIndex({
                         animated: true,
                         index,
                         viewOffset: 0,
@@ -483,7 +484,7 @@ const PostList = ({
                 onScrollToIndexFailed={onScrollToIndexFailed}
                 onViewableItemsChanged={onViewableItemsChanged}
                 progressViewOffset={progressViewOffset}
-                ref={listRef || internalRef}
+                ref={flatListRef}
                 removeClippedSubviews={true}
                 renderItem={renderItem}
                 scrollEventThrottle={SCROLL_EVENT_THROTTLE}
