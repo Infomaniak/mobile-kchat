@@ -424,7 +424,7 @@ describe('*** Test schema for SERVER database ***', () => {
                 },
                 [POST]: {
                     name: POST,
-                    unsafeSql: undefined,
+                    unsafeSql: expect.any(Function),
                     columns: {
                         channel_id: {name: 'channel_id', type: 'string', isIndexed: true},
                         create_at: {name: 'create_at', type: 'number', isIndexed: true},
