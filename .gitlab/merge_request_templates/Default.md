@@ -28,5 +28,5 @@
 - [ ] J'ai vérifié que les tests existants passent
 
 /assign me  
-/reviewer @boris.trombert @aurelien.sberro
+/reviewer @boris.trombert @aurelien.sberro @eliott.scherrer
 /remove_reviewer me  
