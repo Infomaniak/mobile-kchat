@@ -1,0 +1,45 @@
+name: compute-ios-version
+description: Computes iOS version and build number from Git tag (format X.Y.Z-beta.N.ios)
+
+inputs:
+  tag:
+    description: The Git tag to parse
+    required: true
+    default: ${{ github.ref_name }}
+
+outputs:
+  version-number:
+    description: The version number extracted from the tag (e.g., 1.2.3)
+    value: ${{ steps.compute.outputs.version-number }}
+  build-number:
+    description: The build number extracted from the tag (e.g., 4)
+    value: ${{ steps.compute.outputs.build-number }}
+
+runs:
+  using: composite
+  steps:
+    - name: ci/compute-ios-version
+      id: compute
+      shell: bash
+      run: |
+        TAG="${{ inputs.tag }}"
+        echo "Parsing tag: $TAG"
+
+        # Extract version parts from tag (e.g., 1.2.3-beta.4.ios)
+        if [[ "$TAG" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-beta\.([0-9]+)\.ios$ ]]; then
+          MAJOR="${BASH_REMATCH[1]}"
+          MINOR="${BASH_REMATCH[2]}"
+          PATCH="${BASH_REMATCH[3]}"
+          BUILD="${BASH_REMATCH[4]}"
+
+          VERSION_NUMBER="${MAJOR}.${MINOR}.${PATCH}"
+
+          echo "version-number=$VERSION_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "build-number=$BUILD" >> "$GITHUB_OUTPUT"
+          echo "✅ Computed versionNumber: $VERSION_NUMBER"
+          echo "✅ Computed buildNumber: $BUILD"
+        else
+          echo "❌ Error: Tag format invalid. Expected: X.Y.Z-beta.N.ios"
+          echo "   Got: $TAG"
+          exit 1
+        fi

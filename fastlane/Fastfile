@@ -412,6 +412,28 @@ lane :github do
 end
 
 platform :ios do
+  desc 'Set iOS version and build number from environment variables'
+  lane :set_ios_version_from_env do
+    version_number = ENV['VERSION_NUMBER']
+    build_number = ENV['BUILD_NUMBER']
+
+    unless version_number.nil? || version_number.empty?
+      UI.success("Setting iOS versionNumber to #{version_number}")
+      increment_version_number(
+          xcodeproj: './ios/kChat.xcodeproj',
+          version_number: version_number
+      )
+    end
+
+    unless build_number.nil? || build_number.empty?
+      UI.success("Setting iOS buildNumber to #{build_number}")
+      increment_build_number(
+          xcodeproj: './ios/kChat.xcodeproj',
+          build_number: build_number
+      )
+    end
+  end
+
   before_all do
     if ENV['CI'] == 'true'
       setup_ci

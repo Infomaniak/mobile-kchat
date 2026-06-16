@@ -41,7 +41,21 @@ jobs:
         uses: ./.github/actions/prepare-ios-build
         env:
           MATTERMOST_BUILD_GH_TOKEN: "${{ secrets.MATTERMOST_BUILD_GH_TOKEN }}"
-      
+
+      - name: ci/compute-ios-version
+        id: version
+        uses: ./.github/actions/compute-ios-version
+
+      - name: ci/update-ios-version
+        working-directory: ./fastlane
+        env:
+          VERSION_NUMBER: ${{ steps.version.outputs.version-number }}
+          BUILD_NUMBER: ${{ steps.version.outputs.build-number }}
+        run: |
+          echo "Setting iOS versionNumber to $VERSION_NUMBER"
+          echo "Setting iOS buildNumber to $BUILD_NUMBER"
+          bundle exec fastlane ios set_ios_version_from_env
+
       - name: ci/build-and-deploy-ios-beta
         env:
           AWS_ACCESS_KEY_ID: "${{ secrets.MM_MOBILE_BETA_AWS_ACCESS_KEY_ID }}"
