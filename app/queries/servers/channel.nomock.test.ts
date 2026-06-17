@@ -12,6 +12,7 @@ import {
     observeIsReadOnlyChannel,
     observeMyChannelUnreads,
     prepareAllMyChannels,
+    queryMyChannelUnreads,
 } from './channel';
 
 describe('observeMyChannelUnreads', () => {
@@ -203,6 +204,49 @@ describe('observeMyChannelUnreads', () => {
         await operator.batchRecords(models, 'test');
 
         expect(subscriptionNext).not.toHaveBeenCalled();
+    });
+});
+
+describe('queryMyChannelUnreads', () => {
+    const teamId = 'team_id';
+    const otherTeamId = 'other_team_id';
+    const userId = 'user_id';
+    const serverUrl = 'queryMyChannelUnreads.test.com';
+    let database: Database;
+    let operator: ServerDataOperator;
+
+    beforeEach(async () => {
+        await DatabaseManager.init([serverUrl]);
+        const serverDatabaseAndOperator = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        database = serverDatabaseAndOperator.database;
+        operator = serverDatabaseAndOperator.operator;
+    });
+
+    afterEach(async () => {
+        await DatabaseManager.deleteServerDatabase(serverUrl);
+    });
+
+    it('should only return unread channels or channels with mentions', async () => {
+        const channels = [
+            TestHelper.fakeChannel({id: 'read-channel', team_id: teamId, total_msg_count: 20}),
+            TestHelper.fakeChannel({id: 'unread-channel', team_id: teamId, total_msg_count: 30}),
+            TestHelper.fakeChannel({id: 'mention-channel', team_id: teamId, total_msg_count: 20}),
+            TestHelper.fakeChannel({id: 'other-team-channel', team_id: otherTeamId, total_msg_count: 30}),
+        ];
+        const myChannels = [
+            TestHelper.fakeMyChannel({channel_id: 'read-channel', user_id: userId, msg_count: 20, mention_count: 0}),
+            TestHelper.fakeMyChannel({channel_id: 'unread-channel', user_id: userId, msg_count: 20, mention_count: 0, is_unread: true}),
+            TestHelper.fakeMyChannel({channel_id: 'mention-channel', user_id: userId, msg_count: 20, mention_count: 1}),
+            TestHelper.fakeMyChannel({channel_id: 'other-team-channel', user_id: userId, msg_count: 20, mention_count: 0, is_unread: true}),
+        ];
+
+        const models = (await Promise.all((await prepareAllMyChannels(operator, channels, myChannels, false)))).flat();
+        await operator.batchRecords(models, 'test');
+
+        const result = await queryMyChannelUnreads(database, teamId).fetch();
+
+        expect(result).toHaveLength(2);
+        expect(result.map((channel) => channel.id).sort()).toEqual(['mention-channel', 'unread-channel']);
     });
 });
 

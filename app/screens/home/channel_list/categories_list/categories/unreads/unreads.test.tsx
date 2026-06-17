@@ -21,6 +21,7 @@ describe('components/channel_list/categories/body', () => {
     it('do not render when there are no unread channels', () => {
         const wrapper = renderWithEverything(
             <UnreadsCategory
+                channelStates={{}}
                 unreadChannels={[]}
                 onChannelSwitch={() => undefined}
                 onlyUnreads={false}

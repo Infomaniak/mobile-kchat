@@ -1,18 +1,25 @@
+/* eslint-disable max-nested-callbacks */
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$, Observable} from 'rxjs';
-import {switchMap, combineLatestWith, distinctUntilChanged} from 'rxjs/operators';
+import {auditTime, combineLatestWith, distinctUntilChanged, map, shareReplay, switchMap} from 'rxjs/operators';
 
 import {Preferences} from '@constants';
 import {DMS_CATEGORY} from '@constants/categories';
 import {getSidebarPreferenceAsBool} from '@helpers/api/preference';
-import {observeNotifyPropsByChannels} from '@queries/servers/channel';
 import {queryPreferencesByCategoryAndName, querySidebarPreferences} from '@queries/servers/preference';
 import {observeCurrentChannelId, observeCurrentUserId, observeLastUnreadChannelId} from '@queries/servers/system';
 import {observeDeactivatedUsers} from '@queries/servers/user';
-import {type ChannelWithMyChannel, filterArchivedChannels, filterAutoclosedDMs, filterManuallyClosedDms, getUnreadIds, sortChannels} from '@utils/categories';
+import {
+    type ChannelWithMyChannel,
+    filterArchivedChannels,
+    filterAutoclosedDMs,
+    filterManuallyClosedDms,
+    getUnreadIds,
+    sortChannelsWithMyChannel,
+} from '@utils/categories';
 
 import CategoryBody from './category_body';
 
@@ -27,15 +34,23 @@ type EnhanceProps = {
     locale: string;
     currentUserId: string;
     isTablet: boolean;
+    notifyPropsPerChannel: Record<string, Partial<ChannelNotifyProps>>;
 } & WithDatabaseArgs
+
+type ChannelState = {
+    isMuted: boolean;
+    isUnread: boolean;
+    mentionsCount: number;
+};
 
 const withUserId = withObservables([], ({database}: WithDatabaseArgs) => ({currentUserId: observeCurrentUserId(database)}));
 
 const observeCategoryChannels = (category: CategoryModel, myChannels: Observable<MyChannelModel[]>) => {
-    const channels = category.channels.observeWithColumns(['create_at', 'display_name']);
+    const channels = category.channels.observeWithColumns(['create_at', 'delete_at', 'display_name', 'name', 'shared', 'team_id', 'type']);
     const manualSort = category.categoryChannelsBySortOrder.observeWithColumns(['sort_order']);
     return myChannels.pipe(
         combineLatestWith(channels, manualSort),
+        auditTime(0),
         switchMap(([my, cs, sorted]) => {
             const channelMap = new Map<string, ChannelModel>(cs.map((c) => [c.id, c]));
             const categoryChannelMap = new Map<string, number>(sorted.map((s) => [s.channelId, s.sortOrder]));
@@ -56,8 +71,8 @@ const observeCategoryChannels = (category: CategoryModel, myChannels: Observable
     );
 };
 
-const enhanced = withObservables([], ({category, currentUserId, database, isTablet, locale}: EnhanceProps) => {
-    const categoryMyChannels = category.myChannels.observeWithColumns(['is_unread']);
+const enhanced = withObservables(['notifyPropsPerChannel'], ({category, currentUserId, database, isTablet, locale, notifyPropsPerChannel}: EnhanceProps) => {
+    const categoryMyChannels = category.myChannels.observeWithColumns(['last_post_at', 'is_unread', 'mentions_count']);
     const channelsWithMyChannel = observeCategoryChannels(category, categoryMyChannels);
     const currentChannelId = isTablet ? observeCurrentChannelId(database) : of$('');
     const lastUnreadId = isTablet ? observeLastUnreadChannelId(database) : of$(undefined);
@@ -77,10 +92,6 @@ const enhanced = withObservables([], ({category, currentUserId, database, isTabl
                 }),
             );
     }
-
-    const notifyPropsPerChannel = categoryMyChannels.pipe(
-        switchMap((mc) => observeNotifyPropsByChannels(database, mc)),
-    );
 
     const hiddenDmPrefs = queryPreferencesByCategoryAndName(database, Preferences.CATEGORIES.DIRECT_CHANNEL_SHOW, undefined, 'false').
         observeWithColumns(['value']);
@@ -106,28 +117,57 @@ const enhanced = withObservables([], ({category, currentUserId, database, isTabl
     );
 
     const deactivated = (category.type === DMS_CATEGORY) ? observeDeactivatedUsers(database) : of$(undefined);
-    const sortedChannels = channelsWithMyChannel.pipe(
-        combineLatestWith(categorySorting, currentChannelId, lastUnreadId, notifyPropsPerChannel, manuallyClosedPrefs, autoclosePrefs, deactivated, limit),
-        switchMap(([cwms, sorting, channelId, unreadId, notifyProps, manuallyClosedDms, autoclose, deactivatedUsers, maxDms]) => {
+    const sortedChannelsWithMyChannel = channelsWithMyChannel.pipe(
+        combineLatestWith(categorySorting, currentChannelId, lastUnreadId, manuallyClosedPrefs, autoclosePrefs, deactivated, limit),
+        auditTime(0),
+        switchMap(([cwms, sorting, channelId, unreadId, manuallyClosedDms, autoclose, deactivatedUsers, maxDms]) => {
             let channelsW = cwms;
 
             channelsW = filterArchivedChannels(channelsW, channelId);
-            channelsW = filterAutoclosedDMs(category.type, maxDms, currentUserId, channelId, channelsW, autoclose, notifyProps, deactivatedUsers, unreadId);
-            channelsW = filterManuallyClosedDms(channelsW, notifyProps, manuallyClosedDms, currentUserId, unreadId);
+            channelsW = filterAutoclosedDMs(
+                category.type,
+                maxDms,
+                currentUserId,
+                channelId,
+                channelsW,
+                autoclose,
+                notifyPropsPerChannel,
+                deactivatedUsers,
+                unreadId,
+            );
+            channelsW = filterManuallyClosedDms(channelsW, notifyPropsPerChannel, manuallyClosedDms, currentUserId, unreadId);
 
-            return of$(sortChannels(sorting, channelsW, notifyProps, locale));
+            return of$(sortChannelsWithMyChannel(sorting, channelsW, notifyPropsPerChannel, locale));
         }),
+        shareReplay({bufferSize: 1, refCount: true}),
+    );
+
+    const channelStates = sortedChannelsWithMyChannel.pipe(
+        map((cwms) => cwms.reduce<Record<string, ChannelState>>((result, cwm) => {
+            result[cwm.channel.id] = {
+                isMuted: notifyPropsPerChannel[cwm.channel.id]?.mark_unread === 'mention',
+                isUnread: cwm.myChannel.isUnread,
+                mentionsCount: cwm.myChannel.mentionsCount,
+            };
+            return result;
+        }, {})),
+    );
+
+    const sortedChannels = sortedChannelsWithMyChannel.pipe(
+        map((cwms) => cwms.map((cwm) => cwm.channel)),
     );
 
     const unreadIds = channelsWithMyChannel.pipe(
-        combineLatestWith(notifyPropsPerChannel, lastUnreadId),
-        switchMap(([cwms, notifyProps, unreadId]) => {
-            return of$(getUnreadIds(cwms, notifyProps, unreadId));
+        combineLatestWith(lastUnreadId),
+        auditTime(0),
+        switchMap(([cwms, unreadId]) => {
+            return of$(getUnreadIds(cwms, notifyPropsPerChannel, unreadId));
         }),
     );
 
     return {
         category,
+        channelStates,
         sortedChannels,
         unreadIds,
         unreadsOnTop,

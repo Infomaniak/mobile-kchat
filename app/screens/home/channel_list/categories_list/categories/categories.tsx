@@ -24,6 +24,7 @@ import type ChannelModel from '@typings/database/models/servers/channel';
 
 type Props = {
     categories: CategoryModel[];
+    notifyPropsPerChannel: Record<string, Partial<ChannelNotifyProps>>;
     onlyUnreads: boolean;
     unreadsOnTop: boolean;
 }
@@ -43,6 +44,7 @@ const extractKey = (item: CategoryModel | 'UNREADS') => (item === 'UNREADS' ? 'U
 
 const Categories = ({
     categories,
+    notifyPropsPerChannel,
     onlyUnreads,
     unreadsOnTop,
 }: Props) => {
@@ -94,11 +96,12 @@ const Categories = ({
                     category={data.item}
                     isTablet={isTablet}
                     locale={intl.locale}
+                    notifyPropsPerChannel={notifyPropsPerChannel}
                     onChannelSwitch={onChannelSwitch}
                 />
             </>
         );
-    }, [teamId, intl.locale, isTablet, onChannelSwitch, showOnlyUnreadsCategory]);
+    }, [teamId, intl.locale, isTablet, notifyPropsPerChannel, onChannelSwitch, showOnlyUnreadsCategory]);
 
     useEffect(() => {
         const t = setTimeout(() => {

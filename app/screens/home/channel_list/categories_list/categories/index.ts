@@ -8,6 +8,7 @@ import {switchMap, combineLatestWith} from 'rxjs/operators';
 import {Preferences} from '@constants';
 import {getPreferenceValue} from '@helpers/api/preference';
 import {queryCategoriesByTeamIds} from '@queries/servers/categories';
+import {observeAllMyChannelNotifyProps} from '@queries/servers/channel';
 import {querySidebarPreferences} from '@queries/servers/preference';
 import {observeConfigBooleanValue, observeCurrentTeamId, observeOnlyUnreads} from '@queries/servers/system';
 
@@ -42,6 +43,7 @@ const enhanced = withObservables(
         );
         return {
             categories,
+            notifyPropsPerChannel: observeAllMyChannelNotifyProps(database),
             onlyUnreads: observeOnlyUnreads(database),
             unreadsOnTop,
         };

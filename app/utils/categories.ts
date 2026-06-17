@@ -177,21 +177,35 @@ const sortChannelsByName = (notifyPropsPerChannel: Record<string, Partial<Channe
     };
 };
 
-export const sortChannels = (sorting: CategorySorting, channelsWithMyChannel: ChannelWithMyChannel[], notifyPropsPerChannel: Record<string, Partial<ChannelNotifyProps>>, locale: string) => {
+export const sortChannelsWithMyChannel = (
+    sorting: CategorySorting,
+    channelsWithMyChannel: ChannelWithMyChannel[],
+    notifyPropsPerChannel: Record<string, Partial<ChannelNotifyProps>>,
+    locale: string,
+) => {
     if (sorting === 'recent') {
         return channelsWithMyChannel.sort((cwmA, cwmB) => {
             const a = Math.max(cwmA.myChannel.lastPostAt, cwmA.channel.createAt);
             const b = Math.max(cwmB.myChannel.lastPostAt, cwmB.channel.createAt);
             return b - a;
-        }).map((cwm) => cwm.channel);
+        });
     } else if (sorting === 'manual') {
         return channelsWithMyChannel.sort((cwmA, cwmB) => {
             return cwmA.sortOrder - cwmB.sortOrder;
-        }).map((cwm) => cwm.channel);
+        });
     }
 
     const sortByName = sortChannelsByName(notifyPropsPerChannel, locale);
-    return channelsWithMyChannel.sort(sortByName).map((cwm) => cwm.channel);
+    return channelsWithMyChannel.sort(sortByName);
+};
+
+export const sortChannels = (
+    sorting: CategorySorting,
+    channelsWithMyChannel: ChannelWithMyChannel[],
+    notifyPropsPerChannel: Record<string, Partial<ChannelNotifyProps>>,
+    locale: string,
+) => {
+    return sortChannelsWithMyChannel(sorting, channelsWithMyChannel, notifyPropsPerChannel, locale).map((cwm) => cwm.channel);
 };
 
 export const getUnreadIds = (cwms: ChannelWithMyChannel[], notifyPropsPerChannel: Record<string, Partial<ChannelNotifyProps>>, lastUnreadId?: string) => {

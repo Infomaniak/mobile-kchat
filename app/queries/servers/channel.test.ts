@@ -587,7 +587,7 @@ describe('Channel Queries', () => {
             ),
             Q.or(
                 Q.where('is_unread', Q.eq(true)),
-                Q.where('mentions_count', Q.gte(0)),
+                Q.where('mentions_count', Q.gt(0)),
             ),
             Q.sortBy('last_post_at', Q.desc),
         );

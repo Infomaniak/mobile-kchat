@@ -33,6 +33,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 }));
 
 type UnreadCategoriesProps = {
+    channelStates: Record<string, {isMuted: boolean; isUnread: boolean; mentionsCount: number}>;
     onChannelSwitch: (channel: Channel | ChannelModel) => void;
     onlyUnreads: boolean;
     unreadChannels: ChannelModel[];
@@ -41,13 +42,15 @@ type UnreadCategoriesProps = {
 
 const extractKey = (item: ChannelModel) => item.id;
 
-const UnreadCategories = ({onChannelSwitch, onlyUnreads, unreadChannels, unreadThreads}: UnreadCategoriesProps) => {
+const UnreadCategories = ({channelStates, onChannelSwitch, onlyUnreads, unreadChannels, unreadThreads}: UnreadCategoriesProps) => {
     const intl = useIntl();
     const theme = useTheme();
     const isTablet = useIsTablet();
     const styles = getStyleSheet(theme);
 
     const renderItem = useCallback(({item}: {item: ChannelModel}) => {
+        const channelState = channelStates[item.id];
+
         return (
             <ChannelItem
                 channel={item}
@@ -55,10 +58,13 @@ const UnreadCategories = ({onChannelSwitch, onlyUnreads, unreadChannels, unreadT
                 testID='channel_list.category.unreads.channel_item'
                 shouldHighlightActive={true}
                 shouldHighlightState={true}
+                isMuted={channelState?.isMuted}
+                isUnread={channelState?.isUnread}
+                mentionsCount={channelState?.mentionsCount}
                 isOnHome={true}
             />
         );
-    }, [onChannelSwitch]);
+    }, [channelStates, onChannelSwitch]);
 
     const showEmptyState = onlyUnreads && !unreadChannels.length;
     const containerStyle = useMemo(() => {

@@ -1,3 +1,5 @@
+/* eslint-disable no-negated-condition */
+/* eslint-disable no-nested-ternary */
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
@@ -24,17 +26,32 @@ type EnhanceProps = WithDatabaseArgs & {
     serverUrl?: string;
     shouldHighlightActive?: boolean;
     shouldHighlightState?: boolean;
+    isMuted?: boolean;
+    isUnread?: boolean;
+    mentionsCount?: number;
 }
 
-const enhance = withObservables(['channel', 'showTeamName', 'shouldHighlightActive', 'shouldHighlightState'], ({
+const enhance = withObservables([
+    'channel',
+    'showTeamName',
+    'shouldHighlightActive',
+    'shouldHighlightState',
+    'isMuted',
+    'isUnread',
+    'mentionsCount',
+], ({
     channel,
     database,
+    isMuted: initialIsMuted,
+    isUnread: initialIsUnread,
+    mentionsCount: initialMentionsCount,
     showTeamName = false,
     shouldHighlightActive = false,
     shouldHighlightState = false,
 }: EnhanceProps) => {
     const currentUserId = observeCurrentUserId(database);
-    const myChannel = observeMyChannel(database, channel.id);
+    const hasInitialState = initialIsMuted !== undefined && initialIsUnread !== undefined && initialMentionsCount !== undefined;
+    const myChannel = shouldHighlightState && !hasInitialState ? observeMyChannel(database, channel.id) : of$(undefined);
 
     const hasDraft = shouldHighlightState ? queryDraft(database, channel.id).observeWithColumns(['message', 'files', 'metadata']).pipe(
         switchMap((drafts) => {
@@ -59,14 +76,14 @@ const enhance = withObservables(['channel', 'showTeamName', 'shouldHighlightActi
         distinctUntilChanged(),
     ) : of$(false);
 
-    const isMuted = shouldHighlightState ? myChannel.pipe(
+    const isMuted = shouldHighlightState ? (initialIsMuted !== undefined ? of$(initialIsMuted) : myChannel.pipe(
         switchMap((mc) => {
             if (!mc) {
                 return of$(false);
             }
             return observeIsMutedSetting(database, mc.id);
         }),
-    ) : of$(false);
+    )) : of$(false);
 
     const teamId = 'teamId' in channel ? channel.teamId : channel.team_id;
     const teamDisplayName = (teamId && showTeamName) ? observeTeam(database, teamId).pipe(
@@ -76,15 +93,15 @@ const enhance = withObservables(['channel', 'showTeamName', 'shouldHighlightActi
 
     const membersCount = channel.type === General.GM_CHANNEL ? queryChannelMembers(database, channel.id).observeCount(false) : of$(0);
 
-    const isUnread = shouldHighlightState ? myChannel.pipe(
-        switchMap((mc) => of$(mc?.isUnread)),
+    const isUnread = shouldHighlightState ? (initialIsUnread !== undefined ? of$(initialIsUnread) : myChannel.pipe(
+        switchMap((mc) => of$(Boolean(mc?.isUnread))),
         distinctUntilChanged(),
-    ) : of$(false);
+    )) : of$(false);
 
-    const mentionsCount = shouldHighlightState ? myChannel.pipe(
-        switchMap((mc) => of$(mc?.mentionsCount)),
+    const mentionsCount = shouldHighlightState ? (initialMentionsCount !== undefined ? of$(initialMentionsCount) : myChannel.pipe(
+        switchMap((mc) => of$(mc?.mentionsCount ?? 0)),
         distinctUntilChanged(),
-    ) : of$(0);
+    )) : of$(0);
 
     return {
         channel: 'observe' in channel ? channel.observe() : of$(channel),

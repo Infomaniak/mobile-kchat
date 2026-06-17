@@ -560,6 +560,10 @@ export const observeAllMyChannelNotifyProps = (database: Database) => {
 
 export const observeNotifyPropsByChannels = (database: Database, channels: ChannelModel[]|MyChannelModel[]) => {
     const ids = channels.map((c) => c.id);
+    if (!ids.length) {
+        return of$({});
+    }
+
     return queryMyChannelSettingsByIds(database, ids).observeWithColumns(['notify_props']).pipe(
         map$((settings) => settings.reduce<Record<string, Partial<ChannelNotifyProps>>>((obj, setting) => {
             obj[setting.id] = setting.notifyProps;
@@ -582,7 +586,7 @@ export const queryMyChannelUnreads = (database: Database, currentTeamId: string)
         ),
         Q.or(
             Q.where('is_unread', Q.eq(true)),
-            Q.where('mentions_count', Q.gte(0)),
+            Q.where('mentions_count', Q.gt(0)),
         ),
         Q.sortBy('last_post_at', Q.desc),
     );
@@ -751,13 +755,17 @@ export const observeIsMutedSetting = (database: Database, channelId: string) => 
 
 export const observeChannelsByLastPostAt = (database: Database, myChannels: MyChannelModel[]) => {
     const ids = myChannels.map((c) => c.id);
+    if (!ids.length) {
+        return of$([]);
+    }
+
     const idsStr = `'${ids.join("','")}'`;
 
     return database.get<ChannelModel>(CHANNEL).query(
         Q.unsafeSqlQuery(`SELECT DISTINCT c.* FROM ${CHANNEL} c INNER JOIN
         ${MY_CHANNEL} mc ON mc.id=c.id AND c.id IN (${idsStr})
         ORDER BY CASE mc.last_post_at WHEN 0 THEN c.create_at ELSE mc.last_post_at END DESC`),
-    ).observe();
+    ).observeWithColumns(['delete_at', 'display_name', 'name', 'shared', 'team_id', 'type']);
 };
 
 export const queryChannelsForAutocomplete = (database: Database, matchTerm: string, isSearch: boolean, teamId: string) => {

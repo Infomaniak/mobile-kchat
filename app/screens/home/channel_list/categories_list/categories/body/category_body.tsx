@@ -16,7 +16,14 @@ import {isDMorGM} from '@utils/channel';
 import type CategoryModel from '@typings/database/models/servers/category';
 import type ChannelModel from '@typings/database/models/servers/channel';
 
+type ChannelState = {
+    isMuted: boolean;
+    isUnread: boolean;
+    mentionsCount: number;
+};
+
 type Props = {
+    channelStates: Record<string, ChannelState>;
     sortedChannels: ChannelModel[];
     category: CategoryModel;
     onChannelSwitch: (channel: Channel | ChannelModel) => void;
@@ -26,7 +33,7 @@ type Props = {
 
 const extractKey = (item: ChannelModel) => item.id;
 
-const CategoryBody = ({sortedChannels, unreadIds, unreadsOnTop, category, onChannelSwitch}: Props) => {
+const CategoryBody = ({channelStates, sortedChannels, unreadIds, unreadsOnTop, category, onChannelSwitch}: Props) => {
     const serverUrl = useServerUrl();
     const [isChannelScreenActive, setChannelScreenActive] = useState(true);
 
@@ -55,6 +62,8 @@ const CategoryBody = ({sortedChannels, unreadIds, unreadsOnTop, category, onChan
     }, [ids, unreadChannels]);
 
     const renderItem = useCallback(({item}: {item: ChannelModel}) => {
+        const channelState = channelStates[item.id];
+
         return (
             <ChannelItem
                 channel={item}
@@ -63,10 +72,13 @@ const CategoryBody = ({sortedChannels, unreadIds, unreadsOnTop, category, onChan
                 testID={`channel_list.category.${category.displayName.replace(/ /g, '_').toLocaleLowerCase()}.channel_item`}
                 shouldHighlightActive={isChannelScreenActive}
                 shouldHighlightState={true}
+                isMuted={channelState?.isMuted}
+                isUnread={channelState?.isUnread}
+                mentionsCount={channelState?.mentionsCount}
                 isOnHome={true}
             />
         );
-    }, [category.displayName, isChannelScreenActive, onChannelSwitch]);
+    }, [category.displayName, channelStates, isChannelScreenActive, onChannelSwitch]);
 
     const sharedValue = useSharedValue(category.collapsed);
 
