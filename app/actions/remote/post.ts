@@ -130,11 +130,13 @@ export async function createPost(serverUrl: string, post: Partial<Post>, files: 
     });
     initialPostModels.push(...postModels);
 
-    const customEmojis = await queryAllCustomEmojis(database).fetch();
     const emojisInMessage = matchEmoticons(newPost.message);
-    const reactionModels = await addRecentReaction(serverUrl, getValidEmojis(emojisInMessage, customEmojis), true);
-    if (!('error' in reactionModels) && reactionModels.length) {
-        initialPostModels.push(...reactionModels);
+    if (emojisInMessage.length > 0) {
+        const customEmojis = await queryAllCustomEmojis(database).fetch();
+        const reactionModels = await addRecentReaction(serverUrl, getValidEmojis(emojisInMessage, customEmojis), true);
+        if (!('error' in reactionModels) && reactionModels.length) {
+            initialPostModels.push(...reactionModels);
+        }
     }
 
     await operator.batchRecords(initialPostModels, 'createPost - initial');
@@ -532,6 +534,7 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
         let sinceCursor: number | undefined = since;
         let afterCursor: string | undefined;
         let hasMore = true;
+        let totalPostsFetched = 0;
 
         while (hasMore) {
             // eslint-disable-next-line no-await-in-loop
@@ -549,9 +552,10 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
             if (result.posts?.length) {
                 allPosts.push(...result.posts);
                 allOrder.push(...(result.order || []));
+                totalPostsFetched += result.posts.length;
             }
 
-            if (data.next_post_id) {
+            if (data.next_post_id && totalPostsFetched < General.MAX_POSTS_SINCE) {
                 afterCursor = data.next_post_id;
                 sinceCursor = undefined;
             } else {

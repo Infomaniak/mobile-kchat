@@ -14,7 +14,6 @@ import {useServerUrl} from '@context/server';
 import {useAppState, useIsTablet} from '@hooks/device';
 import useDidMount from '@hooks/did_mount';
 import useDidUpdate from '@hooks/did_update';
-import {useDebounce} from '@hooks/utils';
 import EphemeralStore from '@store/ephemeral_store';
 
 import Intro from './intro';
@@ -32,6 +31,7 @@ type Props = {
     listRef: React.RefObject<FlatList<string | PostModel>>;
     onTouchMove?: (event: GestureResponderEvent) => void;
     onTouchEnd?: () => void;
+    requestMorePosts?: () => void;
 }
 
 const edges: Edge[] = [];
@@ -44,6 +44,7 @@ const ChannelPostList = ({
     channelId, contentContainerStyle, isCRTEnabled,
     lastViewedAt, posts, shouldShowJoinLeaveMessages,
     listRef, onTouchMove, onTouchEnd,
+    requestMorePosts,
 }: Props) => {
     const appState = useAppState();
     const isTablet = useIsTablet();
@@ -53,16 +54,20 @@ const ChannelPostList = ({
     const [fetchingPosts, setFetchingPosts] = useState(EphemeralStore.isLoadingMessagesForChannel(serverUrl, channelId));
     const oldPostsCount = useRef<number>(posts.length);
 
-    const onEndReached = useDebounce(useCallback(async () => {
-        if (!fetchingPosts && canLoadPostsBefore.current && posts.length) {
-            const lastPost = posts[posts.length - 1];
+    const postsRef = useRef(posts);
+    postsRef.current = posts;
+
+    const onEndReached = useCallback(async () => {
+        if (!fetchingPosts && canLoadPostsBefore.current && postsRef.current.length) {
+            const lastPost = postsRef.current[postsRef.current.length - 1];
+            requestMorePosts?.();
             const result = await fetchPostsBefore(serverUrl, channelId, lastPost?.id || '');
             canLoadPostsBefore.current = false;
             if (!('error' in result)) {
                 canLoadPostsBefore.current = (result.posts?.length ?? 0) > 0;
             }
         }
-    }, [fetchingPosts, serverUrl, channelId, posts]), 500);
+    }, [fetchingPosts, serverUrl, channelId, requestMorePosts]);
 
     useDidUpdate(() => {
         setFetchingPosts(EphemeralStore.isLoadingMessagesForChannel(serverUrl, channelId));

@@ -178,6 +178,7 @@ export const useHandleSendMessage = ({
                 }
             });
             clearDraft();
+
         }
 
         setSendingMessage(false);
