@@ -1,0 +1,44 @@
+diff --git a/node_modules/commonmark/dist/commonmark.js b/node_modules/commonmark/dist/commonmark.js
+index 65e4a61..0845980 100644
+--- a/node_modules/commonmark/dist/commonmark.js
++++ b/node_modules/commonmark/dist/commonmark.js
+@@ -13560,7 +13560,7 @@
+     };
+ 
+     // Attempt to parse a url
+-    var reUrl = XRegExp.cache('^(?:[A-Za-z][A-Za-z\\d-.+]*:(?:\\/{1,3}|[\\pL\\d%])|www\\d{0,3}[.]|[\\pL\\d.\\-]+[.]\\pL{2,4}\\/)(?:\\[[\\da-f:]+\\]|[^\\s`!()\\[\\]{;:\'",<>?«»“”‘’*_]|[*_]+(?=[^_*\\s])|[`!\\[\\]{;:\'",<>?«»“”‘’](?=[^\\s()<>])|\\((?:[^\\s()<>]|(?:\\([^\\s()<>]+\\)))*\\))+', 'i');
++    var reUrl = XRegExp.cache('^(?:[A-Za-z][A-Za-z\\d-.+]*:(?:\\/{1,3}|[\\pL\\d%])|www\\d{0,3}[.]|[\\pL\\d.\\-]+[.]\\pL{2,4}\\/)(?:\\[[\\da-f:]+\\]|[^\\s`!()\\[\\]{;:\'",<>?«»“”‘’*]|[*_]+(?=[^_*\\s])|[`!\\[\\]{;:\'",<>?«»“”‘’](?=[^\\s()<>])|\\((?:[^\\s()<>]|(?:\\([^\\s()<>]+\\)))*\\))+', 'i');
+     var parseUrl = function (block) {
+         if (this.brackets) {
+             // Don't perform autolinking while inside an explicit link
+@@ -13577,7 +13577,7 @@
+             // Step back to remove trailing punctuation like how GitHub does
+             // https://github.com/github/cmark/blob/master/extensions/autolink.c#L58
+             var url = m[0];
+-            while ((/[?!.,,:*_~'"]$/).test(url)) {
++            while ((/[?!.,,:*~'"]$/).test(url)) {
+                 url = url.substring(0, url.length - 1);
+             }
+ 
+diff --git a/node_modules/commonmark/lib/inlines.js b/node_modules/commonmark/lib/inlines.js
+index a325e08..6cd2fb2 100644
+--- a/node_modules/commonmark/lib/inlines.js
++++ b/node_modules/commonmark/lib/inlines.js
+@@ -929,7 +929,7 @@ var parseEntity = function (block) {
+ };
+ 
+ // Attempt to parse a url
+-var reUrl = XRegExp.cache('^(?:[A-Za-z][A-Za-z\\d-.+]*:(?:\\/{1,3}|[\\pL\\d%])|www\\d{0,3}[.]|[\\pL\\d.\\-]+[.]\\pL{2,4}\\/)(?:\\[[\\da-f:]+\\]|[^\\s`!()\\[\\]{;:\'",<>?«»“”‘’*_]|[*_]+(?=[^_*\\s])|[`!\\[\\]{;:\'",<>?«»“”‘’](?=[^\\s()<>])|\\((?:[^\\s()<>]|(?:\\([^\\s()<>]+\\)))*\\))+', 'i');
++var reUrl = XRegExp.cache('^(?:[A-Za-z][A-Za-z\\d-.+]*:(?:\\/{1,3}|[\\pL\\d%])|www\\d{0,3}[.]|[\\pL\\d.\\-]+[.]\\pL{2,4}\\/)(?:\\[[\\da-f:]+\\]|[^\\s`!()\\[\\]{;:\'",<>?«»“”‘’*]|[*]+(?=[^_*\\s])|[`!\\[\\]{;:\'",<>?«»“”‘’](?=[^\\s()<>])|\\((?:[^\\s()<>]|(?:\\([^\\s()<>]+\\)))*\\))+', 'i');
+ var parseUrl = function (block) {
+     if (this.brackets) {
+         // Don't perform autolinking while inside an explicit link
+@@ -946,7 +946,7 @@ var parseUrl = function (block) {
+         // Step back to remove trailing punctuation like how GitHub does
+         // https://github.com/github/cmark/blob/master/extensions/autolink.c#L58
+         var url = m[0];
+-        while ((/[?!.,,:*_~'"]$/).test(url)) {
++        while ((/[?!.,,:*~'"]$/).test(url)) {
+             url = url.substring(0, url.length - 1);
+         }
+ 

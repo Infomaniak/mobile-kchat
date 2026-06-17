@@ -27,5 +27,6 @@ export default tableSchema({
         {name: 'update_at', type: 'number', isIndexed: true},
         {name: 'user_id', type: 'string', isIndexed: true},
     ],
+    unsafeSql: (sql: string) => `${sql} CREATE INDEX IF NOT EXISTS "Post_channel_id_create_at" ON "Post" ("channel_id", "create_at" DESC);`,
 });
 

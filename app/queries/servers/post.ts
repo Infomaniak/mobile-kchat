@@ -130,7 +130,7 @@ export const getRecentPostsInThread = async (database: Database, rootId: string)
         const recent = chunks[0];
         const post = await getPostById(database, rootId);
         if (post) {
-            return queryPostsChunk(database, post.channelId, recent.earliest, recent.latest).fetch();
+            return queryPostsChunk(database, post.channelId, recent.earliest, recent.latest, false, false, undefined).fetch();
         }
     }
     return [];
@@ -179,7 +179,7 @@ export const getRecentPostsInChannel = async (database: Database, channelId: str
     const chunks = await queryPostsInChannel(database, channelId).fetch();
     if (chunks.length) {
         const recent = chunks[0];
-        return queryPostsChunk(database, channelId, recent.earliest, recent.latest, false, includeDeleted).fetch();
+        return queryPostsChunk(database, channelId, recent.earliest, recent.latest, false, includeDeleted, undefined).fetch();
     }
     return [];
 };
@@ -197,7 +197,7 @@ export const queryPostsByType = (database: Database, type: string) => {
     return database.get<PostModel>(POST).query(...clauses);
 };
 
-export const queryPostsBetween = (database: Database, earliest: number, latest: number, sort: Q.SortOrder | null, userId?: string, channelId?: string, rootId?: string) => {
+export const queryPostsBetween = (database: Database, earliest: number, latest: number, sort: Q.SortOrder | null, userId?: string, channelId?: string, rootId?: string, limit?: number) => {
     const andClauses = [Q.where('create_at', Q.between(earliest, latest))];
     if (channelId) {
         andClauses.push(Q.where('channel_id', channelId));
@@ -214,6 +214,9 @@ export const queryPostsBetween = (database: Database, earliest: number, latest: 
     const clauses: Q.Clause[] = [Q.and(...andClauses)];
     if (sort != null) {
         clauses.push(Q.sortBy('create_at', sort));
+    }
+    if (limit && limit > 0) {
+        clauses.push(Q.take(limit));
     }
     return database.get<PostModel>(POST).query(...clauses);
 };

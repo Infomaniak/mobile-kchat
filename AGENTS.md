@@ -390,3 +390,11 @@ Components use hierarchical testIDs: `component.subcomponent.element`
 
 ### Known Issues
 - Many components require `theme` prop - check for `useTheme()` hook in parent component
+
+### MR conventions
+When using the `create-mr` skill, follow these rules:
+
+### GitLab MR Template
+- **Template location**: `.gitlab/merge_request_templates/Default.md`
+- **Always load this template first** before building the MR description
+
