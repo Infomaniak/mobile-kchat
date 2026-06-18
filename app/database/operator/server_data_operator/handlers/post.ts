@@ -701,19 +701,24 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         }
 
         const targetChunk = chunks[0];
-        if (targetChunk.latest >= latest) {
+        if (targetChunk.earliest <= earliest && targetChunk.latest >= latest) {
             return [];
         }
 
+        const models = [];
+
         // If the chunk was found, Update the chunk and return
-        targetChunk.prepareUpdate((record) => {
+        models.push(targetChunk.prepareUpdate((record) => {
+            record.earliest = Math.min(record.earliest, earliest);
             record.latest = Math.max(record.latest, latest);
-        });
+        }));
+
+        models.push(...await this._mergePostInChannelChunks(targetChunk, chunks, prepareRecordsOnly));
 
         if (!prepareRecordsOnly) {
-            this.batchRecords([targetChunk], 'handleReceivedNewPostForChannel');
+            this.batchRecords(models, 'handleReceivedNewPostForChannel');
         }
-        return [targetChunk];
+        return models;
     };
 
     // ========================

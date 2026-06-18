@@ -758,6 +758,78 @@ describe('*** Operator: Post Handlers tests ***', () => {
         expect(files[0].id).toBe(uploadedFiles[0].id);
     });
 
+    it('=> HandlePosts: should update PostsInChannel chunk when a pending post is replaced by a real post with a different timestamp', async () => {
+        const channelId = 'test-channel-self-dm';
+        const clientTime = 1000;
+        const serverTime = 995;
+
+        // First, simulate creating a pending post with client timestamp
+        const pendingPost = {
+            id: `user:${clientTime}`,
+            channel_id: channelId,
+            create_at: clientTime,
+            update_at: clientTime,
+            user_id: 'user',
+            message: 'pending',
+            type: '',
+            pending_post_id: '',
+            root_id: '',
+            original_id: '',
+            edit_at: 0,
+            delete_at: 0,
+            is_pinned: false,
+        } as Post;
+
+        await operator.handlePosts({
+            actionType: ActionType.POSTS.RECEIVED_NEW,
+            order: [pendingPost.id],
+            posts: [pendingPost],
+            prepareRecordsOnly: false,
+        });
+
+        // Verify the pending post chunk was created as a singleton
+        let chunks = await database.get<PostsInChannelModel>('PostsInChannel').query(
+            Q.where('channel_id', channelId),
+            Q.sortBy('latest', Q.desc),
+        ).fetch();
+        expect(chunks.length).toBe(1);
+        expect(chunks[0].earliest).toBe(clientTime);
+        expect(chunks[0].latest).toBe(clientTime);
+
+        // Now simulate receiving the real post from server with a slightly different timestamp
+        const realPost = {
+            id: 'real-post-id',
+            channel_id: channelId,
+            create_at: serverTime,
+            update_at: serverTime,
+            user_id: 'user',
+            message: 'real',
+            type: '',
+            pending_post_id: pendingPost.id,
+            root_id: '',
+            original_id: '',
+            edit_at: 0,
+            delete_at: 0,
+            is_pinned: false,
+        } as Post;
+
+        await operator.handlePosts({
+            actionType: ActionType.POSTS.RECEIVED_NEW,
+            order: [realPost.id],
+            posts: [realPost],
+            prepareRecordsOnly: false,
+        });
+
+        // The chunk must now cover both the pending and real post timestamps
+        chunks = await database.get<PostsInChannelModel>('PostsInChannel').query(
+            Q.where('channel_id', channelId),
+            Q.sortBy('latest', Q.desc),
+        ).fetch();
+        expect(chunks.length).toBe(1);
+        expect(chunks[0].earliest).toBe(serverTime);
+        expect(chunks[0].latest).toBe(clientTime);
+    });
+
 });
 
 describe('*** Operator: merge chunks ***', () => {
