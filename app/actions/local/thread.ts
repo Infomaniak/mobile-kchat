@@ -137,6 +137,11 @@ export const switchToThread = async (serverUrl: string, rootId: string, isFromNo
 
         DeviceEventEmitter.emit(Events.CLOSE_INPUT_ACCESSORY_VIEW);
 
+        if (NavigationStore.getScreensInStack().includes(Screens.THREAD) && NavigationStore.hasModalsOpened()) {
+            await dismissAllModals();
+            await dismissAllOverlays();
+        }
+
         goToScreen(Screens.THREAD, '', {rootId}, {
             topBar: {
                 title: {
