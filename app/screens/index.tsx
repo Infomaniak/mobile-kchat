@@ -1,9 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {type ComponentType} from 'react';
+import React from 'react';
 import {IntlProvider} from 'react-intl';
-import {Platform} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {Navigation} from 'react-native-navigation';
 import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -276,12 +275,7 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             break;
         case Screens.SNACK_BAR: {
             const snackBarScreen = withServerDatabase(require('@screens/snack_bar').default);
-            Navigation.registerComponent(Screens.SNACK_BAR, () =>
-                Platform.select({
-                    default: snackBarScreen,
-                    ios: withSafeAreaInsets(snackBarScreen) as ComponentType,
-                }),
-            );
+            Navigation.registerComponent(Screens.SNACK_BAR, () => snackBarScreen);
             break;
         }
         case Screens.TABLE:
