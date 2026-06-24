@@ -9,7 +9,7 @@ import {observeIsCallsEnabledInChannel} from '@calls/observers';
 import {General, Permissions} from '@constants';
 import {withServerUrl} from '@context/server';
 import {observeChannel} from '@queries/servers/channel';
-import {observePermissionForChannel, observePermissionForTeam, observeCanManageChannelSettings, observeCanManageChannelAutotranslations} from '@queries/servers/role';
+import {observePermissionForChannel, observePermissionForTeam, observeCanManageChannelSettings} from '@queries/servers/role';
 import {
     observeConfigValue,
 } from '@queries/servers/system';
@@ -175,11 +175,6 @@ const enhanced = withObservables(['channelId'], ({channelId, database}: Props) =
         switchMap(([available, chType, guest]) => of$(available && chType === General.GM_CHANNEL && !guest)),
     );
 
-    // Channel autotranslation observable
-    const canManageAutotranslations = currentUser.pipe(
-        switchMap((u) => (u ? observeCanManageChannelAutotranslations(database, channelId, u) : of$(false))),
-    );
-
     return {
         canArchive,
         canConvert,
@@ -190,7 +185,6 @@ const enhanced = withObservables(['channelId'], ({channelId, database}: Props) =
         convertGMOptionAvailable,
         displayName: channel.pipe(switchMap((c) => of$(c?.displayName || ''))),
         isCallsEnabledInChannel,
-        canManageAutotranslations,
         isGuestUser,
         type,
     };

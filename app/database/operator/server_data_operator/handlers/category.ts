@@ -9,7 +9,7 @@ import {
     transformCategoryRecord,
 } from '@database/operator/server_data_operator/transformers/category';
 import {getUniqueRawsBy} from '@database/operator/utils/general';
-import {logWarning} from '@utils/log';
+import {logWarning, logDebug} from '@utils/log';
 
 import type ServerDataOperatorBase from '.';
 import type {
@@ -76,6 +76,7 @@ const CategoryHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supe
             return res;
         }, []);
 
+        logDebug('[CategoryHandler] handleCategories: updating', createOrUpdateRawValues.length, 'categories');
         if (!createOrUpdateRawValues.length) {
             return [];
         }
@@ -124,6 +125,11 @@ const CategoryHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supe
                 e.channelId !== c.channel_id ||
                 e.sortOrder !== c.sort_order
             ) {
+                logDebug('[CategoryHandler] update for', c.id, {
+                    category: {db: e.categoryId, incoming: c.category_id},
+                    channel: {db: e.channelId, incoming: c.channel_id},
+                    sort: {db: e.sortOrder, incoming: c.sort_order},
+                });
                 res.push(c);
             }
             return res;

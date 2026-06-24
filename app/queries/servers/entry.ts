@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {handleAutotranslationChanges} from '@actions/remote/entry/common';
 import {MM_TABLES} from '@constants/database';
 import DatabaseManager from '@database/manager';
 
@@ -166,7 +165,6 @@ export async function processEntryModels(serverUrl: string, {
     meData,
     isCRTEnabled,
 }: PrepareModelsArgs): Promise<Model[]> {
-    await handleAutotranslationChanges(serverUrl, meData, chData);
     const modelPromises = await prepareEntryModels({operator, teamData, chData, prefData, meData, isCRTEnabled});
 
     const flattenModels = (await Promise.all(modelPromises)).flat();

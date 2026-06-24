@@ -8,8 +8,8 @@ import {distinctUntilChanged, switchMap, combineLatestWith} from 'rxjs/operators
 import {observeIsCallsEnabledInChannel} from '@calls/observers';
 import {General, Permissions} from '@constants';
 import {withServerUrl} from '@context/server';
-import {observeChannelAutotranslation, observeCurrentChannel} from '@queries/servers/channel';
-import {observeCanManageChannelAutotranslations, observeCanManageChannelMembers, observeCanManageChannelSettings, observePermissionForChannel, observePermissionForTeam} from '@queries/servers/role';
+import {observeCurrentChannel} from '@queries/servers/channel';
+import {observeCanManageChannelMembers, observeCanManageChannelSettings, observePermissionForChannel, observePermissionForTeam} from '@queries/servers/role';
 import {
     observeConfigValue,
     observeCurrentChannelId,
@@ -51,11 +51,6 @@ const observeHasChannelSettingsActions = (
 
     const isConvertGMFeatureAvailable = observeConfigValue(database, 'Version').pipe(
         switchMap(() => of$(true)),
-    );
-
-    const canManageChannelAutotranslations = combineLatest([channelId, currentUser]).pipe(
-        switchMap(([cId, u]) => (u ? observeCanManageChannelAutotranslations(database, cId, u) : of$(false))),
-        distinctUntilChanged(),
     );
 
     const team = observeCurrentTeam(database);
@@ -126,15 +121,13 @@ const observeHasChannelSettingsActions = (
 
         // canEnableDisableCalls,
         convertGMOptionAvailable,
-        canManageChannelAutotranslations,
     ]).pipe(
-        switchMap(([manageSettings, convert, archive, unarchive, convertGM, manageAutotranslations]) => {
+        switchMap(([manageSettings, convert, archive, unarchive, convertGM]) => {
             return of$(
-                manageSettings || // Channel info or Channel autotranslations
+                manageSettings || // Channel info
                 convert || // Convert to private
                 archive || unarchive || // Archive channel
-                convertGM || // Convert GM to channel
-                manageAutotranslations, // Channel autotranslations
+                convertGM, // Convert GM to channel
             );
         }),
     );
@@ -157,17 +150,12 @@ const enhanced = withObservables([], ({serverUrl, database}: Props) => {
         distinctUntilChanged(),
     );
 
-    const isAutotranslationEnabledForThisChannel = channelId.pipe(
-        switchMap((cId) => observeChannelAutotranslation(database, cId)),
-    );
-
     return {
         type,
         isCallsEnabledInChannel,
         canManageMembers,
         isCRTEnabled: observeIsCRTEnabled(database),
         hasChannelSettingsActions: observeHasChannelSettingsActions(database, serverUrl, channelId, channel, currentUser, type),
-        isAutotranslationEnabledForThisChannel,
     };
 });
 

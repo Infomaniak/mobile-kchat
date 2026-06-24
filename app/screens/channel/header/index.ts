@@ -4,12 +4,12 @@
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import React from 'react';
 import {of as of$} from 'rxjs';
-import {combineLatestWith, distinctUntilChanged, switchMap} from 'rxjs/operators';
+import {combineLatestWith, switchMap} from 'rxjs/operators';
 
 import {General} from '@constants';
-import {observeChannel, observeChannelInfo, observeIsChannelAutotranslated} from '@queries/servers/channel';
+import {observeChannel, observeChannelInfo} from '@queries/servers/channel';
 import {observeConfigBooleanValue, observeCurrentTeamId, observeCurrentUserId} from '@queries/servers/system';
-import {observeIsUserLanguageSupportedByAutotranslation, observeUser} from '@queries/servers/user';
+import {observeUser} from '@queries/servers/user';
 import {
     getUserCustomStatus,
     getUserIdFromChannelName,
@@ -59,14 +59,6 @@ const enhanced = withObservables(['channelId'], ({channelId, database}: OwnProps
     );
 
     const isCustomStatusEnabled = observeConfigBooleanValue(database, 'EnableCustomUserStatuses');
-    const isChannelAutotranslatedBase = observeIsChannelAutotranslated(database, channelId);
-    const isUserLanguageSupported = observeIsUserLanguageSupportedByAutotranslation(database);
-
-    const isChannelAutotranslated = isChannelAutotranslatedBase.pipe(
-        combineLatestWith(isUserLanguageSupported),
-        switchMap(([isAutotranslated, isLanguageSupported]) => of$(isAutotranslated && isLanguageSupported)),
-        distinctUntilChanged(),
-    );
 
     const displayName = channel.pipe(switchMap((c) => of$(c?.displayName)));
     const memberCount = channelInfo.pipe(
@@ -78,7 +70,6 @@ const enhanced = withObservables(['channelId'], ({channelId, database}: OwnProps
         currentUserId,
         customStatus,
         displayName,
-        isChannelAutotranslated,
         isCustomStatusEnabled,
         isCustomStatusExpired,
         isOwnDirectMessage,

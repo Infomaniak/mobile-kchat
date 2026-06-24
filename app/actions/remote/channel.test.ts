@@ -4,13 +4,11 @@
 /* eslint-disable max-lines */
 
 import {createIntl} from 'react-intl';
-import {DeviceEventEmitter} from 'react-native';
 
-import {ActionType, DeepLink, Events} from '@constants';
+import {DeepLink} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
-import TestHelper from '@test/test_helper';
 
 import {
     removeMemberFromChannel,
@@ -57,8 +55,6 @@ import {
     handleKickFromChannel,
     fetchGroupMessageMembersCommonTeams,
     convertGroupMessageToPrivateChannel,
-    setChannelAutotranslation,
-    setMyChannelAutotranslation,
 } from './channel';
 
 import type ServerDataOperator from '@database/operator/server_data_operator';
@@ -772,58 +768,3 @@ describe('direct and group', () => {
     });
 });
 
-describe('setChannelAutotranslation', () => {
-    it('should update channel and call deletePostsForChannel when disabling autotranslation', async () => {
-        const post = TestHelper.fakePost({id: 'postid1', channel_id: channelId, root_id: ''});
-        const channelWithAutotranslation = TestHelper.fakeChannel({id: channelId, team_id: teamId, autotranslation: true});
-        await operator.handleChannel({channels: [channelWithAutotranslation], prepareRecordsOnly: false});
-        await operator.handlePosts({actionType: ActionType.POSTS.RECEIVED_IN_CHANNEL, order: [post.id], posts: [post], prepareRecordsOnly: false});
-        jest.mocked(mockClient.setChannelAutotranslation).mockResolvedValue({id: channelId, autotranslation: false} as Channel);
-
-        const result = await setChannelAutotranslation(serverUrl, channelId, false);
-
-        expect(result.error).toBeUndefined();
-        expect(result.channel).toBeDefined();
-        expect(result.channel!.autotranslation).toBe(false);
-        expect(mockClient.setChannelAutotranslation).toHaveBeenCalledWith(channelId, false);
-
-        expect(DeviceEventEmitter.emit).toHaveBeenCalledWith(Events.POST_DELETED_FOR_CHANNEL, {serverUrl, channelId, teamId});
-    });
-
-    it('should handle client error', async () => {
-        jest.mocked(mockClient.setChannelAutotranslation).mockRejectedValueOnce(new Error('API error'));
-
-        const result = await setChannelAutotranslation(serverUrl, channelId, true);
-
-        expect(result.error).toBeDefined();
-        expect(DeviceEventEmitter.emit).not.toHaveBeenCalled();
-    });
-});
-
-describe('setMyChannelAutotranslation', () => {
-    it('should update myChannel and call deletePostsForChannel when autotranslation changes', async () => {
-        const post = TestHelper.fakePost({id: 'postid1', channel_id: channelId, root_id: ''});
-        const channel = TestHelper.fakeChannel({id: channelId, team_id: teamId});
-        const myChannelMember = TestHelper.fakeChannelMember({channel_id: channelId, autotranslation_disabled: false});
-        await operator.handleChannel({channels: [channel], prepareRecordsOnly: false});
-        await operator.handleMyChannel({channels: [channel], myChannels: [myChannelMember], prepareRecordsOnly: false});
-        await operator.handlePosts({actionType: ActionType.POSTS.RECEIVED_IN_CHANNEL, order: [post.id], posts: [post], prepareRecordsOnly: false});
-        jest.mocked(mockClient.setMyChannelAutotranslation).mockResolvedValue({} as ChannelMembership);
-
-        const result = await setMyChannelAutotranslation(serverUrl, channelId, false);
-
-        expect(result.error).toBeUndefined();
-        expect(result.data).toBe(true);
-        expect(mockClient.setMyChannelAutotranslation).toHaveBeenCalledWith(channelId, false);
-        expect(DeviceEventEmitter.emit).toHaveBeenCalledWith(Events.POST_DELETED_FOR_CHANNEL, {serverUrl, channelId, teamId});
-    });
-
-    it('should handle client error', async () => {
-        jest.mocked(mockClient.setMyChannelAutotranslation).mockRejectedValueOnce(new Error('API error'));
-
-        const result = await setMyChannelAutotranslation(serverUrl, channelId, true);
-
-        expect(result.error).toBeDefined();
-        expect(DeviceEventEmitter.emit).not.toHaveBeenCalled();
-    });
-});

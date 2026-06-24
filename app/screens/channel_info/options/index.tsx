@@ -13,7 +13,6 @@ import ChannelFiles from './channel_files';
 import ChannelSettings from './channel_settings';
 import IgnoreMentions from './ignore_mentions';
 import Members from './members';
-import MyAutotranslation from './my_autotranslation';
 import NotificationPreference from './notification_preference';
 import PinnedMessages from './pinned_messages';
 
@@ -24,7 +23,6 @@ type Props = {
     canManageMembers: boolean;
     isCRTEnabled: boolean;
     hasChannelSettingsActions: boolean;
-    isAutotranslationEnabledForThisChannel: boolean;
 }
 
 const Options = ({
@@ -34,7 +32,6 @@ const Options = ({
     canManageMembers,
     isCRTEnabled,
     hasChannelSettingsActions,
-    isAutotranslationEnabledForThisChannel,
 }: Props) => {
     const isDMorGM = isTypeDMorGM(type);
 
@@ -52,9 +49,6 @@ const Options = ({
                 </>
             )}
             <NotificationPreference channelId={channelId}/>
-            {isAutotranslationEnabledForThisChannel && (
-                <MyAutotranslation channelId={channelId}/>
-            )}
             <PinnedMessages channelId={channelId}/>
             <ChannelFiles channelId={channelId}/>
             {type !== General.DM_CHANNEL &&
