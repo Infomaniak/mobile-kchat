@@ -113,7 +113,7 @@ const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) =>
 
     useEffect(() => {
         if (files[0]?.transcript?.text) {
-            setTranscript(files[0].transcript.text);
+            setTranscript(files[0].transcript.text.trim());
         }
         setTimeout(() => {
             setIsLoadingTranscript(false);
