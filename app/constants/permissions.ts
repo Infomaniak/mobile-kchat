@@ -153,8 +153,4 @@ export default {
     },
     MANAGE_BOTS: 'manage_bots',
     MANAGE_OTHERS_BOTS: 'manage_others_bots',
-
-    // Autotranslations
-    MANAGE_PUBLIC_CHANNEL_AUTO_TRANSLATION: 'manage_public_channel_auto_translation',
-    MANAGE_PRIVATE_CHANNEL_AUTO_TRANSLATION: 'manage_private_channel_auto_translation',
 };

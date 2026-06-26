@@ -6,7 +6,6 @@ import React from 'react';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
-import {observeIsChannelAutotranslated} from '@queries/servers/channel';
 import {queryAllCustomEmojis} from '@queries/servers/custom_emoji';
 import {observeSavedPostsByIds, observeIsPostAcknowledgementsEnabled} from '@queries/servers/post';
 import {observeConfigBooleanValue} from '@queries/servers/system';
@@ -23,9 +22,9 @@ type OwnProps = {
     channelId: string;
 } & WithDatabaseArgs;
 
-const enhancedWithoutPosts = withObservables(['channelId'], ({database, channelId}: OwnProps) => {
+const enhancedWithoutPosts = withObservables(['channelId'], ({database}: OwnProps) => {
     const currentUser = observeCurrentUser(database);
-    const isChannelAutotranslated = observeIsChannelAutotranslated(database, channelId);
+    const isChannelAutotranslated = of$(false);
     return {
         appsEnabled: observeConfigBooleanValue(database, 'FeatureFlagAppsEnabled'),
         currentTimezone: currentUser.pipe((switchMap((user) => of$(getTimezone(user?.timezone || null))))),

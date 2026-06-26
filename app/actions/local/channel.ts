@@ -9,12 +9,7 @@ import DatabaseManager from '@database/manager';
 import {getTeammateNameDisplaySetting} from '@helpers/api/preference';
 import {extractChannelDisplayName} from '@helpers/database';
 import PushNotifications from '@init/push_notifications';
-import {
-    prepareDeleteChannel, prepareMyChannelsForTeam, queryAllMyChannel,
-    getMyChannel, getChannelById, queryUsersOnChannel, queryUserChannelsByTypes,
-    prepareAllMyChannels,
-    queryMyChannelsWithAutotranslation,
-} from '@queries/servers/channel';
+import {getMyChannel, getChannelById, prepareDeleteChannel, prepareMyChannelsForTeam, queryAllMyChannel, queryUsersOnChannel, queryUserChannelsByTypes, prepareAllMyChannels} from '@queries/servers/channel';
 import {prepareDeletePost, queryPostsInChannel, queryPostsInThread} from '@queries/servers/post';
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
 import {prepareCommonSystemValues, type PrepareCommonSystemValuesArgs, getCommonSystemValues, getCurrentTeamId, setCurrentChannelId, getCurrentUserId, getConfig, getLicense} from '@queries/servers/system';
@@ -299,14 +294,9 @@ export async function updateMyChannelFromWebsocket(serverUrl: string, channelMem
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const member = await getMyChannel(database, channelMember.channel_id);
 
-        if (member && Boolean(member.autotranslationDisabled) !== Boolean(channelMember.autotranslation_disabled)) {
-            await deletePostsForChannel(serverUrl, channelMember.channel_id);
-        }
-
         if (member) {
             member.prepareUpdate((m) => {
                 m.roles = channelMember.roles;
-                m.autotranslationDisabled = channelMember.autotranslation_disabled ?? false;
             });
             if (!prepareRecordsOnly) {
                 operator.batchRecords([member], 'updateMyChannelFromWebsocket');
@@ -550,29 +540,3 @@ export async function deletePostsForChannel(serverUrl: string, channelId: string
     }
 }
 
-export async function deletePostsForChannelsWithAutotranslation(serverUrl: string, prepareRecordsOnly = false) {
-    try {
-        const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const myChannels = await queryMyChannelsWithAutotranslation(database).fetch();
-
-        const deleteResults = await Promise.all(
-            myChannels.map((myChannel) => deletePostsForChannel(serverUrl, myChannel.id, prepareRecordsOnly)),
-        );
-
-        const allModels: Model[] = [];
-        for (const result of deleteResults) {
-            if (result.models) {
-                allModels.push(...result.models);
-            }
-        }
-
-        if (allModels.length && !prepareRecordsOnly) {
-            await operator.batchRecords(allModels, 'deletePostsForChannelsWithAutotranslation');
-        }
-
-        return {error: undefined, models: allModels};
-    } catch (error) {
-        logError('Failed deletePostsForChannelsWithAutotranslation', error);
-        return {error, models: []};
-    }
-}

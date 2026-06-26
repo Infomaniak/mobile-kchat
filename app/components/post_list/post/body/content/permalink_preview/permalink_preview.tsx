@@ -11,7 +11,6 @@ import EditedIndicator from '@components/edited_indicator';
 import FormattedText from '@components/formatted_text';
 import FormattedTime from '@components/formatted_time';
 import Markdown from '@components/markdown';
-import TranslateIcon from '@components/post_list/post/header/translate_icon';
 import ProfilePicture from '@components/post_list/post/profile_picture/profile_picture';
 import {View as ViewConstants} from '@constants';
 import {useServerUrl} from '@context/server';
@@ -19,7 +18,6 @@ import {useTheme} from '@context/theme';
 import {useUserLocale} from '@context/user_locale';
 import {useIsTablet, useWindowDimensions} from '@hooks/device';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {getPostTranslatedMessage, getPostTranslation} from '@utils/post';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {displayUsername, getUserTimezone} from '@utils/user';
@@ -49,7 +47,6 @@ type PermalinkPreviewProps = {
     location: AvailableScreens;
     parentLocation?: string;
     parentPostId?: string;
-    autotranslationsEnabled: boolean;
 };
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -132,7 +129,6 @@ const PermalinkPreview = ({
     location,
     parentLocation,
     parentPostId,
-    autotranslationsEnabled,
 }: PermalinkPreviewProps) => {
     const theme = useTheme();
     const serverUrl = useServerUrl();
@@ -174,15 +170,8 @@ const PermalinkPreview = ({
         channel_type,
     } = embedData;
 
-    const translation = embedPost ? getPostTranslation(embedPost, locale) : undefined;
-
     const truncatedMessage = useMemo(() => {
-        let msg = embedPost?.message ?? '';
-        if (autotranslationsEnabled && embedPost?.type === '') {
-            if (translation?.state === 'ready') {
-                msg = getPostTranslatedMessage(msg, translation);
-            }
-        }
+        const msg = embedPost?.message ?? '';
         if (!msg || typeof msg !== 'string') {
             return '';
         }
@@ -194,7 +183,7 @@ const PermalinkPreview = ({
         }
 
         return cleanMessage;
-    }, [autotranslationsEnabled, embedPost?.message, embedPost?.type, translation]);
+    }, [embedPost?.message]);
 
     const isEdited = useMemo(() => embedData && embedData.post && embedData.post.edit_at > 0, [embedData]);
 
@@ -278,11 +267,6 @@ const PermalinkPreview = ({
                                 value={embedPost?.create_at ?? 0}
                                 style={styles.timestamp}
                             />
-                            {autotranslationsEnabled && embedPost?.type === '' && (
-                                <TranslateIcon
-                                    translationState={translation?.state}
-                                />
-                            )}
                         </View>
                     </View>
 

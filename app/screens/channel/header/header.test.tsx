@@ -41,7 +41,6 @@ describe.skip('ChannelHeader', () => {
             isCustomStatusExpired: false,
             isOwnDirectMessage: false,
             shouldRenderChannelBanner: false,
-            isChannelAutotranslated: false,
         };
     }
 

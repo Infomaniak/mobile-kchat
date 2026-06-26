@@ -30,7 +30,6 @@ type Props = {
     canManageMembers: boolean;
     isCRTEnabled: boolean;
     hasChannelSettingsActions: boolean;
-    isAutotranslationEnabledForThisChannel: boolean;
 }
 
 const edges: Edge[] = ['bottom', 'left', 'right'];
@@ -59,7 +58,6 @@ const ChannelInfo = ({
     isCRTEnabled,
     type,
     hasChannelSettingsActions,
-    isAutotranslationEnabledForThisChannel,
 }: Props) => {
     const theme = useTheme();
     const serverUrl = useServerUrl();
@@ -111,7 +109,6 @@ const ChannelInfo = ({
                         canManageMembers={canManageMembers}
                         isCRTEnabled={isCRTEnabled}
                         hasChannelSettingsActions={hasChannelSettingsActions}
-                        isAutotranslationEnabledForThisChannel={isAutotranslationEnabledForThisChannel}
                     />
                     <View style={styles.separator}/>
                     <ChannelInfoAppBindings

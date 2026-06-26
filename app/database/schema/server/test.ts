@@ -130,7 +130,6 @@ describe('*** Test schema for SERVER database ***', () => {
                         update_at: {name: 'update_at', type: 'number'},
                         banner_info: {name: 'banner_info', type: 'string', isOptional: true},
                         abac_policy_enforced: {name: 'abac_policy_enforced', type: 'boolean', isOptional: true},
-                        autotranslation: {name: 'autotranslation', type: 'boolean', isOptional: true},
                     },
                     columnArray: [
                         {name: 'create_at', type: 'number'},
@@ -145,7 +144,6 @@ describe('*** Test schema for SERVER database ***', () => {
                         {name: 'update_at', type: 'number'},
                         {name: 'banner_info', type: 'string', isOptional: true},
                         {name: 'abac_policy_enforced', type: 'boolean', isOptional: true},
-                        {name: 'autotranslation', type: 'boolean', isOptional: true},
                     ],
                 },
                 [CHANNEL_MEMBERSHIP]: {
@@ -236,7 +234,6 @@ describe('*** Test schema for SERVER database ***', () => {
                         viewed_at: {name: 'viewed_at', type: 'number'},
                         last_fetched_at: {name: 'last_fetched_at', type: 'number', isIndexed: true},
                         last_playbook_runs_fetch_at: {name: 'last_playbook_runs_fetch_at', type: 'number'},
-                        autotranslation_disabled: {name: 'autotranslation_disabled', type: 'boolean', isOptional: true},
                     },
                     columnArray: [
                         {name: 'is_unread', type: 'boolean'},
@@ -249,7 +246,6 @@ describe('*** Test schema for SERVER database ***', () => {
                         {name: 'viewed_at', type: 'number'},
                         {name: 'last_fetched_at', type: 'number', isIndexed: true},
                         {name: 'last_playbook_runs_fetch_at', type: 'number'},
-                        {name: 'autotranslation_disabled', type: 'boolean', isOptional: true},
                     ],
                 },
                 [MY_CHANNEL_SETTINGS]: {

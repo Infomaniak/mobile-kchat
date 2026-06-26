@@ -6,7 +6,6 @@ import {of as of$} from 'rxjs';
 import {map, switchMap, distinctUntilChanged} from 'rxjs/operators';
 
 import {getDisplayNamePreferenceAsBool} from '@helpers/api/preference';
-import {observeIsChannelAutotranslated} from '@queries/servers/channel';
 import {observePost} from '@queries/servers/post';
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
 import {observeUser, observeTeammateNameDisplay, observeCurrentUser} from '@queries/servers/user';
@@ -35,10 +34,6 @@ const enhance = withObservables(['embedData'], ({database, embedData}: WithDatab
         distinctUntilChanged(),
     );
 
-    const channelId = embedData?.post?.channel_id;
-
-    const autotranslationsEnabled = channelId ? observeIsChannelAutotranslated(database, channelId) : of$(false);
-
     return {
         teammateNameDisplay,
         currentUser,
@@ -46,7 +41,6 @@ const enhance = withObservables(['embedData'], ({database, embedData}: WithDatab
         author,
         post,
         isOriginPostDeleted,
-        autotranslationsEnabled,
     };
 });
 

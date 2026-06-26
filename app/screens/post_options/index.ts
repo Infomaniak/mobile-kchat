@@ -3,14 +3,13 @@
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {combineLatest, of as of$, Observable} from 'rxjs';
-import {combineLatestWith, distinctUntilChanged, switchMap} from 'rxjs/operators';
+import {switchMap} from 'rxjs/operators';
 
 import {Permissions, Post, Screens} from '@constants';
 import {AppBindingLocations} from '@constants/apps';
 import {MAX_ALLOWED_REACTIONS} from '@constants/emoji';
-import {DEFAULT_LOCALE} from '@i18n';
 import AppsManager from '@managers/apps_manager';
-import {observeChannel, observeIsReadOnlyChannel, observeIsChannelAutotranslated} from '@queries/servers/channel';
+import {observeChannel, observeIsReadOnlyChannel} from '@queries/servers/channel';
 import {observeLimits} from '@queries/servers/limit';
 import {observePost, observePostSaved} from '@queries/servers/post';
 import {observeReactionsForPost} from '@queries/servers/reaction';
@@ -21,7 +20,7 @@ import {observeUsage} from '@queries/servers/usage';
 import {observeCurrentUser} from '@queries/servers/user';
 import {toMilliseconds} from '@utils/datetime';
 import {isMinimumServerVersion} from '@utils/helpers';
-import {getPostTranslation, isFromWebhook, isSystemMessage} from '@utils/post';
+import {isFromWebhook, isSystemMessage} from '@utils/post';
 import {getPostIdsForCombinedUserActivityPost} from '@utils/post_list';
 
 import PostOptions from './post_options';
@@ -161,14 +160,7 @@ const enhanced = withObservables([], ({combinedPost, post, showAddReaction, sour
     const usage = currentTeamId.pipe(
         switchMap((teamId) => (teamId ? observeUsage(database, teamId) : of$(null))),
     );
-    const canViewTranslation = observeIsChannelAutotranslated(database, post.channelId).pipe(
-        combineLatestWith(currentUser),
-        switchMap(([isAutotranslated, user]) => {
-            const translation = getPostTranslation(post, user?.locale || DEFAULT_LOCALE);
-            return of$(isAutotranslated && post.type === '' && translation?.state === 'ready');
-        }),
-        distinctUntilChanged(),
-    );
+    const canViewTranslation = of$(false);
 
     return {
         canMarkAsUnread,

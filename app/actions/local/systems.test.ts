@@ -154,6 +154,34 @@ describe('dataRetention', () => {
         spy.mockRestore();
     });
 
+    it('retention on - dataRetentionCleanup', async () => {
+        const channel: Channel = {
+            id: 'channelid1',
+            team_id: 'teamid1',
+            total_msg_count: 0,
+        } as Channel;
+
+        await operator.handleConfigs({
+            configs: [
+                {id: 'DataRetentionEnableMessageDeletion', value: 'true'},
+            ],
+            configsToDelete: [],
+            prepareRecordsOnly: false,
+        });
+        await operator.handleSystem({systems:
+            [
+                {id: SYSTEM_IDENTIFIERS.LICENSE, value: {IsLicensed: 'true', DataRetention: 'true'}},
+                {id: SYSTEM_IDENTIFIERS.GRANULAR_DATA_RETENTION_POLICIES, value: {team: [{team_id: 'teamid1', post_duration: 100}], channel: [{channel_id: 'channelid1', post_duration: 100}]}},
+            ],
+        prepareRecordsOnly: false});
+        await operator.handleChannel({channels: [channel], prepareRecordsOnly: false});
+
+        const spy = jest.spyOn(Database.prototype, 'unsafeVacuum').mockImplementation(jest.fn());
+        const {error} = await dataRetentionCleanup(serverUrl);
+        expect(error).toBeDefined(); // LokiJSAdapter doesn't support unsafeSqlQuery
+        spy.mockRestore();
+    });
+
     it('already cleaned today - dataRetentionCleanup', async () => {
         const channel: Channel = {
             id: 'channelid1',
