@@ -20,6 +20,7 @@ import {useIsScreenVisible} from '@hooks/use_screen_visibility';
 import WebsocketManager from '@managers/websocket_manager';
 import {popTopScreen} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
+import {captureException} from '@utils/sentry';
 
 import ChannelContent from './channel_content';
 import ChannelHeader from './header';
@@ -116,6 +117,13 @@ const Channel = ({
             EphemeralStore.removeSwitchingToChannel(channelId);
         }, 500);
 
+        // Detect if Channel screen never renders within 10s (white screen scenario)
+        const renderTimeout = setTimeout(() => {
+            captureException(
+                new Error(`[Channel] Channel screen never rendered within 10s for ${channelId}`),
+            );
+        }, 10000);
+
         storeLastViewedChannelIdAndServer(channelId);
         wsClient?.bindPresenceChannel(channelId);
 
@@ -125,6 +133,7 @@ const Channel = ({
             wsClient?.unbindPresenceChannel();
             cancelAnimationFrame(raf);
             clearTimeout(t);
+            clearTimeout(renderTimeout);
             removeLastViewedChannelIdAndServer();
             EphemeralStore.removeSwitchingToChannel(channelId);
         };

@@ -27,7 +27,8 @@ import {setTeamLoading} from '@store/team_load_store';
 import {generateChannelNameFromDisplayName, getDirectChannelName, isDMorGM} from '@utils/channel';
 import {getFullErrorMessage} from '@utils/errors';
 import {isTablet} from '@utils/helpers';
-import {logDebug, logError, logInfo} from '@utils/log';
+import {logDebug, logError, logInfo, logWarning} from '@utils/log';
+import {captureException} from '@utils/sentry';
 import {showMuteChannelSnackbar} from '@utils/snack_bar';
 import {displayGroupMessageName, displayUsername} from '@utils/user';
 
@@ -1161,26 +1162,39 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
         return switchToGlobalDrafts(serverUrl, teamId);
     }
 
-    const database = DatabaseManager.serverDatabases[serverUrl]?.database;
-    if (!database) {
-        return {error: `${serverUrl} database not found`};
+    try {
+        const database = DatabaseManager.serverDatabases[serverUrl]?.database;
+        if (!database) {
+            logWarning('[switchToChannelById] database not found', serverUrl);
+            return {error: `${serverUrl} database not found`};
+        }
+
+        DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, true);
+
+        // Detect switch that never completes (>15s)
+        const switchTimeout = setTimeout(() => {
+            captureException(new Error(`[switchToChannelById] Switch never completed after 15s for ${channelId}`));
+        }, 15000);
+
+        await switchToChannel(serverUrl, channelId, teamId, skipLastUnread);
+        openChannelIfNeeded(serverUrl, channelId, groupLabel);
+        markChannelAsRead(serverUrl, channelId, false, groupLabel);
+        fetchChannelStats(serverUrl, channelId, false, groupLabel);
+        fetchGroupsForChannelIfConstrained(serverUrl, channelId, false);
+
+        clearTimeout(switchTimeout);
+        DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, false);
+
+        if (await AppsManager.isAppsEnabled(serverUrl)) {
+            AppsManager.fetchBindings(serverUrl, channelId, false, groupLabel);
+        }
+
+        return {};
+    } catch (error) {
+        logError('[switchToChannelById] Failed with error:', error);
+        captureException(error as Error);
+        throw error;
     }
-
-    DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, true);
-
-    await switchToChannel(serverUrl, channelId, teamId, skipLastUnread);
-    openChannelIfNeeded(serverUrl, channelId, groupLabel);
-    markChannelAsRead(serverUrl, channelId, false, groupLabel);
-    fetchChannelStats(serverUrl, channelId, false, groupLabel);
-    fetchGroupsForChannelIfConstrained(serverUrl, channelId, false);
-
-    DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, false);
-
-    if (await AppsManager.isAppsEnabled(serverUrl)) {
-        AppsManager.fetchBindings(serverUrl, channelId, false, groupLabel);
-    }
-
-    return {};
 }
 
 export async function switchToPenultimateChannel(serverUrl: string, teamId?: string) {

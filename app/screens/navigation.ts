@@ -19,6 +19,7 @@ import {isTablet} from '@utils/helpers';
 import {dismissKeyboard} from '@utils/keyboard';
 import {logError} from '@utils/log';
 import {appearanceControlledScreens, mergeNavigationOptions} from '@utils/navigation';
+import {captureException} from '@utils/sentry';
 import {changeOpacity, setNavigatorStyles} from '@utils/theme';
 
 import type {BottomSheetFooterProps} from '@gorhom/bottom-sheet';
@@ -602,6 +603,7 @@ export function resetToTeams() {
 
 export function goToScreen(name: AvailableScreens, title: string, passProps = {}, options: Options = {}) {
     if (!isScreenRegistered(name)) {
+        captureException(new Error(`[Navigation] Screen ${name} is not registered`));
         return '';
     }
 
@@ -656,14 +658,19 @@ export function goToScreen(name: AvailableScreens, title: string, passProps = {}
         return '';
     }
 
-    return Navigation.push(componentId, {
-        component: {
-            id: name,
-            name,
-            passProps,
-            options: merge(defaultOptions, options),
-        },
-    });
+    try {
+        return Navigation.push(componentId, {
+            component: {
+                id: name,
+                name,
+                passProps,
+                options: merge(defaultOptions, options),
+            },
+        });
+    } catch (error) {
+        captureException(error);
+        return '';
+    }
 }
 
 export async function popTopScreen(screenId?: AvailableScreens) {
