@@ -82,7 +82,7 @@ const enhance = withObservables(['post'], ({database, post}: WithDatabaseArgs & 
 const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
     const {id = null, width = 0} = files[0] ?? {};
     const transcriptObj = files[0]?.transcript;
-    const transcript = transcriptObj?.text ?? '';
+    const transcript = transcriptObj?.text?.trim() ?? '';
     const [isLoadingTranscript, setIsLoadingTranscript] = useState(true);
     const theme = useTheme();
     const intl = useIntl();
