@@ -11,6 +11,9 @@ import FloatingTextChipsInput from '@components/floating_input/floating_text_chi
 import SettingBlock from '@components/settings/block';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
+import useBackNavigation from '@hooks/navigate_back';
+import {popTopScreen} from '@screens/navigation';
 import {areBothStringArraysEqual} from '@utils/helpers';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -99,7 +102,7 @@ export function getUniqueKeywordsFromInput(inputText: string, keywords: string[]
     return keywords;
 }
 
-const MentionSettings = ({currentUser}: Props) => {
+const MentionSettings = ({componentId, currentUser}: Props) => {
     const serverUrl = useServerUrl();
     const [mentionProps] = useState(() => getMentionProps(currentUser));
     const notifyProps = mentionProps.notifyProps;
@@ -190,6 +193,13 @@ const MentionSettings = ({currentUser}: Props) => {
     const handleMentionKeywordEntered = useCallback(() => {
         appendKeywordsAndClearInput(mentionKeywordsInput, mentionKeywords);
     }, [appendKeywordsAndClearInput, mentionKeywordsInput, mentionKeywords]);
+
+    const handleBack = useCallback(() => {
+        popTopScreen(componentId);
+    }, [componentId]);
+
+    useBackNavigation(handleBack);
+    useAndroidHardwareBackHandler(componentId, handleBack);
 
     return (
         <KeyboardAwareScrollView
