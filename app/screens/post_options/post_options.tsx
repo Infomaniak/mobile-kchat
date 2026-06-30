@@ -251,6 +251,7 @@ const PostOptions = ({
             componentId={Screens.POST_OPTIONS}
             initialSnapIndex={1}
             snapPoints={snapPoints}
+            scrollable={true}
             testID='post_options'
         />
     );
