@@ -119,10 +119,18 @@ const Channel = ({
         storeLastViewedChannelIdAndServer(channelId);
         wsClient?.bindPresenceChannel(channelId);
 
+        // Lazy load posts after screen appears (switches are instant now)
+        const lazyLoadPosts = setTimeout(() => {
+            if (channelId) {
+                fetchPostsForChannel(serverUrl, channelId, false, false);
+            }
+        }, 100);
+
         return () => {
             wsClient?.unbindPresenceChannel();
             cancelAnimationFrame(raf);
             clearTimeout(t);
+            clearTimeout(lazyLoadPosts);
             removeLastViewedChannelIdAndServer();
             EphemeralStore.removeSwitchingToChannel(channelId);
         };
