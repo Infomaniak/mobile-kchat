@@ -3,9 +3,10 @@
 
 // import {handleCallsSlashCommand} from '@calls/actions';
 import {useCallback, useEffect, useMemo, useState} from 'react';
-import {useIntl} from 'react-intl';
+import {useIntl, type IntlShape} from 'react-intl';
 import {Alert, DeviceEventEmitter} from 'react-native';
 
+import {sendEphemeralPost} from '@actions/local/post';
 import {getChannelTimezones} from '@actions/remote/channel';
 import {executeCommand, handleGotoLocation} from '@actions/remote/command';
 import {checkUserInOverlappingGroups} from '@actions/remote/groups';
@@ -13,16 +14,24 @@ import {createPost} from '@actions/remote/post';
 import {handleReactionToLatestPost} from '@actions/remote/reactions';
 import {createScheduledPost} from '@actions/remote/scheduled_post';
 import {setStatus} from '@actions/remote/user';
-import {Events, General, Screens} from '@constants';
+import {Events, General, Permissions, Screens} from '@constants';
+import {MENTIONS_REGEX} from '@constants/autocomplete';
 import {PostTypes} from '@constants/post';
 import {NOTIFY_ALL_MEMBERS} from '@constants/post_draft';
 import {MESSAGE_TYPE, SNACK_BAR_TYPE} from '@constants/snack_bar';
 import {useServerUrl} from '@context/server';
+import DatabaseManager from '@database/manager';
 import DraftUploadManager from '@managers/draft_upload_manager';
+import {getChannelById, getMyChannel, queryUsersOnChannel} from '@queries/servers/channel';
+import {queryRolesByNames} from '@queries/servers/role';
+import {getMyTeamById} from '@queries/servers/team';
+import {getCurrentUser, queryUsersByUsername} from '@queries/servers/user';
 import * as DraftUtils from '@utils/draft';
 import {isReactionMatch} from '@utils/emoji/helpers';
 import {getErrorMessage, getFullErrorMessage} from '@utils/errors';
+import {logError} from '@utils/log';
 import {scheduledPostFromPost} from '@utils/post';
+import {hasPermission} from '@utils/role';
 import {canPostDraftInChannelOrThread} from '@utils/scheduled_post';
 import {showSnackBar} from '@utils/snack_bar';
 import {confirmOutOfOfficeDisabled} from '@utils/user';
@@ -57,6 +66,87 @@ type Props = {
     deactivatedChannel?: boolean;
     onPostCreated?: (postId: string) => void;
 }
+
+const checkAndSendEphemeralForMentions = async (
+    serverUrl: string,
+    channelId: string,
+    rootId: string,
+    message: string,
+    intl: IntlShape,
+) => {
+    try {
+        const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+
+        const channel = await getChannelById(database, channelId);
+        if (!channel || channel.type !== General.PRIVATE_CHANNEL) {
+            return;
+        }
+
+        const mentions = new Set<string>();
+        const regex = new RegExp(MENTIONS_REGEX.source, MENTIONS_REGEX.flags);
+        let match;
+        while ((match = regex.exec(message)) !== null) {
+            const mention = match[1].toLowerCase().replace(/[.,;:!?]+$/, '');
+            if (mention && mention !== 'all' && mention !== 'channel' && mention !== 'here') {
+                mentions.add(mention);
+            }
+        }
+
+        if (mentions.size === 0) {
+            return;
+        }
+
+        const currentUser = await getCurrentUser(database);
+        if (!currentUser) {
+            return;
+        }
+
+        const mentionedUsers = await queryUsersByUsername(database, Array.from(mentions)).fetch();
+        const channelMembers = await queryUsersOnChannel(database, channelId).fetch();
+        const memberIds = new Set(channelMembers.map((u) => u.id));
+
+        const outOfChannelUsernames: string[] = [];
+        for (const user of mentionedUsers) {
+            if (!memberIds.has(user.id)) {
+                outOfChannelUsernames.push(user.username);
+            }
+        }
+
+        if (outOfChannelUsernames.length === 0) {
+            return;
+        }
+
+        const myChannel = await getMyChannel(database, channelId);
+        const myTeam = channel.teamId ? await getMyTeamById(database, channel.teamId) : undefined;
+
+        const roleNames = new Set<string>();
+        currentUser.roles.split(' ').forEach(roleNames.add, roleNames);
+        if (myChannel?.roles) {
+            myChannel.roles.split(' ').forEach(roleNames.add, roleNames);
+        }
+        if (myTeam?.roles) {
+            myTeam.roles.split(' ').forEach(roleNames.add, roleNames);
+        }
+
+        const roles = await queryRolesByNames(database, Array.from(roleNames)).fetch();
+        if (hasPermission(roles, Permissions.MANAGE_PRIVATE_CHANNEL_MEMBERS)) {
+            return;
+        }
+
+        const mentionsList = outOfChannelUsernames.map((u) => '@' + u).join(', ');
+        const count = outOfChannelUsernames.length;
+        const ephemeralMessage = intl.formatMessage(
+            {
+                id: 'post_body.check_for_out_of_channel_ephemeral.private_no_manage',
+                defaultMessage: '{mentions} {count, plural, one {did not get notified by this mention because they are not in the channel. Please contact an administrator to add them to this private channel.} other {did not get notified by this mention because they are not in the channel. Please contact an administrator to add them to this private channel.}}',
+            },
+            {mentions: mentionsList, count},
+        );
+        await sendEphemeralPost(serverUrl, ephemeralMessage, channelId, rootId, currentUser.id);
+    } catch (error) {
+        logError('Failed checkAndSendEphemeralForMentions', error);
+    }
+};
 
 export const useHandleSendMessage = ({
     value,
@@ -163,6 +253,7 @@ export const useHandleSendMessage = ({
                     const threadRootId = createdPost.root_id || createdPost.id;
                     onPostCreated(threadRootId);
                 }
+                checkAndSendEphemeralForMentions(serverUrl, channelId, rootId, value, intl);
             });
             clearDraft();
 
@@ -176,9 +267,9 @@ export const useHandleSendMessage = ({
                     const threadRootId = createdPost.root_id || createdPost.id;
                     onPostCreated(threadRootId);
                 }
+                checkAndSendEphemeralForMentions(serverUrl, channelId, rootId, value, intl);
             });
             clearDraft();
-
         }
 
         setSendingMessage(false);

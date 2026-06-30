@@ -1551,5 +1551,6 @@
     "send_feedback.type.feature": "Funktion",
   "send_feedback.files.max_size": "Max filstorlek: 32 MB",
   "send_feedback.files.too_many": "Du kan bifoga upp till 5 filer.",
-  "send_feedback.files.too_large": "En eller flera filer överskrider gränsen på 32 MB."
+  "send_feedback.files.too_large": "En eller flera filer överskrider gränsen på 32 MB.",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{mentions} {count, plural, one {fick ingen avisering om denna omnämnande eftersom hen inte är i kanalen. Kontakta en administratör för att lägga till hen i denna privata kanal.} other {fick ingen avisering om denna omnämnande eftersom de inte är i kanalen. Kontakta en administratör för att lägga till dem i denna privata kanal.}}"
 }
