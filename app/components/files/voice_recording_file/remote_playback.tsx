@@ -8,11 +8,9 @@ import {Text, TouchableOpacity, View} from 'react-native';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
-import {fetchPostById} from '@actions/remote/post';
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
 import Loading from '@components/loading';
-import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {observeFilesForPost} from '@queries/servers/file';
 import {blendColors, makeStyleSheetFromTheme} from '@utils/theme';
@@ -74,52 +72,30 @@ type EnhanceProps = {
 
 type Props = {
     files: FileInfo[];
-    currentPost: PostModel;
 }
 
 const enhance = withObservables(['post'], ({database, post}: WithDatabaseArgs & EnhanceProps) => {
     const files = observeFilesForPost(database, post.id).pipe(switchMap((items) => of$(items)));
-    const currentPost = post.observe();
-    return {files, currentPost};
+    return {files};
 });
 
-const RemotePlayBack: React.FunctionComponent = ({files, currentPost}: Props) => {
+const RemotePlayBack: React.FunctionComponent = ({files}: Props) => {
     const {id = null, width = 0} = files[0] ?? {};
+    const transcriptObj = files[0]?.transcript;
+    const transcript = transcriptObj?.text?.trim() ?? '';
+    const [isLoadingTranscript, setIsLoadingTranscript] = useState(true);
     const theme = useTheme();
     const intl = useIntl();
     const styles = getStyleSheet(theme);
-    const serverUrl = useServerUrl();
 
     const [error, setError] = useState('');
-    const [transcript, setTranscript] = useState('');
     const [isOpen, setIsOpen] = useState(false);
-    const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
 
     useEffect(() => {
-        if (files[0]?.transcript?.text || isLoadingTranscript) {
-            return;
-        }
-        setIsLoadingTranscript(true);
-        const handlePosts = async () => {
-            try {
-                await fetchPostById(serverUrl, currentPost.id);
-            } catch (err) {
-                setIsLoadingTranscript(false);
-            }
-        };
-        handlePosts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentPost.id, serverUrl]);
-
-    useEffect(() => {
-        if (files[0]?.transcript?.text) {
-            setTranscript(files[0].transcript.text);
-        }
-        setTimeout(() => {
+        if (transcriptObj && !Array.isArray(transcriptObj)) {
             setIsLoadingTranscript(false);
-        }, 1000);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [files[0]?.transcript?.text]);
+        }
+    }, [transcriptObj]);
 
     const handleLoadError = () => {
         setError(intl.formatMessage({
