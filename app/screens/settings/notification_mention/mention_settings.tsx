@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {defineMessage, useIntl} from 'react-intl';
 import {Text, View} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -11,9 +11,6 @@ import FloatingTextChipsInput from '@components/floating_input/floating_text_chi
 import SettingBlock from '@components/settings/block';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
-import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import useBackNavigation from '@hooks/navigate_back';
-import {popTopScreen} from '@screens/navigation';
 import {areBothStringArraysEqual} from '@utils/helpers';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -102,68 +99,36 @@ export function getUniqueKeywordsFromInput(inputText: string, keywords: string[]
     return keywords;
 }
 
-const MentionSettings = ({componentId, currentUser}: Props) => {
+const MentionSettings = ({currentUser}: Props) => {
     const serverUrl = useServerUrl();
     const [mentionProps] = useState(() => getMentionProps(currentUser));
     const notifyProps = mentionProps.notifyProps;
 
     const [mentionKeywords, setMentionKeywords] = useState(mentionProps.mentionKeywords);
     const [mentionKeywordsInput, setMentionKeywordsInput] = useState('');
-    const [isInputVisible, setIsInputVisible] = useState(false);
-    const [isSwitchOn, setIsSwitchOn] = useState(false);
+    const [isInputVisible, setIsInputVisible] = useState(mentionProps.mentionKeywords.length > 0);
+    const [isSwitchOn, setIsSwitchOn] = useState(mentionProps.mentionKeywords.length > 0);
 
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const intl = useIntl();
 
-    const inputRef = useRef(mentionKeywordsInput);
-    const keywordsRef = useRef(mentionKeywords);
-
-    useEffect(() => {
-        inputRef.current = mentionKeywordsInput;
-    }, [mentionKeywordsInput]);
-
-    useEffect(() => {
-        keywordsRef.current = mentionKeywords;
-    }, [mentionKeywords]);
-
-    const doSave = useCallback(() => {
+    const saveKeywords = useCallback((keywordsToSave: string[]) => {
         if (!currentUser) {
             return;
         }
-
-        const currentKeywords = keywordsRef.current;
-        const currentInput = inputRef.current;
-
-        const finalKeywords = currentInput.length > 0? getUniqueKeywordsFromInput(currentInput, currentKeywords): currentKeywords;
-
         const canSave = canSaveSettings({
-            mentionKeywords: finalKeywords,
+            mentionKeywords: keywordsToSave,
             mentionProps,
         });
-
         if (canSave) {
-            const mention_keys = [...finalKeywords];
             const notify_props: UserNotifyProps = {
                 ...notifyProps,
-                mention_keys: mention_keys.join(','),
+                mention_keys: keywordsToSave.join(','),
             };
             updateMe(serverUrl, {notify_props});
         }
     }, [currentUser, mentionProps, notifyProps, serverUrl]);
-
-    useEffect(() => {
-        return () => {
-            doSave();
-        };
-    }, [doSave]);
-
-    useEffect(() => {
-        if (mentionKeywords.length > 0) {
-            setIsInputVisible(true);
-            setIsSwitchOn(true);
-        }
-    }, [mentionKeywords]);
 
     const toggleInputVisibility = useCallback(() => {
         setIsInputVisible((prev) => !prev);
@@ -185,14 +150,27 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
         toggleInputVisibility();
     }, [toggleInputVisibility, notifyProps, serverUrl]);
 
-    function appendKeywordsAndClearInput(key: string, list: string[]) {
-        const keyAppendedToList = getUniqueKeywordsFromInput(key, list);
+    const handleMentionKeywordRemoved = useCallback((keyword: string) => {
+        const newKeywords = mentionKeywords.filter((item) => item !== keyword);
+        setMentionKeywords(newKeywords);
+        saveKeywords(newKeywords);
+    }, [mentionKeywords, saveKeywords]);
 
+    const appendKeywordsAndClearInput = useCallback((key: string, list: string[]) => {
+        const keyAppendedToList = getUniqueKeywordsFromInput(key, list);
+        if (keyAppendedToList.length === list.length) {
+            // No new keyword added (empty or duplicate)
+            setMentionKeywordsInput('');
+            return;
+        }
         setMentionKeywordsInput('');
-        requestAnimationFrame(() => {
-            setMentionKeywords(keyAppendedToList);
-        });
-    }
+        if (keyAppendedToList.length > 0) {
+            setIsSwitchOn(true);
+            setIsInputVisible(true);
+        }
+        setMentionKeywords(keyAppendedToList);
+        saveKeywords(keyAppendedToList);
+    }, [saveKeywords]);
 
     /**
      * Handler on every key press in the input
@@ -203,7 +181,7 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
         } else {
             setMentionKeywordsInput(text);
         }
-    }, [mentionKeywords]);
+    }, [appendKeywordsAndClearInput, mentionKeywords]);
 
     /**
      * Handler when the user presses the enter key on keyboard
@@ -211,21 +189,7 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
      */
     const handleMentionKeywordEntered = useCallback(() => {
         appendKeywordsAndClearInput(mentionKeywordsInput, mentionKeywords);
-    }, [mentionKeywordsInput, mentionKeywords]);
-
-    const handleMentionKeywordRemoved = useCallback((keyword: string) => {
-        setMentionKeywords(mentionKeywords.filter((item) => item !== keyword));
-    }, [mentionKeywords]);
-
-    useBackNavigation(() => {
-        doSave();
-        popTopScreen(componentId);
-    });
-
-    useAndroidHardwareBackHandler(componentId, () => {
-        doSave();
-        popTopScreen(componentId);
-    });
+    }, [appendKeywordsAndClearInput, mentionKeywordsInput, mentionKeywords]);
 
     return (
         <KeyboardAwareScrollView
