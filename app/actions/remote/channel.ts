@@ -1176,13 +1176,16 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
             captureException(new Error(`[switchToChannelById] Switch never completed after 15s for ${channelId}`));
         }, 15000);
 
-        await switchToChannel(serverUrl, channelId, teamId, skipLastUnread);
-        openChannelIfNeeded(serverUrl, channelId, groupLabel);
-        markChannelAsRead(serverUrl, channelId, false, groupLabel);
-        fetchChannelStats(serverUrl, channelId, false, groupLabel);
-        fetchGroupsForChannelIfConstrained(serverUrl, channelId, false);
+        try {
+            await switchToChannel(serverUrl, channelId, teamId, skipLastUnread);
+            openChannelIfNeeded(serverUrl, channelId, groupLabel);
+            markChannelAsRead(serverUrl, channelId, false, groupLabel);
+            fetchChannelStats(serverUrl, channelId, false, groupLabel);
+            fetchGroupsForChannelIfConstrained(serverUrl, channelId, false);
+        } finally {
+            clearTimeout(switchTimeout);
+        }
 
-        clearTimeout(switchTimeout);
         DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, false);
 
         if (await AppsManager.isAppsEnabled(serverUrl)) {
