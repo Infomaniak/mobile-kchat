@@ -111,6 +111,9 @@ class NetworkManagerSingleton {
             const csrfToken = await getCSRFFromCookie(serverUrl);
 
             this.clients[serverUrl] = new Client(client, serverUrl, bearerToken, csrfToken);
+            if (bearerToken) {
+                this.clients[serverUrl].setClientCredentials(bearerToken);
+            }
         } catch (error) {
             throw new ClientError(serverUrl, {
                 message: 'Cannot find this server. Check spelling and URL format.',

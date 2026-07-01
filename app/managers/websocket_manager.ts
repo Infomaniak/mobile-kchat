@@ -10,6 +10,7 @@ import {distinctUntilChanged} from 'rxjs/operators';
 import {fetchStatusByIds} from '@actions/remote/user';
 import {handleFirstConnect, handleReconnect} from '@actions/websocket';
 import {handleWebSocketEvent} from '@actions/websocket/event';
+import {BASE_SERVER_URL} from '@client/rest/constants';
 import WebSocketClient from '@client/websocket';
 import {General} from '@constants';
 import DatabaseManager from '@database/manager';
@@ -46,16 +47,18 @@ class WebsocketManagerSingleton {
         const netInfo = await NetInfo.fetch();
         this.netConnected = Boolean(netInfo.isConnected);
         this.netType = netInfo.type;
-        serverCredentials.forEach(
-            ({serverUrl, token}) => {
-                try {
-                    DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-                    this.createClient(serverUrl, token);
-                } catch (error) {
-                    logError('WebsocketManager init error', error);
-                }
-            },
-        );
+        serverCredentials.
+            filter(({serverUrl}) => serverUrl !== BASE_SERVER_URL).
+            forEach(
+                ({serverUrl, token}) => {
+                    try {
+                        DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+                        this.createClient(serverUrl, token);
+                    } catch (error) {
+                        logError('WebsocketManager init error', error);
+                    }
+                },
+            );
 
         this.appStateSubscription?.remove();
         this.netStateSubscription?.();
