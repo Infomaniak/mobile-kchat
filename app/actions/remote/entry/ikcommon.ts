@@ -67,32 +67,37 @@ const configureServer = async (teamServer: TeamServer, accessToken: string) => {
 };
 
 export const syncMultiTeam = async (accessToken: string) => {
+    let teamServers: TeamServer[] = [];
+    let serverCreationResults: Array<string | null> = [];
+    const existingServerUrls: Array<string | null> = [];
+
     try {
         const client = await NetworkManager.createGlobalClient(accessToken);
-        const teamServers = await client.getMultiTeams();
+        teamServers = await client.getMultiTeams();
 
         const serverCredentials = await getAllServerCredentials();
-        const serverCreationPromises = [];
-        const existingServerUrls: Array<string | null> = [];
+        const serverCreationPromises: Array<Promise<string | null>> = [];
+
         for (const teamServer of teamServers) {
             if (serverCredentials.some((element) => element.serverUrl === teamServer.url)) {
                 // Server already exists - update token and include in results
                 setServerCredentials(teamServer.url, accessToken);
                 existingServerUrls.push(teamServer.url);
             } else {
-                // The server doesn't exist, create it
-                serverCreationPromises.push(configureServer(teamServer, accessToken));
+                // The server doesn't exist, create it with individual error handling
+                serverCreationPromises.push(
+                    configureServer(teamServer, accessToken).catch((e) => {
+                        logError('[syncMultiTeam] configureServer failed', {
+                            serverUrl: teamServer.url,
+                            error: e,
+                        });
+                        return null;
+                    }),
+                );
             }
         }
 
-        const serverCreationResults = await Promise.all(serverCreationPromises);
-        for (const serverCredential of serverCredentials) {
-            // The server doesn't exist anymore, remove it
-            if (!teamServers.some((element) => element.url === serverCredential.serverUrl)) {
-                DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: serverCredential.serverUrl, removeServer: true});
-            }
-        }
-        return [...serverCreationResults, ...existingServerUrls];
+        serverCreationResults = await Promise.all(serverCreationPromises);
     } catch (e) {
         if (e instanceof ClientError) {
             logError('[syncMultiTeam]', {
@@ -105,9 +110,23 @@ export const syncMultiTeam = async (accessToken: string) => {
         } else {
             logError('[syncMultiTeam]', e);
         }
+    } finally {
+        // ALWAYS clean up obsolete servers when we have the team list
+        if (teamServers.length > 0) {
+            try {
+                const serverCredentials = await getAllServerCredentials();
+                for (const serverCredential of serverCredentials) {
+                    if (!teamServers.some((element) => element.url === serverCredential.serverUrl)) {
+                        DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: serverCredential.serverUrl, removeServer: true});
+                    }
+                }
+            } catch (cleanupError) {
+                logError('[syncMultiTeam] cleanup failed', cleanupError);
+            }
+        }
+
         await removeServerCredentials(BASE_SERVER_URL);
-
-        return [];
     }
-};
 
+    return [...serverCreationResults, ...existingServerUrls];
+};
