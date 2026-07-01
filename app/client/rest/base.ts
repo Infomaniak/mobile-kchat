@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {Calls} from '@constants';
-import {setServerCredentials} from '@init/credentials';
 
 import * as ClientConstants from './constants';
 import ClientTracking from './tracking';
@@ -14,7 +13,7 @@ export default class ClientBase extends ClientTracking {
         super(apiClient);
 
         if (bearerToken) {
-            this.requestHeaders[ClientConstants.HEADER_AUTH] = `${ClientConstants.HEADER_BEARER} ${bearerToken}`;
+            this.setBearerToken(bearerToken);
         }
         if (csrfToken) {
             this.setCSRFToken(csrfToken);
@@ -49,7 +48,6 @@ export default class ClientBase extends ClientTracking {
 
     setBearerToken(bearerToken: string) {
         this.requestHeaders[ClientConstants.HEADER_AUTH] = `${ClientConstants.HEADER_BEARER} ${bearerToken}`;
-        setServerCredentials(this.apiClient.baseUrl, bearerToken);
     }
 
     getCurrentBearerToken(): string {
