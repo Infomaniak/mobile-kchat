@@ -6,7 +6,6 @@ import {DeviceEventEmitter} from 'react-native';
 import {loginEntry} from '@actions/remote/entry/login';
 import {addPushProxyVerificationStateFromLogin} from '@actions/remote/session';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
-import ClientError from '@client/rest/error';
 import {BASE_SERVER_URL} from '@client/rest/constants';
 import ClientError from '@client/rest/error';
 import {Events} from '@constants';
