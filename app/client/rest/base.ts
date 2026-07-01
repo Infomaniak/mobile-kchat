@@ -14,7 +14,7 @@ export default class ClientBase extends ClientTracking {
         super(apiClient);
 
         if (bearerToken) {
-            this.requestHeaders[ClientConstants.HEADER_AUTH] = ClientConstants.HEADER_BEARER + ' ' + bearerToken;
+            this.requestHeaders[ClientConstants.HEADER_AUTH] = `${ClientConstants.HEADER_BEARER} ${bearerToken}`;
         }
         if (csrfToken) {
             this.setCSRFToken(csrfToken);
