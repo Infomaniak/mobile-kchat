@@ -7,6 +7,7 @@ import {loginEntry} from '@actions/remote/entry/login';
 import {addPushProxyVerificationStateFromLogin} from '@actions/remote/session';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
 import {BASE_SERVER_URL} from '@client/rest/constants';
+import ClientError from '@client/rest/error';
 import {Events} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import {PUSH_PROXY_STATUS_VERIFIED} from '@constants/push_proxy';
@@ -14,6 +15,7 @@ import DatabaseManager from '@database/manager';
 import {getAllServerCredentials, removeServerCredentials, setServerCredentials} from '@init/credentials';
 import NetworkManager from '@managers/network_manager';
 import EphemeralStore from '@store/ephemeral_store';
+import {logError} from '@utils/log';
 
 import type {TeamServer} from '@client/rest/ikteams';
 
@@ -68,7 +70,6 @@ export const syncMultiTeam = async (accessToken: string) => {
     try {
         const client = await NetworkManager.createGlobalClient(accessToken);
         const teamServers = await client.getMultiTeams();
-        await removeServerCredentials(BASE_SERVER_URL);
 
         const serverCredentials = await getAllServerCredentials();
         const serverCreationPromises = [];
@@ -93,6 +94,17 @@ export const syncMultiTeam = async (accessToken: string) => {
         }
         return [...serverCreationResults, ...existingServerUrls];
     } catch (e) {
+        if (e instanceof ClientError) {
+            logError('[syncMultiTeam]', {
+                message: e.message,
+                url: e.url,
+                status_code: e.status_code,
+                headers: e.headers,
+                response: e.response,
+            });
+        } else {
+            logError('[syncMultiTeam]', e);
+        }
         await removeServerCredentials(BASE_SERVER_URL);
 
         return [];

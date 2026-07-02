@@ -59,6 +59,7 @@ interface Client extends ClientBase,
 {
     setClientCredentials: (token: string) => void;
     setCSRFToken: (csrfToken: string) => void;
+    setBearerToken: (bearerToken: string) => void;
 }
 
 class Client extends mix(ClientBase).with(
