@@ -119,6 +119,8 @@ const Channel = ({
         storeLastViewedChannelIdAndServer(channelId);
         wsClient?.bindPresenceChannel(channelId);
 
+        fetchPostsForChannel(serverUrl, channelId, false, false);
+
         return () => {
             wsClient?.unbindPresenceChannel();
             cancelAnimationFrame(raf);
