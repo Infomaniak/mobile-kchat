@@ -1168,8 +1168,6 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
 
     DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, true);
 
-    // fetchPostsForChannel moved to Channel screen lazy loading
-    // fetchPostsForChannel(serverUrl, channelId, false, false, groupLabel);
     await switchToChannel(serverUrl, channelId, teamId, skipLastUnread);
     openChannelIfNeeded(serverUrl, channelId, groupLabel);
     markChannelAsRead(serverUrl, channelId, false, groupLabel);
