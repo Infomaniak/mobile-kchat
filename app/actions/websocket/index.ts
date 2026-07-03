@@ -36,7 +36,7 @@ import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {setTeamLoading} from '@store/team_load_store';
 import {isTablet} from '@utils/helpers';
-import {logDebug, logInfo} from '@utils/log';
+import {logDebug, logError, logInfo} from '@utils/log';
 import {captureMessage} from '@utils/sentry';
 
 import type {Model} from '@nozbe/watermelondb';
@@ -76,13 +76,17 @@ export async function handleReconnect(serverUrl: string, groupLabel: BaseRequest
 }
 
 async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel) {
+    logInfo('[doReconnect] starting reconnect for', serverUrl);
+    captureMessage(`[doReconnect] started for ${serverUrl}`);
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
+        logError('[doReconnect] cannot find server database for', serverUrl);
         return new Error('cannot find server database');
     }
 
     const appDatabase = DatabaseManager.appDatabase?.database;
     if (!appDatabase) {
+        logError('[doReconnect] cannot find app database');
         return new Error('cannot find app database');
     }
 
@@ -95,6 +99,7 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
 
     const currentChannelId = await getCurrentChannelId(database);
 
+    logInfo('[doReconnect] setting team loading for', serverUrl);
     setTeamLoading(serverUrl, true);
     const entryData = await entry(serverUrl, currentTeamId, currentChannelId, lastFullSync, groupLabel);
     if ('error' in entryData) {

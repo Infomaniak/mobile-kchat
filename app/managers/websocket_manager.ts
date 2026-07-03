@@ -18,7 +18,8 @@ import {getCurrentUserId} from '@queries/servers/system';
 import {queryAllUsers} from '@queries/servers/user';
 import {toMilliseconds} from '@utils/datetime';
 import {isMainActivity} from '@utils/helpers';
-import {logError} from '@utils/log';
+import {logError, logInfo} from '@utils/log';
+import {captureMessage} from '@utils/sentry';
 
 const WAIT_TO_CLOSE = toMilliseconds({seconds: 15});
 const WAIT_UNTIL_NEXT = toMilliseconds({seconds: 5});
@@ -35,6 +36,8 @@ class WebsocketManagerSingleton {
     private statusUpdatesIntervalIDs: Record<string, NodeJS.Timeout> = {};
     private backgroundIntervalId: number | undefined;
     private firstConnectionSynced: Record<string, boolean> = {};
+    private lastBackgroundAt = 0;
+    private potentialZombie = false;
 
     private appStateSubscription: NativeEventSubscription | undefined;
     private netStateSubscription: NetInfoSubscription | undefined;
@@ -156,22 +159,31 @@ class WebsocketManagerSingleton {
         const client: WebSocketClient = this.clients[serverUrl];
         clearTimeout(this.connectionTimerIDs[serverUrl]);
         delete this.connectionTimerIDs[serverUrl];
-        if (!client?.isConnected()) {
-            const hasSynced = this.firstConnectionSynced[serverUrl];
-            client.initialize({}, !hasSynced);
-            if (!hasSynced) {
-                const error = await handleFirstConnect(serverUrl, groupLabel);
-                if (error) {
-                    // This will try to reconnect and try to sync again
-                    client.close(false);
-                }
+        if (client?.isConnected()) {
+            logInfo('[WebsocketManager] initializeClient: client already connected for', serverUrl, 'skipping');
+            if (this.potentialZombie) {
+                captureMessage(`[WebsocketManager] initializeClient early return - zombie client detected for ${serverUrl}`);
+                this.potentialZombie = false;
+            }
+            return;
+        }
 
-                // Makes sure a client still exist, and therefore we haven't been logged out
-                if (this.clients[serverUrl]) {
-                    this.firstConnectionSynced[serverUrl] = true;
-                }
+        const hasSynced = this.firstConnectionSynced[serverUrl];
+        logInfo('[WebsocketManager] initializeClient: client not connected for', serverUrl, 'initializing, hasSynced:', hasSynced);
+        client.initialize({}, !hasSynced);
+        if (!hasSynced) {
+            const error = await handleFirstConnect(serverUrl, groupLabel);
+            if (error) {
+                // This will try to reconnect and try to sync again
+                client.close(false);
+            }
+
+            // Makes sure a client still exist, and therefore we haven't been logged out
+            if (this.clients[serverUrl]) {
+                this.firstConnectionSynced[serverUrl] = true;
             }
         }
+        this.potentialZombie = false;
     };
 
     private onFirstConnect = (serverUrl: string) => {
@@ -272,6 +284,15 @@ class WebsocketManagerSingleton {
         if (currentIsActive) {
             if (this.isBackgroundTimerRunning) {
                 BackgroundTimer.clearInterval(this.backgroundIntervalId!);
+                const wasLongBackground = Date.now() - this.lastBackgroundAt > WAIT_TO_CLOSE + 5000;
+                if (wasLongBackground) {
+                    logInfo('[WebsocketManager] returning to foreground after long background with active timer, closing all websockets to avoid zombie connections');
+                    captureMessage('[WebsocketManager] foreground return with active background timer - timer never fired');
+                    this.potentialZombie = true;
+                } else {
+                    logInfo('[WebsocketManager] returning to foreground quickly, closing all websockets');
+                }
+                this.closeAll();
             }
             this.isBackgroundTimerRunning = false;
             if (this.netConnected) {
@@ -283,6 +304,7 @@ class WebsocketManagerSingleton {
 
         if (wentBackground && !this.isBackgroundTimerRunning) {
             this.isBackgroundTimerRunning = true;
+            this.lastBackgroundAt = Date.now();
             this.backgroundIntervalId = BackgroundTimer.setInterval(() => {
                 this.closeAll();
                 BackgroundTimer.clearInterval(this.backgroundIntervalId!);
