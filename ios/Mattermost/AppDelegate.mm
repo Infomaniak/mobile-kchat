@@ -207,6 +207,7 @@ continueUserActivity: (nonnull NSUserActivity *)userActivity
 
 -(void)applicationWillResignActive:(UIApplication *)application {
   [[GekidouWrapper default] setPreference:@"false" forKey:@"ApplicationIsForeground"];
+  [self beginDatabaseLockProtection];
 }
 
 -(void)applicationDidEnterBackground:(UIApplication *)application {
