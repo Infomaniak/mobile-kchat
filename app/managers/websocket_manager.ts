@@ -37,7 +37,7 @@ class WebsocketManagerSingleton {
     private backgroundIntervalId: number | undefined;
     private firstConnectionSynced: Record<string, boolean> = {};
     private lastBackgroundAt = 0;
-    private potentialZombie = false;
+    private potentialZombie: Record<string, boolean> = {};
 
     private appStateSubscription: NativeEventSubscription | undefined;
     private netStateSubscription: NetInfoSubscription | undefined;
@@ -76,6 +76,7 @@ class WebsocketManagerSingleton {
         clearTimeout(this.connectionTimerIDs[serverUrl]);
         delete this.clients[serverUrl];
         delete this.firstConnectionSynced[serverUrl];
+        delete this.potentialZombie[serverUrl];
 
         // We don't remove the connected subject so any potential client invalidation
         // and subsequent creation of the client can still be observed by the component.
@@ -113,6 +114,7 @@ class WebsocketManagerSingleton {
             client.close(true);
             client.invalidate();
             this.getConnectedSubject(url).next('not_connected');
+            delete this.potentialZombie[url];
         }
     };
 
@@ -161,9 +163,9 @@ class WebsocketManagerSingleton {
         delete this.connectionTimerIDs[serverUrl];
         if (client?.isConnected()) {
             logInfo('[WebsocketManager] initializeClient: client already connected for', serverUrl, 'skipping');
-            if (this.potentialZombie) {
+            if (this.potentialZombie[serverUrl]) {
                 captureMessage(`[WebsocketManager] initializeClient early return - zombie client detected for ${serverUrl}`);
-                this.potentialZombie = false;
+                delete this.potentialZombie[serverUrl];
             }
             return;
         }
@@ -183,7 +185,7 @@ class WebsocketManagerSingleton {
                 this.firstConnectionSynced[serverUrl] = true;
             }
         }
-        this.potentialZombie = false;
+        delete this.potentialZombie[serverUrl];
     };
 
     private onFirstConnect = (serverUrl: string) => {
@@ -289,11 +291,13 @@ class WebsocketManagerSingleton {
                 if (wasLongBackground) {
                     logInfo('[WebsocketManager] returning to foreground after long background with active timer, closing all websockets to avoid zombie connections');
                     captureMessage('[WebsocketManager] foreground return with active background timer - timer never fired');
-                    this.potentialZombie = true;
+                    for (const url of Object.keys(this.clients)) {
+                        this.potentialZombie[url] = true;
+                    }
+                    this.closeAll();
                 } else {
                     logInfo('[WebsocketManager] returning to foreground quickly, closing all websockets');
                 }
-                this.closeAll();
             }
             this.isBackgroundTimerRunning = false;
             if (this.netConnected) {
