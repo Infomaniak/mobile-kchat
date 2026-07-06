@@ -37,7 +37,7 @@ import NavigationStore from '@store/navigation_store';
 import {setTeamLoading} from '@store/team_load_store';
 import {isTablet} from '@utils/helpers';
 import {logDebug, logError, logInfo} from '@utils/log';
-import {captureMessage} from '@utils/sentry';
+import {captureException, captureMessage} from '@utils/sentry';
 
 import type {Model} from '@nozbe/watermelondb';
 
@@ -76,18 +76,20 @@ export async function handleReconnect(serverUrl: string, groupLabel: BaseRequest
 }
 
 async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel) {
-    logInfo('[doReconnect] starting reconnect for', serverUrl);
-    captureMessage(`[doReconnect] started for ${serverUrl}`);
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
-        logError('[doReconnect] cannot find server database for', serverUrl);
-        return new Error('cannot find server database');
+        const err = new Error(`[doReconnect] cannot find server database for ${serverUrl}`);
+        logError(err);
+        captureException(err);
+        return err;
     }
 
     const appDatabase = DatabaseManager.appDatabase?.database;
     if (!appDatabase) {
-        logError('[doReconnect] cannot find app database');
-        return new Error('cannot find app database');
+        const err = new Error('[doReconnect] cannot find app database');
+        logError(err);
+        captureException(err);
+        return err;
     }
 
     const {database} = operator;
@@ -101,40 +103,51 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
 
     logInfo('[doReconnect] setting team loading for', serverUrl);
     setTeamLoading(serverUrl, true);
-    const entryData = await entry(serverUrl, currentTeamId, currentChannelId, lastFullSync, groupLabel);
-    if ('error' in entryData) {
+
+    try {
+        const entryData = await entry(serverUrl, currentTeamId, currentChannelId, lastFullSync, groupLabel);
+        if ('error' in entryData) {
+            const err = entryData.error instanceof Error ? entryData.error : new Error(String(entryData.error));
+            logError('[doReconnect] entry error for', serverUrl, err);
+            captureException(err);
+            return err;
+        }
+        const {models, initialTeamId, initialChannelId, prefData, teamData, chData, meData, gmConverted} = entryData;
+
+        await handleEntryAfterLoadNavigation(serverUrl, teamData.memberships || [], chData?.memberships || [], currentTeamId || '', currentChannelId || '', initialTeamId, initialChannelId, gmConverted);
+
+        const dt = Date.now();
+        if (models?.length) {
+            await operator.batchRecords(models, 'doReconnect');
+        }
+
+        const batchDuration = Date.now() - dt;
+        captureSlowReconnectBatch(serverUrl, groupLabel, models || [], batchDuration);
+        logInfo('WEBSOCKET RECONNECT MODELS BATCHING TOOK', `${batchDuration}ms`);
+
+        await fetchPostDataIfNeeded(serverUrl, groupLabel);
+
+        const {id: currentUserId, locale: currentUserLocale} = (await getCurrentUser(database))!;
+        const license = await getLicense(database);
+        const config = await getConfig(database);
+
+        await deferredAppEntryActions(serverUrl, lastFullSync, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, meData, initialTeamId, undefined, groupLabel);
+
+        await setLastFullSync(operator, now);
+
+        openAllUnreadChannels(serverUrl, groupLabel);
+
+        dataRetentionCleanup(serverUrl);
+
+        AppsManager.refreshAppBindings(serverUrl, groupLabel);
+    } catch (error) {
+        logError('[doReconnect] unexpected error for', serverUrl, error);
+        captureException(error);
+        return error instanceof Error ? error : new Error(String(error));
+    } finally {
         setTeamLoading(serverUrl, false);
-        return entryData.error;
-    }
-    const {models, initialTeamId, initialChannelId, prefData, teamData, chData, meData, gmConverted} = entryData;
-
-    await handleEntryAfterLoadNavigation(serverUrl, teamData.memberships || [], chData?.memberships || [], currentTeamId || '', currentChannelId || '', initialTeamId, initialChannelId, gmConverted);
-
-    const dt = Date.now();
-    if (models?.length) {
-        await operator.batchRecords(models, 'doReconnect');
     }
 
-    const batchDuration = Date.now() - dt;
-    captureSlowReconnectBatch(serverUrl, groupLabel, models || [], batchDuration);
-    logInfo('WEBSOCKET RECONNECT MODELS BATCHING TOOK', `${batchDuration}ms`);
-
-    await fetchPostDataIfNeeded(serverUrl, groupLabel);
-
-    const {id: currentUserId, locale: currentUserLocale} = (await getCurrentUser(database))!;
-    const license = await getLicense(database);
-    const config = await getConfig(database);
-
-    await deferredAppEntryActions(serverUrl, lastFullSync, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, meData, initialTeamId, undefined, groupLabel);
-
-    await setLastFullSync(operator, now);
-    setTeamLoading(serverUrl, false);
-
-    openAllUnreadChannels(serverUrl, groupLabel);
-
-    dataRetentionCleanup(serverUrl);
-
-    AppsManager.refreshAppBindings(serverUrl, groupLabel);
     return undefined;
 }
 

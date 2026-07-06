@@ -19,7 +19,7 @@ import {queryAllUsers} from '@queries/servers/user';
 import {toMilliseconds} from '@utils/datetime';
 import {isMainActivity} from '@utils/helpers';
 import {logError, logInfo} from '@utils/log';
-import {captureMessage} from '@utils/sentry';
+import {captureException, captureMessage} from '@utils/sentry';
 
 const WAIT_TO_CLOSE = toMilliseconds({seconds: 15});
 const WAIT_UNTIL_NEXT = toMilliseconds({seconds: 5});
@@ -197,6 +197,7 @@ class WebsocketManagerSingleton {
 
         const error = await handleReconnect(serverUrl);
         if (error) {
+            captureException(error);
             this.getClient(serverUrl)?.close(false);
         }
     };
