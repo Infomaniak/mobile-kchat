@@ -10,6 +10,7 @@ import NetworkManager from '@managers/network_manager';
 import {getConfigValue} from '@queries/servers/system';
 import {toMilliseconds} from '@utils/datetime';
 import {logError, logInfo, logWarning} from '@utils/log';
+import {captureMessage, captureException} from '@utils/sentry';
 
 const MAX_WEBSOCKET_FAILS = 7;
 const WEBSOCKET_TIMEOUT = toMilliseconds({seconds: 30});
@@ -86,11 +87,15 @@ export default class WebSocketClient {
         }
 
         if (this.conn && this.connState !== WebSocketReadyState.CLOSED) {
+            logInfo('[WS-client] initialize: connection already exists and not closed', this.serverUrl, 'state:', this.conn?.connection.state);
             return;
         }
 
         const database = DatabaseManager.serverDatabases[this.serverUrl]?.database;
         if (!database) {
+            const err = new Error(`[WS-client] initialize: no database for ${this.serverUrl}`);
+            logError(err.message);
+            captureException(err);
             return;
         }
 
@@ -128,6 +133,8 @@ export default class WebSocketClient {
             this.conn = client;
             this.lastPusher = client;
         } catch (error) {
+            logError('[WS-client] initialize: getOrCreateWebSocketClient failed for', this.serverUrl, error);
+            captureException(error);
             return;
         }
 
@@ -145,11 +152,18 @@ export default class WebSocketClient {
 
             if (this.shouldSkipSync) {
                 logInfo('websocket connected to', this.url);
-                this.firstConnectCallback?.();
+                if (this.firstConnectCallback) {
+                    this.firstConnectCallback();
+                } else {
+                    logWarning('[WS-client] connected: firstConnectCallback is undefined for', this.serverUrl);
+                }
             } else {
                 logInfo('websocket re-established connection to', this.url);
                 if (this.reconnectCallback) {
                     this.reconnectCallback();
+                } else {
+                    logWarning('[WS-client] connected: reconnectCallback is undefined for', this.serverUrl);
+                    captureMessage(`[WS-client] connected: reconnectCallback is undefined for ${this.serverUrl}`);
                 }
             }
 
@@ -221,15 +235,21 @@ export default class WebSocketClient {
                 this.conn.connect();
             }
 
-            const client = NetworkManager.getClient(this.serverUrl);
-            const user = await client.getMe();
-            if (!user) {
-                return;
-            }
+            try {
+                const client = NetworkManager.getClient(this.serverUrl);
+                const user = await client.getMe();
+                if (!user) {
+                    logWarning('[WS-client] connOpen: getMe returned no user for', this.serverUrl);
+                    return;
+                }
 
-            this.bindChannel(`private-team.${user.team_id}`, false);
-            this.bindChannel(`presence-user.${user.user_id}`, false);
-            this.bindChannel(`presence-teamUser.${user.id}`);
+                this.bindChannel(`private-team.${user.team_id}`, false);
+                this.bindChannel(`presence-user.${user.user_id}`, false);
+                this.bindChannel(`presence-teamUser.${user.id}`);
+            } catch (error) {
+                logError('[WS-client] connOpen: getMe failed for', this.serverUrl, error);
+                captureException(error);
+            }
         }
     }
 
