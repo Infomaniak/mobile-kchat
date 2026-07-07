@@ -9,8 +9,9 @@ import {handleReconnect} from '@actions/websocket';
 import WebSocketClient from '@client/websocket';
 import DatabaseManager from '@database/manager';
 import {isMainActivity} from '@utils/helpers';
+import {captureMessage} from '@utils/sentry';
 
-import WebsocketManager from './websocket_manager';
+import WebsocketManager, {WAIT_TO_CLOSE} from './websocket_manager';
 
 import type {ServerDatabase} from '@typings/database/database';
 
@@ -18,6 +19,8 @@ jest.mock('@actions/websocket');
 jest.mock('@actions/websocket/event');
 jest.mock('@client/websocket');
 jest.mock('@utils/helpers');
+
+jest.mock('@utils/sentry');
 
 let capturedAppStateCallback: ((state: AppStateStatus) => void) | undefined;
 let capturedNetInfoCallback: ((state: any) => void) | undefined;
@@ -122,7 +125,7 @@ describe('WebsocketManager - background/foreground reconnection', () => {
 
         capturedAppStateCallback!('background');
 
-        expect(BackgroundTimer.setInterval).toHaveBeenCalledWith(expect.any(Function), 15000);
+        expect(BackgroundTimer.setInterval).toHaveBeenCalledWith(expect.any(Function), WAIT_TO_CLOSE);
         expect((WebsocketManager as any).isBackgroundTimerRunning).toBe(true);
     });
 
@@ -225,6 +228,43 @@ describe('WebsocketManager - background/foreground reconnection', () => {
         expect(mockWebSocketClient.close).toHaveBeenCalledWith(true);
         expect(BackgroundTimer.clearInterval).toHaveBeenCalled();
         expect((WebsocketManager as any).isBackgroundTimerRunning).toBe(false);
+    });
+
+    it('should captureMessage when zombie client is detected during initializeClient', async () => {
+        // Setup: client pretends to be connected and marked as potential zombie
+        (WebsocketManager as any).firstConnectionSynced[mockServerUrl] = true;
+        (WebsocketManager as any).potentialZombie[mockServerUrl] = true;
+        mockWebSocketClient.isConnected.mockReturnValue(true);
+
+        await (WebsocketManager as any).initializeClient(mockServerUrl, 'test');
+
+        expect(captureMessage).toHaveBeenCalledWith(
+            expect.stringContaining('ZOMBIE CLIENT'),
+        );
+
+        // potentialZombie should be cleaned up
+        expect((WebsocketManager as any).potentialZombie[mockServerUrl]).toBeUndefined();
+    });
+
+    it('should captureMessage when client still connected after closeAll without zombie flag', async () => {
+        // Client connected but not marked as zombie
+        (WebsocketManager as any).firstConnectionSynced[mockServerUrl] = true;
+        mockWebSocketClient.isConnected.mockReturnValue(true);
+
+        await (WebsocketManager as any).initializeClient(mockServerUrl, 'test');
+
+        expect(captureMessage).toHaveBeenCalledWith(
+            expect.stringContaining('still connected after closeAll'),
+        );
+    });
+
+    it('should not delete potentialZombie in closeAll', () => {
+        (WebsocketManager as any).potentialZombie[mockServerUrl] = true;
+
+        WebsocketManager.closeAll();
+
+        // potentialZombie should survive closeAll
+        expect((WebsocketManager as any).potentialZombie[mockServerUrl]).toBe(true);
     });
 
     it('should handle network disconnection by closing all websockets', () => {

@@ -18,10 +18,10 @@ import {getCurrentUserId} from '@queries/servers/system';
 import {queryAllUsers} from '@queries/servers/user';
 import {toMilliseconds} from '@utils/datetime';
 import {isMainActivity} from '@utils/helpers';
-import {logError, logInfo} from '@utils/log';
-import {captureException, captureMessage} from '@utils/sentry';
+import {logError, logInfo, logWarning} from '@utils/log';
+import {captureMessage} from '@utils/sentry';
 
-const WAIT_TO_CLOSE = toMilliseconds({seconds: 15});
+export const WAIT_TO_CLOSE = toMilliseconds({seconds: 15});
 const WAIT_UNTIL_NEXT = toMilliseconds({seconds: 5});
 
 class WebsocketManagerSingleton {
@@ -114,7 +114,6 @@ class WebsocketManagerSingleton {
             client.close(true);
             client.invalidate();
             this.getConnectedSubject(url).next('not_connected');
-            delete this.potentialZombie[url];
         }
     };
 
@@ -162,10 +161,11 @@ class WebsocketManagerSingleton {
         clearTimeout(this.connectionTimerIDs[serverUrl]);
         delete this.connectionTimerIDs[serverUrl];
         if (client?.isConnected()) {
-            logInfo('[WebsocketManager] initializeClient: client already connected for', serverUrl, 'skipping');
             if (this.potentialZombie[serverUrl]) {
-                captureMessage(`[WebsocketManager] initializeClient early return - zombie client detected for ${serverUrl}`);
+                captureMessage(`[WebsocketManager] ZOMBIE CLIENT confirmed: ${serverUrl}`);
                 delete this.potentialZombie[serverUrl];
+            } else {
+                captureMessage(`[WebsocketManager] client still connected after closeAll: ${serverUrl}`);
             }
             return;
         }
@@ -199,7 +199,7 @@ class WebsocketManagerSingleton {
 
         const error = await handleReconnect(serverUrl);
         if (error) {
-            captureException(error);
+            logError('[WebsocketManager] reconnect failed for', serverUrl, error);
             this.getClient(serverUrl)?.close(false);
         }
     };
@@ -273,6 +273,7 @@ class WebsocketManagerSingleton {
         this.netType = currentNetType;
 
         if (!currentIsConnected) {
+            logWarning('[WebsocketManager] handleStateChange: no network, closing all websockets');
             this.closeAll();
             return;
         }
@@ -289,8 +290,9 @@ class WebsocketManagerSingleton {
                 BackgroundTimer.clearInterval(this.backgroundIntervalId!);
                 const wasLongBackground = Date.now() - this.lastBackgroundAt > WAIT_TO_CLOSE + 5000;
                 if (wasLongBackground) {
+                    const backgroundDuration = Date.now() - this.lastBackgroundAt;
                     logInfo('[WebsocketManager] returning to foreground after long background with active timer, closing all websockets to avoid zombie connections');
-                    captureMessage('[WebsocketManager] foreground return with active background timer - timer never fired');
+                    captureMessage(`[WebsocketManager] foreground return with active background timer after ${backgroundDuration}ms - potential zombie connections`);
                     for (const url of Object.keys(this.clients)) {
                         this.potentialZombie[url] = true;
                     }
@@ -302,6 +304,9 @@ class WebsocketManagerSingleton {
             this.isBackgroundTimerRunning = false;
             if (this.netConnected) {
                 this.openAll('WebSocket Reconnect');
+            } else {
+                logWarning('[WebsocketManager] handleStateChange: no network at foreground, skipping openAll');
+                captureMessage('[WebsocketManager] foreground with no network');
             }
 
             return;
