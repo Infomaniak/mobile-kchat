@@ -47,25 +47,25 @@ install:
     paths:
       - dist/assets/
 
-# test:check:
-#   stage: check
-#   extends:
-#     - .tests-node
-#   rules:
-#     - *rule-mr
-#     - when: never
-#   script:
-#     - npm run check
+test:check:
+  stage: check
+  extends:
+    - .tests-node
+  rules:
+    - *rule-mr
+    - when: never
+  script:
+    - npm run check
 
-# test:i18n:
-#   stage: check
-#   extends:
-#     - .tests-node
-#   rules:
-#     - *rule-mr
-#     - when: never
-#   script:
-#     - ./scripts/precommit/i18n.sh
+test:i18n:
+  stage: check
+  extends:
+    - .tests-node
+  rules:
+    - *rule-mr
+    - when: never
+  script:
+    - ./scripts/precommit/i18n.sh
 
 test:unit-tests:
   stage: test-unit
@@ -86,17 +86,17 @@ test:unit-tests:
         coverage_format: cobertura
         path: coverage/cobertura-coverage.xml
 
-# code_quality:
-#   stage: test-unit
-#   extends: [.tests-node]
-#   allow_failure: true
-#   rules:
-#     - *rule-mr
-#     - when: never
-#   script:
-#     - mkdir -p reports
-#     - npm run lint -- --format gitlab
-#   artifacts:
-#     expire_in: 7 days
-#     reports:
-#       codequality: gl-code-quality-report.json
+code_quality:
+  stage: test-unit
+  extends: [.tests-node]
+  allow_failure: true
+  rules:
+    - *rule-mr
+    - when: never
+  script:
+    - mkdir -p reports
+    - npm run lint -- --format gitlab
+  artifacts:
+    expire_in: 7 days
+    reports:
+      codequality: gl-code-quality-report.json
