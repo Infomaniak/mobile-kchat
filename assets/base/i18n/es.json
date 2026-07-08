@@ -1031,5 +1031,7 @@
   "send_feedback.type.feature": "Funcionalidad",
   "send_feedback.files.max_size": "Tamaño máximo de archivo: 32 MB",
   "send_feedback.files.too_many": "Puedes adjuntar hasta 5 archivos.",
-  "send_feedback.files.too_large": "Uno o más archivos superan el límite de 32 MB."
+  "send_feedback.files.too_large": "Uno o más archivos superan el límite de 32 MB.",
+  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {no fue notificado por esta mención porque no está en el canal. Por favor, contacte a un administrador para agregarlo a este canal.} other {no fueron notificados por esta mención porque no están en el canal. Por favor, contacte a un administrador para agregarlos a este canal.}}}",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {no fue notificado por esta mención porque no está en el canal. Por favor, contacte a un administrador para agregarlo a este canal privado.} other {no fueron notificados por esta mención porque no están en el canal. Por favor, contacte a un administrador para agregarlos a este canal privado.}}}"
 }

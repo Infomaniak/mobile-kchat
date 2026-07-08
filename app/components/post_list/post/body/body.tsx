@@ -17,7 +17,7 @@ import {isEdited as postEdited, isPostFailed} from '@utils/post';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import Acknowledgements from './acknowledgements';
-import AddMembers from './add_members';
+import ChannelMemberMention from './add_members';
 import Content from './content';
 import Failed from './failed';
 import Message from './message';
@@ -164,7 +164,7 @@ const Body = ({
         );
     } else if (isPostAddChannelMember) {
         message = (
-            <AddMembers
+            <ChannelMemberMention
                 location={location}
                 post={post}
                 theme={theme}

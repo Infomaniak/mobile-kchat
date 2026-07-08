@@ -1145,5 +1145,7 @@
   "send_feedback.type.feature": "Fonctionnalité",
   "send_feedback.files.max_size": "Taille maximale du fichier : 32 Mo",
   "send_feedback.files.too_many": "Vous pouvez joindre jusqu'à 5 fichiers.",
-  "send_feedback.files.too_large": "Un ou plusieurs fichiers dépassent la limite de 32 Mo."
+  "send_feedback.files.too_large": "Un ou plusieurs fichiers dépassent la limite de 32 Mo.",
+  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {n'a pas été notifié(e) par cette mention car il/elle n'est pas dans le canal. Veuillez contacter un administrateur pour l'ajouter à ce canal.} other {n'ont pas été notifiés par cette mention car ils ne sont pas dans le canal. Veuillez contacter un administrateur pour les ajouter à ce canal.}}}",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {n'a pas été notifié(e) par cette mention car il/elle n'est pas dans le canal. Veuillez contacter un administrateur pour l'ajouter à ce canal privé.} other {n'ont pas été notifiés par cette mention car ils ne sont pas dans le canal. Veuillez contacter un administrateur pour les ajouter à ce canal privé.}}}"
 }

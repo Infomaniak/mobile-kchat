@@ -894,6 +894,8 @@
   "plus_menu.create_new_channel.title": "Create New Channel",
   "plus_menu.invite_people_to_team.title": "Invite people to the team",
   "plus_menu.open_direct_message.title": "Open a Direct Message",
+  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {did not get notified by this mention because they are not in the channel. Please contact an administrator to add them to the channel.} other {did not get notified by this mention because they are not in the channel. Please contact an administrator to add them to the channel.}}",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {did not get notified by this mention because they are not in the channel. Please contact an administrator to add them to this private channel.} other {did not get notified by this mention because they are not in the channel. Please contact an administrator to add them to this private channel.}}",
   "post_body.check_for_out_of_channel_groups_mentions_choice.message": "or",
   "post_body.check_for_out_of_channel_groups_mentions_notify.message": "{count, plural, one {notify him} other {notify them}}",
   "post_body.check_for_out_of_channel_groups_mentions.message": "did not get notified by this mention because they are not in the channel. They are also not a member of the groups linked to this channel.",
