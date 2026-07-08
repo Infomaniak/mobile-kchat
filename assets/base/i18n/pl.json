@@ -1553,5 +1553,5 @@
   "send_feedback.files.too_many": "Możesz załączyć maksymalnie 5 plików.",
   "send_feedback.files.too_large": "Jeden lub więcej plików przekracza limit 32 MB.",
   "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {nie został powiadomiony o tej wzmiance, ponieważ nie jest w kanale. Skontaktuj się z administratorem, aby dodać go do tego kanału.} other {nie zostali powiadomieni o tej wzmiance, ponieważ nie są w kanale. Skontaktuj się z administratorem, aby dodać ich do tego kanału.}}",
-  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {nie został powiadomiony o tej wzmiance, ponieważ nie jest w kanale. Skontaktuj się z administratorem, aby dodać go do tego prywatnego kanału.} other {nie zostali powiadomieni o tej wzmiance, ponieważ nie są w kanale. Skontaktuj się z administratorem, aby dodać ich do tego prywatnego kanału."}"
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {nie został powiadomiony o tej wzmiance, ponieważ nie jest w kanale. Skontaktuj się z administratorem, aby dodać go do tego prywatnego kanału.} other {nie zostali powiadomieni o tej wzmiance, ponieważ nie są w kanale. Skontaktuj się z administratorem, aby dodać ich do tego prywatnego kanału.}}"
 }

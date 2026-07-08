@@ -1553,5 +1553,5 @@
   "send_feedback.files.too_many": "Du kan legge ved opptil 5 filer.",
   "send_feedback.files.too_large": "En eller flere filer overstiger grensen på 32 MB.",
   "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {ble ikke varslet om denne omtalen fordi han ikke er i kanalen. Kontakt en administrator for å legge ham til i denne kanalen.} other {ble ikke varslet om denne omtalen fordi de ikke er i kanalen. Kontakt en administrator for å legge dem til i denne kanalen.}}",
-  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {ble ikke varslet om denne omtalen fordi han ikke er i kanalen. Kontakt en administrator for å legge ham til i denne private kanalen.} other {ble ikke varslet om denne omtalen fordi de ikke er i kanalen. Kontakt en administrator for å legge dem til i denne private kanalen."}"
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {ble ikke varslet om denne omtalen fordi han ikke er i kanalen. Kontakt en administrator for å legge ham til i denne private kanalen.} other {ble ikke varslet om denne omtalen fordi de ikke er i kanalen. Kontakt en administrator for å legge dem til i denne private kanalen.}}"
 }

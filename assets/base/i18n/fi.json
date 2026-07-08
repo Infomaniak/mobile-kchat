@@ -1553,5 +1553,5 @@
   "send_feedback.files.too_many": "Voit liittää enintään 5 tiedostoa.",
   "send_feedback.files.too_large": "Yksi tai useampi tiedosto ylittää 32 MB:n rajan.",
   "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {ei saanut ilmoitusta tästä maininnasta, koska hän ei ole kanavalla. Ota yhteyttä ylläpitäjään lisätäksesi hänet tälle kanavalle.} other {eivät saaneet ilmoitusta tästä maininnasta, koska he eivät ole kanavalla. Ota yhteyttä ylläpitäjään lisätäksesi heidät tälle kanavalle.}}",
-  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {ei saanut ilmoitusta tästä maininnasta, koska hän ei ole kanavalla. Ota yhteyttä ylläpitäjään lisätäksesi hänet tälle yksityiselle kanavalle.} other {eivät saaneet ilmoitusta tästä maininnasta, koska he eivät ole kanavalla. Ota yhteyttä ylläpitäjään lisätäksesi heidät tälle yksityiselle kanavalle."}"
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {ei saanut ilmoitusta tästä maininnasta, koska hän ei ole kanavalla. Ota yhteyttä ylläpitäjään lisätäksesi hänet tälle yksityiselle kanavalle.} other {eivät saaneet ilmoitusta tästä maininnasta, koska he eivät ole kanavalla. Ota yhteyttä ylläpitäjään lisätäksesi heidät tälle yksityiselle kanavalle.}}"
 }
