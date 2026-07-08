@@ -109,8 +109,10 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
 
     const [mentionKeywords, setMentionKeywords] = useState(mentionProps.mentionKeywords);
     const [mentionKeywordsInput, setMentionKeywordsInput] = useState('');
-    const [isInputVisible, setIsInputVisible] = useState(mentionProps.mentionKeywords.length > 0);
-    const [isSwitchOn, setIsSwitchOn] = useState(mentionProps.mentionKeywords.length > 0);
+    const [isInputEnabled, setIsInputEnabled] = useState(mentionProps.mentionKeywords.length > 0);
+
+    const isSwitchOn = isInputEnabled;
+    const isInputVisible = isInputEnabled;
 
     const theme = useTheme();
     const styles = getStyleSheet(theme);
@@ -133,14 +135,10 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
         }
     }, [currentUser, mentionProps, notifyProps, serverUrl]);
 
-    const toggleInputVisibility = useCallback(() => {
-        setIsInputVisible((prev) => !prev);
-    }, []);
-
     const toggleSwitch = useCallback(() => {
-        setIsSwitchOn((prev) => {
-            const newSwitchState = !prev;
-            if (!newSwitchState) {
+        setIsInputEnabled((prev) => {
+            const newState = !prev;
+            if (!newState) {
                 setMentionKeywords([]);
                 const notify_props: UserNotifyProps = {
                     ...notifyProps,
@@ -148,10 +146,9 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
                 };
                 updateMe(serverUrl, {notify_props});
             }
-            return newSwitchState;
+            return newState;
         });
-        toggleInputVisibility();
-    }, [toggleInputVisibility, notifyProps, serverUrl]);
+    }, [notifyProps, serverUrl]);
 
     const handleMentionKeywordRemoved = useCallback((keyword: string) => {
         const newKeywords = mentionKeywords.filter((item) => item !== keyword);
@@ -167,10 +164,6 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
             return;
         }
         setMentionKeywordsInput('');
-        if (keyAppendedToList.length > 0) {
-            setIsSwitchOn(true);
-            setIsInputVisible(true);
-        }
         setMentionKeywords(keyAppendedToList);
         saveKeywords(keyAppendedToList);
     }, [saveKeywords]);
