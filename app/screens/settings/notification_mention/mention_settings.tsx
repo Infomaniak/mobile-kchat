@@ -80,21 +80,9 @@ export function getMentionProps(currentUser?: UserModel) {
     };
 }
 
-export type CanSaveSettings = {
-    mentionKeywords: string[];
-    mentionProps: ReturnType<typeof getMentionProps>;
-}
-
-export function canSaveSettings({mentionKeywords, mentionProps}: CanSaveSettings) {
-    const mentionKeywordsChanged = !areBothStringArraysEqual(mentionKeywords, mentionProps.mentionKeywords);
-    return mentionKeywordsChanged;
-}
-
 export function getUniqueKeywordsFromInput(inputText: string, keywords: string[]) {
-    // Replace all the spaces and commas
     const formattedInputText = inputText.trim().replace(/ |,/g, '');
 
-    // Check if the keyword is not empty and not already in the list
     if (formattedInputText.length > 0 && !keywords.includes(formattedInputText)) {
         return [...keywords, formattedInputText];
     }
@@ -104,12 +92,10 @@ export function getUniqueKeywordsFromInput(inputText: string, keywords: string[]
 
 const MentionSettings = ({componentId, currentUser}: Props) => {
     const serverUrl = useServerUrl();
-    const [mentionProps] = useState(() => getMentionProps(currentUser));
-    const notifyProps = mentionProps.notifyProps;
+    const mentionKeywords = getMentionProps(currentUser).mentionKeywords;
 
-    const [mentionKeywords, setMentionKeywords] = useState(mentionProps.mentionKeywords);
     const [mentionKeywordsInput, setMentionKeywordsInput] = useState('');
-    const [isInputEnabled, setIsInputEnabled] = useState(mentionProps.mentionKeywords.length > 0);
+    const [isInputEnabled, setIsInputEnabled] = useState(mentionKeywords.length > 0);
 
     const isSwitchOn = isInputEnabled;
     const isInputVisible = isInputEnabled;
@@ -122,50 +108,38 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
         if (!currentUser) {
             return;
         }
-        const canSave = canSaveSettings({
-            mentionKeywords: keywordsToSave,
-            mentionProps,
-        });
-        if (canSave) {
+        const mentionProps = getMentionProps(currentUser);
+        const mentionKeywordsChanged = !areBothStringArraysEqual(keywordsToSave, mentionProps.mentionKeywords);
+        if (mentionKeywordsChanged) {
             const notify_props: UserNotifyProps = {
-                ...notifyProps,
+                ...mentionProps.notifyProps,
                 mention_keys: keywordsToSave.join(','),
             };
             updateMe(serverUrl, {notify_props});
         }
-    }, [currentUser, mentionProps, notifyProps, serverUrl]);
+    }, [currentUser, serverUrl]);
 
     const toggleSwitch = useCallback(() => {
         setIsInputEnabled((prev) => {
             const newState = !prev;
             if (!newState) {
-                setMentionKeywords([]);
-                const notify_props: UserNotifyProps = {
-                    ...notifyProps,
-                    mention_keys: '',
-                };
-                updateMe(serverUrl, {notify_props});
+                saveKeywords([]);
             }
             return newState;
         });
-    }, [notifyProps, serverUrl]);
+    }, [saveKeywords]);
 
     const handleMentionKeywordRemoved = useCallback((keyword: string) => {
         const newKeywords = mentionKeywords.filter((item) => item !== keyword);
-        setMentionKeywords(newKeywords);
         saveKeywords(newKeywords);
     }, [mentionKeywords, saveKeywords]);
 
     const appendKeywordsAndClearInput = useCallback((key: string, list: string[]) => {
         const keyAppendedToList = getUniqueKeywordsFromInput(key, list);
-        if (keyAppendedToList.length === list.length) {
-            // No new keyword added (empty or duplicate)
-            setMentionKeywordsInput('');
-            return;
-        }
         setMentionKeywordsInput('');
-        setMentionKeywords(keyAppendedToList);
-        saveKeywords(keyAppendedToList);
+        if (keyAppendedToList.length > list.length) {
+            saveKeywords(keyAppendedToList);
+        }
     }, [saveKeywords]);
 
     /**
