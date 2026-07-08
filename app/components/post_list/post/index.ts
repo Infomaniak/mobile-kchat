@@ -11,7 +11,7 @@ import {DEFAULT_LOCALE} from '@i18n';
 import {queryFilesForPost} from '@queries/servers/file';
 import {observePost, observePostAuthor, queryPostsBetween, observeIsPostPriorityEnabled} from '@queries/servers/post';
 import {queryReactionsForPost} from '@queries/servers/reaction';
-import {observePermissionForPost} from '@queries/servers/role';
+import {observeCanManageChannelMembers, observePermissionForPost} from '@queries/servers/role';
 import {observeThreadById} from '@queries/servers/thread';
 import {observeCurrentUser} from '@queries/servers/user';
 import {areConsecutivePosts, isPostEphemeral} from '@utils/post';
@@ -111,7 +111,9 @@ const withPost = withObservables(
         const canDelete = observePermissionForPost(database, post, currentUser, isOwner ? Permissions.DELETE_POST : Permissions.DELETE_OTHERS_POSTS, false);
         const isEphemeral = of$(isPostEphemeral(post));
 
-        if ((post.props?.add_channel_member || post.props?.ask_add_channel_member) && isPostEphemeral(post) && currentUser) {
+        if (post.props?.add_channel_member && isPostEphemeral(post) && currentUser) {
+            isPostAddChannelMember = observeCanManageChannelMembers(database, post.channelId, currentUser);
+        } else if (post.props?.ask_add_channel_member && isPostEphemeral(post) && currentUser) {
             isPostAddChannelMember = of$(true);
         }
 

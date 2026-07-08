@@ -1050,6 +1050,6 @@
   "send_feedback.files.max_size": "Dimensione max file: 32 MB",
   "send_feedback.files.too_many": "Puoi allegare fino a 5 file.",
   "send_feedback.files.too_large": "Uno o più file superano il limite di 32 MB.",
-  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {non è stato notificato da questa menzione perché non è nel canale. Contatta un amministratore per aggiungerlo a questo canale.} other {non sono stati notificati da questa menzione perché non sono nel canale. Contatta un amministratore per aggiungerli a questo canale.}}}",
-  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {non è stato notificato da questa menzione perché non è nel canale. Contatta un amministratore per aggiungerlo a questo canale privato.} other {non sono stati notificati da questa menzione perché non sono nel canale. Contatta un amministratore per aggiungerli a questo canale privato.}}}"
+  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {non è stato notificato da questa menzione perché non è nel canale. Contatta un amministratore per aggiungerlo a questo canale.} other {non sono stati notificati da questa menzione perché non sono nel canale. Contatta un amministratore per aggiungerli a questo canale.}}",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {non è stato notificato da questa menzione perché non è nel canale. Contatta un amministratore per aggiungerlo a questo canale privato.} other {non sono stati notificati da questa menzione perché non sono nel canale. Contatta un amministratore per aggiungerli a questo canale privato."}"
 }

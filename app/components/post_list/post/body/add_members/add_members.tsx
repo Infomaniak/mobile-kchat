@@ -319,7 +319,12 @@ const ChannelMemberMention = ({channelType, currentUser, location, post, theme}:
             return null;
         }
 
-        const groupsMessageDescriptor = askMode ? definedMessages.askPrivate : definedMessages.outOfGroupsMessage;
+        let groupsMessageDescriptor;
+        if (askMode) {
+            groupsMessageDescriptor = channelType === General.OPEN_CHANNEL ? definedMessages.askPublic : definedMessages.askPrivate;
+        } else {
+            groupsMessageDescriptor = definedMessages.outOfGroupsMessage;
+        }
 
         return (
             <Text style={styles.message}>
