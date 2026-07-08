@@ -183,15 +183,13 @@ export const useKeyboardAnimation = (
 
             // Always treat as transitioning if we might receive more events (even with progress: 1)
             // Only exception: if height is 0 (keyboard closing)
-            const shouldTreatAsTransitioning = e.height > 0 && (e.progress < 1 || wasAlreadyOpen);
-
             keyboardTranslateY.value = adjustedHeight;
 
             // Update keyboard state flags
             // NEVER mark as fully open in onStart - always wait for onEnd to confirm
             isKeyboardFullyClosed.value = e.height === 0;
             isKeyboardFullyOpen.value = false; // Always false in onStart - onEnd will set it correctly
-            isKeyboardInTransition.value = e.height > 0 && shouldTreatAsTransitioning;
+            isKeyboardInTransition.value = e.height > 0; // Always true when opening, onEnd will set to false
 
             // When keyboard closes (height: 0), preserve isKeyboardClosing flag if it was true
             // This prevents onMove events from processing stale closing animation values
@@ -499,6 +497,14 @@ export const useKeyboardAnimation = (
    */
     const onScroll = useAnimatedScrollHandler({
         onScroll: (e) => {
+            // CRITICAL FIX: Skip updating scrollPosition during keyboard transitions
+            // During keyboard open, contentInset changes before contentOffset.y is adjusted by scroll
+            // This causes scrollPosition to be incorrectly calculated as contentOffset.y + bottomInset
+            // Instead, scrollPosition is preserved by keyboard handlers and useKeyboardScrollAdjustment
+            if (isKeyboardInTransition.value || !isEnabled.value) {
+                return;
+            }
+
             const newScrollPosition = e.contentOffset.y + bottomInset.value;
 
             // Preserve scrollPosition when keyboard is closed and list resets to 0
