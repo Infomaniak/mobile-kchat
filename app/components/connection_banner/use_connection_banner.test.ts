@@ -44,6 +44,10 @@ describe('useConnectionBanner', () => {
         mockIntl = createMockIntl();
     });
 
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
     describe('initial session behavior', () => {
         it('should show disconnection banner immediately during initial session', async () => {
             const {result} = renderHook(() => useConnectionBanner({
@@ -114,7 +118,6 @@ describe('useConnectionBanner', () => {
             expect(result.current.visible).toBe(true);
             expect(result.current.bannerText).toBe('Unable to connect to network');
 
-            jest.useRealTimers();
         });
 
         it('should keep connecting banner visible while connecting', () => {
@@ -139,7 +142,6 @@ describe('useConnectionBanner', () => {
             expect(result.current.visible).toBe(true);
             expect(result.current.bannerText).toBe('Connecting...');
 
-            jest.useRealTimers();
         });
 
         it('should keep internet unreachable banner visible while unreachable', () => {
@@ -164,7 +166,6 @@ describe('useConnectionBanner', () => {
             expect(result.current.visible).toBe(true);
             expect(result.current.bannerText).toBe('The server is not reachable');
 
-            jest.useRealTimers();
         });
 
         it('should keep slow network banner visible while network is slow', () => {
@@ -189,7 +190,6 @@ describe('useConnectionBanner', () => {
             expect(result.current.visible).toBe(true);
             expect(result.current.bannerText).toBe('Limited network connection');
 
-            jest.useRealTimers();
         });
     });
 
@@ -273,7 +273,52 @@ describe('useConnectionBanner', () => {
             expect(result.current.visible).toBe(false);
             expect(result.current.isShowingConnectedBanner).toBe(false);
 
-            jest.useRealTimers();
+        });
+
+        it('should reset connected banner state when network drops during auto-close window', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
+
+            const {result, rerender} = renderHook(
+                (props) => useConnectionBanner(props),
+                {
+                    initialProps: {
+                        websocketState: 'not_connected' as WebsocketConnectedState,
+                        networkPerformanceState: 'normal' as NetworkPerformanceState,
+                        netInfo: createMockNetInfo(),
+                        appState: 'active',
+                        intl: mockIntl,
+                    },
+                },
+            );
+
+            // Reconnect -> shows 'Connection restored' with 2s auto-close
+            act(() => {
+                rerender({
+                    websocketState: 'connected' as WebsocketConnectedState,
+                    networkPerformanceState: 'normal' as NetworkPerformanceState,
+                    netInfo: createMockNetInfo(),
+                    appState: 'active',
+                    intl: mockIntl,
+                });
+            });
+
+            expect(result.current.isShowingConnectedBanner).toBe(true);
+
+            // Network drops during the 2s window
+            act(() => {
+                rerender({
+                    websocketState: 'not_connected' as WebsocketConnectedState,
+                    networkPerformanceState: 'normal' as NetworkPerformanceState,
+                    netInfo: createMockNetInfo(),
+                    appState: 'active',
+                    intl: mockIntl,
+                });
+            });
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Unable to connect to network');
+            expect(result.current.isShowingConnectedBanner).toBe(false);
+
         });
 
         it('should hide banner when problem is resolved', () => {
@@ -315,7 +360,6 @@ describe('useConnectionBanner', () => {
 
             expect(result.current.visible).toBe(false);
 
-            jest.useRealTimers();
         });
     });
 
