@@ -1549,7 +1549,8 @@
     "send_feedback.priority.immediate": "Øjeblikkelig",
     "send_feedback.type.bug": "Fejl",
     "send_feedback.type.feature": "Funktion",
-  "send_feedback.files.max_size": "Maks. filstørrelse: 32 MB",
-  "send_feedback.files.too_many": "Du kan vedhæfte op til 5 filer.",
-  "send_feedback.files.too_large": "En eller flere filer overstiger grænsen på 32 MB."
+    "send_feedback.files.max_size": "Maks. filstørrelse: 32 MB",
+    "send_feedback.files.too_many": "Du kan vedhæfte op til 5 filer.",
+    "send_feedback.files.too_large": "En eller flere filer overstiger grænsen på 32 MB.",
+    "notification_settings.keywords": "Nøgleord"
 }

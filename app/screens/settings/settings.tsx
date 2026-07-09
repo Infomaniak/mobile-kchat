@@ -112,11 +112,11 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
         goToScreen(screen, title);
     });
 
-    const goToNotificationSettingsPush = preventDoubleTap(() => {
-        const screen = Screens.SETTINGS_NOTIFICATION_PUSH;
+    const goToNotificationSettings = preventDoubleTap(() => {
+        const screen = Screens.SETTINGS_NOTIFICATION;
         const title = intl.formatMessage({
-            id: 'notification_settings.push_notification',
-            defaultMessage: 'Push Notifications',
+            id: 'mobile.notification_settings',
+            defaultMessage: 'Notifications',
         });
 
         gotoSettingsScreen(screen, title);
@@ -175,7 +175,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
         <SettingContainer testID='settings'>
             <View style={{flex: 1}}>
                 <SettingItem
-                    onPress={goToNotificationSettingsPush}
+                    onPress={goToNotificationSettings}
                     optionName='notification'
                     testID='settings.notifications.option'
                 />
