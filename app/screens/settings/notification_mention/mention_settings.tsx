@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {defineMessage, useIntl} from 'react-intl';
 import {Text, View} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -92,18 +92,18 @@ export function getUniqueKeywordsFromInput(inputText: string, keywords: string[]
 
 const MentionSettings = ({componentId, currentUser}: Props) => {
     const serverUrl = useServerUrl();
-    const mentionKeywords = getMentionProps(currentUser).mentionKeywords;
+    const mentionProps = useMemo(() => getMentionProps(currentUser), [currentUser]);
+    const mentionKeywords = mentionProps.mentionKeywords;
 
     const [mentionKeywordsInput, setMentionKeywordsInput] = useState('');
+    const [localKeywords, setLocalKeywords] = useState(mentionKeywords);
     const [isManuallyEnabled, setIsManuallyEnabled] = useState(false);
 
-    const isInputEnabled = mentionKeywords.length > 0 || isManuallyEnabled;
-
     useEffect(() => {
-        if (mentionKeywords.length > 0 && isManuallyEnabled) {
-            setIsManuallyEnabled(false);
-        }
-    }, [mentionKeywords.length, isManuallyEnabled]);
+        setLocalKeywords(mentionKeywords);
+    }, [mentionKeywords]);
+
+    const isInputEnabled = localKeywords.length > 0 || isManuallyEnabled;
 
     const isSwitchOn = isInputEnabled;
     const isInputVisible = isInputEnabled;
@@ -116,7 +116,6 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
         if (!currentUser) {
             return;
         }
-        const mentionProps = getMentionProps(currentUser);
         const mentionKeywordsChanged = !areBothStringArraysEqual(keywordsToSave, mentionProps.mentionKeywords);
         if (mentionKeywordsChanged) {
             const notify_props: UserNotifyProps = {
@@ -125,25 +124,29 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
             };
             updateMe(serverUrl, {notify_props});
         }
-    }, [currentUser, serverUrl]);
+    }, [currentUser, mentionProps, serverUrl]);
 
     const toggleSwitch = useCallback(() => {
         if (isInputEnabled) {
+            setLocalKeywords([]);
             saveKeywords([]);
+            setIsManuallyEnabled(false);
         } else {
             setIsManuallyEnabled(true);
         }
     }, [isInputEnabled, saveKeywords]);
 
     const handleMentionKeywordRemoved = useCallback((keyword: string) => {
-        const newKeywords = mentionKeywords.filter((item) => item !== keyword);
+        const newKeywords = localKeywords.filter((item) => item !== keyword);
+        setLocalKeywords(newKeywords);
         saveKeywords(newKeywords);
-    }, [mentionKeywords, saveKeywords]);
+    }, [localKeywords, saveKeywords]);
 
     const appendKeywordsAndClearInput = useCallback((key: string, list: string[]) => {
         const keyAppendedToList = getUniqueKeywordsFromInput(key, list);
         setMentionKeywordsInput('');
         if (keyAppendedToList.length > list.length) {
+            setLocalKeywords(keyAppendedToList);
             saveKeywords(keyAppendedToList);
         }
     }, [saveKeywords]);
@@ -153,19 +156,19 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
      */
     const handleMentionKeywordsInputChanged = useCallback((text: string) => {
         if (text.includes(COMMA_KEY)) {
-            appendKeywordsAndClearInput(text, mentionKeywords);
+            appendKeywordsAndClearInput(text, localKeywords);
         } else {
             setMentionKeywordsInput(text);
         }
-    }, [appendKeywordsAndClearInput, mentionKeywords]);
+    }, [appendKeywordsAndClearInput, localKeywords]);
 
     /**
      * Handler when the user presses the enter key on keyboard
      * Takes unsaved keywords from the input and adds them to the list
      */
     const handleMentionKeywordEntered = useCallback(() => {
-        appendKeywordsAndClearInput(mentionKeywordsInput, mentionKeywords);
-    }, [appendKeywordsAndClearInput, mentionKeywordsInput, mentionKeywords]);
+        appendKeywordsAndClearInput(mentionKeywordsInput, localKeywords);
+    }, [appendKeywordsAndClearInput, mentionKeywordsInput, localKeywords]);
 
     const handleBack = useCallback(() => {
         popTopScreen(componentId);
@@ -205,7 +208,7 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
                                 returnKeyType='done'
                                 testID='mention_notification_settings.keywords.input'
                                 theme={theme}
-                                chipsValues={mentionKeywords}
+                                chipsValues={localKeywords}
                                 textInputValue={mentionKeywordsInput}
                                 onTextInputSubmitted={handleMentionKeywordEntered}
                             />
