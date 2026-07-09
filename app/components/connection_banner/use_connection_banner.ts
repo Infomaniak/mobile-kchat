@@ -119,9 +119,6 @@ export const useConnectionBanner = ({
         if (appState !== 'active') {
             return;
         }
-        if (visible && closeTimeout.current) {
-            return;
-        }
 
         const priorities = () => {
             if (handleInternetUnreachableState()) {

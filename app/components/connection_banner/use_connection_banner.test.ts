@@ -92,7 +92,9 @@ describe('useConnectionBanner', () => {
     });
 
     describe('persistent banners', () => {
-        it('should keep disconnection banner visible while not connected', async () => {
+        it('should keep disconnection banner visible while not connected', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
+
             const {result} = renderHook(() => useConnectionBanner({
                 websocketState: 'not_connected' as WebsocketConnectedState,
                 networkPerformanceState: 'normal' as NetworkPerformanceState,
@@ -101,21 +103,23 @@ describe('useConnectionBanner', () => {
                 intl: mockIntl,
             }));
 
-            await waitFor(() => {
-                expect(result.current.visible).toBe(true);
-                expect(result.current.bannerText).toBe('Unable to connect to network');
-            });
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Unable to connect to network');
 
-            // Wait longer than auto-close timeout
-            await act(async () => {
-                await new Promise((resolve) => setTimeout(resolve, 3000));
+            // Advance past auto-close timeout
+            act(() => {
+                jest.advanceTimersByTime(3000);
             });
 
             expect(result.current.visible).toBe(true);
             expect(result.current.bannerText).toBe('Unable to connect to network');
+
+            jest.useRealTimers();
         });
 
-        it('should keep connecting banner visible while connecting', async () => {
+        it('should keep connecting banner visible while connecting', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
+
             const {result} = renderHook(() => useConnectionBanner({
                 websocketState: 'connecting' as WebsocketConnectedState,
                 networkPerformanceState: 'normal' as NetworkPerformanceState,
@@ -124,21 +128,23 @@ describe('useConnectionBanner', () => {
                 intl: mockIntl,
             }));
 
-            await waitFor(() => {
-                expect(result.current.visible).toBe(true);
-                expect(result.current.bannerText).toBe('Connecting...');
-            });
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Connecting...');
 
-            // Wait longer than auto-close timeout
-            await act(async () => {
-                await new Promise((resolve) => setTimeout(resolve, 3000));
+            // Advance past auto-close timeout
+            act(() => {
+                jest.advanceTimersByTime(3000);
             });
 
             expect(result.current.visible).toBe(true);
             expect(result.current.bannerText).toBe('Connecting...');
+
+            jest.useRealTimers();
         });
 
-        it('should keep internet unreachable banner visible while unreachable', async () => {
+        it('should keep internet unreachable banner visible while unreachable', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
+
             const {result} = renderHook(() => useConnectionBanner({
                 websocketState: 'connected' as WebsocketConnectedState,
                 networkPerformanceState: 'normal' as NetworkPerformanceState,
@@ -147,21 +153,23 @@ describe('useConnectionBanner', () => {
                 intl: mockIntl,
             }));
 
-            await waitFor(() => {
-                expect(result.current.visible).toBe(true);
-                expect(result.current.bannerText).toBe('The server is not reachable');
-            });
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('The server is not reachable');
 
-            // Wait longer than auto-close timeout
-            await act(async () => {
-                await new Promise((resolve) => setTimeout(resolve, 3000));
+            // Advance past auto-close timeout
+            act(() => {
+                jest.advanceTimersByTime(3000);
             });
 
             expect(result.current.visible).toBe(true);
             expect(result.current.bannerText).toBe('The server is not reachable');
+
+            jest.useRealTimers();
         });
 
-        it('should keep slow network banner visible while network is slow', async () => {
+        it('should keep slow network banner visible while network is slow', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
+
             const {result} = renderHook(() => useConnectionBanner({
                 websocketState: 'connected' as WebsocketConnectedState,
                 networkPerformanceState: 'slow' as NetworkPerformanceState,
@@ -170,18 +178,18 @@ describe('useConnectionBanner', () => {
                 intl: mockIntl,
             }));
 
-            await waitFor(() => {
-                expect(result.current.visible).toBe(true);
-                expect(result.current.bannerText).toBe('Limited network connection');
-            });
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Limited network connection');
 
-            // Wait longer than auto-close timeout
-            await act(async () => {
-                await new Promise((resolve) => setTimeout(resolve, 3000));
+            // Advance past auto-close timeout
+            act(() => {
+                jest.advanceTimersByTime(3000);
             });
 
             expect(result.current.visible).toBe(true);
             expect(result.current.bannerText).toBe('Limited network connection');
+
+            jest.useRealTimers();
         });
     });
 
@@ -296,6 +304,12 @@ describe('useConnectionBanner', () => {
                     appState: 'active',
                     intl: mockIntl,
                 });
+            });
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Connection restored');
+
+            act(() => {
                 jest.advanceTimersByTime(2100);
             });
 
