@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {defineMessage, useIntl} from 'react-intl';
 import {Text, View} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -95,7 +95,15 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
     const mentionKeywords = getMentionProps(currentUser).mentionKeywords;
 
     const [mentionKeywordsInput, setMentionKeywordsInput] = useState('');
-    const [isInputEnabled, setIsInputEnabled] = useState(mentionKeywords.length > 0);
+    const [isManuallyEnabled, setIsManuallyEnabled] = useState(false);
+
+    const isInputEnabled = mentionKeywords.length > 0 || isManuallyEnabled;
+
+    useEffect(() => {
+        if (mentionKeywords.length > 0 && isManuallyEnabled) {
+            setIsManuallyEnabled(false);
+        }
+    }, [mentionKeywords.length, isManuallyEnabled]);
 
     const isSwitchOn = isInputEnabled;
     const isInputVisible = isInputEnabled;
@@ -120,14 +128,12 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
     }, [currentUser, serverUrl]);
 
     const toggleSwitch = useCallback(() => {
-        setIsInputEnabled((prev) => {
-            const newState = !prev;
-            if (!newState) {
-                saveKeywords([]);
-            }
-            return newState;
-        });
-    }, [saveKeywords]);
+        if (isInputEnabled) {
+            saveKeywords([]);
+        } else {
+            setIsManuallyEnabled(true);
+        }
+    }, [isInputEnabled, saveKeywords]);
 
     const handleMentionKeywordRemoved = useCallback((keyword: string) => {
         const newKeywords = mentionKeywords.filter((item) => item !== keyword);

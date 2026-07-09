@@ -10,6 +10,7 @@ import SettingItem from '@components/settings/item';
 import {General, Screens} from '@constants';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useAppState} from '@hooks/device';
+import useBackNavigation from '@hooks/navigate_back';
 import useNotificationProps from '@hooks/notification_props';
 import {popTopScreen} from '@screens/navigation';
 import {gotoSettingsScreen} from '@screens/settings/config';
@@ -104,6 +105,7 @@ const Notifications = ({
     }, [componentId]);
 
     useAndroidHardwareBackHandler(componentId, close);
+    useBackNavigation(close);
 
     return (
         <SettingContainer testID='notification_settings'>
