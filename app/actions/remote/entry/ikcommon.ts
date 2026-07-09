@@ -70,12 +70,19 @@ export const syncMultiTeam = async (accessToken: string) => {
     let teamServers: TeamServer[] = [];
     let serverCreationResults: Array<string | null> = [];
     const existingServerUrls: Array<string | null> = [];
+    let serverCredentials: Array<{serverUrl: string}> = [];
+
+    try {
+        serverCredentials = await getAllServerCredentials();
+    } catch (e) {
+        logError('[syncMultiTeam] failed to get server credentials', e);
+        return [];
+    }
 
     try {
         const client = await NetworkManager.createGlobalClient(accessToken);
         teamServers = await client.getMultiTeams();
 
-        const serverCredentials = await getAllServerCredentials();
         const serverCreationPromises: Array<Promise<string | null>> = [];
 
         for (const teamServer of teamServers) {
@@ -114,11 +121,12 @@ export const syncMultiTeam = async (accessToken: string) => {
         // ALWAYS clean up obsolete servers when we have the team list
         if (teamServers.length > 0) {
             try {
-                const serverCredentials = await getAllServerCredentials();
-                for (const serverCredential of serverCredentials) {
-                    if (!teamServers.some((element) => element.url === serverCredential.serverUrl)) {
-                        DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: serverCredential.serverUrl, removeServer: true});
-                    }
+                const teamServerUrls = new Set(teamServers.map((s) => s.url));
+                const serversToRemove = serverCredentials.filter(
+                    (cred) => !teamServerUrls.has(cred.serverUrl),
+                );
+                for (const serverCredential of serversToRemove) {
+                    DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: serverCredential.serverUrl, removeServer: true});
                 }
             } catch (cleanupError) {
                 logError('[syncMultiTeam] cleanup failed', cleanupError);
