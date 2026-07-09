@@ -121,22 +121,24 @@ export const useConnectionBanner = ({
         }
 
         const priorities = () => {
-            if (isShowingConnectedBanner) {
-                setIsShowingConnectedBanner(false);
-            }
             if (handleInternetUnreachableState()) {
+                setIsShowingConnectedBanner(false);
                 return;
             }
             if (handleDisconnectedState()) {
+                setIsShowingConnectedBanner(false);
                 return;
             }
             if (handleSlowNetworkState()) {
+                setIsShowingConnectedBanner(false);
                 return;
             }
             if (handleConnectedState()) {
                 return;
             }
-            handleConnectingState();
+            if (handleConnectingState()) {
+                setIsShowingConnectedBanner(false);
+            }
         };
 
         priorities();
