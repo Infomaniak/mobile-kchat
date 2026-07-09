@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {defineMessage, useIntl} from 'react-intl';
 import {Text, View} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -98,9 +98,13 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
     const [mentionKeywordsInput, setMentionKeywordsInput] = useState('');
     const [localKeywords, setLocalKeywords] = useState(mentionKeywords);
     const [isManuallyEnabled, setIsManuallyEnabled] = useState(false);
+    const lastSentKeywordsRef = useRef(mentionKeywords);
 
     useEffect(() => {
-        setLocalKeywords(mentionKeywords);
+        if (!areBothStringArraysEqual(mentionKeywords, lastSentKeywordsRef.current)) {
+            setLocalKeywords(mentionKeywords);
+            lastSentKeywordsRef.current = mentionKeywords;
+        }
     }, [mentionKeywords]);
 
     const isInputEnabled = localKeywords.length > 0 || isManuallyEnabled;
@@ -116,8 +120,9 @@ const MentionSettings = ({componentId, currentUser}: Props) => {
         if (!currentUser) {
             return;
         }
-        const mentionKeywordsChanged = !areBothStringArraysEqual(keywordsToSave, mentionProps.mentionKeywords);
+        const mentionKeywordsChanged = !areBothStringArraysEqual(keywordsToSave, lastSentKeywordsRef.current);
         if (mentionKeywordsChanged) {
+            lastSentKeywordsRef.current = keywordsToSave;
             const notify_props: UserNotifyProps = {
                 ...mentionProps.notifyProps,
                 mention_keys: keywordsToSave.join(','),
