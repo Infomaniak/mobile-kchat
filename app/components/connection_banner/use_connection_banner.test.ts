@@ -44,8 +44,12 @@ describe('useConnectionBanner', () => {
         mockIntl = createMockIntl();
     });
 
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
     describe('initial session behavior', () => {
-        it('should not show disconnection banner during initial session', async () => {
+        it('should show disconnection banner immediately during initial session', async () => {
             const {result} = renderHook(() => useConnectionBanner({
                 websocketState: 'not_connected' as WebsocketConnectedState,
                 networkPerformanceState: 'normal' as NetworkPerformanceState,
@@ -55,12 +59,12 @@ describe('useConnectionBanner', () => {
             }));
 
             await waitFor(() => {
-                expect(result.current.visible).toBe(false);
-                expect(result.current.bannerText).toBe('');
+                expect(result.current.visible).toBe(true);
+                expect(result.current.bannerText).toBe('Unable to connect to network');
             });
         });
 
-        it('should not show connecting banner during initial session', async () => {
+        it('should show connecting banner immediately during initial session', async () => {
             const {result} = renderHook(() => useConnectionBanner({
                 websocketState: 'connecting' as WebsocketConnectedState,
                 networkPerformanceState: 'normal' as NetworkPerformanceState,
@@ -70,7 +74,8 @@ describe('useConnectionBanner', () => {
             }));
 
             await waitFor(() => {
-                expect(result.current.visible).toBe(false);
+                expect(result.current.visible).toBe(true);
+                expect(result.current.bannerText).toBe('Connecting...');
             });
         });
 
@@ -90,110 +95,105 @@ describe('useConnectionBanner', () => {
         });
     });
 
-    describe('after initial session (post-first-connection)', () => {
-        it('should show disconnection banner after initial connection is established', async () => {
-            const {result, rerender} = renderHook(
-                ({websocketState, ...rest}) => useConnectionBanner({
-                    websocketState,
-                    ...rest,
-                }),
-                {
-                    initialProps: {
-                        websocketState: 'connecting' as WebsocketConnectedState,
-                        networkPerformanceState: 'normal' as NetworkPerformanceState,
-                        netInfo: createMockNetInfo(),
-                        appState: 'active',
-                        intl: mockIntl,
-                    },
-                },
-            );
+    describe('persistent banners', () => {
+        it('should keep disconnection banner visible while not connected', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
 
-            // First, establish connection (ends initial session)
+            const {result} = renderHook(() => useConnectionBanner({
+                websocketState: 'not_connected' as WebsocketConnectedState,
+                networkPerformanceState: 'normal' as NetworkPerformanceState,
+                netInfo: createMockNetInfo(),
+                appState: 'active',
+                intl: mockIntl,
+            }));
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Unable to connect to network');
+
+            // Advance past auto-close timeout
             act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
+                jest.advanceTimersByTime(3000);
             });
 
-            // Should not show "Connection restored" on initial connection
-            await waitFor(() => {
-                expect(result.current.visible).toBe(false);
-            });
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Unable to connect to network');
 
-            // Now disconnect - should show banner
-            act(() => {
-                rerender({
-                    websocketState: 'not_connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-            });
-
-            await waitFor(() => {
-                expect(result.current.visible).toBe(true);
-                expect(result.current.bannerText).toBe('Unable to connect to network');
-            });
         });
 
-        it('should show connecting banner after initial session', async () => {
-            const {result, rerender} = renderHook(
-                (props) => useConnectionBanner(props),
-                {
-                    initialProps: {
-                        websocketState: 'not_connected' as WebsocketConnectedState,
-                        networkPerformanceState: 'normal' as NetworkPerformanceState,
-                        netInfo: createMockNetInfo(),
-                        appState: 'active',
-                        intl: mockIntl,
-                    },
-                },
-            );
+        it('should keep connecting banner visible while connecting', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
 
-            // First connect to end initial session
+            const {result} = renderHook(() => useConnectionBanner({
+                websocketState: 'connecting' as WebsocketConnectedState,
+                networkPerformanceState: 'normal' as NetworkPerformanceState,
+                netInfo: createMockNetInfo(),
+                appState: 'active',
+                intl: mockIntl,
+            }));
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Connecting...');
+
+            // Advance past auto-close timeout
             act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
+                jest.advanceTimersByTime(3000);
             });
 
-            // Disconnect
-            act(() => {
-                rerender({
-                    websocketState: 'not_connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-            });
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Connecting...');
 
-            // Now go to connecting state - should show banner
-            act(() => {
-                rerender({
-                    websocketState: 'connecting' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-            });
-
-            await waitFor(() => {
-                expect(result.current.visible).toBe(true);
-                expect(result.current.bannerText).toBe('Connecting...');
-            });
         });
 
+        it('should keep internet unreachable banner visible while unreachable', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
+
+            const {result} = renderHook(() => useConnectionBanner({
+                websocketState: 'connected' as WebsocketConnectedState,
+                networkPerformanceState: 'normal' as NetworkPerformanceState,
+                netInfo: createMockNetInfo(false),
+                appState: 'active',
+                intl: mockIntl,
+            }));
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('The server is not reachable');
+
+            // Advance past auto-close timeout
+            act(() => {
+                jest.advanceTimersByTime(3000);
+            });
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('The server is not reachable');
+
+        });
+
+        it('should keep slow network banner visible while network is slow', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
+
+            const {result} = renderHook(() => useConnectionBanner({
+                websocketState: 'connected' as WebsocketConnectedState,
+                networkPerformanceState: 'slow' as NetworkPerformanceState,
+                netInfo: createMockNetInfo(),
+                appState: 'active',
+                intl: mockIntl,
+            }));
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Limited network connection');
+
+            // Advance past auto-close timeout
+            act(() => {
+                jest.advanceTimersByTime(3000);
+            });
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Limited network connection');
+
+        });
+    });
+
+    describe('state transitions', () => {
         it('should show connection restored banner on reconnection', async () => {
             const {result, rerender} = renderHook(
                 (props) => useConnectionBanner(props),
@@ -207,32 +207,6 @@ describe('useConnectionBanner', () => {
                     },
                 },
             );
-
-            // First connect to end initial session
-            act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-            });
-
-            await waitFor(() => {
-                expect(result.current.visible).toBe(false);
-            });
-
-            // Disconnect
-            act(() => {
-                rerender({
-                    websocketState: 'not_connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-            });
 
             await waitFor(() => {
                 expect(result.current.visible).toBe(true);
@@ -256,383 +230,9 @@ describe('useConnectionBanner', () => {
                 expect(result.current.isShowingConnectedBanner).toBe(true);
             });
         });
-    });
-
-    describe('slow network state', () => {
-        it('should show slow network banner when network is slow', async () => {
-            const {result} = renderHook(() => useConnectionBanner({
-                websocketState: 'connected' as WebsocketConnectedState,
-                networkPerformanceState: 'slow' as NetworkPerformanceState,
-                netInfo: createMockNetInfo(),
-                appState: 'active',
-                intl: mockIntl,
-            }));
-
-            await waitFor(() => {
-                expect(result.current.visible).toBe(true);
-                expect(result.current.bannerText).toBe('Limited network connection');
-            });
-        });
-
-        it('should only show slow network banner once', () => {
-            jest.useFakeTimers();
-
-            const {result, rerender} = renderHook(
-                ({networkPerformanceState, ...rest}) => useConnectionBanner({
-                    networkPerformanceState,
-                    ...rest,
-                }),
-                {
-                    initialProps: {
-                        websocketState: 'connected' as WebsocketConnectedState,
-                        networkPerformanceState: 'slow' as NetworkPerformanceState,
-                        netInfo: createMockNetInfo(),
-                        appState: 'active',
-                        intl: mockIntl,
-                    },
-                },
-            );
-
-            expect(result.current.visible).toBe(true);
-
-            // Wait for auto-close
-            act(() => {
-                jest.advanceTimersByTime(2100);
-            });
-
-            expect(result.current.visible).toBe(false);
-
-            // Go to normal then back to slow
-            act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-            });
-
-            act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'slow' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-            });
-
-            // Should not show again
-            expect(result.current.visible).toBe(false);
-
-            jest.useRealTimers();
-        });
-    });
-
-    describe('banner priorities', () => {
-        it('should prioritize internet unreachable over disconnected', async () => {
-            const {result} = renderHook(() => useConnectionBanner({
-                websocketState: 'not_connected' as WebsocketConnectedState,
-                networkPerformanceState: 'normal' as NetworkPerformanceState,
-                netInfo: createMockNetInfo(false),
-                appState: 'active',
-                intl: mockIntl,
-            }));
-
-            await waitFor(() => {
-                expect(result.current.visible).toBe(true);
-                expect(result.current.bannerText).toBe('The server is not reachable');
-            });
-        });
-
-        it('should not re-show banner the moment it closes (effect omits visible from deps)', () => {
-            jest.useFakeTimers();
-
-            const {result} = renderHook(() => useConnectionBanner({
-                websocketState: 'connected' as WebsocketConnectedState,
-                networkPerformanceState: 'normal' as NetworkPerformanceState,
-                netInfo: createMockNetInfo(false),
-                appState: 'active',
-                intl: mockIntl,
-            }));
-
-            expect(result.current.visible).toBe(true);
-            expect(result.current.bannerText).toBe('The server is not reachable');
-
-            // Auto-close: the hook sets a 2s timeout when showing internet unreachable. Advance
-            // time so closeCallback runs. visible becomes false; netInfo is still unreachable.
-            act(() => {
-                jest.advanceTimersByTime(2100);
-            });
-
-            expect(result.current.visible).toBe(false);
-
-            jest.useRealTimers();
-        });
-
-        it('should not show other banners when one is already visible with timeout', async () => {
-            const {result, rerender} = renderHook(
-                (props) => useConnectionBanner(props),
-                {
-                    initialProps: {
-                        websocketState: 'connected' as WebsocketConnectedState,
-                        networkPerformanceState: 'normal' as NetworkPerformanceState,
-                        netInfo: createMockNetInfo(false),
-                        appState: 'active',
-                        intl: mockIntl,
-                    },
-                },
-            );
-
-            await waitFor(() => {
-                expect(result.current.visible).toBe(true);
-                expect(result.current.bannerText).toBe('The server is not reachable');
-            });
-
-            // Try to trigger slow network while banner is visible
-            act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'slow' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(false),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-            });
-
-            // Should still show internet unreachable
-            await waitFor(() => {
-                expect(result.current.bannerText).toBe('The server is not reachable');
-            });
-        });
-    });
-
-    describe('app state changes', () => {
-        it('should hide banner when app goes to background', async () => {
-            const {result, rerender} = renderHook(
-                ({appState, ...rest}) => useConnectionBanner({
-                    appState,
-                    ...rest,
-                }),
-                {
-                    initialProps: {
-                        websocketState: 'connected' as WebsocketConnectedState,
-                        networkPerformanceState: 'normal' as NetworkPerformanceState,
-                        netInfo: createMockNetInfo(false),
-                        appState: 'active',
-                        intl: mockIntl,
-                    },
-                },
-            );
-
-            await waitFor(() => {
-                expect(result.current.visible).toBe(true);
-            });
-
-            // Go to background
-            act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(false),
-                    appState: 'background',
-                    intl: mockIntl,
-                });
-            });
-
-            await waitFor(() => {
-                expect(result.current.visible).toBe(false);
-                expect(result.current.bannerText).toBe('');
-            });
-        });
-
-        it('should reset slow banner flag when app goes to background', async () => {
-            const {result, rerender} = renderHook(
-                ({appState, networkPerformanceState, ...rest}) => useConnectionBanner({
-                    appState,
-                    networkPerformanceState,
-                    ...rest,
-                }),
-                {
-                    initialProps: {
-                        websocketState: 'connected' as WebsocketConnectedState,
-                        networkPerformanceState: 'slow' as NetworkPerformanceState,
-                        netInfo: createMockNetInfo(),
-                        appState: 'active',
-                        intl: mockIntl,
-                    },
-                },
-            );
-
-            await waitFor(() => {
-                expect(result.current.visible).toBe(true);
-            });
-
-            // Go to background
-            act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'slow' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'background',
-                    intl: mockIntl,
-                });
-            });
-
-            // Come back to active
-            act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'slow' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-            });
-
-            // Should show slow banner again (flag was reset)
-            await waitFor(() => {
-                expect(result.current.visible).toBe(true);
-                expect(result.current.bannerText).toBe('Limited network connection');
-            });
-        });
-
-        it('should not show connection restored banner when returning from background if websocket stayed connected', async () => {
-            const {result, rerender} = renderHook(
-                ({appState, websocketState, ...rest}) => useConnectionBanner({
-                    appState,
-                    websocketState,
-                    ...rest,
-                }),
-                {
-                    initialProps: {
-                        websocketState: 'not_connected' as WebsocketConnectedState,
-                        networkPerformanceState: 'normal' as NetworkPerformanceState,
-                        netInfo: createMockNetInfo(),
-                        appState: 'active',
-                        intl: mockIntl,
-                    },
-                },
-            );
-
-            act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-            });
-
-            await waitFor(() => {
-                expect(result.current.visible).toBe(false);
-            });
-
-            act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'background',
-                    intl: mockIntl,
-                });
-            });
-
-            act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-            });
-
-            await waitFor(() => {
-                expect(result.current.visible).toBe(false);
-                expect(result.current.bannerText).toBe('');
-                expect(result.current.isShowingConnectedBanner).toBe(false);
-            });
-        });
-    });
-
-    describe('auto-close behavior', () => {
-        it('should auto-close internet unreachable banner after 2 seconds', () => {
-            jest.useFakeTimers();
-
-            const {result, rerender} = renderHook(
-                (props) => useConnectionBanner(props),
-                {
-                    initialProps: {
-                        websocketState: 'connected' as WebsocketConnectedState,
-                        networkPerformanceState: 'normal' as NetworkPerformanceState,
-                        netInfo: createMockNetInfo(false),
-                        appState: 'active',
-                        intl: mockIntl,
-                    },
-                },
-            );
-
-            expect(result.current.visible).toBe(true);
-            expect(result.current.bannerText).toBe('The server is not reachable');
-
-            // Internet becomes reachable again, then wait for timeout
-            act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(true),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-                jest.advanceTimersByTime(2100);
-            });
-
-            expect(result.current.visible).toBe(false);
-
-            jest.useRealTimers();
-        });
-
-        it('should auto-close slow network banner after 2 seconds', () => {
-            jest.useFakeTimers();
-
-            const {result, rerender} = renderHook(
-                (props) => useConnectionBanner(props),
-                {
-                    initialProps: {
-                        websocketState: 'connected' as WebsocketConnectedState,
-                        networkPerformanceState: 'slow' as NetworkPerformanceState,
-                        netInfo: createMockNetInfo(),
-                        appState: 'active',
-                        intl: mockIntl,
-                    },
-                },
-            );
-
-            expect(result.current.visible).toBe(true);
-            expect(result.current.bannerText).toBe('Limited network connection');
-
-            // Network becomes normal, then wait for timeout
-            act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-                jest.advanceTimersByTime(2100);
-            });
-
-            expect(result.current.visible).toBe(false);
-
-            jest.useRealTimers();
-        });
 
         it('should auto-close connection restored banner after 2 seconds', () => {
-            jest.useFakeTimers();
+            jest.useFakeTimers({doNotFake: ['nextTick']});
 
             const {result, rerender} = renderHook(
                 (props) => useConnectionBanner(props),
@@ -646,30 +246,6 @@ describe('useConnectionBanner', () => {
                     },
                 },
             );
-
-            // First connect to end initial session
-            act(() => {
-                rerender({
-                    websocketState: 'connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-            });
-
-            expect(result.current.visible).toBe(false);
-
-            // Disconnect
-            act(() => {
-                rerender({
-                    websocketState: 'not_connected' as WebsocketConnectedState,
-                    networkPerformanceState: 'normal' as NetworkPerformanceState,
-                    netInfo: createMockNetInfo(),
-                    appState: 'active',
-                    intl: mockIntl,
-                });
-            });
 
             expect(result.current.visible).toBe(true);
             expect(result.current.bannerText).toBe('Unable to connect to network');
@@ -697,7 +273,297 @@ describe('useConnectionBanner', () => {
             expect(result.current.visible).toBe(false);
             expect(result.current.isShowingConnectedBanner).toBe(false);
 
-            jest.useRealTimers();
+        });
+
+        it('should reset connected banner state when network drops during auto-close window', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
+
+            const {result, rerender} = renderHook(
+                (props) => useConnectionBanner(props),
+                {
+                    initialProps: {
+                        websocketState: 'not_connected' as WebsocketConnectedState,
+                        networkPerformanceState: 'normal' as NetworkPerformanceState,
+                        netInfo: createMockNetInfo(),
+                        appState: 'active',
+                        intl: mockIntl,
+                    },
+                },
+            );
+
+            // Reconnect -> shows 'Connection restored' with 2s auto-close
+            act(() => {
+                rerender({
+                    websocketState: 'connected' as WebsocketConnectedState,
+                    networkPerformanceState: 'normal' as NetworkPerformanceState,
+                    netInfo: createMockNetInfo(),
+                    appState: 'active',
+                    intl: mockIntl,
+                });
+            });
+
+            expect(result.current.isShowingConnectedBanner).toBe(true);
+
+            // Network drops during the 2s window
+            act(() => {
+                rerender({
+                    websocketState: 'not_connected' as WebsocketConnectedState,
+                    networkPerformanceState: 'normal' as NetworkPerformanceState,
+                    netInfo: createMockNetInfo(),
+                    appState: 'active',
+                    intl: mockIntl,
+                });
+            });
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Unable to connect to network');
+            expect(result.current.isShowingConnectedBanner).toBe(false);
+
+        });
+
+        it('should hide banner when problem is resolved', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
+
+            const {result, rerender} = renderHook(
+                (props) => useConnectionBanner(props),
+                {
+                    initialProps: {
+                        websocketState: 'not_connected' as WebsocketConnectedState,
+                        networkPerformanceState: 'normal' as NetworkPerformanceState,
+                        netInfo: createMockNetInfo(),
+                        appState: 'active',
+                        intl: mockIntl,
+                    },
+                },
+            );
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Unable to connect to network');
+
+            // Internet comes back and websocket connects
+            act(() => {
+                rerender({
+                    websocketState: 'connected' as WebsocketConnectedState,
+                    networkPerformanceState: 'normal' as NetworkPerformanceState,
+                    netInfo: createMockNetInfo(true),
+                    appState: 'active',
+                    intl: mockIntl,
+                });
+            });
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Connection restored');
+
+            act(() => {
+                jest.advanceTimersByTime(2100);
+            });
+
+            expect(result.current.visible).toBe(false);
+
+        });
+    });
+
+    describe('banner priorities', () => {
+        it('should prioritize internet unreachable over disconnected', async () => {
+            const {result} = renderHook(() => useConnectionBanner({
+                websocketState: 'not_connected' as WebsocketConnectedState,
+                networkPerformanceState: 'normal' as NetworkPerformanceState,
+                netInfo: createMockNetInfo(false),
+                appState: 'active',
+                intl: mockIntl,
+            }));
+
+            await waitFor(() => {
+                expect(result.current.visible).toBe(true);
+                expect(result.current.bannerText).toBe('The server is not reachable');
+            });
+        });
+
+        it('should show slow network banner when network is slow', async () => {
+            const {result} = renderHook(() => useConnectionBanner({
+                websocketState: 'connected' as WebsocketConnectedState,
+                networkPerformanceState: 'slow' as NetworkPerformanceState,
+                netInfo: createMockNetInfo(),
+                appState: 'active',
+                intl: mockIntl,
+            }));
+
+            await waitFor(() => {
+                expect(result.current.visible).toBe(true);
+                expect(result.current.bannerText).toBe('Limited network connection');
+            });
+        });
+
+        it('should prioritize internet unreachable over slow network', async () => {
+            const {result} = renderHook(() => useConnectionBanner({
+                websocketState: 'connected' as WebsocketConnectedState,
+                networkPerformanceState: 'slow' as NetworkPerformanceState,
+                netInfo: createMockNetInfo(false),
+                appState: 'active',
+                intl: mockIntl,
+            }));
+
+            await waitFor(() => {
+                expect(result.current.visible).toBe(true);
+                expect(result.current.bannerText).toBe('The server is not reachable');
+            });
+        });
+
+        it('should prioritize disconnected over slow network', async () => {
+            const {result} = renderHook(() => useConnectionBanner({
+                websocketState: 'not_connected' as WebsocketConnectedState,
+                networkPerformanceState: 'slow' as NetworkPerformanceState,
+                netInfo: createMockNetInfo(),
+                appState: 'active',
+                intl: mockIntl,
+            }));
+
+            await waitFor(() => {
+                expect(result.current.visible).toBe(true);
+                expect(result.current.bannerText).toBe('Unable to connect to network');
+            });
+        });
+    });
+
+    describe('app state changes', () => {
+        it('should hide banner when app goes to background', async () => {
+            const {result, rerender} = renderHook(
+                ({appState, ...rest}) => useConnectionBanner({
+                    appState,
+                    ...rest,
+                }),
+                {
+                    initialProps: {
+                        websocketState: 'not_connected' as WebsocketConnectedState,
+                        networkPerformanceState: 'normal' as NetworkPerformanceState,
+                        netInfo: createMockNetInfo(false),
+                        appState: 'active',
+                        intl: mockIntl,
+                    },
+                },
+            );
+
+            await waitFor(() => {
+                expect(result.current.visible).toBe(true);
+            });
+
+            // Go to background
+            act(() => {
+                rerender({
+                    websocketState: 'not_connected' as WebsocketConnectedState,
+                    networkPerformanceState: 'normal' as NetworkPerformanceState,
+                    netInfo: createMockNetInfo(false),
+                    appState: 'background',
+                    intl: mockIntl,
+                });
+            });
+
+            await waitFor(() => {
+                expect(result.current.visible).toBe(false);
+                expect(result.current.bannerText).toBe('');
+            });
+        });
+
+        it('should show slow banner again when returning from background to active', async () => {
+            const {result, rerender} = renderHook(
+                ({appState, ...rest}) => useConnectionBanner({
+                    appState,
+                    ...rest,
+                }),
+                {
+                    initialProps: {
+                        websocketState: 'connected' as WebsocketConnectedState,
+                        networkPerformanceState: 'slow' as NetworkPerformanceState,
+                        netInfo: createMockNetInfo(),
+                        appState: 'active',
+                        intl: mockIntl,
+                    },
+                },
+            );
+
+            await waitFor(() => {
+                expect(result.current.visible).toBe(true);
+                expect(result.current.bannerText).toBe('Limited network connection');
+            });
+
+            // Go to background
+            act(() => {
+                rerender({
+                    websocketState: 'connected' as WebsocketConnectedState,
+                    networkPerformanceState: 'slow' as NetworkPerformanceState,
+                    netInfo: createMockNetInfo(),
+                    appState: 'background',
+                    intl: mockIntl,
+                });
+            });
+
+            expect(result.current.visible).toBe(false);
+
+            // Come back to active - should show slow banner again
+            act(() => {
+                rerender({
+                    websocketState: 'connected' as WebsocketConnectedState,
+                    networkPerformanceState: 'slow' as NetworkPerformanceState,
+                    netInfo: createMockNetInfo(),
+                    appState: 'active',
+                    intl: mockIntl,
+                });
+            });
+
+            await waitFor(() => {
+                expect(result.current.visible).toBe(true);
+                expect(result.current.bannerText).toBe('Limited network connection');
+            });
+        });
+
+        it('should not show connection restored banner when returning from background if websocket stayed connected', async () => {
+            const {result, rerender} = renderHook(
+                ({appState, ...rest}) => useConnectionBanner({
+                    appState,
+                    ...rest,
+                }),
+                {
+                    initialProps: {
+                        websocketState: 'connected' as WebsocketConnectedState,
+                        networkPerformanceState: 'normal' as NetworkPerformanceState,
+                        netInfo: createMockNetInfo(),
+                        appState: 'active',
+                        intl: mockIntl,
+                    },
+                },
+            );
+
+            await waitFor(() => {
+                expect(result.current.visible).toBe(false);
+            });
+
+            // Go to background
+            act(() => {
+                rerender({
+                    websocketState: 'connected' as WebsocketConnectedState,
+                    networkPerformanceState: 'normal' as NetworkPerformanceState,
+                    netInfo: createMockNetInfo(),
+                    appState: 'background',
+                    intl: mockIntl,
+                });
+            });
+
+            // Come back to active
+            act(() => {
+                rerender({
+                    websocketState: 'connected' as WebsocketConnectedState,
+                    networkPerformanceState: 'normal' as NetworkPerformanceState,
+                    netInfo: createMockNetInfo(),
+                    appState: 'active',
+                    intl: mockIntl,
+                });
+            });
+
+            await waitFor(() => {
+                expect(result.current.visible).toBe(false);
+                expect(result.current.bannerText).toBe('');
+                expect(result.current.isShowingConnectedBanner).toBe(false);
+            });
         });
     });
 });
