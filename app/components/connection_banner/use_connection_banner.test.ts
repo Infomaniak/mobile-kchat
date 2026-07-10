@@ -9,6 +9,10 @@ import type {NetworkPerformanceState} from '@managers/network_performance_manage
 import type {NetInfoState} from '@react-native-community/netinfo';
 import type {IntlShape} from 'react-intl';
 
+jest.mock('@utils/sentry', () => ({
+    captureMessage: jest.fn(),
+}));
+
 const createMockIntl = (): IntlShape => ({
     formatMessage: jest.fn(({defaultMessage}) => defaultMessage || ''),
     formatDate: jest.fn(),
