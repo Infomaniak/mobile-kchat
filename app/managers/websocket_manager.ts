@@ -18,7 +18,7 @@ import {getCurrentUserId} from '@queries/servers/system';
 import {queryAllUsers} from '@queries/servers/user';
 import {toMilliseconds} from '@utils/datetime';
 import {isMainActivity} from '@utils/helpers';
-import {logError, logInfo, logWarning} from '@utils/log';
+import {logError, logInfo, logWarning, logDebug} from '@utils/log';
 import {captureMessage} from '@utils/sentry';
 
 export const WAIT_TO_CLOSE = toMilliseconds({seconds: 15});
@@ -109,7 +109,10 @@ class WebsocketManagerSingleton {
     };
 
     public closeAll = () => {
-        for (const url of Object.keys(this.clients)) {
+        const clientUrls = Object.keys(this.clients);
+        captureMessage(`[WebsocketManager] closeAll called for ${clientUrls.length} clients: ${clientUrls.join(', ') || 'none'}`);
+        logDebug('[WebsocketManager] closeAll', {clientCount: clientUrls.length, clients: clientUrls});
+        for (const url of clientUrls) {
             const client = this.clients[url];
             client.close(true);
             client.invalidate();
@@ -119,7 +122,10 @@ class WebsocketManagerSingleton {
 
     public openAll = async (groupLabel?: BaseRequestGroupLabel) => {
         let queued = 0;
-        for await (const clientUrl of Object.keys(this.clients)) {
+        const clientUrls = Object.keys(this.clients);
+        captureMessage(`[WebsocketManager] openAll called for ${clientUrls.length} clients`);
+        logDebug('[WebsocketManager] openAll', {clientCount: clientUrls.length, clients: clientUrls, groupLabel});
+        for await (const clientUrl of clientUrls) {
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
             if (clientUrl === activeServerUrl || this.firstConnectionSynced[clientUrl]) {
                 this.initializeClient(clientUrl, groupLabel);
@@ -171,9 +177,11 @@ class WebsocketManagerSingleton {
         }
 
         const hasSynced = this.firstConnectionSynced[serverUrl];
+        captureMessage(`[WebsocketManager] initializeClient for ${serverUrl}, hasSynced=${hasSynced}, clientExists=${Boolean(client)}`);
         logInfo('[WebsocketManager] initializeClient: client not connected for', serverUrl, 'initializing, hasSynced:', hasSynced);
         client.initialize({}, !hasSynced);
         if (!hasSynced) {
+            captureMessage(`[WebsocketManager] calling handleFirstConnect for ${serverUrl}`);
             const error = await handleFirstConnect(serverUrl, groupLabel);
             if (error) {
                 // This will try to reconnect and try to sync again
@@ -189,11 +197,15 @@ class WebsocketManagerSingleton {
     };
 
     private onFirstConnect = (serverUrl: string) => {
+        captureMessage(`[WebsocketManager] onFirstConnect for ${serverUrl}`);
+        logDebug('[WebsocketManager] onFirstConnect', {serverUrl});
         this.startPeriodicStatusUpdates(serverUrl);
         this.getConnectedSubject(serverUrl).next('connected');
     };
 
     private onReconnect = async (serverUrl: string) => {
+        captureMessage(`[WebsocketManager] onReconnect for ${serverUrl}`);
+        logDebug('[WebsocketManager] onReconnect', {serverUrl});
         this.startPeriodicStatusUpdates(serverUrl);
         this.getConnectedSubject(serverUrl).next('connected');
 
@@ -205,6 +217,8 @@ class WebsocketManagerSingleton {
     };
 
     private onReliableReconnect = async (serverUrl: string) => {
+        captureMessage(`[WebsocketManager] onReliableReconnect for ${serverUrl}`);
+        logDebug('[WebsocketManager] onReliableReconnect', {serverUrl});
         this.getConnectedSubject(serverUrl).next('connected');
     };
 
@@ -245,6 +259,8 @@ class WebsocketManagerSingleton {
 
     private onAppStateChange = (appState: AppStateStatus) => {
         const isMain = isMainActivity();
+        captureMessage(`[WebsocketManager] onAppStateChange: ${appState}, isMain=${isMain}`);
+        logDebug('[WebsocketManager] onAppStateChange', {appState, isMain});
         if (!isMain) {
             return;
         }
@@ -259,7 +275,16 @@ class WebsocketManagerSingleton {
     };
 
     private handleStateChange = (currentIsConnected: boolean, currentNetType: NetInfoStateType, currentIsActive: boolean) => {
+        logDebug('[WebsocketManager] handleStateChange', {
+            currentIsConnected,
+            currentNetType,
+            currentIsActive,
+            previousActiveState: this.previousActiveState,
+            previousNetConnected: this.netConnected,
+            previousNetType: this.netType,
+        });
         if (currentIsActive === this.previousActiveState && currentIsConnected === this.netConnected && currentNetType === this.netType) {
+            captureMessage('[WebsocketManager] handleStateChange SKIPPED (no state change)');
             return;
         }
 

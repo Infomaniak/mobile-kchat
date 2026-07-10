@@ -66,21 +66,26 @@ function captureSlowReconnectBatch(serverUrl: string, groupLabel: BaseRequestGro
 }
 
 export async function handleFirstConnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel) {
+    captureMessage(`[handleFirstConnect] called for ${serverUrl}, groupLabel=${groupLabel || 'undefined'}`);
     setExtraSessionProps(serverUrl, groupLabel);
     autoUpdateTimezone(serverUrl, groupLabel);
     return doReconnect(serverUrl, groupLabel);
 }
 
 export async function handleReconnect(serverUrl: string, groupLabel: BaseRequestGroupLabel = 'WebSocket Reconnect') {
+    captureMessage(`[handleReconnect] called for ${serverUrl}, groupLabel=${groupLabel}`);
     return doReconnect(serverUrl, groupLabel);
 }
 
 async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel) {
+    captureMessage(`[doReconnect] START for ${serverUrl}, groupLabel=${groupLabel || 'undefined'}`);
+    logDebug('[doReconnect] START', {serverUrl, groupLabel});
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
         const err = new Error(`[doReconnect] cannot find server database for ${serverUrl}`);
         logError(err);
         captureException(err);
+        captureMessage(`[doReconnect] FAILED: no operator for ${serverUrl}`);
         return err;
     }
 
@@ -89,6 +94,7 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
         const err = new Error('[doReconnect] cannot find app database');
         logError(err);
         captureException(err);
+        captureMessage(`[doReconnect] FAILED: no app database for ${serverUrl}`);
         return err;
     }
 
@@ -101,7 +107,10 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
 
     const currentChannelId = await getCurrentChannelId(database);
 
+    logDebug('[doReconnect] DB state', {lastFullSync, currentTeamId, currentChannelId, now});
+
     logInfo('[doReconnect] setting team loading for', serverUrl);
+    captureMessage(`[doReconnect] calling setTeamLoading(true) for ${serverUrl}`);
     setTeamLoading(serverUrl, true);
 
     try {
@@ -110,9 +119,12 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
             const err = entryData.error instanceof Error ? entryData.error : new Error(String(entryData.error));
             logError('[doReconnect] entry error for', serverUrl, err);
             captureException(err);
+            captureMessage(`[doReconnect] entry FAILED for ${serverUrl}: ${err.message}`);
             return err;
         }
         const {models, initialTeamId, initialChannelId, prefData, teamData, chData, meData, gmConverted} = entryData;
+        captureMessage(`[doReconnect] entry SUCCESS for ${serverUrl}, models=${models?.length || 0}`);
+        logDebug('[doReconnect] entry SUCCESS', {serverUrl, modelCount: models?.length || 0});
 
         await handleEntryAfterLoadNavigation(serverUrl, teamData.memberships || [], chData?.memberships || [], currentTeamId || '', currentChannelId || '', initialTeamId, initialChannelId, gmConverted);
 
@@ -143,8 +155,10 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
     } catch (error) {
         logError('[doReconnect] unexpected error for', serverUrl, error);
         captureException(error);
+        captureMessage(`[doReconnect] UNEXPECTED ERROR for ${serverUrl}: ${error instanceof Error ? error.message : String(error)}`);
         return error instanceof Error ? error : new Error(String(error));
     } finally {
+        captureMessage(`[doReconnect] END for ${serverUrl}, setting team loading false`);
         setTeamLoading(serverUrl, false);
     }
 
