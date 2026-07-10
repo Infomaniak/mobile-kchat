@@ -260,6 +260,11 @@
   "combined_system_message.removed_from_team.one_you": "Fuiste **eliminado del equipo**.",
   "combined_system_message.removed_from_team.two": "{firstUser} y {secondUser} fueron **eliminados del equipo**.",
   "combined_system_message.you": "Tu",
+  "connection_banner.connected": "Conexión restablecida",
+  "connection_banner.connecting": "Conectando...",
+  "connection_banner.not_connected": "No se puede conectar a la red",
+  "connection_banner.not_reachable": "El servidor no es accesible",
+  "connection_banner.slow": "Conexión de red limitada",
   "create_direct_message.title": "Crear Mensaje Directo",
   "create_post.deactivated": "Estás viendo un canal archivado con un usuario desactivado.",
   "create_post.thread_reply": "Responder a este hilo...",
@@ -758,6 +763,8 @@
   "plus_menu.open_direct_message.title": "Abrir un Mensaje Directo",
   "post_body.check_for_out_of_channel_groups_mentions_choice.message": "o",
   "post_body.check_for_out_of_channel_groups_mentions_notify.message": "{count, plural, one {notificarlo} other {notificarles}}",
+  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {no fue notificado por esta mención porque no está en el canal. Por favor, contacte a un administrador para agregarlo a este canal.} other {no fueron notificados por esta mención porque no están en el canal. Por favor, contacte a un administrador para agregarlos a este canal.}}",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {no fue notificado por esta mención porque no está en el canal. Por favor, contacte a un administrador para agregarlo a este canal privado.} other {no fueron notificados por esta mención porque no están en el canal. Por favor, contacte a un administrador para agregarlos a este canal privado.}}",
   "post_body.check_for_out_of_channel_groups_mentions.message": "no fueron notificados por esta mención porque no se encuentra en este canal. No pueden ser agregados al canal porque no son miembros de los grupos enlazados. Para agregarlos a este canal, deben ser agregados a alguno de los grupos enlazados.",
   "post_body.check_for_out_of_channel_mentions.link.and": " y ",
   "post_body.check_for_out_of_channel_mentions.link.private": "agregarlos a este canal privado",
@@ -1032,6 +1039,5 @@
   "send_feedback.files.max_size": "Tamaño máximo de archivo: 32 MB",
   "send_feedback.files.too_many": "Puedes adjuntar hasta 5 archivos.",
   "send_feedback.files.too_large": "Uno o más archivos superan el límite de 32 MB.",
-  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {no fue notificado por esta mención porque no está en el canal. Por favor, contacte a un administrador para agregarlo a este canal.} other {no fueron notificados por esta mención porque no están en el canal. Por favor, contacte a un administrador para agregarlos a este canal.}}",
-  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {no fue notificado por esta mención porque no está en el canal. Por favor, contacte a un administrador para agregarlo a este canal privado.} other {no fueron notificados por esta mención porque no están en el canal. Por favor, contacte a un administrador para agregarlos a este canal privado.}}"
+  "notification_settings.keywords": "Palabras clave"
 }

@@ -1156,6 +1156,8 @@
   "plus_menu.open_direct_message.title": "Direktnachricht öffnen",
   "post_body.check_for_out_of_channel_groups_mentions_choice.message": "oder",
   "post_body.check_for_out_of_channel_groups_mentions_notify.message": "{count, plural, one {benachrichtigen Sie ihn} other {benachrichtigen Sie sie}}",
+  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {wurde nicht über diese Erwähnung benachrichtigt, da er nicht im Kanal ist. Bitte wenden Sie sich an einen Administrator, um ihn zu diesem Kanal hinzuzufügen.} other {wurden nicht über diese Erwähnung benachrichtigt, da sie nicht im Kanal sind. Bitte wenden Sie sich an einen Administrator, um sie zu diesem Kanal hinzuzufügen.}}",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {wurde nicht über diese Erwähnung benachrichtigt, da er nicht im Kanal ist. Bitte wenden Sie sich an einen Administrator, um ihn zu diesem privaten Kanal hinzuzufügen.} other {wurden nicht über diese Erwähnung benachrichtigt, da sie nicht im Kanal sind. Bitte wenden Sie sich an einen Administrator, um sie zu diesem privaten Kanal hinzuzufügen.}}",
   "post_body.check_for_out_of_channel_groups_mentions.message": "wurde durch diese Erwähnung nicht benachrichtigt, da sie sich nicht im Kanal befinden. Sie sind auch keine Mitglieder der mit diesem Kanal verknüpften Gruppen.",
   "post_body.check_for_out_of_channel_mentions.link.and": " und ",
   "post_body.check_for_out_of_channel_mentions.link.private": "sie zu diesem privaten Kanal hinzufügen",
@@ -1538,6 +1540,5 @@
   "send_feedback.files.max_size": "Max. Dateigröße: 32 MB",
   "send_feedback.files.too_many": "Sie können bis zu 5 Dateien anhängen.",
   "send_feedback.files.too_large": "Eine oder mehrere Dateien überschreiten das Limit von 32 MB.",
-  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {wurde nicht über diese Erwähnung benachrichtigt, da er nicht im Kanal ist. Bitte wenden Sie sich an einen Administrator, um ihn zu diesem Kanal hinzuzufügen.} other {wurden nicht über diese Erwähnung benachrichtigt, da sie nicht im Kanal sind. Bitte wenden Sie sich an einen Administrator, um sie zu diesem Kanal hinzuzufügen.}}",
-  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {wurde nicht über diese Erwähnung benachrichtigt, da er nicht im Kanal ist. Bitte wenden Sie sich an einen Administrator, um ihn zu diesem privaten Kanal hinzuzufügen.} other {wurden nicht über diese Erwähnung benachrichtigt, da sie nicht im Kanal sind. Bitte wenden Sie sich an einen Administrator, um sie zu diesem privaten Kanal hinzuzufügen.}}"
+  "notification_settings.keywords": "Schlüsselwörter"
 }

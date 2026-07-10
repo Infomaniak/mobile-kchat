@@ -263,6 +263,11 @@
   "combined_system_message.removed_from_team.one_you": "Sei stato **rimosso dalla squadra**.",
   "combined_system_message.removed_from_team.two": "{firstUser} e {secondUser} sono stati **rimossi dalla squadra**.",
   "combined_system_message.you": "Tu",
+  "connection_banner.connected": "Connessione ripristinata",
+  "connection_banner.connecting": "Connessione in corso...",
+  "connection_banner.not_connected": "Impossibile connettersi alla rete",
+  "connection_banner.not_reachable": "Il server non è raggiungibile",
+  "connection_banner.slow": "Connessione di rete limitata",
   "create_direct_message.title": "Creare un messaggio diretto",
   "create_post.deactivated": "Stai visualizzando un canale archiviato con un utente disattivato.",
   "create_post.thread_reply": "Rispondi a questo thread...",
@@ -762,6 +767,8 @@
   "plus_menu.open_direct_message.title": "Aprire un messaggio diretto",
   "post_body.check_for_out_of_channel_groups_mentions_choice.message": "o",
   "post_body.check_for_out_of_channel_groups_mentions_notify.message": "{count, plural, one {notificarlo} other {notificarli}}",
+  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {non è stato notificato da questa menzione perché non è nel canale. Contatta un amministratore per aggiungerlo a questo canale.} other {non sono stati notificati da questa menzione perché non sono nel canale. Contatta un amministratore per aggiungerli a questo canale.}}",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {non è stato notificato da questa menzione perché non è nel canale. Contatta un amministratore per aggiungerlo a questo canale privato.} other {non sono stati notificati da questa menzione perché non sono nel canale. Contatta un amministratore per aggiungerli a questo canale privato.}}",
   "post_body.check_for_out_of_channel_groups_mentions.message": "non saranno notificati di questa citazione perché non appartengono a questo canale. Non sono nemmeno membri di un gruppo collegato a questo canale.",
   "post_body.check_for_out_of_channel_mentions.link.and": " e ",
   "post_body.check_for_out_of_channel_mentions.link.private": "aggiungerli a questo canale privato",
@@ -1050,6 +1057,5 @@
   "send_feedback.files.max_size": "Dimensione max file: 32 MB",
   "send_feedback.files.too_many": "Puoi allegare fino a 5 file.",
   "send_feedback.files.too_large": "Uno o più file superano il limite di 32 MB.",
-  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {non è stato notificato da questa menzione perché non è nel canale. Contatta un amministratore per aggiungerlo a questo canale.} other {non sono stati notificati da questa menzione perché non sono nel canale. Contatta un amministratore per aggiungerli a questo canale.}}",
-  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {non è stato notificato da questa menzione perché non è nel canale. Contatta un amministratore per aggiungerlo a questo canale privato.} other {non sono stati notificati da questa menzione perché non sono nel canale. Contatta un amministratore per aggiungerli a questo canale privato.}}"
+  "notification_settings.keywords": "Parole chiave"
 }
