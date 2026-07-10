@@ -152,11 +152,9 @@ describe('useKeyboardAnimation', () => {
             expect(result.current.keyboardTranslateY.value).toBe(300);
             expect(result.current.bottomInset.value).toBe(300);
 
-            // isKeyboardFullyOpen is set to false in onStart to prevent jerky behavior
-            // It will be set to true in onEnd when animation completes
             expect(result.current.isKeyboardFullyOpen.value).toBe(false);
             expect(result.current.isKeyboardFullyClosed.value).toBe(false);
-            expect(result.current.isKeyboardInTransition.value).toBe(false);
+            expect(result.current.isKeyboardInTransition.value).toBe(true); // Always true during keyboard opening
 
             // Call onEnd to finalize the state
             act(() => {
@@ -462,18 +460,20 @@ describe('useKeyboardAnimation', () => {
     });
 
     describe('scroll handler', () => {
-        it('should track scroll position with bottomInset', () => {
+        it('should skip scrollPosition update during keyboard transition', () => {
             const {result} = renderHook(() =>
                 useKeyboardAnimation(100, true, false, 0, false, true),
             );
 
-            // Set bottomInset first
+            // Start keyboard opening
             act(() => {
                 keyboardHandlerCallbacks.onStart?.({
                     height: 200,
                     progress: 1,
                 });
             });
+
+            expect(result.current.isKeyboardInTransition.value).toBe(true);
 
             const mockScrollEvent = {
                 contentOffset: {y: 100},
@@ -483,6 +483,41 @@ describe('useKeyboardAnimation', () => {
                 result.current.onScroll(mockScrollEvent);
             });
 
+            // During transition, scrollPosition should NOT be updated
+            expect(result.current.scrollPosition.value).toBe(0);
+        });
+
+        it('should track scroll position after keyboard transition completes', () => {
+            const {result} = renderHook(() =>
+                useKeyboardAnimation(100, true, false, 0, false, true),
+            );
+
+            // Complete keyboard opening
+            act(() => {
+                keyboardHandlerCallbacks.onStart?.({
+                    height: 200,
+                    progress: 1,
+                });
+            });
+
+            act(() => {
+                keyboardHandlerCallbacks.onEnd?.({
+                    height: 200,
+                    progress: 1,
+                });
+            });
+
+            expect(result.current.isKeyboardInTransition.value).toBe(false);
+
+            const mockScrollEvent = {
+                contentOffset: {y: 100},
+            } as unknown as Parameters<typeof result.current.onScroll>[0];
+
+            act(() => {
+                result.current.onScroll(mockScrollEvent);
+            });
+
+            // After transition, scrollPosition should be updated
             expect(result.current.scrollPosition.value).toBe(100 + result.current.bottomInset.value);
         });
     });

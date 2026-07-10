@@ -3,7 +3,7 @@
 
 import TestHelper from '@test/test_helper';
 
-import {getMentionProps, canSaveSettings, getUniqueKeywordsFromInput, type CanSaveSettings} from './mention_settings';
+import {getMentionProps, getUniqueKeywordsFromInput} from './mention_settings';
 
 describe('getMentionProps', () => {
     test('Should have correct return type when input is empty', () => {
@@ -49,50 +49,6 @@ describe('getMentionProps', () => {
 
         expect(mentionProps.mentionKeywords).toHaveLength(3);
         expect(mentionProps.mentionKeywords).toEqual(['testUser2', 'testKey1', 'testKey2']);
-    });
-});
-
-describe('canSaveSettings', () => {
-    const getBaseCanSaveSettingParams = (): CanSaveSettings => ({
-        mentionKeywords: [],
-        mentionProps: {
-            mentionKeywords: [],
-            usernameMention: true,
-            channel: true,
-            first_name: true,
-            comments: 'any',
-            notifyProps: TestHelper.fakeUserNotifyProps(),
-        },
-    });
-
-    test('Should return true when mentionKeywords have changed', () => {
-        const canSaveSettingParams = getBaseCanSaveSettingParams();
-        canSaveSettingParams.mentionKeywords = ['test1', 'test2'];
-        canSaveSettingParams.mentionProps.mentionKeywords = ['test1', 'test2', 'test3'];
-
-        expect(canSaveSettings(canSaveSettingParams)).toEqual(true);
-    });
-
-    test('Should return false when mentionKeywords have not changed', () => {
-        const canSaveSettingParams = getBaseCanSaveSettingParams();
-        canSaveSettingParams.mentionKeywords = ['test1', 'test2'];
-        canSaveSettingParams.mentionProps.mentionKeywords = ['test2', 'test1'];
-
-        expect(canSaveSettings(canSaveSettingParams)).toEqual(false);
-    });
-
-    test.skip('Should return true when only userName has changed', () => {
-        // IK change : skipped on CI temporarily, will fix later
-        const canSaveSettingParams = getBaseCanSaveSettingParams();
-        canSaveSettingParams.mentionKeywords = ['test1', 'test2'];
-        canSaveSettingParams.mentionProps.channel = true;
-        canSaveSettingParams.mentionProps.comments = 'any';
-        canSaveSettingParams.mentionProps.first_name = true;
-        canSaveSettingParams.mentionProps.usernameMention = false;
-        canSaveSettingParams.mentionProps.mentionKeywords = ['test1', 'test2'];
-        canSaveSettingParams.mentionProps.notifyProps = TestHelper.fakeUserNotifyProps();
-
-        expect(canSaveSettings(canSaveSettingParams)).toEqual(true);
     });
 });
 

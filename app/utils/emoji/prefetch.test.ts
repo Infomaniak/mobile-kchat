@@ -54,4 +54,14 @@ describe('prefetchCustomEmojiImages', () => {
         expect(logDebug).toHaveBeenCalledWith('Prefetching 2 custom emoji images');
         expect(ExpoImage.prefetch).toHaveBeenCalledWith(expectedResults, {cachePolicy: 'disk'});
     });
+
+    it('should fallback to plain urls on Android', () => {
+        Platform.OS = 'android';
+
+        prefetchCustomEmojiImages(mockClient, emojis);
+        const expectedUrls = ['url/emoji1', 'url/emoji2'];
+
+        expect(logDebug).toHaveBeenCalledWith('Prefetching 2 custom emoji images');
+        expect(ExpoImage.prefetch).toHaveBeenCalledWith(expectedUrls, {cachePolicy: 'disk'});
+    });
 });

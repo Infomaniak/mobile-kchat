@@ -40,10 +40,7 @@ export const useConnectionBanner = ({
     intl,
 }: UseConnectionBannerParams): UseConnectionBannerReturn => {
     const closeTimeout = useRef<NodeJS.Timeout | null>();
-    const openTimeout = useRef<NodeJS.Timeout | null>();
-    const initialAppSession = useRef(true);
     const previousWebsocketState = useRef<WebsocketConnectedState>(websocketState);
-    const hasShownSlowBanner = useRef(false);
 
     const [visible, setVisible] = useState(false);
     const [bannerText, setBannerText] = useState('');
@@ -56,19 +53,15 @@ export const useConnectionBanner = ({
 
     const openCallback = useCallback(() => {
         clearTimeoutRef(closeTimeout);
-        clearTimeoutRef(openTimeout);
         setVisible(true);
     }, []);
 
     const handleDisconnectedState = useCallback((): boolean => {
         if (websocketState === 'not_connected') {
             previousWebsocketState.current = 'not_connected';
-
-            if (!initialAppSession.current) {
-                setBannerText(intl.formatMessage({id: 'connection_banner.not_connected', defaultMessage: 'Unable to connect to network'}));
-                openCallback();
-                return true;
-            }
+            setBannerText(intl.formatMessage({id: 'connection_banner.not_connected', defaultMessage: 'Unable to connect to network'}));
+            openCallback();
+            return true;
         }
         return false;
     }, [websocketState, openCallback, intl]);
@@ -77,55 +70,41 @@ export const useConnectionBanner = ({
         if (netInfo.isInternetReachable === false) {
             setBannerText(intl.formatMessage({id: 'connection_banner.not_reachable', defaultMessage: 'The server is not reachable'}));
             openCallback();
-            closeTimeout.current = setTimeout(closeCallback, CLOSE_TIMEOUT_DURATION_MS);
             return true;
         }
         return false;
-    }, [netInfo.isInternetReachable, intl, openCallback, closeCallback]);
+    }, [netInfo.isInternetReachable, intl, openCallback]);
 
     const handleSlowNetworkState = useCallback((): boolean => {
-        if (networkPerformanceState === 'slow' && !hasShownSlowBanner.current) {
-            hasShownSlowBanner.current = true;
-
+        if (networkPerformanceState === 'slow') {
             setBannerText(intl.formatMessage({id: 'connection_banner.slow', defaultMessage: 'Limited network connection'}));
             openCallback();
-            closeTimeout.current = setTimeout(() => {
-                closeCallback();
-            }, CLOSE_TIMEOUT_DURATION_MS);
             return true;
         }
         return false;
-    }, [networkPerformanceState, intl, openCallback, closeCallback]);
+    }, [networkPerformanceState, intl, openCallback]);
 
     const handleConnectedState = useCallback((): boolean => {
         if (websocketState === 'connected' && previousWebsocketState.current !== 'connected') {
             previousWebsocketState.current = 'connected';
-            if (!initialAppSession.current && !isShowingConnectedBanner) {
-                setIsShowingConnectedBanner(true);
-                setBannerText(intl.formatMessage({id: 'connection_banner.connected', defaultMessage: 'Connection restored'}));
-                openCallback();
-                closeTimeout.current = setTimeout(() => {
-                    closeCallback();
-
-                    setIsShowingConnectedBanner(false);
-                }, CLOSE_TIMEOUT_DURATION_MS);
-                return true;
-            }
-
-            initialAppSession.current = false;
+            setIsShowingConnectedBanner(true);
+            setBannerText(intl.formatMessage({id: 'connection_banner.connected', defaultMessage: 'Connection restored'}));
+            openCallback();
+            closeTimeout.current = setTimeout(() => {
+                closeCallback();
+                setIsShowingConnectedBanner(false);
+            }, CLOSE_TIMEOUT_DURATION_MS);
             return true;
         }
         return false;
-    }, [websocketState, intl, openCallback, closeCallback, isShowingConnectedBanner]);
+    }, [websocketState, intl, openCallback, closeCallback]);
 
     const handleConnectingState = useCallback((): boolean => {
         if (websocketState === 'connecting') {
-            if (!initialAppSession.current) {
-                setBannerText(intl.formatMessage({id: 'connection_banner.connecting', defaultMessage: 'Connecting...'}));
-                openCallback();
-                return true;
-            }
+            setBannerText(intl.formatMessage({id: 'connection_banner.connecting', defaultMessage: 'Connecting...'}));
+            openCallback();
             previousWebsocketState.current = 'connecting';
+            return true;
         }
         return false;
     }, [websocketState, intl, openCallback]);
@@ -133,7 +112,6 @@ export const useConnectionBanner = ({
     useEffect(() => {
         return () => {
             clearTimeoutRef(closeTimeout);
-            clearTimeoutRef(openTimeout);
         };
     }, []);
 
@@ -141,24 +119,20 @@ export const useConnectionBanner = ({
         if (appState !== 'active') {
             return;
         }
-        if (visible && closeTimeout.current) {
-            return;
-        }
 
         const priorities = () => {
-            if (handleInternetUnreachableState()) {
+            const shouldHideBanner =
+                handleInternetUnreachableState() ||
+                handleDisconnectedState() ||
+                handleSlowNetworkState() ||
+                handleConnectingState();
+
+            if (shouldHideBanner) {
+                setIsShowingConnectedBanner(false);
                 return;
             }
-            if (handleDisconnectedState()) {
-                return;
-            }
-            if (handleSlowNetworkState()) {
-                return;
-            }
-            if (handleConnectedState()) {
-                return;
-            }
-            handleConnectingState();
+
+            handleConnectedState();
         };
 
         priorities();
@@ -179,9 +153,7 @@ export const useConnectionBanner = ({
         if (appState !== 'active') {
             setVisible(false);
             setBannerText('');
-            clearTimeoutRef(openTimeout);
             clearTimeoutRef(closeTimeout);
-            hasShownSlowBanner.current = false;
             setIsShowingConnectedBanner(false);
         }
     }, [appState]);
