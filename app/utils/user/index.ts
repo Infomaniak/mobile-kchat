@@ -23,6 +23,26 @@ const displayUsernameMessages = defineMessages({
     },
 });
 
+const AVATAR_COLORS = [
+    '#EC8932', // orange[400]
+    '#297A5A', // green[700]
+    '#15B7B7', // teal[600]
+    '#32A5EC', // cyan[400]
+    '#28427B', // indigo[400]
+    '#3F4350', // neutral[900]
+    '#6167BD', // purple[400]
+    '#DA6C6E', // red[300]
+];
+
+export function getAvatarColor(identifier: string): string {
+    let hash = 0;
+    for (let i = 0; i < identifier.length; i++) {
+        hash = identifier.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % AVATAR_COLORS.length;
+    return AVATAR_COLORS[index];
+}
+
 export function displayUsername(user?: UserProfile | UserModel | null, locale?: string, teammateDisplayNameSetting?: string, useFallbackUsername = true) {
     let name = useFallbackUsername ? getLocalizedMessage(locale || DEFAULT_LOCALE, displayUsernameMessages.someone.id, displayUsernameMessages.someone.defaultMessage) : '';
 
@@ -56,6 +76,33 @@ export function displayGroupMessageName(users: Array<UserProfile | UserModel>, l
     });
 
     return names.sort(sortUsernames).join(', ').trim();
+}
+
+export function getInitialsFromName(name: string): string {
+    const trimmed = name.trim();
+    if (!trimmed) {
+        return '';
+    }
+
+    const words = trimmed.split(/[\s'-]+/).filter((w) => w.length > 0);
+
+    if (words.length >= 2) {
+        return (words[0][0] + words[1][0]).toUpperCase();
+    }
+
+    const word = words[0];
+    if (word.length === 1) {
+        return word.toUpperCase();
+    }
+
+    return (word[0] + word[1]).toUpperCase();
+}
+
+export function extractDisplayName(user?: UserModel | UserProfile | null): string {
+    if (!user) {
+        return '';
+    }
+    return getFullName(user) || user.nickname || user.username || '';
 }
 
 export function getFullName(user: UserProfile | UserModel): string {

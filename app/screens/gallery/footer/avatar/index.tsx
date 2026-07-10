@@ -2,17 +2,10 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet} from 'react-native';
 
-import {buildAbsoluteUrl} from '@actions/remote/file';
-import {buildProfileImageUrlFromUser} from '@actions/remote/user';
-import CompassIcon from '@components/compass_icon';
-import ExpoImage from '@components/expo_image';
-import {useServerUrl} from '@context/server';
-import NetworkManager from '@managers/network_manager';
+import Avatar from '@components/avatar';
 import {urlSafeBase64Encode} from '@utils/security';
-import {changeOpacity} from '@utils/theme';
-import {getLastPictureUpdate} from '@utils/user';
 
 import type UserModel from '@typings/database/models/servers/user';
 
@@ -37,49 +30,23 @@ const styles = StyleSheet.create({
     },
 });
 
-const Avatar = ({
+const GalleryFooterAvatar = ({
     author,
     overrideIconUrl,
 }: Props) => {
-    const serverUrl = useServerUrl();
-
-    let uri = overrideIconUrl;
-    let id = 'avatar-override';
-    if (uri) {
-        id = `avatar-override-${urlSafeBase64Encode(uri)}`;
-    } else if (author) {
-        uri = buildProfileImageUrlFromUser(serverUrl, author);
-        id = `user-${author.id}-${getLastPictureUpdate(author)}`;
-    }
-
-    let picture;
-    if (uri) {
-        const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
-        const headers = {Authorization: token};
-
-        picture = (
-            <ExpoImage
-                id={id}
-                source={{uri: buildAbsoluteUrl(serverUrl, uri), headers}}
-                style={[styles.avatar, styles.avatarRadius]}
-            />
-        );
-    } else {
-        picture = (
-            <CompassIcon
-                name='account-outline'
-                size={32}
-                color={changeOpacity('#fff', 0.48)}
-            />
-        );
-    }
+    const overrideUriId = overrideIconUrl ? `avatar-override-${urlSafeBase64Encode(overrideIconUrl)}` : undefined;
 
     return (
-        <View style={[styles.avatarContainer, styles.avatarRadius]}>
-            {picture}
-        </View>
+        <Avatar
+            author={author}
+            containerStyle={[styles.avatarContainer, styles.avatarRadius]}
+            imageStyle={[styles.avatar, styles.avatarRadius]}
+            overrideUri={overrideIconUrl}
+            overrideUriId={overrideUriId}
+            size={32}
+            testID='gallery.footer.avatar'
+        />
     );
 };
 
-export default Avatar;
-
+export default GalleryFooterAvatar;
