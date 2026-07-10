@@ -67,15 +67,15 @@ export type EntryResponse = {
 }
 
 export const entry = async (serverUrl: string, teamId?: string, channelId?: string, since = 0, groupLabel?: RequestGroupLabel): Promise<EntryResponse> => {
-    captureMessage(`[entry] START for ${serverUrl}, teamId=${teamId}, channelId=${channelId}, since=${since}`);
+    captureMessage(`[Étape 22/35] [entry] START for ${serverUrl}, teamId=${teamId}, channelId=${channelId}, since=${since}`);
     const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
     const result = await entryRest(serverUrl, teamId, channelId, since, groupLabel);
 
     // Fetch data retention policies
     if (result.error) {
-        captureMessage(`[entry] ERROR for ${serverUrl}: ${getFullErrorMessage(result.error)}`);
+        captureMessage(`[Étape 28/35] [entry] ERROR for ${serverUrl}: ${getFullErrorMessage(result.error)}`);
     } else {
-        captureMessage(`[entry] SUCCESS for ${serverUrl}, models=${result.models?.length || 0}`);
+        captureMessage(`[Étape 25/35] [entry] SUCCESS for ${serverUrl}, models=${result.models?.length || 0}`);
         const isDataRetentionEnabled = await getIsDataRetentionEnabled(database);
         if (isDataRetentionEnabled) {
             fetchDataRetentionPolicy(serverUrl, false, groupLabel);
@@ -86,7 +86,7 @@ export const entry = async (serverUrl: string, teamId?: string, channelId?: stri
 };
 
 const entryRest = async (serverUrl: string, teamId?: string, channelId?: string, since = 0, groupLabel?: RequestGroupLabel) => {
-    captureMessage(`[entryRest] START for ${serverUrl}`);
+    captureMessage(`[Étape 23/35] [entryRest] START for ${serverUrl}`);
     try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         let lastDisconnectedAt = since || await getLastFullSync(database);
@@ -122,7 +122,7 @@ const entryRest = async (serverUrl: string, teamId?: string, channelId?: string,
         const [teamData, meData] = await Promise.all(promises);
         const error = confResp.error || prefData.error || teamData.error || meData.error;
         if (error) {
-            captureMessage(`[entryRest] FETCH ERROR for ${serverUrl}: ${getFullErrorMessage(error)}`);
+            captureMessage(`[Étape 27/35] [entryRest] FETCH ERROR for ${serverUrl}: ${getFullErrorMessage(error)}`);
             return {error};
         }
 
@@ -192,12 +192,12 @@ const entryRest = async (serverUrl: string, teamId?: string, channelId?: string,
         const modelPromises = await prepareEntryModels({operator, teamData: initialTeamData, chData, prefData, meData, isCRTEnabled});
         const models = (await Promise.all(modelPromises)).flat();
         logDebug('Process models on entry', groupLabel, models.length, `${Date.now() - dt}ms`);
-        captureMessage(`[entryRest] SUCCESS for ${serverUrl}, models=${models.length}`);
+        captureMessage(`[Étape 24/35] [entryRest] SUCCESS for ${serverUrl}, models=${models.length}`);
 
         return {models, initialChannelId, initialTeamId, prefData, teamData, chData, meData, gmConverted};
     } catch (error) {
         logError('entryRest', groupLabel, error);
-        captureMessage(`[entryRest] UNEXPECTED ERROR for ${serverUrl}: ${getFullErrorMessage(error)}`);
+        captureMessage(`[Étape 29/35] [entryRest] UNEXPECTED ERROR for ${serverUrl}: ${getFullErrorMessage(error)}`);
         return {error};
     }
 };

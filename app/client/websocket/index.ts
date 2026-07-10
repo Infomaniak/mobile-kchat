@@ -140,6 +140,7 @@ export default class WebSocketClient {
 
         this.bindConnection('connected', () => {
             clearTimeout(this.connectionTimeout);
+            captureMessage(`[PUSHER] connected for ${this.serverUrl}, failCount=${this.connectFailCount}`);
 
             // No need to reset sequence number here.
             this.serverSequence = 0;
@@ -221,8 +222,13 @@ export default class WebSocketClient {
 
         this.bindConnection('error', (evt: PusherEvent) => {
             if (evt?.url === this.url) {
+                captureMessage(`[PUSHER] error for ${this.serverUrl}: ${evt?.message || 'unknown'}`);
                 this.onError(evt);
             }
+        });
+
+        this.bindConnection('state_change', (states: {previous: string; current: string}) => {
+            captureMessage(`[PUSHER] state_change for ${this.serverUrl}: ${states.previous} -> ${states.current}`);
         });
 
         // Infomaniak - this.conn.open();
@@ -240,6 +246,7 @@ export default class WebSocketClient {
                 const user = await client.getMe();
                 if (!user) {
                     logWarning('[WS-client] connOpen: getMe returned no user for', this.serverUrl);
+                    captureMessage(`[Étape 34/35] [WS-client] connOpen: getMe returned no user for ${this.serverUrl}`);
                     return;
                 }
 
@@ -248,6 +255,7 @@ export default class WebSocketClient {
                 this.bindChannel(`presence-teamUser.${user.id}`);
             } catch (error) {
                 logError('[WS-client] connOpen: getMe failed for', this.serverUrl, error);
+                captureMessage(`[Étape 35/35] [WS-client] connOpen: getMe failed for ${this.serverUrl}: ${error instanceof Error ? error.message : String(error)}`);
                 captureException(error);
             }
         }

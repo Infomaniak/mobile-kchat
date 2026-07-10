@@ -17,7 +17,7 @@ export const getLoadingTeamChannelsSubject = (serverUrl: string) => {
 export const setTeamLoading = (serverUrl: string, loading: boolean) => {
     const subject = getLoadingTeamChannelsSubject(serverUrl);
     const newValue = subject.value + (loading ? 1 : -1);
-    captureMessage(`[setTeamLoading] ${serverUrl}: loading=${loading}, newValue=${newValue}, prevValue=${subject.value}`);
+    captureMessage(`[Étape 33/35] [setTeamLoading] ${serverUrl}: loading=${loading}, newValue=${newValue}, prevValue=${subject.value}`);
     logDebug('[setTeamLoading]', {serverUrl, loading, newValue, prevValue: subject.value});
     subject.next(newValue);
 };

@@ -110,7 +110,7 @@ class WebsocketManagerSingleton {
 
     public closeAll = () => {
         const clientUrls = Object.keys(this.clients);
-        captureMessage(`[WebsocketManager] closeAll called for ${clientUrls.length} clients: ${clientUrls.join(', ') || 'none'}`);
+        captureMessage(`[Étape 7/35] [WebsocketManager] closeAll called for ${clientUrls.length} clients: ${clientUrls.join(', ') || 'none'}`);
         logDebug('[WebsocketManager] closeAll', {clientCount: clientUrls.length, clients: clientUrls});
         for (const url of clientUrls) {
             const client = this.clients[url];
@@ -123,7 +123,7 @@ class WebsocketManagerSingleton {
     public openAll = async (groupLabel?: BaseRequestGroupLabel) => {
         let queued = 0;
         const clientUrls = Object.keys(this.clients);
-        captureMessage(`[WebsocketManager] openAll called for ${clientUrls.length} clients`);
+        captureMessage(`[Étape 8/35] [WebsocketManager] openAll called for ${clientUrls.length} clients`);
         logDebug('[WebsocketManager] openAll', {clientCount: clientUrls.length, clients: clientUrls, groupLabel});
         for await (const clientUrl of clientUrls) {
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
@@ -168,20 +168,20 @@ class WebsocketManagerSingleton {
         delete this.connectionTimerIDs[serverUrl];
         if (client?.isConnected()) {
             if (this.potentialZombie[serverUrl]) {
-                captureMessage(`[WebsocketManager] ZOMBIE CLIENT confirmed: ${serverUrl}`);
+                captureMessage(`[Étape 9/35] [WebsocketManager] ZOMBIE CLIENT confirmed: ${serverUrl}`);
                 delete this.potentialZombie[serverUrl];
             } else {
-                captureMessage(`[WebsocketManager] client still connected after closeAll: ${serverUrl}`);
+                captureMessage(`[Étape 10/35] [WebsocketManager] client still connected after closeAll: ${serverUrl}`);
             }
             return;
         }
 
         const hasSynced = this.firstConnectionSynced[serverUrl];
-        captureMessage(`[WebsocketManager] initializeClient for ${serverUrl}, hasSynced=${hasSynced}, clientExists=${Boolean(client)}`);
+        captureMessage(`[Étape 11/35] [WebsocketManager] initializeClient for ${serverUrl}, hasSynced=${hasSynced}, clientExists=${Boolean(client)}`);
         logInfo('[WebsocketManager] initializeClient: client not connected for', serverUrl, 'initializing, hasSynced:', hasSynced);
         client.initialize({}, !hasSynced);
         if (!hasSynced) {
-            captureMessage(`[WebsocketManager] calling handleFirstConnect for ${serverUrl}`);
+            captureMessage(`[Étape 12/35] [WebsocketManager] calling handleFirstConnect for ${serverUrl}`);
             const error = await handleFirstConnect(serverUrl, groupLabel);
             if (error) {
                 // This will try to reconnect and try to sync again
@@ -197,14 +197,14 @@ class WebsocketManagerSingleton {
     };
 
     private onFirstConnect = (serverUrl: string) => {
-        captureMessage(`[WebsocketManager] onFirstConnect for ${serverUrl}`);
+        captureMessage(`[Étape 15/35] [WebsocketManager] onFirstConnect for ${serverUrl}`);
         logDebug('[WebsocketManager] onFirstConnect', {serverUrl});
         this.startPeriodicStatusUpdates(serverUrl);
         this.getConnectedSubject(serverUrl).next('connected');
     };
 
     private onReconnect = async (serverUrl: string) => {
-        captureMessage(`[WebsocketManager] onReconnect for ${serverUrl}`);
+        captureMessage(`[Étape 16/35] [WebsocketManager] onReconnect for ${serverUrl}`);
         logDebug('[WebsocketManager] onReconnect', {serverUrl});
         this.startPeriodicStatusUpdates(serverUrl);
         this.getConnectedSubject(serverUrl).next('connected');
@@ -217,7 +217,7 @@ class WebsocketManagerSingleton {
     };
 
     private onReliableReconnect = async (serverUrl: string) => {
-        captureMessage(`[WebsocketManager] onReliableReconnect for ${serverUrl}`);
+        captureMessage(`[Étape 17/35] [WebsocketManager] onReliableReconnect for ${serverUrl}`);
         logDebug('[WebsocketManager] onReliableReconnect', {serverUrl});
         this.getConnectedSubject(serverUrl).next('connected');
     };
@@ -259,7 +259,7 @@ class WebsocketManagerSingleton {
 
     private onAppStateChange = (appState: AppStateStatus) => {
         const isMain = isMainActivity();
-        captureMessage(`[WebsocketManager] onAppStateChange: ${appState}, isMain=${isMain}`);
+        captureMessage(`[Étape 1/35] [WebsocketManager] onAppStateChange: ${appState}, isMain=${isMain}`);
         logDebug('[WebsocketManager] onAppStateChange', {appState, isMain});
         if (!isMain) {
             return;
@@ -275,6 +275,7 @@ class WebsocketManagerSingleton {
     };
 
     private handleStateChange = (currentIsConnected: boolean, currentNetType: NetInfoStateType, currentIsActive: boolean) => {
+        captureMessage(`[Étape 2/35] [WebsocketManager] handleStateChange START: previousActive=${this.previousActiveState}, currentActive=${currentIsActive}, previousNet=${this.netConnected}, currentNet=${currentIsConnected}`);
         logDebug('[WebsocketManager] handleStateChange', {
             currentIsConnected,
             currentNetType,
@@ -283,8 +284,9 @@ class WebsocketManagerSingleton {
             previousNetConnected: this.netConnected,
             previousNetType: this.netType,
         });
-        if (currentIsActive === this.previousActiveState && currentIsConnected === this.netConnected && currentNetType === this.netType) {
-            captureMessage('[WebsocketManager] handleStateChange SKIPPED (no state change)');
+        const willSkip = currentIsActive === this.previousActiveState && currentIsConnected === this.netConnected && currentNetType === this.netType;
+        if (willSkip) {
+            captureMessage('[Étape 3/35] [WebsocketManager] handleStateChange SKIPPED (no state change)');
             return;
         }
 
@@ -317,8 +319,9 @@ class WebsocketManagerSingleton {
                 if (wasLongBackground) {
                     const backgroundDuration = Date.now() - this.lastBackgroundAt;
                     logInfo('[WebsocketManager] returning to foreground after long background with active timer, closing all websockets to avoid zombie connections');
-                    captureMessage(`[WebsocketManager] foreground return with active background timer after ${backgroundDuration}ms - potential zombie connections`);
+                    captureMessage(`[Étape 5/35] [WebsocketManager] foreground return with active background timer after ${backgroundDuration}ms - potential zombie connections`);
                     for (const url of Object.keys(this.clients)) {
+                        captureMessage(`[Étape 6/35] [WebsocketManager] potentialZombie set to true for ${url}`);
                         this.potentialZombie[url] = true;
                     }
                     this.closeAll();
@@ -331,7 +334,7 @@ class WebsocketManagerSingleton {
                 this.openAll('WebSocket Reconnect');
             } else {
                 logWarning('[WebsocketManager] handleStateChange: no network at foreground, skipping openAll');
-                captureMessage('[WebsocketManager] foreground with no network');
+                captureMessage('[Étape 4/35] [WebsocketManager] foreground with no network');
             }
 
             return;
