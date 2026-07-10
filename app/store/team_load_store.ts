@@ -2,6 +2,9 @@
 // See LICENSE.txt for license information.
 import {BehaviorSubject} from 'rxjs';
 
+import {logDebug} from '@utils/log';
+import {captureMessage} from '@utils/sentry';
+
 const loadingTeamChannels: {[serverUrl: string]: BehaviorSubject<number>} = {};
 
 export const getLoadingTeamChannelsSubject = (serverUrl: string) => {
@@ -13,5 +16,8 @@ export const getLoadingTeamChannelsSubject = (serverUrl: string) => {
 
 export const setTeamLoading = (serverUrl: string, loading: boolean) => {
     const subject = getLoadingTeamChannelsSubject(serverUrl);
-    subject.next(subject.value + (loading ? 1 : -1));
+    const newValue = subject.value + (loading ? 1 : -1);
+    captureMessage(`[setTeamLoading] ${serverUrl}: loading=${loading}, newValue=${newValue}, prevValue=${subject.value}`);
+    logDebug('[setTeamLoading]', {serverUrl, loading, newValue, prevValue: subject.value});
+    subject.next(newValue);
 };

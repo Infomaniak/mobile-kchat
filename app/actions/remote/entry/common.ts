@@ -29,6 +29,7 @@ import {isDefaultChannel, isDMorGM, sortChannelsByDisplayName} from '@utils/chan
 import {getFullErrorMessage} from '@utils/errors';
 import {isMinimumServerVersion, isTablet} from '@utils/helpers';
 import {logDebug, logError} from '@utils/log';
+import {captureMessage} from '@utils/sentry';
 import {processIsCRTEnabled} from '@utils/thread';
 
 import type {Database, Model} from '@nozbe/watermelondb';
@@ -66,11 +67,15 @@ export type EntryResponse = {
 }
 
 export const entry = async (serverUrl: string, teamId?: string, channelId?: string, since = 0, groupLabel?: RequestGroupLabel): Promise<EntryResponse> => {
+    captureMessage(`[entry] START for ${serverUrl}, teamId=${teamId}, channelId=${channelId}, since=${since}`);
     const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
     const result = await entryRest(serverUrl, teamId, channelId, since, groupLabel);
 
     // Fetch data retention policies
-    if (!result.error) {
+    if (result.error) {
+        captureMessage(`[entry] ERROR for ${serverUrl}: ${getFullErrorMessage(result.error)}`);
+    } else {
+        captureMessage(`[entry] SUCCESS for ${serverUrl}, models=${result.models?.length || 0}`);
         const isDataRetentionEnabled = await getIsDataRetentionEnabled(database);
         if (isDataRetentionEnabled) {
             fetchDataRetentionPolicy(serverUrl, false, groupLabel);
@@ -81,6 +86,7 @@ export const entry = async (serverUrl: string, teamId?: string, channelId?: stri
 };
 
 const entryRest = async (serverUrl: string, teamId?: string, channelId?: string, since = 0, groupLabel?: RequestGroupLabel) => {
+    captureMessage(`[entryRest] START for ${serverUrl}`);
     try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         let lastDisconnectedAt = since || await getLastFullSync(database);
@@ -116,6 +122,7 @@ const entryRest = async (serverUrl: string, teamId?: string, channelId?: string,
         const [teamData, meData] = await Promise.all(promises);
         const error = confResp.error || prefData.error || teamData.error || meData.error;
         if (error) {
+            captureMessage(`[entryRest] FETCH ERROR for ${serverUrl}: ${getFullErrorMessage(error)}`);
             return {error};
         }
 
@@ -185,10 +192,12 @@ const entryRest = async (serverUrl: string, teamId?: string, channelId?: string,
         const modelPromises = await prepareEntryModels({operator, teamData: initialTeamData, chData, prefData, meData, isCRTEnabled});
         const models = (await Promise.all(modelPromises)).flat();
         logDebug('Process models on entry', groupLabel, models.length, `${Date.now() - dt}ms`);
+        captureMessage(`[entryRest] SUCCESS for ${serverUrl}, models=${models.length}`);
 
         return {models, initialChannelId, initialTeamId, prefData, teamData, chData, meData, gmConverted};
     } catch (error) {
         logError('entryRest', groupLabel, error);
+        captureMessage(`[entryRest] UNEXPECTED ERROR for ${serverUrl}: ${getFullErrorMessage(error)}`);
         return {error};
     }
 };
