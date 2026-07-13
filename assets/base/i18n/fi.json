@@ -1171,6 +1171,8 @@
     "plus_menu.open_direct_message.title": "Avaa suora viesti",
     "post_body.check_for_out_of_channel_groups_mentions_choice.message": "tai",
     "post_body.check_for_out_of_channel_groups_mentions_notify.message": "{count, plural, one {ilmoita hänelle} other {ilmoita heille}}",
+  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {ei saanut ilmoitusta tästä maininnasta, koska hän ei ole kanavalla. Ota yhteyttä ylläpitäjään lisätäksesi hänet tälle kanavalle.} other {eivät saaneet ilmoitusta tästä maininnasta, koska he eivät ole kanavalla. Ota yhteyttä ylläpitäjään lisätäksesi heidät tälle kanavalle.}}",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {ei saanut ilmoitusta tästä maininnasta, koska hän ei ole kanavalla. Ota yhteyttä ylläpitäjään lisätäksesi hänet tälle yksityiselle kanavalle.} other {eivät saaneet ilmoitusta tästä maininnasta, koska he eivät ole kanavalla. Ota yhteyttä ylläpitäjään lisätäksesi heidät tälle yksityiselle kanavalle.}}",
     "post_body.check_for_out_of_channel_groups_mentions.message": "Henkilöä ei ilmoitettu tästä maininnasta, koska hän ei ole tässä kanavassa. Hän ei myöskään ole minkään tähän kanavaan liittyvän ryhmän jäsen. Jotta hänet voitaisiin lisätä tähän kanavaan, hänet on lisättävä johonkin siihen liittyvään ryhmään.",
     "post_body.check_for_out_of_channel_mentions.link.and": "ja",
     "post_body.check_for_out_of_channel_mentions.link.private": "lisää heidät tähän yksityiseen kanavaan",

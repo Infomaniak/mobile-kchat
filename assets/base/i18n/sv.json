@@ -1171,6 +1171,8 @@
     "plus_menu.open_direct_message.title": "Öppna ett direktmeddelande",
     "post_body.check_for_out_of_channel_groups_mentions_choice.message": "eller",
     "post_body.check_for_out_of_channel_groups_mentions_notify.message": "{count, plural, one {meddela honom} other {meddela dem}}",
+  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {fick ingen avisering om denna omnämnande eftersom hen inte är i kanalen. Kontakta en administratör för att lägga till hen i denna kanal.} other {fick ingen avisering om denna omnämnande eftersom de inte är i kanalen. Kontakta en administratör för att lägga till dem i denna kanal.}}",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {fick ingen avisering om denna omnämnande eftersom hen inte är i kanalen. Kontakta en administratör för att lägga till hen i denna privata kanal.} other {fick ingen avisering om denna omnämnande eftersom de inte är i kanalen. Kontakta en administratör för att lägga till dem i denna privata kanal.}}",
     "post_body.check_for_out_of_channel_groups_mentions.message": "personen blev inte meddelad om detta omnämnande eftersom hen inte är med i kanalen. Personen är inte heller medlem i någon av de grupper som är kopplade till kanalen. För att personen ska bli meddelad om omnämnanden i kanalen måste hen läggas till i någon av de kopplade grupperna.",
     "post_body.check_for_out_of_channel_mentions.link.and": "och",
     "post_body.check_for_out_of_channel_mentions.link.private": "lägg till dem i den här privata kanalen",

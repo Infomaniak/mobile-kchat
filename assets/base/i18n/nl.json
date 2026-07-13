@@ -1171,6 +1171,8 @@
     "plus_menu.open_direct_message.title": "Open een direct bericht",
     "post_body.check_for_out_of_channel_groups_mentions_choice.message": "of",
     "post_body.check_for_out_of_channel_groups_mentions_notify.message": "{count, plural, one {meld het hem} other {meld het hen}}",
+  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {is niet op de hoogte gebracht van deze vermelding omdat hij niet in het kanaal zit. Neem contact op met een beheerder om hem toe te voegen aan dit kanaal.} other {zijn niet op de hoogte gebracht van deze vermelding omdat ze niet in het kanaal zitten. Neem contact op met een beheerder om hen toe te voegen aan dit kanaal.}}",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {is niet op de hoogte gebracht van deze vermelding omdat hij niet in het kanaal zit. Neem contact op met een beheerder om hem toe te voegen aan dit privé-kanaal.} other {zijn niet op de hoogte gebracht van deze vermelding omdat ze niet in het kanaal zitten. Neem contact op met een beheerder om hen toe te voegen aan dit privé-kanaal.}}",
     "post_body.check_for_out_of_channel_groups_mentions.message": "Deze persoon is niet op de hoogte gesteld van deze vermelding, omdat hij/zij niet in dit kanaal zit. Hij/zij is ook geen lid van de groepen die aan dit kanaal zijn gekoppeld.",
     "post_body.check_for_out_of_channel_mentions.link.and": "en",
     "post_body.check_for_out_of_channel_mentions.link.private": "voeg ze toe aan dit privé-kanaal",

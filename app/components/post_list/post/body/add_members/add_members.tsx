@@ -19,7 +19,7 @@ import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
-type AddMembersProps = {
+type ChannelMemberMentionProps = {
     channelType: string | null;
     currentUser?: UserModel;
     location: AvailableScreens;
@@ -88,26 +88,38 @@ const definedMessages = defineMessages({
         id: 'post_body.check_for_out_of_channel_mentions.message.multiple',
         defaultMessage: 'were mentioned but they are not in the channel. Would you like to ',
     },
+    askPublic: {
+        id: 'post_body.check_for_out_of_channel_ephemeral.ask',
+        defaultMessage: '{count, plural, one {did not get notified by this mention because they are not in the channel. Please contact an administrator to add them to the channel.} other {did not get notified by this mention because they are not in the channel. Please contact an administrator to add them to the channel.}}',
+    },
+    askPrivate: {
+        id: 'post_body.check_for_out_of_channel_ephemeral.private_no_manage',
+        defaultMessage: '{count, plural, one {did not get notified by this mention because they are not in the channel. Please contact an administrator to add them to this private channel.} other {did not get notified by this mention because they are not in the channel. Please contact an administrator to add them to this private channel.}}',
+    },
     outOfGroupsMessage: {
         id: 'post_body.check_for_out_of_channel_groups_mentions.message',
         defaultMessage: 'did not get notified by this mention because they are not in the channel. They are also not a member of the groups linked to this channel.',
     },
 });
 
-const AddMembers = ({channelType, currentUser, location, post, theme}: AddMembersProps) => {
+const ChannelMemberMention = ({channelType, currentUser, location, post, theme}: ChannelMemberMentionProps) => {
     const intl = useIntl();
     const styles = getStyleSheet(theme);
     const textStyles = getMarkdownTextStyles(theme);
     const serverUrl = useServerUrl();
-    if (!isAddMemberProps(post.props?.add_channel_member)) {
+
+    const memberProps = post.props?.ask_add_channel_member || post.props?.add_channel_member;
+    const askMode = Boolean(post.props?.ask_add_channel_member);
+
+    if (!isAddMemberProps(memberProps)) {
         return null;
     }
 
-    const postId = post.props.add_channel_member.post_id;
-    const noGroupsUsernames = post.props.add_channel_member.not_in_groups_usernames || [];
-    const userIds = post.props.add_channel_member.not_in_channel_user_ids || post.props.add_channel_member.user_ids || [];
-    const usernames = post.props.add_channel_member.not_in_channel_usernames || post.props.add_channel_member?.usernames || [];
-    const originalPostId = post.props.add_channel_member.original_post_id || '';
+    const postId = memberProps.post_id;
+    const noGroupsUsernames = memberProps.not_in_groups_usernames || [];
+    const userIds = memberProps.not_in_channel_user_ids || memberProps.user_ids || [];
+    const usernames = memberProps.not_in_channel_usernames || memberProps?.usernames || [];
+    const originalPostId = memberProps.original_post_id || '';
 
     if (!postId || !channelType) {
         return null;
@@ -207,10 +219,30 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
 
     const outOfGroupsAtMentions = generateAtMentions(noGroupsUsernames);
 
-    let outOfChannelMessage = null;
-    if (usernames.length) {
+    const renderOutOfChannelMessage = () => {
+        if (!usernames.length) {
+            return null;
+        }
+
+        if (askMode) {
+            const askMessageDescriptor = channelType === General.OPEN_CHANNEL? definedMessages.askPublic: definedMessages.askPrivate;
+
+            return (
+                <Text style={styles.message}>
+                    {outOfChannelAtMentions}
+                    {' '}
+                    <FormattedText
+                        {...askMessageDescriptor}
+                        values={{
+                            count: usernames.length,
+                        }}
+                    />
+                </Text>
+            );
+        }
+
         if (channelType === General.OPEN_CHANNEL) {
-            outOfChannelMessage = (
+            return (
                 <Text>
                     {outOfChannelAtMentions}
                     {' '}
@@ -256,52 +288,64 @@ const AddMembers = ({channelType, currentUser, location, post, theme}: AddMember
                     />
                 </Text>
             );
-        } else {
-            outOfChannelMessage = (
-                <Text style={styles.message}>
-                    {outOfChannelAtMentions}
-                    {' '}
-                    <FormattedText
-                        {...outOfChannelMessageDescriptor}
-                    />
-                    <Text
-                        style={textStyles.link}
-                        testID='add_channel_member_link'
-                        onPress={handleAddChannelMember}
-                    >
-                        <FormattedText
-                            {...linkMessageDescriptor}
-                        />
-                    </Text>
-                    <FormattedText
-                        id={'post_body.check_for_out_of_channel_mentions.message_last'}
-                        defaultMessage={'? They will have access to all message history.'}
-                    />
-                </Text>
-            );
         }
-    }
 
-    let outOfGroupsMessage = null;
-    if (noGroupsUsernames?.length) {
-        outOfGroupsMessage = (
-            <Text>
-                {outOfGroupsAtMentions}
+        return (
+            <Text style={styles.message}>
+                {outOfChannelAtMentions}
                 {' '}
                 <FormattedText
-                    {...definedMessages.outOfGroupsMessage}
-                    style={styles.message}
+                    {...outOfChannelMessageDescriptor}
+                />
+                <Text
+                    style={textStyles.link}
+                    testID='add_channel_member_link'
+                    onPress={handleAddChannelMember}
+                >
+                    <FormattedText
+                        {...linkMessageDescriptor}
+                    />
+                </Text>
+                <FormattedText
+                    id={'post_body.check_for_out_of_channel_mentions.message_last'}
+                    defaultMessage={'? They will have access to all message history.'}
                 />
             </Text>
         );
-    }
+    };
+
+    const renderGroupsMessage = () => {
+        if (!noGroupsUsernames?.length) {
+            return null;
+        }
+
+        let groupsMessageDescriptor;
+        if (askMode) {
+            groupsMessageDescriptor = channelType === General.OPEN_CHANNEL ? definedMessages.askPublic : definedMessages.askPrivate;
+        } else {
+            groupsMessageDescriptor = definedMessages.outOfGroupsMessage;
+        }
+
+        return (
+            <Text style={styles.message}>
+                {outOfGroupsAtMentions}
+                {' '}
+                <FormattedText
+                    {...groupsMessageDescriptor}
+                    values={{
+                        count: noGroupsUsernames.length,
+                    }}
+                />
+            </Text>
+        );
+    };
 
     return (
         <>
-            {outOfChannelMessage}
-            {outOfGroupsMessage}
+            {renderOutOfChannelMessage()}
+            {renderGroupsMessage()}
         </>
     );
 };
 
-export default AddMembers;
+export default ChannelMemberMention;

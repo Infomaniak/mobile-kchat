@@ -1171,6 +1171,8 @@
     "plus_menu.open_direct_message.title": "Άνοιγμα άμεσου μηνύματος",
     "post_body.check_for_out_of_channel_groups_mentions_choice.message": "ή",
     "post_body.check_for_out_of_channel_groups_mentions_notify.message": "{count, plural, one {ενημερώστε τον} other {ενημερώστε τους}}",
+  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {δεν ειδοποιήθηκε για αυτήν την αναφορά επειδή δεν βρίσκεται στο κανάλι. Επικοινωνήστε με έναν διαχειριστή για να τον προσθέσετε σε αυτό το κανάλι.} other {δεν ειδοποιήθηκαν για αυτήν την αναφορά επειδή δεν βρίσκονται στο κανάλι. Επικοινωνήστε με έναν διαχειριστή για να τους προσθέσετε σε αυτό το κανάλι.}}",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {δεν ειδοποιήθηκε για αυτήν την αναφορά επειδή δεν βρίσκεται στο κανάλι. Επικοινωνήστε με έναν διαχειριστή για να τον προσθέσετε σε αυτό το ιδιωτικό κανάλι.} other {δεν ειδοποιήθηκαν για αυτήν την αναφορά επειδή δεν βρίσκονται στο κανάλι. Επικοινωνήστε με έναν διαχειριστή για να τους προσθέσετε σε αυτό το ιδιωτικό κανάλι.}}",
     "post_body.check_for_out_of_channel_groups_mentions.message": "Δεν ειδοποιήθηκε για αυτήν την αναφορά επειδή δεν βρίσκεται στο κανάλι. Επίσης, δεν είναι μέλος των ομάδων που συνδέονται με αυτό το κανάλι.",
     "post_body.check_for_out_of_channel_mentions.link.and": "και",
     "post_body.check_for_out_of_channel_mentions.link.private": "προσθέστε τους σε αυτό το ιδιωτικό κανάλι",

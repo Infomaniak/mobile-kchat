@@ -113,6 +113,8 @@ const withPost = withObservables(
 
         if (post.props?.add_channel_member && isPostEphemeral(post) && currentUser) {
             isPostAddChannelMember = observeCanManageChannelMembers(database, post.channelId, currentUser);
+        } else if (post.props?.ask_add_channel_member && isPostEphemeral(post) && currentUser) {
+            isPostAddChannelMember = of$(true);
         }
 
         let highlightReplyBar = of$(false);

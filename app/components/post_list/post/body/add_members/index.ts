@@ -8,7 +8,7 @@ import {switchMap} from 'rxjs/operators';
 import {observeChannel} from '@queries/servers/channel';
 import {observeCurrentUser} from '@queries/servers/user';
 
-import AddMembers from './add_members';
+import ChannelMemberMention from './add_members';
 
 import type {WithDatabaseArgs} from '@typings/database/database';
 import type PostModel from '@typings/database/models/servers/post';
@@ -21,4 +21,4 @@ const enhance = withObservables(['post'], ({database, post}: WithDatabaseArgs & 
         ),
     ),
 }));
-export default withDatabase(enhance(AddMembers));
+export default withDatabase(enhance(ChannelMemberMention));

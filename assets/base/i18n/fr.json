@@ -843,6 +843,8 @@
   "plus_menu.open_direct_message.title": "Ouvrir un message direct",
   "post_body.check_for_out_of_channel_groups_mentions_choice.message": "ou",
   "post_body.check_for_out_of_channel_groups_mentions_notify.message": "{count, plural, one {le notifier} other {les notifier}}",
+  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {n'a pas été notifié(e) par cette mention car il/elle n'est pas dans le canal. Veuillez contacter un administrateur pour l'ajouter à ce canal.} other {n'ont pas été notifiés par cette mention car ils ne sont pas dans le canal. Veuillez contacter un administrateur pour les ajouter à ce canal.}}",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {n'a pas été notifié(e) par cette mention car il/elle n'est pas dans le canal. Veuillez contacter un administrateur pour l'ajouter à ce canal privé.} other {n'ont pas été notifiés par cette mention car ils ne sont pas dans le canal. Veuillez contacter un administrateur pour les ajouter à ce canal privé.}}",
   "post_body.check_for_out_of_channel_groups_mentions.message": "n'a pas été notifié par cette mention. L'utilisateur n'est pas dans le canal et ne peut pas être ajouté à ce canal, car il ne fait pas partie des groupes liés. Pour l'ajouter à ce canal, l'utilisateur doit être ajouté aux groupes liés.",
   "post_body.check_for_out_of_channel_mentions.link.and": " et ",
   "post_body.check_for_out_of_channel_mentions.link.private": "ajouter à ce canal privé",

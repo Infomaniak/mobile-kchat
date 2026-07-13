@@ -767,6 +767,8 @@
   "plus_menu.open_direct_message.title": "Aprire un messaggio diretto",
   "post_body.check_for_out_of_channel_groups_mentions_choice.message": "o",
   "post_body.check_for_out_of_channel_groups_mentions_notify.message": "{count, plural, one {notificarlo} other {notificarli}}",
+  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {non è stato notificato da questa menzione perché non è nel canale. Contatta un amministratore per aggiungerlo a questo canale.} other {non sono stati notificati da questa menzione perché non sono nel canale. Contatta un amministratore per aggiungerli a questo canale.}}",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {non è stato notificato da questa menzione perché non è nel canale. Contatta un amministratore per aggiungerlo a questo canale privato.} other {non sono stati notificati da questa menzione perché non sono nel canale. Contatta un amministratore per aggiungerli a questo canale privato.}}",
   "post_body.check_for_out_of_channel_groups_mentions.message": "non saranno notificati di questa citazione perché non appartengono a questo canale. Non sono nemmeno membri di un gruppo collegato a questo canale.",
   "post_body.check_for_out_of_channel_mentions.link.and": " e ",
   "post_body.check_for_out_of_channel_mentions.link.private": "aggiungerli a questo canale privato",

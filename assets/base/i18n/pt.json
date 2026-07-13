@@ -1171,6 +1171,8 @@
     "plus_menu.open_direct_message.title": "Abrir uma mensagem direta",
     "post_body.check_for_out_of_channel_groups_mentions_choice.message": "ou",
     "post_body.check_for_out_of_channel_groups_mentions_notify.message": "{count, plural, one {notificá-lo} other {notificá-los}}",
+  "post_body.check_for_out_of_channel_ephemeral.ask": "{count, plural, one {não foi notificado(a) por esta menção porque não está no canal. Contacte um administrador para o(a) adicionar a este canal.} other {não foram notificados(as) por esta menção porque não estão no canal. Contacte um administrador para os(as) adicionar a este canal.}}",
+  "post_body.check_for_out_of_channel_ephemeral.private_no_manage": "{count, plural, one {não foi notificado(a) por esta menção porque não está no canal. Contacte um administrador para o(a) adicionar a este canal privado.} other {não foram notificados(as) por esta menção porque não estão no canal. Contacte um administrador para os(as) adicionar a este canal privado.}}",
     "post_body.check_for_out_of_channel_groups_mentions.message": "não foi notificado(a) sobre esta menção porque não está neste canal. Também não é membro de nenhum dos grupos vinculados a este canal.",
     "post_body.check_for_out_of_channel_mentions.link.and": "e",
     "post_body.check_for_out_of_channel_mentions.link.private": "adicione-os a este canal privado",
