@@ -89,10 +89,7 @@ class WebsocketManagerSingleton {
 
         client.setFirstConnectCallback(() => isCurrentClient() && this.onFirstConnect(serverUrl));
         client.setEventCallback((evt: WebSocketMessage) => handleWebSocketEvent(serverUrl, evt));
-
-        //client.setMissedEventsCallback(() => {}) Nothing to do on missedEvents callback
         client.setReconnectCallback(() => isCurrentClient() && this.onReconnect(serverUrl));
-        client.setReliableReconnectCallback(() => isCurrentClient() && this.onReliableReconnect(serverUrl));
         client.setCloseCallback((connectFailCount: number) => this.onWebsocketClose(serverUrl, connectFailCount));
 
         this.clients[serverUrl] = client;
@@ -183,10 +180,6 @@ class WebsocketManagerSingleton {
         if (error) {
             this.getClient(serverUrl)?.close(false);
         }
-    };
-
-    private onReliableReconnect = async (serverUrl: string) => {
-        this.getConnectedSubject(serverUrl).next('connected');
     };
 
     private onWebsocketClose = async (serverUrl: string, connectFailCount: number) => {

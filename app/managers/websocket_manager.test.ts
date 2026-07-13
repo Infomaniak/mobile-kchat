@@ -69,7 +69,6 @@ describe('WebsocketManager - background/foreground reconnection', () => {
             setReconnectCallback: jest.fn((cb: () => void) => {
                 mockCallbacks.reconnect = cb;
             }),
-            setReliableReconnectCallback: jest.fn(),
             setCloseCallback: jest.fn((cb: (count: number) => void) => {
                 mockCallbacks.close = cb;
             }),
