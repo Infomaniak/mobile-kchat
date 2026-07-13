@@ -108,7 +108,6 @@ const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Pro
             );
         }
         const extractedName = extractDisplayName(author);
-        const extractedName = extractDisplayName(author);
         const fallbackColor = author?.id ? getAvatarColor(author.id) : undefined;
         return (
             <InitialsFallback

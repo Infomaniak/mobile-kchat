@@ -95,7 +95,6 @@ export function getInitialsFromName(name: string): string {
         return '';
     }
     if (word.length === 1) {
-    if (word.length === 1) {
         return word.toUpperCase();
     }
 
