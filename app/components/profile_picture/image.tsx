@@ -98,6 +98,16 @@ const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Pro
     const showFallback = !imgSource || hasImageError;
 
     if (showFallback) {
+        if (!author) {
+            return (
+                <CompassIcon
+                    name='account-outline'
+                    size={iconSize || size}
+                    style={style.icon}
+                />
+            );
+        }
+        const extractedName = extractDisplayName(author);
         const extractedName = extractDisplayName(author);
         const fallbackColor = author?.id ? getAvatarColor(author.id) : undefined;
         return (
