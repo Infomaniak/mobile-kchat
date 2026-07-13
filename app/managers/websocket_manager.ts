@@ -3,7 +3,6 @@
 
 import NetInfo, {NetInfoStateType, type NetInfoState, type NetInfoSubscription} from '@react-native-community/netinfo';
 import {AppState, type AppStateStatus, type NativeEventSubscription} from 'react-native';
-import BackgroundTimer from 'react-native-background-timer';
 import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged} from 'rxjs/operators';
 
@@ -20,7 +19,6 @@ import {toMilliseconds} from '@utils/datetime';
 import {isMainActivity} from '@utils/helpers';
 import {logError} from '@utils/log';
 
-const WAIT_TO_CLOSE = toMilliseconds({seconds: 15});
 const WAIT_UNTIL_NEXT = toMilliseconds({seconds: 5});
 
 class WebsocketManagerSingleton {
@@ -28,12 +26,10 @@ class WebsocketManagerSingleton {
 
     private clients: Record<string, WebSocketClient> = {};
     private connectionTimerIDs: Record<string, NodeJS.Timeout> = {};
-    private isBackgroundTimerRunning = false;
     private netConnected = false;
     private netType: NetInfoStateType = NetInfoStateType.none;
     private previousActiveState: boolean;
     private statusUpdatesIntervalIDs: Record<string, NodeJS.Timeout> = {};
-    private backgroundIntervalId: number | undefined;
     private firstConnectionSynced: Record<string, boolean> = {};
 
     private appStateSubscription: NativeEventSubscription | undefined;
@@ -234,6 +230,10 @@ class WebsocketManagerSingleton {
             return;
         }
 
+        if (appState === 'inactive') {
+            return;
+        }
+
         const isActive = appState === 'active';
         this.handleStateChange(this.netConnected, this.netType, isActive);
     };
@@ -244,13 +244,8 @@ class WebsocketManagerSingleton {
     };
 
     private handleStateChange = (currentIsConnected: boolean, currentNetType: NetInfoStateType, currentIsActive: boolean) => {
-        if (currentIsActive === this.previousActiveState && currentIsConnected === this.netConnected && currentNetType === this.netType) {
-            return;
-        }
-
         this.cancelConnectTimers();
 
-        const wentBackground = this.previousActiveState && !currentIsActive;
         const switchedNetworks = currentIsConnected && currentNetType !== this.netType && this.netType !== 'none';
 
         this.previousActiveState = currentIsActive;
@@ -263,31 +258,13 @@ class WebsocketManagerSingleton {
         }
 
         if (switchedNetworks) {
-            // Close all connections when we switch from (for example) vpn to wifi
-            // to ensure we are using the right network and doesn't get stuck on
-            // retries.
             this.closeAll();
         }
 
         if (currentIsActive) {
-            if (this.isBackgroundTimerRunning) {
-                BackgroundTimer.clearInterval(this.backgroundIntervalId!);
-            }
-            this.isBackgroundTimerRunning = false;
-            if (this.netConnected) {
-                this.openAll('WebSocket Reconnect');
-            }
-
-            return;
-        }
-
-        if (wentBackground && !this.isBackgroundTimerRunning) {
-            this.isBackgroundTimerRunning = true;
-            this.backgroundIntervalId = BackgroundTimer.setInterval(() => {
-                this.closeAll();
-                BackgroundTimer.clearInterval(this.backgroundIntervalId!);
-                this.isBackgroundTimerRunning = false;
-            }, WAIT_TO_CLOSE);
+            this.openAll('WebSocket Reconnect');
+        } else {
+            this.closeAll();
         }
     };
 
