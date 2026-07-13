@@ -6,6 +6,7 @@ import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react
 import {storeGlobal, storeOnboardingViewedValue} from '@actions/app/global';
 import {terminateSession} from '@actions/local/session';
 import {syncMultiTeam} from '@actions/remote/entry/ikcommon';
+import {handleReconnect} from '@actions/websocket';
 import {Events, Launch} from '@constants';
 import {GLOBAL_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
@@ -16,6 +17,7 @@ import {getAllServers} from '@queries/app/servers';
 import EphemeralStore from '@store/ephemeral_store';
 import {deleteFileCacheByDir} from '@utils/file';
 import {isMainActivity} from '@utils/helpers';
+import {logError} from '@utils/log';
 
 import type {LaunchType} from '@typings/launch';
 
@@ -32,6 +34,7 @@ export class SessionManagerSingleton {
         AppState.addEventListener('change', this.onAppStateChange);
 
         DeviceEventEmitter.addListener(Events.SERVER_LOGOUT, this.onLogout);
+        DeviceEventEmitter.addListener(Events.ACTIVE_SERVER_CHANGED, this.onActiveServerChanged);
 
         this.previousAppState = AppState.currentState;
     }
@@ -66,6 +69,7 @@ export class SessionManagerSingleton {
             case 'active':
                 if (!EphemeralStore.isLoggingIn()) {
                     this.syncMultiTeam();
+                    this.resyncActiveServer();
                 }
                 break;
             case 'background':
@@ -82,7 +86,28 @@ export class SessionManagerSingleton {
                 await syncMultiTeam(credentials[0].token);
             }
         } catch (error) {
-            // do nothing
+            logError('[SessionManager] syncMultiTeam failed', error);
+        }
+    };
+
+    private resyncActiveServer = async () => {
+        try {
+            const activeServerUrl = await DatabaseManager.getActiveServerUrl();
+            if (activeServerUrl) {
+                await handleReconnect(activeServerUrl);
+            }
+        } catch (error) {
+            logError('[SessionManager] resyncActiveServer failed', error);
+        }
+    };
+
+    private onActiveServerChanged = async ({serverUrl}: {serverUrl: string}) => {
+        try {
+            if (serverUrl) {
+                await handleReconnect(serverUrl);
+            }
+        } catch (error) {
+            logError('[SessionManager] onActiveServerChanged failed', error);
         }
     };
 
