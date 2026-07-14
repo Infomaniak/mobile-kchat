@@ -158,7 +158,9 @@ class WebsocketManagerSingleton {
         }
         clearTimeout(this.connectionTimerIDs[serverUrl]);
         delete this.connectionTimerIDs[serverUrl];
-        if (!client.isConnected()) {
+        if (client.isConnected()) {
+            this.getConnectedSubject(serverUrl).next('connected');
+        } else {
             client.initialize({});
         }
     };

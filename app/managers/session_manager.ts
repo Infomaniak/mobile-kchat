@@ -116,6 +116,7 @@ export class SessionManagerSingleton {
         }
         try {
             this.syncingUrls.add(serverUrl);
+            EphemeralStore.setSyncing(true);
             if (this.firstSyncedUrls.has(serverUrl)) {
                 await handleReconnect(serverUrl);
             } else {
@@ -131,6 +132,7 @@ export class SessionManagerSingleton {
             return new Error(String(error));
         } finally {
             this.syncingUrls.delete(serverUrl);
+            EphemeralStore.setSyncing(false);
         }
         return undefined;
     };

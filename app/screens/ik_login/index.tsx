@@ -8,6 +8,7 @@ import {infomaniakLogin} from '@actions/remote/iksession';
 import FormattedText from '@components/formatted_text';
 import {Launch} from '@constants';
 import {getDefaultThemeByAppearance} from '@context/theme';
+import DatabaseManager from '@database/manager';
 import {login as displayLoginWebView} from '@init/ikauth';
 import {launchToHome} from '@init/launch';
 import PushNotifications from '@init/push_notifications';
@@ -47,19 +48,22 @@ const Server = ({
             if (result.serverUrl) {
                 const error = await SessionManager.triggerSync(result.serverUrl);
                 if (error) {
-                    logError('ik_login: triggerSync failed', error);
+                    logError('[ik_login] triggerSync failed', error);
                     resetToInfomaniakNoTeams();
                     return;
                 }
+
+                await DatabaseManager.setActiveServerDatabase(result.serverUrl);
                 await goToHome(result.serverUrl!, result.error as never);
             } else {
                 resetToInfomaniakNoTeams();
             }
         } catch (error) {
-            logError('ik_login: login failed', error);
+            logError('[ik_login] login failed', error);
+            resetToInfomaniakNoTeams();
         } finally {
-            setConnecting(false);
             EphemeralStore.setLoggingIn(false);
+            setConnecting(false);
         }
     };
 

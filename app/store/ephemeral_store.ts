@@ -22,6 +22,7 @@ class EphemeralStoreSingleton {
     theme: Theme | undefined;
     creatingChannel = false;
     private loggingIn = false;
+    private syncing = false;
     creatingDMorGMTeammates: string[] = [];
 
     noticeShown = new Set<string>();
@@ -87,6 +88,12 @@ class EphemeralStoreSingleton {
     };
 
     isLoggingIn = () => this.loggingIn;
+
+    setSyncing = (value: boolean) => {
+        this.syncing = value;
+    };
+
+    isSyncing = () => this.syncing;
 
     addLoadingMessagesForChannel = (serverUrl: string, channelId: string) => {
         if (!this.loadingMessagesForChannel[serverUrl]) {
