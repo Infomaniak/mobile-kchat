@@ -5,16 +5,15 @@ import React, {useEffect, useState} from 'react';
 import {Image, View} from 'react-native';
 
 import {infomaniakLogin} from '@actions/remote/iksession';
+import {handleFirstConnect} from '@actions/websocket';
 import FormattedText from '@components/formatted_text';
 import {Launch} from '@constants';
 import {getDefaultThemeByAppearance} from '@context/theme';
 import {login as displayLoginWebView} from '@init/ikauth';
 import {launchToHome} from '@init/launch';
 import PushNotifications from '@init/push_notifications';
-import SessionManager from '@managers/session_manager';
 import {resetToInfomaniakNoTeams} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
-import {logError} from '@utils/log';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
@@ -45,21 +44,19 @@ const Server = ({
             const accessToken = await displayLoginWebView();
             const result = await infomaniakLogin(accessToken);
             if (result.serverUrl) {
-                const error = await SessionManager.triggerSync(result.serverUrl);
-                if (error) {
-                    logError('ik_login: triggerSync failed', error);
-                    resetToInfomaniakNoTeams();
-                    return;
-                }
+                await handleFirstConnect(result.serverUrl);
                 await goToHome(result.serverUrl!, result.error as never);
+                EphemeralStore.setLoggingIn(false);
             } else {
                 resetToInfomaniakNoTeams();
+                EphemeralStore.setLoggingIn(false);
             }
         } catch (error) {
-            logError('ik_login: login failed', error);
+            // eslint-disable-next-line no-console
+            console.error('Error during login:', error);
+            EphemeralStore.setLoggingIn(false);
         } finally {
             setConnecting(false);
-            EphemeralStore.setLoggingIn(false);
         }
     };
 
