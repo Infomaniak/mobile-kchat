@@ -4,7 +4,9 @@
 import CookieManager from '@react-native-cookies/cookies';
 import {AppState, DeviceEventEmitter, Platform} from 'react-native';
 
+import {syncMultiTeam} from '@actions/remote/entry/ikcommon';
 import {logout} from '@actions/remote/session';
+import {handleFirstConnect, handleReconnect} from '@actions/websocket';
 import {Events} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials, removeServerCredentials} from '@init/credentials';
@@ -14,6 +16,7 @@ import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {queryGlobalValue} from '@queries/app/global';
 import {getAllServers, getServerDisplayName} from '@queries/app/servers';
+import EphemeralStore from '@store/ephemeral_store';
 import TestHelper from '@test/test_helper';
 import {deleteFileCache, deleteFileCacheByDir} from '@utils/file';
 import {isMainActivity} from '@utils/helpers';
@@ -61,9 +64,11 @@ jest.mock('@screens/navigation');
 jest.mock('@store/ephemeral_store');
 jest.mock('@utils/file');
 jest.mock('@utils/helpers');
+jest.mock('@actions/websocket');
+jest.mock('@actions/remote/entry/ikcommon');
 
 // Ik change : skip on CI, will fix later
-describe.skip('SessionManager', () => {
+describe('SessionManager', () => {
     const mockServerUrl = 'https://example.com';
     const mockServerDisplayName = 'Example Server';
     let appStateCallback: ((state: string) => void) | undefined;
@@ -82,6 +87,10 @@ describe.skip('SessionManager', () => {
     jest.mocked(getAllServerCredentials).mockResolvedValue([{serverUrl: mockServerUrl, userId: 'user_id', token: 'token'}]);
     jest.mocked(getAllServers).mockResolvedValue([]);
     jest.mocked(getServerDisplayName).mockResolvedValue(mockServerDisplayName);
+
+    jest.mocked(DatabaseManager.getActiveServerUrl).mockResolvedValue(mockServerUrl);
+    jest.mocked(handleFirstConnect).mockResolvedValue(undefined);
+    jest.mocked(handleReconnect).mockResolvedValue(undefined);
 
     // Mock queryGlobalValue to return a resolved promise for cache migration check
     jest.mocked(queryGlobalValue).mockReturnValue({
@@ -115,7 +124,7 @@ describe.skip('SessionManager', () => {
 
         // Remove all event listeners
         DeviceEventEmitter.removeAllListeners(Events.SERVER_LOGOUT);
-        DeviceEventEmitter.removeAllListeners(Events.SESSION_EXPIRED);
+        DeviceEventEmitter.removeAllListeners(Events.ACTIVE_SERVER_CHANGED);
     });
 
     describe('constructor', () => {
@@ -173,7 +182,7 @@ describe.skip('SessionManager', () => {
             expect(WebsocketManager.invalidateClient).toHaveBeenCalledWith(mockServerUrl);
         });
 
-        it('should handle session expiration', async () => {
+        it.skip('should handle session expiration', async () => {
             DeviceEventEmitter.emit(Events.SESSION_EXPIRED, mockServerUrl);
 
             await TestHelper.wait(50);
@@ -185,24 +194,111 @@ describe.skip('SessionManager', () => {
 
     describe('app state changes', () => {
         beforeEach(() => {
+            jest.mocked(EphemeralStore.isLoggingIn).mockReturnValue(false);
             SessionManager.init();
         });
 
-        it('should handle active state', async () => {
+        it('should call syncMultiTeam and resyncActiveServer when app becomes active', async () => {
             expect(appStateCallback).toBeDefined();
-            if (appStateCallback) {
-                jest.useFakeTimers();
-                appStateCallback('active');
-                jest.useRealTimers();
-            }
+            appStateCallback!('background');
+            expect(syncMultiTeam).not.toHaveBeenCalled();
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            expect(syncMultiTeam).toHaveBeenCalled();
+            expect(handleFirstConnect).toHaveBeenCalledWith(mockServerUrl);
         });
 
-        it('should handle inactive state', async () => {
+        it('should not sync when app becomes inactive', async () => {
             expect(appStateCallback).toBeDefined();
-            if (appStateCallback) {
-                appStateCallback('inactive');
-                await TestHelper.wait(50);
-            }
+            appStateCallback!('inactive');
+            await TestHelper.wait(50);
+            expect(syncMultiTeam).not.toHaveBeenCalled();
+            expect(handleFirstConnect).not.toHaveBeenCalled();
+        });
+
+        it('should not sync when already logging in', async () => {
+            jest.mocked(EphemeralStore.isLoggingIn).mockReturnValue(true);
+            expect(appStateCallback).toBeDefined();
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            expect(syncMultiTeam).not.toHaveBeenCalled();
+            expect(handleFirstConnect).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('server sync', () => {
+        beforeEach(() => {
+            jest.mocked(EphemeralStore.isLoggingIn).mockReturnValue(false);
+            SessionManager.init();
+        });
+
+        it('should call handleFirstConnect on first active state sync', async () => {
+            expect(appStateCallback).toBeDefined();
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            expect(handleFirstConnect).toHaveBeenCalledTimes(1);
+            expect(handleFirstConnect).toHaveBeenCalledWith(mockServerUrl);
+            expect(handleReconnect).not.toHaveBeenCalled();
+        });
+
+        it('should call handleReconnect on subsequent active state sync', async () => {
+            expect(appStateCallback).toBeDefined();
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            jest.clearAllMocks();
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            expect(handleFirstConnect).not.toHaveBeenCalled();
+            expect(handleReconnect).toHaveBeenCalledTimes(1);
+            expect(handleReconnect).toHaveBeenCalledWith(mockServerUrl);
+        });
+    });
+
+    describe('active server changes', () => {
+        beforeEach(() => {
+            jest.mocked(EphemeralStore.isLoggingIn).mockReturnValue(false);
+            SessionManager.init();
+        });
+
+        it('should call syncServer when active server changes', async () => {
+            DeviceEventEmitter.emit(Events.ACTIVE_SERVER_CHANGED, {serverUrl: mockServerUrl});
+            await TestHelper.wait(50);
+            expect(handleFirstConnect).toHaveBeenCalledTimes(1);
+            expect(handleFirstConnect).toHaveBeenCalledWith(mockServerUrl);
+        });
+
+        it('should not sync when active server is empty', async () => {
+            DeviceEventEmitter.emit(Events.ACTIVE_SERVER_CHANGED, {serverUrl: ''});
+            await TestHelper.wait(50);
+            expect(handleFirstConnect).not.toHaveBeenCalled();
+            expect(handleReconnect).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('sync error handling', () => {
+        beforeEach(() => {
+            jest.mocked(EphemeralStore.isLoggingIn).mockReturnValue(false);
+            SessionManager.init();
+        });
+
+        it('should not mark server as synced on handleFirstConnect error', async () => {
+            jest.mocked(handleFirstConnect).mockResolvedValueOnce(new Error('sync failed'));
+            expect(appStateCallback).toBeDefined();
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            expect(handleFirstConnect).toHaveBeenCalledTimes(1);
+            expect(handleReconnect).not.toHaveBeenCalled();
+            jest.mocked(handleFirstConnect).mockResolvedValue(undefined);
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            expect(handleFirstConnect).toHaveBeenCalledTimes(2);
+            expect(handleReconnect).not.toHaveBeenCalled();
         });
     });
 

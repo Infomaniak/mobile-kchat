@@ -15,8 +15,8 @@ import {registerScreens} from '@screens/index';
 import {registerNavigationListeners} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
-import {withMinDuration} from '@utils/timing';
 import {logInfo} from '@utils/log';
+import {withMinDuration} from '@utils/timing';
 
 // Controls whether the main initialization (database, etc...) is done, either on app launch
 // or on the Share Extension, for example.
@@ -71,7 +71,7 @@ export async function initialize() {
 }
 
 export async function start() {
-    let totalStart = Date.now();
+    const totalStart = Date.now();
 
     await withMinDuration(async () => {
         NavigationStore.reset();

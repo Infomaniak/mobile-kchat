@@ -42,11 +42,6 @@ export default class WebSocketClient {
     private pingInterval: NodeJS.Timeout | undefined;
     private waitingForPong: boolean = false;
 
-    // The first time we connect to a server (on init or login)
-    // we do the sync out of the websocket lifecycle.
-    // This is used to avoid calling twice to the sync logic.
-    private shouldSkipSync = false;
-
     // responseSequence is the number to track a response sent
     // via the websocket. A response will always have the same sequence number
     // as the request.
@@ -58,8 +53,7 @@ export default class WebSocketClient {
 
     // Callbacks
     private eventCallback?: Function;
-    private firstConnectCallback?: () => void;
-    private reconnectCallback?: () => void;
+    private connectedCallback?: () => void;
     private errorCallback?: Function;
     private closeCallback?: (connectFailCount: number) => void;
     private connectingCallback?: () => void;
@@ -76,7 +70,7 @@ export default class WebSocketClient {
         this.serverUrl = serverUrl;
     }
 
-    public async initialize(opts = {}, shouldSkipSync = false) {
+    public async initialize(opts = {}) {
         const {forceConnection} = Object.assign({}, DEFAULT_OPTIONS, opts);
 
         if (forceConnection) {
@@ -104,8 +98,6 @@ export default class WebSocketClient {
         if (this.connectFailCount === 0) {
             logInfo('websocket connecting to ' + this.url);
         }
-
-        this.shouldSkipSync = shouldSkipSync;
 
         try {
             const headers: ClientHeaders = {};
@@ -141,15 +133,8 @@ export default class WebSocketClient {
                 //this.sendMessage('authentication_challenge', {token: this.token});
             }
 
-            if (this.shouldSkipSync) {
-                logInfo('websocket connected to', this.url);
-                this.firstConnectCallback?.();
-            } else {
-                logInfo('websocket re-established connection to', this.url);
-                if (this.reconnectCallback) {
-                    this.reconnectCallback();
-                }
-            }
+            logInfo('websocket connected to', this.url);
+            this.connectedCallback?.();
 
             this.connectFailCount = 0;
         });
@@ -158,12 +143,6 @@ export default class WebSocketClient {
             clearTimeout(this.connectionTimeout);
             this.conn = undefined;
             this.responseSequence = 1;
-
-            // We skip the sync on first connect, since we are syncing along
-            // the init logic. If the connection closes at any point after that,
-            // we don't want to skip the sync. If we keep the same connection and
-            // reliable websockets are enabled this won't trigger a new sync.
-            this.shouldSkipSync = false;
 
             logInfo('[WS-client] disconnected event', this.serverUrl, 'stop:', this.stop, 'failCount:', this.connectFailCount);
             if (this.connectFailCount === 0) {
@@ -354,12 +333,8 @@ export default class WebSocketClient {
         this.eventCallback = callback;
     }
 
-    public setFirstConnectCallback(callback: () => void) {
-        this.firstConnectCallback = callback;
-    }
-
-    public setReconnectCallback(callback: () => void) {
-        this.reconnectCallback = callback;
+    public setConnectedCallback(callback: () => void) {
+        this.connectedCallback = callback;
     }
 
     public setErrorCallback(callback: Function) {
@@ -423,7 +398,7 @@ export default class WebSocketClient {
             }
         } else if (!this.conn || this.connState === WebSocketReadyState.CLOSED) {
             this.conn = undefined;
-            this.initialize(this.token);
+            this.initialize();
         }
     }
 

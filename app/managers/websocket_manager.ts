@@ -7,7 +7,7 @@ import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged} from 'rxjs/operators';
 
 import {fetchStatusByIds} from '@actions/remote/user';
-import {handleFirstConnect, handleReconnect} from '@actions/websocket';
+import {handleFirstConnect} from '@actions/websocket';
 import {handleWebSocketEvent} from '@actions/websocket/event';
 import {BASE_SERVER_URL} from '@client/rest/constants';
 import WebSocketClient from '@client/websocket';
@@ -87,9 +87,9 @@ class WebsocketManagerSingleton {
 
         const isCurrentClient = () => this.clients[serverUrl] === client;
 
-        client.setFirstConnectCallback(() => isCurrentClient() && this.onFirstConnect(serverUrl));
+        client.setConnectedCallback(() => isCurrentClient() && this.onConnected(serverUrl));
         client.setEventCallback((evt: WebSocketMessage) => handleWebSocketEvent(serverUrl, evt));
-        client.setReconnectCallback(() => isCurrentClient() && this.onReconnect(serverUrl));
+
         client.setCloseCallback((connectFailCount: number) => this.onWebsocketClose(serverUrl, connectFailCount));
 
         this.clients[serverUrl] = client;
@@ -151,7 +151,7 @@ class WebsocketManagerSingleton {
         delete this.connectionTimerIDs[serverUrl];
         if (!client?.isConnected()) {
             const hasSynced = this.firstConnectionSynced[serverUrl];
-            client.initialize({}, !hasSynced);
+            client.initialize({});
             if (!hasSynced) {
                 const error = await handleFirstConnect(serverUrl, groupLabel);
                 if (error) {
@@ -167,19 +167,9 @@ class WebsocketManagerSingleton {
         }
     };
 
-    private onFirstConnect = (serverUrl: string) => {
+    private onConnected = (serverUrl: string) => {
         this.startPeriodicStatusUpdates(serverUrl);
         this.getConnectedSubject(serverUrl).next('connected');
-    };
-
-    private onReconnect = async (serverUrl: string) => {
-        this.startPeriodicStatusUpdates(serverUrl);
-        this.getConnectedSubject(serverUrl).next('connected');
-
-        const error = await handleReconnect(serverUrl);
-        if (error) {
-            this.getClient(serverUrl)?.close(false);
-        }
     };
 
     private onWebsocketClose = async (serverUrl: string, connectFailCount: number) => {
