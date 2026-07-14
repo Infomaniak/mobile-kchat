@@ -6,7 +6,7 @@ import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react
 import {storeGlobal, storeOnboardingViewedValue} from '@actions/app/global';
 import {terminateSession} from '@actions/local/session';
 import {syncMultiTeam} from '@actions/remote/entry/ikcommon';
-import {handleReconnect} from '@actions/websocket';
+import {handleFirstConnect, handleReconnect} from '@actions/websocket';
 import {Events, Launch} from '@constants';
 import {GLOBAL_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
@@ -29,6 +29,7 @@ type LogoutCallbackArg = {
 export class SessionManagerSingleton {
     private previousAppState: AppStateStatus;
     private terminatingSessionUrl = new Set<string>();
+    private firstResyncDone = false;
 
     constructor() {
         AppState.addEventListener('change', this.onAppStateChange);
@@ -94,7 +95,16 @@ export class SessionManagerSingleton {
         try {
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
             if (activeServerUrl) {
-                await handleReconnect(activeServerUrl);
+                if (this.firstResyncDone) {
+                    await handleReconnect(activeServerUrl);
+                } else {
+                    const error = await handleFirstConnect(activeServerUrl);
+                    if (error) {
+                        return;
+                    }
+
+                    this.firstResyncDone = true;
+                }
             }
         } catch (error) {
             logError('[SessionManager] resyncActiveServer failed', error);
@@ -104,7 +114,7 @@ export class SessionManagerSingleton {
     private onActiveServerChanged = async ({serverUrl}: {serverUrl: string}) => {
         try {
             if (serverUrl) {
-                await handleReconnect(serverUrl);
+                await handleFirstConnect(serverUrl);
             }
         } catch (error) {
             logError('[SessionManager] onActiveServerChanged failed', error);

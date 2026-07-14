@@ -12,6 +12,7 @@ import WebsocketManager from './websocket_manager';
 
 import type {ServerDatabase} from '@typings/database/database';
 
+jest.mock('@actions/remote/user');
 jest.mock('@actions/websocket/event');
 jest.mock('@client/websocket');
 jest.mock('@utils/helpers');
@@ -62,13 +63,10 @@ describe('WebsocketManager - background/foreground reconnection', () => {
         mockCallbacks = {};
         mockWebSocketClient = {
             initialize: jest.fn(),
-            setFirstConnectCallback: jest.fn((cb: () => void) => {
-                mockCallbacks.firstConnect = cb;
+            setConnectedCallback: jest.fn((cb: () => void) => {
+                mockCallbacks.connected = cb;
             }),
             setEventCallback: jest.fn(),
-            setReconnectCallback: jest.fn((cb: () => void) => {
-                mockCallbacks.reconnect = cb;
-            }),
             setCloseCallback: jest.fn((cb: (count: number) => void) => {
                 mockCallbacks.close = cb;
             }),
@@ -134,7 +132,7 @@ describe('WebsocketManager - background/foreground reconnection', () => {
         // Allow async openAll to complete its microtasks
         await new Promise(process.nextTick);
 
-        expect(mockWebSocketClient.initialize).toHaveBeenCalledWith({}, false);
+        expect(mockWebSocketClient.initialize).toHaveBeenCalledWith({});
     });
 
     it('should reinitialize websocket clients when returning to foreground after background', async () => {
@@ -165,6 +163,19 @@ describe('WebsocketManager - background/foreground reconnection', () => {
 
         expect(mockWebSocketClient.close).toHaveBeenCalledWith(true);
         expect(mockWebSocketClient.invalidate).toHaveBeenCalled();
+    });
+
+    it('should not trigger data sync on connected callback', () => {
+        expect(mockCallbacks.connected).toBeDefined();
+
+        let latestState: WebsocketConnectedState | undefined;
+        WebsocketManager.observeWebsocketState(mockServerUrl).subscribe((state) => {
+            latestState = state;
+        });
+
+        mockCallbacks.connected!();
+
+        expect(latestState).toBe('connected');
     });
 
     it('should handle network disconnection by closing all websockets', () => {
