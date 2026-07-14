@@ -489,7 +489,7 @@ const PostList = ({
                 removeClippedSubviews={Platform.OS === 'android'}
                 renderItem={renderItem}
                 scrollEventThrottle={SCROLL_EVENT_THROTTLE}
-                style={styles.flex}
+                style={[styles.flex, {backgroundColor: theme.centerChannelBg}]}
                 viewabilityConfig={VIEWABILITY_CONFIG}
                 testID={`${testID}.flat_list`}
                 inverted={true}

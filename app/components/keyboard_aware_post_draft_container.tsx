@@ -10,6 +10,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {InputAccessoryViewContainer, InputAccessoryViewContent} from '@components/input_accessory_view';
 import {Events} from '@constants';
 import {KeyboardAnimationProvider} from '@context/keyboard_animation';
+import {useTheme} from '@context/theme';
 import {useIsTablet, useWindowDimensions} from '@hooks/device';
 import {useInputAccessoryView} from '@hooks/useInputAccessoryView';
 import {useKeyboardAwarePostDraft} from '@hooks/useKeyboardAwarePostDraft';
@@ -63,6 +64,7 @@ export const KeyboardAwarePostDraftContainer = ({
     enabled = true,
     onEmojiSearchFocusChange,
 }: Props) => {
+    const theme = useTheme();
     const {height: windowHeight} = useWindowDimensions();
     const insets = useSafeAreaInsets();
     const isTablet = useIsTablet();
@@ -604,7 +606,7 @@ export const KeyboardAwarePostDraftContainer = ({
     // KeyboardGestureArea will be a no-op on Android if rendered, but we avoid it for clarity
     const content = (
         <>
-            <View style={containerStyle}>
+            <View style={[containerStyle, {backgroundColor: theme.centerChannelBg}]}>
                 {renderList({
                     keyboardCurrentHeight,
                     listRef,
@@ -619,6 +621,7 @@ export const KeyboardAwarePostDraftContainer = ({
                 style={[
                     inputContainerAnimatedStyle,
                     styles.inputContainer,
+                    {backgroundColor: theme.centerChannelBg},
                 ]}
             >
                 <View onLayout={onLayout}>
