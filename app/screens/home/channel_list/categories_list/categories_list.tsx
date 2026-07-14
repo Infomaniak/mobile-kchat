@@ -2,16 +2,18 @@
 // See LICENSE.txt for license information.
 
 import React, {useEffect, useMemo, useState} from 'react';
-import {DeviceEventEmitter, useWindowDimensions} from 'react-native';
+import {DeviceEventEmitter, useWindowDimensions, View} from 'react-native';
 import Animated, {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 
 import DraftsButton from '@components/drafts_buttton';
+import Loading from '@components/loading';
 import ThreadsButton from '@components/threads_button';
 import {Events, Screens} from '@constants';
 import {CHANNEL, DRAFT, THREAD} from '@constants/screens';
 import {TABLET_SIDEBAR_WIDTH, TEAM_SIDEBAR_WIDTH} from '@constants/view';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
+import EphemeralStore from '@store/ephemeral_store';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import Categories from './categories';
@@ -126,6 +128,13 @@ const CategoriesList = ({
 
     const content = useMemo(() => {
         if (!hasChannels) {
+            if (EphemeralStore.isSyncing()) {
+                return (
+                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                        <Loading color={theme.buttonBg}/>
+                    </View>
+                );
+            }
             return (<LoadChannelsError/>);
         }
 
@@ -137,7 +146,7 @@ const CategoriesList = ({
                 <Categories/>
             </>
         );
-    }, [draftsButtonComponent, hasChannels, threadButtonComponent]);
+    }, [draftsButtonComponent, hasChannels, threadButtonComponent, theme]);
 
     return (
         <Animated.View style={[styles.container, tabletStyle]}>

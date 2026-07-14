@@ -1153,5 +1153,9 @@
   "send_feedback.files.max_size": "Taille maximale du fichier : 32 Mo",
   "send_feedback.files.too_many": "Vous pouvez joindre jusqu'à 5 fichiers.",
   "send_feedback.files.too_large": "Un ou plusieurs fichiers dépassent la limite de 32 Mo.",
-  "notification_settings.keywords": "Mots-clés"
+  "notification_settings.keywords": "Mots-clés",
+  "mobile.components.select_server_view.connect": "Se connecter",
+  "mobile.components.select_server_view.connecting": "Connexion en cours...",
+  "loading_error.retry": "Réessayer",
+  "infomaniak.no_team.discover_ksuite": "Découvrez kSuite"
 }
