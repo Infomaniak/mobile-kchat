@@ -5,6 +5,7 @@ import React, {useEffect, useState} from 'react';
 import {Image, View} from 'react-native';
 
 import {infomaniakLogin} from '@actions/remote/iksession';
+import {handleFirstConnect} from '@actions/websocket';
 import FormattedText from '@components/formatted_text';
 import {Launch} from '@constants';
 import {getDefaultThemeByAppearance} from '@context/theme';
@@ -43,6 +44,7 @@ const Server = ({
             const accessToken = await displayLoginWebView();
             const result = await infomaniakLogin(accessToken);
             if (result.serverUrl) {
+                await handleFirstConnect(result.serverUrl);
                 await goToHome(result.serverUrl!, result.error as never);
                 EphemeralStore.setLoggingIn(false);
             } else {
