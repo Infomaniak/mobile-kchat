@@ -34,7 +34,7 @@ export async function loginEntry({serverUrl}: AfterLoginArgs): Promise<{error?: 
         const credentials = await getServerCredentials(serverUrl);
         if (credentials?.token) {
             WebsocketManager.createClient(serverUrl, credentials.token);
-            await WebsocketManager.initializeClient(serverUrl, 'Login');
+            await WebsocketManager.initializeClient(serverUrl);
         }
 
         return {};

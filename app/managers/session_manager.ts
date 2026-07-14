@@ -29,7 +29,7 @@ type LogoutCallbackArg = {
 export class SessionManagerSingleton {
     private previousAppState: AppStateStatus;
     private terminatingSessionUrl = new Set<string>();
-    private firstResyncDone = false;
+    private firstSyncedUrls = new Set<string>();
 
     constructor() {
         AppState.addEventListener('change', this.onAppStateChange);
@@ -95,26 +95,33 @@ export class SessionManagerSingleton {
         try {
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
             if (activeServerUrl) {
-                if (this.firstResyncDone) {
-                    await handleReconnect(activeServerUrl);
-                } else {
-                    const error = await handleFirstConnect(activeServerUrl);
-                    if (error) {
-                        return;
-                    }
-
-                    this.firstResyncDone = true;
-                }
+                await this.syncServer(activeServerUrl);
             }
         } catch (error) {
             logError('[SessionManager] resyncActiveServer failed', error);
         }
     };
 
+    private syncServer = async (serverUrl: string) => {
+        try {
+            if (this.firstSyncedUrls.has(serverUrl)) {
+                await handleReconnect(serverUrl);
+            } else {
+                const error = await handleFirstConnect(serverUrl);
+                if (error) {
+                    return;
+                }
+                this.firstSyncedUrls.add(serverUrl);
+            }
+        } catch (error) {
+            logError('[SessionManager] syncServer failed', error);
+        }
+    };
+
     private onActiveServerChanged = async ({serverUrl}: {serverUrl: string}) => {
         try {
             if (serverUrl) {
-                await handleFirstConnect(serverUrl);
+                await this.syncServer(serverUrl);
             }
         } catch (error) {
             logError('[SessionManager] onActiveServerChanged failed', error);

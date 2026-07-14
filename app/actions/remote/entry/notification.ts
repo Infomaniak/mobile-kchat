@@ -149,7 +149,7 @@ export async function pushNotificationEntry(serverUrl: string, notification: Not
         captureMessage(`Notification redirect failed: channelId=${channelId}, teamId=${teamId}, hasMyChannel=${Boolean(myChannel)}, hasMyTeam=${Boolean(myTeam)}, isThread=${isThreadNotification}, isConference=${isConferenceNotification}`);
     }
 
-    WebsocketManager.openAll(groupLabel);
+    WebsocketManager.openAll();
 
     return {};
 }
