@@ -6,6 +6,7 @@ import {DeviceEventEmitter} from 'react-native';
 import {loginEntry} from '@actions/remote/entry/login';
 import {addPushProxyVerificationStateFromLogin} from '@actions/remote/session';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
+import {handleFirstConnect} from '@actions/websocket';
 import {BASE_SERVER_URL} from '@client/rest/constants';
 import ClientError from '@client/rest/error';
 import {Events} from '@constants';
@@ -59,6 +60,8 @@ const configureServer = async (teamServer: TeamServer, accessToken: string) => {
         await addPushProxyVerificationStateFromLogin(serverUrl);
         await loginEntry({serverUrl});
         await DatabaseManager.setActiveServerDatabase(serverUrl);
+        await handleFirstConnect(serverUrl);
+
         return serverUrl;
     } catch (e) {
         await removeServerCredentials(serverUrl);
