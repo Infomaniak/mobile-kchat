@@ -135,6 +135,9 @@ export class SessionManagerSingleton {
         try {
             this.terminatingSessionUrl.add(serverUrl);
 
+            // Remove from synced urls so next login will trigger firstConnect again
+            this.firstSyncedUrls.delete(serverUrl);
+
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
             const activeServerDisplayName = await DatabaseManager.getActiveServerDisplayName();
 

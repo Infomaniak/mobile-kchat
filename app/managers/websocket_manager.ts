@@ -232,7 +232,7 @@ class WebsocketManagerSingleton {
         }
 
         if (currentIsActive) {
-            this.openAll();
+            this.openAll().catch((error) => logError('[WebsocketManager] openAll failed', error));
         } else {
             this.closeAll();
         }
