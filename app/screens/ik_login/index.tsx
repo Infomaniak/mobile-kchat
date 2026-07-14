@@ -9,7 +9,7 @@ import FormattedText from '@components/formatted_text';
 import {Launch} from '@constants';
 import {getDefaultThemeByAppearance} from '@context/theme';
 import DatabaseManager from '@database/manager';
-import {login as displayLoginWebView} from '@init/ikauth';
+import {login as displayLoginWebView, LoginCancelledError} from '@init/ikauth';
 import {launchToHome} from '@init/launch';
 import PushNotifications from '@init/push_notifications';
 import SessionManager from '@managers/session_manager';
@@ -57,8 +57,10 @@ const Server = ({
                 resetToInfomaniakNoTeams();
             }
         } catch (error) {
+            if (error instanceof LoginCancelledError) {
+                return;
+            }
             logError('[ik_login] login failed', error);
-            resetToInfomaniakNoTeams();
         } finally {
             setConnecting(false);
         }

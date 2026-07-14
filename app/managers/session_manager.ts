@@ -14,6 +14,7 @@ import {getAllServerCredentials} from '@init/credentials';
 import {relaunchApp} from '@init/launch';
 import {queryGlobalValue} from '@queries/app/global';
 import {getAllServers} from '@queries/app/servers';
+import {resetToInfomaniakNoTeams} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import {deleteFileCacheByDir} from '@utils/file';
 import {isMainActivity} from '@utils/helpers';
@@ -37,6 +38,7 @@ export class SessionManagerSingleton {
 
         DeviceEventEmitter.addListener(Events.SERVER_LOGOUT, this.onLogout);
         DeviceEventEmitter.addListener(Events.ACTIVE_SERVER_CHANGED, this.onActiveServerChanged);
+        DeviceEventEmitter.addListener(Events.NO_TEAMS, this.onNoTeams);
 
         this.previousAppState = AppState.currentState;
     }
@@ -178,6 +180,18 @@ export class SessionManagerSingleton {
             }
         } finally {
             this.terminatingSessionUrl.delete(serverUrl);
+        }
+    };
+
+    private onNoTeams = async () => {
+        try {
+            const servers = await getAllServers();
+            if (!servers.length) {
+                await resetToInfomaniakNoTeams();
+
+            }
+        } catch (error) {
+            logError('[SessionManager] onNoTeams failed', error);
         }
     };
 

@@ -84,6 +84,14 @@ export const syncMultiTeam = async (accessToken: string) => {
         const client = await NetworkManager.createGlobalClient(accessToken);
         teamServers = await client.getMultiTeams();
 
+        if (teamServers.length === 0) {
+            if (serverCredentials.length > 0) {
+                logError('[syncMultiTeam] getMultiTeams returned 0 teams, emitting NO_TEAMS');
+                DeviceEventEmitter.emit(Events.NO_TEAMS);
+            }
+            return [];
+        }
+
         const serverCreationPromises: Array<Promise<string | null>> = [];
 
         for (const teamServer of teamServers) {
