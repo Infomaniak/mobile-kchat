@@ -41,14 +41,12 @@ export async function login(): Promise<string> {
     } catch (error: any) {
         const code = error?.code;
         const message = error?.message?.toLowerCase() || '';
-        const rawMessage = error?.message || '';
         const isCancelled =
             code === 'user_cancelled' ||
             code === -3 ||
             code === '-3' ||
             message.includes('cancel') ||
-            message.includes('annul') ||
-            rawMessage.includes('-3');
+            message.includes('annul');
 
         if (isCancelled) {
             throw new LoginCancelledError();
