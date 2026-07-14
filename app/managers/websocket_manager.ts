@@ -7,7 +7,6 @@ import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged} from 'rxjs/operators';
 
 import {fetchStatusByIds} from '@actions/remote/user';
-import {handleFirstConnect} from '@actions/websocket';
 import {handleWebSocketEvent} from '@actions/websocket/event';
 import {BASE_SERVER_URL} from '@client/rest/constants';
 import WebSocketClient from '@client/websocket';
@@ -30,7 +29,6 @@ class WebsocketManagerSingleton {
     private netType: NetInfoStateType = NetInfoStateType.none;
     private previousActiveState: boolean;
     private statusUpdatesIntervalIDs: Record<string, NodeJS.Timeout> = {};
-    private firstConnectionSynced: Record<string, boolean> = {};
 
     private appStateSubscription: NativeEventSubscription | undefined;
     private netStateSubscription: NetInfoSubscription | undefined;
@@ -68,7 +66,6 @@ class WebsocketManagerSingleton {
         this.clients[serverUrl]?.invalidate();
         clearTimeout(this.connectionTimerIDs[serverUrl]);
         delete this.clients[serverUrl];
-        delete this.firstConnectionSynced[serverUrl];
 
         // We don't remove the connected subject so any potential client invalidation
         // and subsequent creation of the client can still be observed by the component.
@@ -106,16 +103,16 @@ class WebsocketManagerSingleton {
         }
     };
 
-    public openAll = async (groupLabel?: BaseRequestGroupLabel) => {
+    public openAll = async () => {
         let queued = 0;
-        for await (const clientUrl of Object.keys(this.clients)) {
-            const activeServerUrl = await DatabaseManager.getActiveServerUrl();
-            if (clientUrl === activeServerUrl || this.firstConnectionSynced[clientUrl]) {
-                this.initializeClient(clientUrl, groupLabel);
+        const activeServerUrl = await DatabaseManager.getActiveServerUrl();
+        for (const clientUrl of Object.keys(this.clients)) {
+            if (clientUrl === activeServerUrl) {
+                this.initializeClient(clientUrl);
             } else {
                 queued += 1;
                 this.getConnectedSubject(clientUrl).next('connecting');
-                this.connectionTimerIDs[clientUrl] = setTimeout(() => this.initializeClient(clientUrl, groupLabel), WAIT_UNTIL_NEXT * queued);
+                this.connectionTimerIDs[clientUrl] = setTimeout(() => this.initializeClient(clientUrl), WAIT_UNTIL_NEXT * queued);
             }
         }
     };
@@ -145,25 +142,15 @@ class WebsocketManagerSingleton {
         }
     };
 
-    public initializeClient = async (serverUrl: string, groupLabel: BaseRequestGroupLabel = 'WebSocket Reconnect') => {
+    public initializeClient = async (serverUrl: string) => {
         const client: WebSocketClient = this.clients[serverUrl];
+        if (!client) {
+            return;
+        }
         clearTimeout(this.connectionTimerIDs[serverUrl]);
         delete this.connectionTimerIDs[serverUrl];
-        if (!client?.isConnected()) {
-            const hasSynced = this.firstConnectionSynced[serverUrl];
+        if (!client.isConnected()) {
             client.initialize({});
-            if (!hasSynced) {
-                const error = await handleFirstConnect(serverUrl, groupLabel);
-                if (error) {
-                    // This will try to reconnect and try to sync again
-                    client.close(false);
-                }
-
-                // Makes sure a client still exist, and therefore we haven't been logged out
-                if (this.clients[serverUrl]) {
-                    this.firstConnectionSynced[serverUrl] = true;
-                }
-            }
         }
     };
 
@@ -245,7 +232,7 @@ class WebsocketManagerSingleton {
         }
 
         if (currentIsActive) {
-            this.openAll('WebSocket Reconnect');
+            this.openAll();
         } else {
             this.closeAll();
         }

@@ -50,6 +50,9 @@ describe('WebsocketManager - background/foreground reconnection', () => {
 
         await DatabaseManager.init([mockServerUrl]);
 
+        // Mock getActiveServerUrl so openAll can identify the active server
+        (DatabaseManager as any).getActiveServerUrl = jest.fn().mockResolvedValue(mockServerUrl);
+
         // Reset singleton internal state by manipulating private fields
         (WebsocketManager as any).previousActiveState = true;
         (WebsocketManager as any).connectedSubjects = {};
@@ -57,7 +60,6 @@ describe('WebsocketManager - background/foreground reconnection', () => {
         // Clean up existing clients
         WebsocketManager.invalidateClient(mockServerUrl);
         delete (WebsocketManager as any).clients[mockServerUrl];
-        delete (WebsocketManager as any).firstConnectionSynced[mockServerUrl];
 
         // Setup WebSocketClient mock
         mockCallbacks = {};
@@ -126,27 +128,25 @@ describe('WebsocketManager - background/foreground reconnection', () => {
         expect(mockWebSocketClient.initialize).not.toHaveBeenCalled();
 
         // 2. Foreground → openAll
-        (WebsocketManager as any).firstConnectionSynced[mockServerUrl] = true;
         capturedAppStateCallback!('active');
 
-        // Allow async openAll to complete its microtasks
-        await new Promise(process.nextTick);
+        // Allow async openAll to complete
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
         expect(mockWebSocketClient.initialize).toHaveBeenCalledWith({});
     });
 
     it('should reinitialize websocket clients when returning to foreground after background', async () => {
-        // Setup: first connection already synced
-        (WebsocketManager as any).firstConnectionSynced[mockServerUrl] = true;
-
         // 1. Background → closeAll immediately
         capturedAppStateCallback!('background');
+
+        expect(mockWebSocketClient.close).toHaveBeenCalledWith(true);
 
         // 2. Foreground → openAll triggers initializeClient
         capturedAppStateCallback!('active');
 
-        // Allow async openAll to complete its microtasks
-        await new Promise(process.nextTick);
+        // Allow async openAll to complete
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
         expect(mockWebSocketClient.initialize).toHaveBeenCalled();
     });

@@ -24,7 +24,7 @@ export async function switchToServer(serverUrl: string, theme: Theme, intl: Intl
     if (server.lastActiveAt) {
         Navigation.updateProps(Screens.HOME, {extra: undefined});
         DatabaseManager.setActiveServerDatabase(server.url);
-        WebsocketManager.initializeClient(server.url, 'Server Switch');
+        WebsocketManager.initializeClient(server.url);
         return;
     }
 
