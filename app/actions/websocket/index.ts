@@ -65,17 +65,17 @@ function captureSlowReconnectBatch(serverUrl: string, groupLabel: BaseRequestGro
     })}`);
 }
 
-export async function handleFirstConnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel) {
+export async function handleFirstConnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel): Promise<Error | undefined> {
     setExtraSessionProps(serverUrl, groupLabel);
     autoUpdateTimezone(serverUrl, groupLabel);
     return doReconnect(serverUrl, groupLabel);
 }
 
-export async function handleReconnect(serverUrl: string, groupLabel: BaseRequestGroupLabel = 'WebSocket Reconnect') {
+export async function handleReconnect(serverUrl: string, groupLabel: BaseRequestGroupLabel = 'WebSocket Reconnect'): Promise<Error | undefined> {
     return doReconnect(serverUrl, groupLabel);
 }
 
-async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel) {
+async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel): Promise<Error | undefined> {
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
         return new Error('cannot find server database');
@@ -99,7 +99,10 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
     const entryData = await entry(serverUrl, currentTeamId, currentChannelId, lastFullSync, groupLabel);
     if ('error' in entryData) {
         setTeamLoading(serverUrl, false);
-        return entryData.error;
+        if (entryData.error instanceof Error) {
+            return entryData.error;
+        }
+        return new Error(String(entryData.error));
     }
     const {models, initialTeamId, initialChannelId, prefData, teamData, chData, meData, gmConverted} = entryData;
 

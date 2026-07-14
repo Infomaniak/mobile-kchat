@@ -103,16 +103,16 @@ export class SessionManagerSingleton {
         try {
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
             if (activeServerUrl) {
-                await this.syncServer(activeServerUrl);
+                await this.triggerSync(activeServerUrl);
             }
         } catch (error) {
             logError('[SessionManager] resyncActiveServer failed', error);
         }
     };
 
-    private syncServer = async (serverUrl: string) => {
+    triggerSync = async (serverUrl: string): Promise<Error | undefined> => {
         if (this.syncingUrls.has(serverUrl)) {
-            return;
+            return undefined;
         }
         try {
             this.syncingUrls.add(serverUrl);
@@ -121,21 +121,24 @@ export class SessionManagerSingleton {
             } else {
                 const error = await handleFirstConnect(serverUrl);
                 if (error) {
-                    return;
+                    logError('[SessionManager] handleFirstConnect failed', error);
+                    return error;
                 }
                 this.firstSyncedUrls.add(serverUrl);
             }
-        } catch (error) {
-            logError('[SessionManager] syncServer failed', error);
+        } catch (error: any) {
+            logError('[SessionManager] triggerSync failed', error);
+            return new Error(String(error));
         } finally {
             this.syncingUrls.delete(serverUrl);
         }
+        return undefined;
     };
 
     private onActiveServerChanged = async ({serverUrl}: {serverUrl: string}) => {
         try {
-            if (serverUrl) {
-                await this.syncServer(serverUrl);
+            if (serverUrl && !EphemeralStore.isLoggingIn()) {
+                await this.triggerSync(serverUrl);
             }
         } catch (error) {
             logError('[SessionManager] onActiveServerChanged failed', error);
