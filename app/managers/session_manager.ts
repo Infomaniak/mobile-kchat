@@ -80,6 +80,13 @@ export class SessionManagerSingleton {
         }
     };
 
+    triggerInitialResync() {
+        if (!EphemeralStore.isLoggingIn()) {
+            this.syncMultiTeam();
+            this.resyncActiveServer();
+        }
+    }
+
     private syncMultiTeam = async () => {
         try {
             const credentials = await getAllServerCredentials();
