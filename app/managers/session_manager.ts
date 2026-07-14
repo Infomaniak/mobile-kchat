@@ -30,6 +30,7 @@ export class SessionManagerSingleton {
     private previousAppState: AppStateStatus;
     private terminatingSessionUrl = new Set<string>();
     private firstSyncedUrls = new Set<string>();
+    private syncingUrls = new Set<string>();
 
     constructor() {
         AppState.addEventListener('change', this.onAppStateChange);
@@ -103,7 +104,11 @@ export class SessionManagerSingleton {
     };
 
     private syncServer = async (serverUrl: string) => {
+        if (this.syncingUrls.has(serverUrl)) {
+            return;
+        }
         try {
+            this.syncingUrls.add(serverUrl);
             if (this.firstSyncedUrls.has(serverUrl)) {
                 await handleReconnect(serverUrl);
             } else {
@@ -115,6 +120,8 @@ export class SessionManagerSingleton {
             }
         } catch (error) {
             logError('[SessionManager] syncServer failed', error);
+        } finally {
+            this.syncingUrls.delete(serverUrl);
         }
     };
 

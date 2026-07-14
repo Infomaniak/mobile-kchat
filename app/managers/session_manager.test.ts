@@ -300,6 +300,37 @@ describe('SessionManager', () => {
             expect(handleFirstConnect).toHaveBeenCalledTimes(2);
             expect(handleReconnect).not.toHaveBeenCalled();
         });
+
+        it('should clear firstSyncedUrls on logout', async () => {
+            // First sync
+            expect(appStateCallback).toBeDefined();
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+
+            // After first sync, should use reconnect
+            jest.clearAllMocks();
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            expect(handleFirstConnect).not.toHaveBeenCalled();
+            expect(handleReconnect).toHaveBeenCalledTimes(1);
+
+            // Logout
+            DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {
+                serverUrl: mockServerUrl,
+                removeServer: true,
+            });
+            await TestHelper.wait(50);
+
+            // After logout, should be firstConnect again
+            jest.clearAllMocks();
+            DeviceEventEmitter.emit(Events.ACTIVE_SERVER_CHANGED, {serverUrl: mockServerUrl});
+            await TestHelper.wait(50);
+
+            expect(handleFirstConnect).toHaveBeenCalledTimes(1);
+            expect(handleReconnect).not.toHaveBeenCalled();
+        });
     });
 
     describe('cleanup operations', () => {
