@@ -70,6 +70,9 @@ export async function start() {
 
     }, 1000); // Ik: min duration for splashscreen
 
+    // Trigger initial data sync for cold start (onAppStateChange won't fire if already active)
+    SessionManager.triggerInitialResync();
+
     if (!__DEV__) {
         // Ik Analytics / Matomo
         matomo.trackAppStart({});

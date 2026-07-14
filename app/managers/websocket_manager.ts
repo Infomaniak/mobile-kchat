@@ -29,6 +29,7 @@ class WebsocketManagerSingleton {
     private netType: NetInfoStateType = NetInfoStateType.none;
     private previousActiveState: boolean;
     private statusUpdatesIntervalIDs: Record<string, NodeJS.Timeout> = {};
+    private isOpeningAll = false;
 
     private appStateSubscription: NativeEventSubscription | undefined;
     private netStateSubscription: NetInfoSubscription | undefined;
@@ -104,16 +105,24 @@ class WebsocketManagerSingleton {
     };
 
     public openAll = async () => {
-        let queued = 0;
-        const activeServerUrl = await DatabaseManager.getActiveServerUrl();
-        for (const clientUrl of Object.keys(this.clients)) {
-            if (clientUrl === activeServerUrl) {
-                this.initializeClient(clientUrl);
-            } else {
-                queued += 1;
-                this.getConnectedSubject(clientUrl).next('connecting');
-                this.connectionTimerIDs[clientUrl] = setTimeout(() => this.initializeClient(clientUrl), WAIT_UNTIL_NEXT * queued);
+        if (this.isOpeningAll) {
+            return;
+        }
+        this.isOpeningAll = true;
+        try {
+            let queued = 0;
+            const activeServerUrl = await DatabaseManager.getActiveServerUrl();
+            for (const clientUrl of Object.keys(this.clients)) {
+                if (clientUrl === activeServerUrl) {
+                    this.initializeClient(clientUrl);
+                } else {
+                    queued += 1;
+                    this.getConnectedSubject(clientUrl).next('connecting');
+                    this.connectionTimerIDs[clientUrl] = setTimeout(() => this.initializeClient(clientUrl), WAIT_UNTIL_NEXT * queued);
+                }
             }
+        } finally {
+            this.isOpeningAll = false;
         }
     };
 
