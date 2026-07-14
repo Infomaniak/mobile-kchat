@@ -28,7 +28,31 @@ const config: Omit<AuthConfiguration, 'scopes'> = {
     // scopes: [],
 };
 
+export class LoginCancelledError extends Error {
+    constructor() {
+        super('User cancelled login');
+    }
+}
+
 export async function login(): Promise<string> {
-    const result = await authorize(config as AuthConfiguration);
-    return result.accessToken;
+    try {
+        const result = await authorize(config as AuthConfiguration);
+        return result.accessToken;
+    } catch (error: any) {
+        const code = error?.code;
+        const message = error?.message?.toLowerCase() || '';
+        const rawMessage = error?.message || '';
+        const isCancelled =
+            code === 'user_cancelled' ||
+            code === -3 ||
+            code === '-3' ||
+            message.includes('cancel') ||
+            message.includes('annul') ||
+            rawMessage.includes('-3');
+
+        if (isCancelled) {
+            throw new LoginCancelledError();
+        }
+        throw error;
+    }
 }
