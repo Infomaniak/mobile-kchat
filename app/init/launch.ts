@@ -19,8 +19,7 @@ import {getAllServers} from '@queries/app/servers';
 import {queryPostsByType} from '@queries/servers/post';
 import {getThemeForCurrentTeam} from '@queries/servers/preference';
 import {getCurrentUserId} from '@queries/servers/system';
-import {queryMyTeams} from '@queries/servers/team';
-import {resetToHome, resetToOnboarding, resetToInfomaniakLogin, resetToInfomaniakNoTeams} from '@screens/navigation';
+import {resetToHome, resetToOnboarding, resetToInfomaniakLogin} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import {getLaunchPropsFromDeepLink, handleDeepLink} from '@utils/deep_link';
 import {logInfo} from '@utils/log';
@@ -208,21 +207,8 @@ export const launchToHome = async (props: LaunchProps) => {
             break;
     }
 
-    let nTeams = 0;
-    if (props.serverUrl) {
-        const database = DatabaseManager.serverDatabases[props.serverUrl]?.database;
-        if (database) {
-            nTeams = await queryMyTeams(database).fetchCount();
-        }
-    }
-
-    if (nTeams) {
-        logInfo('Launch app in Home screen');
-        return resetToHome(props);
-    }
-
-    logInfo('Launch app in Infomaniak No Teams screen');
-    return resetToInfomaniakNoTeams();
+    logInfo('Launch app in Home screen');
+    return resetToHome(props);
 };
 
 export const relaunchApp = (props: LaunchProps) => {

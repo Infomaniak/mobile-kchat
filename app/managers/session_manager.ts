@@ -69,10 +69,8 @@ export class SessionManagerSingleton {
         this.previousAppState = appState;
         switch (appState) {
             case 'active':
-                if (!EphemeralStore.isLoggingIn()) {
-                    this.syncMultiTeam();
-                    this.resyncActiveServer();
-                }
+                this.syncMultiTeam();
+                this.resyncActiveServer();
                 break;
             case 'background':
             case 'inactive':
@@ -81,10 +79,8 @@ export class SessionManagerSingleton {
     };
 
     triggerInitialResync() {
-        if (!EphemeralStore.isLoggingIn()) {
-            this.syncMultiTeam();
-            this.resyncActiveServer();
-        }
+        this.syncMultiTeam();
+        this.resyncActiveServer();
     }
 
     private syncMultiTeam = async () => {
@@ -137,7 +133,7 @@ export class SessionManagerSingleton {
 
     private onActiveServerChanged = async ({serverUrl}: {serverUrl: string}) => {
         try {
-            if (serverUrl && !EphemeralStore.isLoggingIn()) {
+            if (serverUrl) {
                 await this.triggerSync(serverUrl);
             }
         } catch (error) {

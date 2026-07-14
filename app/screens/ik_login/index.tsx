@@ -14,7 +14,6 @@ import {launchToHome} from '@init/launch';
 import PushNotifications from '@init/push_notifications';
 import SessionManager from '@managers/session_manager';
 import {resetToInfomaniakNoTeams} from '@screens/navigation';
-import EphemeralStore from '@store/ephemeral_store';
 import {logError} from '@utils/log';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -41,7 +40,6 @@ const Server = ({
 
     const handleConnect = async () => {
         setConnecting(true);
-        EphemeralStore.setLoggingIn(true);
         try {
             const accessToken = await displayLoginWebView();
             const result = await infomaniakLogin(accessToken);
@@ -62,7 +60,6 @@ const Server = ({
             logError('[ik_login] login failed', error);
             resetToInfomaniakNoTeams();
         } finally {
-            EphemeralStore.setLoggingIn(false);
             setConnecting(false);
         }
     };

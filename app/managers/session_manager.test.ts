@@ -16,7 +16,6 @@ import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {queryGlobalValue} from '@queries/app/global';
 import {getAllServers, getServerDisplayName} from '@queries/app/servers';
-import EphemeralStore from '@store/ephemeral_store';
 import TestHelper from '@test/test_helper';
 import {deleteFileCache, deleteFileCacheByDir} from '@utils/file';
 import {isMainActivity} from '@utils/helpers';
@@ -194,7 +193,6 @@ describe('SessionManager', () => {
 
     describe('app state changes', () => {
         beforeEach(() => {
-            jest.mocked(EphemeralStore.isLoggingIn).mockReturnValue(false);
             SessionManager.init();
         });
 
@@ -215,21 +213,10 @@ describe('SessionManager', () => {
             expect(syncMultiTeam).not.toHaveBeenCalled();
             expect(handleFirstConnect).not.toHaveBeenCalled();
         });
-
-        it('should not sync when already logging in', async () => {
-            jest.mocked(EphemeralStore.isLoggingIn).mockReturnValue(true);
-            expect(appStateCallback).toBeDefined();
-            appStateCallback!('background');
-            await appStateCallback!('active');
-            await TestHelper.wait(50);
-            expect(syncMultiTeam).not.toHaveBeenCalled();
-            expect(handleFirstConnect).not.toHaveBeenCalled();
-        });
     });
 
     describe('server sync', () => {
         beforeEach(() => {
-            jest.mocked(EphemeralStore.isLoggingIn).mockReturnValue(false);
             SessionManager.init();
         });
 
@@ -260,7 +247,6 @@ describe('SessionManager', () => {
 
     describe('active server changes', () => {
         beforeEach(() => {
-            jest.mocked(EphemeralStore.isLoggingIn).mockReturnValue(false);
             SessionManager.init();
         });
 
@@ -281,7 +267,6 @@ describe('SessionManager', () => {
 
     describe('sync error handling', () => {
         beforeEach(() => {
-            jest.mocked(EphemeralStore.isLoggingIn).mockReturnValue(false);
             SessionManager.init();
         });
 
