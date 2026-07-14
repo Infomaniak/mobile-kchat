@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {DeviceEventEmitter, useWindowDimensions, View} from 'react-native';
 import Animated, {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 
@@ -13,7 +13,6 @@ import {CHANNEL, DRAFT, THREAD} from '@constants/screens';
 import {TABLET_SIDEBAR_WIDTH, TEAM_SIDEBAR_WIDTH} from '@constants/view';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
-import EphemeralStore from '@store/ephemeral_store';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import Categories from './categories';
@@ -64,6 +63,21 @@ const CategoriesList = ({
     const isTablet = useIsTablet();
     const tabletWidth = useSharedValue(isTablet ? getTabletWidth(moreThanOneTeam) : 0);
     const [activeScreen, setActiveScreen] = useState<ScreenType>(isTablet && lastChannelId === Screens.GLOBAL_DRAFTS ? DRAFT : CHANNEL);
+    const [showLoadError, setShowLoadError] = useState(false);
+    const loadErrorTimer = useRef<ReturnType<typeof setTimeout>>();
+
+    useEffect(() => {
+        if (hasChannels) {
+            setShowLoadError(false);
+            return undefined;
+        }
+        loadErrorTimer.current = setTimeout(() => setShowLoadError(true), 300);
+        return () => {
+            if (loadErrorTimer.current) {
+                clearTimeout(loadErrorTimer.current);
+            }
+        };
+    }, [hasChannels]);
 
     useEffect(() => {
         if (isTablet) {
@@ -128,7 +142,7 @@ const CategoriesList = ({
 
     const content = useMemo(() => {
         if (!hasChannels) {
-            if (EphemeralStore.isSyncing()) {
+            if (!showLoadError) {
                 return (
                     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                         <Loading color={theme.buttonBg}/>
@@ -146,7 +160,7 @@ const CategoriesList = ({
                 <Categories/>
             </>
         );
-    }, [draftsButtonComponent, hasChannels, threadButtonComponent, theme]);
+    }, [draftsButtonComponent, hasChannels, showLoadError, threadButtonComponent, theme]);
 
     return (
         <Animated.View style={[styles.container, tabletStyle]}>
