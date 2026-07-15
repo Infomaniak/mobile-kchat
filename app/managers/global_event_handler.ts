@@ -12,6 +12,7 @@ import {batchTeamThreadSync} from '@actions/remote/thread';
 import {Device, Events} from '@constants';
 import {MIN_REQUIRED_VERSION} from '@constants/supported_server';
 import DatabaseManager from '@database/manager';
+import {attemptServerDatabaseRecovery} from '@database/recovery';
 import {DEFAULT_LOCALE, getTranslations} from '@i18n';
 import {getServerCredentials} from '@init/credentials';
 import {getActiveServerUrl} from '@queries/app/servers';
@@ -21,8 +22,11 @@ import {getTeamChannelHistory} from '@queries/servers/team';
 import {setScreensOrientation} from '@screens/navigation';
 import CallManager, {CallAnsweredEvent, CallEndedEvent, CallMutedEvent, CallVideoMutedEvent} from '@store/CallManager';
 import {alertInvalidDeepLink, parseAndHandleDeepLink} from '@utils/deep_link';
+import {getFullErrorMessage} from '@utils/errors';
 import {getIntlShape} from '@utils/general';
-import {logError} from '@utils/log';
+import {logDebug, logError} from '@utils/log';
+
+import type {Database} from '@nozbe/watermelondb';
 
 type LinkingCallbackArg = {url: string};
 
@@ -61,6 +65,7 @@ class GlobalEventHandlerSingleton {
 
         this.initialized();
         DeviceEventEmitter.addListener(Events.POST_DELETED_FOR_CHANNEL, this.onPostDeletedForChannel);
+        DeviceEventEmitter.addListener(Events.DATABASE_CORRUPTION_DETECTED, this.onDatabaseCorruptionDetected);
     }
 
     init = () => {
@@ -80,6 +85,18 @@ class GlobalEventHandlerSingleton {
     };
     onPostDeletedForChannel = async ({serverUrl, teamId}: {serverUrl: string; teamId: string}) => {
         batchTeamThreadSync(serverUrl, teamId);
+    };
+
+    onDatabaseCorruptionDetected = ({database, error, source}: {database: Database; error: unknown; source: string}) => {
+        const serverUrl = DatabaseManager.getServerUrlForDatabase(database);
+        if (!serverUrl) {
+            logDebug('onDatabaseCorruptionDetected: skipping recovery, server URL not found', source);
+            return;
+        }
+
+        attemptServerDatabaseRecovery(serverUrl, error, source).catch((recoveryError) => {
+            logError('onDatabaseCorruptionDetected: unhandled recovery error', getFullErrorMessage(recoveryError));
+        });
     };
 
     onDeepLink = async (event: LinkingCallbackArg) => {

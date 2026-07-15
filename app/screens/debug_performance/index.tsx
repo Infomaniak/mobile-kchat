@@ -3,12 +3,14 @@
 
 import {useDatabase} from '@nozbe/watermelondb/react';
 import React, {useCallback, useEffect, useState} from 'react';
-import {Alert, ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {Alert, DeviceEventEmitter, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import CompassIcon from '@components/compass_icon';
+import {Events} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import DatabaseManager from '@database/manager';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {usePreventDoubleTap} from '@hooks/utils';
 import PerformanceMonitor from '@managers/performance_monitor';
@@ -104,6 +106,22 @@ function formatTime(ms: number): string {
     return `${ms.toFixed(1)}ms`;
 }
 
+// Simulate database corruption by emitting the exact event the real corruption path uses.
+// This triggers the same recovery flow (GlobalEventHandler → attemptServerDatabaseRecovery).
+async function simulateDatabaseCorruption(serverUrl: string): Promise<void> {
+    const serverDb = DatabaseManager.serverDatabases[serverUrl];
+    if (!serverDb) {
+        throw new Error(`No active database found for server ${serverUrl}`);
+    }
+
+    const fakeError = new Error('database disk image is malformed');
+    DeviceEventEmitter.emit(Events.DATABASE_CORRUPTION_DETECTED, {
+        database: serverDb.database,
+        error: fakeError,
+        source: 'debug_simulation',
+    });
+}
+
 function MetricsSummary({componentId}: MetricsSummaryProps) {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
@@ -129,8 +147,37 @@ function MetricsSummary({componentId}: MetricsSummaryProps) {
 
     const [injectionStatus, setInjectionStatus] = useState<string>('');
     const [isInjecting, setIsInjecting] = useState(false);
+    const [corruptionStatus, setCorruptionStatus] = useState<string>('');
     const serverUrl = useServerUrl();
     const isPreprod = serverUrl?.includes('preprod.dev.infomaniak.ch') ?? false;
+
+    const handleSimulateCorruption = useCallback(() => {
+        if (!serverUrl) {
+            return;
+        }
+        Alert.alert(
+            'Simulate Database Corruption',
+            'This will corrupt the current server database file to trigger the automatic recovery flow. The app will attempt to recover on the next database operation.\n\n⚠️ This is for testing only and requires a restart or navigation to trigger recovery.',
+            [
+                {text: 'Cancel', style: 'cancel'},
+                {
+                    text: 'Corrupt DB',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setCorruptionStatus('Corrupting database file...');
+                        try {
+                            await simulateDatabaseCorruption(serverUrl);
+                            setCorruptionStatus('Database corrupted successfully. Recovery will trigger on next DB access.');
+                        } catch (err: any) {
+                            const message = err?.message ?? String(err);
+                            setCorruptionStatus(`Error: ${message}`);
+                        }
+                    },
+                },
+            ],
+            {cancelable: true},
+        );
+    }, [serverUrl]);
 
     const handleInjectData = useCallback(() => {
         if (isInjecting) {
@@ -394,6 +441,25 @@ function MetricsSummary({componentId}: MetricsSummaryProps) {
                         <Text style={[styles.metricLabel, {textAlign: 'center', marginTop: 8}]}>{injectionStatus}</Text>
                     )}
                 </View>
+
+                {/* Database Corruption Simulation (Dev only) */}
+                {__DEV__ && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>{'Database Corruption Test'}</Text>
+                        {corruptionStatus !== '' && (
+                            <Text style={[styles.metricLabel, {textAlign: 'center', marginBottom: 8}]}>
+                                {corruptionStatus}
+                            </Text>
+                        )}
+                        <TouchableOpacity
+                            style={[styles.button, {backgroundColor: '#C92A2A'}]}
+                            onPress={handleSimulateCorruption}
+                            testID='debug_performance.corrupt_db.button'
+                        >
+                            <Text style={styles.buttonText}>{'Simulate DB Corruption'}</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
 
                 <TouchableOpacity
                     style={styles.button}
