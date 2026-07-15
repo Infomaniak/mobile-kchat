@@ -27,11 +27,15 @@ type LogoutCallbackArg = {
     removeServer: boolean;
 }
 
+type TriggerSyncOptions = {
+    queueIfRunning?: boolean;
+}
+
 export class SessionManagerSingleton {
     private previousAppState: AppStateStatus;
     private terminatingSessionUrl = new Set<string>();
     private firstSyncedUrls = new Set<string>();
-    private syncingUrls = new Set<string>();
+    private syncPromises = new Map<string, Promise<Error | undefined>>();
     private pendingSyncUrls = new Set<string>();
 
     constructor() {
@@ -110,16 +114,33 @@ export class SessionManagerSingleton {
         }
     };
 
-    triggerSync = async (serverUrl: string): Promise<Error | undefined> => {
-        if (this.syncingUrls.has(serverUrl)) {
-            this.pendingSyncUrls.add(serverUrl);
-            return undefined;
+    triggerSync = (serverUrl: string, options: TriggerSyncOptions = {}): Promise<Error | undefined> => {
+        const currentSync = this.syncPromises.get(serverUrl);
+        if (currentSync) {
+            if (options.queueIfRunning) {
+                this.pendingSyncUrls.add(serverUrl);
+                return currentSync.then((error) => {
+                    if (error || !this.pendingSyncUrls.has(serverUrl)) {
+                        return error;
+                    }
+
+                    return this.triggerSync(serverUrl);
+                });
+            }
+            return currentSync;
         }
 
+        const syncPromise = this.runSync(serverUrl).finally(() => {
+            this.syncPromises.delete(serverUrl);
+        });
+        this.syncPromises.set(serverUrl, syncPromise);
+        return syncPromise;
+    };
+
+    private runSync = async (serverUrl: string): Promise<Error | undefined> => {
         let syncError: Error | undefined;
 
         try {
-            this.syncingUrls.add(serverUrl);
             this.pendingSyncUrls.delete(serverUrl);
 
             syncError = await this.performSync(serverUrl);
@@ -129,8 +150,6 @@ export class SessionManagerSingleton {
         } catch (error: unknown) {
             logError('[SessionManager] triggerSync failed', error);
             return error instanceof Error ? error : new Error(String(error));
-        } finally {
-            this.syncingUrls.delete(serverUrl);
         }
         return syncError;
     };
@@ -178,7 +197,7 @@ export class SessionManagerSingleton {
         try {
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
             if (serverUrl && serverUrl === activeServerUrl) {
-                await this.triggerSync(serverUrl);
+                await this.triggerSync(serverUrl, {queueIfRunning: true});
             }
         } catch (error) {
             logError('[SessionManager] onWebsocketReconnected failed', error);
@@ -195,6 +214,7 @@ export class SessionManagerSingleton {
             // Remove from synced urls so next login will trigger firstConnect again
             this.firstSyncedUrls.delete(serverUrl);
             this.pendingSyncUrls.delete(serverUrl);
+            this.syncPromises.delete(serverUrl);
 
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
             const activeServerDisplayName = await DatabaseManager.getActiveServerDisplayName();
@@ -228,11 +248,7 @@ export class SessionManagerSingleton {
 
     private onNoTeams = async () => {
         try {
-            const servers = await getAllServers();
-            if (!servers.length) {
-                await resetToInfomaniakNoTeams();
-
-            }
+            await resetToInfomaniakNoTeams();
         } catch (error) {
             logError('[SessionManager] onNoTeams failed', error);
         }

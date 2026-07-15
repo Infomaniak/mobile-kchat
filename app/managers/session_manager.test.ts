@@ -16,6 +16,7 @@ import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {queryGlobalValue} from '@queries/app/global';
 import {getAllServers, getServerDisplayName} from '@queries/app/servers';
+import {resetToInfomaniakNoTeams} from '@screens/navigation';
 import TestHelper from '@test/test_helper';
 import {deleteFileCache, deleteFileCacheByDir} from '@utils/file';
 import {isMainActivity} from '@utils/helpers';
@@ -125,6 +126,7 @@ describe('SessionManager', () => {
         DeviceEventEmitter.removeAllListeners(Events.SERVER_LOGOUT);
         DeviceEventEmitter.removeAllListeners(Events.ACTIVE_SERVER_CHANGED);
         DeviceEventEmitter.removeAllListeners(Events.WEBSOCKET_RECONNECTED);
+        DeviceEventEmitter.removeAllListeners(Events.NO_TEAMS);
     });
 
     describe('constructor', () => {
@@ -310,6 +312,44 @@ describe('SessionManager', () => {
             expect(handleFirstConnect).toHaveBeenCalledTimes(1);
             expect(handleReconnect).toHaveBeenCalledTimes(1);
             expect(handleReconnect).toHaveBeenCalledWith(mockServerUrl);
+        });
+
+        it('should return the running sync result when another sync is already running', async () => {
+            const syncError = new Error('sync failed');
+            let resolveFirstSync: (value: Error | undefined) => void;
+            jest.mocked(handleFirstConnect).mockImplementationOnce(() => {
+                return new Promise((resolve) => {
+                    resolveFirstSync = resolve;
+                });
+            });
+
+            const firstSync = SessionManager.triggerSync(mockServerUrl);
+            await TestHelper.wait(0);
+
+            const secondSync = SessionManager.triggerSync(mockServerUrl);
+            resolveFirstSync!(syncError);
+
+            await expect(firstSync).resolves.toBe(syncError);
+            await expect(secondSync).resolves.toBe(syncError);
+            expect(handleFirstConnect).toHaveBeenCalledTimes(1);
+            expect(handleReconnect).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('no teams', () => {
+        beforeEach(() => {
+            SessionManager.init();
+        });
+
+        it('should reset to no-teams screen even when a server is registered locally', async () => {
+            jest.mocked(getAllServers).mockResolvedValueOnce([{
+                url: mockServerUrl,
+            }] as Awaited<ReturnType<typeof getAllServers>>);
+
+            DeviceEventEmitter.emit(Events.NO_TEAMS);
+            await TestHelper.wait(50);
+
+            expect(resetToInfomaniakNoTeams).toHaveBeenCalledTimes(1);
         });
     });
 
