@@ -60,7 +60,9 @@ jest.mock('@queries/app/global', () => ({
 }));
 jest.mock('@queries/app/servers');
 jest.mock('@queries/servers/user');
-jest.mock('@screens/navigation');
+jest.mock('@screens/navigation', () => ({
+    resetToInfomaniakNoTeams: jest.fn(),
+}));
 jest.mock('@store/ephemeral_store');
 jest.mock('@utils/file');
 jest.mock('@utils/helpers');
