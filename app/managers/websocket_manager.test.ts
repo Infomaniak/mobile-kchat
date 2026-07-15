@@ -2,9 +2,10 @@
 // See LICENSE.txt for license information.
 
 import NetInfo from '@react-native-community/netinfo';
-import {AppState, type AppStateStatus} from 'react-native';
+import {AppState, DeviceEventEmitter, type AppStateStatus} from 'react-native';
 
 import WebSocketClient from '@client/websocket';
+import {Events} from '@constants';
 import DatabaseManager from '@database/manager';
 import {isMainActivity} from '@utils/helpers';
 
@@ -56,6 +57,8 @@ describe('WebsocketManager - background/foreground reconnection', () => {
         // Reset singleton internal state by manipulating private fields
         (WebsocketManager as any).previousActiveState = true;
         (WebsocketManager as any).connectedSubjects = {};
+        (WebsocketManager as any).connectedOnceUrls = new Set<string>();
+        (WebsocketManager as any).needsSyncOnConnectUrls = new Set<string>();
 
         // Clean up existing clients
         WebsocketManager.invalidateClient(mockServerUrl);
@@ -91,6 +94,8 @@ describe('WebsocketManager - background/foreground reconnection', () => {
         WebsocketManager.closeAll();
         WebsocketManager.invalidateClient(mockServerUrl);
         (WebsocketManager as any).previousActiveState = true;
+        (WebsocketManager as any).connectedOnceUrls = new Set<string>();
+        (WebsocketManager as any).needsSyncOnConnectUrls = new Set<string>();
 
         // Clear any lingering periodic status update intervals
         const statusIds = (WebsocketManager as any).statusUpdatesIntervalIDs || {};
@@ -165,17 +170,39 @@ describe('WebsocketManager - background/foreground reconnection', () => {
         expect(mockWebSocketClient.invalidate).toHaveBeenCalled();
     });
 
-    it('should not trigger data sync on connected callback', () => {
+    it('should not emit reconnect event on first connected callback', () => {
         expect(mockCallbacks.connected).toBeDefined();
 
+        const listener = jest.fn();
+        const subscription = DeviceEventEmitter.addListener(Events.WEBSOCKET_RECONNECTED, listener);
         let latestState: WebsocketConnectedState | undefined;
-        WebsocketManager.observeWebsocketState(mockServerUrl).subscribe((state) => {
+        const stateSubscription = WebsocketManager.observeWebsocketState(mockServerUrl).subscribe((state) => {
             latestState = state;
         });
 
         mockCallbacks.connected!();
 
         expect(latestState).toBe('connected');
+        expect(listener).not.toHaveBeenCalled();
+
+        stateSubscription.unsubscribe();
+        subscription.remove();
+    });
+
+    it('should emit reconnect event when websocket reconnects after a disconnect while active', () => {
+        expect(mockCallbacks.connected).toBeDefined();
+        expect(mockCallbacks.close).toBeDefined();
+
+        const listener = jest.fn();
+        const subscription = DeviceEventEmitter.addListener(Events.WEBSOCKET_RECONNECTED, listener);
+
+        mockCallbacks.connected!();
+        mockCallbacks.close!(1);
+        mockCallbacks.connected!();
+
+        expect(listener).toHaveBeenCalledWith({serverUrl: mockServerUrl});
+
+        subscription.remove();
     });
 
     it('should handle network disconnection by closing all websockets', () => {

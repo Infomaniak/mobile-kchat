@@ -41,6 +41,7 @@ export default keyMirror({
     DRAFT_SWIPEABLE: null,
     ACTIVE_SCREEN: null,
     ACTIVE_SERVER_CHANGED: null,
+    WEBSOCKET_RECONNECTED: null,
     FILE_ADD_REMOVED: null,
     POST_DELETED_FOR_CHANNEL: null,
     KEYBOARD_STATE_CHANGED: null,
