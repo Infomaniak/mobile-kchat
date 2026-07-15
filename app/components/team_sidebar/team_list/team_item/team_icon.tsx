@@ -12,6 +12,7 @@ import {useTheme} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
+import {getInitialsFromName} from '@utils/user';
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
@@ -119,7 +120,7 @@ export default function TeamIcon({
                 style={textStyle}
                 testID={`${testID}.display_name_abbreviation`}
             >
-                {displayName.substring(0, 2)}
+                {getInitialsFromName(displayName)}
             </Text>
         );
     } else {

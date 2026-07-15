@@ -1,16 +1,10 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useMemo} from 'react';
-import {StyleSheet, View} from 'react-native';
+import React from 'react';
+import {StyleSheet} from 'react-native';
 
-import {buildAbsoluteUrl} from '@actions/remote/file';
-import {buildProfileImageUrlFromUser} from '@actions/remote/user';
-import CompassIcon from '@components/compass_icon';
-import ExpoImage from '@components/expo_image';
-import {useServerUrl} from '@context/server';
-import {changeOpacity} from '@utils/theme';
-import {getLastPictureUpdate} from '@utils/user';
+import Avatar from '@components/avatar';
 
 import type UserModel from '@typings/database/models/servers/user';
 
@@ -36,35 +30,15 @@ const styles = StyleSheet.create({
 const ProfileAvatar = ({
     author,
 }: Props) => {
-    const serverUrl = useServerUrl();
-
-    const uri = useMemo(() => buildProfileImageUrlFromUser(serverUrl, author), [serverUrl, author]);
-
-    let picture;
-    if (uri) {
-        picture = (
-            <ExpoImage
-                id={`user-${author.id}-${getLastPictureUpdate(author)}`}
-                source={{uri: buildAbsoluteUrl(serverUrl, uri)}}
-                style={[styles.avatar, styles.avatarRadius]}
-            />
-        );
-    } else {
-        picture = (
-            <CompassIcon
-                name='account-outline'
-                size={22}
-                color={changeOpacity('#fff', 0.48)}
-            />
-        );
-    }
-
     return (
-        <View style={[styles.avatarContainer, styles.avatarRadius]}>
-            {picture}
-        </View>
+        <Avatar
+            author={author}
+            containerStyle={[styles.avatarContainer, styles.avatarRadius]}
+            imageStyle={[styles.avatar, styles.avatarRadius]}
+            size={20}
+            testID='draft_scheduled_post.profile_avatar'
+        />
     );
 };
 
 export default ProfileAvatar;
-
