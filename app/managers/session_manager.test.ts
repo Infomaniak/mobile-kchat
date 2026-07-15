@@ -124,6 +124,7 @@ describe('SessionManager', () => {
         // Remove all event listeners
         DeviceEventEmitter.removeAllListeners(Events.SERVER_LOGOUT);
         DeviceEventEmitter.removeAllListeners(Events.ACTIVE_SERVER_CHANGED);
+        DeviceEventEmitter.removeAllListeners(Events.WEBSOCKET_RECONNECTED);
     });
 
     describe('constructor', () => {
@@ -262,6 +263,53 @@ describe('SessionManager', () => {
             await TestHelper.wait(50);
             expect(handleFirstConnect).not.toHaveBeenCalled();
             expect(handleReconnect).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('websocket reconnection', () => {
+        beforeEach(() => {
+            SessionManager.init();
+        });
+
+        it('should sync active server when websocket reconnects', async () => {
+            DeviceEventEmitter.emit(Events.WEBSOCKET_RECONNECTED, {serverUrl: mockServerUrl});
+            await TestHelper.wait(50);
+
+            expect(handleFirstConnect).toHaveBeenCalledTimes(1);
+            expect(handleFirstConnect).toHaveBeenCalledWith(mockServerUrl);
+        });
+
+        it('should ignore websocket reconnects for inactive servers', async () => {
+            jest.mocked(DatabaseManager.getActiveServerUrl).mockResolvedValueOnce('https://other.example.com');
+
+            DeviceEventEmitter.emit(Events.WEBSOCKET_RECONNECTED, {serverUrl: mockServerUrl});
+            await TestHelper.wait(50);
+
+            expect(handleFirstConnect).not.toHaveBeenCalled();
+            expect(handleReconnect).not.toHaveBeenCalled();
+        });
+
+        it('should replay a sync requested while another sync is running', async () => {
+            let resolveFirstSync: (value: Error | undefined) => void;
+            jest.mocked(handleFirstConnect).mockImplementationOnce(() => {
+                return new Promise((resolve) => {
+                    resolveFirstSync = resolve;
+                });
+            });
+
+            const firstSync = SessionManager.triggerSync(mockServerUrl);
+            await TestHelper.wait(0);
+
+            DeviceEventEmitter.emit(Events.WEBSOCKET_RECONNECTED, {serverUrl: mockServerUrl});
+            await TestHelper.wait(0);
+
+            resolveFirstSync!(undefined);
+            await firstSync;
+            await TestHelper.wait(50);
+
+            expect(handleFirstConnect).toHaveBeenCalledTimes(1);
+            expect(handleReconnect).toHaveBeenCalledTimes(1);
+            expect(handleReconnect).toHaveBeenCalledWith(mockServerUrl);
         });
     });
 

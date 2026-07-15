@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import NetInfo, {NetInfoStateType, type NetInfoState, type NetInfoSubscription} from '@react-native-community/netinfo';
-import {AppState, type AppStateStatus, type NativeEventSubscription} from 'react-native';
+import {AppState, DeviceEventEmitter, type AppStateStatus, type NativeEventSubscription} from 'react-native';
 import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged} from 'rxjs/operators';
 
@@ -10,7 +10,7 @@ import {fetchStatusByIds} from '@actions/remote/user';
 import {handleWebSocketEvent} from '@actions/websocket/event';
 import {BASE_SERVER_URL} from '@client/rest/constants';
 import WebSocketClient from '@client/websocket';
-import {General} from '@constants';
+import {Events, General} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getCurrentUserId} from '@queries/servers/system';
 import {queryAllUsers} from '@queries/servers/user';
@@ -30,6 +30,8 @@ class WebsocketManagerSingleton {
     private previousActiveState: boolean;
     private statusUpdatesIntervalIDs: Record<string, NodeJS.Timeout> = {};
     private isOpeningAll = false;
+    private connectedOnceUrls = new Set<string>();
+    private needsSyncOnConnectUrls = new Set<string>();
 
     private appStateSubscription: NativeEventSubscription | undefined;
     private netStateSubscription: NetInfoSubscription | undefined;
@@ -67,6 +69,8 @@ class WebsocketManagerSingleton {
         this.clients[serverUrl]?.invalidate();
         clearTimeout(this.connectionTimerIDs[serverUrl]);
         delete this.clients[serverUrl];
+        this.connectedOnceUrls.delete(serverUrl);
+        this.needsSyncOnConnectUrls.delete(serverUrl);
 
         // We don't remove the connected subject so any potential client invalidation
         // and subsequent creation of the client can still be observed by the component.
@@ -168,10 +172,21 @@ class WebsocketManagerSingleton {
     private onConnected = (serverUrl: string) => {
         this.startPeriodicStatusUpdates(serverUrl);
         this.getConnectedSubject(serverUrl).next('connected');
+
+        const shouldSync = this.needsSyncOnConnectUrls.delete(serverUrl);
+        this.connectedOnceUrls.add(serverUrl);
+
+        if (shouldSync) {
+            DeviceEventEmitter.emit(Events.WEBSOCKET_RECONNECTED, {serverUrl});
+        }
     };
 
     private onWebsocketClose = async (serverUrl: string, connectFailCount: number) => {
         this.getConnectedSubject(serverUrl).next('not_connected');
+        if (this.connectedOnceUrls.has(serverUrl) && this.previousActiveState) {
+            this.needsSyncOnConnectUrls.add(serverUrl);
+        }
+
         if (connectFailCount <= 1) { // First fail
             this.stopPeriodicStatusUpdates(serverUrl);
         }

@@ -32,12 +32,14 @@ export class SessionManagerSingleton {
     private terminatingSessionUrl = new Set<string>();
     private firstSyncedUrls = new Set<string>();
     private syncingUrls = new Set<string>();
+    private pendingSyncUrls = new Set<string>();
 
     constructor() {
         AppState.addEventListener('change', this.onAppStateChange);
 
         DeviceEventEmitter.addListener(Events.SERVER_LOGOUT, this.onLogout);
         DeviceEventEmitter.addListener(Events.ACTIVE_SERVER_CHANGED, this.onActiveServerChanged);
+        DeviceEventEmitter.addListener(Events.WEBSOCKET_RECONNECTED, this.onWebsocketReconnected);
         DeviceEventEmitter.addListener(Events.NO_TEAMS, this.onNoTeams);
 
         this.previousAppState = AppState.currentState;
@@ -110,27 +112,56 @@ export class SessionManagerSingleton {
 
     triggerSync = async (serverUrl: string): Promise<Error | undefined> => {
         if (this.syncingUrls.has(serverUrl)) {
+            this.pendingSyncUrls.add(serverUrl);
             return undefined;
         }
+
+        let syncError: Error | undefined;
+
         try {
             this.syncingUrls.add(serverUrl);
-            if (this.firstSyncedUrls.has(serverUrl)) {
-                await handleReconnect(serverUrl);
-            } else {
-                const error = await handleFirstConnect(serverUrl);
-                if (error) {
-                    logError('[SessionManager] handleFirstConnect failed', error);
-                    return error;
-                }
-                this.firstSyncedUrls.add(serverUrl);
+            this.pendingSyncUrls.delete(serverUrl);
+
+            syncError = await this.performSync(serverUrl);
+            if (!syncError) {
+                syncError = await this.replayPendingSync(serverUrl);
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             logError('[SessionManager] triggerSync failed', error);
-            return new Error(String(error));
+            return error instanceof Error ? error : new Error(String(error));
         } finally {
             this.syncingUrls.delete(serverUrl);
         }
+        return syncError;
+    };
+
+    private performSync = async (serverUrl: string): Promise<Error | undefined> => {
+        if (this.firstSyncedUrls.has(serverUrl)) {
+            return handleReconnect(serverUrl);
+        }
+
+        const error = await handleFirstConnect(serverUrl);
+        if (error) {
+            logError('[SessionManager] handleFirstConnect failed', error);
+            return error;
+        }
+
+        this.firstSyncedUrls.add(serverUrl);
         return undefined;
+    };
+
+    private replayPendingSync = async (serverUrl: string): Promise<Error | undefined> => {
+        if (!this.pendingSyncUrls.has(serverUrl)) {
+            return undefined;
+        }
+
+        this.pendingSyncUrls.delete(serverUrl);
+        const error = await this.performSync(serverUrl);
+        if (error) {
+            return error;
+        }
+
+        return this.replayPendingSync(serverUrl);
     };
 
     private onActiveServerChanged = async ({serverUrl}: {serverUrl: string}) => {
@@ -143,6 +174,17 @@ export class SessionManagerSingleton {
         }
     };
 
+    private onWebsocketReconnected = async ({serverUrl}: {serverUrl: string}) => {
+        try {
+            const activeServerUrl = await DatabaseManager.getActiveServerUrl();
+            if (serverUrl && serverUrl === activeServerUrl) {
+                await this.triggerSync(serverUrl);
+            }
+        } catch (error) {
+            logError('[SessionManager] onWebsocketReconnected failed', error);
+        }
+    };
+
     private onLogout = async ({serverUrl, removeServer}: LogoutCallbackArg) => {
         if (this.terminatingSessionUrl.has(serverUrl)) {
             return;
@@ -152,6 +194,7 @@ export class SessionManagerSingleton {
 
             // Remove from synced urls so next login will trigger firstConnect again
             this.firstSyncedUrls.delete(serverUrl);
+            this.pendingSyncUrls.delete(serverUrl);
 
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
             const activeServerDisplayName = await DatabaseManager.getActiveServerDisplayName();
