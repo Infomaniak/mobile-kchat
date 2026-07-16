@@ -88,7 +88,7 @@ export async function attemptServerDatabaseRecovery(
         const database = DatabaseManager.serverDatabases[serverUrl];
         if (!database) {
             logDebug('attemptServerDatabaseRecovery: database not found after wipe', serverUrl, source);
-            return true;
+            return false;
         }
 
         if (shouldResync && DatabaseManager.serverDatabases[serverUrl]) {

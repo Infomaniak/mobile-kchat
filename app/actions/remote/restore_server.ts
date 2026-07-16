@@ -55,7 +55,7 @@ export async function restoreServerAfterDatabaseWipe(serverUrl: string): Promise
 
         return {};
     } catch (error) {
-        return handleRestoreError(serverUrl, error);
+        return {error};
     }
 }
 
@@ -65,6 +65,5 @@ async function handleRestoreError(serverUrl: string, error: unknown): Promise<Re
         return {};
     }
 
-    await DatabaseManager.wipeServerData(serverUrl);
     return {error};
 }
