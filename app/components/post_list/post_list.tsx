@@ -85,6 +85,7 @@ export const postListRef = React.createRef<PostListHandle>();
 
 const CONTENT_OFFSET_THRESHOLD = 160;
 const HIGHLIGHT_SCROLL_RETRY_TIMEOUT = 250;
+const MAX_HIGHLIGHT_SCROLL_RETRIES = 3;
 const SCROLL_EVENT_THROTTLE = Platform.select({android: 17, default: 60});
 
 const keyExtractor = (item: PostListItem | PostListOtherItem) => (item.type === 'post' ? item.value.currentPost.id : item.value);
@@ -150,6 +151,8 @@ const PostList = ({
     const onViewableItemsChangedListener = useRef<ViewableItemsChangedListenerEvent>();
     const scrolledToHighlighted = useRef(false);
     const didHandleInitialHighlightedScroll = useRef(false);
+    const hasUserTouchedList = useRef(false);
+    const highlightedScrollRetryCount = useRef(0);
     const [refreshing, setRefreshing] = useState(false);
     const [limit, setLimit] = useState<KSuiteLimit | undefined>(undefined);
     const [showScrollToEndBtn, setShowScrollToEndBtn] = useState(false);
@@ -162,6 +165,7 @@ const PostList = ({
     const internalRef = useRef<FlatList<string | PostModel>>(null);
     const flatListRef = listRef || internalRef;
     const activeScrollTargetId = scrollTargetId ?? highlightedId;
+    const shouldUseInitialScrollIndex = !scrollTargetId;
     const previousScrollTargetId = useRef(activeScrollTargetId);
 
     // Update progressViewOffset to position RefreshControl correctly when keyboard-aware props are applied.
@@ -250,6 +254,7 @@ const PostList = ({
         if (previousScrollTargetId.current !== activeScrollTargetId) {
             previousScrollTargetId.current = activeScrollTargetId;
             didHandleInitialHighlightedScroll.current = false;
+            highlightedScrollRetryCount.current = 0;
             scrolledToHighlighted.current = false;
         }
     }, [activeScrollTargetId]);
@@ -315,28 +320,27 @@ const PostList = ({
             return;
         }
 
-        flatListRef.current.scrollToIndex({
-            animated,
-            index,
-            viewOffset: 0,
-            viewPosition: 0.5, // 0 is at bottom
-        });
+        flatListRef.current.scrollToIndex({animated, index, viewOffset: 0, viewPosition: 0.5});
     }, [flatListRef]);
+
+    const handleTouchMove = useCallback((event: GestureResponderEvent) => {
+        hasUserTouchedList.current = true;
+        onTouchMove?.(event);
+    }, [onTouchMove]);
 
     const internalOnScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const {y} = event.nativeEvent.contentOffset;
         const isThresholdReached = y > CONTENT_OFFSET_THRESHOLD;
 
-        if (forceShowScrollToEndBtn && y <= 0) {
+        if (forceShowScrollToEndBtn && y <= 0 && hasUserTouchedList.current) {
             logDebug('[PostList] reset to recent posts from manual scroll', {channelId, location});
+            hasUserTouchedList.current = false;
             handleScrollToEndPress();
             return;
         }
-
         if (isThresholdReached !== showScrollToEndBtn) {
             setShowScrollToEndBtn(isThresholdReached);
         }
-
         if (!y && lastPostId !== firstIdInPosts) {
             setLastPostId(firstIdInPosts);
         }
@@ -344,25 +348,21 @@ const PostList = ({
 
     const onScrollToIndexFailed = useCallback((info: ScrollIndexFailed) => {
         if (activeScrollTargetId) {
-            logDebug('[PostList] scroll to highlighted post failed', {
-                channelId,
-                highlightedId: activeScrollTargetId,
-                requestedIndex: info.index,
-                highestMeasuredFrameIndex: info.highestMeasuredFrameIndex,
-                averageItemLength: info.averageItemLength,
-                location,
-            });
+            logDebug('[PostList] scroll to highlighted post failed', {channelId, highlightedId: activeScrollTargetId, requestedIndex: info.index, highestMeasuredFrameIndex: info.highestMeasuredFrameIndex, averageItemLength: info.averageItemLength, location});
+            if (highlightedScrollRetryCount.current >= MAX_HIGHLIGHT_SCROLL_RETRIES) {
+                return;
+            }
+            highlightedScrollRetryCount.current += 1;
+            setTimeout(() => scrollToHighlightedIndex(info.index, false), HIGHLIGHT_SCROLL_RETRY_TIMEOUT);
             return;
         }
 
         const index = Math.min(info.highestMeasuredFrameIndex, info.index);
-        if (!activeScrollTargetId) {
-            if (onScrollEndIndexListener.current) {
-                onScrollEndIndexListener.current(index);
-            }
-            scrollToIndex(index);
+        if (onScrollEndIndexListener.current) {
+            onScrollEndIndexListener.current(index);
         }
-    }, [activeScrollTargetId, channelId, location, scrollToIndex]);
+        scrollToIndex(index);
+    }, [activeScrollTargetId, channelId, location, scrollToHighlightedIndex, scrollToIndex]);
 
     const onViewableItemsChanged = useCallback(({viewableItems}: ViewableItemsChanged) => {
         if (!viewableItems.length) {
@@ -489,7 +489,13 @@ const PostList = ({
         if (!didHandleInitialHighlightedScroll.current) {
             didHandleInitialHighlightedScroll.current = true;
 
-            if (scrollTargetIndex >= 0) {
+            if (scrollTargetId && scrollTargetIndex >= 0) {
+                scrolledToHighlighted.current = true;
+                logDebug('[PostList] using target window for highlighted post', {channelId, highlightedId: activeScrollTargetId, index: scrollTargetIndex, orderedPostsCount: orderedPosts.length, location});
+                return undefined;
+            }
+
+            if (shouldUseInitialScrollIndex && scrollTargetIndex >= 0) {
                 scrolledToHighlighted.current = true;
                 logDebug('[PostList] using initial scroll index for highlighted post', {channelId, highlightedId: activeScrollTargetId, index: scrollTargetIndex, orderedPostsCount: orderedPosts.length, location});
                 return undefined;
@@ -518,7 +524,7 @@ const PostList = ({
     // - scrolledToHighlighted is a ref (stable reference, doesn't need to be in deps)
     // - We only need to re-run when the posts list changes or the highlighted post changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeScrollTargetId, scrollTargetIndex, orderedPosts]);
+    }, [activeScrollTargetId, scrollTargetId, scrollTargetIndex, orderedPosts, shouldUseInitialScrollIndex]);
 
     // Sync emoji picker padding from SharedValue to React state
     // This ensures the padding updates when SharedValues change
@@ -563,7 +569,7 @@ const PostList = ({
                 keyboardShouldPersistTaps='handled'
                 keyExtractor={keyExtractor}
                 initialNumToRender={initialNumToRender}
-                initialScrollIndex={scrollTargetIndex >= 0 ? scrollTargetIndex : undefined}
+                initialScrollIndex={shouldUseInitialScrollIndex && scrollTargetIndex >= 0 ? scrollTargetIndex : undefined}
                 ListHeaderComponent={header}
                 ListFooterComponent={footer}
                 maintainVisibleContentPosition={SCROLL_POSITION_CONFIG}
@@ -585,7 +591,7 @@ const PostList = ({
                 testID={`${testID}.flat_list`}
                 inverted={true}
                 refreshing={refreshing}
-                onTouchMove={onTouchMove}
+                onTouchMove={handleTouchMove}
                 onTouchEnd={onTouchEnd}
                 onRefresh={onRefresh}
             />

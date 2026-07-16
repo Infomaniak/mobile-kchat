@@ -25,7 +25,7 @@ import type PostModel from '@typings/database/models/servers/post';
 import type PostsInChannelModel from '@typings/database/models/servers/posts_in_channel';
 
 const MAX_POSTS_LIMIT = 3000;
-const TARGET_NEWER_POSTS_LIMIT = 8;
+const TARGET_NEWER_POSTS_LIMIT = 2;
 
 const getTargetChunk = (postsInChannel: PostsInChannelModel[], targetPostCreateAt?: number) => {
     if (!targetPostCreateAt) {
