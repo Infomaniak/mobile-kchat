@@ -118,11 +118,12 @@ export async function jumpToPostInChannel(serverUrl: string, options: JumpToPost
                     rootCreateAt: targetPost.createAt,
                 });
             } else {
-                logDebug(`[${logPrefix}] root post missing, keeping reply as target`, {
+                logDebug(`[${logPrefix}] root post missing`, {
                     postId,
                     rootId: sourcePost.rootId,
                     error: rootPostResult.error ? getFullErrorMessage(rootPostResult.error) : undefined,
                 });
+                return {error: rootPostResult.error ?? 'Post'};
             }
         }
 

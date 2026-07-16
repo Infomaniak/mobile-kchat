@@ -254,6 +254,7 @@ const PostList = ({
         if (previousScrollTargetId.current !== activeScrollTargetId) {
             previousScrollTargetId.current = activeScrollTargetId;
             didHandleInitialHighlightedScroll.current = false;
+            hasUserTouchedList.current = false;
             highlightedScrollRetryCount.current = 0;
             scrolledToHighlighted.current = false;
         }
@@ -496,9 +497,7 @@ const PostList = ({
             }
 
             if (shouldUseInitialScrollIndex && scrollTargetIndex >= 0) {
-                scrolledToHighlighted.current = true;
                 logDebug('[PostList] using initial scroll index for highlighted post', {channelId, highlightedId: activeScrollTargetId, index: scrollTargetIndex, orderedPostsCount: orderedPosts.length, location});
-                return undefined;
             }
         }
 
