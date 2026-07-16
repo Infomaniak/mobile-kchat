@@ -476,6 +476,7 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
 
         switch (actionType) {
             case ActionType.POSTS.RECEIVED_IN_CHANNEL:
+            case ActionType.POSTS.RECEIVED_AROUND:
                 return this.handleReceivedPostsInChannel(posts, prepareRecordsOnly) as Promise<PostsInChannelModel[]>;
             case ActionType.POSTS.RECEIVED_SINCE:
                 return this.handleReceivedPostsInChannelSince(posts, prepareRecordsOnly) as Promise<PostsInChannelModel[]>;
