@@ -22,6 +22,7 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {DEFAULT_INPUT_ACCESSORY_HEIGHT} from '@hooks/useInputAccessoryView';
 import EphemeralStore from '@store/ephemeral_store';
+import {logDebug} from '@utils/log';
 import {getDateForDateLine, preparePostList} from '@utils/post_list';
 
 import {INITIAL_BATCH_TO_RENDER, SCROLL_POSITION_CONFIG, VIEWABILITY_CONFIG} from './config';
@@ -41,6 +42,7 @@ type Props = {
     currentUsername: string;
     customEmojiNames: string[];
     disablePullToRefresh?: boolean;
+    forceShowScrollToEndBtn?: boolean;
     highlightedId?: PostModel['id'];
     highlightPinnedOrSaved?: boolean;
     isCRTEnabled?: boolean;
@@ -48,8 +50,10 @@ type Props = {
     lastViewedAt: number;
     location: AvailableScreens;
     onEndReached?: () => void;
+    onScrollToEnd?: () => boolean | void;
     posts: PostModel[];
     rootId?: string;
+    scrollTargetId?: PostModel['id'];
     shouldRenderReplyButton?: boolean;
     shouldShowJoinLeaveMessages: boolean;
     showMoreMessages?: boolean;
@@ -80,6 +84,7 @@ export type PostListHandle = {
 export const postListRef = React.createRef<PostListHandle>();
 
 const CONTENT_OFFSET_THRESHOLD = 160;
+const HIGHLIGHT_SCROLL_RETRY_TIMEOUT = 250;
 const SCROLL_EVENT_THROTTLE = Platform.select({android: 17, default: 60});
 
 const keyExtractor = (item: PostListItem | PostListOtherItem) => (item.type === 'post' ? item.value.currentPost.id : item.value);
@@ -103,6 +108,7 @@ const PostList = ({
     customEmojiNames,
     disablePullToRefresh,
     footer,
+    forceShowScrollToEndBtn,
     header,
     highlightedId,
     highlightPinnedOrSaved = true,
@@ -111,8 +117,10 @@ const PostList = ({
     lastViewedAt,
     location,
     onEndReached,
+    onScrollToEnd,
     posts,
     rootId,
+    scrollTargetId,
     shouldRenderReplyButton = true,
     shouldShowJoinLeaveMessages,
     showMoreMessages,
@@ -141,6 +149,7 @@ const PostList = ({
     const onScrollEndIndexListener = useRef<onScrollEndIndexListenerEvent>();
     const onViewableItemsChangedListener = useRef<ViewableItemsChangedListenerEvent>();
     const scrolledToHighlighted = useRef(false);
+    const didHandleInitialHighlightedScroll = useRef(false);
     const [refreshing, setRefreshing] = useState(false);
     const [limit, setLimit] = useState<KSuiteLimit | undefined>(undefined);
     const [showScrollToEndBtn, setShowScrollToEndBtn] = useState(false);
@@ -152,6 +161,8 @@ const PostList = ({
     const {isVisible: isKeyboardVisible} = useKeyboardState();
     const internalRef = useRef<FlatList<string | PostModel>>(null);
     const flatListRef = listRef || internalRef;
+    const activeScrollTargetId = scrollTargetId ?? highlightedId;
+    const previousScrollTargetId = useRef(activeScrollTargetId);
 
     // Update progressViewOffset to position RefreshControl correctly when keyboard-aware props are applied.
     // Only update when keyboard state changes (fully open ↔ fully closed) to prevent flickering during animation.
@@ -185,6 +196,22 @@ const PostList = ({
         return orderedPosts.findIndex((i) => i.type === 'start-of-new-messages');
     }, [orderedPosts]);
 
+    const scrollTargetIndex = useMemo(() => {
+        if (!activeScrollTargetId) {
+            return -1;
+        }
+
+        return orderedPosts.findIndex((p) => p.type === 'post' && p.value.currentPost.id === activeScrollTargetId);
+    }, [activeScrollTargetId, orderedPosts]);
+
+    const initialNumToRender = useMemo(() => {
+        if (scrollTargetIndex < 0) {
+            return INITIAL_BATCH_TO_RENDER + 2;
+        }
+
+        return Math.max(INITIAL_BATCH_TO_RENDER + 2, scrollTargetIndex + 1);
+    }, [scrollTargetIndex]);
+
     const isNewMessage = lastPostId ? firstIdInPosts !== lastPostId : false;
 
     const scrollToEnd = useCallback(() => {
@@ -196,19 +223,42 @@ const PostList = ({
         setShowScrollToEndBtn(false);
     }, [inputAccessoryViewAnimatedHeight, keyboardHeight, flatListRef]);
 
+    const handleScrollToEndPress = useCallback(() => {
+        const resetToRecentPosts = onScrollToEnd?.();
+        if (resetToRecentPosts) {
+            logDebug('[PostList] reset to recent posts before scroll to end', {channelId, location});
+            setTimeout(scrollToEnd, HIGHLIGHT_SCROLL_RETRY_TIMEOUT);
+            return;
+        }
+
+        scrollToEnd();
+    }, [channelId, location, onScrollToEnd, scrollToEnd]);
+
     useEffect(() => {
+        if (activeScrollTargetId || forceShowScrollToEndBtn) {
+            return undefined;
+        }
+
         const t = setTimeout(() => {
             scrollToEnd();
         }, 300);
 
         return () => clearTimeout(t);
-    }, [channelId, rootId, scrollToEnd]);
+    }, [activeScrollTargetId, channelId, forceShowScrollToEndBtn, rootId, scrollToEnd]);
+
+    useEffect(() => {
+        if (previousScrollTargetId.current !== activeScrollTargetId) {
+            previousScrollTargetId.current = activeScrollTargetId;
+            didHandleInitialHighlightedScroll.current = false;
+            scrolledToHighlighted.current = false;
+        }
+    }, [activeScrollTargetId]);
 
     useEffect(() => {
         const scrollToBottom = (screen: string) => {
             if (screen === location) {
                 const scrollToBottomTimer = setTimeout(() => {
-                    scrollToEnd();
+                    handleScrollToEndPress();
                     clearTimeout(scrollToBottomTimer);
                 }, 400);
             }
@@ -220,7 +270,7 @@ const PostList = ({
         return () => {
             scrollBottomListener.remove();
         };
-    }, [location, scrollToEnd, serverUrl]);
+    }, [handleScrollToEndPress, location, serverUrl]);
 
     const onRefresh = useCallback(async () => {
         if (disablePullToRefresh) {
@@ -260,9 +310,28 @@ const PostList = ({
         });
     }, [flatListRef]);
 
+    const scrollToHighlightedIndex = useCallback((index: number, animated = true) => {
+        if (index < 0 || !flatListRef?.current) {
+            return;
+        }
+
+        flatListRef.current.scrollToIndex({
+            animated,
+            index,
+            viewOffset: 0,
+            viewPosition: 0.5, // 0 is at bottom
+        });
+    }, [flatListRef]);
+
     const internalOnScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const {y} = event.nativeEvent.contentOffset;
         const isThresholdReached = y > CONTENT_OFFSET_THRESHOLD;
+
+        if (forceShowScrollToEndBtn && y <= 0) {
+            logDebug('[PostList] reset to recent posts from manual scroll', {channelId, location});
+            handleScrollToEndPress();
+            return;
+        }
 
         if (isThresholdReached !== showScrollToEndBtn) {
             setShowScrollToEndBtn(isThresholdReached);
@@ -271,18 +340,29 @@ const PostList = ({
         if (!y && lastPostId !== firstIdInPosts) {
             setLastPostId(firstIdInPosts);
         }
-    }, [firstIdInPosts, lastPostId, showScrollToEndBtn]);
+    }, [channelId, firstIdInPosts, forceShowScrollToEndBtn, handleScrollToEndPress, lastPostId, location, showScrollToEndBtn]);
 
     const onScrollToIndexFailed = useCallback((info: ScrollIndexFailed) => {
-        const index = Math.min(info.highestMeasuredFrameIndex, info.index);
+        if (activeScrollTargetId) {
+            logDebug('[PostList] scroll to highlighted post failed', {
+                channelId,
+                highlightedId: activeScrollTargetId,
+                requestedIndex: info.index,
+                highestMeasuredFrameIndex: info.highestMeasuredFrameIndex,
+                averageItemLength: info.averageItemLength,
+                location,
+            });
+            return;
+        }
 
-        if (!highlightedId) {
+        const index = Math.min(info.highestMeasuredFrameIndex, info.index);
+        if (!activeScrollTargetId) {
             if (onScrollEndIndexListener.current) {
                 onScrollEndIndexListener.current(index);
             }
             scrollToIndex(index);
         }
-    }, [highlightedId, scrollToIndex]);
+    }, [activeScrollTargetId, channelId, location, scrollToIndex]);
 
     const onViewableItemsChanged = useCallback(({viewableItems}: ViewableItemsChanged) => {
         if (!viewableItems.length) {
@@ -406,18 +486,28 @@ const PostList = ({
     }, [appsEnabled, currentTimezone, currentUsername, customEmojiNames, highlightPinnedOrSaved, highlightedId, isCRTEnabled, isChannelAutotranslated, isPostAcknowledgementEnabled, location, rootId, shouldRenderReplyButton, shouldShowJoinLeaveMessages, testID, theme]);
 
     useEffect(() => {
-        const t = setTimeout(() => {
-            if (highlightedId && orderedPosts && !scrolledToHighlighted.current) {
+        if (!didHandleInitialHighlightedScroll.current) {
+            didHandleInitialHighlightedScroll.current = true;
+
+            if (scrollTargetIndex >= 0) {
                 scrolledToHighlighted.current = true;
-                // eslint-disable-next-line max-nested-callbacks
-                const index = orderedPosts.findIndex((p) => p.type === 'post' && p.value.currentPost.id === highlightedId);
-                if (index >= 0 && flatListRef?.current) {
-                    flatListRef?.current?.scrollToIndex({
-                        animated: true,
-                        index,
-                        viewOffset: 0,
-                        viewPosition: 0.5, // 0 is at bottom
-                    });
+                logDebug('[PostList] using initial scroll index for highlighted post', {channelId, highlightedId: activeScrollTargetId, index: scrollTargetIndex, orderedPostsCount: orderedPosts.length, location});
+                return undefined;
+            }
+        }
+
+        const t = setTimeout(() => {
+            if (activeScrollTargetId && orderedPosts && !scrolledToHighlighted.current) {
+                scrolledToHighlighted.current = true;
+                logDebug('[PostList] attempting scroll to highlighted post', {
+                    channelId,
+                    highlightedId: activeScrollTargetId,
+                    index: scrollTargetIndex,
+                    orderedPostsCount: orderedPosts.length,
+                    location,
+                });
+                if (scrollTargetIndex >= 0 && flatListRef?.current) {
+                    scrollToHighlightedIndex(scrollTargetIndex);
                 }
             }
         }, 500);
@@ -428,7 +518,7 @@ const PostList = ({
     // - scrolledToHighlighted is a ref (stable reference, doesn't need to be in deps)
     // - We only need to re-run when the posts list changes or the highlighted post changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [orderedPosts, highlightedId]);
+    }, [activeScrollTargetId, scrollTargetIndex, orderedPosts]);
 
     // Sync emoji picker padding from SharedValue to React state
     // This ensures the padding updates when SharedValues change
@@ -472,7 +562,8 @@ const PostList = ({
                 keyboardDismissMode='interactive'
                 keyboardShouldPersistTaps='handled'
                 keyExtractor={keyExtractor}
-                initialNumToRender={INITIAL_BATCH_TO_RENDER + 2}
+                initialNumToRender={initialNumToRender}
+                initialScrollIndex={scrollTargetIndex >= 0 ? scrollTargetIndex : undefined}
                 ListHeaderComponent={header}
                 ListFooterComponent={footer}
                 maintainVisibleContentPosition={SCROLL_POSITION_CONFIG}
@@ -500,9 +591,9 @@ const PostList = ({
             />
             {location !== Screens.PERMALINK &&
             <ScrollToEndView
-                onPress={scrollToEnd}
+                onPress={handleScrollToEndPress}
                 isNewMessage={isNewMessage}
-                showScrollToEndBtn={showScrollToEndBtn}
+                showScrollToEndBtn={showScrollToEndBtn || Boolean(forceShowScrollToEndBtn)}
                 location={location}
                 testID={'scroll-to-end-view'}
             />

@@ -9,6 +9,7 @@ import {storePostsForChannel} from '@actions/local/post';
 import {fetchDirectChannelsInfo, fetchMyChannel, switchToChannelById} from '@actions/remote/channel';
 import {fetchConference, switchToConferenceByChannelId} from '@actions/remote/conference';
 import {fetchPostsForChannel, fetchPostThread} from '@actions/remote/post';
+import {jumpToPostInChannel} from '@actions/remote/post_navigation';
 import {forceLogoutIfNecessary} from '@actions/remote/session';
 import {fetchMyTeam} from '@actions/remote/team';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
@@ -232,6 +233,7 @@ export const openNotification = async (serverUrl: string, notification: Notifica
     const channelId = notification.payload!.channel_id!;
     const conferenceId = notification.payload!.conference_id;
     const conferenceJWT = notification.payload!.conference_jwt;
+    const postId = notification.payload!.post_id;
     const rootId = notification.payload!.root_id!;
     try {
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
@@ -264,11 +266,29 @@ export const openNotification = async (serverUrl: string, notification: Notifica
             }
         }
 
+        const jumpToNotificationPost = async () => {
+            if (postId) {
+                const result = await jumpToPostInChannel(serverUrl, {
+                    channelId,
+                    groupLabel: 'Notification',
+                    logPrefix: 'openNotification',
+                    postId,
+                    teamId,
+                });
+
+                if (!result.error) {
+                    return result;
+                }
+            }
+
+            return switchToChannelById(serverUrl, channelId, teamId);
+        };
+
         if (myChannel && myTeam) {
             if (isThreadNotification) {
                 return fetchAndSwitchToThread(serverUrl, rootId, true);
             }
-            return switchToChannelById(serverUrl, channelId, teamId);
+            return jumpToNotificationPost();
         }
 
         const result = await fetchNotificationData(serverUrl, notification);
@@ -279,7 +299,7 @@ export const openNotification = async (serverUrl: string, notification: Notifica
         if (isThreadNotification) {
             return fetchAndSwitchToThread(serverUrl, rootId, true);
         }
-        return switchToChannelById(serverUrl, channelId, teamId);
+        return jumpToNotificationPost();
     } catch (error) {
         forceLogoutIfNecessary(serverUrl, error);
         return {error};

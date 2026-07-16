@@ -4,6 +4,7 @@
 import {fetchMyChannel, switchToChannelById} from '@actions/remote/channel';
 import {fetchConference, switchToConferenceByChannelId} from '@actions/remote/conference';
 import {fetchPostById} from '@actions/remote/post';
+import {jumpToPostInChannel} from '@actions/remote/post_navigation';
 import {fetchMyTeam} from '@actions/remote/team';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
 import {getDefaultThemeByAppearance} from '@context/theme';
@@ -32,6 +33,7 @@ export async function pushNotificationEntry(serverUrl: string, notification: Not
     const channelId = notification.channel_id!;
     const conferenceId = notification.conference_id;
     const conferenceJWT = notification.conference_jwt;
+    const postId = notification.post_id;
     const rootId = notification.root_id!;
 
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
@@ -138,7 +140,24 @@ export async function pushNotificationEntry(serverUrl: string, notification: Not
                     emitNotificationError('Post');
                 }
             } else {
-                await switchToChannelById(serverUrl, channelId, teamId);
+                PerformanceMetricsManager.setLoadTarget('CHANNEL');
+                if (postId) {
+                    const result = await jumpToPostInChannel(serverUrl, {
+                        channelId,
+                        groupLabel,
+                        logPrefix: 'pushNotificationEntry',
+                        postId,
+                        teamId,
+                    });
+
+                    if (!result.error) {
+                        redirected = true;
+                    }
+                }
+
+                if (!redirected) {
+                    await switchToChannelById(serverUrl, channelId, teamId);
+                }
             }
         } else {
             PerformanceMetricsManager.setLoadTarget('CHANNEL');
