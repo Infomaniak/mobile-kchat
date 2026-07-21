@@ -26,6 +26,8 @@ import {typography} from '@utils/typography';
 import {tryOpenURL} from '@utils/url';
 import {getUserTimezoneProps} from '@utils/user';
 
+import ReportProblem from './report_problem';
+
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
@@ -207,6 +209,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
                     type='link'
                 />
                 }
+                <ReportProblem/>
                 <SettingItem
                     onPress={openFeedback}
                     optionName='feedback'
