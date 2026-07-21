@@ -18,7 +18,7 @@ import {getCurrentUser, queryUsersById} from '@queries/servers/user';
 import {dismissAllModalsAndPopToRoot, dismissAllModalsAndPopToScreen} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import {isTablet} from '@utils/helpers';
-import {logDebug, logError, logInfo} from '@utils/log';
+import {logDebug, logError, logInfo, perfEnd, perfStart} from '@utils/log';
 import {displayGroupMessageName, displayUsername, getUserIdFromChannelName} from '@utils/user';
 
 import type ServerDataOperator from '@database/operator/server_data_operator';
@@ -27,18 +27,28 @@ import type ChannelModel from '@typings/database/models/servers/channel';
 import type UserModel from '@typings/database/models/servers/user';
 
 export async function switchToChannel(serverUrl: string, channelId: string, teamId?: string, skipLastUnread = false, prepareRecordsOnly = false) {
+    perfStart(`switchToChannel:${channelId}`);
     try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         let models: Model[] = [];
         const dt = Date.now();
         const isTabletDevice = isTablet();
+
+        perfStart(`switchToChannel:${channelId}:getCommonSystemValues`);
         const system = await getCommonSystemValues(database);
+        perfEnd(`switchToChannel:${channelId}:getCommonSystemValues`);
+
+        perfStart(`switchToChannel:${channelId}:getMyChannel`);
         const member = await getMyChannel(database, channelId);
+        perfEnd(`switchToChannel:${channelId}:getMyChannel`);
 
         EphemeralStore.addSwitchingToChannel(channelId);
 
         if (member) {
+            perfStart(`switchToChannel:${channelId}:fetchChannel`);
             const channel = await member.channel.fetch();
+            perfEnd(`switchToChannel:${channelId}:fetchChannel`);
+
             if (channel) {
                 if (!channel.teamId && teamId) {
                     const team = await getTeamById(database, teamId);
@@ -49,11 +59,15 @@ export async function switchToChannel(serverUrl: string, channelId: string, team
                 const toTeamId = channel.teamId || teamId || system.currentTeamId;
 
                 if (isTabletDevice && system.currentChannelId !== channelId) {
+                    perfStart(`switchToChannel:${channelId}:setCurrentChannelIdEmpty`);
+
                     // On tablet, the channel is being rendered, by setting the channel to empty first we speed up
                     // the switch by ~3x
                     await setCurrentChannelId(operator, '');
+                    perfEnd(`switchToChannel:${channelId}:setCurrentChannelIdEmpty`);
                 }
 
+                perfStart(`switchToChannel:${channelId}:prepareModels`);
                 const modelPromises: Array<Promise<Model[]>> = [];
                 if (system.currentTeamId !== toTeamId) {
                     modelPromises.push(addTeamToTeamHistory(operator, toTeamId, true));
@@ -75,21 +89,29 @@ export async function switchToChannel(serverUrl: string, channelId: string, team
                 }
 
                 models = (await Promise.all(modelPromises)).flat();
+                perfEnd(`switchToChannel:${channelId}:prepareModels`);
+
+                perfStart(`switchToChannel:${channelId}:markChannelAsViewed`);
                 const {member: viewedAt} = await markChannelAsViewed(serverUrl, channelId, false, true);
                 if (viewedAt) {
                     models.push(viewedAt);
                 }
+                perfEnd(`switchToChannel:${channelId}:markChannelAsViewed`);
 
+                perfStart(`switchToChannel:${channelId}:batchRecords`);
                 if (models.length && !prepareRecordsOnly) {
                     await operator.batchRecords(models, 'switchToChannel');
                 }
+                perfEnd(`switchToChannel:${channelId}:batchRecords`);
 
+                perfStart(`switchToChannel:${channelId}:navigation`);
                 if (isTabletDevice) {
                     await dismissAllModalsAndPopToRoot();
                     DeviceEventEmitter.emit(NavigationConstants.NAVIGATION_HOME, Screens.CHANNEL);
                 } else {
                     await dismissAllModalsAndPopToScreen(Screens.CHANNEL, '', undefined, {topBar: {visible: false}});
                 }
+                perfEnd(`switchToChannel:${channelId}:navigation`);
 
                 logInfo('channel switch to', channel?.displayName, channelId, (Date.now() - dt), 'ms');
             }
@@ -97,8 +119,10 @@ export async function switchToChannel(serverUrl: string, channelId: string, team
             logDebug('failed to navigate to channel because there was no membership, channel id: ', channelId);
         }
 
+        perfEnd(`switchToChannel:${channelId}`);
         return {models};
     } catch (error) {
+        perfEnd(`switchToChannel:${channelId}`);
         logError('Failed to switch to channelId', channelId, 'teamId', teamId, 'error', error);
         return {error};
     }

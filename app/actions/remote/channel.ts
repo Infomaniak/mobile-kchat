@@ -27,7 +27,7 @@ import {setTeamLoading} from '@store/team_load_store';
 import {generateChannelNameFromDisplayName, getDirectChannelName, isDMorGM} from '@utils/channel';
 import {getFullErrorMessage} from '@utils/errors';
 import {isTablet} from '@utils/helpers';
-import {logDebug, logError, logInfo, logWarning} from '@utils/log';
+import {logDebug, logError, logInfo, logWarning, perfEnd, perfStart} from '@utils/log';
 import {captureException} from '@utils/sentry';
 import {showMuteChannelSnackbar} from '@utils/snack_bar';
 import {displayGroupMessageName, displayUsername} from '@utils/user';
@@ -1155,9 +1155,12 @@ export async function getChannelTimezones(serverUrl: string, channelId: string) 
 }
 
 export async function switchToChannelById(serverUrl: string, channelId: string, teamId?: string, skipLastUnread = false, groupLabel?: RequestGroupLabel) {
+    perfStart(`switchToChannelById:${channelId}`);
     if (channelId === Screens.GLOBAL_THREADS) {
+        perfEnd(`switchToChannelById:${channelId}`);
         return switchToGlobalThreads(serverUrl, teamId);
     } else if (channelId === Screens.GLOBAL_DRAFTS) {
+        perfEnd(`switchToChannelById:${channelId}`);
         return switchToGlobalDrafts(serverUrl, teamId);
     }
 
@@ -1176,21 +1179,38 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
         }, 15000);
 
         try {
+            perfStart(`switchToChannelById:${channelId}:switchToChannel`);
             await switchToChannel(serverUrl, channelId, teamId, skipLastUnread);
+            perfEnd(`switchToChannelById:${channelId}:switchToChannel`);
+
+            perfStart(`switchToChannelById:${channelId}:openChannelIfNeeded`);
             openChannelIfNeeded(serverUrl, channelId, groupLabel);
+            perfEnd(`switchToChannelById:${channelId}:openChannelIfNeeded`);
+
+            perfStart(`switchToChannelById:${channelId}:markChannelAsRead`);
             markChannelAsRead(serverUrl, channelId, false, groupLabel);
+            perfEnd(`switchToChannelById:${channelId}:markChannelAsRead`);
+
+            perfStart(`switchToChannelById:${channelId}:fetchChannelStats`);
             fetchChannelStats(serverUrl, channelId, false, groupLabel);
+            perfEnd(`switchToChannelById:${channelId}:fetchChannelStats`);
+
+            perfStart(`switchToChannelById:${channelId}:fetchGroupsForChannelIfConstrained`);
             fetchGroupsForChannelIfConstrained(serverUrl, channelId, false);
+            perfEnd(`switchToChannelById:${channelId}:fetchGroupsForChannelIfConstrained`);
         } finally {
             clearTimeout(switchTimeout);
         }
 
         DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, false);
 
+        perfStart(`switchToChannelById:${channelId}:fetchBindings`);
         if (await AppsManager.isAppsEnabled(serverUrl)) {
             AppsManager.fetchBindings(serverUrl, channelId, false, groupLabel);
         }
+        perfEnd(`switchToChannelById:${channelId}:fetchBindings`);
 
+        perfEnd(`switchToChannelById:${channelId}`);
         return {};
     } catch (error) {
         logError('[switchToChannelById] Failed with error:', error);

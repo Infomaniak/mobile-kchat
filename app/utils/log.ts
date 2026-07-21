@@ -2,9 +2,12 @@
 // See LICENSE.txt for license information.
 
 import Config from '@assets/config.json';
+import {ENABLE_PERF_MONITOR} from '@constants/dev_config';
 import keyMirror from '@utils/key_mirror';
 
 const SentryLevels = keyMirror({debug: null, info: null, warning: null, error: null});
+
+const perfTimers = new Map<string, number>();
 
 export function logError(...args: any[]) {
     // eslint-disable-next-line no-console
@@ -39,6 +42,33 @@ export function logTimestamp(label: string, timestamp: number | undefined) {
         time = `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
     }
     logInfo(label, timestamp, time);
+}
+
+export function perfStart(label: string) {
+    if (!ENABLE_PERF_MONITOR) {
+        return;
+    }
+    perfTimers.set(label, Date.now());
+    logDebug(`[PERF] ${label} START`);
+}
+
+export function perfEnd(label: string) {
+    if (!ENABLE_PERF_MONITOR) {
+        return;
+    }
+    const start = perfTimers.get(label);
+    if (start) {
+        perfTimers.delete(label);
+        const elapsed = Date.now() - start;
+        logDebug(`[PERF] ${label} END ${elapsed}ms`);
+    }
+}
+
+export function perfLog(label: string, elapsedMs: number) {
+    if (!ENABLE_PERF_MONITOR) {
+        return;
+    }
+    logDebug(`[PERF] ${label} ${elapsedMs}ms`);
 }
 
 const addBreadcrumb = (logLevel: keyof typeof SentryLevels, ...args: any[]) => {
