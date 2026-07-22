@@ -34,7 +34,7 @@ import TabBar from './tab_bar';
 import type {DeepLinkWithData, LaunchProps} from '@typings/launch';
 
 if (Platform.OS === 'ios') {
-    // We do this on iOS to avoid conflicts betwen ReactNavigation & Wix ReactNativeNavigation
+    // We do this on iOS to avoid conflicts with the nested React Navigation tree.
     enableScreens(false);
 }
 

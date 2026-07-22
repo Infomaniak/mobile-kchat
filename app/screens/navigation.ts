@@ -1,41 +1,38 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-/* eslint-disable max-lines */
-
 import RNUtils from '@mattermost/rnutils';
 import merge from 'deepmerge';
-import {Appearance, DeviceEventEmitter, Platform, Alert, type EmitterSubscription, StatusBar} from 'react-native';
-import {type ComponentWillAppearEvent, type ImageResource, type LayoutOrientation, Navigation, type Options, OptionsModalPresentationStyle, type OptionsTopBarButton, type ScreenPoppedEvent, type EventSubscription, type OptionsStatusBar} from 'react-native-navigation';
+import {router} from 'expo-router';
+import {Alert, DeviceEventEmitter, Platform, StatusBar} from 'react-native';
 import tinyColor from 'tinycolor2';
 
 import CompassIcon from '@components/compass_icon';
-import {Events, Screens, Launch} from '@constants';
+import {Events, Launch, Screens} from '@constants';
 import {NOT_READY} from '@constants/screens';
 import {getDefaultThemeByAppearance} from '@context/theme';
+import BottomSheetStore from '@store/bottom_sheet_store';
 import EphemeralStore from '@store/ephemeral_store';
+import NavigationHeaderStore from '@store/navigation_header_store';
+import NavigationPropsStore from '@store/navigation_props_store';
 import NavigationStore from '@store/navigation_store';
 import {isTablet} from '@utils/helpers';
 import {dismissKeyboard} from '@utils/keyboard';
-import {logError} from '@utils/log';
-import {appearanceControlledScreens, mergeNavigationOptions} from '@utils/navigation';
+import {logDebug, logError} from '@utils/log';
 import {captureException} from '@utils/sentry';
-import {changeOpacity, setNavigatorStyles} from '@utils/theme';
+import {changeOpacity} from '@utils/theme';
 
 import type {BottomSheetFooterProps} from '@gorhom/bottom-sheet';
 import type {default as UserProfileScreen} from '@screens/user_profile';
 import type {LaunchProps} from '@typings/launch';
-import type {AvailableScreens, NavButtons} from '@typings/screens/navigation';
+import type {AvailableScreens, NavButtons, NavigationButton, NavigationOptions} from '@typings/screens/navigation';
 import type {ComponentProps} from 'react';
 import type {IntlShape} from 'react-intl';
 import type {Asset} from 'react-native-image-picker';
 
-const alpha = {
-    from: 0,
-    to: 1,
-    duration: 150,
-};
-let subscriptions: Array<EmitterSubscription | EventSubscription> | undefined;
+type LayoutOrientation = 'sensor' | 'sensorLandscape' | 'sensorPortrait' | 'landscape' | 'portrait';
+
+export {addNavigationButtonPressedListener, emitNavigationButtonPressed} from './navigation_button_events';
 
 export const allOrientations: LayoutOrientation[] = ['sensor', 'sensorLandscape', 'sensorPortrait', 'landscape', 'portrait'];
 export const portraitOrientation: LayoutOrientation[] = ['portrait'];
@@ -47,6 +44,25 @@ const loginFlowScreens = new Set<AvailableScreens>([
     Screens.MFA,
     Screens.FORGOT_PASSWORD,
 ]);
+
+function routeToScreen(name: AvailableScreens, passProps: Record<string, unknown> = {}, replace = false) {
+    const propsId = NavigationPropsStore.set(passProps);
+    const route = {
+        pathname: '/[screen]',
+        params: {
+            propsId,
+            screen: name,
+        },
+    } as never;
+
+    if (replace) {
+        router.replace(route);
+    } else {
+        router.push(route);
+    }
+
+    return propsId;
+}
 
 function setNavigationBarColor(screen: AvailableScreens, th?: Theme) {
     if (Platform.OS === 'android' && Platform.Version >= 34) {
@@ -64,66 +80,19 @@ function showBottomTabsIfNeeded(screen: AvailableScreens) {
     }
 }
 
-export function registerNavigationListeners() {
-    subscriptions?.forEach((v) => v.remove());
-    subscriptions = [
-        Navigation.events().registerScreenPoppedListener(onPoppedListener),
-        Navigation.events().registerCommandListener(onCommandListener),
-        Navigation.events().registerComponentWillAppearListener(onScreenWillAppear),
-
-        /**
-         * For the time being and until we add the emoji picker in the keyboard area
-         * will keep Android as adjustResize cause useAnimatedKeyboard from reanimated
-         * is reporting the wrong values when the keyboard was opened but we switch
-         * to a different channel or thread.
-         */
-        // Navigation.events().registerComponentDidAppearListener(onScreenDidAppear),
-        // Navigation.events().registerComponentDidDisappearListener(onScreenDidDisappear),
-    ];
-}
-
-function onCommandListener(name: string, params: any) {
-    switch (name) {
-        case 'setRoot':
-            NavigationStore.clearScreensFromStack();
-            NavigationStore.addScreenToStack(params.layout.root.children[0].id);
-            break;
-        case 'push':
-            NavigationStore.addScreenToStack(params.layout.id);
-            break;
-        case 'showModal':
-            NavigationStore.addModalToStack(params.layout.children[0].id);
-            break;
-        case 'popToRoot':
-            NavigationStore.clearScreensFromStack();
-            NavigationStore.addScreenToStack(Screens.HOME);
-            break;
-        case 'popTo':
-            NavigationStore.popTo(params.componentId);
-            break;
-        case 'dismissModal':
-            NavigationStore.removeModalFromStack(params.componentId);
-            break;
+function trackScreen(screen: AvailableScreens, modal = false) {
+    if (modal) {
+        NavigationStore.addModalToStack(screen);
+    } else {
+        NavigationStore.addScreenToStack(screen);
     }
 
-    const screen = NavigationStore.getVisibleScreen();
     showBottomTabsIfNeeded(screen);
     setNavigationBarColor(screen);
 }
 
-function onPoppedListener({componentId}: ScreenPoppedEvent) {
-    // screen pop does not trigger registerCommandListener, but does trigger screenPoppedListener
-    const screen = componentId as AvailableScreens;
-    NavigationStore.removeScreenFromStack(screen);
-
-    // If we pop to home, we need to show the tab bar
-    showBottomTabsIfNeeded(NavigationStore.getVisibleScreen());
-
-    setNavigationBarColor(screen);
-}
-
-function onScreenWillAppear(event: ComponentWillAppearEvent) {
-    showBottomTabsIfNeeded(event.componentId as AvailableScreens);
+export function registerNavigationListeners() {
+    logDebug('[Navigation.registerNavigationListeners] Expo Router owns navigation events');
 }
 
 export const loginAnimationOptions = () => {
@@ -145,41 +114,15 @@ export const loginAnimationOptions = () => {
             backButton: {
                 color: changeOpacity(theme.centerChannelColor, 0.56),
             },
-            scrollEdgeAppearance: {
-                active: true,
-                noBorder: true,
-                translucid: true,
-            },
-        },
-        animations: {
-            topBar: {
-                alpha,
-            },
-            push: {
-                waitForRender: false,
-                content: {
-                    alpha,
-                },
-            },
-            pop: {
-                content: {
-                    alpha: {
-                        from: 1,
-                        to: 0,
-                        duration: 100,
-                    },
-                },
-            },
         },
     };
 };
 
-export const bottomSheetModalOptions = (theme: Theme, closeButtonId?: string): Options => {
+export const bottomSheetModalOptions = (theme: Theme, closeButtonId?: string): NavigationOptions => {
     if (closeButtonId) {
         const closeButton = CompassIcon.getImageSourceSync('close', 24, theme.centerChannelColor);
         const closeButtonTestId = `${closeButtonId.replace('close-', 'close.').replace(/-/g, '_')}.button`;
         return {
-            modalPresentationStyle: OptionsModalPresentationStyle.formSheet,
             topBar: {
                 leftButtons: [{
                     id: closeButtonId,
@@ -206,79 +149,12 @@ export const bottomSheetModalOptions = (theme: Theme, closeButtonId?: string): O
                 enabled: false,
             },
         },
-        modalPresentationStyle: Platform.select({
-            ios: OptionsModalPresentationStyle.overFullScreen,
-            default: OptionsModalPresentationStyle.overCurrentContext,
-        }),
-
     };
 };
 
-// This locks phones to portrait for all screens while keeps
-// all orientations available for Tablets.
-Navigation.setDefaultOptions({
-    animations: {
-        setRoot: {
-            enter: {
-                waitForRender: true,
-                enabled: true,
-                alpha: {
-                    from: 0,
-                    to: 1,
-                    duration: 300,
-                },
-            },
-        },
-    },
-    layout: {
-        orientation: isTablet() ? allOrientations : portraitOrientation,
-    },
-    topBar: {
-        title: {
-            fontFamily: 'SuisseIntl-SemiBold',
-            fontSize: 18,
-            fontWeight: '600',
-        },
-        backButton: {
-            enableMenu: false,
-        },
-        subtitle: {
-            fontFamily: 'SuisseIntl-Regular',
-            fontSize: 12,
-            fontWeight: '400',
-        },
-    },
-    statusBar: {
-        backgroundColor: 'transparent',
-        drawBehind: true,
-        translucent: true,
-    },
-});
-
-Appearance.addChangeListener(() => {
-    const theme = getThemeFromState();
-    const screens = NavigationStore.getScreensInStack();
-
-    if (screens.includes(Screens.SERVER) || screens.includes(Screens.ONBOARDING)) {
-        for (const screen of screens) {
-            if (appearanceControlledScreens.has(screen)) {
-                Navigation.updateProps(screen, {theme});
-                setNavigatorStyles(screen, theme, loginAnimationOptions(), theme.sidebarBg);
-            }
-        }
-    }
-});
-
 export function setScreensOrientation(allowRotation: boolean) {
-    const options: Options = {
-        layout: {
-            orientation: allowRotation ? allOrientations : portraitOrientation,
-        },
-    };
-    Navigation.setDefaultOptions(options);
-    const screens = NavigationStore.getScreensInStack();
-    for (const s of screens) {
-        Navigation.mergeOptions(s, options);
+    if (allowRotation) {
+        RNUtils.unlockOrientation();
     }
 }
 
@@ -286,9 +162,6 @@ export function getThemeFromState(): Theme {
     return EphemeralStore.theme || getDefaultThemeByAppearance();
 }
 
-// This is a temporary helper function to avoid
-// crashes when trying to load a screen that does
-// NOT exists, this should be removed for GA
 function isScreenRegistered(screen: AvailableScreens) {
     const notImplemented = NOT_READY.includes(screen) || !Object.values(Screens).includes(screen);
     if (notImplemented) {
@@ -306,26 +179,20 @@ function edgeToEdgeHack(screen: AvailableScreens, theme: Theme) {
     const isDark = tinyColor(theme.sidebarBg).isDark();
 
     if (Platform.OS === 'android') {
-        if (Platform.Version >= 34) {
-            const listener = Navigation.events().registerComponentDidAppearListener((event) => {
-                if (event.componentName === screen) {
-                    setNavigationBarColor(screen, theme);
-                    listener.remove();
-                }
-            });
-        }
-
-        if (Platform.Version >= 36) {
-            return {
-                drawBehind: true,
-                translucent: false,
-                isDark,
-            };
-        }
+        setNavigationBarColor(screen, theme);
     }
 
     StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content');
     return {isDark};
+}
+
+function replaceRoot(screen: AvailableScreens, passProps: Record<string, unknown> = {}) {
+    NavigationStore.clearScreensFromStack();
+    NavigationPropsStore.clear();
+    BottomSheetStore.clear();
+    trackScreen(screen);
+    routeToScreen(screen, passProps, true);
+    return '';
 }
 
 export function openToS() {
@@ -333,378 +200,131 @@ export function openToS() {
     return showOverlay(Screens.TERMS_OF_SERVICE, {}, {overlay: {interceptTouchOutside: true}});
 }
 
-export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}) {
+export async function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}) {
     const theme = getThemeFromState();
-    const edgeToEdge = edgeToEdgeHack(Screens.HOME, theme);
+    edgeToEdgeHack(Screens.HOME, theme);
 
     if (!passProps.coldStart && (passProps.launchType === Launch.AddServer || passProps.launchType === Launch.AddServerFromDeepLink)) {
         dismissModal({componentId: Screens.SERVER});
         dismissModal({componentId: Screens.BOTTOM_SHEET});
         if (passProps.launchType === Launch.AddServerFromDeepLink) {
-            Navigation.updateProps(Screens.HOME, {launchType: Launch.DeepLink, extra: passProps.extra});
+            routeToScreen(Screens.HOME, {launchType: Launch.DeepLink, extra: passProps.extra}, true);
         }
         return '';
     }
 
-    const stack = {
-        children: [{
-            component: {
-                id: Screens.HOME,
-                name: Screens.HOME,
-                passProps,
-                options: {
-                    layout: {
-                        componentBackgroundColor: theme.centerChannelBg,
-                    },
-                    statusBar: {
-                        visible: true,
-                        backgroundColor: theme.sidebarBg,
-                        ...edgeToEdge,
-                    },
-                    topBar: {
-                        visible: false,
-                        height: 0,
-                        background: {
-                            color: theme.sidebarBg,
-                        },
-                        backButton: {
-                            visible: false,
-                            color: theme.sidebarHeaderTextColor,
-                        },
-                    },
-                },
-            },
-        }],
-    };
-
-    return Navigation.setRoot({
-        root: {stack},
-    });
+    return replaceRoot(Screens.HOME, passProps as unknown as Record<string, unknown>);
 }
 
-function computeStatusBarStyle(backgroundHex: string): NonNullable<OptionsStatusBar['style']> {
-    const isDark = tinyColor(backgroundHex).isDark();
-    return isDark ? 'light' : 'dark';
-}
-
-export function resetToInfomaniakLogin(passProps: LaunchProps) {
+export async function resetToInfomaniakLogin(passProps: LaunchProps) {
     const theme = getDefaultThemeByAppearance();
+    edgeToEdgeHack(Screens.INFOMANIAK_LOGIN, theme);
 
-    const children = [{
-        component: {
-            id: Screens.INFOMANIAK_LOGIN,
-            name: Screens.INFOMANIAK_LOGIN,
-            passProps: {
-                ...passProps,
-                theme,
-            },
-            options: {
-                layout: {
-                    backgroundColor: theme.centerChannelBg,
-                    componentBackgroundColor: theme.centerChannelBg,
-                },
-                topBar: {
-                    backButton: {
-                        color: theme.sidebarHeaderTextColor,
-                        title: '',
-                    },
-                    background: {
-                        color: theme.sidebarBg,
-                    },
-                    visible: false,
-                    height: 0,
-                },
-                statusBar: {
-                    style: computeStatusBarStyle(theme.centerChannelBg),
-                    visible: true,
-                },
-            },
-        },
-    }];
-
-    return Navigation.setRoot({
-        root: {
-            stack: {
-                children,
-            },
-        },
-    });
+    return replaceRoot(Screens.INFOMANIAK_LOGIN, {
+        ...passProps,
+        theme,
+    } as Record<string, unknown>);
 }
 
-export function resetToInfomaniakNoTeams() {
+export async function resetToInfomaniakNoTeams() {
     const theme = getDefaultThemeByAppearance();
+    edgeToEdgeHack(Screens.INFOMANIAK_NO_TEAMS, theme);
 
-    const children = [{
-        component: {
-            id: Screens.INFOMANIAK_NO_TEAMS,
-            name: Screens.INFOMANIAK_NO_TEAMS,
-            passProps: {
-                theme,
-            },
-            options: {
-                layout: {
-                    backgroundColor: theme.centerChannelBg,
-                    componentBackgroundColor: theme.centerChannelBg,
-                },
-                topBar: {
-                    backButton: {
-                        color: theme.sidebarHeaderTextColor,
-                        title: '',
-                    },
-                    background: {
-                        color: theme.sidebarBg,
-                    },
-                    visible: false,
-                    height: 0,
-                },
-            },
-        },
-    }];
-
-    Navigation.setRoot({
-        root: {
-            stack: {
-                children,
-            },
-        },
-    });
+    return replaceRoot(Screens.INFOMANIAK_NO_TEAMS, {theme});
 }
 
-export function resetToSelectServer(passProps: LaunchProps) {
+export async function resetToSelectServer(passProps: LaunchProps) {
     const theme = getDefaultThemeByAppearance();
-    const edgeToEdge = edgeToEdgeHack(Screens.SERVER, theme);
+    edgeToEdgeHack(Screens.SERVER, theme);
 
-    const children = [{
-        component: {
-            id: Screens.SERVER,
-            name: Screens.SERVER,
-            passProps: {
-                ...passProps,
-                theme,
-            },
-            options: {
-                layout: {
-                    backgroundColor: theme.centerChannelBg,
-                    componentBackgroundColor: theme.centerChannelBg,
-                },
-                statusBar: {
-                    visible: true,
-                    backgroundColor: theme.sidebarBg,
-                    ...edgeToEdge,
-                },
-                topBar: {
-                    backButton: {
-                        color: theme.sidebarHeaderTextColor,
-                        title: '',
-                    },
-                    background: {
-                        color: theme.sidebarBg,
-                    },
-                    visible: false,
-                    height: 0,
-                },
-            },
-        },
-    }];
-
-    return Navigation.setRoot({
-        root: {
-            stack: {
-                children,
-            },
-        },
-    });
+    return replaceRoot(Screens.SERVER, {
+        ...passProps,
+        theme,
+    } as Record<string, unknown>);
 }
 
-export function resetToOnboarding(passProps: LaunchProps) {
+export async function resetToOnboarding(passProps: LaunchProps) {
     const theme = getDefaultThemeByAppearance();
-    const edgeToEdge = edgeToEdgeHack(Screens.ONBOARDING, theme);
+    edgeToEdgeHack(Screens.ONBOARDING, theme);
 
-    const children = [{
-        component: {
-            id: Screens.ONBOARDING,
-            name: Screens.ONBOARDING,
-            passProps: {
-                ...passProps,
-                theme,
-            },
-            options: {
-                layout: {
-                    backgroundColor: theme.centerChannelBg,
-                    componentBackgroundColor: theme.centerChannelBg,
-                },
-                statusBar: {
-                    visible: true,
-                    backgroundColor: theme.sidebarBg,
-                    ...edgeToEdge,
-                },
-                topBar: {
-                    backButton: {
-                        color: theme.sidebarHeaderTextColor,
-                        title: '',
-                    },
-                    background: {
-                        color: theme.sidebarBg,
-                    },
-                    visible: false,
-                    height: 0,
-                },
-            },
-        },
-    }];
-
-    return Navigation.setRoot({
-        root: {
-            stack: {
-                children,
-            },
-        },
-    });
+    return replaceRoot(Screens.ONBOARDING, {
+        ...passProps,
+        theme,
+    } as Record<string, unknown>);
 }
 
-export function resetToTeams() {
+export async function resetToTeams() {
     const theme = getThemeFromState();
-    const edgeToEdge = edgeToEdgeHack(Screens.SELECT_TEAM, theme);
+    edgeToEdgeHack(Screens.SELECT_TEAM, theme);
 
-    return Navigation.setRoot({
-        root: {
-            stack: {
-                children: [{
-                    component: {
-                        id: Screens.SELECT_TEAM,
-                        name: Screens.SELECT_TEAM,
-                        options: {
-                            layout: {
-                                componentBackgroundColor: theme.centerChannelBg,
-                            },
-                            statusBar: {
-                                visible: true,
-                                backgroundColor: theme.sidebarBg,
-                                ...edgeToEdge,
-                            },
-                            topBar: {
-                                visible: false,
-                                height: 0,
-                                background: {
-                                    color: theme.sidebarBg,
-                                },
-                                backButton: {
-                                    visible: false,
-                                    color: theme.sidebarHeaderTextColor,
-                                },
-                            },
-                        },
-                    },
-                }],
-            },
-        },
-    });
+    return replaceRoot(Screens.SELECT_TEAM);
 }
 
-export function goToScreen(name: AvailableScreens, title: string, passProps = {}, options: Options = {}) {
+export function goToScreen(name: AvailableScreens, title: string, passProps = {}, options: NavigationOptions = {}) {
     if (!isScreenRegistered(name)) {
         captureException(new Error(`[Navigation] Screen ${name} is not registered`));
         return '';
     }
 
     const theme = getThemeFromState();
-    const edgeToEdge = edgeToEdgeHack(name, theme);
-    const componentId = NavigationStore.getVisibleScreen();
-    if (!componentId) {
+    edgeToEdgeHack(name, theme);
+
+    if (!NavigationStore.getVisibleScreen()) {
         logError('Trying to go to screen without any screen on the navigation store');
         return '';
     }
 
-    const defaultOptions: Options = {
-        layout: {
-            componentBackgroundColor: theme.centerChannelBg,
-        },
-        popGesture: true,
-        sideMenu: {
-            left: {enabled: false},
-            right: {enabled: false},
-        },
-        statusBar: {
-            style: edgeToEdge.isDark ? 'light' : 'dark',
-            backgroundColor: theme.sidebarBg,
-            drawBehind: edgeToEdge.drawBehind ?? false,
-            translucent: edgeToEdge.translucent ?? false,
-        },
-        topBar: {
-            animate: true,
-            visible: true,
-            backButton: {
-                color: theme.sidebarHeaderTextColor,
-                title: '',
-                testID: 'screen.back.button',
-            },
-            background: {
-                color: theme.sidebarBg,
-            },
-            title: {
-                color: theme.sidebarHeaderTextColor,
-                text: title,
-            },
-        },
-    };
-
     DeviceEventEmitter.emit(Events.TAB_BAR_VISIBLE, false);
 
+    const nextProps = {
+        ...passProps,
+        navigationOptions: merge({title}, options),
+    };
+
     if (NavigationStore.getScreensInStack().includes(name)) {
-        Navigation.updateProps(name, passProps);
-        if (NavigationStore.getVisibleScreen() !== name) {
-            return Navigation.popTo(name, merge(defaultOptions, options));
-        }
+        NavigationStore.popTo(name);
+        router.dismissTo({
+            pathname: '/[screen]',
+            params: {screen: name},
+        } as never);
         return '';
     }
 
-    try {
-        return Navigation.push(componentId, {
-            component: {
-                id: name,
-                name,
-                passProps,
-                options: merge(defaultOptions, options),
-            },
-        });
-    } catch (error) {
-        captureException(error);
-        return '';
-    }
+    trackScreen(name);
+    routeToScreen(name, nextProps);
+    return '';
 }
 
 export async function popTopScreen(screenId?: AvailableScreens) {
-    try {
-        if (screenId) {
-            await Navigation.pop(screenId);
-        } else {
-            const componentId = NavigationStore.getVisibleScreen();
-            await Navigation.pop(componentId);
+    if (screenId) {
+        NavigationStore.removeScreenFromStack(screenId);
+    } else {
+        const componentId = NavigationStore.getVisibleScreen();
+        if (componentId) {
+            NavigationStore.removeScreenFromStack(componentId);
         }
-    } catch (error) {
-        // RNN returns a promise rejection if there are no screens
-        // atop the root screen to pop. We'll do nothing in this case.
+    }
+
+    if (router.canGoBack()) {
+        router.back();
     }
 }
 
 export async function popTo(screenId: AvailableScreens) {
-    try {
-        await Navigation.popTo(screenId);
-    } catch (error) {
-        // RNN returns a promise rejection if there are no screens
-        // atop the root screen to pop. We'll do nothing in this case.
-    }
+    NavigationStore.popTo(screenId);
+    router.dismissTo({
+        pathname: '/[screen]',
+        params: {screen: screenId},
+    } as never);
 }
 
 export async function popToRoot() {
-    const componentId = NavigationStore.getVisibleScreen();
-
-    try {
-        await Navigation.popToRoot(componentId);
-    } catch (error) {
-        // RNN returns a promise rejection if there are no screens
-        // atop the root screen to pop. We'll do nothing in this case.
-    }
+    NavigationStore.clearScreensFromStack();
+    NavigationStore.addScreenToStack(Screens.HOME);
+    router.dismissTo({
+        pathname: '/[screen]',
+        params: {screen: Screens.HOME},
+    } as never);
 }
 
 export async function dismissAllModalsAndPopToRoot() {
@@ -713,248 +333,92 @@ export async function dismissAllModalsAndPopToRoot() {
     await popToRoot();
 }
 
-/**
- * Dismisses All modals in the stack and pops the stack to the desired screen
- * (if the screen is not in the stack, it will push a new one)
- * @param screenId Screen to pop or display
- * @param title Title to be shown in the top bar
- * @param passProps Props to pass to the screen
- * @param options Navigation options
- */
 export async function dismissAllModalsAndPopToScreen(screenId: AvailableScreens, title: string, passProps = {}, options = {}) {
     await dismissAllModals();
     await dismissAllOverlays();
     if (NavigationStore.getScreensInStack().includes(screenId)) {
-        let mergeOptions = options;
-        if (title) {
-            mergeOptions = merge(mergeOptions, {
-                topBar: {
-                    title: {
-                        text: title,
-                    },
-                },
-            });
-        }
-        try {
-            await Navigation.popTo(screenId, mergeOptions);
-            if (Object.keys(passProps).length > 0) {
-                Navigation.updateProps(screenId, passProps);
-            }
-        } catch {
-            // catch in case there is nothing to pop
-        }
+        await popTo(screenId);
     } else {
         await goToScreen(screenId, title, passProps, options);
     }
 }
 
-export function showModal(name: AvailableScreens, title: string, passProps = {}, options: Options = {}) {
+export function showModal(name: AvailableScreens, title: string, passProps = {}, options: NavigationOptions = {}) {
     if (!isScreenRegistered(name) || NavigationStore.getVisibleModal() === name) {
-        return;
+        return undefined;
     }
 
     const theme = getThemeFromState();
-    const edgeToEdge = edgeToEdgeHack(name, theme);
-    const modalPresentationStyle: OptionsModalPresentationStyle = Platform.OS === 'ios' ? OptionsModalPresentationStyle.pageSheet : OptionsModalPresentationStyle.none;
-    const defaultOptions: Options = {
-        modalPresentationStyle,
-        layout: {
-            componentBackgroundColor: theme.centerChannelBg,
-        },
-        statusBar: {
-            visible: true,
-            backgroundColor: theme.sidebarBg,
-            ...edgeToEdge,
-        },
-        topBar: {
-            animate: true,
-            visible: true,
-            backButton: {
-                color: theme.sidebarHeaderTextColor,
-                title: '',
-            },
-            background: {
-                color: theme.sidebarBg,
-            },
-            title: {
-                color: theme.sidebarHeaderTextColor,
-                text: title,
-            },
-            leftButtonColor: theme.sidebarHeaderTextColor,
-            rightButtonColor: theme.sidebarHeaderTextColor,
-        },
-        modal: {swipeToDismiss: false},
-    };
-
-    Navigation.showModal({
-        stack: {
-            children: [{
-                component: {
-                    id: name,
-                    name,
-                    passProps: {
-                        ...passProps,
-                        isModal: true,
-                    },
-                    options: merge(defaultOptions, options),
-                },
-            }],
-        },
+    edgeToEdgeHack(name, theme);
+    trackScreen(name, true);
+    routeToScreen(name, {
+        ...passProps,
+        isModal: true,
+        navigationOptions: merge({title}, options),
     });
+
+    return undefined;
 }
 
-export function showModalOverCurrentContext(name: AvailableScreens, passProps = {}, options: Options = {}) {
-    const title = '';
-    let animations;
-    switch (Platform.OS) {
-        case 'android':
-            animations = {
-                showModal: {
-                    waitForRender: false,
-                    alpha: {
-                        from: 0,
-                        to: 1,
-                        duration: 250,
-                    },
-                },
-                dismissModal: {
-                    alpha: {
-                        from: 1,
-                        to: 0,
-                        duration: 250,
-                    },
-                },
-            };
-            break;
-        default:
-            animations = {
-                showModal: {
-                    alpha: {
-                        from: 0,
-                        to: 1,
-                        duration: 250,
-                    },
-                },
-                dismissModal: {
-                    enter: {
-                        enabled: false,
-                    },
-                    exit: {
-                        enabled: false,
-                    },
-                },
-            };
-            break;
-    }
-    const defaultOptions = {
-        modalPresentationStyle: OptionsModalPresentationStyle.overCurrentContext,
-        layout: {
-            backgroundColor: 'transparent',
-            componentBackgroundColor: 'transparent',
-        },
-        topBar: {
-            visible: false,
-            height: 0,
-        },
-        animations,
-    };
-    const mergeOptions = merge(defaultOptions, options);
-    showModal(name, title, passProps, mergeOptions);
+export function showModalOverCurrentContext(name: AvailableScreens, passProps = {}, options: NavigationOptions = {}) {
+    return showModal(name, '', passProps, options);
 }
 
-export async function dismissModal(options?: Options & { componentId: AvailableScreens}) {
-    if (!NavigationStore.hasModalsOpened()) {
-        return;
-    }
-
+export async function dismissModal(options?: NavigationOptions & {componentId: AvailableScreens}) {
     const componentId = options?.componentId || NavigationStore.getVisibleModal();
     if (componentId) {
-        try {
-            await Navigation.dismissModal(componentId, options);
-        } catch (error) {
-            // RNN returns a promise rejection if there is no modal to
-            // dismiss. We'll do nothing in this case.
-        }
+        NavigationStore.removeModalFromStack(componentId);
+        NavigationStore.removeScreenFromStack(componentId);
+    }
+
+    if (router.canGoBack()) {
+        router.back();
     }
 }
 
 export async function dismissAllModals() {
-    if (!NavigationStore.hasModalsOpened()) {
-        return;
-    }
-
-    try {
-        const modals = [...NavigationStore.getModalsInStack()];
-        for await (const modal of modals) {
-            await Navigation.dismissModal(modal, {animations: {dismissModal: {enabled: false}}});
-        }
-    } catch (error) {
-        // RNN returns a promise rejection if there are no modals to
-        // dismiss. We'll do nothing in this case.
-    }
+    NavigationStore.getModalsInStack().forEach((modal) => {
+        NavigationStore.removeModalFromStack(modal);
+    });
 }
 
-export const buildNavigationButton = (id: string, testID: string, icon?: ImageResource, text?: string): OptionsTopBarButton => ({
-    fontSize: 16,
-    fontFamily: 'SuisseIntl-SemiBold',
-    fontWeight: '600',
+export const buildNavigationButton = (id: string, testID: string, icon?: unknown, text?: string): NavigationButton => ({
     id,
     icon,
-    showAsAction: 'always',
     testID,
     text,
 });
 
 export function setButtons(componentId: AvailableScreens, buttons: NavButtons = {leftButtons: [], rightButtons: []}) {
-    const options = {
-        topBar: {
-            ...buttons,
-        },
-    };
-
-    mergeNavigationOptions(componentId, options);
+    NavigationHeaderStore.setButtons(componentId, buttons);
+    return buttons;
 }
 
-export function showOverlay(name: AvailableScreens, passProps = {}, options: Options = {}, id?: string) {
+export function showOverlay(name: AvailableScreens, passProps = {}, options: NavigationOptions = {}, id?: string) {
     if (!isScreenRegistered(name)) {
-        return;
+        return undefined;
     }
 
-    const defaultOptions = {
-        layout: {
-            backgroundColor: 'transparent',
-            componentBackgroundColor: 'transparent',
-        },
-        overlay: {
-            interceptTouchOutside: false,
-        },
-    };
-
-    Navigation.showOverlay({
-        component: {
-            id,
-            name,
-            passProps,
-            options: merge(defaultOptions, options),
-        },
+    trackScreen(name, true);
+    routeToScreen(name, {
+        ...passProps,
+        overlayId: id,
+        navigationOptions: options,
     });
+
+    return undefined;
 }
 
 export async function dismissOverlay(componentId: string) {
-    try {
-        await Navigation.dismissOverlay(componentId);
-    } catch (error) {
-        // RNN returns a promise rejection if there is no modal with
-        // this componentId to dismiss. We'll do nothing in this case.
+    NavigationStore.removeModalFromStack(componentId as AvailableScreens);
+    NavigationStore.removeScreenFromStack(componentId as AvailableScreens);
+    if (router.canGoBack()) {
+        router.back();
     }
 }
 
 export async function dismissAllOverlays() {
-    try {
-        await Navigation.dismissAllOverlays();
-    } catch {
-        // do nothing
-    }
+    await dismissAllModals();
 }
 
 type BottomSheetArgs = {
@@ -970,23 +434,23 @@ type BottomSheetArgs = {
 }
 
 export function bottomSheet({title, renderContent, footerComponent, snapPoints, initialSnapIndex = 1, theme, closeButtonId, scrollable = false, enableDynamicSizing}: BottomSheetArgs) {
+    BottomSheetStore.setState({
+        footerComponent,
+        renderContent,
+        snapPoints,
+    });
+
     if (isTablet()) {
         showModal(Screens.BOTTOM_SHEET, title, {
             closeButtonId,
             enableDynamicSizing,
             initialSnapIndex,
-            renderContent,
-            footerComponent,
-            snapPoints,
             scrollable,
         }, bottomSheetModalOptions(theme, closeButtonId));
     } else {
         showModalOverCurrentContext(Screens.BOTTOM_SHEET, {
             enableDynamicSizing,
             initialSnapIndex,
-            renderContent,
-            footerComponent,
-            snapPoints,
             scrollable,
         }, bottomSheetModalOptions(theme));
     }
@@ -994,12 +458,13 @@ export function bottomSheet({title, renderContent, footerComponent, snapPoints, 
 
 export async function dismissBottomSheet(alternativeScreen: AvailableScreens = Screens.BOTTOM_SHEET) {
     DeviceEventEmitter.emit(Events.CLOSE_BOTTOM_SHEET);
-    await NavigationStore.waitUntilScreensIsRemoved(alternativeScreen);
+    NavigationStore.removeScreenFromStack(alternativeScreen);
+    await dismissModal({componentId: alternativeScreen});
 }
 
 type AsBottomSheetArgs = {
     closeButtonId: string;
-    props?: Record<string, any>;
+    props?: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
     screen: AvailableScreens;
     theme: Theme;
     title: string;
@@ -1060,15 +525,16 @@ export const showShareFeedbackOverlay = () => {
 };
 
 export async function findChannels(title: string, theme: Theme) {
-    const options: Options = {};
     const closeButtonId = 'close-find-channels';
     const closeButton = CompassIcon.getImageSourceSync('close', 24, theme.sidebarHeaderTextColor);
-    options.topBar = {
-        leftButtons: [{
-            id: closeButtonId,
-            icon: closeButton,
-            testID: 'close.find_channels.button',
-        }],
+    const options: NavigationOptions = {
+        topBar: {
+            leftButtons: [{
+                id: closeButtonId,
+                icon: closeButton,
+                testID: 'close.find_channels.button',
+            }],
+        },
     };
 
     showModal(

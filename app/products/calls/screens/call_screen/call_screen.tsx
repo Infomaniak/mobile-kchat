@@ -7,7 +7,6 @@ import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
 import React, {forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type ComponentProps, type MutableRefObject} from 'react';
 import {useIntl} from 'react-intl';
 import {ActivityIndicator, FlatList, Platform, View} from 'react-native';
-import {Navigation} from 'react-native-navigation';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 
 import {fetchChannelById, switchToChannelById} from '@actions/remote/channel';
@@ -25,6 +24,7 @@ import DatabaseManager from '@database/manager';
 import {useCollapsibleHeader} from '@hooks/header';
 import {useMountedRef, useRerender, useTransientRef} from '@hooks/utils';
 import {getCommonSystemValues} from '@queries/servers/system';
+import {popTopScreen} from '@screens/navigation';
 import CallManager from '@store/CallManager';
 import {isDMorGM as isChannelDMorGM} from '@utils/channel';
 import {logError} from '@utils/log';
@@ -352,8 +352,8 @@ const CallScreen = ({
             hasUpdatedRef(leavingRef, true)
         ) {
             // Remove the call screen, and in some situations it needs to be removed twice before actually being removed
-            Navigation.pop(Screens.CALL).catch(() => null);
-            Navigation.pop(Screens.CALL).catch(() => null);
+            popTopScreen(Screens.CALL).catch(() => null);
+            popTopScreen(Screens.CALL).catch(() => null);
 
             // Return back to the channel where this meeting has been started
             const database = DatabaseManager.serverDatabases[serverUrl]?.database;

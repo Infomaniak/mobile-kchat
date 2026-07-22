@@ -6,12 +6,6 @@ import React from 'react';
 import {injectIntl, type IntlShape} from 'react-intl';
 import {BackHandler, type NativeEventSubscription, SafeAreaView, View} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {
-    Navigation,
-    type NavigationButtonPressedEvent,
-    NavigationComponent,
-    type Options,
-} from 'react-native-navigation';
 
 import {CustomStatusDurationEnum} from '@constants/custom_status';
 import {observeCurrentUser} from '@queries/servers/user';
@@ -24,7 +18,7 @@ import ClearAfterMenuItem from './components/clear_after_menu_item';
 
 import type {WithDatabaseArgs} from '@typings/database/database';
 import type UserModel from '@typings/database/models/servers/user';
-import type {AvailableScreens} from '@typings/screens/navigation';
+import type {AvailableScreens, Options} from '@typings/screens/navigation';
 
 interface Props {
     componentId: AvailableScreens;
@@ -64,10 +58,10 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-class ClearAfterModal extends NavigationComponent<Props, State> {
+class ClearAfterModal extends React.Component<Props, State> {
     private backListener: NativeEventSubscription | undefined;
     constructor(props: Props) {
-        super({...props, componentName: 'ClearAfterModal'});
+        super(props);
 
         const options: Options = {
             topBar: {
@@ -95,7 +89,6 @@ class ClearAfterModal extends NavigationComponent<Props, State> {
     }
 
     componentDidMount() {
-        Navigation.events().bindComponent(this);
         this.backListener = BackHandler.addEventListener('hardwareBackPress', this.onBackPress);
     }
 
@@ -103,7 +96,7 @@ class ClearAfterModal extends NavigationComponent<Props, State> {
         this.backListener?.remove();
     }
 
-    navigationButtonPressed({buttonId}: NavigationButtonPressedEvent) {
+    navigationButtonPressed({buttonId}: {buttonId: string}) {
         switch (buttonId) {
             case CLEAR_AFTER:
                 this.onDone();

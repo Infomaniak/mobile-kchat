@@ -4,7 +4,6 @@
 import React, {useCallback, useRef, useState} from 'react';
 import {DeviceEventEmitter, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {GestureDetector, Gesture, GestureHandlerRootView} from 'react-native-gesture-handler';
-import {Navigation} from 'react-native-navigation';
 import Animated, {runOnJS, useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 import {initialWindowMetrics} from 'react-native-safe-area-context';
 
@@ -97,7 +96,13 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
     const notificationTapped = usePreventDoubleTap(useCallback(() => {
         tapped.current = true;
         dismiss();
-    }, [dismiss]));
+        if (serverUrl) {
+            const {channel_id: channelId} = notification.payload || {};
+            if (channelId) {
+                openNotification(serverUrl, notification);
+            }
+        }
+    }, [dismiss, notification, serverUrl]));
 
     useDidMount(() => {
         initial.value = 0;
@@ -109,19 +114,6 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
         }, AUTO_DISMISS_TIME_MILLIS);
 
         return cancelDismissTimer;
-    });
-
-    useDidMount(() => {
-        const didDismissListener = Navigation.events().registerComponentDidDisappearListener(async ({componentId: screen}) => {
-            if (componentId === screen && tapped.current && serverUrl) {
-                const {channel_id} = notification.payload || {};
-                if (channel_id) {
-                    openNotification(serverUrl, notification);
-                }
-            }
-        });
-
-        return () => didDismissListener.remove();
     });
 
     useDidMount(() => {

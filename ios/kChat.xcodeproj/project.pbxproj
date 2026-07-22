@@ -40,6 +40,7 @@
 		67FEAE2A2A1261EA00DDF4AE /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 67FEADFA2A1260B900DDF4AE /* Localizable.strings */; };
 		67FEAE2C2A127C3600DDF4AE /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67FEAE2B2A127C3600DDF4AE /* NumberFormatter.swift */; };
 		7F0F4B0A24BA173900E14C60 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7F0F4B0924BA173900E14C60 /* LaunchScreen.storyboard */; };
+		7F0F4B0B24BA173900E14C60 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7F0F4B0C24BA173900E14C60 /* SplashScreen.storyboard */; };
 		7F151D3E221B062700FAD8F3 /* RuntimeUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F151D3D221B062700FAD8F3 /* RuntimeUtils.swift */; };
 		7F1EB88527FDE361002E7EEC /* GekidouWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1EB88427FDE361002E7EEC /* GekidouWrapper.swift */; };
 		7F1EBFCE286F2AE200824AF1 /* MultipleAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1EBFCD286F2AE200824AF1 /* MultipleAttachmentView.swift */; };
@@ -228,6 +229,7 @@
 		69AE95766B25F56960B8492F /* Pods_kChatShareExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_kChatShareExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6BAF8296411D4657B5A0E8F8 /* libRNReactNativeDocViewer.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNReactNativeDocViewer.a; sourceTree = "<group>"; };
 		7F0F4B0924BA173900E14C60 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = SplashScreenResource/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		7F0F4B0C24BA173900E14C60 /* SplashScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = SplashScreenResource/SplashScreen.storyboard; sourceTree = "<group>"; };
 		7F151D3D221B062700FAD8F3 /* RuntimeUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RuntimeUtils.swift; sourceTree = "<group>"; };
 		7F151D43221B082A00FAD8F3 /* Mattermost-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Mattermost-Bridging-Header.h"; path = "Mattermost/Mattermost-Bridging-Header.h"; sourceTree = "<group>"; };
 		7F1EB88427FDE361002E7EEC /* GekidouWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GekidouWrapper.swift; sourceTree = "<group>"; };
@@ -427,6 +429,7 @@
 				7F63D2C21E6DD98A001FAE12 /* Mattermost.entitlements */,
 				7F151D43221B082A00FAD8F3 /* Mattermost-Bridging-Header.h */,
 				7F0F4B0924BA173900E14C60 /* LaunchScreen.storyboard */,
+				7F0F4B0C24BA173900E14C60 /* SplashScreen.storyboard */,
 				C9A1070F2BBD7C8700753CDC /* PrivacyInfo.xcprivacy */,
 			);
 			name = Mattermost;
@@ -977,6 +980,7 @@
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				672D98A329F1927F004228D6 /* InfoPlist.strings in Resources */,
 				7F0F4B0A24BA173900E14C60 /* LaunchScreen.storyboard in Resources */,
+				7F0F4B0B24BA173900E14C60 /* SplashScreen.storyboard in Resources */,
 				7F292A711E8AB73400A450A3 /* SplashScreenResource in Resources */,
 				C9A107102BBD7C8700753CDC /* PrivacyInfo.xcprivacy in Resources */,
 				7FB31F812710995B0032E2E5 /* Metropolis-Light.ttf in Resources */,

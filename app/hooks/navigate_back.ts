@@ -2,13 +2,14 @@
 // See LICENSE.txt for license information.
 
 import {useEffect} from 'react';
-import {Navigation} from 'react-native-navigation';
+
+import {addNavigationButtonPressedListener} from '@screens/navigation_button_events';
 
 const BACK_BUTTON = 'RNN.back';
 
 const useBackNavigation = (callback: () => void) => {
     useEffect(() => {
-        const backListener = Navigation.events().registerNavigationButtonPressedListener(({buttonId}) => {
+        const backListener = addNavigationButtonPressedListener(({buttonId}) => {
             if (buttonId === BACK_BUTTON) {
                 callback();
             }

@@ -2,15 +2,15 @@
 // See LICENSE.txt for license information.
 
 import {Alert} from 'react-native';
-import {Navigation, OptionsModalPresentationStyle, type Options} from 'react-native-navigation';
 
 import CompassIcon from '@components/compass_icon';
 import {Screens, ServerErrors} from '@constants';
 import {showModal} from '@screens/navigation';
+import NavigationHeaderStore from '@store/navigation_header_store';
 import {isErrorWithMessage, isServerError} from '@utils/errors';
 
 import type {GalleryItemType} from '@typings/screens/gallery';
-import type {AvailableScreens} from '@typings/screens/navigation';
+import type {AvailableScreens, NavigationOptions} from '@typings/screens/navigation';
 import type {IntlShape} from 'react-intl';
 
 export const appearanceControlledScreens = new Set<AvailableScreens>([
@@ -24,8 +24,9 @@ export const appearanceControlledScreens = new Set<AvailableScreens>([
     Screens.SHARE_FEEDBACK,
 ]);
 
-export function mergeNavigationOptions(componentId: string, options: Options) {
-    Navigation.mergeOptions(componentId, options);
+export function mergeNavigationOptions(componentId: string, options: NavigationOptions) {
+    NavigationHeaderStore.mergeOptions(componentId as AvailableScreens, options);
+    return options;
 }
 
 export function alertTeamRemove(displayName: string, intl: IntlShape) {
@@ -103,8 +104,7 @@ export function previewPdf(item: FileInfo | GalleryItemType, path: string, theme
     const closeButton = CompassIcon.getImageSourceSync('close', 24, theme.sidebarHeaderTextColor);
     const closeButtonId = 'close-pdf-viewer';
 
-    const options: Options = {
-        modalPresentationStyle: OptionsModalPresentationStyle.currentContext,
+    const options: NavigationOptions = {
         topBar: {
             visible: false,
             animate: false,

@@ -2,10 +2,10 @@
 
 #import <AVFoundation/AVFoundation.h>
 #import <Intents/Intents.h>
+#import <ReactAppDependencyProvider/RCTAppDependencyProvider.h>
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
 #import <RNKeychain/RNKeychainManager.h>
-#import <ReactNativeNavigation/ReactNativeNavigation.h>
 #import <UserNotifications/UserNotifications.h>
 #import <TurboLogIOSNative/TurboLog.h>
 
@@ -70,9 +70,12 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
   [RNNotifications startMonitorNotifications];
 
   os_log(OS_LOG_DEFAULT, "Mattermost started!!");
-  [ReactNativeNavigation bootstrapWithDelegate:self launchOptions:launchOptions];
 
-  return YES;
+  self.moduleName = @"Mattermost";
+  self.dependencyProvider = [RCTAppDependencyProvider new];
+  self.initialProps = [self prepareInitialProps];
+
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
 -(BOOL)bridgelessEnabled {
@@ -225,16 +228,6 @@ continueUserActivity: (nonnull NSUserActivity *)userActivity
   return self.orientationLock;
 }
 
-- (NSArray<id<RCTBridgeModule>> *)extraModulesForBridge:(RCTBridge *)bridge
-{
-  NSMutableArray<id<RCTBridgeModule>> *extraModules = [NSMutableArray new];
-  [extraModules addObjectsFromArray:[ReactNativeNavigation extraModulesForBridge:bridge]];
-
-  // You can inject any extra modules that you would like here, more information at:
-  // https://facebook.github.io/react-native/docs/native-modules-ios.html#dependency-injection
-  return extraModules;
-}
-
 - (NSDictionary *)prepareInitialProps
 {
   NSMutableDictionary *initProps = [NSMutableDictionary new];
@@ -245,6 +238,11 @@ continueUserActivity: (nonnull NSUserActivity *)userActivity
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
+{
+  return [self getBundleURL];
+}
+
+- (NSURL *)bundleURL
 {
   return [self getBundleURL];
 }

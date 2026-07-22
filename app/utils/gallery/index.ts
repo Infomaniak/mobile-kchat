@@ -5,7 +5,6 @@ import RNUtils from '@mattermost/rnutils';
 import {Image} from 'expo-image';
 import React, {type RefObject} from 'react';
 import {DeviceEventEmitter, Keyboard, Platform, View} from 'react-native';
-import {Navigation, type Options, type OptionsLayout} from 'react-native-navigation';
 import {measure, type AnimatedRef} from 'react-native-reanimated';
 
 import {Events, Screens} from '@constants';
@@ -18,6 +17,7 @@ import {urlSafeBase64Encode} from '@utils/security';
 import {showSnackBar} from '@utils/snack_bar';
 
 import type {GalleryItemType, GalleryManagerSharedValues} from '@typings/screens/gallery';
+import type {NavigationOptions} from '@typings/screens/navigation';
 
 export const clamp = (value: number, lowerBound: number, upperBound: number) => {
     'worklet';
@@ -170,10 +170,10 @@ export function openGalleryAtIndex(galleryIdentifier: string, initialIndex: numb
         initialIndex,
         items,
     };
-    const layout: OptionsLayout = {
+    const layout = {
         orientation: allOrientations,
     };
-    const options: Options = {
+    const options: NavigationOptions = {
         layout,
         topBar: {
             background: {
@@ -197,8 +197,6 @@ export function openGalleryAtIndex(galleryIdentifier: string, initialIndex: numb
     };
 
     if (Platform.OS === 'ios') {
-        // on iOS we need both the navigation & the module
-        Navigation.setDefaultOptions({layout});
         RNUtils.unlockOrientation();
     }
     showOverlay(Screens.GALLERY, props, options);

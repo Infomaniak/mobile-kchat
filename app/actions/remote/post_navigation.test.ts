@@ -100,7 +100,7 @@ describe('jumpToPostInChannel', () => {
     const mockedSwitchToChannelById = jest.mocked(switchToChannelById);
 
     beforeEach(() => {
-        mockedDatabaseManager.getServerDatabaseAndOperator.mockReturnValue({database} as any);
+        mockedDatabaseManager.getServerDatabaseAndOperator.mockReturnValue({database} as unknown as ReturnType<typeof DatabaseManager.getServerDatabaseAndOperator>);
         mockedFetchPostById.mockResolvedValue({post: mockApiPost()});
         mockedFetchPostsAround.mockResolvedValue({posts: [mockApiPost()]});
         mockedGetChannelById.mockResolvedValue({id: channelId, teamId} as never);

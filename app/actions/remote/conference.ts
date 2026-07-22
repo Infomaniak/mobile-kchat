@@ -22,7 +22,7 @@ import {getFullName} from '@utils/user';
 import {forceLogoutIfNecessary} from './session';
 
 import type ConferenceModel from '@typings/database/models/servers/conference';
-import type {Options} from 'react-native-navigation';
+import type {Options} from '@typings/screens/navigation';
 
 export const fetchConference = async (serverUrl: string, conferenceId: string) => {
     try {

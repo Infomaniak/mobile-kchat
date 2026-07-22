@@ -11,8 +11,7 @@ import useDidUpdate from '@hooks/did_update';
 import BrowseChannels, {ARCHIVED, PUBLIC, SHARED} from './browse_channels';
 
 import type MyChannelModel from '@typings/database/models/servers/my_channel';
-import type {AvailableScreens} from '@typings/screens/navigation';
-import type {ImageResource} from 'react-native-navigation';
+import type {AvailableScreens, ImageResource} from '@typings/screens/navigation';
 
 type Props = {
 

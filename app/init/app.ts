@@ -4,15 +4,12 @@
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials} from '@init/credentials';
 import ImageCacheMigration from '@init/image_cache_migration';
-import {initialLaunch} from '@init/launch';
 import PushNotifications from '@init/push_notifications';
 import GlobalEventHandler from '@managers/global_event_handler';
 import {matomo} from '@managers/matomo';
 import NetworkManager from '@managers/network_manager';
 import SessionManager from '@managers/session_manager';
 import WebsocketManager from '@managers/websocket_manager';
-import {registerScreens} from '@screens/index';
-import {registerNavigationListeners} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {withMinDuration} from '@utils/timing';
@@ -46,7 +43,6 @@ export async function initialize() {
 
         await DatabaseManager.init(serverUrls);
         await NetworkManager.init(serverCredentials);
-
         await ImageCacheMigration.init();
 
         GlobalEventHandler.init();
@@ -64,17 +60,12 @@ export async function start() {
 
         PushNotifications.init(serverCredentials.length > 0);
 
-        registerNavigationListeners();
-        registerScreens();
-
         await WebsocketManager.init(serverCredentials);
+
     }, 1000); // Ik: min duration for splashscreen
 
     if (!__DEV__) {
         // Ik Analytics / Matomo
         matomo.trackAppStart({});
     }
-
-    initialLaunch();
-
 }

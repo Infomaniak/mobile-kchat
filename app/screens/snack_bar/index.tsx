@@ -8,10 +8,10 @@ import {
     Text,
     TouchableOpacity,
     type StyleProp,
+    type NativeSyntheticEvent,
     type ViewStyle,
 } from 'react-native';
 import {Gesture, GestureDetector, GestureHandlerRootView} from 'react-native-gesture-handler';
-import {type ComponentEvent, Navigation} from 'react-native-navigation';
 import Animated, {
     Extrapolation,
     FadeIn,
@@ -260,21 +260,17 @@ const SnackBar = ({
 
     // This effect checks if we are navigating away and if so, it dismisses the snack bar
     useEffect(() => {
-        const onHideSnackBar = (event?: ComponentEvent) => {
-            const evtComponentId = event?.componentId;
+        const onHideSnackBar = (event?: NativeSyntheticEvent<{componentId?: string}> | {componentId?: string}) => {
+            const evtComponentId = event && ('nativeEvent' in event ? event.nativeEvent.componentId : event.componentId);
             if ((componentId !== evtComponentId) && (sourceScreen !== evtComponentId)) {
                 animateHiding(true);
             }
         };
 
-        const screenWillAppear = Navigation.events().registerComponentWillAppearListener(onHideSnackBar);
-        const screenDidDisappear = Navigation.events().registerComponentDidDisappearListener(onHideSnackBar);
         const tabPress = DeviceEventEmitter.addListener('tabPress', onHideSnackBar);
         const navigateToTab = DeviceEventEmitter.addListener(NavigationConstants.NAVIGATE_TO_TAB, onHideSnackBar);
 
         return () => {
-            screenWillAppear.remove();
-            screenDidDisappear.remove();
             tabPress.remove();
             navigateToTab.remove();
         };

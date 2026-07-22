@@ -21,8 +21,7 @@ import ChannelInfoForm from './channel_info_form';
 import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type ChannelModel from '@typings/database/models/servers/channel';
 import type ChannelInfoModel from '@typings/database/models/servers/channel_info';
-import type {AvailableScreens} from '@typings/screens/navigation';
-import type {ImageResource} from 'react-native-navigation';
+import type {AvailableScreens, ImageResource} from '@typings/screens/navigation';
 
 type Props = {
     componentId: AvailableScreens;

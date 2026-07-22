@@ -10,10 +10,9 @@ import {
     type OnPasswordRequiredEvent,
 } from '@mattermost/secure-pdf-viewer';
 import {deleteAsync} from 'expo-file-system';
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Alert} from 'react-native';
-import {Navigation} from 'react-native-navigation';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {setFileAsBlocked} from '@actions/local/file';
@@ -60,16 +59,7 @@ const PdfViewer = ({allowPdfLinkNavigation, closeButtonId, componentId, fileId, 
     const passwordRef = useRef<PasswordRef>(null);
     const [maxAttempts, setMaxAttempts] = useState<number | undefined>(undefined);
     const [remainingAttempts, setRemainingAttempts] = useState<number | undefined>(undefined);
-    const [navBarVisible, setNavBarVisible] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-
-    const toggleNavbar = useCallback((visible: boolean) => {
-        Navigation.mergeOptions(componentId, {
-            topBar: {
-                visible,
-                animate: true,
-            }});
-    }, [componentId]);
 
     const onClose = useCallback(() => {
         onDismiss?.();
@@ -118,12 +108,8 @@ const PdfViewer = ({allowPdfLinkNavigation, closeButtonId, componentId, fileId, 
     }, []);
 
     const onTap = useCallback(() => {
-        setNavBarVisible((prev) => !prev);
+        // Expo Router owns headers; PDF chrome toggling will be restored with the header migration.
     }, []);
-
-    useEffect(() => {
-        toggleNavbar(navBarVisible);
-    }, [navBarVisible, toggleNavbar]);
 
     useNavButtonPressed(closeButtonId, componentId, onClose, [onClose]);
     useAndroidHardwareBackHandler(componentId, onClose);

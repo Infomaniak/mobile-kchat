@@ -14,7 +14,7 @@ import NavigationStore from '@store/navigation_store';
 import {appearanceControlledScreens, mergeNavigationOptions} from '@utils/navigation';
 
 import type {NamedStyles} from '@typings/global/styles';
-import type {Options} from 'react-native-navigation';
+import type {NavigationOptions} from '@typings/screens/navigation';
 
 const rgbPattern = /^rgba?\((\d+),(\d+),(\d+)(?:,([\d.]+))?\)$/;
 
@@ -78,9 +78,9 @@ export function changeOpacity(oldColor: string, opacity: number): string {
     return `rgba(${red},${green},${blue},${alpha * opacity})`;
 }
 
-export function setNavigatorStyles(componentId: string, theme: Theme, additionalOptions: Options = {}, statusBarColor?: string) {
+export function setNavigatorStyles(componentId: string, theme: Theme, additionalOptions: NavigationOptions = {}, statusBarColor?: string) {
     const isDark = tinyColor(statusBarColor || theme.sidebarBg).isDark();
-    const options: Options = {
+    const options: NavigationOptions = {
         topBar: {
             title: {
                 color: theme.sidebarHeaderTextColor,

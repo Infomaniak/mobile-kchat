@@ -2,18 +2,17 @@
 // See LICENSE.txt for license information.
 
 import {type DependencyList, type EffectCallback, useEffect} from 'react';
-import {Navigation} from 'react-native-navigation';
+
+import {addNavigationButtonPressedListener} from '@screens/navigation_button_events';
 
 type Callback = EffectCallback | (() => Promise<void>);
 const useNavButtonPressed = (navButtonId: string, componentId: string, callback: Callback, deps?: DependencyList) => {
     useEffect(() => {
-        const unsubscribe = Navigation.events().registerComponentListener({
-            navigationButtonPressed: ({buttonId}: { buttonId: string }) => {
-                if (buttonId === navButtonId) {
-                    callback();
-                }
-            },
-        }, componentId);
+        const unsubscribe = addNavigationButtonPressedListener(({buttonId, componentId: eventComponentId}) => {
+            if (buttonId === navButtonId && (!eventComponentId || eventComponentId === componentId)) {
+                callback();
+            }
+        });
 
         return () => {
             unsubscribe.remove();

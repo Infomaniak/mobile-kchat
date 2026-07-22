@@ -68,6 +68,7 @@
         }
     },
     "include": [
+        "index.tsx",
         "app/**/*",
         "share_extension/**/*",
         "test/**/*",

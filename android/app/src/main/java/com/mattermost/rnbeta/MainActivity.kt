@@ -2,9 +2,11 @@ package com.mattermost.rnbeta
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
+import com.facebook.react.ReactActivity
 import androidx.core.view.WindowCompat
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint
@@ -15,10 +17,9 @@ import com.mattermost.notification.NotificationUtils
 import com.mattermost.notification.NotificationUtils.dismissCallNotification
 import com.mattermost.rnutils.helpers.FoldableObserver
 import com.oney.WebRTCModule.WebRTCModuleOptions
-import com.reactnativenavigation.NavigationActivity
 import expo.modules.ReactActivityDelegateWrapper
 
-class MainActivity : NavigationActivity() {
+class MainActivity : ReactActivity() {
     private var HWKeyboardConnected = false
     private val foldableObserver = FoldableObserver.getInstance(this)
     private var lastOrientation: Int = Configuration.ORIENTATION_UNDEFINED
@@ -39,13 +40,12 @@ class MainActivity : NavigationActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(null)
-        setContentView(R.layout.launch_screen)
+        super.onCreate(savedInstanceState)
         handleIntentExtras(getIntent())
         setHWKeyboardConnected()
         lastOrientation = this.resources.configuration.orientation
         foldableObserver.onCreate()
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        WindowCompat.setDecorFitsSystemWindows(window, Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
 
     }
 
@@ -76,11 +76,6 @@ class MainActivity : NavigationActivity() {
         } else if (newConfig.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES) {
             HWKeyboardConnected = false
         }
-    }
-
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        reactGateway.onWindowFocusChanged(hasFocus)
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {

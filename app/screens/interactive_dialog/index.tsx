@@ -5,7 +5,6 @@ import React, {useCallback, useEffect, useMemo, useReducer, useRef, useState} fr
 import {useIntl} from 'react-intl';
 import {Keyboard} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {type ImageResource, Navigation} from 'react-native-navigation';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {submitInteractiveDialog} from '@actions/remote/integrations';
@@ -14,6 +13,7 @@ import ErrorText from '@components/error_text';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
+import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {buildNavigationButton, dismissModal, setButtons} from '@screens/navigation';
 import {checkDialogElementForError, checkIfErrorsMatchElements} from '@utils/integrations';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -22,7 +22,7 @@ import {secureGetFromRecord} from '@utils/types';
 import DialogElement from './dialog_element';
 import DialogIntroductionText from './dialog_introduction_text';
 
-import type {AvailableScreens} from '@typings/screens/navigation';
+import type {AvailableScreens, ImageResource} from '@typings/screens/navigation';
 
 const getStyleFromTheme = makeStyleSheetFromTheme((theme) => {
     return {
@@ -199,34 +199,26 @@ function InteractiveDialog({
         }
     }, [elements, url, callbackId, state, values, serverUrl, intl]);
 
-    useEffect(() => {
-        const unsubscribe = Navigation.events().registerComponentListener({
-            navigationButtonPressed: ({buttonId}: { buttonId: string }) => {
-                switch (buttonId) {
-                    case CLOSE_BUTTON_ID:
-                        if (notifyOnCancel) {
-                            submitInteractiveDialog(serverUrl, {
-                                url,
-                                callback_id: callbackId,
-                                state,
-                                cancelled: true,
-                            } as DialogSubmission);
-                        }
-                        close();
-                        break;
-                    case SUBMIT_BUTTON_ID: {
-                        if (!submitting) {
-                            handleSubmit();
-                        }
-                        break;
-                    }
-                }
-            },
-        }, componentId);
-        return () => {
-            unsubscribe.remove();
-        };
-    }, [serverUrl, url, callbackId, state, handleSubmit, submitting, componentId, notifyOnCancel]);
+    const handleCancel = useCallback(() => {
+        if (notifyOnCancel) {
+            submitInteractiveDialog(serverUrl, {
+                url,
+                callback_id: callbackId,
+                state,
+                cancelled: true,
+            } as DialogSubmission);
+        }
+        close();
+    }, [callbackId, notifyOnCancel, serverUrl, state, url]);
+
+    const handleSubmitButton = useCallback(() => {
+        if (!submitting) {
+            handleSubmit();
+        }
+    }, [handleSubmit, submitting]);
+
+    useNavButtonPressed(CLOSE_BUTTON_ID, componentId, handleCancel, [handleCancel]);
+    useNavButtonPressed(SUBMIT_BUTTON_ID, componentId, handleSubmitButton, [handleSubmitButton]);
 
     useAndroidHardwareBackHandler(componentId, close);
 

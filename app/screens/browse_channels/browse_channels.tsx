@@ -21,8 +21,7 @@ import {changeOpacity, getKeyboardAppearanceFromTheme} from '@utils/theme';
 import ChannelDropdown from './channel_dropdown';
 import ChannelList from './channel_list';
 
-import type {AvailableScreens, NavButtons} from '@typings/screens/navigation';
-import type {ImageResource, OptionsTopBarButton} from 'react-native-navigation';
+import type {AvailableScreens, ImageResource, NavButtons, OptionsTopBarButton} from '@typings/screens/navigation';
 
 const CLOSE_BUTTON_ID = 'close-browse-channels';
 const CREATE_BUTTON_ID = 'create-pub-channel';

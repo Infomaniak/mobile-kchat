@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {Platform} from 'react-native';
-import {Navigation} from 'react-native-navigation';
 
 import Config from '@assets/config.json';
 import ClientError from '@client/rest/error';
@@ -52,9 +51,6 @@ export function initializeSentry() {
         ...mmConfig,
         ...sentryOptions,
         enableCaptureFailedRequests: false,
-        integrations: [
-            Sentry.reactNativeNavigationIntegration({navigation: Navigation}),
-        ],
     });
 }
 
