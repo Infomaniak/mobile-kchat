@@ -1,17 +1,19 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useLocalSearchParams} from 'expo-router';
+import {useLocalSearchParams, usePathname} from 'expo-router';
 import React, {useEffect, useMemo} from 'react';
-import {View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import {Screens} from '@constants';
 import {withServerDatabase} from '@database/components';
 import {usePropsFromParams} from '@hooks/props_from_params';
+import BottomSheetStore from '@store/bottom_sheet_store';
 import NavigationHeaderStore from '@store/navigation_header_store';
+import NavigationOverlayStore, {type NavigationOverlayState} from '@store/navigation_overlay_store';
 import NavigationPropsStore from '@store/navigation_props_store';
 import NavigationStore from '@store/navigation_store';
-import {logDebug} from '@utils/log';
+import {logDebug, logInfo} from '@utils/log';
 
 import NavigationHeader from './navigation_header';
 
@@ -23,12 +25,31 @@ type ScreenRouteProps = Record<string, unknown> & {
 }
 
 const ROOT_STYLE = {flex: 1};
+const styles = StyleSheet.create({
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        zIndex: 1000,
+    },
+});
 
 function asScreen(Component: ScreenComponent, withDatabase = true): ScreenComponent {
     return withDatabase ? withServerDatabase(Component) : Component;
 }
 
-function getScreenComponent(screenName: AvailableScreens): ScreenComponent | undefined {
+function BottomSheetScreen(props: Record<string, unknown>) {
+    const state = BottomSheetStore.getState();
+    const BottomSheet = require('@screens/bottom_sheet').default;
+
+    return (
+        <BottomSheet
+            {...props}
+            {...state}
+            componentId={Screens.BOTTOM_SHEET}
+        />
+    );
+}
+
+export function getScreenComponent(screenName: AvailableScreens): ScreenComponent | undefined {
     switch (screenName) {
         case Screens.AI_OPTIONS:
             return asScreen(require('@screens/ai_options/index').default);
@@ -37,7 +58,7 @@ function getScreenComponent(screenName: AvailableScreens): ScreenComponent | und
         case Screens.ATTACHMENT_OPTIONS:
             return asScreen(require('@screens/attachment_options').default);
         case Screens.BOTTOM_SHEET:
-            return asScreen(require('@screens/bottom_sheet').default);
+            return asScreen(BottomSheetScreen);
         case Screens.BROWSE_CHANNELS:
             return asScreen(require('@screens/browse_channels').default);
         case Screens.CHANNEL:
@@ -209,18 +230,85 @@ function getScreenComponent(screenName: AvailableScreens): ScreenComponent | und
     return undefined;
 }
 
+function useNavigationOverlayState() {
+    const [state, setState] = React.useState<NavigationOverlayState>(() => NavigationOverlayStore.getState());
+
+    useEffect(() => {
+        const unsubscribe = NavigationOverlayStore.subscribe(() => {
+            setState(NavigationOverlayStore.getState());
+        });
+
+        setState(NavigationOverlayStore.getState());
+
+        return unsubscribe;
+    }, []);
+
+    return state;
+}
+
+function NavigationOverlay() {
+    const overlayState = useNavigationOverlayState();
+    const overlayScreenName = overlayState.screen;
+
+    const OverlayScreen = useMemo(() => {
+        if (!overlayScreenName) {
+            return undefined;
+        }
+
+        logInfo('[ExpoRouterBoot] Overlay resolving component', overlayScreenName);
+        return getScreenComponent(overlayScreenName);
+    }, [overlayScreenName]);
+
+    useEffect(() => {
+        if (!overlayScreenName) {
+            return undefined;
+        }
+
+        logInfo('[ExpoRouterBoot] Overlay mounted', {
+            screenName: overlayScreenName,
+            propKeys: Object.keys(overlayState.props || {}),
+        });
+
+        return () => {
+            logInfo('[ExpoRouterBoot] Overlay unmounted', overlayScreenName);
+        };
+    }, [overlayScreenName, overlayState.props]);
+
+    if (!OverlayScreen || !overlayScreenName) {
+        return null;
+    }
+
+    return (
+        <View
+            pointerEvents='box-none'
+            style={styles.overlay}
+        >
+            <OverlayScreen
+                {...overlayState.props}
+                componentId={overlayScreenName}
+            />
+        </View>
+    );
+}
+
 export default function ScreenRoute() {
-    const params = useLocalSearchParams<{screen?: string; propsId?: string}>();
+    const params = useLocalSearchParams<{propsId?: string; screen?: string; targetScreen?: string}>();
+    const pathname = usePathname();
     const screenNameParam = Array.isArray(params.screen) ? params.screen[0] : params.screen;
+    const targetScreenNameParam = Array.isArray(params.targetScreen) ? params.targetScreen[0] : params.targetScreen;
+    const screenNameFromPath = pathname.split('/').filter(Boolean)[0];
+    const normalizedScreenNameFromPath = screenNameFromPath === 'undefined' ? undefined : screenNameFromPath;
     const propsId = Array.isArray(params.propsId) ? params.propsId[0] : params.propsId;
-    const screenName = screenNameParam as AvailableScreens;
+    const screenName = (targetScreenNameParam || screenNameParam || normalizedScreenNameFromPath) as AvailableScreens | undefined;
     const props = usePropsFromParams<ScreenRouteProps>();
+    const propKeys = useMemo(() => Object.keys(props), [props]);
 
     const Screen = useMemo(() => {
         if (!screenName) {
             return undefined;
         }
 
+        logInfo('[ExpoRouterBoot] ScreenRoute resolving component', screenName);
         return getScreenComponent(screenName);
     }, [screenName]);
 
@@ -229,14 +317,16 @@ export default function ScreenRoute() {
             return undefined;
         }
 
+        logInfo('[ExpoRouterBoot] ScreenRoute mounted', {screenName, propsId, propKeys});
         NavigationStore.addScreenToStack(screenName);
 
         return () => {
+            logInfo('[ExpoRouterBoot] ScreenRoute unmounted', screenName);
             NavigationHeaderStore.clear(screenName);
             NavigationStore.removeScreenFromStack(screenName);
             NavigationPropsStore.remove(propsId);
         };
-    }, [propsId, screenName]);
+    }, [propKeys, propsId, screenName]);
 
     useEffect(() => {
         if (!screenName || !props.navigationOptions) {
@@ -247,6 +337,16 @@ export default function ScreenRoute() {
     }, [props.navigationOptions, screenName]);
 
     if (!Screen || !screenName) {
+        logInfo('[ExpoRouterBoot] ScreenRoute render skipped', {
+            hasScreen: Boolean(Screen),
+            params,
+            pathname,
+            normalizedScreenNameFromPath,
+            screenName,
+            screenNameFromPath,
+            screenNameParam,
+            targetScreenNameParam,
+        });
         return null;
     }
 
@@ -257,6 +357,7 @@ export default function ScreenRoute() {
                 {...props}
                 componentId={screenName}
             />
+            <NavigationOverlay/>
         </View>
     );
 }

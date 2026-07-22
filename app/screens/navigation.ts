@@ -9,16 +9,17 @@ import tinyColor from 'tinycolor2';
 
 import CompassIcon from '@components/compass_icon';
 import {Events, Launch, Screens} from '@constants';
-import {NOT_READY} from '@constants/screens';
+import {NOT_READY, SCREENS_AS_BOTTOM_SHEET} from '@constants/screens';
 import {getDefaultThemeByAppearance} from '@context/theme';
 import BottomSheetStore from '@store/bottom_sheet_store';
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationHeaderStore from '@store/navigation_header_store';
+import NavigationOverlayStore from '@store/navigation_overlay_store';
 import NavigationPropsStore from '@store/navigation_props_store';
 import NavigationStore from '@store/navigation_store';
 import {isTablet} from '@utils/helpers';
 import {dismissKeyboard} from '@utils/keyboard';
-import {logDebug, logError} from '@utils/log';
+import {logDebug, logError, logInfo} from '@utils/log';
 import {captureException} from '@utils/sentry';
 import {changeOpacity} from '@utils/theme';
 
@@ -45,15 +46,20 @@ const loginFlowScreens = new Set<AvailableScreens>([
     Screens.FORGOT_PASSWORD,
 ]);
 
+function buildScreenHref(name: AvailableScreens, propsId?: string) {
+    const queryParams = [`targetScreen=${encodeURIComponent(name)}`];
+    if (propsId) {
+        queryParams.push(`propsId=${encodeURIComponent(propsId)}`);
+    }
+
+    return `/${encodeURIComponent(name)}?${queryParams.join('&')}`;
+}
+
 function routeToScreen(name: AvailableScreens, passProps: Record<string, unknown> = {}, replace = false) {
+    logInfo('[ExpoRouterBoot] routeToScreen()', {name, replace, passPropKeys: Object.keys(passProps)});
     const propsId = NavigationPropsStore.set(passProps);
-    const route = {
-        pathname: '/[screen]',
-        params: {
-            propsId,
-            screen: name,
-        },
-    } as never;
+    const route = buildScreenHref(name, propsId) as never;
+    logInfo('[ExpoRouterBoot] routeToScreen href', route);
 
     if (replace) {
         router.replace(route);
@@ -187,6 +193,7 @@ function edgeToEdgeHack(screen: AvailableScreens, theme: Theme) {
 }
 
 function replaceRoot(screen: AvailableScreens, passProps: Record<string, unknown> = {}) {
+    logInfo('[ExpoRouterBoot] replaceRoot()', {screen, passPropKeys: Object.keys(passProps)});
     NavigationStore.clearScreensFromStack();
     NavigationPropsStore.clear();
     BottomSheetStore.clear();
@@ -283,10 +290,7 @@ export function goToScreen(name: AvailableScreens, title: string, passProps = {}
 
     if (NavigationStore.getScreensInStack().includes(name)) {
         NavigationStore.popTo(name);
-        router.dismissTo({
-            pathname: '/[screen]',
-            params: {screen: name},
-        } as never);
+        router.dismissTo(buildScreenHref(name) as never);
         return '';
     }
 
@@ -312,19 +316,13 @@ export async function popTopScreen(screenId?: AvailableScreens) {
 
 export async function popTo(screenId: AvailableScreens) {
     NavigationStore.popTo(screenId);
-    router.dismissTo({
-        pathname: '/[screen]',
-        params: {screen: screenId},
-    } as never);
+    router.dismissTo(buildScreenHref(screenId) as never);
 }
 
 export async function popToRoot() {
     NavigationStore.clearScreensFromStack();
     NavigationStore.addScreenToStack(Screens.HOME);
-    router.dismissTo({
-        pathname: '/[screen]',
-        params: {screen: Screens.HOME},
-    } as never);
+    router.dismissTo(buildScreenHref(Screens.HOME) as never);
 }
 
 export async function dismissAllModalsAndPopToRoot() {
@@ -361,11 +359,37 @@ export function showModal(name: AvailableScreens, title: string, passProps = {},
 }
 
 export function showModalOverCurrentContext(name: AvailableScreens, passProps = {}, options: NavigationOptions = {}) {
+    if (!isTablet() && SCREENS_AS_BOTTOM_SHEET.has(name)) {
+        trackScreen(name, true);
+        NavigationOverlayStore.setState({
+            navigationOptions: options,
+            props: {
+                ...passProps,
+                isModal: true,
+                navigationOptions: options,
+            },
+            screen: name,
+        });
+
+        return undefined;
+    }
+
     return showModal(name, '', passProps, options);
 }
 
 export async function dismissModal(options?: NavigationOptions & {componentId: AvailableScreens}) {
     const componentId = options?.componentId || NavigationStore.getVisibleModal();
+    const isMobileBottomSheet = Boolean(componentId && !isTablet() && SCREENS_AS_BOTTOM_SHEET.has(componentId));
+    if (NavigationOverlayStore.clear(componentId) || isMobileBottomSheet) {
+        if (componentId) {
+            NavigationStore.removeModalFromStack(componentId);
+            NavigationStore.removeScreenFromStack(componentId);
+            NavigationHeaderStore.clear(componentId);
+        }
+
+        return;
+    }
+
     if (componentId) {
         NavigationStore.removeModalFromStack(componentId);
         NavigationStore.removeScreenFromStack(componentId);
@@ -377,8 +401,10 @@ export async function dismissModal(options?: NavigationOptions & {componentId: A
 }
 
 export async function dismissAllModals() {
+    NavigationOverlayStore.clear();
     NavigationStore.getModalsInStack().forEach((modal) => {
         NavigationStore.removeModalFromStack(modal);
+        NavigationHeaderStore.clear(modal);
     });
 }
 
@@ -410,6 +436,13 @@ export function showOverlay(name: AvailableScreens, passProps = {}, options: Nav
 }
 
 export async function dismissOverlay(componentId: string) {
+    if (NavigationOverlayStore.clear(componentId as AvailableScreens)) {
+        NavigationStore.removeModalFromStack(componentId as AvailableScreens);
+        NavigationStore.removeScreenFromStack(componentId as AvailableScreens);
+        NavigationHeaderStore.clear(componentId as AvailableScreens);
+        return;
+    }
+
     NavigationStore.removeModalFromStack(componentId as AvailableScreens);
     NavigationStore.removeScreenFromStack(componentId as AvailableScreens);
     if (router.canGoBack()) {

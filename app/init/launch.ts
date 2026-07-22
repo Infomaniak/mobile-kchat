@@ -19,8 +19,7 @@ import {getAllServers} from '@queries/app/servers';
 import {queryPostsByType} from '@queries/servers/post';
 import {getThemeForCurrentTeam} from '@queries/servers/preference';
 import {getCurrentUserId} from '@queries/servers/system';
-import {queryMyTeams} from '@queries/servers/team';
-import {resetToHome, resetToOnboarding, resetToInfomaniakLogin, resetToInfomaniakNoTeams} from '@screens/navigation';
+import {resetToHome, resetToOnboarding, resetToInfomaniakLogin} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import {getLaunchPropsFromDeepLink, handleDeepLink} from '@utils/deep_link';
 import {logInfo} from '@utils/log';
@@ -33,12 +32,15 @@ import type {DeepLinkWithData, LaunchProps} from '@typings/launch';
 const initialNotificationTypes = [PushNotification.NOTIFICATION_TYPE.MESSAGE];
 
 export const initialLaunch = async () => {
+    logInfo('[ExpoRouterBoot] initialLaunch(): begin');
     const deepLinkUrl = await Linking.getInitialURL();
+    logInfo('[ExpoRouterBoot] initialLaunch(): initial URL', deepLinkUrl || 'none');
     if (deepLinkUrl) {
         return launchAppFromDeepLink(deepLinkUrl, true);
     }
 
     const notification = await Notifications.getInitialNotification();
+    logInfo('[ExpoRouterBoot] initialLaunch(): initial notification', notification ? 'present' : 'none');
     let tapped = Platform.select({android: true, ios: false})!;
     if (Platform.OS === 'ios' && notification) {
         // when a notification is received on iOS, getInitialNotification, will return the notification
@@ -56,6 +58,7 @@ export const initialLaunch = async () => {
     }
 
     const coldStart = notification ? (tapped || AppState.currentState === 'active') : true;
+    logInfo('[ExpoRouterBoot] initialLaunch(): launchApp normal', {coldStart});
     return launchApp({launchType: Launch.Normal, coldStart});
 };
 
@@ -77,6 +80,7 @@ const launchAppFromNotification = async (notification: NotificationWithData, col
  * @returns a redirection to a screen, either onboarding, add_server, login or home depending on the scenario
  */
 export const launchApp = async (props: LaunchProps) => {
+    logInfo('[ExpoRouterBoot] launchApp(): begin', props);
     let serverUrl: string | undefined;
     switch (props?.launchType) {
         case Launch.DeepLink:
@@ -110,6 +114,7 @@ export const launchApp = async (props: LaunchProps) => {
         }
         default:
             serverUrl = await getActiveServerUrl();
+            logInfo('[ExpoRouterBoot] launchApp(): active server URL loaded', serverUrl || 'none');
             break;
     }
 
@@ -118,9 +123,12 @@ export const launchApp = async (props: LaunchProps) => {
     }
 
     cleanupEphemeralPosts();
+    logInfo('[ExpoRouterBoot] launchApp(): cleanupEphemeralPosts started');
 
     if (serverUrl) {
+        logInfo('[ExpoRouterBoot] launchApp(): checking credentials', serverUrl);
         const credentials = await getServerCredentials(serverUrl);
+        logInfo('[ExpoRouterBoot] launchApp(): credentials', credentials ? 'present' : 'missing');
         if (credentials) {
             const database = DatabaseManager.serverDatabases[serverUrl]?.database;
             let hasCurrentUser = false;
@@ -162,13 +170,16 @@ export const launchApp = async (props: LaunchProps) => {
 
     // if the config value is set and the onboarding has not been seeing yet, show the onboarding
     if (LocalConfig.ShowOnboarding && !onboardingViewed) {
+        logInfo('[ExpoRouterBoot] launchApp(): routing onboarding');
         return resetToOnboarding(props);
     }
 
+    logInfo('[ExpoRouterBoot] launchApp(): routing infomaniak login');
     return resetToInfomaniakLogin(props);
 };
 
 export const launchToHome = async (props: LaunchProps) => {
+    logInfo('[ExpoRouterBoot] launchToHome(): begin', props);
     let openPushNotification = false;
 
     switch (props.launchType) {
@@ -208,21 +219,9 @@ export const launchToHome = async (props: LaunchProps) => {
             break;
     }
 
-    let nTeams = 0;
-    if (props.serverUrl) {
-        const database = DatabaseManager.serverDatabases[props.serverUrl]?.database;
-        if (database) {
-            nTeams = await queryMyTeams(database).fetchCount();
-        }
-    }
-
-    if (nTeams) {
-        logInfo('Launch app in Home screen');
-        return resetToHome(props);
-    }
-
-    logInfo('Launch app in Infomaniak No Teams screen');
-    return resetToInfomaniakNoTeams();
+    logInfo('Launch app in Home screen');
+    logInfo('[ExpoRouterBoot] launchToHome(): resetToHome');
+    return resetToHome(props);
 };
 
 export const relaunchApp = (props: LaunchProps) => {

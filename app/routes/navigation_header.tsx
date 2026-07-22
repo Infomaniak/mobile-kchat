@@ -35,6 +35,9 @@ const BACK_BUTTONS: NavigationButton[] = [BACK_BUTTON];
 const HEADER_HEIGHT = 56;
 const SIDE_WIDTH = 112;
 const ICON_SIZE = 24;
+const SCREENS_WITH_OWN_HEADER = new Set<AvailableScreens>([
+    Screens.CHANNEL,
+]);
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     header: {
@@ -169,6 +172,8 @@ export default function NavigationHeader({screenName}: Props) {
     const isTablet = useIsTablet();
     const state = useNavigationHeaderState(screenName);
     const isBottomSheetScreen = SCREENS_AS_BOTTOM_SHEET.has(screenName);
+    const screenHasOwnHeader = SCREENS_WITH_OWN_HEADER.has(screenName);
+    const hasExplicitHeader = Boolean(state.title || state.leftButtons?.length || state.rightButtons?.length);
     const hideBackButton = MODAL_SCREENS_WITHOUT_BACK.has(screenName) || isBottomSheetScreen || screenName === Screens.HOME;
     const canGoBack = router.canGoBack();
     const showBackButton = canGoBack && !hideBackButton;
@@ -193,6 +198,10 @@ export default function NavigationHeader({screenName}: Props) {
     }, []);
 
     if (state.visible === false || (isBottomSheetScreen && !isTablet)) {
+        return null;
+    }
+
+    if (screenHasOwnHeader && !hasExplicitHeader) {
         return null;
     }
 

@@ -29,7 +29,7 @@ export function installAlertSpy() {
             return undefined;
         }
 
-        return (originalAlert as any)(title, message, buttons, options);
+        return originalAlert(title, message, buttons, options);
     }) as typeof Alert.alert;
 }
 
@@ -56,6 +56,7 @@ if (__DEV__) {
 
 setFontFamily();
 installAlertSpy();
+logInfo('[ExpoRouterBoot] JS entry initialized');
 
 if (global.HermesInternal) {
     require('@formatjs/intl-getcanonicallocales/polyfill-force');
@@ -81,9 +82,11 @@ if (Platform.OS === 'android') {
 process.env.EXPO_OS = Platform.OS;
 
 function App() {
+    logInfo('[ExpoRouterBoot] App render: creating ExpoRoot');
     const {ExpoRoot} = require('expo-router') as typeof import('expo-router');
     const context = require.context('./app/routes') as RequireContext;
     return <ExpoRoot context={context}/>;
 }
 
+logInfo('[ExpoRouterBoot] Registering Mattermost root component');
 AppRegistry.registerComponent('Mattermost', () => App);

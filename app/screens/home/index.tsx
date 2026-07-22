@@ -3,6 +3,7 @@
 
 import {useHardwareKeyboardEvents} from '@mattermost/hardware-keyboard';
 import {createBottomTabNavigator, type BottomTabBarProps} from '@react-navigation/bottom-tabs';
+import {NavigationIndependentTree} from '@react-navigation/core';
 import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
 import React, {useCallback, useEffect, useMemo} from 'react';
 import {useIntl} from 'react-intl';
@@ -176,54 +177,56 @@ export function HomeScreen(props: HomeProps) {
             style={styles.flex}
             nativeID={`${Screens.HOME}.screen`}
         >
-            <NavigationContainer
-                theme={{
-                    ...DefaultTheme,
-                    dark: false,
-                    colors: {
-                        ...DefaultTheme.colors,
-                        primary: theme.centerChannelColor,
-                        background: 'transparent',
-                        card: theme.centerChannelBg,
-                        text: theme.centerChannelColor,
-                        border: 'white',
-                        notification: theme.mentionHighlightBg,
-                    },
-                }}
-            >
-                <Tab.Navigator
-                    screenOptions={{headerShown: false, freezeOnBlur: false, lazy: true}}
-                    backBehavior='none'
-                    tabBar={TabBarComponent}
+            <NavigationIndependentTree>
+                <NavigationContainer
+                    theme={{
+                        ...DefaultTheme,
+                        dark: false,
+                        colors: {
+                            ...DefaultTheme.colors,
+                            primary: theme.centerChannelColor,
+                            background: 'transparent',
+                            card: theme.centerChannelBg,
+                            text: theme.centerChannelColor,
+                            border: 'white',
+                            notification: theme.mentionHighlightBg,
+                        },
+                    }}
                 >
-                    <Tab.Screen
-                        name={Screens.HOME}
-                        options={{tabBarButtonTestID: 'tab_bar.home.tab', freezeOnBlur: true}}
+                    <Tab.Navigator
+                        screenOptions={{headerShown: false, freezeOnBlur: false, lazy: true}}
+                        backBehavior='none'
+                        tabBar={TabBarComponent}
                     >
-                        {() => <ChannelList {...props}/>}
-                    </Tab.Screen>
-                    <Tab.Screen
-                        name={Screens.SEARCH}
-                        component={Search}
-                        options={{tabBarButtonTestID: 'tab_bar.search.tab', freezeOnBlur: true, lazy: true}}
-                    />
-                    <Tab.Screen
-                        name={Screens.MENTIONS}
-                        component={RecentMentions}
-                        options={{tabBarButtonTestID: 'tab_bar.mentions.tab', freezeOnBlur: true, lazy: true}}
-                    />
-                    <Tab.Screen
-                        name={Screens.SAVED_MESSAGES}
-                        component={SavedMessages}
-                        options={{tabBarButtonTestID: 'tab_bar.saved_messages.tab', freezeOnBlur: true, lazy: true}}
-                    />
-                    <Tab.Screen
-                        name={Screens.ACCOUNT}
-                        component={Account}
-                        options={{tabBarButtonTestID: 'tab_bar.account.tab', freezeOnBlur: true, lazy: true}}
-                    />
-                </Tab.Navigator>
-            </NavigationContainer>
+                        <Tab.Screen
+                            name={Screens.HOME}
+                            options={{tabBarButtonTestID: 'tab_bar.home.tab', freezeOnBlur: true}}
+                        >
+                            {() => <ChannelList {...props}/>}
+                        </Tab.Screen>
+                        <Tab.Screen
+                            name={Screens.SEARCH}
+                            component={Search}
+                            options={{tabBarButtonTestID: 'tab_bar.search.tab', freezeOnBlur: true, lazy: true}}
+                        />
+                        <Tab.Screen
+                            name={Screens.MENTIONS}
+                            component={RecentMentions}
+                            options={{tabBarButtonTestID: 'tab_bar.mentions.tab', freezeOnBlur: true, lazy: true}}
+                        />
+                        <Tab.Screen
+                            name={Screens.SAVED_MESSAGES}
+                            component={SavedMessages}
+                            options={{tabBarButtonTestID: 'tab_bar.saved_messages.tab', freezeOnBlur: true, lazy: true}}
+                        />
+                        <Tab.Screen
+                            name={Screens.ACCOUNT}
+                            component={Account}
+                            options={{tabBarButtonTestID: 'tab_bar.account.tab', freezeOnBlur: true, lazy: true}}
+                        />
+                    </Tab.Navigator>
+                </NavigationContainer>
+            </NavigationIndependentTree>
             <ServerVersion/>
         </View>
     );

@@ -12,6 +12,7 @@ import SessionManager from '@managers/session_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
+import {logInfo, logWarning} from '@utils/log';
 import {withMinDuration} from '@utils/timing';
 
 // Controls whether the main initialization (database, etc...) is done, either on app launch
@@ -35,22 +36,35 @@ Promise.allSettled = Promise.allSettled || (<T>(promises: Array<Promise<T>>) => 
 ));
 
 export async function initialize() {
-    if (!baseAppInitialized) {
-        baseAppInitialized = true;
-
-        serverCredentials = await getAllServerCredentials();
-        const serverUrls = serverCredentials.map((credential) => credential.serverUrl);
-
-        await DatabaseManager.init(serverUrls);
-        await NetworkManager.init(serverCredentials);
-        await ImageCacheMigration.init();
-
-        GlobalEventHandler.init();
-        SessionManager.init();
+    if (baseAppInitialized) {
+        logInfo('[ExpoRouterBoot] initialize(): skipped, already initialized');
+        return;
     }
+
+    logInfo('[ExpoRouterBoot] initialize(): begin');
+    baseAppInitialized = true;
+
+    serverCredentials = await getAllServerCredentials();
+    logInfo('[ExpoRouterBoot] initialize(): credentials loaded', serverCredentials.length);
+    const serverUrls = serverCredentials.map((credential) => credential.serverUrl);
+
+    logInfo('[ExpoRouterBoot] initialize(): DatabaseManager.init begin');
+    await DatabaseManager.init(serverUrls);
+    logInfo('[ExpoRouterBoot] initialize(): DatabaseManager.init done');
+    logInfo('[ExpoRouterBoot] initialize(): NetworkManager.init begin');
+    await NetworkManager.init(serverCredentials);
+    logInfo('[ExpoRouterBoot] initialize(): NetworkManager.init done');
+    logInfo('[ExpoRouterBoot] initialize(): ImageCacheMigration.init begin');
+    await ImageCacheMigration.init();
+    logInfo('[ExpoRouterBoot] initialize(): ImageCacheMigration.init done');
+
+    GlobalEventHandler.init();
+    SessionManager.init();
+    logInfo('[ExpoRouterBoot] initialize(): managers initialized');
 }
 
 export async function start() {
+    logInfo('[ExpoRouterBoot] start(): begin');
     await withMinDuration(async () => {
         NavigationStore.reset();
         EphemeralStore.setCurrentThreadId('');
@@ -58,14 +72,29 @@ export async function start() {
 
         await initialize();
 
+        logInfo('[ExpoRouterBoot] start(): PushNotifications.init begin');
         PushNotifications.init(serverCredentials.length > 0);
+        logInfo('[ExpoRouterBoot] start(): PushNotifications.init done');
 
+        logInfo('[ExpoRouterBoot] start(): WebsocketManager.init begin');
         await WebsocketManager.init(serverCredentials);
+        logInfo('[ExpoRouterBoot] start(): WebsocketManager.init done');
 
     }, 1000); // Ik: min duration for splashscreen
+
+    // Trigger initial data sync for cold start (onAppStateChange won't fire if already active)
+    logInfo('[ExpoRouterBoot] start(): triggerInitialResync begin');
+    if (typeof SessionManager.triggerInitialResync === 'function') {
+        SessionManager.triggerInitialResync();
+        logInfo('[ExpoRouterBoot] start(): triggerInitialResync done');
+    } else {
+        logWarning('[ExpoRouterBoot] start(): triggerInitialResync unavailable, continuing boot');
+    }
 
     if (!__DEV__) {
         // Ik Analytics / Matomo
         matomo.trackAppStart({});
     }
+
+    logInfo('[ExpoRouterBoot] start(): done');
 }
