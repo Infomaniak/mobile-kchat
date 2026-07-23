@@ -6,14 +6,13 @@ import {useIntl} from 'react-intl';
 
 import OptionItem from '@components/option_item';
 import {Screens} from '@constants';
-import {useServerUrl} from '@context/server';
+import {useIsInfomaniakServer} from '@hooks/network';
 import {usePreventDoubleTap} from '@hooks/utils';
 import {goToScreen} from '@screens/navigation';
 
 const SendFeedback = () => {
     const intl = useIntl();
-    const serverUrl = useServerUrl();
-    const isServerInfomaniak = (/https?:\/\/infomaniak\.kchat/).test(serverUrl);
+    const isServerInfomaniak = useIsInfomaniakServer();
 
     const openSendFeedback = usePreventDoubleTap(useCallback(() => {
         const title = intl.formatMessage({id: 'account.send_feedback', defaultMessage: 'Send Feedback'});

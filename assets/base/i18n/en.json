@@ -1008,7 +1008,6 @@
   "screen.channel_files.results.filter.title": "Filter by file type",
   "screen.mentions.subtitle": "Messages you've been mentioned in",
   "screen.mentions.title": "Recent Mentions",
-  "screen.report_problem.button": "Report a problem",
   "screen.report_problem.details.description": "When reporting a problem, share the metadata and app logs given below to help troubleshoot your problem faster",
   "screen.report_problem.details.description_without_logs": "When reporting a problem, share the metadata given below to help troubleshoot your problem faster",
   "screen.report_problem.details.title": "Troubleshooting details",

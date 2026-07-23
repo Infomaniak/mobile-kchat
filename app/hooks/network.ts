@@ -19,7 +19,7 @@ const COOKIE_NEXT_USE_WEBKIT = false;
  */
 export const useNextState = (): [boolean | undefined, () => void] => {
     const serverUrl = useServerUrl();
-    const isServerInfomaniak = (/https?:\/\/infomaniak\.kchat/).test(serverUrl);
+    const isServerInfomaniak = useIsInfomaniakServer();
     const [isNext, setIsNext] = useState(isServerInfomaniak ? false : undefined);
     const isNextRef = useTransientRef(isNext);
 
