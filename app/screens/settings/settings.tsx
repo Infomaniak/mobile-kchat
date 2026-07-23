@@ -11,11 +11,11 @@ import CompassIcon from '@components/compass_icon';
 import SettingContainer from '@components/settings/container';
 import SettingItem from '@components/settings/item';
 import {Screens} from '@constants';
-import {ENABLE_PERF_MONITOR} from '@constants/dev_config';
 import {SNACK_BAR_TYPE} from '@constants/snack_bar';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import {useIsInfomaniakServer} from '@hooks/network';
 import {usePreventDoubleTap} from '@hooks/utils';
 import {dismissModal, goToScreen, setButtons} from '@screens/navigation';
 import {gotoSettingsScreen} from '@screens/settings/config';
@@ -86,6 +86,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
     const intl = useIntl();
     const styles = getStyleSheet(theme);
     const timezone = useMemo(() => getUserTimezoneProps(currentUser), [currentUser]);
+    const isInfomaniak = useIsInfomaniakServer();
 
     const closeButton = useMemo(() => {
         return {
@@ -193,7 +194,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
                     info={intl.formatMessage(timezone.useAutomaticTimezone ? TIMEZONE_FORMAT[0] : TIMEZONE_FORMAT[1])}
                     testID='display_settings.timezone.option'
                 />
-                {ENABLE_PERF_MONITOR && (
+                {isInfomaniak && (
                     <SettingItem
                         optionName='performance_debug'
                         onPress={goToPerformanceDebug}
@@ -209,7 +210,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
                     type='link'
                 />
                 }
-                <ReportProblem/>
+                {isInfomaniak && <ReportProblem/>}
                 <SettingItem
                     onPress={openFeedback}
                     optionName='feedback'

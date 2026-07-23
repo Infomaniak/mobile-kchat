@@ -65,3 +65,8 @@ export const useNextState = (): [boolean | undefined, () => void] => {
 
     return [isNext, onNextToggle];
 };
+
+export const useIsInfomaniakServer = (): boolean => {
+    const serverUrl = useServerUrl();
+    return (/https?:\/\/infomaniak\.kchat/).test(serverUrl);
+};
