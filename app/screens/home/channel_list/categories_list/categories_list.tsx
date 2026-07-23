@@ -1,11 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useEffect, useMemo, useState} from 'react';
-import {DeviceEventEmitter, useWindowDimensions} from 'react-native';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {DeviceEventEmitter, useWindowDimensions, View} from 'react-native';
 import Animated, {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 
 import DraftsButton from '@components/drafts_buttton';
+import Loading from '@components/loading';
 import ThreadsButton from '@components/threads_button';
 import {Events, Screens} from '@constants';
 import {CHANNEL, DRAFT, THREAD} from '@constants/screens';
@@ -62,6 +63,21 @@ const CategoriesList = ({
     const isTablet = useIsTablet();
     const tabletWidth = useSharedValue(isTablet ? getTabletWidth(moreThanOneTeam) : 0);
     const [activeScreen, setActiveScreen] = useState<ScreenType>(isTablet && lastChannelId === Screens.GLOBAL_DRAFTS ? DRAFT : CHANNEL);
+    const [showLoadError, setShowLoadError] = useState(false);
+    const loadErrorTimer = useRef<ReturnType<typeof setTimeout>>();
+
+    useEffect(() => {
+        if (hasChannels) {
+            setShowLoadError(false);
+            return undefined;
+        }
+        loadErrorTimer.current = setTimeout(() => setShowLoadError(true), 300);
+        return () => {
+            if (loadErrorTimer.current) {
+                clearTimeout(loadErrorTimer.current);
+            }
+        };
+    }, [hasChannels]);
 
     useEffect(() => {
         if (isTablet) {
@@ -126,6 +142,13 @@ const CategoriesList = ({
 
     const content = useMemo(() => {
         if (!hasChannels) {
+            if (!showLoadError) {
+                return (
+                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                        <Loading color={theme.buttonBg}/>
+                    </View>
+                );
+            }
             return (<LoadChannelsError/>);
         }
 
@@ -137,7 +160,7 @@ const CategoriesList = ({
                 <Categories/>
             </>
         );
-    }, [draftsButtonComponent, hasChannels, threadButtonComponent]);
+    }, [draftsButtonComponent, hasChannels, showLoadError, threadButtonComponent, theme]);
 
     return (
         <Animated.View style={[styles.container, tabletStyle]}>

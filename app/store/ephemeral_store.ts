@@ -21,7 +21,6 @@ export type ChannelJumpTarget = {
 class EphemeralStoreSingleton {
     theme: Theme | undefined;
     creatingChannel = false;
-    private loggingIn = false;
     creatingDMorGMTeammates: string[] = [];
 
     noticeShown = new Set<string>();
@@ -81,12 +80,6 @@ class EphemeralStoreSingleton {
         this.processingNotification = v;
     };
     getProcessingNotification = () => this.processingNotification;
-
-    setLoggingIn = (value: boolean) => {
-        this.loggingIn = value;
-    };
-
-    isLoggingIn = () => this.loggingIn;
 
     addLoadingMessagesForChannel = (serverUrl: string, channelId: string) => {
         if (!this.loadingMessagesForChannel[serverUrl]) {

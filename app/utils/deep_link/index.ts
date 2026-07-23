@@ -65,7 +65,7 @@ export async function handleDeepLink(deepLink: DeepLinkWithData, intlShape?: Int
         if (existingServerUrl !== currentServerUrl && NavigationStore.getVisibleScreen()) {
             await dismissAllModalsAndPopToRoot();
             DatabaseManager.setActiveServerDatabase(existingServerUrl);
-            WebsocketManager.initializeClient(existingServerUrl, 'DeepLink');
+            WebsocketManager.initializeClient(existingServerUrl);
             await NavigationStore.waitUntilScreenHasLoaded(Screens.HOME);
         }
 

@@ -2,11 +2,10 @@
 // See LICENSE.txt for license information.
 
 import NetInfo from '@react-native-community/netinfo';
-import {AppState, type AppStateStatus} from 'react-native';
-import BackgroundTimer from 'react-native-background-timer';
+import {AppState, DeviceEventEmitter, type AppStateStatus} from 'react-native';
 
-import {handleReconnect} from '@actions/websocket';
 import WebSocketClient from '@client/websocket';
+import {Events} from '@constants';
 import DatabaseManager from '@database/manager';
 import {isMainActivity} from '@utils/helpers';
 
@@ -14,7 +13,7 @@ import WebsocketManager from './websocket_manager';
 
 import type {ServerDatabase} from '@typings/database/database';
 
-jest.mock('@actions/websocket');
+jest.mock('@actions/remote/user');
 jest.mock('@actions/websocket/event');
 jest.mock('@client/websocket');
 jest.mock('@utils/helpers');
@@ -52,28 +51,27 @@ describe('WebsocketManager - background/foreground reconnection', () => {
 
         await DatabaseManager.init([mockServerUrl]);
 
+        // Mock getActiveServerUrl so openAll can identify the active server
+        (DatabaseManager as any).getActiveServerUrl = jest.fn().mockResolvedValue(mockServerUrl);
+
         // Reset singleton internal state by manipulating private fields
         (WebsocketManager as any).previousActiveState = true;
-        (WebsocketManager as any).isBackgroundTimerRunning = false;
         (WebsocketManager as any).connectedSubjects = {};
+        (WebsocketManager as any).connectedOnceUrls = new Set<string>();
+        (WebsocketManager as any).needsSyncOnConnectUrls = new Set<string>();
 
         // Clean up existing clients
         WebsocketManager.invalidateClient(mockServerUrl);
         delete (WebsocketManager as any).clients[mockServerUrl];
-        delete (WebsocketManager as any).firstConnectionSynced[mockServerUrl];
 
         // Setup WebSocketClient mock
         mockCallbacks = {};
         mockWebSocketClient = {
             initialize: jest.fn(),
-            setFirstConnectCallback: jest.fn((cb: () => void) => {
-                mockCallbacks.firstConnect = cb;
+            setConnectedCallback: jest.fn((cb: () => void) => {
+                mockCallbacks.connected = cb;
             }),
             setEventCallback: jest.fn(),
-            setReconnectCallback: jest.fn((cb: () => void) => {
-                mockCallbacks.reconnect = cb;
-            }),
-            setReliableReconnectCallback: jest.fn(),
             setCloseCallback: jest.fn((cb: (count: number) => void) => {
                 mockCallbacks.close = cb;
             }),
@@ -83,15 +81,6 @@ describe('WebsocketManager - background/foreground reconnection', () => {
         };
 
         (WebSocketClient as unknown as jest.Mock).mockImplementation(() => mockWebSocketClient);
-
-        // Mock BackgroundTimer to capture interval callbacks
-        jest.spyOn(BackgroundTimer, 'setInterval').mockImplementation((callback: () => void) => {
-            (WebsocketManager as any)._bgTimerCallback = callback;
-            return 12345;
-        });
-        jest.spyOn(BackgroundTimer, 'clearInterval').mockImplementation(() => {
-            (WebsocketManager as any)._bgTimerCallback = undefined;
-        });
 
         // Mock DatabaseManager.getServerDatabaseAndOperator for init
         jest.spyOn(DatabaseManager, 'getServerDatabaseAndOperator').mockImplementation(() => {
@@ -105,7 +94,8 @@ describe('WebsocketManager - background/foreground reconnection', () => {
         WebsocketManager.closeAll();
         WebsocketManager.invalidateClient(mockServerUrl);
         (WebsocketManager as any).previousActiveState = true;
-        (WebsocketManager as any).isBackgroundTimerRunning = false;
+        (WebsocketManager as any).connectedOnceUrls = new Set<string>();
+        (WebsocketManager as any).needsSyncOnConnectUrls = new Set<string>();
 
         // Clear any lingering periodic status update intervals
         const statusIds = (WebsocketManager as any).statusUpdatesIntervalIDs || {};
@@ -117,114 +107,102 @@ describe('WebsocketManager - background/foreground reconnection', () => {
         await DatabaseManager.destroyServerDatabase(mockServerUrl);
     });
 
-    it('should start background timer when app goes to background', () => {
+    it('should close all websockets immediately when app goes to background', () => {
         expect(capturedAppStateCallback).toBeDefined();
 
         capturedAppStateCallback!('background');
 
-        expect(BackgroundTimer.setInterval).toHaveBeenCalledWith(expect.any(Function), 15000);
-        expect((WebsocketManager as any).isBackgroundTimerRunning).toBe(true);
-    });
-
-    it('should close all websockets after 15s in background', () => {
-        capturedAppStateCallback!('background');
-
-        expect((WebsocketManager as any).isBackgroundTimerRunning).toBe(true);
-
-        // Trigger the background timer callback manually
-        const bgCallback = (WebsocketManager as any)._bgTimerCallback;
-        expect(bgCallback).toBeDefined();
-        bgCallback();
-
         expect(mockWebSocketClient.close).toHaveBeenCalledWith(true);
-        expect((WebsocketManager as any).isBackgroundTimerRunning).toBe(false);
+        expect(mockWebSocketClient.invalidate).toHaveBeenCalled();
     });
 
-    it('should open all websockets when returning to foreground after background timer fired', async () => {
-        // 1. Simulate background → timer fired (closeAll)
+    it('should NOT close websockets when app goes to inactive (Control Center, notification shade)', () => {
+        expect(capturedAppStateCallback).toBeDefined();
+
+        capturedAppStateCallback!('inactive');
+
+        expect(mockWebSocketClient.close).not.toHaveBeenCalled();
+        expect(mockWebSocketClient.invalidate).not.toHaveBeenCalled();
+    });
+
+    it('should open all websockets when returning to foreground', async () => {
+        // 1. Background → closeAll immediately
         capturedAppStateCallback!('background');
-        const bgCallback = (WebsocketManager as any)._bgTimerCallback;
-        expect(bgCallback).toBeDefined();
-        bgCallback();
 
         expect(mockWebSocketClient.close).toHaveBeenCalledWith(true);
         expect(mockWebSocketClient.initialize).not.toHaveBeenCalled();
 
-        // 2. Simulate foreground
-        // Need to firstConnectionSynced so it triggers immediate open
-        (WebsocketManager as any).firstConnectionSynced[mockServerUrl] = true;
+        // 2. Foreground → openAll
         capturedAppStateCallback!('active');
 
-        // Allow async openAll to complete its microtasks
-        await new Promise(process.nextTick);
+        // Allow async openAll to complete
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(BackgroundTimer.clearInterval).toHaveBeenCalled();
-        expect((WebsocketManager as any).isBackgroundTimerRunning).toBe(false);
-        expect(mockWebSocketClient.initialize).toHaveBeenCalledWith({}, false);
+        expect(mockWebSocketClient.initialize).toHaveBeenCalledWith({});
     });
 
-    it('should trigger handleReconnect after websocket reconnects post-foreground', async () => {
-        // Setup: first connection already synced
-        (WebsocketManager as any).firstConnectionSynced[mockServerUrl] = true;
-
-        // 1. Background → timer fires → closeAll
+    it('should reinitialize websocket clients when returning to foreground after background', async () => {
+        // 1. Background → closeAll immediately
         capturedAppStateCallback!('background');
-        const bgCallback = (WebsocketManager as any)._bgTimerCallback;
-        bgCallback();
 
-        // 2. Foreground → openAll → initializeClient
-        capturedAppStateCallback!('active');
-
-        // Allow async openAll to complete its microtasks
-        await new Promise(process.nextTick);
-
-        // The initializeClient method should have called client.initialize
-        expect(mockWebSocketClient.initialize).toHaveBeenCalled();
-
-        // 3. Simulate Pusher 'connected' event via firstConnect callback
-        // Since shouldSkipSync is false after close, this triggers reconnect
-        // Actually, looking at client code, after close (which sets shouldSkipSync=false),
-        // the connected callback will call reconnectCallback
-        jest.mocked(handleReconnect).mockResolvedValue(undefined);
-
-        if (mockCallbacks.reconnect) {
-            await mockCallbacks.reconnect();
-        }
-
-        expect(handleReconnect).toHaveBeenCalledWith(mockServerUrl);
-    });
-
-    it('should clear background timer when returning to foreground before it fires', () => {
-        capturedAppStateCallback!('background');
-        expect((WebsocketManager as any).isBackgroundTimerRunning).toBe(true);
-
-        // Return to foreground before 15s
-        (WebsocketManager as any).firstConnectionSynced[mockServerUrl] = true;
-        capturedAppStateCallback!('active');
-
-        // If we call it now, it shouldn't error but should have no effect since timer was cleared
-        expect(true).toBe(true);
-    });
-
-    it('should handle race condition when timer fires during foreground transition', () => {
-        capturedAppStateCallback!('background');
-        expect((WebsocketManager as any).isBackgroundTimerRunning).toBe(true);
-
-        const bgCallback = (WebsocketManager as any)._bgTimerCallback;
-        expect(bgCallback).toBeDefined();
-
-        (WebsocketManager as any).firstConnectionSynced[mockServerUrl] = true;
-
-        // Simulate: foreground event happens, then timer callback executes (race)
-        capturedAppStateCallback!('active');
-
-        // Timer callback fires AFTER foreground transition already processed
-        bgCallback();
-
-        // Should not be in a broken state: closed then opened
         expect(mockWebSocketClient.close).toHaveBeenCalledWith(true);
-        expect(BackgroundTimer.clearInterval).toHaveBeenCalled();
-        expect((WebsocketManager as any).isBackgroundTimerRunning).toBe(false);
+
+        // 2. Foreground → openAll triggers initializeClient
+        capturedAppStateCallback!('active');
+
+        // Allow async openAll to complete
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(mockWebSocketClient.initialize).toHaveBeenCalled();
+    });
+
+    it('should skip inactive during active→background transition and only close on background', () => {
+        // active → inactive (Control Center) — nothing happens
+        capturedAppStateCallback!('inactive');
+        expect(mockWebSocketClient.close).not.toHaveBeenCalled();
+
+        jest.clearAllMocks();
+
+        // inactive → background — now close
+        capturedAppStateCallback!('background');
+
+        expect(mockWebSocketClient.close).toHaveBeenCalledWith(true);
+        expect(mockWebSocketClient.invalidate).toHaveBeenCalled();
+    });
+
+    it('should not emit reconnect event on first connected callback', () => {
+        expect(mockCallbacks.connected).toBeDefined();
+
+        const listener = jest.fn();
+        const subscription = DeviceEventEmitter.addListener(Events.WEBSOCKET_RECONNECTED, listener);
+        let latestState: WebsocketConnectedState | undefined;
+        const stateSubscription = WebsocketManager.observeWebsocketState(mockServerUrl).subscribe((state) => {
+            latestState = state;
+        });
+
+        mockCallbacks.connected!();
+
+        expect(latestState).toBe('connected');
+        expect(listener).not.toHaveBeenCalled();
+
+        stateSubscription.unsubscribe();
+        subscription.remove();
+    });
+
+    it('should emit reconnect event when websocket reconnects after a disconnect while active', () => {
+        expect(mockCallbacks.connected).toBeDefined();
+        expect(mockCallbacks.close).toBeDefined();
+
+        const listener = jest.fn();
+        const subscription = DeviceEventEmitter.addListener(Events.WEBSOCKET_RECONNECTED, listener);
+
+        mockCallbacks.connected!();
+        mockCallbacks.close!(1);
+        mockCallbacks.connected!();
+
+        expect(listener).toHaveBeenCalledWith({serverUrl: mockServerUrl});
+
+        subscription.remove();
     });
 
     it('should handle network disconnection by closing all websockets', () => {
