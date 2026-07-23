@@ -709,6 +709,8 @@
     "mobile.error_handler.button": "Επανεκκίνηση",
     "mobile.error_handler.description": "Πατήστε «Επανεκκίνηση» για να ανοίξετε ξανά την εφαρμογή. Μετά την επανεκκίνηση, μπορείτε να αναφέρετε το πρόβλημα από το μενού ρυθμίσεων",
     "mobile.error_handler.title": "Παρουσιάστηκε ένα απρόσμενο σφάλμα",
+    "mobile.file_upload.attach_logs": "Επισύναψη αρχείων καταγραφής εφαρμογής",
+    "mobile.file_upload.attach_logs_failed": "Αποτυχία επισύναψης αρχείων καταγραφής εφαρμογής",
     "mobile.file_attachment.title": "Αρχεία και πολυμέσα",
     "mobile.file_upload.browse": "Επισύναψη αρχείου",
     "mobile.file_upload.camera_photo": "Τραβήξτε μια φωτογραφία",

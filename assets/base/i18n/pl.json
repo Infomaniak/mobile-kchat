@@ -709,6 +709,8 @@
     "mobile.error_handler.button": "Uruchom ponownie",
     "mobile.error_handler.description": "Dotknij opcji „Uruchom ponownie”, aby ponownie otworzyć aplikację. Po ponownym uruchomieniu możesz zgłosić problem z poziomu menu ustawień",
     "mobile.error_handler.title": "Wystąpił nieoczekiwany błąd",
+    "mobile.file_upload.attach_logs": "Załącz logi aplikacji",
+    "mobile.file_upload.attach_logs_failed": "Nie udało się załączyć logów aplikacji",
     "mobile.file_attachment.title": "Pliki i multimedia",
     "mobile.file_upload.browse": "Załącz plik",
     "mobile.file_upload.camera_photo": "Zrób zdjęcie",

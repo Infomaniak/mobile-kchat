@@ -588,6 +588,8 @@
   "mobile.error_handler.button": "Relancer",
   "mobile.error_handler.description": "\nCliquez sur relancer pour ouvrir l'application à nouveau. Après le redémarrage, vous pouvez signaler le problème à partir du menu paramètres.\n",
   "mobile.error_handler.title": "Une erreur inattendue s'est produite",
+  "mobile.file_upload.attach_logs": "Joindre les logs de l'app",
+  "mobile.file_upload.attach_logs_failed": "Échec de l'envoi des logs de l'app",
   "mobile.file_upload.disabled2": "Les envois de fichiers depuis un périphérique mobile sont désactivés.",
   "mobile.file_upload.max_warning": "Envois limités à maximum {count} fichiers.",
   "mobile.file_upload.voice_record_error": "L'enregistrement a échoué, veuillez réessayer.",

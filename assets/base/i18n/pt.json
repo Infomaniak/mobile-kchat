@@ -709,6 +709,8 @@
     "mobile.error_handler.button": "Reiniciar",
     "mobile.error_handler.description": "Toque em \"Reiniciar\" para abrir o aplicativo novamente. Após a reinicialização, você pode relatar o problema no menu de configurações",
     "mobile.error_handler.title": "Ocorreu um erro inesperado",
+    "mobile.file_upload.attach_logs": "Anexar logs do app",
+    "mobile.file_upload.attach_logs_failed": "Falha ao anexar logs do app",
     "mobile.file_attachment.title": "Arquivos e mídia",
     "mobile.file_upload.browse": "Anexar um arquivo",
     "mobile.file_upload.camera_photo": "Tire uma foto",

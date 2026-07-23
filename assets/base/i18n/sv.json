@@ -709,6 +709,8 @@
     "mobile.error_handler.button": "Starta om",
     "mobile.error_handler.description": "Tryck på ”Starta om” för att öppna appen igen. Efter omstarten kan du rapportera problemet från inställningsmenyn",
     "mobile.error_handler.title": "Ett oväntat fel uppstod",
+    "mobile.file_upload.attach_logs": "Bifoga app-loggar",
+    "mobile.file_upload.attach_logs_failed": "Det gick inte att bifoga app-loggar",
     "mobile.file_attachment.title": "Filer och media",
     "mobile.file_upload.browse": "Bifoga en fil",
     "mobile.file_upload.camera_photo": "Ta ett foto",

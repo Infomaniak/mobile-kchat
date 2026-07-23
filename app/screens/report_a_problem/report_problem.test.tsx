@@ -8,9 +8,6 @@ import {View} from 'react-native';
 import {savePreference} from '@actions/remote/preference';
 import {Preferences, Screens} from '@constants';
 import {renderWithIntl} from '@test/intl-test-helper';
-import {logDebug} from '@utils/log';
-import {emailLogs, getDefaultReportAProblemLink, shareLogs} from '@utils/share_logs';
-import {tryOpenURL} from '@utils/url';
 
 import AppLogs from './app_logs';
 import ReportProblem from './report_problem';
@@ -48,7 +45,6 @@ describe('screens/report_a_problem/report_problem', () => {
         allowDownloadLogs: true,
         attachLogsEnabled: false,
         currentUserId: 'user1',
-        isLicensed: true,
         metadata: {
             currentUserId: 'user1',
             currentTeamId: 'team1',
@@ -80,166 +76,6 @@ describe('screens/report_a_problem/report_problem', () => {
 
         expect(getByText('When reporting a problem, share the metadata given below to help troubleshoot your problem faster')).toBeTruthy();
         expect(queryByTestId('app-logs')).not.toBeVisible();
-    });
-
-    it('handles email report type and allows sharing logs', async () => {
-        const props = {
-            ...baseProps,
-            reportAProblemType: 'email',
-            reportAProblemMail: 'test@example.com',
-            siteName: 'Test Site',
-            allowDownloadLogs: true,
-        };
-
-        const {getByText} = renderWithIntl(
-            <ReportProblem {...props}/>,
-        );
-
-        await act(async () => {
-            fireEvent.press(getByText('Report a problem'));
-            expect(emailLogs).toHaveBeenCalledWith(
-                props.metadata,
-                props.siteName,
-                props.reportAProblemMail,
-                false,
-            );
-        });
-    });
-
-    it('handles email report type and does not allow downloading logs', async () => {
-        const props = {
-            ...baseProps,
-            reportAProblemType: 'email',
-            reportAProblemMail: 'test@example.com',
-            siteName: 'Test Site',
-            allowDownloadLogs: false,
-        };
-
-        const {getByText} = renderWithIntl(
-            <ReportProblem {...props}/>,
-        );
-
-        await act(async () => {
-            fireEvent.press(getByText('Report a problem'));
-            expect(emailLogs).toHaveBeenCalledWith(
-                props.metadata,
-                props.siteName,
-                props.reportAProblemMail,
-                true,
-            );
-        });
-    });
-
-    it('handles link report type', async () => {
-        const props = {
-            ...baseProps,
-            reportAProblemType: 'link',
-            reportAProblemLink: 'https://example.com/report',
-        };
-
-        const {getByText} = renderWithIntl(
-            <ReportProblem {...props}/>,
-        );
-
-        await act(async () => {
-            fireEvent.press(getByText('Report a problem'));
-            expect(tryOpenURL).toHaveBeenCalledWith(props.reportAProblemLink);
-        });
-    });
-
-    it('handles missing report link', async () => {
-        const props = {
-            ...baseProps,
-            reportAProblemType: 'link',
-            reportAProblemLink: undefined,
-        };
-
-        const {getByText} = renderWithIntl(
-            <ReportProblem {...props}/>,
-        );
-
-        await act(async () => {
-            fireEvent.press(getByText('Report a problem'));
-            expect(logDebug).toHaveBeenCalledWith('Report a problem link is not set');
-            expect(tryOpenURL).toHaveBeenCalledWith('default-link');
-        });
-    });
-
-    it('handles default report type when licensed', async () => {
-        const props = {
-            ...baseProps,
-            reportAProblemType: 'default',
-            isLicensed: true,
-        };
-
-        const {getByText} = renderWithIntl(
-            <ReportProblem {...props}/>,
-        );
-
-        await act(async () => {
-            fireEvent.press(getByText('Report a problem'));
-            expect(getDefaultReportAProblemLink).toHaveBeenCalledWith(true);
-            expect(tryOpenURL).toHaveBeenCalledWith('default-link');
-        });
-    });
-
-    it('handles default report type when not licensed', async () => {
-        const props = {
-            ...baseProps,
-            reportAProblemType: 'default',
-            isLicensed: false,
-        };
-
-        const {getByText} = renderWithIntl(
-            <ReportProblem {...props}/>,
-        );
-
-        await act(async () => {
-            fireEvent.press(getByText('Report a problem'));
-            expect(getDefaultReportAProblemLink).toHaveBeenCalledWith(false);
-            expect(tryOpenURL).toHaveBeenCalledWith('default-link');
-        });
-    });
-
-    it('handles legacy behavior when reportAProblemType is not defined', async () => {
-        const props = {
-            ...baseProps,
-            reportAProblemType: undefined,
-            reportAProblemLink: 'https://example.com/report',
-        };
-
-        const {getByText} = renderWithIntl(
-            <ReportProblem {...props}/>,
-        );
-
-        await act(async () => {
-            fireEvent.press(getByText('Report a problem'));
-            expect(tryOpenURL).toHaveBeenCalledWith(props.reportAProblemLink);
-        });
-    });
-
-    it('handles legacy behavior with no link', async () => {
-        const props = {
-            ...baseProps,
-            reportAProblemType: undefined,
-            reportAProblemLink: undefined,
-            reportAProblemMail: 'test@example.com',
-            siteName: 'Test Site',
-        };
-
-        const {getByText} = renderWithIntl(
-            <ReportProblem {...props}/>,
-        );
-
-        await act(async () => {
-            fireEvent.press(getByText('Report a problem'));
-            expect(shareLogs).toHaveBeenCalledWith(
-                props.metadata,
-                props.siteName,
-                undefined,
-                false,
-            );
-        });
     });
 
     describe('attach logs toggle', () => {

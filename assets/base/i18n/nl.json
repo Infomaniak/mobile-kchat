@@ -709,6 +709,8 @@
     "mobile.error_handler.button": "Opnieuw starten",
     "mobile.error_handler.description": "Tik op \"Opnieuw starten\" om de app opnieuw te openen. Na het opnieuw starten kunt u het probleem melden via het instellingenmenu",
     "mobile.error_handler.title": "Er is een onverwachte fout opgetreden",
+    "mobile.file_upload.attach_logs": "App-logs bijvoegen",
+    "mobile.file_upload.attach_logs_failed": "App-logs konden niet worden bijgevoegd",
     "mobile.file_attachment.title": "Bestanden en media",
     "mobile.file_upload.browse": "Voeg een bestand toe",
     "mobile.file_upload.camera_photo": "Maak een foto",
