@@ -73,7 +73,7 @@ target 'kChat' do
   pod 'Gekidou', :path => './Gekidou'
   pod 'CocoaLumberjack', :modular_headers => true
   pod 'TurboLogIOSNative', :git => 'https://github.com/larkox/react-native-turbo-log-ios-native.git', :modular_headers => true
-  pod 'JitsiMeetSDKLite', :podspec => './JitsiMeetSDKLiteNoHermes.podspec'
+  # pod 'JitsiMeetSDKLite', :podspec => './JitsiMeetSDKLiteNoHermes.podspec'
   
 end
 

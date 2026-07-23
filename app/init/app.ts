@@ -84,12 +84,13 @@ export async function start() {
 
     // Trigger initial data sync for cold start (onAppStateChange won't fire if already active)
     logInfo('[ExpoRouterBoot] start(): triggerInitialResync begin');
-    if (typeof SessionManager.triggerInitialResync === 'function') {
-        SessionManager.triggerInitialResync();
-        logInfo('[ExpoRouterBoot] start(): triggerInitialResync done');
-    } else {
-        logWarning('[ExpoRouterBoot] start(): triggerInitialResync unavailable, continuing boot');
-    }
+
+    // if (typeof SessionManager.triggerInitialResync === 'function') {
+    //     SessionManager.triggerInitialResync();
+    //     logInfo('[ExpoRouterBoot] start(): triggerInitialResync done');
+    // } else {
+    //     logWarning('[ExpoRouterBoot] start(): triggerInitialResync unavailable, continuing boot');
+    // }
 
     if (!__DEV__) {
         // Ik Analytics / Matomo

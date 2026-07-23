@@ -8,6 +8,7 @@ import RNNotifications
 import TurboLogIOSNative
 import UIKit
 import mattermost_rnutils
+import mattermost_hardware_keyboard
 import os.log
 
 #if canImport(react_native_paste_input)
@@ -43,7 +44,6 @@ class AppDelegate: ExpoAppDelegate, OrientationLockable, RNAppAuthAuthorizationF
         _ application: UIApplication,
         willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        CallManager.shared.registerForVoIPPushes()
         return super.application(application, willFinishLaunchingWithOptions: launchOptions)
     }
 
