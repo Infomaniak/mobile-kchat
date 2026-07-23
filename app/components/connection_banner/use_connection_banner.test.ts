@@ -321,6 +321,64 @@ describe('useConnectionBanner', () => {
 
         });
 
+        it('should show connection restored when internet recovers while websocket was already connected', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
+
+            const {result, rerender} = renderHook(
+                (props) => useConnectionBanner(props),
+                {
+                    initialProps: {
+                        websocketState: 'connected' as WebsocketConnectedState,
+                        networkPerformanceState: 'normal' as NetworkPerformanceState,
+                        netInfo: createMockNetInfo(true),
+                        appState: 'active',
+                        intl: mockIntl,
+                    },
+                },
+            );
+
+            // Banner initially hidden
+            expect(result.current.visible).toBe(false);
+
+            // Internet drops - show internet unreachable banner
+            act(() => {
+                rerender({
+                    websocketState: 'connected' as WebsocketConnectedState,
+                    networkPerformanceState: 'normal' as NetworkPerformanceState,
+                    netInfo: createMockNetInfo(false),
+                    appState: 'active',
+                    intl: mockIntl,
+                });
+            });
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('The server is not reachable');
+
+            // Internet comes back - websocket stayed connected
+            act(() => {
+                rerender({
+                    websocketState: 'connected' as WebsocketConnectedState,
+                    networkPerformanceState: 'normal' as NetworkPerformanceState,
+                    netInfo: createMockNetInfo(true),
+                    appState: 'active',
+                    intl: mockIntl,
+                });
+            });
+
+            // Should show "Connection restored"
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Connection restored');
+            expect(result.current.isShowingConnectedBanner).toBe(true);
+
+            // Auto-close after 2s
+            act(() => {
+                jest.advanceTimersByTime(2100);
+            });
+
+            expect(result.current.visible).toBe(false);
+            expect(result.current.isShowingConnectedBanner).toBe(false);
+        });
+
         it('should hide banner when problem is resolved', () => {
             jest.useFakeTimers({doNotFake: ['nextTick']});
 

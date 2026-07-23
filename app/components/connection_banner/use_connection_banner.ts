@@ -41,6 +41,8 @@ export const useConnectionBanner = ({
 }: UseConnectionBannerParams): UseConnectionBannerReturn => {
     const closeTimeout = useRef<NodeJS.Timeout | null>();
     const previousWebsocketState = useRef<WebsocketConnectedState>(websocketState);
+    const visibleRef = useRef(false);
+    const isShowingConnectedBannerRef = useRef(false);
 
     const [visible, setVisible] = useState(false);
     const [bannerText, setBannerText] = useState('');
@@ -48,12 +50,14 @@ export const useConnectionBanner = ({
 
     const closeCallback = useCallback(() => {
         setVisible(false);
+        visibleRef.current = false;
         clearTimeoutRef(closeTimeout);
     }, []);
 
     const openCallback = useCallback(() => {
         clearTimeoutRef(closeTimeout);
         setVisible(true);
+        visibleRef.current = true;
     }, []);
 
     const handleDisconnectedState = useCallback((): boolean => {
@@ -84,20 +88,26 @@ export const useConnectionBanner = ({
         return false;
     }, [networkPerformanceState, intl, openCallback]);
 
+    const showConnectedBanner = useCallback(() => {
+        setIsShowingConnectedBanner(true);
+        isShowingConnectedBannerRef.current = true;
+        setBannerText(intl.formatMessage({id: 'connection_banner.connected', defaultMessage: 'Connection restored'}));
+        openCallback();
+        closeTimeout.current = setTimeout(() => {
+            closeCallback();
+            setIsShowingConnectedBanner(false);
+            isShowingConnectedBannerRef.current = false;
+        }, CLOSE_TIMEOUT_DURATION_MS);
+    }, [intl, openCallback, closeCallback]);
+
     const handleConnectedState = useCallback((): boolean => {
         if (websocketState === 'connected' && previousWebsocketState.current !== 'connected') {
             previousWebsocketState.current = 'connected';
-            setIsShowingConnectedBanner(true);
-            setBannerText(intl.formatMessage({id: 'connection_banner.connected', defaultMessage: 'Connection restored'}));
-            openCallback();
-            closeTimeout.current = setTimeout(() => {
-                closeCallback();
-                setIsShowingConnectedBanner(false);
-            }, CLOSE_TIMEOUT_DURATION_MS);
+            showConnectedBanner();
             return true;
         }
         return false;
-    }, [websocketState, intl, openCallback, closeCallback]);
+    }, [websocketState, showConnectedBanner]);
 
     const handleConnectingState = useCallback((): boolean => {
         if (websocketState === 'connecting') {
@@ -108,6 +118,15 @@ export const useConnectionBanner = ({
         }
         return false;
     }, [websocketState, intl, openCallback]);
+
+    const handleResolvedState = useCallback((): boolean => {
+        if (visibleRef.current && !isShowingConnectedBannerRef.current && websocketState === 'connected') {
+            previousWebsocketState.current = 'connected';
+            showConnectedBanner();
+            return true;
+        }
+        return false;
+    }, [websocketState, showConnectedBanner]);
 
     useEffect(() => {
         return () => {
@@ -129,32 +148,40 @@ export const useConnectionBanner = ({
 
             if (shouldHideBanner) {
                 setIsShowingConnectedBanner(false);
+                isShowingConnectedBannerRef.current = false;
                 return;
             }
 
-            handleConnectedState();
+            if (handleConnectedState()) {
+                return;
+            }
+
+            handleResolvedState();
         };
 
         priorities();
 
-    // We omit 'visible' from dependencies because we do not want
-    // to show again the banner the moment the banner is closed.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // We omit 'visible' from dependencies because we do not want
+        // to show again the banner the moment the banner is closed.
+
     }, [
         handleInternetUnreachableState,
         handleDisconnectedState,
         handleSlowNetworkState,
         handleConnectedState,
         handleConnectingState,
+        handleResolvedState,
         appState,
     ]);
 
     useDidUpdate(() => {
         if (appState !== 'active') {
             setVisible(false);
+            visibleRef.current = false;
             setBannerText('');
             clearTimeoutRef(closeTimeout);
             setIsShowingConnectedBanner(false);
+            isShowingConnectedBannerRef.current = false;
         }
     }, [appState]);
 
