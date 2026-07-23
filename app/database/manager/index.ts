@@ -5,7 +5,7 @@ import {Database, Q} from '@nozbe/watermelondb';
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 import logger from '@nozbe/watermelondb/utils/common/logger';
 import {nativeApplicationVersion, nativeBuildVersion} from 'expo-application';
-import {deleteAsync, documentDirectory, getInfoAsync, makeDirectoryAsync, moveAsync} from 'expo-file-system';
+import {deleteAsync, documentDirectory, getInfoAsync, makeDirectoryAsync, moveAsync} from 'expo-file-system/legacy';
 import {DeviceEventEmitter, Platform} from 'react-native';
 
 import {Events} from '@constants';

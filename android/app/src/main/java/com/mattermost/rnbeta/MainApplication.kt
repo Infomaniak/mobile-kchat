@@ -12,12 +12,10 @@ import com.facebook.react.ReactHost
 import com.facebook.react.ReactPackage
 import com.facebook.react.ReactNativeHost
 import com.facebook.react.bridge.UiThreadUtil
-import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
+import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
-import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.react.modules.network.OkHttpClientProvider
-import com.facebook.soloader.SoLoader
 import com.mattermost.call.IkCallPackage
 import com.mattermost.ikstorage.IkStoragePackage
 import com.oney.WebRTCModule.WebRTCModuleOptions
@@ -85,11 +83,7 @@ class MainApplication : Application(), ReactApplication, INotificationsApplicati
         OkHttpClientProvider.setOkHttpClientFactory(RCTOkHttpClientFactory())
         ExpoImageOkHttpClientGlideModule.okHttpClient = RCTOkHttpClientFactory().createNewNetworkModuleClient()
 
-        SoLoader.init(this, OpenSourceMergedSoMapping)
-        if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
-            // If you opted-in for the New Architecture, we load the native entry point for this app.
-            load(bridgelessEnabled = false)
-        }
+        loadReactNative(this)
 
         // @jitsi/react-native-sdk setup
         // Ref https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#android

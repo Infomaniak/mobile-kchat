@@ -3,7 +3,7 @@
 
 import React, {useMemo} from 'react';
 import {Platform, Text, View} from 'react-native';
-import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
+import Animated, {useAnimatedStyle, withTiming, type SharedValue} from 'react-native-reanimated';
 
 import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
@@ -32,7 +32,7 @@ type Props = {
     onBackPress?: () => void;
     onTitlePress?: () => void;
     rightButtons?: HeaderRightButton[];
-    scrollValue?: Animated.SharedValue<number>;
+    scrollValue?: SharedValue<number>;
     showBackButton?: boolean;
     subtitle?: string;
     subtitleCompanion?: React.ReactElement;
@@ -283,4 +283,3 @@ const Header = ({
 };
 
 export default React.memo(Header);
-

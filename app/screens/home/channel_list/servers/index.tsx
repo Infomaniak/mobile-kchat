@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
 const Servers = React.forwardRef<ServersRef>((_, ref) => {
     const intl = useIntl();
     const [total, setTotal] = useState<UnreadMessages>({mentions: 0, unread: false});
-    const registeredServers = useRef<ServersModel[]|undefined>();
+    const registeredServers = useRef<ServersModel[]|undefined | undefined>(undefined);
     const currentServerUrl = useServerUrl();
     const theme = useTheme();
 

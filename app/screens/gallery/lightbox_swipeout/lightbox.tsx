@@ -61,7 +61,7 @@ export default function Lightbox({
         targetDimensions,
     } = useLightboxSharedValues();
     const [renderChildren, setRenderChildren] = useState<boolean>(false);
-    const childLayoutTimeoutRef = React.useRef<NodeJS.Timeout>();
+    const childLayoutTimeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
     const animateOnMount = () => {
         'worklet';

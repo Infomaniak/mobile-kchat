@@ -43,7 +43,7 @@ const SendTestNotificationNotice = ({
     const serverUrl = useServerUrl();
     const [buttonState, setButtonState] = useState<ButtonState>('idle');
     const isSending = useRef(false);
-    const timeout = useRef<NodeJS.Timeout>();
+    const timeout = useRef<NodeJS.Timeout | undefined>(undefined);
 
     const [href] = useExternalLink({
         userId,

@@ -3,14 +3,15 @@
 module.exports = {
     presets: [
         ['@babel/preset-env', {targets: {node: 'current'}}],
-        'module:@react-native/babel-preset',
+        'babel-preset-expo',
         '@babel/preset-typescript',
     ],
     plugins: [
         '@babel/plugin-transform-runtime',
         ['@babel/plugin-proposal-decorators', {legacy: true}],
         ['@babel/plugin-transform-flow-strip-types'],
-        ['@babel/plugin-proposal-class-properties', {loose: true}],
+        ['@babel/plugin-transform-class-properties', {loose: true}],
+        '@babel/plugin-transform-class-static-block',
         ['module-resolver', {
             root: ['.'],
             alias: {
@@ -48,7 +49,7 @@ module.exports = {
             safe: false,
             allowUndefined: true,
         }],
-        'react-native-reanimated/plugin',
+        'react-native-worklets/plugin',
     ],
     exclude: ['**/*.png', '**/*.jpg', '**/*.gif'],
 };

@@ -92,7 +92,7 @@ const Modifiers = ({scrollEnabled, searchValue, setSearchValue, searchRef, setTe
     const [showMore, setShowMore] = useState(false);
     const height = useSharedValue(NUM_ITEMS_BEFORE_EXPAND * MODIFIER_LABEL_HEIGHT);
     const data = useMemo(() => getModifiersSectionsData(intl, teamId), [intl, teamId]);
-    const timeoutRef = useRef<NodeJS.Timeout | undefined>();
+    const timeoutRef = useRef<NodeJS.Timeout | undefined | undefined>(undefined);
 
     const styles = getStyleFromTheme(theme);
     const animatedStyle = useAnimatedStyle(() => ({

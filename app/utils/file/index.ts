@@ -6,7 +6,7 @@ import {applicationName} from 'expo-application';
 import {
     cacheDirectory, deleteAsync, documentDirectory, getInfoAsync,
     type FileInfo as ExpoFileInfo,
-} from 'expo-file-system';
+} from 'expo-file-system/legacy';
 import mimeDB from 'mime-db';
 import {Alert, Linking, Platform} from 'react-native';
 import FileSystem from 'react-native-fs';

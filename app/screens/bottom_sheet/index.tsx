@@ -89,8 +89,7 @@ export const animatedConfig: Omit<WithSpringConfig, 'velocity'> = {
     mass: 0.3,
     stiffness: 121.6,
     overshootClamping: true,
-    restSpeedThreshold: 0.3,
-    restDisplacementThreshold: 0.3,
+    energyThreshold: 0.3,
 };
 
 const BottomSheet = ({
@@ -114,8 +113,8 @@ const BottomSheet = ({
     const insets = useSafeAreaInsets();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
-    const interaction = useRef<Handle>();
-    const timeoutRef = useRef<NodeJS.Timeout>();
+    const interaction = useRef<Handle | undefined>(undefined);
+    const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
     const {enabled, panResponder} = useBottomSheetListsFix();
 

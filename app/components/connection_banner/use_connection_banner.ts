@@ -39,7 +39,7 @@ export const useConnectionBanner = ({
     appState,
     intl,
 }: UseConnectionBannerParams): UseConnectionBannerReturn => {
-    const closeTimeout = useRef<NodeJS.Timeout | null>();
+    const closeTimeout = useRef<NodeJS.Timeout | null | undefined>(undefined);
     const previousWebsocketState = useRef<WebsocketConnectedState>(websocketState);
 
     const [visible, setVisible] = useState(false);

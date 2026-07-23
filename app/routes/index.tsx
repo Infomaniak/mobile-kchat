@@ -2,8 +2,6 @@
 // See LICENSE.txt for license information.
 
 import useDidMount from '@hooks/did_mount';
-import {start} from '@init/app';
-import {initialLaunch} from '@init/launch';
 import {logError, logInfo} from '@utils/log';
 import {captureException} from '@utils/sentry';
 
@@ -11,10 +9,27 @@ export default function InitialRoute() {
     useDidMount(() => {
         logInfo('[ExpoRouterBoot] InitialRoute mounted: start initialization');
 
-        start().
-            then(() => {
+        Promise.resolve().
+            then(async () => {
+                logInfo('[ExpoRouterBoot] InitialRoute: importing @init/app');
+                const appModule = await import('@init/app');
+                logInfo('[ExpoRouterBoot] InitialRoute: imported @init/app', {
+                    keys: Object.keys(appModule),
+                    startType: typeof appModule.start,
+                });
+
+                logInfo('[ExpoRouterBoot] InitialRoute: importing @init/launch');
+                const launchModule = await import('@init/launch');
+                logInfo('[ExpoRouterBoot] InitialRoute: imported @init/launch', {
+                    initialLaunchType: typeof launchModule.initialLaunch,
+                    keys: Object.keys(launchModule),
+                });
+
+                logInfo('[ExpoRouterBoot] InitialRoute: calling start()');
+                await appModule.start();
+
                 logInfo('[ExpoRouterBoot] start() resolved: running initialLaunch()');
-                return initialLaunch();
+                await launchModule.initialLaunch();
             }).
             then(() => {
                 logInfo('[ExpoRouterBoot] initialLaunch() resolved');

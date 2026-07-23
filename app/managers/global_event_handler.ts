@@ -22,12 +22,24 @@ import {setScreensOrientation} from '@screens/navigation';
 import CallManager, {CallAnsweredEvent, CallEndedEvent, CallMutedEvent, CallVideoMutedEvent} from '@store/CallManager';
 import {alertInvalidDeepLink, parseAndHandleDeepLink} from '@utils/deep_link';
 import {getIntlShape} from '@utils/general';
-import {logError} from '@utils/log';
+import {logError, logInfo, logWarning} from '@utils/log';
 
 type LinkingCallbackArg = {url: string};
 
-const callManagerEmitter = new NativeEventEmitter(NativeModules.CallManagerModule);
+logInfo('[BootDebug] global_event_handler: module evaluation begin', {
+    hasCallManagerModule: Boolean(NativeModules.CallManagerModule),
+    hasRNUtils: Boolean(RNUtils),
+});
+const callManagerModule = NativeModules.CallManagerModule;
+const callManagerEmitter = callManagerModule ? new NativeEventEmitter(callManagerModule) : undefined;
+logInfo('[BootDebug] global_event_handler: callManagerEmitter created', {
+    hasCallManagerEmitter: Boolean(callManagerEmitter),
+});
+logInfo('[BootDebug] global_event_handler: creating splitViewEmitter', {
+    hasRNUtils: Boolean(RNUtils),
+});
 const splitViewEmitter = new NativeEventEmitter(RNUtils);
+logInfo('[BootDebug] global_event_handler: splitViewEmitter created');
 
 const messages = defineMessages({
     serverUpgradeTitle: {
@@ -49,10 +61,14 @@ class GlobalEventHandlerSingleton {
 
     constructor() {
         DeviceEventEmitter.addListener(Events.SERVER_VERSION_CHANGED, this.onServerVersionChanged);
-        callManagerEmitter.addListener('CallAnswered', this.onCallAnswered);
-        callManagerEmitter.addListener('CallEnded', this.onCallEnded);
-        if (Platform.OS === 'ios') {
-            callManagerEmitter.addListener('CallMuted', this.onCallMuted);
+        if (callManagerEmitter) {
+            callManagerEmitter.addListener('CallAnswered', this.onCallAnswered);
+            callManagerEmitter.addListener('CallEnded', this.onCallEnded);
+            if (Platform.OS === 'ios') {
+                callManagerEmitter.addListener('CallMuted', this.onCallMuted);
+            }
+        } else {
+            logWarning('[GlobalEventHandler] CallManagerModule unavailable, skipping native calls events');
         }
 
         // callManagerEmitter.addListener('CallVideoMuted', this.onCallMuted);
@@ -70,7 +86,7 @@ class GlobalEventHandlerSingleton {
 
     initialized = () => {
         try {
-            const {initialized} = NativeModules.CallManagerModule;
+            const {initialized} = callManagerModule || {};
             if (typeof initialized === 'function') {
                 initialized();
             }

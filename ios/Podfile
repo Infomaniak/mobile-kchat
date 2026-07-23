@@ -12,7 +12,22 @@ require File.join(File.dirname(`node --print "require.resolve('expo/package.json
 node_require('react-native/scripts/react_native_pods.rb')
 node_require('react-native-permissions/scripts/setup.rb')
 
-platform :ios, '16.6' #min_ios_version_supported
+require 'json'
+podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
+
+def ccache_enabled?(podfile_properties)
+  return ENV['USE_CCACHE'] == '1' if ENV['USE_CCACHE']
+
+  podfile_properties['ccacheEnabled'] == 'true'
+end
+
+ENV['EX_DEV_CLIENT_NETWORK_INSPECTOR'] ||= podfile_properties['EX_DEV_CLIENT_NETWORK_INSPECTOR']
+ENV['RCT_NEW_ARCH_ENABLED'] ||= '1'
+ENV['RCT_USE_RN_DEP'] ||= '1' if podfile_properties['buildReactNativeFromSource'] != 'true'
+ENV['RCT_USE_PREBUILT_RNCORE'] ||= '1' if podfile_properties['buildReactNativeFromSource'] != 'true'
+ENV['EXPO_USE_PRECOMPILED_MODULES'] ||= '1' if podfile_properties['buildExpoModulesFromSource'] != 'true'
+
+platform :ios, podfile_properties['deploymentTarget'] || '16.6' #min_ios_version_supported
 prepare_react_native_project!
 
 Pod::UI.puts "Configuring Pod with statically linked Frameworks".green
@@ -25,8 +40,23 @@ setup_permissions([
   "PhotoLibrary"
 ])
 
+if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
+  config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
+else
+  config_command = [
+    'node',
+    '--no-warnings',
+    '--eval',
+    'require(\'expo/bin/autolinking\')',
+    'expo-modules-autolinking',
+    'react-native-config',
+    '--json',
+    '--platform',
+    'ios'
+  ]
+end
 
-config = use_native_modules!
+config = use_native_modules!(config_command)
 
 target 'kChat' do
   # Pods for Mattermost
@@ -36,31 +66,27 @@ target 'kChat' do
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/..",
-    :hermes_enabled => false
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  # because of jitsi activating hermes & conflicting
-  pod 'React-jsi', :path => '../node_modules/react-native/ReactCommon/jsi', :modular_headers => true
-  pod 'React-jsc', :path => '../node_modules/react-native/ReactCommon/jsc', :modular_headers => true
   pod 'simdjson', path: '../node_modules/@nozbe/simdjson', :modular_headers => true
   pod 'Gekidou', :path => './Gekidou'
   pod 'CocoaLumberjack', :modular_headers => true
   pod 'TurboLogIOSNative', :git => 'https://github.com/larkox/react-native-turbo-log-ios-native.git', :modular_headers => true
-  pod 'JitsiMeetSDKLite', :git => 'https://github.com/jitsi/jitsi-meet-ios-sdk-releases.git', :tag => '11.3.1-lite'
+  pod 'JitsiMeetSDKLite', :podspec => './JitsiMeetSDKLiteNoHermes.podspec'
   
 end
 
 target 'kChatNotificationService' do
   inherit! :search_paths
   pod 'TurboLogIOSNative', :git => 'https://github.com/larkox/react-native-turbo-log-ios-native.git', :modular_headers => true
-  pod 'Sentry/HybridSDK', '8.48.0'
+  pod 'Sentry', '9.12.1'
   pod 'Gekidou', :path => './Gekidou'
 end
 
 target 'kChatShareExtension' do
   inherit! :search_paths
-  pod 'Sentry/HybridSDK', '8.48.0'
+  pod 'Sentry', '9.12.1'
   pod 'Gekidou', :path => './Gekidou'
   pod 'OpenGraph', '1.4.1'
 end
@@ -70,7 +96,8 @@ post_install do |installer|
   react_native_post_install(
     installer,
     config[:reactNativePath],
-    :mac_catalyst_enabled => false
+    :mac_catalyst_enabled => false,
+    :ccache_enabled => ccache_enabled?(podfile_properties),
   )
 
   # Bitcode stripping for frameworks
@@ -107,13 +134,6 @@ post_install do |installer|
       end
     end
 
-    # react-native-worklets-core (Jitsi fork) expects jsc/JSCRuntime.h but we use JSC via React-jsc
-    if t.name == 'react-native-worklets-core'
-      t.build_configurations.each do |bc|
-        jsc_path = File.join(Pod::Config.instance.installation_root, '..', 'node_modules', 'react-native', 'ReactCommon')
-        bc.build_settings['HEADER_SEARCH_PATHS'] = "$(inherited) \"#{jsc_path}\""
-      end
-    end
   end
 
   # ensure stdlib is embedded for Gekidou to work correctly in extensions

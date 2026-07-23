@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {forwardRef} from 'react';
-import Animated, {useAnimatedStyle, useDerivedValue} from 'react-native-reanimated';
+import Animated, {useAnimatedStyle, useDerivedValue, type SharedValue} from 'react-native-reanimated';
 
 import {SEARCH_INPUT_HEIGHT, SEARCH_INPUT_MARGIN} from '@constants/view';
 import {useTheme} from '@context/theme';
@@ -23,7 +23,7 @@ type Props = SearchProps & {
     onBackPress?: () => void;
     onTitlePress?: () => void;
     rightButtons?: HeaderRightButton[];
-    scrollValue?: Animated.SharedValue<number>;
+    scrollValue?: SharedValue<number>;
     lockValue?: number;
     hideHeader?: () => void;
     showBackButton?: boolean;
@@ -130,4 +130,3 @@ const NavigationHeader = forwardRef<SearchRef, Props>(({
 
 NavigationHeader.displayName = 'NavHeader';
 export default NavigationHeader;
-

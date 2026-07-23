@@ -110,7 +110,7 @@ const SnackBar = ({
     const {width: windowWidth, height: windowHeight} = useWindowDimensions();
     const offset = useSharedValue(0);
     const isPanned = useSharedValue(false);
-    const baseTimer = useRef<NodeJS.Timeout>();
+    const baseTimer = useRef<NodeJS.Timeout | undefined>(undefined);
     const mounted = useRef(false);
     const userHasUndo = useRef(false);
 
