@@ -1556,5 +1556,8 @@
     "send_feedback.files.max_size": "Max filstorlek: 32 MB",
     "send_feedback.files.too_many": "Du kan bifoga upp till 5 filer.",
     "send_feedback.files.too_large": "En eller flera filer överskrider gränsen på 32 MB.",
-    "notification_settings.keywords": "Nyckelord"
+    "notification_settings.keywords": "Nyckelord",
+    "screen.report_problem.enable_log_attachments": "Aktivera bifoga app-loggar",
+    "screen.report_problem.enable_log_attachments.description": "Visa ett alternativ för att bifoga app-loggar i filbilagans meny",
+    "screen.report_problem.logs.no_logs": "Inga loggfiler tillgängliga"
 }

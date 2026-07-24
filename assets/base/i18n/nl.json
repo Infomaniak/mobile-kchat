@@ -1556,5 +1556,8 @@
     "send_feedback.files.max_size": "Max. bestandsgrootte: 32 MB",
     "send_feedback.files.too_many": "Je kunt maximaal 5 bestanden bijvoegen.",
     "send_feedback.files.too_large": "Eén of meer bestanden overschrijden de limiet van 32 MB.",
-    "notification_settings.keywords": "Sleutelwoorden"
+    "notification_settings.keywords": "Sleutelwoorden",
+    "screen.report_problem.enable_log_attachments": "App-logbijlagen inschakelen",
+    "screen.report_problem.enable_log_attachments.description": "Toon een optie om app-logs bij te voegen in het bestandsbijlagemenu",
+    "screen.report_problem.logs.no_logs": "Geen logbestanden beschikbaar"
 }

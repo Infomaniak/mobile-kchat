@@ -1556,5 +1556,8 @@
     "send_feedback.files.max_size": "Maksymalny rozmiar pliku: 32 MB",
     "send_feedback.files.too_many": "Możesz załączyć maksymalnie 5 plików.",
     "send_feedback.files.too_large": "Jeden lub więcej plików przekracza limit 32 MB.",
-    "notification_settings.keywords": "Słowa kluczowe"
+    "notification_settings.keywords": "Słowa kluczowe",
+    "screen.report_problem.enable_log_attachments": "Włącz załączanie logów aplikacji",
+    "screen.report_problem.enable_log_attachments.description": "Pokaż opcję dołączania logów aplikacji w menu załączników",
+    "screen.report_problem.logs.no_logs": "Brak dostępnych plików logów"
 }

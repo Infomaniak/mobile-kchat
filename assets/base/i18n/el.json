@@ -1556,5 +1556,8 @@
     "send_feedback.files.max_size": "Μέγιστο μέγεθος αρχείου: 32 MB",
     "send_feedback.files.too_many": "Μπορείτε να επισυνάψετε έως 5 αρχεία.",
     "send_feedback.files.too_large": "Ένα ή περισσότερα αρχεία υπερβαίνουν το όριο των 32 MB.",
-    "notification_settings.keywords": "Λέξεις-κλειδιά"
+    "notification_settings.keywords": "Λέξεις-κλειδιά",
+    "screen.report_problem.enable_log_attachments": "Ενεργοποίηση συνημμένων logs εφαρμογής",
+    "screen.report_problem.enable_log_attachments.description": "Εμφάνιση επιλογής για επισύναψη logs εφαρμογής στο μενού συνημμένων αρχείων",
+    "screen.report_problem.logs.no_logs": "Δεν υπάρχουν διαθέσιμα αρχεία logs"
 }

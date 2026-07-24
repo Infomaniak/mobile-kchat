@@ -1059,5 +1059,8 @@
   "send_feedback.files.max_size": "Dimensione max file: 32 MB",
   "send_feedback.files.too_many": "Puoi allegare fino a 5 file.",
   "send_feedback.files.too_large": "Uno o più file superano il limite di 32 MB.",
-  "notification_settings.keywords": "Parole chiave"
+  "notification_settings.keywords": "Parole chiave",
+  "screen.report_problem.enable_log_attachments": "Abilita allegati log dell'app",
+  "screen.report_problem.enable_log_attachments.description": "Mostra un'opzione per allegare i log dell'app nel menu allegati file",
+  "screen.report_problem.logs.no_logs": "Nessun file di log disponibile"
 }

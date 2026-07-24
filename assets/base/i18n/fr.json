@@ -1,4 +1,4 @@
-{
+  {
   "account.logout": "Se déconnecter",
   "account.logout_from": "Se déconnecter de {serverName}",
   "account.server_preprod": "Passer à la version NEXT",
@@ -1159,5 +1159,8 @@
   "mobile.components.select_server_view.connect": "Se connecter",
   "mobile.components.select_server_view.connecting": "Connexion en cours...",
   "loading_error.retry": "Réessayer",
-  "infomaniak.no_team.discover_ksuite": "Découvrez kSuite"
+  "infomaniak.no_team.discover_ksuite": "Découvrez kSuite",
+  "screen.report_problem.enable_log_attachments": "Activer la pièce jointe des logs de l'app",
+  "screen.report_problem.enable_log_attachments.description": "Afficher une option pour joindre les logs de l'app dans le menu de pièce jointe",
+  "screen.report_problem.logs.no_logs": "Aucun fichier de logs disponible"
 }
