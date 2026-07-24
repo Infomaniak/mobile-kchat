@@ -225,6 +225,15 @@ object NotificationHelper {
 
     private fun getPostId(notification: Bundle) = notification.getString(KEY_POST_ID)
 
+    fun clearAllNotifications(context: Context) {
+        val notificationManager = NotificationManagerCompat.from(context)
+        val pSharedPref = context.getSharedPreferences(PUSH_NOTIFICATIONS, Context.MODE_PRIVATE) 
+        pSharedPref?.edit {
+            remove(NOTIFICATIONS_IN_GROUP)
+        }
+        notificationManager.cancelAll()
+    }
+
     fun removeServerNotifications(context: Context, serverUrl: String) {
         val notificationManager = NotificationManagerCompat.from(context)
         val notificationsPerServer = loadMap(context)

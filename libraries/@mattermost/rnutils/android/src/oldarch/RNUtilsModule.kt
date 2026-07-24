@@ -102,6 +102,11 @@ class RNUtilsModule(context: ReactApplicationContext) :
     }
 
     @ReactMethod
+    fun clearAllNotifications() {
+        implementation.clearAllNotifications()
+    }
+
+    @ReactMethod
     fun setSoftKeyboardToAdjustResize() {
         implementation.setSoftKeyboardToAdjustResize()
     }

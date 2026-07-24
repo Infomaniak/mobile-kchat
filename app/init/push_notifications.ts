@@ -324,6 +324,10 @@ class PushNotificationsSingleton {
         RNUtils.removeServerNotifications(serverUrl);
     };
 
+    clearAllNotifications = () => {
+        RNUtils.clearAllNotifications();
+    };
+
     removeThreadNotifications = async (serverUrl: string, threadId: string) => {
         RNUtils.removeThreadNotifications(serverUrl, threadId);
     };

@@ -96,6 +96,10 @@ import React
         })
     }
     
+    @objc public func clearAllNotifications() {
+        notificationCenter.removeAllDeliveredNotifications()
+    }
+
     @objc public func removeServerNotifications(serverUrl: String) {
         notificationCenter.getDeliveredNotifications(completionHandler: {notifications in
             var notificationIds = [String]()

@@ -39,6 +39,11 @@ class Notifications {
             NotificationHelper.removeThreadNotifications(applicationContext, serverUrl, threadId)
         }
 
+        fun clearAllNotifications() {
+            val applicationContext = context.applicationContext
+            NotificationHelper.clearAllNotifications(applicationContext)
+        }
+
         fun removeServerNotifications(serverUrl: String) {
             val applicationContext = context.applicationContext
             NotificationHelper.removeServerNotifications(applicationContext, serverUrl)
