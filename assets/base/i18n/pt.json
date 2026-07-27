@@ -709,6 +709,8 @@
     "mobile.error_handler.button": "Reiniciar",
     "mobile.error_handler.description": "Toque em \"Reiniciar\" para abrir o aplicativo novamente. Após a reinicialização, você pode relatar o problema no menu de configurações",
     "mobile.error_handler.title": "Ocorreu um erro inesperado",
+    "mobile.file_upload.attach_logs": "Anexar logs do app",
+    "mobile.file_upload.attach_logs_failed": "Falha ao anexar logs do app",
     "mobile.file_attachment.title": "Arquivos e mídia",
     "mobile.file_upload.browse": "Anexar um arquivo",
     "mobile.file_upload.camera_photo": "Tire uma foto",
@@ -1554,5 +1556,8 @@
     "send_feedback.files.max_size": "Tamanho máximo do ficheiro: 32 MB",
     "send_feedback.files.too_many": "Pode anexar até 5 ficheiros.",
     "send_feedback.files.too_large": "Um ou mais ficheiros excedem o limite de 32 MB.",
-    "notification_settings.keywords": "Palavras-chave"
+    "notification_settings.keywords": "Palavras-chave",
+    "screen.report_problem.enable_log_attachments": "Ativar anexos de logs do app",
+    "screen.report_problem.enable_log_attachments.description": "Mostrar uma opção para anexar logs do app no menu de anexos de arquivos",
+    "screen.report_problem.logs.no_logs": "Nenhum arquivo de logs disponível"
 }

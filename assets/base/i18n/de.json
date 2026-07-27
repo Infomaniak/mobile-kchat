@@ -696,6 +696,8 @@
   "mobile.error_handler.description": "\nTippe auf Neustarten um die App neu zu öffnen. Nach dem Neustart kannst Du das Problem über das Einstellungsmenü melden.\n",
   "mobile.error_handler.title": "Ein unerwarteter Fehler ist aufgetreten",
   "mobile.file_attachment.title": "Dateien und Medien",
+  "mobile.file_upload.attach_logs": "App-Logs anhängen",
+  "mobile.file_upload.attach_logs_failed": "App-Logs konnten nicht angehängt werden",
   "mobile.file_upload.browse": "Datei anhängen",
   "mobile.file_upload.camera_photo": "Mach ein Foto",
   "mobile.file_upload.camera_video": "Nimm ein Video auf",
@@ -1540,5 +1542,8 @@
   "send_feedback.files.max_size": "Max. Dateigröße: 32 MB",
   "send_feedback.files.too_many": "Sie können bis zu 5 Dateien anhängen.",
   "send_feedback.files.too_large": "Eine oder mehrere Dateien überschreiten das Limit von 32 MB.",
-  "notification_settings.keywords": "Schlüsselwörter"
+  "notification_settings.keywords": "Schlüsselwörter",
+  "screen.report_problem.enable_log_attachments": "App-Log-Anhänge aktivieren",
+  "screen.report_problem.enable_log_attachments.description": "Option zum Anhängen von App-Logs im Dateianhang-Menü anzeigen",
+  "screen.report_problem.logs.no_logs": "Keine Logdateien verfügbar"
 }

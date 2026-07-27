@@ -709,6 +709,8 @@
     "mobile.error_handler.button": "Επανεκκίνηση",
     "mobile.error_handler.description": "Πατήστε «Επανεκκίνηση» για να ανοίξετε ξανά την εφαρμογή. Μετά την επανεκκίνηση, μπορείτε να αναφέρετε το πρόβλημα από το μενού ρυθμίσεων",
     "mobile.error_handler.title": "Παρουσιάστηκε ένα απρόσμενο σφάλμα",
+    "mobile.file_upload.attach_logs": "Επισύναψη αρχείων καταγραφής εφαρμογής",
+    "mobile.file_upload.attach_logs_failed": "Αποτυχία επισύναψης αρχείων καταγραφής εφαρμογής",
     "mobile.file_attachment.title": "Αρχεία και πολυμέσα",
     "mobile.file_upload.browse": "Επισύναψη αρχείου",
     "mobile.file_upload.camera_photo": "Τραβήξτε μια φωτογραφία",
@@ -1554,5 +1556,8 @@
     "send_feedback.files.max_size": "Μέγιστο μέγεθος αρχείου: 32 MB",
     "send_feedback.files.too_many": "Μπορείτε να επισυνάψετε έως 5 αρχεία.",
     "send_feedback.files.too_large": "Ένα ή περισσότερα αρχεία υπερβαίνουν το όριο των 32 MB.",
-    "notification_settings.keywords": "Λέξεις-κλειδιά"
+    "notification_settings.keywords": "Λέξεις-κλειδιά",
+    "screen.report_problem.enable_log_attachments": "Ενεργοποίηση συνημμένων logs εφαρμογής",
+    "screen.report_problem.enable_log_attachments.description": "Εμφάνιση επιλογής για επισύναψη logs εφαρμογής στο μενού συνημμένων αρχείων",
+    "screen.report_problem.logs.no_logs": "Δεν υπάρχουν διαθέσιμα αρχεία logs"
 }

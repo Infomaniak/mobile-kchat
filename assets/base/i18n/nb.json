@@ -709,6 +709,8 @@
     "mobile.error_handler.button": "Start på nytt",
     "mobile.error_handler.description": "Trykk på «Start på nytt» for å åpne appen igjen. Etter omstart kan du rapportere problemet fra innstillingsmenyen",
     "mobile.error_handler.title": "En uventet feil oppstod",
+    "mobile.file_upload.attach_logs": "Legg ved app-logger",
+    "mobile.file_upload.attach_logs_failed": "Kunne ikke legge ved app-logger",
     "mobile.file_attachment.title": "Filer og media",
     "mobile.file_upload.browse": "Legg ved en fil",
     "mobile.file_upload.camera_photo": "Ta et bilde",
@@ -1554,5 +1556,8 @@
     "send_feedback.files.max_size": "Maks filstørrelse: 32 MB",
     "send_feedback.files.too_many": "Du kan legge ved opptil 5 filer.",
     "send_feedback.files.too_large": "En eller flere filer overstiger grensen på 32 MB.",
-    "notification_settings.keywords": "Nøkkelord"
+    "notification_settings.keywords": "Nøkkelord",
+    "screen.report_problem.enable_log_attachments": "Aktiver app-loggvedlegg",
+    "screen.report_problem.enable_log_attachments.description": "Vis et alternativ for å legge ved app-logger i filvedleggsmenyen",
+    "screen.report_problem.logs.no_logs": "Ingen loggfiler tilgjengelig"
 }

@@ -24,6 +24,7 @@ type Props = {
     canShowEmojiPicker?: boolean;
     maxFileCount: number;
     channelId: string;
+    showAttachLogs?: boolean;
     location?: AvailableScreens;
 
     // Draft Handler
@@ -57,6 +58,7 @@ export default function QuickActions({
     canShowPostPriority,
     canShowEmojiPicker = true,
     maxFileCount,
+    showAttachLogs,
     updateValue,
     addFiles,
     postPriority,
@@ -81,6 +83,7 @@ export default function QuickActions({
         maxFileCount,
         maxFilesReached: fileCount >= maxFileCount,
         onUploadFiles: addFiles,
+        showAttachLogs,
     };
 
     return (

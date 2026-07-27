@@ -3,22 +3,22 @@
 
 import {withDatabase} from '@nozbe/watermelondb/DatabaseProvider';
 import {withObservables} from '@nozbe/watermelondb/react';
-import {switchMap} from '@nozbe/watermelondb/utils/rx';
-import {of as of$} from 'rxjs';
+import {map} from 'rxjs/operators';
 
-import {observeConfigBooleanValue, observeConfigValue, observeLicense, observeReportAProblemMetadata} from '@queries/servers/system';
+import {Preferences} from '@constants';
+import {queryPreferencesByCategoryAndName} from '@queries/servers/preference';
+import {observeConfigBooleanValue, observeCurrentUserId, observeReportAProblemMetadata} from '@queries/servers/system';
 
 import ReportProblem from './report_problem';
 
 const enhanced = withObservables([], ({database}) => {
     return {
-        reportAProblemType: observeConfigValue(database, 'ReportAProblemType'),
-        reportAProblemMail: observeConfigValue(database, 'ReportAProblemMail'),
-        reportAProblemLink: observeConfigValue(database, 'ReportAProblemLink'),
-        siteName: observeConfigValue(database, 'SiteName'),
         allowDownloadLogs: observeConfigBooleanValue(database, 'AllowDownloadLogs', true),
-        isLicensed: observeLicense(database).pipe(switchMap((license) => (license ? of$(license.IsLicensed) : of$(false)))),
         metadata: observeReportAProblemMetadata(database),
+        currentUserId: observeCurrentUserId(database),
+        attachLogsEnabled: queryPreferencesByCategoryAndName(database, Preferences.CATEGORIES.ADVANCED_SETTINGS, Preferences.ATTACH_APP_LOGS).
+            observe().
+            pipe(map((prefs) => prefs?.[0]?.value === 'true')),
     };
 });
 

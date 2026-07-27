@@ -1,4 +1,4 @@
-{
+  {
   "account.logout": "Se déconnecter",
   "account.logout_from": "Se déconnecter de {serverName}",
   "account.server_preprod": "Passer à la version NEXT",
@@ -588,6 +588,8 @@
   "mobile.error_handler.button": "Relancer",
   "mobile.error_handler.description": "\nCliquez sur relancer pour ouvrir l'application à nouveau. Après le redémarrage, vous pouvez signaler le problème à partir du menu paramètres.\n",
   "mobile.error_handler.title": "Une erreur inattendue s'est produite",
+  "mobile.file_upload.attach_logs": "Joindre les logs de l'app",
+  "mobile.file_upload.attach_logs_failed": "Échec de l'envoi des logs de l'app",
   "mobile.file_upload.disabled2": "Les envois de fichiers depuis un périphérique mobile sont désactivés.",
   "mobile.file_upload.max_warning": "Envois limités à maximum {count} fichiers.",
   "mobile.file_upload.voice_record_error": "L'enregistrement a échoué, veuillez réessayer.",
@@ -1157,5 +1159,8 @@
   "mobile.components.select_server_view.connect": "Se connecter",
   "mobile.components.select_server_view.connecting": "Connexion en cours...",
   "loading_error.retry": "Réessayer",
-  "infomaniak.no_team.discover_ksuite": "Découvrez kSuite"
+  "infomaniak.no_team.discover_ksuite": "Découvrez kSuite",
+  "screen.report_problem.enable_log_attachments": "Activer la pièce jointe des logs de l'app",
+  "screen.report_problem.enable_log_attachments.description": "Afficher une option pour joindre les logs de l'app dans le menu de pièce jointe",
+  "screen.report_problem.logs.no_logs": "Aucun fichier de logs disponible"
 }

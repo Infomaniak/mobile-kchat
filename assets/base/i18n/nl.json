@@ -709,6 +709,8 @@
     "mobile.error_handler.button": "Opnieuw starten",
     "mobile.error_handler.description": "Tik op \"Opnieuw starten\" om de app opnieuw te openen. Na het opnieuw starten kunt u het probleem melden via het instellingenmenu",
     "mobile.error_handler.title": "Er is een onverwachte fout opgetreden",
+    "mobile.file_upload.attach_logs": "App-logs bijvoegen",
+    "mobile.file_upload.attach_logs_failed": "App-logs konden niet worden bijgevoegd",
     "mobile.file_attachment.title": "Bestanden en media",
     "mobile.file_upload.browse": "Voeg een bestand toe",
     "mobile.file_upload.camera_photo": "Maak een foto",
@@ -1554,5 +1556,8 @@
     "send_feedback.files.max_size": "Max. bestandsgrootte: 32 MB",
     "send_feedback.files.too_many": "Je kunt maximaal 5 bestanden bijvoegen.",
     "send_feedback.files.too_large": "Eén of meer bestanden overschrijden de limiet van 32 MB.",
-    "notification_settings.keywords": "Sleutelwoorden"
+    "notification_settings.keywords": "Sleutelwoorden",
+    "screen.report_problem.enable_log_attachments": "App-logbijlagen inschakelen",
+    "screen.report_problem.enable_log_attachments.description": "Toon een optie om app-logs bij te voegen in het bestandsbijlagemenu",
+    "screen.report_problem.logs.no_logs": "Geen logbestanden beschikbaar"
 }

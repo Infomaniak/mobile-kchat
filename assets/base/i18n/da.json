@@ -710,6 +710,8 @@
     "mobile.error_handler.description": "Tryk på \"Genstart\" for at åbne appen igen. Efter genstart kan du rapportere problemet fra indstillingsmenuen",
     "mobile.error_handler.title": "Der opstod en uventet fejl",
     "mobile.file_attachment.title": "Filer og medier",
+    "mobile.file_upload.attach_logs": "Vedhæft app-logger",
+    "mobile.file_upload.attach_logs_failed": "Kunne ikke vedhæfte app-logger",
     "mobile.file_upload.browse": "Vedhæft en fil",
     "mobile.file_upload.camera_photo": "Tag et billede",
     "mobile.file_upload.camera_video": "Optag en video",
@@ -1554,5 +1556,8 @@
     "send_feedback.files.max_size": "Maks. filstørrelse: 32 MB",
     "send_feedback.files.too_many": "Du kan vedhæfte op til 5 filer.",
     "send_feedback.files.too_large": "En eller flere filer overstiger grænsen på 32 MB.",
-    "notification_settings.keywords": "Nøgleord"
+    "notification_settings.keywords": "Nøgleord",
+    "screen.report_problem.enable_log_attachments": "Aktivér vedhæftning af app-logs",
+    "screen.report_problem.enable_log_attachments.description": "Vis en mulighed for at vedhæfte app-logs i filvedhæftningsmenuen",
+    "screen.report_problem.logs.no_logs": "Ingen logfiler tilgængelige"
 }

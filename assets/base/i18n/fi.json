@@ -709,6 +709,8 @@
     "mobile.error_handler.button": "Käynnistä uudelleen",
     "mobile.error_handler.description": "Napauta Käynnistä uudelleen, jotta sovellus avautuu uudelleen. Uudelleenkäynnistyksen jälkeen voit ilmoittaa ongelmasta asetusten valikosta",
     "mobile.error_handler.title": "Odottamaton virhe ilmeni",
+    "mobile.file_upload.attach_logs": "Liitä sovelluslokit",
+    "mobile.file_upload.attach_logs_failed": "Sovelluslokien liittäminen epäonnistui",
     "mobile.file_attachment.title": "Tiedostot ja mediasisältö",
     "mobile.file_upload.browse": "Liitä tiedosto",
     "mobile.file_upload.camera_photo": "Ota valokuva",
@@ -1554,5 +1556,8 @@
     "send_feedback.files.max_size": "Tiedoston enimmäiskoko: 32 MB",
     "send_feedback.files.too_many": "Voit liittää enintään 5 tiedostoa.",
     "send_feedback.files.too_large": "Yksi tai useampi tiedosto ylittää 32 MB:n rajan.",
-    "notification_settings.keywords": "Avainsanat"
+    "notification_settings.keywords": "Avainsanat",
+    "screen.report_problem.enable_log_attachments": "Ota sovelluslokien liittäminen käyttöön",
+    "screen.report_problem.enable_log_attachments.description": "Näytä vaihtoehto liittää sovelluslokit tiedoston liittämisvalikkoon",
+    "screen.report_problem.logs.no_logs": "Ei lokitiedostoja saatavilla"
 }
