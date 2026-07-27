@@ -5,7 +5,7 @@ import {LinearGradient} from 'expo-linear-gradient';
 import React, {useMemo, useCallback, useEffect, useState} from 'react';
 import {Text, View, Pressable, type LayoutChangeEvent} from 'react-native';
 
-import {openPermalinkInChannel} from '@actions/remote/permalink';
+import {showPermalink} from '@actions/remote/permalink';
 import {fetchUsersByIds} from '@actions/remote/user';
 import EditedIndicator from '@components/edited_indicator';
 import FormattedText from '@components/formatted_text';
@@ -18,7 +18,6 @@ import {useTheme} from '@context/theme';
 import {useUserLocale} from '@context/user_locale';
 import {useIsTablet, useWindowDimensions} from '@hooks/device';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {logDebug} from '@utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {displayUsername, getUserTimezone} from '@utils/user';
@@ -214,10 +213,7 @@ const PermalinkPreview = ({
         const postId = embedData.post_id;
 
         if (postId) {
-            logDebug('[PermalinkPreview] pressed', {postId, teamName});
-            openPermalinkInChannel(serverUrl, teamName, postId);
-        } else {
-            logDebug('[PermalinkPreview] pressed without post id', {teamName});
+            showPermalink(serverUrl, teamName, postId);
         }
     }, [embedData.team_name, embedData.post_id, serverUrl]));
 

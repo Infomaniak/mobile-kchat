@@ -15,7 +15,6 @@ import {useAppState, useIsTablet} from '@hooks/device';
 import useDidMount from '@hooks/did_mount';
 import useDidUpdate from '@hooks/did_update';
 import EphemeralStore from '@store/ephemeral_store';
-import {logDebug} from '@utils/log';
 
 import Intro from './intro';
 
@@ -29,18 +28,13 @@ type Props = {
     lastViewedAt: number;
     posts: PostModel[];
     shouldShowJoinLeaveMessages: boolean;
-    forceShowScrollToEndBtn?: boolean;
-    highlightedPostId?: string;
-    highlightedPostSelectedAt?: number;
     listRef: React.RefObject<FlatList<string | PostModel>>;
     onTouchMove?: (event: GestureResponderEvent) => void;
     onTouchEnd?: () => void;
     requestMorePosts?: () => void;
-    resetJumpTarget?: () => boolean;
 }
 
 const edges: Edge[] = [];
-const HIGHLIGHT_CLEAR_TIMEOUT = 5000;
 const styles = StyleSheet.create({
     flex: {flex: 1},
     containerStyle: {paddingTop: 12},
@@ -49,11 +43,8 @@ const styles = StyleSheet.create({
 const ChannelPostList = ({
     channelId, contentContainerStyle, isCRTEnabled,
     lastViewedAt, posts, shouldShowJoinLeaveMessages,
-    forceShowScrollToEndBtn,
-    highlightedPostId, highlightedPostSelectedAt,
     listRef, onTouchMove, onTouchEnd,
     requestMorePosts,
-    resetJumpTarget,
 }: Props) => {
     const appState = useAppState();
     const isTablet = useIsTablet();
@@ -61,21 +52,12 @@ const ChannelPostList = ({
     const canLoadPostsBefore = useRef(true);
     const canLoadPost = useRef(true);
     const [fetchingPosts, setFetchingPosts] = useState(EphemeralStore.isLoadingMessagesForChannel(serverUrl, channelId));
-    const [activeHighlightedPostId, setActiveHighlightedPostId] = useState(highlightedPostId);
     const oldPostsCount = useRef<number>(posts.length);
 
     const postsRef = useRef(posts);
     postsRef.current = posts;
 
     const onEndReached = useCallback(async () => {
-        if (highlightedPostId) {
-            logDebug('[ChannelPostList] skipping onEndReached while jump target is active', {
-                channelId,
-                highlightedPostId,
-            });
-            return;
-        }
-
         if (!fetchingPosts && canLoadPostsBefore.current && postsRef.current.length) {
             const lastPost = postsRef.current[postsRef.current.length - 1];
             requestMorePosts?.();
@@ -85,7 +67,7 @@ const ChannelPostList = ({
                 canLoadPostsBefore.current = (result.posts?.length ?? 0) > 0;
             }
         }
-    }, [channelId, fetchingPosts, highlightedPostId, requestMorePosts, serverUrl]);
+    }, [fetchingPosts, serverUrl, channelId, requestMorePosts]);
 
     useDidUpdate(() => {
         setFetchingPosts(EphemeralStore.isLoadingMessagesForChannel(serverUrl, channelId));
@@ -121,44 +103,6 @@ const ChannelPostList = ({
         }
     }, [posts.length]);
 
-    useEffect(() => {
-        if (highlightedPostId) {
-            logDebug('[ChannelPostList] received highlight target', {
-                channelId,
-                highlightedPostId,
-                highlightedPostSelectedAt,
-                postsCount: posts.length,
-                containsPost: posts.some((post) => post.id === highlightedPostId),
-            });
-        }
-        setActiveHighlightedPostId(highlightedPostId);
-    }, [channelId, highlightedPostId, highlightedPostSelectedAt, posts]);
-
-    useEffect(() => {
-        if (!activeHighlightedPostId || !posts.some((post) => post.id === activeHighlightedPostId)) {
-            if (activeHighlightedPostId) {
-                logDebug('[ChannelPostList] active highlight not in current posts', {
-                    channelId,
-                    activeHighlightedPostId,
-                    postsCount: posts.length,
-                });
-            }
-            return undefined;
-        }
-
-        logDebug('[ChannelPostList] active highlight visible in posts', {
-            channelId,
-            activeHighlightedPostId,
-            postsCount: posts.length,
-        });
-        const timeout = setTimeout(() => {
-            logDebug('[ChannelPostList] clearing visual highlight', {channelId, activeHighlightedPostId});
-            setActiveHighlightedPostId(undefined);
-        }, HIGHLIGHT_CLEAR_TIMEOUT);
-
-        return () => clearTimeout(timeout);
-    }, [activeHighlightedPostId, channelId, posts]);
-
     useDidUpdate(() => {
         if (appState === 'active') {
             markChannelAsRead(serverUrl, channelId, true);
@@ -181,15 +125,11 @@ const ChannelPostList = ({
             channelId={channelId}
             contentContainerStyle={[contentContainerStyle, !isCRTEnabled && styles.containerStyle]}
             isCRTEnabled={isCRTEnabled}
-            forceShowScrollToEndBtn={forceShowScrollToEndBtn}
             footer={intro}
-            highlightedId={activeHighlightedPostId}
             lastViewedAt={lastViewedAt}
             location={Screens.CHANNEL}
             onEndReached={onEndReached}
-            onScrollToEnd={resetJumpTarget}
             posts={posts}
-            scrollTargetId={highlightedPostId}
             shouldShowJoinLeaveMessages={shouldShowJoinLeaveMessages}
             showMoreMessages={true}
             testID='channel.post_list'

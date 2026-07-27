@@ -6,17 +6,9 @@ import {BehaviorSubject} from 'rxjs';
 
 import {Events} from '@constants';
 import {toMilliseconds} from '@utils/datetime';
-import {logDebug} from '@utils/log';
 
 const TIME_TO_CLEAR_WEBSOCKET_ACTIONS = toMilliseconds({seconds: 30});
 import type {KSuiteLimit} from '@components/post_list/limited_messages/limited_messages';
-
-export type ChannelJumpTarget = {
-    channelId: string;
-    createAt: number;
-    postId: string;
-    selectedAt: number;
-};
 
 class EphemeralStoreSingleton {
     theme: Theme | undefined;
@@ -30,7 +22,6 @@ class EphemeralStoreSingleton {
     private canJoinOtherTeams: {[serverUrl: string]: BehaviorSubject<boolean>} = {};
 
     private loadingMessagesForChannel: {[serverUrl: string]: Set<string>} = {};
-    private channelJumpTargets: {[serverUrl: string]: Record<string, ChannelJumpTarget | undefined>} = {};
 
     private websocketEditingPost: {[serverUrl: string]: {[id: string]: {post: Post; timeout: NodeJS.Timeout} | undefined} | undefined} = {};
     private websocketRemovingPost: {[serverUrl: string]: Set<string> | undefined} = {};
@@ -97,39 +88,6 @@ class EphemeralStoreSingleton {
 
     isLoadingMessagesForChannel = (serverUrl: string, channelId: string) => {
         return Boolean(this.loadingMessagesForChannel[serverUrl]?.has(channelId));
-    };
-
-    setChannelJumpTarget = (serverUrl: string, target: Omit<ChannelJumpTarget, 'selectedAt'>) => {
-        if (!this.channelJumpTargets[serverUrl]) {
-            this.channelJumpTargets[serverUrl] = {};
-        }
-
-        const nextTarget = {...target, selectedAt: Date.now()};
-        this.channelJumpTargets[serverUrl][target.channelId] = nextTarget;
-        logDebug('[EphemeralStore.setChannelJumpTarget]', {
-            channelId: target.channelId,
-            postId: target.postId,
-            createAt: target.createAt,
-            selectedAt: nextTarget.selectedAt,
-        });
-        DeviceEventEmitter.emit(Events.CHANNEL_JUMP_TARGET, {serverUrl, channelId: target.channelId, target: nextTarget});
-    };
-
-    getChannelJumpTarget = (serverUrl: string, channelId: string) => {
-        return this.channelJumpTargets[serverUrl]?.[channelId];
-    };
-
-    clearChannelJumpTarget = (serverUrl: string, channelId: string, postId?: string, emit = true) => {
-        const target = this.channelJumpTargets[serverUrl]?.[channelId];
-        if (!target || (postId && target.postId !== postId)) {
-            return;
-        }
-
-        delete this.channelJumpTargets[serverUrl][channelId];
-        logDebug('[EphemeralStore.clearChannelJumpTarget]', {channelId, postId, emit});
-        if (emit) {
-            DeviceEventEmitter.emit(Events.CHANNEL_JUMP_TARGET, {serverUrl, channelId, target: undefined});
-        }
     };
 
     // Ephemeral control for out of order websocket events

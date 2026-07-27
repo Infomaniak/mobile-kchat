@@ -55,7 +55,6 @@ export type PostsForChannel = PostsRequest & {
 
 type PostsObjectsRequest = {
     error?: unknown;
-    has_limitation?: string;
     order?: string[];
     posts?: IDMappedObjects<Post>;
     previousPostId?: string;
@@ -738,7 +737,6 @@ export async function fetchPostThread(serverUrl: string, postId: string, options
 
 export async function fetchPostsAround(serverUrl: string, channelId: string, postId: string, perPage = General.POST_AROUND_CHUNK_SIZE, isCRTEnabled = false) {
     try {
-        logDebug('[fetchPostsAround] start', {channelId, postId, perPage, isCRTEnabled});
         const client = NetworkManager.getClient(serverUrl);
         const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
 
@@ -752,41 +750,19 @@ export async function fetchPostsAround(serverUrl: string, channelId: string, pos
             client.getPostsBefore(channelId, postId, 0, perPage, isCRTEnabled, isCRTEnabled),
         ]);
 
-        const postsById = {
-            ...filterPostsInOrderedArray(after.posts, after.order),
-            ...filterPostsInOrderedArray(before.posts, before.order),
-        };
-        const focusedPost = post.posts?.[postId];
-        if (focusedPost) {
-            postsById[postId] = focusedPost;
-        }
-
-        const orderedPosts = Object.values(postsById);
-        const order = orderedPosts.
-            sort((a, b) => b.create_at - a.create_at).
-            map((p) => p.id);
-
-        logDebug('[fetchPostsAround] responses merged', {
-            channelId,
-            postId,
-            afterCount: after.order?.length ?? 0,
-            beforeCount: before.order?.length ?? 0,
-            hasFocusedPost: Boolean(focusedPost),
-            mergedCount: order.length,
-            firstOrderedPostId: order[0],
-            lastOrderedPostId: order[order.length - 1],
-        });
-
         const preData: PostResponse = {
-            posts: postsById,
-            order,
-            has_limitation: after.has_limitation || before.has_limitation,
+            posts: {
+                ...filterPostsInOrderedArray(after.posts, after.order),
+                [postId]: post.posts![postId],
+                ...filterPostsInOrderedArray(before.posts, before.order),
+            },
+            order: [],
         };
 
         EphemeralStore.setServerHasLimit(serverUrl, preData.has_limitation);
         const data = processPostsFetched(preData);
 
-        let postModels: Model[] = [];
+        let posts: Model[] = [];
         const models: Model[] = [];
         if (data.posts?.length) {
             try {
@@ -802,19 +778,13 @@ export async function fetchPostsAround(serverUrl: string, channelId: string, pos
                 logError('FETCH AUTHORS ERROR', error);
             }
 
-            postModels = await operator.handlePosts({
+            posts = await operator.handlePosts({
                 actionType: ActionType.POSTS.RECEIVED_AROUND,
                 ...data,
                 prepareRecordsOnly: true,
             });
 
-            models.push(...postModels);
-            logDebug('[fetchPostsAround] prepared post models', {
-                channelId,
-                postId,
-                postsCount: data.posts.length,
-                modelsCount: postModels.length,
-            });
+            models.push(...posts);
 
             if (isCRTEnabled) {
                 const threadModels = await prepareThreadsFromReceivedPosts(operator, data.posts, false);
@@ -823,13 +793,6 @@ export async function fetchPostsAround(serverUrl: string, channelId: string, pos
                 }
             }
             await operator.batchRecords(models, 'fetchPostsAround');
-            logDebug('[fetchPostsAround] batch complete', {
-                channelId,
-                postId,
-                batchModelsCount: models.length,
-            });
-        } else {
-            logDebug('[fetchPostsAround] no posts returned after processing', {channelId, postId});
         }
 
         return {posts: data.posts};
