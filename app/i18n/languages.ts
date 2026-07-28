@@ -4,28 +4,19 @@
 import keyMirror from '@utils/key_mirror';
 
 const languages: Record<string, string> = keyMirror({
-    bg: null,
     de: null,
-    en: null,
-    'en-AU': null,
     es: null,
-    fa: null,
+    en: null,
     fr: null,
-    hu: null,
     it: null,
-    ja: null,
-    ko: null,
+    nb: null,
+    sv: null,
+    el: null,
+    da: null,
+    fi: null,
+    pt: null,
     nl: null,
     pl: null,
-    'pt-BR': null,
-    ro: null,
-    ru: null,
-    sv: null,
-    tr: null,
-    uk: null,
-    vi: null,
-    'zh-CN': null,
-    'zh-TW': null,
 });
 
 export default languages;

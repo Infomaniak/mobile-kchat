@@ -6,10 +6,7 @@ import React, {type ComponentProps} from 'react';
 import NavigationHeader from '@components/navigation_header';
 import {General} from '@constants';
 import {useServerUrl} from '@context/server';
-import {fetchPlaybookRunsForChannel} from '@playbooks/actions/remote/runs';
-import {goToCreateQuickChecklist, goToPlaybookRun, goToPlaybookRuns} from '@playbooks/screens/navigation';
-import EphemeralStore from '@store/ephemeral_store';
-import {renderWithIntl, waitFor} from '@test/intl-test-helper';
+import {renderWithIntl} from '@test/intl-test-helper';
 
 import ChannelHeader from './header';
 
@@ -20,8 +17,6 @@ jest.mock('@components/navigation_header', () => ({
 jest.mocked(NavigationHeader).mockImplementation((props) => React.createElement('NavigationHeader', {testID: 'navigation-header', ...props}));
 
 jest.mock('@screens/navigation');
-jest.mock('@playbooks/screens/navigation');
-jest.mock('@playbooks/actions/remote/runs');
 
 jest.mock('@calls/state', () => ({
     getCallsConfig: jest.fn().mockReturnValue({
@@ -41,18 +36,11 @@ describe.skip('ChannelHeader', () => {
             channelType: 'O' as ChannelType,
             displayName: 'Test Channel',
             teamId: 'team-id',
-            hasPlaybookRuns: false,
             callsEnabledInChannel: false,
-            isBookmarksEnabled: false,
-            canAddBookmarks: false,
-            hasBookmarks: false,
-            shouldRenderBookmarks: false,
             isCustomStatusEnabled: false,
             isCustomStatusExpired: false,
             isOwnDirectMessage: false,
             shouldRenderChannelBanner: false,
-            isPlaybooksEnabled: true,
-            isChannelAutotranslated: false,
         };
     }
 
@@ -116,122 +104,5 @@ describe.skip('ChannelHeader', () => {
                 }),
             ]),
         );
-    });
-
-    it.skip('shows playbook button with count when there are active runs', () => {
-        // IK change : skipped on CI temporarily, will fix later
-        const props: any = getBaseProps();
-        props.playbooksActiveRuns = 3;
-        props.hasPlaybookRuns = true;
-
-        const {getByTestId} = renderWithIntl(<ChannelHeader {...props}/>);
-
-        const navHeader = getByTestId('navigation-header');
-        expect(navHeader.props.rightButtons).toEqual(
-            expect.arrayContaining([
-                expect.objectContaining({
-                    iconName: 'product-playbooks',
-                    count: 3,
-                }),
-            ]),
-        );
-    });
-
-    it.skip('navigates to single playbook run when there is an active playbook provided', () => {
-        // IK change : skipped on CI temporarily, will fix later
-        const props: any = getBaseProps();
-        props.playbooksActiveRuns = 1;
-        props.hasPlaybookRuns = true;
-        props.activeRunId = 'run-id';
-
-        const {getByTestId} = renderWithIntl(<ChannelHeader {...props}/>);
-
-        const navHeader = getByTestId('navigation-header');
-        const playbookButton = (navHeader.props as ComponentProps<typeof NavigationHeader>).rightButtons?.find((button) => button.iconName === 'product-playbooks');
-        expect(playbookButton).toBeTruthy();
-
-        playbookButton?.onPress();
-        expect(goToPlaybookRun).toHaveBeenCalledWith(expect.anything(), 'run-id');
-        expect(goToPlaybookRuns).not.toHaveBeenCalled();
-    });
-
-    it.skip('navigates to playbook runs list when there is no active playbook provided', () => {
-        // IK change : skipped on CI temporarily, will fix later
-        const props: any = getBaseProps();
-        props.activeRunId = undefined;
-        props.playbooksActiveRuns = 3;
-        props.hasPlaybookRuns = true;
-        props.displayName = 'Test Channel';
-
-        const {getByTestId} = renderWithIntl(<ChannelHeader {...props}/>);
-
-        const navHeader = getByTestId('navigation-header');
-        const playbookButton = (navHeader.props as ComponentProps<typeof NavigationHeader>).rightButtons?.find((button) => button.iconName === 'product-playbooks');
-        expect(playbookButton).toBeTruthy();
-
-        playbookButton?.onPress();
-        expect(goToPlaybookRuns).toHaveBeenCalledWith(expect.anything(), 'channel-id', 'Test Channel');
-        expect(goToPlaybookRun).not.toHaveBeenCalled();
-    });
-
-    it.skip('should set the ephemeral store when we fetch the playbook runs for the channel', async () => {
-        // IK change : skipped on CI temporarily, will fix later
-
-        const props: any = getBaseProps();
-        props.playbooksActiveRuns = 0;
-        props.hasPlaybookRuns = false;
-        props.displayName = 'Test Channel';
-
-        const {getByTestId} = renderWithIntl(<ChannelHeader {...props}/>);
-
-        const navHeader = getByTestId('navigation-header');
-        const playbookButton = (navHeader.props as ComponentProps<typeof NavigationHeader>).rightButtons?.find((button) => button.iconName === 'product-playbooks');
-        expect(playbookButton).toBeTruthy();
-        expect(playbookButton?.count).toBe('+');
-
-        playbookButton?.onPress();
-
-        expect(goToCreateQuickChecklist).toHaveBeenCalledWith(
-            expect.anything(), // intl
-            'channel-id',
-            'Test Channel',
-            'current-user-id',
-            'team-id',
-            serverUrl,
-        );
-        expect(goToPlaybookRun).not.toHaveBeenCalled();
-        expect(goToPlaybookRuns).not.toHaveBeenCalled();
-    });
-
-    it('should not fetch runs when playbooks are disabled', async () => {
-        const ephemeralGetSpy = jest.spyOn(EphemeralStore, 'getChannelPlaybooksSynced');
-
-        const props = getBaseProps();
-        props.isPlaybooksEnabled = false;
-        ephemeralGetSpy.mockReturnValue(false);
-
-        renderWithIntl(<ChannelHeader {...props}/>);
-
-        await waitFor(() => {
-            expect(ephemeralGetSpy).not.toHaveBeenCalled();
-            expect(fetchPlaybookRunsForChannel).not.toHaveBeenCalled();
-        });
-    });
-
-    it.skip('should not fetch runs when we already have the runs synced', async () => {
-        // IK change : skipped on CI temporarily, will fix later
-        const ephemeralGetSpy = jest.spyOn(EphemeralStore, 'getChannelPlaybooksSynced');
-
-        const props = getBaseProps();
-        props.isPlaybooksEnabled = true;
-
-        ephemeralGetSpy.mockReturnValue(true);
-
-        renderWithIntl(<ChannelHeader {...props}/>);
-
-        await waitFor(() => {
-            expect(ephemeralGetSpy).toHaveBeenCalledWith(serverUrl, 'channel-id');
-            expect(fetchPlaybookRunsForChannel).not.toHaveBeenCalled();
-        });
     });
 });

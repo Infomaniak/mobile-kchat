@@ -6,7 +6,6 @@ import {View} from 'react-native';
 
 import Markdown from '@components/markdown';
 import MessageAttachment from '@components/post_list/post/body/content/message_attachments/message_attachment';
-import TranslateIcon from '@components/post_list/post/header/translate_icon';
 import ProfilePicture from '@components/post_list/post/profile_picture/profile_picture';
 import {Screens} from '@constants';
 import DatabaseManager from '@database/manager';
@@ -28,14 +27,6 @@ jest.mock('@components/markdown', () => ({
 }));
 jest.mocked(Markdown).mockImplementation((props) =>
     React.createElement('Text', {testID: 'markdown'}, props.value),
-);
-
-jest.mock('@components/post_list/post/header/translate_icon', () => ({
-    __esModule: true,
-    default: jest.fn(),
-}));
-jest.mocked(TranslateIcon).mockImplementation(() =>
-    React.createElement(View, {testID: 'translate-icon'}, null),
 );
 
 jest.mock('@components/post_list/post/profile_picture/profile_picture', () => ({
@@ -134,7 +125,6 @@ describe('IK - Webhook Support in PermalinkPreview', () => {
         isOriginPostDeleted: false,
         parentLocation: Screens.CHANNEL,
         parentPostId: 'parent-post-123',
-        autotranslationsEnabled: false,
     };
 
     describe('override_username support', () => {

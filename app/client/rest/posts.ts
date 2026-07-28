@@ -13,7 +13,6 @@ export interface ClientPostsMix {
     getPost: (postId: string, groupLabel?: RequestGroupLabel) => Promise<Post>;
     patchPost: (postPatch: Partial<Post> & {id: string}) => Promise<Post>;
     deletePost: (postId: string) => Promise<any>;
-    burnPostNow: (postId: string) => Promise<any>;
     getPostThread: (postId: string, options: FetchPaginatedThreadOptions, groupLabel?: RequestGroupLabel) => Promise<PostResponse>;
     getPosts: (channelId: string, page?: number, perPage?: number, collapsedThreads?: boolean, collapsedThreadsExtended?: boolean, groupLabel?: RequestGroupLabel) => Promise<PostResponse>;
     getPostsSince: (channelId: string, since?: number, after?: string, collapsedThreads?: boolean, collapsedThreadsExtended?: boolean, groupLabel?: RequestGroupLabel) => Promise<PostResponse>;
@@ -38,7 +37,6 @@ export interface ClientPostsMix {
     doSummarize: (postId: string, botUsername: string) => Promise<any>;
     doReaction: (postId: string) => Promise<any>;
     sendTestNotification: () => Promise<{status: 'OK'}>;
-    revealBoRPost: (postId: string) => Promise<Post>;
 }
 
 const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) => class extends superclass {
@@ -73,13 +71,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
     deletePost = async (postId: string) => {
         return this.doFetch(
             `${this.getPostRoute(postId)}`,
-            {method: 'delete'},
-        );
-    };
-
-    burnPostNow = async (postId: string) => {
-        return this.doFetch(
-            `${this.getPostRoute(postId)}/burn`,
             {method: 'delete'},
         );
     };
@@ -273,12 +264,6 @@ const ClientPosts = <TBase extends Constructor<ClientBase>>(superclass: TBase) =
         );
     };
 
-    revealBoRPost = async (postId: string) => {
-        return this.doFetch(
-            `${this.getPostRoute(postId)}/reveal`,
-            {method: 'get'},
-        );
-    };
 };
 
 export default ClientPosts;

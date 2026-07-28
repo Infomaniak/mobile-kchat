@@ -6,7 +6,7 @@ import {DeviceEventEmitter} from 'react-native';
 import {addChannelToDefaultCategory, handleConvertedGMCategories} from '@actions/local/category';
 import {
     markChannelAsViewed, removeCurrentUserFromChannel, setChannelDeleteAt,
-    storeMyChannelsForTeam, updateChannelInfoFromChannel, updateMyChannelFromWebsocket, deletePostsForChannel,
+    storeMyChannelsForTeam, updateChannelInfoFromChannel, updateMyChannelFromWebsocket,
 } from '@actions/local/channel';
 import {storePostsForChannel} from '@actions/local/post';
 import {fetchMissingDirectChannelsInfo, fetchMyChannel, fetchChannelStats, fetchChannelById, handleKickFromChannel} from '@actions/remote/channel';
@@ -100,11 +100,6 @@ export async function handleChannelUpdatedEvent(serverUrl: string, msg: any) {
         const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const existingChannel = await getChannelById(database, updatedChannel.id);
         const existingChannelType = existingChannel?.type;
-
-        const autotranslationDisabled = existingChannel?.autotranslation && !updatedChannel.autotranslation;
-        if (autotranslationDisabled) {
-            await deletePostsForChannel(serverUrl, updatedChannel.id);
-        }
 
         const models: Model[] = await operator.handleChannel({channels: [updatedChannel], prepareRecordsOnly: true});
         const infoModel = await updateChannelInfoFromChannel(serverUrl, updatedChannel, true);

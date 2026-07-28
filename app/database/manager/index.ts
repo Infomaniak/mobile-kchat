@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {AiBotModel, AiThreadModel} from '@agents/database/models';
 import {Database, Q} from '@nozbe/watermelondb';
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 import logger from '@nozbe/watermelondb/utils/common/logger';
@@ -14,7 +13,7 @@ import {DatabaseType, MIGRATION_EVENTS, MM_TABLES} from '@constants/database';
 import AppDatabaseMigrations from '@database/migration/app';
 import ServerDatabaseMigrations from '@database/migration/server';
 import {InfoModel, GlobalModel, ServersModel} from '@database/models/app';
-import {CategoryModel, CategoryChannelModel, ChannelModel, ChannelBookmarkModel, ChannelInfoModel, ChannelMembershipModel, CustomEmojiModel, CustomProfileFieldModel, CustomProfileAttributeModel, DraftModel, FileModel,
+import {CategoryModel, CategoryChannelModel, ChannelModel, ChannelInfoModel, ChannelMembershipModel, CustomEmojiModel, CustomProfileFieldModel, CustomProfileAttributeModel, DraftModel, FileModel,
     GroupModel, GroupChannelModel, GroupTeamModel, GroupMembershipModel, MyChannelModel, MyChannelSettingsModel, MyTeamModel,
     PostModel, PostsInChannelModel, PostsInThreadModel, PreferenceModel, ReactionModel, RoleModel,
     ScheduledPostModel, SystemModel, TeamModel, TeamChannelHistoryModel, TeamMembershipModel, TeamSearchHistoryModel,
@@ -27,8 +26,6 @@ import ServerDataOperator from '@database/operator/server_data_operator';
 import {schema as appSchema} from '@database/schema/app';
 import {serverSchema} from '@database/schema/server';
 import {beforeUpgrade} from '@helpers/database/upgrade';
-import {removePreauthSecret} from '@init/credentials';
-import {PlaybookRunModel, PlaybookChecklistModel, PlaybookChecklistItemModel, PlaybookRunPropertyFieldModel, PlaybookRunPropertyValueModel} from '@playbooks/database/models';
 import {getActiveServer, getServer, getServerByIdentifier} from '@queries/app/servers';
 import {logDebug, logError} from '@utils/log';
 import {deleteIOSDatabase, getIOSAppGroupDetails, renameIOSDatabase} from '@utils/mattermost_managed';
@@ -37,6 +34,8 @@ import {removeProtocol} from '@utils/url';
 
 import LimitsModel from '../models/server/limits';
 import CloudUsageModel from '../models/server/usage';
+
+import {instrumentAdapter} from './instrument_adapter';
 
 import type {AppDatabase, CreateServerDatabaseArgs, RegisterServerDatabaseArgs, Models, ServerDatabase, ServerDatabases} from '@typings/database/database';
 
@@ -56,7 +55,6 @@ class DatabaseManagerSingleton {
             CategoryModel,
             CategoryChannelModel,
             ChannelModel,
-            ChannelBookmarkModel,
             ChannelInfoModel,
             ChannelMembershipModel,
             ConfigModel,
@@ -91,13 +89,6 @@ class DatabaseManagerSingleton {
             ThreadInTeamModel,
             TeamThreadsSyncModel,
             UserModel,
-            PlaybookRunModel,
-            PlaybookChecklistModel,
-            PlaybookChecklistItemModel,
-            PlaybookRunPropertyFieldModel,
-            PlaybookRunPropertyValueModel,
-            AiBotModel,
-            AiThreadModel,
             LimitsModel,
             CloudUsageModel,
         ];
@@ -151,6 +142,7 @@ class DatabaseManagerSingleton {
                 jsi: true,
                 schema,
             });
+            instrumentAdapter(adapter);
 
             const database = new Database({adapter, modelClasses});
             const operator = new AppDataOperator(database);
@@ -193,6 +185,7 @@ class DatabaseManagerSingleton {
                     jsi: true,
                     schema,
                 });
+                instrumentAdapter(adapter);
 
                 // Registers the new server connection into the DEFAULT database
                 await this.addServerToAppDatabase({
@@ -439,9 +432,6 @@ class DatabaseManagerSingleton {
 
                 delete this.serverDatabases[serverUrl];
                 this.deleteServerDatabaseFiles(serverUrl);
-
-                // Remove pre-auth secret when server is destroyed
-                await removePreauthSecret(serverUrl);
             }
         }
     };

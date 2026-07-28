@@ -1,10 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {AiBotSchema, AiThreadSchema} from '@agents/database/schema';
 import {type AppSchema, appSchema} from '@nozbe/watermelondb';
-
-import {PlaybookRunSchema, PlaybookChecklistSchema, PlaybookChecklistItemSchema, PlaybookRunAttributeSchema, PlaybookRunAttributeValueSchema} from '@playbooks/database/schema';
 
 import {
     CategorySchema,
@@ -42,7 +39,6 @@ import {
     TeamThreadsSyncSchema,
     UserSchema,
     ScheduledPostSchema,
-    ChannelBookmarkSchema,
     CustomProfileAttributeSchema,
     CustomProfileFieldSchema,
     LimitSchema,
@@ -50,18 +46,10 @@ import {
 } from './table_schemas';
 
 export const serverSchema: AppSchema = appSchema({
-    version: 10,
+    version: 11,
     tables: [
-        AiBotSchema,
-        AiThreadSchema,
-        PlaybookRunSchema,
-        PlaybookChecklistSchema,
-        PlaybookChecklistItemSchema,
-        PlaybookRunAttributeSchema,
-        PlaybookRunAttributeValueSchema,
         CustomProfileFieldSchema,
         CustomProfileAttributeSchema,
-        ChannelBookmarkSchema,
         CategoryChannelSchema,
         CategorySchema,
         ChannelInfoSchema,

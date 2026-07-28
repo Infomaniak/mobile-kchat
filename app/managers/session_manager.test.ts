@@ -4,19 +4,19 @@
 import CookieManager from '@react-native-cookies/cookies';
 import {AppState, DeviceEventEmitter, Platform} from 'react-native';
 
-import {cancelAllSessionNotifications} from '@actions/local/session';
-import {logout, scheduleSessionNotification} from '@actions/remote/session';
+import {syncMultiTeam} from '@actions/remote/entry/ikcommon';
+import {logout} from '@actions/remote/session';
+import {handleFirstConnect, handleReconnect} from '@actions/websocket';
 import {Events} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials, removeServerCredentials} from '@init/credentials';
 import {relaunchApp} from '@init/launch';
 import PushNotifications from '@init/push_notifications';
-import IntuneManager from '@managers/intune_manager';
 import NetworkManager from '@managers/network_manager';
-import SecurityManager from '@managers/security_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {queryGlobalValue} from '@queries/app/global';
 import {getAllServers, getServerDisplayName} from '@queries/app/servers';
+import {resetToInfomaniakNoTeams} from '@screens/navigation';
 import TestHelper from '@test/test_helper';
 import {deleteFileCache, deleteFileCacheByDir} from '@utils/file';
 import {isMainActivity} from '@utils/helpers';
@@ -52,20 +52,7 @@ jest.mock('@actions/local/session', () => {
 jest.mock('@init/credentials');
 jest.mock('@init/launch');
 jest.mock('@init/push_notifications');
-jest.mock('@managers/intune_manager', () => ({
-    __esModule: true,
-    default: {
-        unenrollServer: jest.fn().mockResolvedValue(undefined),
-        subscribeToPolicyChanges: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToEnrollmentChanges: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToWipeRequests: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToAuthRequired: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToConditionalLaunchBlocked: jest.fn().mockReturnValue({remove: jest.fn()}),
-        subscribeToIdentitySwitchRequired: jest.fn().mockReturnValue({remove: jest.fn()}),
-    },
-}));
 jest.mock('@managers/network_manager');
-jest.mock('@managers/security_manager');
 jest.mock('@managers/websocket_manager');
 jest.mock('@queries/app/global', () => ({
     queryGlobalValue: jest.fn(),
@@ -73,13 +60,17 @@ jest.mock('@queries/app/global', () => ({
 }));
 jest.mock('@queries/app/servers');
 jest.mock('@queries/servers/user');
-jest.mock('@screens/navigation');
+jest.mock('@screens/navigation', () => ({
+    resetToInfomaniakNoTeams: jest.fn(),
+}));
 jest.mock('@store/ephemeral_store');
 jest.mock('@utils/file');
 jest.mock('@utils/helpers');
+jest.mock('@actions/websocket');
+jest.mock('@actions/remote/entry/ikcommon');
 
 // Ik change : skip on CI, will fix later
-describe.skip('SessionManager', () => {
+describe('SessionManager', () => {
     const mockServerUrl = 'https://example.com';
     const mockServerDisplayName = 'Example Server';
     let appStateCallback: ((state: string) => void) | undefined;
@@ -98,6 +89,10 @@ describe.skip('SessionManager', () => {
     jest.mocked(getAllServerCredentials).mockResolvedValue([{serverUrl: mockServerUrl, userId: 'user_id', token: 'token'}]);
     jest.mocked(getAllServers).mockResolvedValue([]);
     jest.mocked(getServerDisplayName).mockResolvedValue(mockServerDisplayName);
+
+    jest.mocked(DatabaseManager.getActiveServerUrl).mockResolvedValue(mockServerUrl);
+    jest.mocked(handleFirstConnect).mockResolvedValue(undefined);
+    jest.mocked(handleReconnect).mockResolvedValue(undefined);
 
     // Mock queryGlobalValue to return a resolved promise for cache migration check
     jest.mocked(queryGlobalValue).mockReturnValue({
@@ -131,7 +126,9 @@ describe.skip('SessionManager', () => {
 
         // Remove all event listeners
         DeviceEventEmitter.removeAllListeners(Events.SERVER_LOGOUT);
-        DeviceEventEmitter.removeAllListeners(Events.SESSION_EXPIRED);
+        DeviceEventEmitter.removeAllListeners(Events.ACTIVE_SERVER_CHANGED);
+        DeviceEventEmitter.removeAllListeners(Events.WEBSOCKET_RECONNECTED);
+        DeviceEventEmitter.removeAllListeners(Events.NO_TEAMS);
     });
 
     describe('constructor', () => {
@@ -146,11 +143,6 @@ describe.skip('SessionManager', () => {
     });
 
     describe('initialization', () => {
-        it('should initialize correctly', async () => {
-            SessionManager.init();
-            expect(cancelAllSessionNotifications).toHaveBeenCalled();
-        });
-
         it('should delete legacy cache on first init', async () => {
             // Mock cache migration as not done
             jest.mocked(queryGlobalValue).mockReturnValueOnce({
@@ -192,18 +184,14 @@ describe.skip('SessionManager', () => {
             expect(PushNotifications.removeServerNotifications).toHaveBeenCalledWith(mockServerUrl);
             expect(NetworkManager.invalidateClient).toHaveBeenCalledWith(mockServerUrl);
             expect(WebsocketManager.invalidateClient).toHaveBeenCalledWith(mockServerUrl);
-            expect(SecurityManager.removeServer).toHaveBeenCalledWith(mockServerUrl);
-            expect(IntuneManager.unenrollServer).toHaveBeenCalledWith(mockServerUrl, false);
         });
 
-        it('should handle session expiration', async () => {
+        it.skip('should handle session expiration', async () => {
             DeviceEventEmitter.emit(Events.SESSION_EXPIRED, mockServerUrl);
 
             await TestHelper.wait(50);
 
             expect(logout).toHaveBeenCalledWith(mockServerUrl, undefined, {skipEvents: true, skipServerLogout: true});
-            expect(SecurityManager.removeServer).toHaveBeenCalledWith(mockServerUrl);
-            expect(IntuneManager.unenrollServer).toHaveBeenCalledWith(mockServerUrl, true);
             expect(relaunchApp).toHaveBeenCalled();
         });
     });
@@ -213,23 +201,210 @@ describe.skip('SessionManager', () => {
             SessionManager.init();
         });
 
-        it('should handle active state', async () => {
+        it('should call syncMultiTeam and resyncActiveServer when app becomes active', async () => {
             expect(appStateCallback).toBeDefined();
-            if (appStateCallback) {
-                jest.useFakeTimers();
-                appStateCallback('active');
-                expect(cancelAllSessionNotifications).toHaveBeenCalled();
-                jest.useRealTimers();
-            }
+            appStateCallback!('background');
+            expect(syncMultiTeam).not.toHaveBeenCalled();
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            expect(syncMultiTeam).toHaveBeenCalled();
+            expect(handleFirstConnect).toHaveBeenCalledWith(mockServerUrl);
         });
 
-        it('should handle inactive state', async () => {
+        it('should not sync when app becomes inactive', async () => {
             expect(appStateCallback).toBeDefined();
-            if (appStateCallback) {
-                appStateCallback('inactive');
-                await TestHelper.wait(50);
-                expect(scheduleSessionNotification).toHaveBeenCalled();
-            }
+            appStateCallback!('inactive');
+            await TestHelper.wait(50);
+            expect(syncMultiTeam).not.toHaveBeenCalled();
+            expect(handleFirstConnect).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('server sync', () => {
+        beforeEach(() => {
+            SessionManager.init();
+        });
+
+        it('should call handleFirstConnect on first active state sync', async () => {
+            expect(appStateCallback).toBeDefined();
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            expect(handleFirstConnect).toHaveBeenCalledTimes(1);
+            expect(handleFirstConnect).toHaveBeenCalledWith(mockServerUrl);
+            expect(handleReconnect).not.toHaveBeenCalled();
+        });
+
+        it('should call handleReconnect on subsequent active state sync', async () => {
+            expect(appStateCallback).toBeDefined();
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            jest.clearAllMocks();
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            expect(handleFirstConnect).not.toHaveBeenCalled();
+            expect(handleReconnect).toHaveBeenCalledTimes(1);
+            expect(handleReconnect).toHaveBeenCalledWith(mockServerUrl);
+        });
+    });
+
+    describe('active server changes', () => {
+        beforeEach(() => {
+            SessionManager.init();
+        });
+
+        it('should call syncServer when active server changes', async () => {
+            DeviceEventEmitter.emit(Events.ACTIVE_SERVER_CHANGED, {serverUrl: mockServerUrl});
+            await TestHelper.wait(50);
+            expect(handleFirstConnect).toHaveBeenCalledTimes(1);
+            expect(handleFirstConnect).toHaveBeenCalledWith(mockServerUrl);
+        });
+
+        it('should not sync when active server is empty', async () => {
+            DeviceEventEmitter.emit(Events.ACTIVE_SERVER_CHANGED, {serverUrl: ''});
+            await TestHelper.wait(50);
+            expect(handleFirstConnect).not.toHaveBeenCalled();
+            expect(handleReconnect).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('websocket reconnection', () => {
+        beforeEach(() => {
+            SessionManager.init();
+        });
+
+        it('should sync active server when websocket reconnects', async () => {
+            DeviceEventEmitter.emit(Events.WEBSOCKET_RECONNECTED, {serverUrl: mockServerUrl});
+            await TestHelper.wait(50);
+
+            expect(handleFirstConnect).toHaveBeenCalledTimes(1);
+            expect(handleFirstConnect).toHaveBeenCalledWith(mockServerUrl);
+        });
+
+        it('should ignore websocket reconnects for inactive servers', async () => {
+            jest.mocked(DatabaseManager.getActiveServerUrl).mockResolvedValueOnce('https://other.example.com');
+
+            DeviceEventEmitter.emit(Events.WEBSOCKET_RECONNECTED, {serverUrl: mockServerUrl});
+            await TestHelper.wait(50);
+
+            expect(handleFirstConnect).not.toHaveBeenCalled();
+            expect(handleReconnect).not.toHaveBeenCalled();
+        });
+
+        it('should replay a sync requested while another sync is running', async () => {
+            let resolveFirstSync: (value: Error | undefined) => void;
+            jest.mocked(handleFirstConnect).mockImplementationOnce(() => {
+                return new Promise((resolve) => {
+                    resolveFirstSync = resolve;
+                });
+            });
+
+            const firstSync = SessionManager.triggerSync(mockServerUrl);
+            await TestHelper.wait(0);
+
+            DeviceEventEmitter.emit(Events.WEBSOCKET_RECONNECTED, {serverUrl: mockServerUrl});
+            await TestHelper.wait(0);
+
+            resolveFirstSync!(undefined);
+            await firstSync;
+            await TestHelper.wait(50);
+
+            expect(handleFirstConnect).toHaveBeenCalledTimes(1);
+            expect(handleReconnect).toHaveBeenCalledTimes(1);
+            expect(handleReconnect).toHaveBeenCalledWith(mockServerUrl);
+        });
+
+        it('should return the running sync result when another sync is already running', async () => {
+            const syncError = new Error('sync failed');
+            let resolveFirstSync: (value: Error | undefined) => void;
+            jest.mocked(handleFirstConnect).mockImplementationOnce(() => {
+                return new Promise((resolve) => {
+                    resolveFirstSync = resolve;
+                });
+            });
+
+            const firstSync = SessionManager.triggerSync(mockServerUrl);
+            await TestHelper.wait(0);
+
+            const secondSync = SessionManager.triggerSync(mockServerUrl);
+            resolveFirstSync!(syncError);
+
+            await expect(firstSync).resolves.toBe(syncError);
+            await expect(secondSync).resolves.toBe(syncError);
+            expect(handleFirstConnect).toHaveBeenCalledTimes(1);
+            expect(handleReconnect).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('no teams', () => {
+        beforeEach(() => {
+            SessionManager.init();
+        });
+
+        it('should reset to no-teams screen even when a server is registered locally', async () => {
+            jest.mocked(getAllServers).mockResolvedValueOnce([{
+                url: mockServerUrl,
+            }] as Awaited<ReturnType<typeof getAllServers>>);
+
+            DeviceEventEmitter.emit(Events.NO_TEAMS);
+            await TestHelper.wait(50);
+
+            expect(resetToInfomaniakNoTeams).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('sync error handling', () => {
+        beforeEach(() => {
+            SessionManager.init();
+        });
+
+        it('should not mark server as synced on handleFirstConnect error', async () => {
+            jest.mocked(handleFirstConnect).mockResolvedValueOnce(new Error('sync failed'));
+            expect(appStateCallback).toBeDefined();
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            expect(handleFirstConnect).toHaveBeenCalledTimes(1);
+            expect(handleReconnect).not.toHaveBeenCalled();
+            jest.mocked(handleFirstConnect).mockResolvedValue(undefined);
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            expect(handleFirstConnect).toHaveBeenCalledTimes(2);
+            expect(handleReconnect).not.toHaveBeenCalled();
+        });
+
+        it('should clear firstSyncedUrls on logout', async () => {
+            // First sync
+            expect(appStateCallback).toBeDefined();
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+
+            // After first sync, should use reconnect
+            jest.clearAllMocks();
+            appStateCallback!('background');
+            await appStateCallback!('active');
+            await TestHelper.wait(50);
+            expect(handleFirstConnect).not.toHaveBeenCalled();
+            expect(handleReconnect).toHaveBeenCalledTimes(1);
+
+            // Logout
+            DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {
+                serverUrl: mockServerUrl,
+                removeServer: true,
+            });
+            await TestHelper.wait(50);
+
+            // After logout, should be firstConnect again
+            jest.clearAllMocks();
+            DeviceEventEmitter.emit(Events.ACTIVE_SERVER_CHANGED, {serverUrl: mockServerUrl});
+            await TestHelper.wait(50);
+
+            expect(handleFirstConnect).toHaveBeenCalledTimes(1);
+            expect(handleReconnect).not.toHaveBeenCalled();
         });
     });
 

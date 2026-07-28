@@ -25,12 +25,6 @@ setup_permissions([
   "PhotoLibrary"
 ])
 
-# Conditional Intune MAM support
-intune_enabled = ENV['INTUNE_ENABLED'] == 'true' || ENV['INTUNE_ENABLED'] == '1'
-
-if intune_enabled
-  puts "🔐 Intune MAM features enabled"
-end
 
 config = use_native_modules!
 
@@ -54,11 +48,7 @@ target 'kChat' do
   pod 'CocoaLumberjack', :modular_headers => true
   pod 'TurboLogIOSNative', :git => 'https://github.com/larkox/react-native-turbo-log-ios-native.git', :modular_headers => true
   pod 'JitsiMeetSDKLite', :git => 'https://github.com/jitsi/jitsi-meet-ios-sdk-releases.git', :tag => '11.3.1-lite'
-
-  # Conditional Intune MAM pod (internal builds only)
-  if intune_enabled
-    pod 'mattermost-intune', :path => '../libraries/@mattermost/intune'
-  end
+  
 end
 
 target 'kChatNotificationService' do
@@ -152,6 +142,22 @@ post_install do |installer|
   if app_target
     app_target.build_configurations.each do |c|
       c.build_settings.delete('APPLICATION_EXTENSION_API_ONLY')
+    end
+  end
+
+  # Xcode 26: fmt 11.0.2 consteval broken with Apple clang 21
+  # https://github.com/fmtlib/fmt/issues/4740
+  fmt_base = File.join(Dir.pwd, 'Pods', 'fmt', 'include', 'fmt', 'base.h')
+  if File.exist?(fmt_base)
+    FileUtils.chmod(0644, fmt_base)
+    content = File.read(fmt_base)
+    patched = content.gsub(
+      /#elif defined\(__apple_build_version__\) && __apple_build_version__ < 14000029L/,
+      '#elif defined(__apple_build_version__)'
+    )
+    if patched != content
+      File.write(fmt_base, patched)
+      Pod::UI.puts "Patched fmt/base.h for Xcode 26 compatibility".green
     end
   end
 end

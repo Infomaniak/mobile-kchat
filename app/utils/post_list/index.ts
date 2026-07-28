@@ -4,7 +4,6 @@
 import moment from 'moment-timezone';
 
 import {Post} from '@constants';
-import {isExpiredBoRPost} from '@utils/bor';
 import {toMilliseconds} from '@utils/datetime';
 import {isFromWebhook} from '@utils/post';
 import {ensureString, includes, isArrayOf, isStringArray, secureGetFromRecord} from '@utils/types';
@@ -204,10 +203,6 @@ export function selectOrderedPosts(
     for (let i = posts.length - 1; i >= 0; i--) {
         const post: PostWithPrevAndNext = {currentPost: posts[i]};
         post.isSaved = savedPostIds.has(post.currentPost.id);
-
-        if (!isThreadScreen && isExpiredBoRPost(post.currentPost)) {
-            continue;
-        }
 
         if (includePrevNext) {
             post.nextPost = posts[i - 1];

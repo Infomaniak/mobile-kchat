@@ -15,7 +15,6 @@ import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useIsTablet} from '@hooks/device';
 import useDidUpdate from '@hooks/did_update';
 import {useIsScreenVisible} from '@hooks/use_screen_visibility';
-import SecurityManager from '@managers/security_manager';
 import {popTopScreen, setButtons} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
@@ -121,7 +120,7 @@ const Thread = ({
                 edges={safeAreaViewEdges}
                 testID='thread.screen'
                 onLayout={onLayout}
-                nativeID={SecurityManager.getShieldScreenId(componentId)}
+                nativeID={`${componentId}.screen`}
             >
                 <RoundedHeaderContext/>
                 {Boolean(rootPost) &&

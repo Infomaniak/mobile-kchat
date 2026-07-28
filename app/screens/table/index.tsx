@@ -8,7 +8,6 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import SecurityManager from '@managers/security_manager';
 import {popTopScreen} from '@screens/navigation';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -66,7 +65,7 @@ const Table = ({componentId, renderAsFlex, renderRows, width}: Props) => {
         return (
             <View
                 style={styles.noTableContainer}
-                nativeID={SecurityManager.getShieldScreenId(componentId)}
+                nativeID={`${componentId}.screen`}
             >
                 <Text style={styles.noTableText}>{intl.formatMessage({id: 'table.cannot_display_table', defaultMessage: 'Cannot display table'})}</Text>
             </View>
@@ -77,7 +76,7 @@ const Table = ({componentId, renderAsFlex, renderRows, width}: Props) => {
         return (
             <View
                 style={styles.container}
-                nativeID={SecurityManager.getShieldScreenId(componentId)}
+                nativeID={`${componentId}.screen`}
             >
                 <ScrollView testID='table.screen'>
                     <ScrollView
@@ -96,7 +95,7 @@ const Table = ({componentId, renderAsFlex, renderRows, width}: Props) => {
         <SafeAreaView
             style={styles.container}
             testID='table.screen'
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
         >
             <ScrollView
                 style={styles.fullHeight}

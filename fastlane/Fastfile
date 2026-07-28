@@ -152,6 +152,28 @@ lane :set_app_version_build do
   set_app_build_number
 end
 
+desc 'Set Android versionCode and versionName from environment variables'
+lane :set_android_version_from_env do
+  version_code = ENV['ANDROID_VERSION_CODE']
+  version_name = ENV['VERSION_NUMBER']
+  
+  unless version_code.nil? || version_code.empty?
+    UI.success("Setting Android versionCode to #{version_code}")
+    android_set_version_code(
+        gradle_file: './android/app/build.gradle',
+        version_code: version_code.to_i
+    )
+  end
+  
+  unless version_name.nil? || version_name.empty?
+    UI.success("Setting Android versionName to #{version_name}")
+    android_set_version_name(
+        gradle_file: './android/app/build.gradle',
+        version_name: version_name
+    )
+  end
+end
+
 desc 'Configure the app before building'
 lane :configure do
   json = load_config_json('../dist/assets/config.json')
@@ -390,6 +412,28 @@ lane :github do
 end
 
 platform :ios do
+  desc 'Set iOS version and build number from environment variables'
+  lane :set_ios_version_from_env do
+    version_number = ENV['VERSION_NUMBER']
+    build_number = ENV['BUILD_NUMBER']
+
+    unless version_number.nil? || version_number.empty?
+      UI.success("Setting iOS versionNumber to #{version_number}")
+      increment_version_number(
+          xcodeproj: './ios/kChat.xcodeproj',
+          version_number: version_number
+      )
+    end
+
+    unless build_number.nil? || build_number.empty?
+      UI.success("Setting iOS buildNumber to #{build_number}")
+      increment_build_number(
+          xcodeproj: './ios/kChat.xcodeproj',
+          build_number: build_number
+      )
+    end
+  end
+
   before_all do
     if ENV['CI'] == 'true'
       setup_ci
@@ -632,28 +676,12 @@ platform :ios do
 
     ########################
 
-    # Configure Intune
-    intune_enabled = ENV['INTUNE_ENABLED'] == 'true' || ENV['INTUNE_ENABLED'] == '1'
-    if intune_enabled
-      intune_client_id = ENV['INTUNE_CLIENT_ID']
-      intune_redirect_uri = "msauth.#{app_bundle_id}://auth"
-
     update_info_plist(
       xcodeproj: './ios/kChat.xcodeproj',
       plist_path: 'Mattermost/Info.plist',
       block: proc do |plist|
         plist["AppGroupIdentifier"] = app_group_id
-
-        plist["IntuneMAMSettings"] = {
-              "AppGroupIdentifiers" => [ENV['IOS_APP_GROUP'] || 'group.com.mattermost.rnbeta'],
-              "MAMTelemetryDisabled" => true,
-              "MultiIdentity" => true,
-              "ADALLogOverrideDisabled" => true,
-              "HooksAlwaysEnabled" => true,
-              "ADALClientId" => intune_client_id,
-              "ADALRedirectUri" => intune_redirect_uri,
-              "MaxFileProtectionLevel" => "NSFileProtectionCompleteUntilFirstUserAuthentication"
-            }
+  
       end
     )
 
@@ -677,7 +705,6 @@ platform :ios do
         plist["AppGroupIdentifier"] = app_group_id
       end
     )
-    end
 
     # Sync the provisioning profiles using match
     if ENV['SYNC_PROVISIONING_PROFILES'] == 'true'

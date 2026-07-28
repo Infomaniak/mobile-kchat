@@ -74,12 +74,6 @@ export const showScheduledPostCreationErrorSnackbar = (errorMessage: string) => 
     });
 };
 
-export const showPlaybookErrorSnackbar = () => {
-    return showSnackBar({
-        barType: SNACK_BAR_TYPE.PLAYBOOK_ERROR,
-    });
-};
-
 export const showEnableTranslationSnackbar = (onAction: () => void, location: AvailableScreens) => {
     return showSnackBar({
         onAction,
@@ -89,9 +83,3 @@ export const showEnableTranslationSnackbar = (onAction: () => void, location: Av
     });
 };
 
-export const showBoRPostErrorSnackbar = (message?: string) => {
-    return showSnackBar({
-        barType: SNACK_BAR_TYPE.BOR_POST_EXPIRED,
-        customMessage: message,
-    });
-};

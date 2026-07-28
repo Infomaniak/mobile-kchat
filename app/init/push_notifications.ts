@@ -21,7 +21,7 @@ import {storeDeviceToken} from '@actions/app/global';
 import {markChannelAsViewed} from '@actions/local/channel';
 import {updateThread} from '@actions/local/thread';
 import {backgroundNotification, openNotification} from '@actions/remote/notifications';
-import {Device, Events, Navigation, PushNotification, Screens} from '@constants';
+import {Device, Navigation, PushNotification, Screens} from '@constants';
 import DatabaseManager from '@database/manager';
 import {DEFAULT_LOCALE, getLocalizedMessage} from '@i18n';
 import {getServerDisplayName} from '@queries/app/servers';
@@ -32,7 +32,7 @@ import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {isBetaApp} from '@utils/general';
 import {isMainActivity, isTablet} from '@utils/helpers';
-import {logDebug, logInfo} from '@utils/log';
+import {logDebug, logWarning} from '@utils/log';
 import {convertToNotificationData} from '@utils/notification';
 
 const messages = defineMessages({
@@ -118,10 +118,10 @@ class PushNotificationsSingleton {
                             unread_replies: 0,
                             last_viewed_at: Date.now(),
                         };
-                        updateThread(serverUrl, payload.root_id, data);
+                        await updateThread(serverUrl, payload.root_id, data);
                     }
                 } else {
-                    markChannelAsViewed(serverUrl, payload.channel_id);
+                    await markChannelAsViewed(serverUrl, payload.channel_id);
                 }
             }
         }
@@ -193,21 +193,9 @@ class PushNotificationsSingleton {
                 // Handle notification tapped
                 openNotification(serverUrl, notification);
             } else {
-                backgroundNotification(serverUrl, notification);
-            }
-        }
-    };
-
-    handleSessionNotification = async (notification: NotificationWithData) => {
-        logInfo('Session expired notification');
-
-        const serverUrl = await this.getServerUrlFromNotification(notification);
-
-        if (serverUrl) {
-            if (notification.userInteraction) {
-                DeviceEventEmitter.emit(Events.SESSION_EXPIRED, serverUrl);
-            } else {
-                DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl});
+                // Awaited so the caller can keep the app alive until the DB write
+                // completes (see onNotificationReceivedBackground).
+                await backgroundNotification(serverUrl, notification);
             }
         }
     };
@@ -218,13 +206,10 @@ class PushNotificationsSingleton {
         if (payload) {
             switch (payload.type) {
                 case PushNotification.NOTIFICATION_TYPE.CLEAR:
-                    this.handleClearNotification(notification);
+                    await this.handleClearNotification(notification);
                     break;
                 case PushNotification.NOTIFICATION_TYPE.MESSAGE:
-                    this.handleMessageNotification(notification);
-                    break;
-                case PushNotification.NOTIFICATION_TYPE.SESSION:
-                    this.handleSessionNotification(notification);
+                    await this.handleMessageNotification(notification);
                     break;
             }
         }
@@ -247,12 +232,37 @@ class PushNotificationsSingleton {
     onNotificationReceivedBackground = async (incoming: Notification, completion: (response: NotificationBackgroundFetchResult) => void) => {
         if (incoming.payload.verified === 'false') {
             logDebug('not handling background notification because it was not verified, ackId=', incoming.payload.ackId);
+
+            // Always finish the iOS background completion handler, or the OS
+            // keeps the app awake until it times out and then terminates it.
+            completion(NotificationBackgroundFetchResult.NO_DATA);
             return;
         }
         const notification = convertToNotificationData(incoming, false);
-        this.processNotification(notification);
 
-        completion(NotificationBackgroundFetchResult.NEW_DATA);
+        // TEMP (device verification, remove before merge — MM-69124): grep MMLogs
+        // for "onNotificationReceivedBackground". A "processing" line followed by a
+        // "processed" line (no truncation between) means the DB work finished before
+        // completion, i.e. the fix held.
+        logDebug('onNotificationReceivedBackground: processing', notification.payload?.ack_id);
+
+        // Wait until the notification is fully processed (including its DB
+        // read/write) before signaling completion. iOS keeps the app alive
+        // until the fetch completion handler is called; calling it early lets
+        // the OS re-suspend the app while a WatermelonDB statement still holds
+        // the shared App Group SQLite lock, which triggers a RUNNINGBOARD
+        // 0xdead10cc termination. completion() must run on every path,
+        // including failures, for the same reason.
+        try {
+            await this.processNotification(notification);
+
+            // TEMP (device verification, remove before merge — MM-69124)
+            logDebug('onNotificationReceivedBackground: processed → completion(NEW_DATA)');
+            completion(NotificationBackgroundFetchResult.NEW_DATA);
+        } catch (error) {
+            logWarning('onNotificationReceivedBackground', error);
+            completion(NotificationBackgroundFetchResult.FAILED);
+        }
     };
 
     // This triggers when the app was in the foreground (Android and iOS)

@@ -12,7 +12,6 @@ import Loading from '@components/loading';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useDidMount from '@hooks/did_mount';
-import SecurityManager from '@managers/security_manager';
 import {logDebug} from '@utils/log';
 import {alertTeamAddError} from '@utils/navigation';
 import {makeStyleSheetFromTheme} from '@utils/theme';
@@ -151,7 +150,7 @@ const SelectTeam = ({
             mode='margin'
             edges={safeAreaEdges}
             style={safeAreaStyle}
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
         >
             <Animated.View style={top}/>
             <View style={styles.container}>

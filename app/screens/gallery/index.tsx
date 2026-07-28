@@ -11,7 +11,6 @@ import {ANDROID_GALLERY_FOOTER_PADDING, ANDROID_NAV_BAR_HEIGHT} from '@constants
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useIsTablet, useWindowDimensions} from '@hooks/device';
 import {useGalleryControls} from '@hooks/gallery';
-import SecurityManager from '@managers/security_manager';
 import {dismissOverlay, setScreensOrientation} from '@screens/navigation';
 import {freezeOtherScreens} from '@utils/gallery';
 
@@ -90,7 +89,7 @@ const GalleryScreen = ({componentId, galleryIdentifier, hideActions, initialInde
     return (
         <View
             style={containerStyle}
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
         >
             <Header
                 index={localIndex}

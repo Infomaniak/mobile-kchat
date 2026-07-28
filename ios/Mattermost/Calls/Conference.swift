@@ -20,3 +20,11 @@ struct PartialConference: Codable {
   let id: String
   let url: String
 }
+
+struct ConferenceRegistrant: Codable {
+  let present: Bool
+}
+
+struct ConferenceStatus: Codable {
+  let registrants: [String: ConferenceRegistrant]?
+}

@@ -3,7 +3,7 @@
 
 import BottomSheetM, {BottomSheetBackdrop, BottomSheetScrollView, BottomSheetView, type BottomSheetBackdropProps} from '@gorhom/bottom-sheet';
 import React, {type ReactNode, useCallback, useEffect, useMemo, useRef} from 'react';
-import {DeviceEventEmitter, type Handle, InteractionManager, Keyboard, ScrollView, type StyleProp, View, type ViewStyle} from 'react-native';
+import {DeviceEventEmitter, type Handle, InteractionManager, ScrollView, type StyleProp, View, type ViewStyle} from 'react-native';
 import {ReduceMotion, useReducedMotion, type WithSpringConfig} from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
@@ -13,9 +13,9 @@ import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useBottomSheetListsFix} from '@hooks/bottom_sheet_lists_fix';
 import {useIsTablet} from '@hooks/device';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import SecurityManager from '@managers/security_manager';
 import {dismissModal} from '@screens/navigation';
 import {hapticFeedback} from '@utils/general';
+import {dismissKeyboard} from '@utils/keyboard';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import Indicator from './indicator';
@@ -182,7 +182,7 @@ const BottomSheet = ({
 
     useEffect(() => {
         hapticFeedback();
-        Keyboard.dismiss();
+        dismissKeyboard();
 
         return () => {
             if (timeoutRef.current) {
@@ -235,7 +235,7 @@ const BottomSheet = ({
         return (
             <View
                 style={styles.view}
-                nativeID={SecurityManager.getShieldScreenId(componentId)}
+                nativeID={`${componentId}.screen`}
             >
                 <View style={styles.separator}/>
                 {content}

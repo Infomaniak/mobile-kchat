@@ -7,17 +7,15 @@ import {loginEntry} from '@actions/remote/entry/login';
 import {addPushProxyVerificationStateFromLogin} from '@actions/remote/session';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
 import {BASE_SERVER_URL} from '@client/rest/constants';
+import ClientError from '@client/rest/error';
 import {Events} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import {PUSH_PROXY_STATUS_VERIFIED} from '@constants/push_proxy';
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials, removeServerCredentials, setServerCredentials} from '@init/credentials';
 import NetworkManager from '@managers/network_manager';
-import {getCurrentChannelId, getCurrentTeamId, getLastFullSync} from '@queries/servers/system';
 import EphemeralStore from '@store/ephemeral_store';
-import {setTeamLoading} from '@store/team_load_store';
-
-import {entry} from './common';
+import {logError} from '@utils/log';
 
 import type {TeamServer} from '@client/rest/ikteams';
 
@@ -61,6 +59,7 @@ const configureServer = async (teamServer: TeamServer, accessToken: string) => {
         await addPushProxyVerificationStateFromLogin(serverUrl);
         await loginEntry({serverUrl});
         await DatabaseManager.setActiveServerDatabase(serverUrl);
+
         return serverUrl;
     } catch (e) {
         await removeServerCredentials(serverUrl);
@@ -69,72 +68,82 @@ const configureServer = async (teamServer: TeamServer, accessToken: string) => {
 };
 
 export const syncMultiTeam = async (accessToken: string) => {
+    let teamServers: TeamServer[] = [];
+    let serverCreationResults: Array<string | null> = [];
+    const existingServerUrls: Array<string | null> = [];
+    let serverCredentials: Array<{serverUrl: string}> = [];
+
+    try {
+        serverCredentials = await getAllServerCredentials();
+    } catch (e) {
+        logError('[syncMultiTeam] failed to get server credentials', e);
+        return [];
+    }
+
     try {
         const client = await NetworkManager.createGlobalClient(accessToken);
-        const teamServers = await client.getMultiTeams();
-        await removeServerCredentials(BASE_SERVER_URL);
+        teamServers = await client.getMultiTeams();
 
-        const serverCredentials = await getAllServerCredentials();
-        const serverCreationPromises = [];
-        const existingServerUrls: Array<string | null> = [];
+        if (teamServers.length === 0) {
+            if (serverCredentials.length > 0) {
+                logError('[syncMultiTeam] getMultiTeams returned 0 teams, emitting NO_TEAMS');
+                DeviceEventEmitter.emit(Events.NO_TEAMS);
+            }
+            return [];
+        }
+
+        const serverCreationPromises: Array<Promise<string | null>> = [];
+
         for (const teamServer of teamServers) {
             if (serverCredentials.some((element) => element.serverUrl === teamServer.url)) {
                 // Server already exists - update token and include in results
                 setServerCredentials(teamServer.url, accessToken);
                 existingServerUrls.push(teamServer.url);
             } else {
-                // The server doesn't exist, create it
-                serverCreationPromises.push(configureServer(teamServer, accessToken));
+                // The server doesn't exist, create it with individual error handling
+                serverCreationPromises.push(
+                    configureServer(teamServer, accessToken).catch((e) => {
+                        logError('[syncMultiTeam] configureServer failed', {
+                            serverUrl: teamServer.url,
+                            error: e,
+                        });
+                        return null;
+                    }),
+                );
             }
         }
 
-        const serverCreationResults = await Promise.all(serverCreationPromises);
-        for (const serverCredential of serverCredentials) {
-            // The server doesn't exist anymore, remove it
-            if (!teamServers.some((element) => element.url === serverCredential.serverUrl)) {
-                DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: serverCredential.serverUrl, removeServer: true});
+        serverCreationResults = await Promise.all(serverCreationPromises);
+    } catch (e) {
+        if (e instanceof ClientError) {
+            logError('[syncMultiTeam]', {
+                message: e.message,
+                url: e.url,
+                status_code: e.status_code,
+                headers: e.headers,
+                response: e.response,
+            });
+        } else {
+            logError('[syncMultiTeam]', e);
+        }
+    } finally {
+        // ALWAYS clean up obsolete servers when we have the team list
+        if (teamServers.length > 0) {
+            try {
+                const teamServerUrls = new Set(teamServers.map((s) => s.url));
+                const serversToRemove = serverCredentials.filter(
+                    (cred) => !teamServerUrls.has(cred.serverUrl),
+                );
+                for (const serverCredential of serversToRemove) {
+                    DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: serverCredential.serverUrl, removeServer: true});
+                }
+            } catch (cleanupError) {
+                logError('[syncMultiTeam] cleanup failed', cleanupError);
             }
         }
-        return [...serverCreationResults, ...existingServerUrls];
-    } catch (e) {
+
         await removeServerCredentials(BASE_SERVER_URL);
-
-        return [];
     }
-};
 
-export const syncServerData = async () => {
-    try {
-        const activeServerUrl = await DatabaseManager.getActiveServerUrl();
-        if (!activeServerUrl) {
-            return new Error('cannot find active server url');
-        }
-
-        setTeamLoading(activeServerUrl, true);
-        const operator = DatabaseManager.serverDatabases[activeServerUrl]?.operator;
-        if (!operator) {
-            return new Error('cannot find server database');
-        }
-        const {database} = operator;
-        const lastFullSync = await getLastFullSync(database);
-        const currentTeamId = await getCurrentTeamId(database);
-        const currentChannelId = await getCurrentChannelId(database);
-        const entryData = await entry(activeServerUrl, currentTeamId, currentChannelId, lastFullSync);
-
-        if ('error' in entryData) {
-            setTeamLoading(activeServerUrl, false);
-            return new Error('Error in entry data');
-        }
-
-        const {models} = entryData;
-
-        if (models?.length) {
-            await operator.batchRecords(models, 'syncUnreadChannels');
-        }
-        setTeamLoading(activeServerUrl, false);
-
-        return models;
-    } catch (e) {
-        return e;
-    }
+    return [...serverCreationResults, ...existingServerUrls];
 };

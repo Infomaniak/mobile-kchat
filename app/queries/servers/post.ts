@@ -2,17 +2,16 @@
 // See LICENSE.txt for license information.
 
 import {Database, Model, Q, Query} from '@nozbe/watermelondb';
-import {of as of$, combineLatestWith, combineLatest} from 'rxjs';
+import {of as of$, combineLatestWith} from 'rxjs';
 import {switchMap, distinctUntilChanged} from 'rxjs/operators';
 
 import {MM_TABLES} from '@constants/database';
-import {SKU_SHORT_NAME} from '@constants/license';
 import {logDebug, logWarning} from '@utils/log';
 import {updatePermalinkMetadata} from '@utils/permalink_sync';
 
 import {queryGroupsByNames} from './group';
 import {querySavedPostsPreferences} from './preference';
-import {getConfigValue, observeConfigBooleanValue, observeConfigIntValue, observeIsMinimumLicenseTier} from './system';
+import {getConfigValue, observeConfigBooleanValue} from './system';
 import {queryUsersByUsername, observeUser, observeCurrentUser} from './user';
 
 import type PostModel from '@typings/database/models/servers/post';
@@ -20,9 +19,6 @@ import type PostInChannelModel from '@typings/database/models/servers/posts_in_c
 import type PostsInThreadModel from '@typings/database/models/servers/posts_in_thread';
 
 const {SERVER: {POST, POSTS_IN_CHANNEL, POSTS_IN_THREAD}} = MM_TABLES;
-
-const DEFAULT_BURN_ON_READ_DURATION_SECONDS = '600';
-const DEFAULT_BURN_ON_READ_MAXIMUM_TTL_SECONDS = '604800';
 
 export const prepareDeletePost = async (post: PostModel): Promise<Model[]> => {
     const preparedModels: Model[] = [post.prepareDestroyPermanently()];
@@ -134,7 +130,7 @@ export const getRecentPostsInThread = async (database: Database, rootId: string)
         const recent = chunks[0];
         const post = await getPostById(database, rootId);
         if (post) {
-            return queryPostsChunk(database, post.channelId, recent.earliest, recent.latest).fetch();
+            return queryPostsChunk(database, post.channelId, recent.earliest, recent.latest, false, false, undefined).fetch();
         }
     }
     return [];
@@ -183,7 +179,7 @@ export const getRecentPostsInChannel = async (database: Database, channelId: str
     const chunks = await queryPostsInChannel(database, channelId).fetch();
     if (chunks.length) {
         const recent = chunks[0];
-        return queryPostsChunk(database, channelId, recent.earliest, recent.latest, false, includeDeleted).fetch();
+        return queryPostsChunk(database, channelId, recent.earliest, recent.latest, false, includeDeleted, undefined).fetch();
     }
     return [];
 };
@@ -201,7 +197,7 @@ export const queryPostsByType = (database: Database, type: string) => {
     return database.get<PostModel>(POST).query(...clauses);
 };
 
-export const queryPostsBetween = (database: Database, earliest: number, latest: number, sort: Q.SortOrder | null, userId?: string, channelId?: string, rootId?: string) => {
+export const queryPostsBetween = (database: Database, earliest: number, latest: number, sort: Q.SortOrder | null, userId?: string, channelId?: string, rootId?: string, limit?: number) => {
     const andClauses = [Q.where('create_at', Q.between(earliest, latest))];
     if (channelId) {
         andClauses.push(Q.where('channel_id', channelId));
@@ -218,6 +214,9 @@ export const queryPostsBetween = (database: Database, earliest: number, latest: 
     const clauses: Q.Clause[] = [Q.and(...andClauses)];
     if (sort != null) {
         clauses.push(Q.sortBy('create_at', sort));
+    }
+    if (limit && limit > 0) {
+        clauses.push(Q.take(limit));
     }
     return database.get<PostModel>(POST).query(...clauses);
 };
@@ -256,32 +255,6 @@ export const getIsPostAcknowledgementsEnabled = async (database: Database) => {
 
 export const observeIsPostPriorityEnabled = (database: Database) => {
     return observeConfigBooleanValue(database, 'PostPriority');
-};
-
-export const observeIsBoREnabled = (database: Database) => {
-    const featureEnabled = observeConfigBooleanValue(database, 'EnableBurnOnRead');
-    const licenseValid = observeIsMinimumLicenseTier(database, SKU_SHORT_NAME.EnterpriseAdvanced);
-
-    return combineLatest([featureEnabled, licenseValid]).pipe(
-        switchMap(([enabled, licensed]) => of$(enabled && licensed)),
-    );
-};
-
-export const observeBoRConfig = (database: Database) => {
-    const borDurationSecondsObservable = observeConfigIntValue(database, 'BurnOnReadDurationSeconds');
-    const maxBoRDurationSecondsStringObservable = observeConfigIntValue(database, 'BurnOnReadMaximumTimeToLiveSeconds');
-
-    // merge all observables and return single observable of object with both values
-    return combineLatest([borDurationSecondsObservable, maxBoRDurationSecondsStringObservable]).pipe(
-        switchMap(([borDurationSeconds, borMaximumTimeToLiveSeconds]) => {
-            const borConfig = {
-                enabled: false,
-                borDurationSeconds: borDurationSeconds || parseInt(DEFAULT_BURN_ON_READ_DURATION_SECONDS, 10),
-                borMaximumTimeToLiveSeconds: borMaximumTimeToLiveSeconds || parseInt(DEFAULT_BURN_ON_READ_MAXIMUM_TTL_SECONDS, 10),
-            };
-            return of$(borConfig);
-        }),
-    );
 };
 
 export const observeIsPostAcknowledgementsEnabled = (database: Database) => {

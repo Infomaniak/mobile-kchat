@@ -137,7 +137,6 @@ describe.skip('PermalinkPreview Enhanced Component', () => {
             expect(permalinkPreview.props.author).toBeDefined();
             expect(permalinkPreview.props.currentUser).toBeDefined();
             expect(permalinkPreview.props.isMilitaryTime).toBe(false);
-            expect(permalinkPreview.props.autotranslationsEnabled).toBe(false);
         });
     });
 
@@ -171,7 +170,6 @@ describe.skip('PermalinkPreview Enhanced Component', () => {
             expect(permalinkPreview.props.author).toBeUndefined();
             expect(permalinkPreview.props.currentUser).toBeDefined();
             expect(permalinkPreview.props.isMilitaryTime).toBe(false);
-            expect(permalinkPreview.props.autotranslationsEnabled).toBe(false);
         });
     });
 
@@ -212,7 +210,6 @@ describe.skip('PermalinkPreview Enhanced Component', () => {
             expect(permalinkPreview.props.teammateNameDisplay).toBe('username');
             expect(permalinkPreview.props.currentUser).toBeDefined();
             expect(permalinkPreview.props.isMilitaryTime).toBe(false);
-            expect(permalinkPreview.props.autotranslationsEnabled).toBe(false);
         });
     });
 
@@ -245,7 +242,6 @@ describe.skip('PermalinkPreview Enhanced Component', () => {
             expect(permalinkPreview.props.author).toBeUndefined();
             expect(permalinkPreview.props.currentUser).toBeDefined();
             expect(permalinkPreview.props.isMilitaryTime).toBe(false);
-            expect(permalinkPreview.props.autotranslationsEnabled).toBe(false);
         });
     });
 
@@ -286,7 +282,6 @@ describe.skip('PermalinkPreview Enhanced Component', () => {
             expect(permalinkPreview.props.teammateNameDisplay).toBe('full_name');
             expect(permalinkPreview.props.currentUser).toBeDefined();
             expect(permalinkPreview.props.isMilitaryTime).toBe(false);
-            expect(permalinkPreview.props.autotranslationsEnabled).toBe(false);
         });
     });
 
@@ -325,58 +320,7 @@ describe.skip('PermalinkPreview Enhanced Component', () => {
         await waitFor(() => {
             const permalinkPreview = getByTestId('permalink-preview');
             expect(permalinkPreview.props.isMilitaryTime).toBe(true);
-            expect(permalinkPreview.props.autotranslationsEnabled).toBe(false);
         });
     });
 
-    it('should pass autotranslationsEnabled true when channel has autotranslation enabled', async () => {
-        await operator.handleConfigs({
-            configs: [
-                {id: 'EnableAutoTranslation', value: 'true'},
-                {id: 'RestrictDMAndGMAutotranslation', value: 'false'},
-            ],
-            configsToDelete: [],
-            prepareRecordsOnly: false,
-        });
-
-        const channelId = 'channel-123';
-        const channel = TestHelper.fakeChannel({id: channelId, team_id: 'team1', autotranslation: true});
-        const myChannel = TestHelper.fakeMyChannel({
-            id: channelId,
-            channel_id: channelId,
-            user_id: 'current-user',
-            autotranslation_disabled: false,
-        });
-        await operator.handleChannel({channels: [channel], prepareRecordsOnly: false});
-        await operator.handleMyChannel({channels: [channel], myChannels: [myChannel], prepareRecordsOnly: false});
-
-        const embedData: PermalinkEmbedData = {
-            post_id: 'post-123',
-            post: TestHelper.fakePost({
-                id: 'post-123',
-                user_id: 'author-user',
-                message: 'Test message',
-                channel_id: channelId,
-            }),
-            team_name: 'test-team',
-            channel_display_name: 'Test Channel',
-            channel_type: 'O',
-            channel_id: channelId,
-        };
-
-        await createPostWithPermalinkEmbed(operator, database, embedData);
-
-        const {getByTestId} = renderWithEverything(
-            <EnhancedPermalinkPreview
-                embedData={embedData}
-                location={Screens.CHANNEL}
-            />,
-            {database, serverUrl},
-        );
-
-        await waitFor(() => {
-            const permalinkPreview = getByTestId('permalink-preview');
-            expect(permalinkPreview.props.autotranslationsEnabled).toBe(true);
-        });
-    });
 });

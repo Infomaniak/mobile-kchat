@@ -1,17 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Image, type ImageProps} from 'expo-image';
 import React from 'react';
 import {View} from 'react-native';
 
-import {buildAbsoluteUrl} from '@actions/remote/file';
+import Avatar from '@components/avatar';
 import CompassIcon from '@components/compass_icon';
-import {ACCOUNT_OUTLINE_IMAGE} from '@constants/profile';
-import NetworkManager from '@managers/network_manager';
 import {useShareExtensionServerUrl} from '@share/state';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
-import {getLastPictureUpdate} from '@utils/user';
 
 import type UserModel from '@typings/database/models/servers/user';
 
@@ -31,69 +27,48 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
         height: 24,
         width: 24,
     },
+    archiveOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 12,
+        backgroundColor: changeOpacity(theme.centerChannelBg, 0.72),
+    },
 }));
 
-const Avatar = ({author, theme}: Props) => {
+const ShareExtensionAvatar = ({author, theme}: Props) => {
     const serverUrl = useShareExtensionServerUrl();
     const style = getStyleSheet(theme);
-    const isBot = author?.isBot || false;
-    let pictureUrl = '';
 
-    if (author?.deleteAt) {
-        return (
+    const isDeleted = Boolean(author?.deleteAt);
+
+    const archiveOverlay = isDeleted ? (
+        <View style={style.archiveOverlay}>
             <CompassIcon
                 name='archive-outline'
-                style={style.icon}
-                size={24}
+                size={16}
+                style={{color: '#FFFFFF'}}
             />
-        );
-    }
-
-    let token = null;
-    if (author && serverUrl) {
-        try {
-            const client = NetworkManager.getClient(serverUrl);
-            const lastPictureUpdate = (isBot ? author?.props?.bot_last_icon_update as number : author?.lastPictureUpdate) || 0;
-            const absoluteUrl = client.getAbsoluteUrl(client.getProfilePictureUrl(author.id, lastPictureUpdate));
-            if (typeof absoluteUrl === 'string') {
-                pictureUrl = absoluteUrl;
-            }
-
-            token = client.getCurrentBearerToken();
-        } catch {
-            // handle below that the client is not set
-        }
-    }
-
-    let icon;
-    if (author && pictureUrl && token && serverUrl) {
-        const imgSource: ImageProps['source'] = {
-            uri: buildAbsoluteUrl(serverUrl, pictureUrl),
-            headers: {Authorization: token},
-        };
-        icon = (
-            <Image
-                id={`user-${author.id}-${getLastPictureUpdate(author)}`}
-                key={pictureUrl}
-                style={style.image}
-                source={imgSource}
-            />
-        );
-    } else {
-        icon = (
-            <CompassIcon
-                color={changeOpacity(theme.centerChannelColor, 0.72)}
-                name={ACCOUNT_OUTLINE_IMAGE}
-                size={24}
-            />
-        );
-    }
+        </View>
+    ) : null;
 
     return (
-        <View style={style.container}>
-            {icon}
-        </View>
+        <Avatar
+            author={author}
+            containerStyle={style.container}
+            fallbackChildren={archiveOverlay}
+            imageStyle={style.image}
+            serverUrl={serverUrl}
+            size={24}
+            textColor={style.icon.color}
+            theme={theme}
+            testID='share_extension.channel_item.avatar'
+        />
     );
 };
 
-export default Avatar;
+export default ShareExtensionAvatar;

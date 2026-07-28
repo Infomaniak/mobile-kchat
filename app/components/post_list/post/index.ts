@@ -14,7 +14,6 @@ import {queryReactionsForPost} from '@queries/servers/reaction';
 import {observeCanManageChannelMembers, observePermissionForPost} from '@queries/servers/role';
 import {observeThreadById} from '@queries/servers/thread';
 import {observeCurrentUser} from '@queries/servers/user';
-import {isBoRPost} from '@utils/bor';
 import {areConsecutivePosts, isPostEphemeral} from '@utils/post';
 
 import Post from './post';
@@ -88,9 +87,6 @@ function isFirstReply(post: PostModel, previousPost?: PostModel) {
 }
 
 function observeIsConsecutivePost(database: Database, post: PostModel, userLocale: string, previousPost?: PostModel) {
-    if (isBoRPost(post)) {
-        return of$(false);
-    }
     if (!post ||!previousPost) {
         return of$(false);
     }
@@ -117,6 +113,8 @@ const withPost = withObservables(
 
         if (post.props?.add_channel_member && isPostEphemeral(post) && currentUser) {
             isPostAddChannelMember = observeCanManageChannelMembers(database, post.channelId, currentUser);
+        } else if (post.props?.ask_add_channel_member && isPostEphemeral(post) && currentUser) {
+            isPostAddChannelMember = of$(true);
         }
 
         let highlightReplyBar = of$(false);
@@ -140,8 +138,6 @@ const withPost = withObservables(
 
         const hasReplies = observeHasReplies(database, post);//Need to review and understand
 
-        // Don't combine consecutive Burn on Read posts as we want each BoR post
-        // to display its header to allow displaying the remaining time.
         const isConsecutivePost = observeIsConsecutivePost(database, post, currentUser?.locale || DEFAULT_LOCALE, previousPost);
 
         const hasFiles = queryFilesForPost(database, post.id).observeCount().pipe(

@@ -31,8 +31,7 @@ jest.mock('@actions/local/post', () => ({
 import type {PostModel} from '@database/models/server';
 import type Database from '@nozbe/watermelondb/Database';
 
-// Ik change : skip on CI, will fix later
-describe.skip('components/post_list/PostList', () => {
+describe('components/post_list/PostList', () => {
     let database: Database;
     const serverUrl = 'https://server.com';
     const fetchPostsSpy = jest.spyOn(postFunctions, 'fetchPosts');

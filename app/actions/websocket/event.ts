@@ -3,18 +3,9 @@
 
 // IK change: agents feature not available on our server
 // import {checkIsAgentsPluginEnabled} from '@agents/actions/remote/agents_status';
-import {handleAgentPostUpdate} from '@agents/actions/websocket';
-import {handleAgentsEvents} from '@agents/actions/websocket/events';
 
-import * as bookmark from '@actions/local/channel_bookmark';
-import {
-    handleBoRPostAllRevealed,
-    handleBoRPostBurnedEvent,
-    handleBoRPostRevealedEvent,
-} from '@actions/websocket/burn_on_read';
 import * as scheduledPost from '@actions/websocket/scheduled_post';
 import {WebsocketEvents} from '@constants';
-import {handlePlaybookEvents} from '@playbooks/actions/websocket/events';
 
 import * as category from './category';
 import * as channel from './channel';
@@ -211,18 +202,6 @@ export async function handleWebSocketEvent(serverUrl: string, msg: WebSocketMess
             // checkIsAgentsPluginEnabled(serverUrl);
             break;
 
-        // bookmarks
-        case WebsocketEvents.CHANNEL_BOOKMARK_CREATED:
-        case WebsocketEvents.CHANNEL_BOOKMARK_DELETED:
-            bookmark.handleBookmarkAddedOrDeleted(serverUrl, msg);
-            break;
-        case WebsocketEvents.CHANNEL_BOOKMARK_UPDATED:
-            bookmark.handleBookmarkEdited(serverUrl, msg);
-            break;
-        case WebsocketEvents.CHANNEL_BOOKMARK_SORTED:
-            bookmark.handleBookmarkSorted(serverUrl, msg);
-            break;
-
         // scheduled posts
         case WebsocketEvents.SCHEDULED_POST_CREATED:
         case WebsocketEvents.SCHEDULED_POST_UPDATED:
@@ -279,23 +258,6 @@ export async function handleWebSocketEvent(serverUrl: string, msg: WebSocketMess
             handleLimitationChanged(serverUrl);
             break;
 
-        // Agents
-        case WebsocketEvents.AGENTS_POST_UPDATE:
-        case WebsocketEvents.AGENTS_TOOL_CALL_STATUS:
-            handleAgentPostUpdate(msg);
-            break;
-
-        // Burn on Read Events
-        case WebsocketEvents.BOR_POST_REVEALED:
-            handleBoRPostRevealedEvent(serverUrl, msg);
-            break;
-        case WebsocketEvents.BOR_POST_BURNED:
-            handleBoRPostBurnedEvent(serverUrl, msg);
-            break;
-        case WebsocketEvents.BURN_ON_READ_ALL_REVEALED:
-            handleBoRPostAllRevealed(serverUrl, msg);
-            break;
-
         // Autotranslation
         case WebsocketEvents.POST_TRANSLATION_UPDATED:
             handlePostTranslationUpdatedEvent(serverUrl, msg);
@@ -312,6 +274,4 @@ export async function handleWebSocketEvent(serverUrl: string, msg: WebSocketMess
 
             break;
     }
-    handlePlaybookEvents(serverUrl, msg);
-    handleAgentsEvents(serverUrl, msg);
 }

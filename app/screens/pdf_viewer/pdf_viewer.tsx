@@ -21,7 +21,6 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import SecurityManager from '@managers/security_manager';
 import {dismissModal} from '@screens/navigation';
 import {logError} from '@utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -133,7 +132,7 @@ const PdfViewer = ({allowPdfLinkNavigation, closeButtonId, componentId, fileId, 
 
     return (
         <SafeAreaView
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
             style={styles.flex}
         >
             {Boolean(errorMessage) && <PdfLoadError message={errorMessage}/>}

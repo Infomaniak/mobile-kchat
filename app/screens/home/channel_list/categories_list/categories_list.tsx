@@ -1,19 +1,18 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import AgentsButton from '@agents/components/agents_button';
-import React, {useEffect, useMemo, useState} from 'react';
-import {DeviceEventEmitter, useWindowDimensions} from 'react-native';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {DeviceEventEmitter, useWindowDimensions, View} from 'react-native';
 import Animated, {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 
 import DraftsButton from '@components/drafts_buttton';
+import Loading from '@components/loading';
 import ThreadsButton from '@components/threads_button';
 import {Events, Screens} from '@constants';
-import {AGENTS, CHANNEL, DRAFT, THREAD} from '@constants/screens';
+import {CHANNEL, DRAFT, THREAD} from '@constants/screens';
 import {TABLET_SIDEBAR_WIDTH, TEAM_SIDEBAR_WIDTH} from '@constants/view';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
-import PlaybooksButton from '@playbooks/components/playbooks_button';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import Categories from './categories';
@@ -39,15 +38,13 @@ type ChannelListProps = {
     scheduledPostHasError: boolean;
     lastChannelId?: string;
     scheduledPostsEnabled?: boolean;
-    agentsEnabled?: boolean;
-    showPlaybooksButton?: boolean;
 };
 
 const getTabletWidth = (moreThanOneTeam: boolean) => {
     return TABLET_SIDEBAR_WIDTH - (moreThanOneTeam ? TEAM_SIDEBAR_WIDTH : 0);
 };
 
-type ScreenType = typeof AGENTS | typeof DRAFT | typeof THREAD | typeof CHANNEL;
+type ScreenType = typeof DRAFT | typeof THREAD | typeof CHANNEL;
 
 const CategoriesList = ({
     hasChannels,
@@ -59,8 +56,6 @@ const CategoriesList = ({
     scheduledPostHasError,
     lastChannelId,
     scheduledPostsEnabled,
-    agentsEnabled,
-    showPlaybooksButton,
 }: ChannelListProps) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
@@ -68,6 +63,21 @@ const CategoriesList = ({
     const isTablet = useIsTablet();
     const tabletWidth = useSharedValue(isTablet ? getTabletWidth(moreThanOneTeam) : 0);
     const [activeScreen, setActiveScreen] = useState<ScreenType>(isTablet && lastChannelId === Screens.GLOBAL_DRAFTS ? DRAFT : CHANNEL);
+    const [showLoadError, setShowLoadError] = useState(false);
+    const loadErrorTimer = useRef<ReturnType<typeof setTimeout>>();
+
+    useEffect(() => {
+        if (hasChannels) {
+            setShowLoadError(false);
+            return undefined;
+        }
+        loadErrorTimer.current = setTimeout(() => setShowLoadError(true), 300);
+        return () => {
+            if (loadErrorTimer.current) {
+                clearTimeout(loadErrorTimer.current);
+            }
+        };
+    }, [hasChannels]);
 
     useEffect(() => {
         if (isTablet) {
@@ -80,7 +90,7 @@ const CategoriesList = ({
 
     useEffect(() => {
         const listener = DeviceEventEmitter.addListener(Events.ACTIVE_SCREEN, (screen: string) => {
-            if (screen === AGENTS || screen === DRAFT || screen === THREAD) {
+            if (screen === DRAFT || screen === THREAD) {
                 setActiveScreen(screen);
             } else {
                 setActiveScreen(CHANNEL);
@@ -130,30 +140,15 @@ const CategoriesList = ({
         return null;
     }, [activeScreen, draftsCount, isTablet, scheduledPostCount, scheduledPostHasError, scheduledPostsEnabled]);
 
-    const agentsButtonComponent = useMemo(() => {
-        if (!agentsEnabled) {
-            return null;
-        }
-
-        return (
-            <AgentsButton
-                shouldHighlightActive={activeScreen === AGENTS}
-            />
-        );
-    }, [agentsEnabled, activeScreen]);
-
-    const playbooksButtonComponent = useMemo(() => {
-        if (!showPlaybooksButton) {
-            return null;
-        }
-
-        return (
-            <PlaybooksButton/>
-        );
-    }, [showPlaybooksButton]);
-
     const content = useMemo(() => {
         if (!hasChannels) {
+            if (!showLoadError) {
+                return (
+                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                        <Loading color={theme.buttonBg}/>
+                    </View>
+                );
+            }
             return (<LoadChannelsError/>);
         }
 
@@ -162,12 +157,10 @@ const CategoriesList = ({
                 <SubHeader/>
                 {threadButtonComponent}
                 {draftsButtonComponent}
-                {agentsButtonComponent}
-                {playbooksButtonComponent}
-                <Categories isTablet={isTablet}/>
+                <Categories/>
             </>
         );
-    }, [agentsButtonComponent, draftsButtonComponent, hasChannels, isTablet, playbooksButtonComponent, threadButtonComponent]);
+    }, [draftsButtonComponent, hasChannels, showLoadError, threadButtonComponent, theme]);
 
     return (
         <Animated.View style={[styles.container, tabletStyle]}>

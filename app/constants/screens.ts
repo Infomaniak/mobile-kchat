@@ -1,14 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import AGENTS_SCREENS from '@agents/constants/screens';
-
-import PLAYBOOKS_SCREENS from '@playbooks/constants/screens';
+import {AGENTS_REWRITE_OPTIONS} from '@agents/constants/screens';
 
 export const ABOUT = 'About';
 export const ACCOUNT = 'Account';
 export const AI_OPTIONS = 'AiOptions';
-export const AGENTS = 'Agents';
 export const APPS_FORM = 'AppForm';
 export const ATTACHMENT_OPTIONS = 'AttachmentOptions';
 export const BOTTOM_SHEET = 'BottomSheet';
@@ -19,7 +16,6 @@ export const CALL_HOST_CONTROLS = 'CallHostControls';
 export const CHANNEL = 'Channel';
 export const CHANNEL_ADD_MEMBERS = 'ChannelAddMembers';
 export const CHANNEL_BANNER = 'ChannelBanner';
-export const CHANNEL_BOOKMARK = 'ChannelBookmarkAddOrEdit';
 export const CHANNEL_FILES = 'ChannelFiles';
 export const CHANNEL_INFO = 'ChannelInfo';
 export const CHANNEL_NOTIFICATION_PREFERENCES = 'ChannelNotificationPreferences';
@@ -73,6 +69,8 @@ export const SAVED_MESSAGES = 'SavedMessages';
 export const SCHEDULED_POST_OPTIONS = 'ScheduledPostOptions';
 export const SEARCH = 'Search';
 export const SELECT_TEAM = 'SelectTeam';
+export const SEND_FEEDBACK = 'SendFeedback';
+export const FEEDBACK_OPTIONS = 'FeedbackOptions';
 export const SERVER = 'Server';
 export const SETTINGS = 'Settings';
 export const SETTINGS_ADVANCED = 'SettingsAdvanced';
@@ -90,7 +88,6 @@ export const SETTINGS_NOTIFICATION_PUSH = 'SettingsNotificationPush';
 export const SETTINGS_NOTIFICATION_CALL = 'SettingsNotificationCall';
 export const SHARE_FEEDBACK = 'ShareFeedback';
 export const SNACK_BAR = 'SnackBar';
-export const SSO = 'SSO';
 export const TABLE = 'Table';
 export const TEAM_SELECTOR_LIST = 'TeamSelectorList';
 export const TERMS_OF_SERVICE = 'TermsOfService';
@@ -103,15 +100,15 @@ export const INFOMANIAK_NO_TEAMS = 'InfomaniakNoTeams';
 export const INFOMANIAK_QUOTA_EXCEEDED = 'InfomaniakQuotaExceeded';
 
 export const INFOMANIAK_REMINDER = 'InfomaniakReminder';
-export const TRANSCRIPTION = 'Transcription';
 export const INFOMANIAK_EVOLVE = 'InfomaniakEvolve';
+export const TRANSCRIPTION = 'Transcription';
+export const DEBUG_PERFORMANCE = 'DebugPerformance';
 export const SHOW_TRANSLATION = 'ShowTranslation';
 
 export default {
     ABOUT,
     ACCOUNT,
     AI_OPTIONS,
-    AGENTS,
     APPS_FORM,
     ATTACHMENT_OPTIONS,
     BOTTOM_SHEET,
@@ -122,7 +119,6 @@ export default {
     CHANNEL,
     CHANNEL_ADD_MEMBERS,
     CHANNEL_BANNER,
-    CHANNEL_BOOKMARK,
     CHANNEL_FILES,
     CHANNEL_INFO,
     CHANNEL_NOTIFICATION_PREFERENCES,
@@ -175,6 +171,8 @@ export default {
     SCHEDULED_POST_OPTIONS,
     SEARCH,
     SELECT_TEAM,
+    SEND_FEEDBACK,
+    FEEDBACK_OPTIONS,
     SERVER,
     SETTINGS,
     SETTINGS_ADVANCED,
@@ -192,7 +190,6 @@ export default {
     SETTINGS_NOTIFICATION_CALL,
     SHARE_FEEDBACK,
     SNACK_BAR,
-    SSO,
     TABLE,
     TEAM_SELECTOR_LIST,
     TERMS_OF_SERVICE,
@@ -206,9 +203,9 @@ export default {
     INFOMANIAK_REMINDER,
     INFOMANIAK_EVOLVE,
     TRANSCRIPTION,
+    DEBUG_PERFORMANCE,
     SHOW_TRANSLATION,
-    ...PLAYBOOKS_SCREENS,
-    ...AGENTS_SCREENS,
+    AGENTS_REWRITE_OPTIONS,
 } as const;
 
 export const MODAL_SCREENS_WITHOUT_BACK = new Set<string>([
@@ -238,8 +235,7 @@ export const SCREENS_WITH_TRANSPARENT_BACKGROUND = new Set<string>([
 ]);
 
 export const SCREENS_AS_BOTTOM_SHEET = new Set<string>([
-    AGENTS_SCREENS.AGENTS_SELECTOR,
-    AGENTS_SCREENS.AGENTS_REWRITE_OPTIONS,
+    AGENTS_REWRITE_OPTIONS,
     ATTACHMENT_OPTIONS,
     BOTTOM_SHEET,
     DRAFT_SCHEDULED_POST_OPTIONS,

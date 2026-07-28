@@ -23,7 +23,6 @@ import {getIsCRTEnabled, prepareThreadsFromReceivedPosts} from '@queries/servers
 import {queryAllUsers} from '@queries/servers/user';
 import EphemeralStore from '@store/ephemeral_store';
 import {setFetchingThreadState} from '@store/fetching_thread_store';
-import {isBoRPost} from '@utils/bor';
 import {getValidEmojis, matchEmoticons} from '@utils/emoji/helpers';
 import {getFullErrorMessage, isServerError} from '@utils/errors';
 import {hasArrayChanged} from '@utils/helpers';
@@ -36,6 +35,7 @@ import {processChannelPostsByTeam} from './post.auxiliary';
 import {forceLogoutIfNecessary} from './session';
 
 import type {Client} from '@client/rest';
+import type ClientError from '@client/rest/error';
 import type Model from '@nozbe/watermelondb/Model';
 import type PostModel from '@typings/database/models/servers/post';
 
@@ -130,11 +130,13 @@ export async function createPost(serverUrl: string, post: Partial<Post>, files: 
     });
     initialPostModels.push(...postModels);
 
-    const customEmojis = await queryAllCustomEmojis(database).fetch();
     const emojisInMessage = matchEmoticons(newPost.message);
-    const reactionModels = await addRecentReaction(serverUrl, getValidEmojis(emojisInMessage, customEmojis), true);
-    if (!('error' in reactionModels) && reactionModels.length) {
-        initialPostModels.push(...reactionModels);
+    if (emojisInMessage.length > 0) {
+        const customEmojis = await queryAllCustomEmojis(database).fetch();
+        const reactionModels = await addRecentReaction(serverUrl, getValidEmojis(emojisInMessage, customEmojis), true);
+        if (!('error' in reactionModels) && reactionModels.length) {
+            initialPostModels.push(...reactionModels);
+        }
     }
 
     await operator.batchRecords(initialPostModels, 'createPost - initial');
@@ -532,6 +534,7 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
         let sinceCursor: number | undefined = since;
         let afterCursor: string | undefined;
         let hasMore = true;
+        let totalPostsFetched = 0;
 
         while (hasMore) {
             // eslint-disable-next-line no-await-in-loop
@@ -549,9 +552,10 @@ export async function fetchPostsSince(serverUrl: string, channelId: string, sinc
             if (result.posts?.length) {
                 allPosts.push(...result.posts);
                 allOrder.push(...(result.order || []));
+                totalPostsFetched += result.posts.length;
             }
 
-            if (data.next_post_id) {
+            if (data.next_post_id && totalPostsFetched < General.MAX_POSTS_SINCE) {
                 afterCursor = data.next_post_id;
                 sinceCursor = undefined;
             } else {
@@ -805,22 +809,41 @@ export async function fetchMissingChannelsFromPosts(serverUrl: string, posts: Po
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
 
         const channelIds = new Set(await queryAllMyChannel(database).fetchIds());
-        const channelPromises: Array<Promise<Channel>> = [];
-        const userPromises: Array<Promise<ChannelMembership>> = [];
+        const fetchPromises: Array<Promise<{channel: Channel; member?: ChannelMembership}>> = [];
+
+        const getChannelAndMember = async (id: string): Promise<{channel: Channel; member?: ChannelMembership}> => {
+            const channelPromise = client.getChannel(id);
+            const memberPromise = client.getMyChannelMember(id).catch((error: ClientError) => {
+                if (error.status_code === 404) {
+                    return undefined;
+                }
+                throw error;
+            });
+            const channel = await channelPromise;
+            const member = await memberPromise;
+            return {channel, member};
+        };
 
         posts.forEach((post) => {
             const id = post.channel_id;
 
             if (!channelIds.has(id)) {
-                channelPromises.push(client.getChannel(id));
-                userPromises.push(client.getMyChannelMember(id));
+                fetchPromises.push(getChannelAndMember(id));
             }
         });
 
-        const channels = await Promise.all(channelPromises);
-        const channelMemberships = await Promise.all(userPromises);
+        const results = await Promise.all(fetchPromises);
+        const channels: Channel[] = [];
+        const channelMemberships: ChannelMembership[] = [];
 
-        if (!fetchOnly && channels.length && channelMemberships.length) {
+        results.forEach(({channel, member}) => {
+            channels.push(channel);
+            if (member) {
+                channelMemberships.push(member);
+            }
+        });
+
+        if (!fetchOnly && channels.length) {
             const isCRTEnabled = await getIsCRTEnabled(database);
             const modelPromises = prepareMissingChannelsForAllTeams(operator, channels, channelMemberships, isCRTEnabled);
             if (modelPromises.length) {
@@ -938,24 +961,6 @@ export const deletePost = async (serverUrl: string, postToDelete: PostModel | Po
     }
 };
 
-export const burnPostNow = async (serverUrl: string, postToBurn: PostModel | Post) => {
-    if (!isBoRPost(postToBurn)) {
-        return {error: 'Post is not a Burn-on-Read post'};
-    }
-
-    try {
-        const client = NetworkManager.getClient(serverUrl);
-        await client.burnPostNow(postToBurn.id);
-
-        const post = await removePost(serverUrl, postToBurn);
-        return {post};
-    } catch (error) {
-        logDebug('error on burnPostNow', getFullErrorMessage(error));
-        forceLogoutIfNecessary(serverUrl, error);
-        return {error};
-    }
-};
-
 export const markPostAsUnread = async (serverUrl: string, postId: string) => {
     try {
         const client = NetworkManager.getClient(serverUrl);
@@ -1041,32 +1046,6 @@ export const editPost = async (serverUrl: string, postId: string, postMessage: s
     }
 };
 
-export const revealBoRPost = async (serverUrl: string, postId: string) => {
-    try {
-        const client = NetworkManager.getClient(serverUrl);
-        const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-
-        const post = await getPostById(database, postId);
-        if (!post) {
-            return {post: undefined};
-        }
-
-        const revealedPost = await client.revealBoRPost(postId);
-        await operator.handlePosts({
-            actionType: ActionType.POSTS.RECEIVED_IN_CHANNEL,
-            order: [revealedPost.id],
-            posts: [revealedPost],
-            prepareRecordsOnly: false,
-        });
-
-        return {post};
-    } catch (error) {
-        logDebug('error on revealBoRPost', getFullErrorMessage(error));
-        forceLogoutIfNecessary(serverUrl, error);
-        return {error};
-    }
-};
-
 export async function fetchSavedPosts(serverUrl: string, teamId?: string, channelId?: string, page?: number, perPage?: number) {
     try {
         const client = NetworkManager.getClient(serverUrl);
@@ -1099,7 +1078,7 @@ export async function fetchSavedPosts(serverUrl: string, teamId?: string, channe
             );
         }
 
-        if (channels?.length && channelMemberships?.length) {
+        if (channels?.length) {
             const isCRTEnabled = await getIsCRTEnabled(database);
             const channelPromises = prepareMissingChannelsForAllTeams(operator, channels, channelMemberships, isCRTEnabled);
             if (channelPromises.length) {
@@ -1175,7 +1154,7 @@ export async function fetchPinnedPosts(serverUrl: string, channelId: string) {
             );
         }
 
-        if (channels?.length && channelMemberships?.length) {
+        if (channels?.length) {
             const channelPromises = prepareMissingChannelsForAllTeams(operator, channels, channelMemberships, isCRTEnabled);
             if (channelPromises.length) {
                 promises.push(...channelPromises);

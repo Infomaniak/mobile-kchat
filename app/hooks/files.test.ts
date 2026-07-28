@@ -3,16 +3,12 @@
 
 import {renderHook} from '@testing-library/react-hooks';
 
-import {getLocalFileInfo} from '@actions/local/file';
 import {buildFilePreviewUrl, buildFileUrl} from '@actions/remote/file';
 import {useServerUrl} from '@context/server';
 import TestHelper from '@test/test_helper';
 import {isGif, isImage, isVideo} from '@utils/file';
-import {getImageSize} from '@utils/gallery';
 
-import {useChannelBookmarkFiles, useImageAttachments} from './files';
-
-import type ChannelBookmarkModel from '@typings/database/models/servers/channel_bookmark';
+import {useImageAttachments} from './files';
 
 jest.mock('@actions/remote/file', () => ({
     buildFilePreviewUrl: jest.fn(),
@@ -149,44 +145,5 @@ describe('useImageAttachments', () => {
         expect(result.current.images).toEqual([
             TestHelper.fakeFileInfo({id: '', localPath: 'path/to/image1', uri: 'path/to/image1'}),
         ]);
-    });
-});
-
-describe('useChannelBookmarkFiles', () => {
-    it('should fetch and set file info correctly', async () => {
-        const serverUrl = 'https://example.com';
-        (useServerUrl as jest.Mock).mockReturnValue(serverUrl);
-
-        const bookmarks = [
-            {fileId: '1', ownerId: 'user1'},
-            {fileId: '2', ownerId: 'user2'},
-        ] as ChannelBookmarkModel[];
-
-        const file1 = {id: '1', localPath: 'path/to/image1', has_preview_image: true, toFileInfo: jest.fn().mockReturnValue({id: '1'})};
-        const file2 = {id: '2', localPath: 'path/to/video1', has_preview_image: false, toFileInfo: jest.fn().mockReturnValue({id: '2'})};
-
-        (getLocalFileInfo as jest.Mock).mockImplementation((url, id) => {
-            if (id === '1') {
-                return {file: file1};
-            } else if (id === '2') {
-                return {file: file2};
-            }
-            return {file: null};
-        });
-
-        (isImage as jest.Mock).mockImplementation((file) => file.id === '1');
-        (isVideo as jest.Mock).mockImplementation((file) => file.id === '2');
-        (isGif as jest.Mock).mockImplementation(() => false);
-        (buildFileUrl as jest.Mock).mockImplementation((url, id) => `${url}/files/${id}`);
-        (buildFilePreviewUrl as jest.Mock).mockImplementation((url, id) => `${url}/files/${id}/preview`);
-        (getImageSize as jest.Mock).mockImplementation(() => ({width: 100, height: 100}));
-
-        const {result, waitForNextUpdate} = renderHook(() => useChannelBookmarkFiles(bookmarks));
-
-        await waitForNextUpdate();
-
-        expect(result.current).toHaveLength(2);
-        expect(result.current[0].id).toBe('1');
-        expect(result.current[1].id).toBe('2');
     });
 });

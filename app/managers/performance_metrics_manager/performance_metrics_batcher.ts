@@ -7,7 +7,6 @@ import {sendPerformanceReport} from '@actions/remote/performance';
 import DatabaseManager from '@database/manager';
 import {getConfigValue} from '@queries/servers/system';
 import {toMilliseconds} from '@utils/datetime';
-import {logDebug} from '@utils/log';
 
 const MAX_BATCH_SIZE = 100;
 const INTERVAL_TIME = toMilliseconds({seconds: 60});
@@ -92,7 +91,6 @@ class Batcher {
             this.start();
         }
 
-        logDebug('Performance metric:', measure);
         this.batch.push(measure);
         if (this.batch.length >= MAX_BATCH_SIZE) {
             this.sendBatch();

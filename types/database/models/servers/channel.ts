@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import type CategoryChannelModel from './category_channel';
-import type ChannelBookmarkModel from './channel_bookmark';
 import type ChannelInfoModel from './channel_info';
 import type ChannelMembershipModel from './channel_membership';
 import type DraftModel from './draft';
@@ -13,7 +12,6 @@ import type TeamModel from './team';
 import type UserModel from './user';
 import type {Query, Relation, Model} from '@nozbe/watermelondb';
 import type {Associations} from '@nozbe/watermelondb/Model';
-import type PlaybookRunModel from '@playbooks/types/database/models/playbook_run';
 
 /**
  * The Channel model represents a channel in the Mattermost app.
@@ -60,26 +58,17 @@ declare class ChannelModel extends Model {
     /** Whether the channel has Attribute-Based Access Control (ABAC) policy enforcement enabled, controlling access based on user attributes */
     abacPolicyEnforced?: boolean;
 
-    /** autotranslation : Whether the channel has automatic translation enabled */
-    autotranslation: boolean;
-
     /** members : Users belonging to this channel */
     members: Query<ChannelMembershipModel>;
 
     /** drafts : All drafts for this channel */
     drafts: Query<DraftModel>;
 
-    /** bookmarks : All bookmaks for this channel */
-    bookmarks: Query<ChannelBookmarkModel>;
-
     /** posts : All posts made in the channel */
     posts: Query<PostModel>;
 
     /** postsInChannel : a section of the posts for that channel bounded by a range */
     postsInChannel: Query<PostsInChannelModel>;
-
-    /** playbookRuns : All playbook runs for this channel */
-    playbookRuns: Query<PlaybookRunModel>;
 
     /** team : The TEAM to which this CHANNEL belongs */
     team: Relation<TeamModel>;

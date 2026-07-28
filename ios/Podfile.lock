@@ -198,6 +198,51 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - NitroModules (0.34.1):
+    - DoubleConversion
+    - glog
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-callinvoker
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - NitroSound (0.2.8):
+    - DoubleConversion
+    - glog
+    - NitroModules
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-callinvoker
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - ObjectiveDropboxOfficial (6.2.3)
   - OpenGraph (1.4.1)
   - RCT-Folly (2024.11.18.00):
@@ -1426,27 +1471,6 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-emm (1.6.2):
-    - DoubleConversion
-    - glog
-    - RCT-Folly (= 2024.11.18.00)
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - Yoga
   - react-native-get-random-values (1.11.0):
     - React-Core
   - react-native-image-picker (8.2.0):
@@ -1969,8 +1993,6 @@ PODS:
     - React-CoreModules
     - React-RCTImage
     - React-RCTText
-  - RNAudioRecorderPlayer (3.6.14):
-    - React-Core
   - RNCalendarEvents (2.2.0):
     - React-Core
   - RNCAsyncStorage (1.23.1):
@@ -2380,6 +2402,8 @@ DEPENDENCIES:
   - "mattermost-hardware-keyboard (from `../node_modules/@mattermost/hardware-keyboard`)"
   - "mattermost-react-native-turbo-log (from `../node_modules/@mattermost/react-native-turbo-log`)"
   - "mattermost-rnutils (from `../node_modules/@mattermost/rnutils`)"
+  - NitroModules (from `../node_modules/react-native-nitro-modules`)
+  - NitroSound (from `../node_modules/react-native-nitro-sound`)
   - OpenGraph (= 1.4.1)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
@@ -2418,7 +2442,6 @@ DEPENDENCIES:
   - react-native-color-matrix-image-filters (from `../node_modules/react-native-color-matrix-image-filters`)
   - "react-native-cookies (from `../node_modules/@react-native-cookies/cookies`)"
   - react-native-document-picker (from `../node_modules/react-native-document-picker`)
-  - "react-native-emm (from `../node_modules/@mattermost/react-native-emm`)"
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - "react-native-keep-awake (from `../node_modules/@sayem314/react-native-keep-awake`)"
@@ -2468,7 +2491,6 @@ DEPENDENCIES:
   - ReactNativeExceptionHandler (from `../node_modules/react-native-exception-handler`)
   - ReactNativeIncallManager (from `../node_modules/react-native-incall-manager`)
   - ReactNativeNavigation (from `../node_modules/react-native-navigation`)
-  - RNAudioRecorderPlayer (from `../node_modules/react-native-audio-recorder-player`)
   - RNCalendarEvents (from `../node_modules/react-native-calendar-events`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
@@ -2587,6 +2609,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@mattermost/react-native-turbo-log"
   mattermost-rnutils:
     :path: "../node_modules/@mattermost/rnutils"
+  NitroModules:
+    :path: "../node_modules/react-native-nitro-modules"
+  NitroSound:
+    :path: "../node_modules/react-native-nitro-sound"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -2657,8 +2683,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-cookies/cookies"
   react-native-document-picker:
     :path: "../node_modules/react-native-document-picker"
-  react-native-emm:
-    :path: "../node_modules/@mattermost/react-native-emm"
   react-native-get-random-values:
     :path: "../node_modules/react-native-get-random-values"
   react-native-image-picker:
@@ -2757,8 +2781,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-incall-manager"
   ReactNativeNavigation:
     :path: "../node_modules/react-native-navigation"
-  RNAudioRecorderPlayer:
-    :path: "../node_modules/react-native-audio-recorder-player"
   RNCalendarEvents:
     :path: "../node_modules/react-native-calendar-events"
   RNCAsyncStorage:
@@ -2871,6 +2893,8 @@ SPEC CHECKSUMS:
   mattermost-hardware-keyboard: c34d122f4dfb4342cd5770fb9d9f8f8fd5b73b28
   mattermost-react-native-turbo-log: aa271112608b6dc5c1d65227534b29208acbc96f
   mattermost-rnutils: 70efb35bc7afc07a9bbac873caaf29bda9befca8
+  NitroModules: da63c7e9f5bf490dc1672eeb8e212b8ac872b947
+  NitroSound: d69cdafbdc4839f52d76c8ea40e29b63409bb417
   ObjectiveDropboxOfficial: fe206ce8c0bc49976c249d472db7fdbc53ebbd53
   OpenGraph: 596722bb7f112d2dabcdb284cb817f01341a7540
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
@@ -2908,7 +2932,6 @@ SPEC CHECKSUMS:
   react-native-color-matrix-image-filters: ac6b7d1f964e4d158d183c1cf71b6a26e9a0c339
   react-native-cookies: d648ab7025833b977c0b19e142503034f5f29411
   react-native-document-picker: b25a7e3d6de8023d6a5bf522d6f20d42b047e3c6
-  react-native-emm: f6703906a39f9f6c3eed2de8a8e98dfd6e366bd7
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
   react-native-image-picker: ed4d6351125d1253fc98a09a79fff140d78653e9
   react-native-keep-awake: 03b74eebe4f2bb5e8478fc8f420651a92463b6f8
@@ -2958,7 +2981,6 @@ SPEC CHECKSUMS:
   ReactNativeExceptionHandler: a23922ca00122b050ae9412f960061791c232c47
   ReactNativeIncallManager: ef7b845e166f04cf8ddf433d8a23227b01cef87a
   ReactNativeNavigation: 6cef83673a08a51d426ff041c015da7c2a178a77
-  RNAudioRecorderPlayer: b5ed41ccfe72a211a870bfe09ab36c046eb27d2a
   RNCalendarEvents: 62e1ac89d3afbfa77cf2dafa8727af93fa70825f
   RNCAsyncStorage: aa75595c1aefa18f868452091fa0c411a516ce11
   RNCClipboard: 7c3e3b5f71d84ef61690ad377b6c50cf27864ff5
@@ -2997,6 +3019,6 @@ SPEC CHECKSUMS:
   WatermelonDB: 4c846c8cb94eef3cba90fa034d15310163226703
   Yoga: 2b02f3f767761bb4ffd25b1bb56fd264be57bd6b
 
-PODFILE CHECKSUM: 6ce9ad1756a725e4fc905fbcb7653e70d23ea648
+PODFILE CHECKSUM: 9af04c2bbdb8412b327d543f5556cbd0f4dcd5de
 
 COCOAPODS: 1.16.1

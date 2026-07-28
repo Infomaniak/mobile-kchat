@@ -11,8 +11,8 @@ export default tableSchema({
     name: MY_CHANNEL,
     columns: [
         {name: 'is_unread', type: 'boolean'},
-        {name: 'last_post_at', type: 'number'},
-        {name: 'last_viewed_at', type: 'number'},
+        {name: 'last_post_at', type: 'number', isIndexed: true},
+        {name: 'last_viewed_at', type: 'number', isIndexed: true},
         {name: 'manually_unread', type: 'boolean'},
         {name: 'mentions_count', type: 'number'},
         {name: 'message_count', type: 'number'},
@@ -20,7 +20,6 @@ export default tableSchema({
         {name: 'viewed_at', type: 'number'},
         {name: 'last_fetched_at', type: 'number', isIndexed: true},
         {name: 'last_playbook_runs_fetch_at', type: 'number'},
-        {name: 'autotranslation_disabled', type: 'boolean', isOptional: true},
     ],
 });
 

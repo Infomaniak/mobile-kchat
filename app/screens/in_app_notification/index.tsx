@@ -6,7 +6,7 @@ import {DeviceEventEmitter, StyleSheet, Text, TouchableOpacity, View} from 'reac
 import {GestureDetector, Gesture, GestureHandlerRootView} from 'react-native-gesture-handler';
 import {Navigation} from 'react-native-navigation';
 import Animated, {runOnJS, useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {initialWindowMetrics} from 'react-native-safe-area-context';
 
 import {openNotification} from '@actions/remote/notifications';
 import {Navigation as NavigationTypes} from '@constants';
@@ -14,7 +14,6 @@ import DatabaseManager from '@database/manager';
 import {useIsTablet} from '@hooks/device';
 import useDidMount from '@hooks/did_mount';
 import {usePreventDoubleTap} from '@hooks/utils';
-import SecurityManager from '@managers/security_manager';
 import {dismissOverlay} from '@screens/navigation';
 import {changeOpacity} from '@utils/theme';
 import {secureGetFromRecord} from '@utils/types';
@@ -75,7 +74,7 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
     const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
     const initial = useSharedValue(-130);
     const isTablet = useIsTablet();
-    const insets = useSafeAreaInsets();
+    const insetTop = initialWindowMetrics?.insets.top ?? 0;
     const tapped = useRef<boolean>(false);
 
     const animateDismissOverlay = () => {
@@ -135,11 +134,10 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
         const translateY = animate ? withTiming(-130, {duration: 300}) : withTiming(initial.value, {duration: 300});
 
         return {
-
-            marginTop: insets.top,
+            marginTop: insetTop,
             transform: [{translateY}],
         };
-    }, [animate, insets.top]);
+    }, [animate, insetTop]);
 
     const message = notification.payload?.body || notification.payload?.message;
     const gesture = Gesture.Pan().activeOffsetY(-20).onStart(() => runOnJS(animateDismissOverlay)());
@@ -152,7 +150,7 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
                 <Animated.View
                     style={[styles.container, isTablet ? styles.tablet : undefined, animatedStyle]}
                     testID='in_app_notification.screen'
-                    nativeID={SecurityManager.getShieldScreenId(componentId)}
+                    nativeID={`${componentId}.screen`}
                 >
                     <View style={styles.flex}>
                         <TouchableOpacity

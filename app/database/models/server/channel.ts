@@ -5,14 +5,11 @@ import {children, field, immutableRelation, json} from '@nozbe/watermelondb/deco
 import Model, {type Associations} from '@nozbe/watermelondb/Model';
 
 import {MM_TABLES} from '@constants/database';
-import {PLAYBOOK_TABLES} from '@playbooks/constants/database';
 import {safeParseJSON} from '@utils/helpers';
 
 import type {Query, Relation} from '@nozbe/watermelondb';
-import type PlaybookRunModel from '@playbooks/types/database/models/playbook_run';
 import type CategoryChannelModel from '@typings/database/models/servers/category_channel';
 import type ChannelModelInterface from '@typings/database/models/servers/channel';
-import type ChannelBookmarkModel from '@typings/database/models/servers/channel_bookmark';
 import type ChannelInfoModel from '@typings/database/models/servers/channel_info';
 import type ChannelMembershipModel from '@typings/database/models/servers/channel_membership';
 import type DraftModel from '@typings/database/models/servers/draft';
@@ -25,7 +22,6 @@ import type UserModel from '@typings/database/models/servers/user';
 const {
     CATEGORY_CHANNEL,
     CHANNEL,
-    CHANNEL_BOOKMARK,
     CHANNEL_INFO,
     CHANNEL_MEMBERSHIP,
     CONFERENCE,
@@ -38,8 +34,6 @@ const {
     USER,
 } = MM_TABLES.SERVER;
 
-const {PLAYBOOK_RUN} = PLAYBOOK_TABLES;
-
 /**
  * The Channel model represents a channel in the Mattermost app.
  */
@@ -49,9 +43,6 @@ export default class ChannelModel extends Model implements ChannelModelInterface
 
     /** associations : Describes every relationship to this table. */
     static associations: Associations = {
-
-        /** A CHANNEL can be associated with multiple CHANNEL_BOOKMARK (relationship is 1:N) */
-        [CHANNEL_BOOKMARK]: {type: 'has_many', foreignKey: 'channel_id'},
 
         /** A CHANNEL can be associated with multiple CHANNEL_MEMBERSHIP (relationship is 1:N) */
         [CHANNEL_MEMBERSHIP]: {type: 'has_many', foreignKey: 'channel_id'},
@@ -86,8 +77,6 @@ export default class ChannelModel extends Model implements ChannelModelInterface
         /** A CHANNEL is associated with one CHANNEL_INFO**/
         [CHANNEL_INFO]: {type: 'has_many', foreignKey: 'id'},
 
-        /** A CHANNEL can be associated with multiple PLAYBOOK_RUN (relationship is 1:N) */
-        [PLAYBOOK_RUN]: {type: 'has_many', foreignKey: 'channel_id'},
     };
 
     /** create_at : The creation date for this channel */
@@ -135,17 +124,11 @@ export default class ChannelModel extends Model implements ChannelModelInterface
     /** drafts : All drafts for this channel */
     @children(DRAFT) drafts!: Query<DraftModel>;
 
-    /** bookmarks : All bookmarks for this channel */
-    @children(CHANNEL_BOOKMARK) bookmarks!: Query<ChannelBookmarkModel>;
-
     /** posts : All posts made in that channel */
     @children(POST) posts!: Query<PostModel>;
 
     /** postsInChannel : a section of the posts for that channel bounded by a range */
     @children(POSTS_IN_CHANNEL) postsInChannel!: Query<PostsInChannelModel>;
-
-    /** playbookRuns : All playbook runs for this channel */
-    @children(PLAYBOOK_RUN) playbookRuns!: Query<PlaybookRunModel>;
 
     /** team : The TEAM to which this CHANNEL belongs */
     @immutableRelation(TEAM, 'team_id') team!: Relation<TeamModel>;
@@ -163,10 +146,8 @@ export default class ChannelModel extends Model implements ChannelModelInterface
     /** categoryChannel : Query returning the membership data for the current user if it belongs to this channel */
     @immutableRelation(CATEGORY_CHANNEL, 'channel_id') categoryChannel!: Relation<CategoryChannelModel>;
 
-    /** autotranslation : Whether the channel has automatic translation enabled */
-    @field('autotranslation') autotranslation!: boolean;
-
     toApi = (): Channel => {
+
         return {
             id: this.id,
             create_at: this.createAt,
@@ -187,7 +168,6 @@ export default class ChannelModel extends Model implements ChannelModelInterface
             shared: this.shared,
             banner_info: this.bannerInfo,
             policy_enforced: this.abacPolicyEnforced,
-            autotranslation: this.autotranslation,
         };
     };
 }

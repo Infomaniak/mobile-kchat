@@ -7,11 +7,9 @@ import {DeviceEventEmitter} from 'react-native';
 
 import {Events} from '@constants';
 import {MM_TABLES, SYSTEM_IDENTIFIERS} from '@constants/database';
-import {PostTypes, BOR_POST_CLEANUP_MIN_RUN_INTERVAL} from '@constants/post';
 import DatabaseManager from '@database/manager';
 import {getServerCredentials} from '@init/credentials';
 import {queryAllChannelsForTeam} from '@queries/servers/channel';
-import {queryPostsByType} from '@queries/servers/post';
 import {
     getConfig,
     getLicense,
@@ -19,13 +17,10 @@ import {
     getGranularDataRetentionPolicies,
     getLastGlobalDataRetentionRun,
     getIsDataRetentionEnabled,
-    getLastBoRPostCleanupRun,
 } from '@queries/servers/system';
 import PostModel from '@typings/database/models/servers/post';
-import {isExpiredBoRPost} from '@utils/bor';
 import {logError} from '@utils/log';
 
-import {deletePostsForChannelsWithAutotranslation} from './channel';
 import {deletePosts} from './post';
 
 import type {DataRetentionPoliciesRequest} from '@actions/remote/systems';
@@ -72,9 +67,6 @@ export async function storeConfig(serverUrl: string, config: ClientConfig | unde
         const configsToUpdate: IdValue[] = [];
         const configsToDelete: IdValue[] = [];
 
-        // Check if EnableAutoTranslation changed from enabled to disabled
-        const enableAutoTranslationChanged = (currentConfig?.EnableAutoTranslation === 'true') !== (config.EnableAutoTranslation === 'true');
-
         let k: keyof ClientConfig;
         for (k in config) {
             if (currentConfig?.[k] !== config[k]) {
@@ -96,11 +88,6 @@ export async function storeConfig(serverUrl: string, config: ClientConfig | unde
         if (configsToDelete.length || configsToUpdate.length) {
             const results = await operator.handleConfigs({configs: configsToUpdate, configsToDelete, prepareRecordsOnly});
             DeviceEventEmitter.emit(Events.CONFIG_CHANGED, {serverUrl, config});
-
-            // If EnableAutoTranslation was disabled, delete posts and disable user autotranslation
-            if (enableAutoTranslationChanged) {
-                await deletePostsForChannelsWithAutotranslation(serverUrl, prepareRecordsOnly);
-            }
 
             return results;
         }
@@ -336,54 +323,3 @@ export async function dismissAnnouncement(serverUrl: string, announcementText: s
     }
 }
 
-export async function expiredBoRPostCleanup(serverUrl: string) {
-    try {
-        const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const lastRunAt = await getLastBoRPostCleanupRun(database);
-
-        const shouldRunNow = (Date.now() - lastRunAt) > BOR_POST_CLEANUP_MIN_RUN_INTERVAL;
-
-        if (!shouldRunNow) {
-            return;
-        }
-
-        const {error} = await removeExpiredBoRPosts(serverUrl);
-        if (!error) {
-            await updateLastBoRCleanupRun(serverUrl);
-        }
-    } catch (error) {
-        logError('An error occurred running the Burn on Read cleanup task', error);
-    }
-}
-
-async function removeExpiredBoRPosts(serverUrl: string) {
-    try {
-        const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-        const allBoRPosts = await queryPostsByType(database, PostTypes.BURN_ON_READ).fetch();
-        const expiredBoRPostIDs = allBoRPosts.
-            filter((post) => isExpiredBoRPost(post)).
-            map((post) => post.id);
-
-        await dataRetentionCleanPosts(serverUrl, expiredBoRPostIDs);
-        return {error: undefined};
-    } catch (error) {
-        logError('An error occurred while performing BoR post cleanup', error);
-        return {error};
-    }
-}
-
-async function updateLastBoRCleanupRun(serverUrl: string) {
-    try {
-        const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
-
-        const systems: IdValue[] = [{
-            id: SYSTEM_IDENTIFIERS.LAST_BOR_POST_CLEANUP_RUN,
-            value: Date.now(),
-        }];
-
-        return operator.handleSystem({systems, prepareRecordsOnly: false});
-    } catch (error) {
-        logError('Failed updateLastBoRCleanupRun', error);
-        return {error};
-    }
-}

@@ -13,6 +13,7 @@
 @interface AppDelegate : EXAppDelegateWrapper<OrientationLockable, RNAppAuthAuthorizationFlowManager>
 
 @property (nonatomic) UIInterfaceOrientationMask orientationLock;
+@property (nonatomic, assign) UIBackgroundTaskIdentifier databaseLockBackgroundTask;
 @property (nonatomic, weak) id<RNAppAuthAuthorizationFlowManagerDelegate> authorizationFlowManagerDelegate;
 
 @end

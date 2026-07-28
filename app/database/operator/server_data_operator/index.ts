@@ -1,8 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import AgentsHandler, {type AgentsHandlerMix} from '@agents/database/operators/handlers';
-
 import ServerDataOperatorBase from '@database/operator/server_data_operator/handlers';
 import CategoryHandler, {type CategoryHandlerMix} from '@database/operator/server_data_operator/handlers/category';
 import ChannelHandler, {type ChannelHandlerMix} from '@database/operator/server_data_operator/handlers/channel';
@@ -14,19 +12,16 @@ import TeamHandler, {type TeamHandlerMix} from '@database/operator/server_data_o
 import TeamThreadsSyncHandler, {type TeamThreadsSyncHandlerMix} from '@database/operator/server_data_operator/handlers/team_threads_sync';
 import ThreadHandler, {type ThreadHandlerMix} from '@database/operator/server_data_operator/handlers/thread';
 import UserHandler, {type UserHandlerMix} from '@database/operator/server_data_operator/handlers/user';
-import PlaybookHandler, {type PlaybookHandlerMix} from '@playbooks/database/operators/handlers';
 import mix from '@utils/mix';
 
 import type {Database} from '@nozbe/watermelondb';
 
 interface ServerDataOperator extends
-    AgentsHandlerMix,
     CategoryHandlerMix,
     ChannelHandlerMix,
     ConferenceHandlerMix,
     CustomProfileHandlerMix,
     GroupHandlerMix,
-    PlaybookHandlerMix,
     PostHandlerMix,
     ServerDataOperatorBase,
     TeamHandlerMix,
@@ -36,13 +31,11 @@ interface ServerDataOperator extends
 {}
 
 class ServerDataOperator extends mix(ServerDataOperatorBase).with(
-    AgentsHandler,
     CategoryHandler,
     ChannelHandler,
     ConferenceHandler,
     CustomProfileHandler,
     GroupHandler,
-    PlaybookHandler,
     PostHandler,
     TeamHandler,
     ThreadHandler,

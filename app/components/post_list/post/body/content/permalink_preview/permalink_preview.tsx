@@ -11,7 +11,6 @@ import EditedIndicator from '@components/edited_indicator';
 import FormattedText from '@components/formatted_text';
 import FormattedTime from '@components/formatted_time';
 import Markdown from '@components/markdown';
-import TranslateIcon from '@components/post_list/post/header/translate_icon';
 import ProfilePicture from '@components/post_list/post/profile_picture/profile_picture';
 import {View as ViewConstants} from '@constants';
 import {useServerUrl} from '@context/server';
@@ -19,7 +18,6 @@ import {useTheme} from '@context/theme';
 import {useUserLocale} from '@context/user_locale';
 import {useIsTablet, useWindowDimensions} from '@hooks/device';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {getPostTranslatedMessage, getPostTranslation} from '@utils/post';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {displayUsername, getUserTimezone} from '@utils/user';
@@ -49,7 +47,6 @@ type PermalinkPreviewProps = {
     location: AvailableScreens;
     parentLocation?: string;
     parentPostId?: string;
-    autotranslationsEnabled: boolean;
 };
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -99,7 +96,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             ...typography('Body', 100),
             lineHeight: 20,
         },
-
         channelContext: {
             marginTop: 8,
             color: changeOpacity(theme.centerChannelColor, 0.64),
@@ -110,7 +106,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             ...typography('Body', 75, 'SemiBold'),
         },
         contentContainer: {
-            overflow: 'hidden',
             position: 'relative',
         },
         gradientOverlay: {
@@ -134,7 +129,6 @@ const PermalinkPreview = ({
     location,
     parentLocation,
     parentPostId,
-    autotranslationsEnabled,
 }: PermalinkPreviewProps) => {
     const theme = useTheme();
     const serverUrl = useServerUrl();
@@ -176,15 +170,8 @@ const PermalinkPreview = ({
         channel_type,
     } = embedData;
 
-    const translation = embedPost ? getPostTranslation(embedPost, locale) : undefined;
-
     const truncatedMessage = useMemo(() => {
-        let msg = embedPost?.message ?? '';
-        if (autotranslationsEnabled && embedPost?.type === '') {
-            if (translation?.state === 'ready') {
-                msg = getPostTranslatedMessage(msg, translation);
-            }
-        }
+        const msg = embedPost?.message ?? '';
         if (!msg || typeof msg !== 'string') {
             return '';
         }
@@ -196,7 +183,7 @@ const PermalinkPreview = ({
         }
 
         return cleanMessage;
-    }, [autotranslationsEnabled, embedPost?.message, embedPost?.type, translation]);
+    }, [embedPost?.message]);
 
     const isEdited = useMemo(() => embedData && embedData.post && embedData.post.edit_at > 0, [embedData]);
 
@@ -219,6 +206,8 @@ const PermalinkPreview = ({
 
     const hasFiles = filesInfo.length > 0;
 
+    const hasAttachments = Array.isArray(embedPost?.props?.attachments) && embedPost.props.attachments.length > 0;
+
     const handlePress = usePreventDoubleTap(useCallback(() => {
         const teamName = embedData.team_name;
         const postId = embedData.post_id;
@@ -230,9 +219,9 @@ const PermalinkPreview = ({
 
     const handleContentLayout = useCallback((event: LayoutChangeEvent) => {
         const {height, width} = event.nativeEvent.layout;
-        setShowGradient(height >= maxPermalinkHeight);
+        setShowGradient(!hasAttachments && height >= maxPermalinkHeight);
         setLayoutWidth(width);
-    }, [maxPermalinkHeight]);
+    }, [maxPermalinkHeight, hasAttachments]);
 
     // We need to memoize this value because it is actually a getter that returns a new list
     // on every render. We need to trust that changes in the currentUser will trigger the recalculation.
@@ -254,7 +243,12 @@ const PermalinkPreview = ({
             onPress={handlePress}
             testID='permalink-preview-container'
         >
-            <View style={[styles.contentContainer, {maxHeight: maxPermalinkHeight}]}>
+            <View
+                style={[
+                    styles.contentContainer,
+                    !hasAttachments && {maxHeight: maxPermalinkHeight, overflow: 'hidden'},
+                ]}
+            >
                 <View onLayout={handleContentLayout}>
                     <View style={styles.header}>
                         <ProfilePicture
@@ -273,11 +267,6 @@ const PermalinkPreview = ({
                                 value={embedPost?.create_at ?? 0}
                                 style={styles.timestamp}
                             />
-                            {autotranslationsEnabled && embedPost?.type === '' && (
-                                <TranslateIcon
-                                    translationState={translation?.state}
-                                />
-                            )}
                         </View>
                     </View>
 
@@ -334,7 +323,7 @@ const PermalinkPreview = ({
                     )}
                 </View>
 
-                {showGradient && (
+                {showGradient && !hasAttachments && (
                     <LinearGradient
                         colors={[changeOpacity(theme.centerChannelBg, 0), theme.centerChannelBg]}
                         style={styles.gradientOverlay}

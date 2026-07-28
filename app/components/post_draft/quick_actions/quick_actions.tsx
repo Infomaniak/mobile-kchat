@@ -19,12 +19,12 @@ type Props = {
     fileCount: number;
     isAgentsEnabled: boolean;
     isPostPriorityEnabled: boolean;
-    isBoREnabled: boolean;
     canShowPostPriority?: boolean;
     canShowSlashCommands?: boolean;
     canShowEmojiPicker?: boolean;
     maxFileCount: number;
     channelId: string;
+    showAttachLogs?: boolean;
     location?: AvailableScreens;
 
     // Draft Handler
@@ -33,8 +33,6 @@ type Props = {
     addFiles: (file: FileInfo[]) => void;
     postPriority: PostPriority;
     updatePostPriority: (postPriority: PostPriority) => void;
-    postBoRConfig?: PostBoRConfig;
-    updatePostBoRStatus?: (config: PostBoRConfig) => void;
     focus: () => void;
 }
 
@@ -60,6 +58,7 @@ export default function QuickActions({
     canShowPostPriority,
     canShowEmojiPicker = true,
     maxFileCount,
+    showAttachLogs,
     updateValue,
     addFiles,
     postPriority,
@@ -84,6 +83,7 @@ export default function QuickActions({
         maxFileCount,
         maxFilesReached: fileCount >= maxFileCount,
         onUploadFiles: addFiles,
+        showAttachLogs,
     };
 
     return (

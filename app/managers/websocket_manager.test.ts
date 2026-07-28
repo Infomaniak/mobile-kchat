@@ -1,227 +1,216 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-// import NetInfo from '@react-native-community/netinfo';
-// import {AppState} from 'react-native';
-// import BackgroundTimer from 'react-native-background-timer';
+import NetInfo from '@react-native-community/netinfo';
+import {AppState, DeviceEventEmitter, type AppStateStatus} from 'react-native';
 
-// import {fetchStatusByIds} from '@actions/remote/user';
-// import {handleFirstConnect, handleReconnect} from '@actions/websocket';
-// import WebSocketClient from '@client/websocket';
-// import DatabaseManager from '@database/manager';
-// import {getCurrentUserId} from '@queries/servers/system';
-// import {queryAllUsers} from '@queries/servers/user';
-// import EphemeralStore from '@store/ephemeral_store';
-// import TestHelper from '@test/test_helper';
-// import {logError} from '@utils/log';
+import WebSocketClient from '@client/websocket';
+import {Events} from '@constants';
+import DatabaseManager from '@database/manager';
+import {isMainActivity} from '@utils/helpers';
 
-// import WebsocketManager from './websocket_manager';
+import WebsocketManager from './websocket_manager';
 
-// import type {ServerDatabase} from '@typings/database/database';
+import type {ServerDatabase} from '@typings/database/database';
 
-// jest.mock('@react-native-community/netinfo');
-// jest.mock('react-native/Libraries/AppState/AppState');
-// jest.mock('react-native-background-timer');
-// jest.mock('@actions/local/user');
-// jest.mock('@actions/remote/user');
-// jest.mock('@actions/websocket');
-// jest.mock('@actions/websocket/event');
-// jest.mock('@client/websocket');
-// jest.mock('@database/manager');
-// jest.mock('@queries/servers/system');
-// jest.mock('@queries/servers/user');
-// jest.mock('@utils/log');
-// jest.mock('@store/ephemeral_store');
+jest.mock('@actions/remote/user');
+jest.mock('@actions/websocket/event');
+jest.mock('@client/websocket');
+jest.mock('@utils/helpers');
 
-// describe.skip('WebsocketManager', () => {
-//     // IK change : skipped on CI temporarily, will fix later
-//     let manager: typeof WebsocketManager;
-//     let mockWebSocketClient: any;
-//     let mockCallbacks: {[key: string]: (...args: any[]) => void};
-//     const mockServerUrl = 'https://example.com';
-//     const mockToken = 'mock-token';
-//     const mockCredentials = [{serverUrl: mockServerUrl, token: mockToken} as ServerCredential];
+let capturedAppStateCallback: ((state: AppStateStatus) => void) | undefined;
+let capturedNetInfoCallback: ((state: any) => void) | undefined;
 
-//     beforeEach(async () => {
-//         mockCallbacks = {};
-//         await DatabaseManager.init([mockServerUrl]);
+let mockWebSocketClient: any;
+let mockCallbacks: {[key: string]: (...args: any[]) => void};
 
-//         // Reset NetInfo mock
-//         (NetInfo.fetch as jest.Mock).mockResolvedValue({isConnected: true, type: 'wifi'});
-//         (NetInfo.addEventListener as jest.Mock).mockReturnValue(jest.fn());
+const mockServerUrl = 'https://example.com';
+const mockToken = 'mock-token';
+const mockCredentials = [{serverUrl: mockServerUrl, token: mockToken} as ServerCredential];
 
-//         // Reset AppState mock
-//         AppState.currentState = 'active';
+describe('WebsocketManager - background/foreground reconnection', () => {
+    beforeEach(async () => {
+        jest.clearAllMocks();
 
-//         // Reset WebSocketClient mock
-//         mockWebSocketClient = {
-//             setFirstConnectCallback: jest.fn((cb) => {
-//                 mockCallbacks.firstConnect = cb;
-//             }),
+        (isMainActivity as jest.Mock).mockReturnValue(true);
 
-//             setEventCallback: jest.fn(),
-//             setReconnectCallback: jest.fn((cb) => {
-//                 mockCallbacks.reconnect = cb;
-//             }),
-//             setReliableReconnectCallback: jest.fn(),
-//             setCloseCallback: jest.fn((cb) => {
-//                 mockCallbacks.close = cb;
-//             }),
-//             initialize: jest.fn(),
-//             isConnected: jest.fn().mockReturnValue(true),
-//             close: jest.fn(),
-//             invalidate: jest.fn(),
-//         };
-//         (WebSocketClient as unknown as jest.Mock).mockImplementation(() => mockWebSocketClient);
+        // Capture callbacks
+        jest.spyOn(AppState, 'addEventListener').mockImplementation((event: string, callback: (state: AppStateStatus) => void) => {
+            if (event === 'change') {
+                capturedAppStateCallback = callback;
+            }
+            return {remove: jest.fn()};
+        });
 
-//         // Reset DatabaseManager mock
-//         jest.spyOn(DatabaseManager, 'getServerDatabaseAndOperator').mockImplementation(() => ({
-//             database: {},
-//             operator: {},
-//         } as ServerDatabase));
+        jest.spyOn(NetInfo, 'addEventListener').mockImplementation((callback: (state: any) => void) => {
+            capturedNetInfoCallback = callback;
+            return jest.fn();
+        });
 
-//         manager = WebsocketManager;
-//     });
+        jest.spyOn(NetInfo, 'fetch').mockResolvedValue({isConnected: true, type: 'wifi'} as any);
 
-//     afterEach(async () => {
-//         await DatabaseManager.destroyServerDatabase(mockServerUrl);
-//         jest.clearAllMocks();
-//     });
+        await DatabaseManager.init([mockServerUrl]);
 
-//     describe('init', () => {
-//         it('should initialize correctly', async () => {
-//             await manager.init(mockCredentials);
+        // Mock getActiveServerUrl so openAll can identify the active server
+        (DatabaseManager as any).getActiveServerUrl = jest.fn().mockResolvedValue(mockServerUrl);
 
-//             expect(NetInfo.fetch).toHaveBeenCalled();
-//             expect(WebSocketClient).toHaveBeenCalledWith(mockServerUrl, mockToken);
-//             expect(NetInfo.addEventListener).toHaveBeenCalled();
-//         });
+        // Reset singleton internal state by manipulating private fields
+        (WebsocketManager as any).previousActiveState = true;
+        (WebsocketManager as any).connectedSubjects = {};
+        (WebsocketManager as any).connectedOnceUrls = new Set<string>();
+        (WebsocketManager as any).needsSyncOnConnectUrls = new Set<string>();
 
-//         it('should handle initialization error gracefully', async () => {
-//             (DatabaseManager.getServerDatabaseAndOperator as jest.Mock).mockImplementationOnce(() => {
-//                 throw new Error('Database error');
-//             });
+        // Clean up existing clients
+        WebsocketManager.invalidateClient(mockServerUrl);
+        delete (WebsocketManager as any).clients[mockServerUrl];
 
-//             await manager.init(mockCredentials);
+        // Setup WebSocketClient mock
+        mockCallbacks = {};
+        mockWebSocketClient = {
+            initialize: jest.fn(),
+            setConnectedCallback: jest.fn((cb: () => void) => {
+                mockCallbacks.connected = cb;
+            }),
+            setEventCallback: jest.fn(),
+            setCloseCallback: jest.fn((cb: (count: number) => void) => {
+                mockCallbacks.close = cb;
+            }),
+            isConnected: jest.fn().mockReturnValue(false),
+            close: jest.fn(),
+            invalidate: jest.fn(),
+        };
 
-//             expect(jest.mocked(logError)).toHaveBeenCalled();
-//         });
-//     });
+        (WebSocketClient as unknown as jest.Mock).mockImplementation(() => mockWebSocketClient);
 
-//     describe('client management', () => {
-//         beforeEach(async () => {
-//             await manager.init(mockCredentials);
-//             jest.clearAllMocks();
-//         });
+        // Mock DatabaseManager.getServerDatabaseAndOperator for init
+        jest.spyOn(DatabaseManager, 'getServerDatabaseAndOperator').mockImplementation(() => {
+            return DatabaseManager.serverDatabases[mockServerUrl] as unknown as ServerDatabase;
+        });
 
-//         it('should create and invalidate clients correctly', () => {
-//             const client = manager.createClient(mockServerUrl, mockToken);
-//             expect(client).toBeDefined();
+        await WebsocketManager.init(mockCredentials);
+    });
 
-//             manager.invalidateClient(mockServerUrl);
-//             expect(manager.getClient(mockServerUrl)).toBeUndefined();
-//         });
+    afterEach(async () => {
+        WebsocketManager.closeAll();
+        WebsocketManager.invalidateClient(mockServerUrl);
+        (WebsocketManager as any).previousActiveState = true;
+        (WebsocketManager as any).connectedOnceUrls = new Set<string>();
+        (WebsocketManager as any).needsSyncOnConnectUrls = new Set<string>();
 
-//         it('should handle websocket state observations', () => {
-//             const observable = manager.observeWebsocketState(mockServerUrl);
-//             expect(observable).toBeDefined();
-//         });
-//     });
+        // Clear any lingering periodic status update intervals
+        const statusIds = (WebsocketManager as any).statusUpdatesIntervalIDs || {};
+        for (const id of Object.values(statusIds)) {
+            clearInterval(id as number);
+        }
+        (WebsocketManager as any).statusUpdatesIntervalIDs = {};
 
-//     describe('proper callbacks set', () => {
-//         it('should remove playbooks when the reconnect callback is called', () => {
-//             const client = manager.createClient(mockServerUrl, mockToken);
-//             expect(client).toBeDefined();
+        await DatabaseManager.destroyServerDatabase(mockServerUrl);
+    });
 
-//             expect(client.setReconnectCallback).toHaveBeenCalled();
-//             jest.mocked(client.setReconnectCallback).mock.calls[0][0]();
-//             expect(EphemeralStore.clearChannelPlaybooksSynced).toHaveBeenCalled();
-//         });
-//     });
+    it('should close all websockets immediately when app goes to background', () => {
+        expect(capturedAppStateCallback).toBeDefined();
 
-//     describe('connection handling', () => {
-//         beforeEach(async () => {
-//             await manager.init(mockCredentials);
-//         });
+        capturedAppStateCallback!('background');
 
-//         it('should handle first connect correctly', async () => {
-//             mockWebSocketClient.isConnected.mockReturnValueOnce(false);
+        expect(mockWebSocketClient.close).toHaveBeenCalledWith(true);
+        expect(mockWebSocketClient.invalidate).toHaveBeenCalled();
+    });
 
-//             await manager.initializeClient(mockServerUrl);
+    it('should NOT close websockets when app goes to inactive (Control Center, notification shade)', () => {
+        expect(capturedAppStateCallback).toBeDefined();
 
-//             expect(mockWebSocketClient.initialize).toHaveBeenCalledWith({}, true);
-//             expect(handleFirstConnect).toHaveBeenCalledWith(mockServerUrl, 'WebSocket Reconnect');
+        capturedAppStateCallback!('inactive');
 
-//             if (mockCallbacks.firstConnect) {
-//                 mockCallbacks.firstConnect();
-//             }
-//         });
+        expect(mockWebSocketClient.close).not.toHaveBeenCalled();
+        expect(mockWebSocketClient.invalidate).not.toHaveBeenCalled();
+    });
 
-//         it('should handle reconnect correctly', async () => {
-//             const client = manager.getClient(mockServerUrl);
-//             expect(client).toBeDefined();
+    it('should open all websockets when returning to foreground', async () => {
+        // 1. Background → closeAll immediately
+        capturedAppStateCallback!('background');
 
-//             mockCallbacks.reconnect();
-//             expect(handleReconnect).toHaveBeenCalledWith(mockServerUrl);
-//         });
-//     });
+        expect(mockWebSocketClient.close).toHaveBeenCalledWith(true);
+        expect(mockWebSocketClient.initialize).not.toHaveBeenCalled();
 
-//     describe('state changes', () => {
-//         beforeEach(async () => {
-//             await manager.init(mockCredentials);
-//         });
+        // 2. Foreground → openAll
+        capturedAppStateCallback!('active');
 
-//         it('should handle app state changes', () => {
-//             const mockIntervalId = 123;
-//             jest.spyOn(BackgroundTimer, 'setInterval').mockReturnValue(mockIntervalId);
+        // Allow async openAll to complete
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
-//             // Get the app state callback and simulate background state
-//             const mockAppStateChange = (AppState.addEventListener as jest.Mock).mock.calls[0][1];
-//             mockAppStateChange('active');
-//             mockAppStateChange('background');
+        expect(mockWebSocketClient.initialize).toHaveBeenCalledWith({});
+    });
 
-//             expect(BackgroundTimer.setInterval).toHaveBeenCalled();
-//             expect(BackgroundTimer.setInterval).toHaveBeenCalledWith(expect.any(Function), 15000);
-//         });
+    it('should reinitialize websocket clients when returning to foreground after background', async () => {
+        // 1. Background → closeAll immediately
+        capturedAppStateCallback!('background');
 
-//         it('should handle network state changes', () => {
-//             const mockNetInfoCallback = (NetInfo.addEventListener as jest.Mock).mock.calls[0][0];
-//             mockNetInfoCallback({isConnected: false, type: 'none'});
+        expect(mockWebSocketClient.close).toHaveBeenCalledWith(true);
 
-//             // Verify that clients are closed when network is disconnected
-//             expect(manager.getClient(mockServerUrl)?.close).toHaveBeenCalled();
-//         });
-//     });
+        // 2. Foreground → openAll triggers initializeClient
+        capturedAppStateCallback!('active');
 
-//     describe('periodic updates', () => {
-//         beforeEach(async () => {
-//             jest.mocked(getCurrentUserId).mockResolvedValue('user1');
-//             jest.mocked(queryAllUsers).mockImplementation(() => TestHelper.fakeQuery([
-//                 TestHelper.fakeUserModel({id: 'user1'}),
-//                 TestHelper.fakeUserModel({id: 'user2'}),
-//             ]));
-//             await manager.init(mockCredentials);
-//         });
+        // Allow async openAll to complete
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
-//         it('should handle periodic status updates', async () => {
-//             const client = manager.getClient(mockServerUrl);
-//             expect(client).toBeDefined();
+        expect(mockWebSocketClient.initialize).toHaveBeenCalled();
+    });
 
-//             // Trigger first connect callback which starts periodic updates
-//             mockCallbacks.firstConnect();
+    it('should skip inactive during active→background transition and only close on background', () => {
+        // active → inactive (Control Center) — nothing happens
+        capturedAppStateCallback!('inactive');
+        expect(mockWebSocketClient.close).not.toHaveBeenCalled();
 
-//             // Wait for all promises to resolve
-//             await new Promise((resolve) => setImmediate(resolve));
+        jest.clearAllMocks();
 
-//             expect(fetchStatusByIds).toHaveBeenCalledWith(mockServerUrl, ['user2']);
+        // inactive → background — now close
+        capturedAppStateCallback!('background');
 
-//             // Close the websocket to stop the periodic updates
-//             mockCallbacks.close(0);
-//         });
-//     });
-// });
-describe('plugins', () => {
-    test('dummy test', () => {
-        expect(true).toBe(true);
+        expect(mockWebSocketClient.close).toHaveBeenCalledWith(true);
+        expect(mockWebSocketClient.invalidate).toHaveBeenCalled();
+    });
+
+    it('should not emit reconnect event on first connected callback', () => {
+        expect(mockCallbacks.connected).toBeDefined();
+
+        const listener = jest.fn();
+        const subscription = DeviceEventEmitter.addListener(Events.WEBSOCKET_RECONNECTED, listener);
+        let latestState: WebsocketConnectedState | undefined;
+        const stateSubscription = WebsocketManager.observeWebsocketState(mockServerUrl).subscribe((state) => {
+            latestState = state;
+        });
+
+        mockCallbacks.connected!();
+
+        expect(latestState).toBe('connected');
+        expect(listener).not.toHaveBeenCalled();
+
+        stateSubscription.unsubscribe();
+        subscription.remove();
+    });
+
+    it('should emit reconnect event when websocket reconnects after a disconnect while active', () => {
+        expect(mockCallbacks.connected).toBeDefined();
+        expect(mockCallbacks.close).toBeDefined();
+
+        const listener = jest.fn();
+        const subscription = DeviceEventEmitter.addListener(Events.WEBSOCKET_RECONNECTED, listener);
+
+        mockCallbacks.connected!();
+        mockCallbacks.close!(1);
+        mockCallbacks.connected!();
+
+        expect(listener).toHaveBeenCalledWith({serverUrl: mockServerUrl});
+
+        subscription.remove();
+    });
+
+    it('should handle network disconnection by closing all websockets', () => {
+        expect(capturedNetInfoCallback).toBeDefined();
+
+        capturedNetInfoCallback!({isConnected: false, type: 'none'});
+
+        // Ensure clients are closed when network drops
+        expect(mockWebSocketClient.close).toHaveBeenCalledWith(true);
     });
 });

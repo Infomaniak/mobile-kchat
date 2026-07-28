@@ -12,16 +12,15 @@ export default tableSchema({
     columns: [
         {name: 'create_at', type: 'number'},
         {name: 'creator_id', type: 'string', isIndexed: true},
-        {name: 'delete_at', type: 'number'},
+        {name: 'delete_at', type: 'number', isIndexed: true},
         {name: 'display_name', type: 'string'},
         {name: 'is_group_constrained', type: 'boolean'},
         {name: 'name', type: 'string', isIndexed: true},
         {name: 'shared', type: 'boolean'},
         {name: 'team_id', type: 'string', isIndexed: true},
-        {name: 'type', type: 'string'},
+        {name: 'type', type: 'string', isIndexed: true},
         {name: 'update_at', type: 'number'},
         {name: 'banner_info', type: 'string', isOptional: true},
         {name: 'abac_policy_enforced', type: 'boolean', isOptional: true},
-        {name: 'autotranslation', type: 'boolean', isOptional: true},
     ],
 });

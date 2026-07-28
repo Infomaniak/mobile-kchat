@@ -15,6 +15,7 @@ import {SNACK_BAR_TYPE} from '@constants/snack_bar';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import {useIsInfomaniakServer} from '@hooks/network';
 import {usePreventDoubleTap} from '@hooks/utils';
 import {dismissModal, goToScreen, setButtons} from '@screens/navigation';
 import {gotoSettingsScreen} from '@screens/settings/config';
@@ -24,6 +25,8 @@ import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {tryOpenURL} from '@utils/url';
 import {getUserTimezoneProps} from '@utils/user';
+
+import ReportProblem from './report_problem';
 
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -83,6 +86,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
     const intl = useIntl();
     const styles = getStyleSheet(theme);
     const timezone = useMemo(() => getUserTimezoneProps(currentUser), [currentUser]);
+    const isInfomaniak = useIsInfomaniakServer();
 
     const closeButton = useMemo(() => {
         return {
@@ -111,11 +115,11 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
         goToScreen(screen, title);
     });
 
-    const goToNotificationSettingsPush = preventDoubleTap(() => {
-        const screen = Screens.SETTINGS_NOTIFICATION_PUSH;
+    const goToNotificationSettings = preventDoubleTap(() => {
+        const screen = Screens.SETTINGS_NOTIFICATION;
         const title = intl.formatMessage({
-            id: 'notification_settings.push_notification',
-            defaultMessage: 'Push Notifications',
+            id: 'mobile.notification_settings',
+            defaultMessage: 'Notifications',
         });
 
         gotoSettingsScreen(screen, title);
@@ -125,6 +129,11 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
         const screen = Screens.SETTINGS_DISPLAY_TIMEZONE;
         const title = intl.formatMessage({id: 'display_settings.timezone', defaultMessage: 'Timezone'});
         gotoSettingsScreen(screen, title);
+    });
+
+    const goToPerformanceDebug = preventDoubleTap(() => {
+        const screen = Screens.DEBUG_PERFORMANCE;
+        goToScreen(screen, 'Performance Monitor');
     });
 
     const openHelp = usePreventDoubleTap(useCallback(() => {
@@ -169,7 +178,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
         <SettingContainer testID='settings'>
             <View style={{flex: 1}}>
                 <SettingItem
-                    onPress={goToNotificationSettingsPush}
+                    onPress={goToNotificationSettings}
                     optionName='notification'
                     testID='settings.notifications.option'
                 />
@@ -185,6 +194,13 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
                     info={intl.formatMessage(timezone.useAutomaticTimezone ? TIMEZONE_FORMAT[0] : TIMEZONE_FORMAT[1])}
                     testID='display_settings.timezone.option'
                 />
+                {isInfomaniak && (
+                    <SettingItem
+                        optionName='performance_debug'
+                        onPress={goToPerformanceDebug}
+                        testID='settings.performance_debug.option'
+                    />
+                )}
                 {Platform.OS === 'android' && <View style={styles.helpGroup}/>}
                 {showHelp &&
                 <SettingItem
@@ -194,6 +210,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
                     type='link'
                 />
                 }
+                {isInfomaniak && <ReportProblem/>}
                 <SettingItem
                     onPress={openFeedback}
                     optionName='feedback'

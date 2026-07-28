@@ -17,10 +17,10 @@ import {useIsTablet} from '@hooks/device';
 import {useDefaultHeaderHeight} from '@hooks/header';
 import {useTeamSwitch} from '@hooks/team_switch';
 import {useIsScreenVisible} from '@hooks/use_screen_visibility';
-import SecurityManager from '@managers/security_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {popTopScreen} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
+import {captureException} from '@utils/sentry';
 
 import ChannelContent from './channel_content';
 import ChannelHeader from './header';
@@ -39,7 +39,6 @@ type ChannelProps = {
     currentUserId: string;
     channelType: ChannelType;
     hasGMasDMFeature: boolean;
-    includeBookmarkBar?: boolean;
     includeChannelBanner: boolean;
     scheduledPostCount: number;
 };
@@ -59,8 +58,6 @@ const Channel = ({
     channelType,
     currentUserId,
     hasGMasDMFeature,
-
-    // includeBookmarkBar,
     includeChannelBanner,
     scheduledPostCount,
 }: ChannelProps) => {
@@ -120,13 +117,23 @@ const Channel = ({
             EphemeralStore.removeSwitchingToChannel(channelId);
         }, 500);
 
+        // Detect if Channel screen never renders within 10s (white screen scenario)
+        const renderTimeout = setTimeout(() => {
+            captureException(
+                new Error(`[Channel] Channel screen never rendered within 10s for ${channelId}`),
+            );
+        }, 10000);
+
         storeLastViewedChannelIdAndServer(channelId);
         wsClient?.bindPresenceChannel(channelId);
+
+        fetchPostsForChannel(serverUrl, channelId, false, false);
 
         return () => {
             wsClient?.unbindPresenceChannel();
             cancelAnimationFrame(raf);
             clearTimeout(t);
+            clearTimeout(renderTimeout);
             removeLastViewedChannelIdAndServer();
             EphemeralStore.removeSwitchingToChannel(channelId);
         };
@@ -144,14 +151,13 @@ const Channel = ({
                 edges={safeAreaViewEdges}
                 testID='channel.screen'
                 onLayout={onLayout}
-                nativeID={componentId ? SecurityManager.getShieldScreenId(componentId) : undefined}
+                nativeID={componentId ? `${componentId}.screen` : undefined}
             >
                 <ChannelHeader
                     channelId={channelId}
                     componentId={componentId}
                     callsEnabledInChannel={isCallsEnabledInChannel}
                     isTabletView={isTabletView}
-                    shouldRenderBookmarks={shouldRender}
                     shouldRenderChannelBanner={includeChannelBanner}
                 />
                 {Platform.OS === 'ios' ? (

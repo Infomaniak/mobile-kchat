@@ -5,7 +5,7 @@
 
 import {chunk} from 'lodash';
 
-import {updateChannelsDisplayName, deletePostsForChannelsWithAutotranslation} from '@actions/local/channel';
+import {updateChannelsDisplayName} from '@actions/local/channel';
 import {updateRecentCustomStatuses, updateLocalUser} from '@actions/local/user';
 import {fetchRolesIfNeeded} from '@actions/remote/role';
 import {General} from '@constants';
@@ -76,7 +76,7 @@ export const fetchMe = async (serverUrl: string, fetchOnly = false, groupLabel?:
             if (currentUser) {
                 const localeChanged = currentUser.locale !== user.locale;
                 if (localeChanged) {
-                    await deletePostsForChannelsWithAutotranslation(serverUrl);
+                    // no-op: locale changed
                 }
             }
         }

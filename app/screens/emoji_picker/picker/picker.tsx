@@ -8,7 +8,6 @@ import {searchCustomEmojis} from '@actions/remote/custom_emoji';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useDebounce} from '@hooks/utils';
-import SecurityManager from '@managers/security_manager';
 import {getKeyboardAppearanceFromTheme} from '@utils/theme';
 
 import EmojiFiltered from './filtered';
@@ -84,7 +83,7 @@ const Picker = ({customEmojis, customEmojisEnabled, file, imageUrl, onEmojiPress
         <View
             style={styles.flex}
             testID={`${testID}.screen`}
-            nativeID={SecurityManager.getShieldScreenId(testID as AvailableScreens)}
+            nativeID={`${testID as AvailableScreens}.screen`}
         >
             <View style={styles.searchBar}>
                 <PickerHeader

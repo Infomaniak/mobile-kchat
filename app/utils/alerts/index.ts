@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import Emm from '@mattermost/react-native-emm';
 import {createIntl, defineMessages} from 'react-intl';
 import {Alert, Platform, type AlertButton} from 'react-native';
 
@@ -11,7 +10,6 @@ import {Preferences} from '@constants';
 import DatabaseManager from '@database/manager';
 import {DEFAULT_LOCALE, getTranslations} from '@i18n';
 import {getServerCredentials} from '@init/credentials';
-import {IntuneAuthRequiredReasons} from '@managers/intune_manager/types';
 import {queryAllActiveServers} from '@queries/app/servers';
 import {getConfigValue} from '@queries/servers/system';
 import {logError} from '@utils/log';
@@ -230,9 +228,6 @@ export const buildSecurityAlertOptions = async (
         buttons.push({
             text: translations[messages.exit.id],
             style: 'destructive',
-            onPress: () => {
-                Emm.exitApp();
-            },
         });
     }
 
@@ -283,9 +278,6 @@ export const showNotSecuredAlert = async (server: string, siteName: string | und
     if (Platform.OS === 'android') {
         buttons.push({
             text: translations[messages.androidSettings.id],
-            onPress: () => {
-                Emm.openSecuritySettings();
-            },
         });
     }
 
@@ -324,9 +316,7 @@ export const showBiometricFailureAlert = async (server: string, blurOnAuthentica
     const translations = getTranslations(locale || DEFAULT_LOCALE);
 
     const buttons = await buildSecurityAlertOptions(server, translations, () => {
-        if (blurOnAuthenticate) {
-            Emm.removeBlurEffect();
-        }
+        if (blurOnAuthenticate) { /* empty */ }
     }, retryCallback);
     const securedBy = siteName || serverSiteName || 'Mattermost';
 
@@ -352,16 +342,8 @@ export const showAuthenticationRequiredAlert = async (reason?: string, locale?: 
     const translations = getTranslations(locale || DEFAULT_LOCALE);
 
     // Customize message based on reason
-    let title = translations[messages.authentication_required_title.id];
-    let message = translations[messages.authentication_required_message.id];
-
-    if (reason === IntuneAuthRequiredReasons.CONSENT_DENIED) {
-        title = translations[messages.consent_denied_title.id];
-        message = translations[messages.consent_denied_message.id];
-    } else if (reason === IntuneAuthRequiredReasons.AUTH_FAILED) {
-        title = translations[messages.authentication_failed_title.id];
-        message = translations[messages.authentication_failed_message.id];
-    }
+    const title = translations[messages.authentication_required_title.id];
+    const message = translations[messages.authentication_required_message.id];
 
     Alert.alert(title, message, [{text: translations[messages.okay.id], onPress: callback}], {cancelable: false});
 };

@@ -1,8 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import AgentPost from '@agents/components/agent_post';
-import {isAgentPost} from '@agents/utils';
 import React, {Fragment, type ReactNode, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Platform, type StyleProp, View, type ViewStyle, TouchableHighlight, type LayoutChangeEvent, TouchableOpacity} from 'react-native';
@@ -18,7 +16,6 @@ import {
 } from '@calls/components/ik_mail_attachment_custom_message/ik_mail_attachment_custom_message';
 import {isCallsCustomMessage} from '@calls/utils';
 import FormattedText from '@components/formatted_text';
-import UnrevealedBurnOnReadPost from '@components/post_list/post/burn_on_read/unrevealed';
 import IkWelcomeMessage from '@components/post_list/post/ik_welcome_message';
 import SystemAvatar from '@components/system_avatar';
 import SystemHeader from '@components/system_header';
@@ -31,7 +28,6 @@ import {useIsTablet} from '@hooks/device';
 import useDidMount from '@hooks/did_mount';
 import PerformanceMetricsManager from '@managers/performance_metrics_manager';
 import {openAsBottomSheet} from '@screens/navigation';
-import {isBoRPost, isUnrevealedBoRPost} from '@utils/bor';
 import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {hasJumboEmojiOnly} from '@utils/emoji/helpers';
 import {
@@ -72,6 +68,7 @@ type PostProps = {
     highlight?: boolean;
     highlightPinnedOrSaved?: boolean;
     highlightReplyBar: boolean;
+    isChannelMember?: boolean;
     isConsecutivePost?: boolean;
     isCRTEnabled?: boolean;
     isEphemeral: boolean;
@@ -147,6 +144,7 @@ const Post = ({
     highlight,
     highlightPinnedOrSaved = true,
     highlightReplyBar,
+    isChannelMember = true,
     isCRTEnabled,
     isConsecutivePost,
     isEphemeral,
@@ -186,10 +184,6 @@ const Post = ({
     const isSystemPost = isSystemMessage(post);
     const isMailAttachment = isMailAttachmentMessage(post);
     const isCallsPost = isCallsCustomMessage(post);
-    const borPost = isBoRPost(post);
-    const isUnrevealedPost = isUnrevealedBoRPost(post);
-    const isOwnPost = Boolean(currentUser && post.userId === currentUser.id);
-    const isAgentPostType = isAgentPost(post);
     const hasBeenDeleted = (post.deleteAt !== 0);
     const isWebHook = isFromWebhook(post);
     const isVoiceMessage = post.type === PostTypes.VOICE_MESSAGE;
@@ -223,8 +217,7 @@ const Post = ({
         if (isEphemeral || hasBeenDeleted) {
             removePost(serverUrl, post);
         } else if (isValidSystemMessage && !hasBeenDeleted && !isPendingOrFailed) {
-            // BoR posts cannot have replies, so don't open threads screen for them
-            if (!borPost && [Screens.CHANNEL, Screens.PERMALINK].includes(location)) {
+            if ([Screens.CHANNEL, Screens.PERMALINK].includes(location)) {
                 await blurAndDismissKeyboard();
                 const postRootId = post.rootId || post.id;
                 fetchAndSwitchToThread(serverUrl, postRootId);
@@ -234,13 +227,9 @@ const Post = ({
         setTimeout(() => {
             pressDetected.current = false;
         }, 300);
-    }, [location, isAutoResponder, isSystemPost, isEphemeral, hasBeenDeleted, isPendingOrFailed, serverUrl, post, borPost, blurAndDismissKeyboard]);
+    }, [location, isAutoResponder, isSystemPost, isEphemeral, hasBeenDeleted, isPendingOrFailed, serverUrl, post, blurAndDismissKeyboard]);
 
     const handlePress = useCallback(() => {
-        if (isBoRPost(post)) {
-            return;
-        }
-
         pressDetected.current = true;
 
         KeyboardController.dismiss();
@@ -290,7 +279,7 @@ const Post = ({
         }
 
         await blurAndDismissKeyboard();
-        const passProps = {sourceScreen: location, post, showAddReaction, serverUrl};
+        const passProps = {sourceScreen: location, post, showAddReaction, serverUrl, isChannelMember};
         const title = isTablet ? intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}) : '';
 
         openAsBottomSheet({
@@ -300,7 +289,7 @@ const Post = ({
             title,
             props: passProps,
         });
-    }, [post, isSystemPost, canDelete, hasBeenDeleted, isPendingOrFailed, isEphemeral, blurAndDismissKeyboard, closeInputAccessoryView, showInputAccessoryView, location, showAddReaction, serverUrl, isTablet, intl, theme]);
+    }, [post, isSystemPost, canDelete, hasBeenDeleted, isPendingOrFailed, isEphemeral, blurAndDismissKeyboard, closeInputAccessoryView, showInputAccessoryView, location, showAddReaction, serverUrl, isTablet, intl, theme, isChannelMember]);
 
     const [, rerender] = useState(false);
     useEffect(() => {
@@ -487,18 +476,6 @@ const Post = ({
     } else if (isCallsPost && !hasBeenDeleted) {
         body = <IkCallsCustomMessage post={post}/>;
 
-    } else if (isUnrevealedPost && !isOwnPost) {
-        body = (
-            <UnrevealedBurnOnReadPost post={post}/>
-        );
-    } else if (isAgentPostType && !hasBeenDeleted) {
-        body = (
-            <AgentPost
-                post={post}
-                currentUserId={currentUser?.id}
-                location={location}
-            />
-        );
     } else {
         body = (
             <Body

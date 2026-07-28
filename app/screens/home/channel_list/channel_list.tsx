@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useManagedConfig} from '@mattermost/react-native-emm';
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect} from 'react';
 import {useIntl} from 'react-intl';
@@ -20,8 +19,7 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import PerformanceMetricsManager from '@managers/performance_metrics_manager';
-import {openToS, resetToInfomaniakNoTeams} from '@screens/navigation';
-import EphemeralStore from '@store/ephemeral_store';
+import {openToS} from '@screens/navigation';
 import NavigationStore from '@store/navigation_store';
 import {isMainActivity} from '@utils/helpers';
 import {tryRunAppReview} from '@utils/reviews';
@@ -78,7 +76,6 @@ let hasRendered = false;
 const ChannelListScreen = (props: ChannelProps) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
-    const managedConfig = useManagedConfig<ManagedConfig>();
     const intl = useIntl();
 
     const isTablet = useIsTablet();
@@ -87,7 +84,7 @@ const ChannelListScreen = (props: ChannelProps) => {
     const navigation = useNavigation();
     const serverUrl = useServerUrl();
     const params = route.params as {direction: string};
-    const canAddOtherServers = managedConfig?.allowOtherServers !== 'false';
+    const canAddOtherServers = true;
 
     const handleBackPress = useCallback(() => {
         const isHomeScreen = NavigationStore.getVisibleScreen() === Screens.HOME;
@@ -134,19 +131,6 @@ const ChannelListScreen = (props: ChannelProps) => {
             transform: [{translateX: withTiming(0, {duration: 150})}],
         };
     }, [isFocused, params]);
-
-    useEffect(() => {
-        if (!props.hasTeams && !EphemeralStore.isLoggingIn()) {
-            // Debounce: verify hasTeams is still false after a short delay
-            const timer = setTimeout(() => {
-                if (!EphemeralStore.isLoggingIn()) {
-                    resetToInfomaniakNoTeams();
-                }
-            }, 1000);
-            return () => clearTimeout(timer);
-        }
-        return undefined;
-    }, [props.hasTeams]);
 
     useEffect(() => {
         const back = BackHandler.addEventListener('hardwareBackPress', handleBackPress);

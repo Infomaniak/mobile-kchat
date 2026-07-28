@@ -33,9 +33,6 @@ import java.security.cert.X509Certificate
 import java.util.Objects
 
 class ShareWorker(private val context: Context, workerParameters: WorkerParameters) : Worker(context, workerParameters) {
-    companion object {
-        private const val HEADER_X_MATTERMOST_PREAUTH_SECRET = "X-Mattermost-Preauth-Secret"
-    }
     private val jsonType: MediaType? = "application/json; charset=utf-8".toMediaTypeOrNull()
     private val okHttpClient: OkHttpClient
         get() {
@@ -93,18 +90,14 @@ class ShareWorker(private val context: Context, workerParameters: WorkerParamete
             val files = if (jsonObject.has("files")) jsonObject.getJSONArray("files") else null
             val serverUrl = jsonObject.getString("serverUrl")
             val token = jsonObject.getString("token")
-            val preauthSecret = if (jsonObject.has("preauthSecret") && !jsonObject.isNull("preauthSecret")) {
-                val secret = jsonObject.getString("preauthSecret")
-                if (secret.isNotEmpty()) secret else null
-            } else null
             val postData = buildPostObject(jsonObject)
 
             if (files != null && files.length() > 0) {
                 setForegroundAsync(createForegroundInfo())
-                return uploadFiles(serverUrl, token, preauthSecret, files, postData)
+                return uploadFiles(serverUrl, token, files, postData)
             } else {
                 try {
-                    return post(serverUrl, token, preauthSecret, postData)
+                    return post(serverUrl, token, postData)
                 } catch (e: IOException) {
                     Log.e(MattermostShareImpl.NAME, "Error sending the post", e)
                     return Result.failure()
@@ -131,16 +124,12 @@ class ShareWorker(private val context: Context, workerParameters: WorkerParamete
     }
 
     @Throws(IOException::class)
-    private fun post(serverUrl: String, token: String, preauthSecret: String?, postData: JSONObject): Result {
+    private fun post(serverUrl: String, token: String, postData: JSONObject): Result {
         val body = postData.toString().toRequestBody(jsonType)
         val requestBuilder = Request.Builder()
                 .header("Authorization", "BEARER $token")
                 .url("$serverUrl/api/v4/posts")
                 .post(body)
-
-        if (preauthSecret != null) {
-            requestBuilder.header(HEADER_X_MATTERMOST_PREAUTH_SECRET, preauthSecret)
-        }
 
         val request = requestBuilder.build()
 
@@ -150,62 +139,112 @@ class ShareWorker(private val context: Context, workerParameters: WorkerParamete
         return Result.success()
     }
 
-    private fun uploadFiles(serverUrl: String, token: String, preauthSecret: String?, files: JSONArray, postData: JSONObject): Result {
+    private fun uploadSingleFile(
+        serverUrl: String,
+        token: String,
+        file: JSONObject,
+        channelId: String
+    ): String? {
         try {
-            val builder = MultipartBody.Builder()
-                    .setType(MultipartBody.FORM)
-
-            for (i in 0 until files.length()) {
-                val file = files.getJSONObject(i)
-                val mime = file.getString("type")
-                val fullPath = file.getString("value")
-                val filePath = fullPath.replaceFirst("file://".toRegex(), "")
-                val fileInfo = File(filePath)
-                if (fileInfo.exists()) {
-                    val mediaType = mime.toMediaType()
-                    builder.addFormDataPart("files", file.getString("filename"), fileInfo.asRequestBody(mediaType))
-                }
+            val mime = file.getString("type")
+            val fullPath = file.getString("value")
+            val filePath = fullPath.replaceFirst("file://".toRegex(), "")
+            val fileInfo = File(filePath)
+            if (!fileInfo.exists()) {
+                Log.w(
+                    MattermostShareImpl.NAME,
+                    "File not found at path: $filePath"
+                )
+                return null
             }
 
-            builder.addFormDataPart("channel_id", postData.getString("channel_id"))
+            val builder = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+            val mediaType = mime.toMediaType()
+            builder.addFormDataPart(
+                "files",
+                file.getString("filename"),
+                fileInfo.asRequestBody(mediaType)
+            )
+            builder.addFormDataPart("channel_id", channelId)
+
             val body: RequestBody = builder.build()
             val requestBuilder = Request.Builder()
-                    .header("Authorization", "BEARER $token")
-                    .url("$serverUrl/api/v4/files")
-                    .post(body)
-
-            if (preauthSecret != null) {
-                requestBuilder.header(HEADER_X_MATTERMOST_PREAUTH_SECRET, preauthSecret)
-            }
+                .header("Authorization", "BEARER $token")
+                .url("$serverUrl/api/v4/files")
+                .post(body)
 
             val request = requestBuilder.build()
 
-            try {
-                okHttpClient.newCall(request).execute().use { response ->
-                    if (response.isSuccessful) {
-                        val responseData = Objects.requireNonNull<ResponseBody>(response.body).string()
-                        val responseJson = JSONObject(responseData)
+            okHttpClient.newCall(request).execute().use { response ->
+                if (response.isSuccessful) {
+                    val responseData = Objects.requireNonNull<ResponseBody>(response.body).string()
+                    val responseJson = JSONObject(responseData)
 
-                        response.body?.close()
-                        response.close()
+                    response.body?.close()
+                    response.close()
 
-                        val fileInfoArray = responseJson.getJSONArray("file_infos")
-                        val fileIds = JSONArray()
-                        for (i in 0 until fileInfoArray.length()) {
-                            val fileInfo = fileInfoArray.getJSONObject(i)
-                            fileIds.put(fileInfo.getString("id"))
-                        }
-                        postData.put("file_ids", fileIds)
-                        return post(serverUrl, token, preauthSecret, postData)
+                    val fileInfoArray = responseJson.getJSONArray("file_infos")
+                    if (fileInfoArray.length() > 0) {
+                        val fileData = fileInfoArray.getJSONObject(0)
+                        return fileData.getString("id")
                     }
-                    return Result.failure()
+                } else {
+                    Log.e(
+                        MattermostShareImpl.NAME,
+                        "Failed to upload a single file. Response code: ${response.code}"
+                    )
                 }
-            } catch (e: IOException) {
-                Log.e(MattermostShareImpl.NAME, "Failed to upload the files and post", e)
-                return Result.failure()
+                return null
             }
         } catch (e: JSONException) {
-            Log.e(MattermostShareImpl.NAME, "Failed to create the multipart body to upload the files", e)
+            Log.e(
+                MattermostShareImpl.NAME,
+                "Failed to create the multipart body to upload a single file",
+                e
+            )
+            return null
+        } catch (e: IOException) {
+            Log.e(
+                MattermostShareImpl.NAME,
+                "Failed to upload a single file due to IOException",
+                e
+            )
+            return null
+        }
+    }
+
+    private fun uploadFiles(
+        serverUrl: String,
+        token: String,
+        files: JSONArray,
+        postData: JSONObject
+    ): Result {
+        try {
+            val channelId = postData.getString("channel_id")
+            val fileIds = JSONArray()
+            var atLeastOneSuccess = false
+
+            for (i in 0 until files.length()) {
+                val file = files.getJSONObject(i)
+                val fileId = uploadSingleFile(serverUrl, token, file, channelId)
+                if (fileId != null) {
+                    fileIds.put(fileId)
+                    atLeastOneSuccess = true
+                }
+            }
+
+            if (atLeastOneSuccess) {
+                postData.put("file_ids", fileIds)
+                return post(serverUrl, token, postData)
+            }
+            return Result.failure()
+        } catch (e: JSONException) {
+            Log.e(
+                MattermostShareImpl.NAME,
+                "Failed to create the post object for multiple file upload",
+                e
+            )
             return Result.failure()
         }
     }

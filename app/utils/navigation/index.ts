@@ -20,7 +20,6 @@ export const appearanceControlledScreens = new Set<AvailableScreens>([
     Screens.SERVER,
     Screens.FORGOT_PASSWORD,
     Screens.MFA,
-    Screens.SSO,
     Screens.REVIEW_APP,
     Screens.SHARE_FEEDBACK,
 ]);
@@ -41,7 +40,7 @@ export function alertTeamRemove(displayName: string, intl: IntlShape) {
         }, {displayName}),
         [{
             style: 'cancel',
-            text: intl.formatMessage({id: 'mobile.oauth.something_wrong.okButton', defaultMessage: 'OK'}),
+            text: 'OK',
         }],
     );
 }
@@ -58,7 +57,7 @@ export function alertChannelRemove(displayName: string, intl: IntlShape) {
         }, {displayName}),
         [{
             style: 'cancel',
-            text: intl.formatMessage({id: 'mobile.oauth.something_wrong.okButton', defaultMessage: 'OK'}),
+            text: 'OK',
         }],
     );
 }

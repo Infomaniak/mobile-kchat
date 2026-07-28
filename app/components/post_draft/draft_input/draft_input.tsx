@@ -45,9 +45,7 @@ export type Props = {
 
     // Post Props
     postPriority: PostPriority;
-    postBoRConfig?: PostBoRConfig;
     updatePostPriority: (postPriority: PostPriority) => void;
-    updatePostBoRStatus: (config: PostBoRConfig) => void;
     persistentNotificationInterval: number;
     persistentNotificationMaxRecipients: number;
 
@@ -151,7 +149,6 @@ function DraftInput({
     persistentNotificationMaxRecipients,
     setIsFocused,
     scheduledPostsEnabled,
-    postBoRConfig,
 }: Props) {
     const [recording, setRecording] = useState(false);
     const intl = useIntl();
@@ -159,7 +156,7 @@ function DraftInput({
     const theme = useTheme();
     const isTablet = useIsTablet();
 
-    const {inputRef, focusInput: focus} = useKeyboardAnimationContext();
+    const {inputRef, focusInput: focus, blurAndDismissKeyboard} = useKeyboardAnimationContext();
 
     const handleLayout = useCallback((e: LayoutChangeEvent) => {
         updatePostInputTop(e.nativeEvent.layout.height);
@@ -183,6 +180,7 @@ function DraftInput({
         }
 
         if (check === 'granted') {
+            await blurAndDismissKeyboard();
             setRecording(true);
             userTyping('recording', serverUrl, channelId, rootId);
         }
@@ -192,6 +190,7 @@ function DraftInput({
 
             if (result === 'granted') {
                 await new Promise((resolve) => setTimeout(resolve, 500));
+                await blurAndDismissKeyboard();
                 setRecording(true);
                 userTyping('recording', serverUrl, channelId, rootId);
             }
@@ -200,7 +199,7 @@ function DraftInput({
                 openSettings();
             }
         }
-    }, [channelId, rootId, serverUrl]);
+    }, [blurAndDismissKeyboard, channelId, rootId, serverUrl]);
 
     const onCloseRecording = useCallback(() => {
         setRecording(false);
@@ -304,7 +303,6 @@ function DraftInput({
                     <Header
                         noMentionsError={noMentionsError}
                         postPriority={postPriority}
-                        postBoRConfig={postBoRConfig}
                     />
 
                     {recording && (

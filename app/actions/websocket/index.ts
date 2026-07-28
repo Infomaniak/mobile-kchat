@@ -6,7 +6,7 @@
 // import {handleAgentsReconnect} from '@agents/actions/websocket/reconnect';
 
 import {markChannelAsViewed} from '@actions/local/channel';
-import {dataRetentionCleanup, expiredBoRPostCleanup} from '@actions/local/systems';
+import {dataRetentionCleanup} from '@actions/local/systems';
 import {markChannelAsRead} from '@actions/remote/channel';
 import {
     entry,
@@ -37,18 +37,45 @@ import NavigationStore from '@store/navigation_store';
 import {setTeamLoading} from '@store/team_load_store';
 import {isTablet} from '@utils/helpers';
 import {logDebug, logInfo} from '@utils/log';
+import {captureMessage} from '@utils/sentry';
 
-export async function handleFirstConnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel) {
+import type {Model} from '@nozbe/watermelondb';
+
+const SLOW_RECONNECT_BATCH_THRESHOLD = 5000;
+
+function getModelsByTable(models: Model[]) {
+    const counts = models.reduce<Record<string, number>>((acc, model) => {
+        acc[model.table] = (acc[model.table] || 0) + 1;
+        return acc;
+    }, {});
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+}
+
+function captureSlowReconnectBatch(serverUrl: string, groupLabel: BaseRequestGroupLabel | undefined, models: Model[], duration: number) {
+    if (duration < SLOW_RECONNECT_BATCH_THRESHOLD) {
+        return;
+    }
+
+    captureMessage(`Slow websocket reconnect batch: ${JSON.stringify({
+        serverUrl,
+        groupLabel,
+        duration,
+        models: models.length,
+        tables: getModelsByTable(models),
+    })}`);
+}
+
+export async function handleFirstConnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel): Promise<Error | undefined> {
     setExtraSessionProps(serverUrl, groupLabel);
     autoUpdateTimezone(serverUrl, groupLabel);
     return doReconnect(serverUrl, groupLabel);
 }
 
-export async function handleReconnect(serverUrl: string, groupLabel: BaseRequestGroupLabel = 'WebSocket Reconnect') {
+export async function handleReconnect(serverUrl: string, groupLabel: BaseRequestGroupLabel = 'WebSocket Reconnect'): Promise<Error | undefined> {
     return doReconnect(serverUrl, groupLabel);
 }
 
-async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel) {
+async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel): Promise<Error | undefined> {
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
         return new Error('cannot find server database');
@@ -72,7 +99,10 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
     const entryData = await entry(serverUrl, currentTeamId, currentChannelId, lastFullSync, groupLabel);
     if ('error' in entryData) {
         setTeamLoading(serverUrl, false);
-        return entryData.error;
+        if (entryData.error instanceof Error) {
+            return entryData.error;
+        }
+        return new Error(String(entryData.error));
     }
     const {models, initialTeamId, initialChannelId, prefData, teamData, chData, meData, gmConverted} = entryData;
 
@@ -83,24 +113,15 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
         await operator.batchRecords(models, 'doReconnect');
     }
 
-    logInfo('WEBSOCKET RECONNECT MODELS BATCHING TOOK', `${Date.now() - dt}ms`);
+    const batchDuration = Date.now() - dt;
+    captureSlowReconnectBatch(serverUrl, groupLabel, models || [], batchDuration);
+    logInfo('WEBSOCKET RECONNECT MODELS BATCHING TOOK', `${batchDuration}ms`);
 
     await fetchPostDataIfNeeded(serverUrl, groupLabel);
 
     const {id: currentUserId, locale: currentUserLocale} = (await getCurrentUser(database))!;
     const license = await getLicense(database);
     const config = await getConfig(database);
-
-    // handlePlaybookReconnect(serverUrl);
-    // IK change: agents feature not available on our server
-    // handleAgentsReconnect(serverUrl);
-
-    // if (isSupportedServerCalls(config?.Version)) {
-    //     loadConfigAndCalls(serverUrl, currentUserId, groupLabel);
-    // }
-
-    // IK change: agents feature not available on our server
-    // checkIsAgentsPluginEnabled(serverUrl);
 
     await deferredAppEntryActions(serverUrl, lastFullSync, currentUserId, currentUserLocale, prefData.preferences, config, license, teamData, chData, meData, initialTeamId, undefined, groupLabel);
 
@@ -110,8 +131,6 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
     openAllUnreadChannels(serverUrl, groupLabel);
 
     dataRetentionCleanup(serverUrl);
-
-    expiredBoRPostCleanup(serverUrl);
 
     AppsManager.refreshAppBindings(serverUrl, groupLabel);
     return undefined;

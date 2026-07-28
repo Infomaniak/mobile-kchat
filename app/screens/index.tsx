@@ -1,11 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {loadAgentsScreen} from '@agents/screens';
-import {Provider as EMMProvider} from '@mattermost/react-native-emm';
-import React, {type ComponentType} from 'react';
+import React from 'react';
 import {IntlProvider} from 'react-intl';
-import {Platform} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {Navigation} from 'react-native-navigation';
 import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -13,7 +10,6 @@ import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-contex
 import {Screens} from '@constants';
 import {withServerDatabase} from '@database/components';
 import {DEFAULT_LOCALE, getTranslations} from '@i18n';
-import {loadPlaybooksScreen} from '@playbooks/screens';
 import {logDebug} from '@utils/log';
 import {useTopInsetShared} from '@utils/top_inset_shared';
 
@@ -74,16 +70,6 @@ export const withSafeAreaInsets = (Screen: React.ComponentType) => {
     return SafeAreaInsetsWrapper;
 };
 
-const withManagedConfig = (Screen: React.ComponentType) => {
-    return function EmmProvider(props: any) {
-        return (
-            <EMMProvider>
-                <Screen {...props}/>
-            </EMMProvider>
-        );
-    };
-};
-
 Navigation.setLazyComponentRegistrator((screenName) => {
     let screen: any|undefined;
     switch (screenName) {
@@ -104,9 +90,6 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             break;
         case Screens.CHANNEL:
             screen = withServerDatabase(require('@screens/channel').default);
-            break;
-        case Screens.CHANNEL_BOOKMARK:
-            screen = withServerDatabase(require('@screens/channel_bookmark').default);
             break;
         case Screens.CHANNEL_NOTIFICATION_PREFERENCES:
             screen = withServerDatabase(require('@screens/channel_notification_preferences').default);
@@ -191,9 +174,7 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             break;
         case Screens.IN_APP_NOTIFICATION: {
             const notificationScreen = require('@screens/in_app_notification').default;
-            Navigation.registerComponent(Screens.IN_APP_NOTIFICATION, () =>
-                withSafeAreaInsets(notificationScreen),
-            );
+            Navigation.registerComponent(Screens.IN_APP_NOTIFICATION, () => notificationScreen);
             return;
         }
         case Screens.JOIN_TEAM:
@@ -283,22 +264,20 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.SETTINGS_NOTIFICATION_CALL:
             screen = withServerDatabase(require('@screens/settings/notification_call').default);
             break;
+        case Screens.SEND_FEEDBACK:
+            screen = withServerDatabase(require('@screens/send_feedback').default);
+            break;
+        case Screens.FEEDBACK_OPTIONS:
+            screen = withServerDatabase(require('@screens/feedback_options').default);
+            break;
         case Screens.SHARE_FEEDBACK:
             screen = withServerDatabase(require('@screens/share_feedback').default);
             break;
         case Screens.SNACK_BAR: {
             const snackBarScreen = withServerDatabase(require('@screens/snack_bar').default);
-            Navigation.registerComponent(Screens.SNACK_BAR, () =>
-                Platform.select({
-                    default: snackBarScreen,
-                    ios: withSafeAreaInsets(snackBarScreen) as ComponentType,
-                }),
-            );
+            Navigation.registerComponent(Screens.SNACK_BAR, () => snackBarScreen);
             break;
         }
-        case Screens.SSO:
-            screen = withIntl(require('@screens/sso').default);
-            break;
         case Screens.TABLE:
             screen = withServerDatabase(require('@screens/table').default);
             break;
@@ -312,9 +291,9 @@ Navigation.setLazyComponentRegistrator((screenName) => {
             screen = withServerDatabase(require('@screens/thread').default);
             break;
         case Screens.THREAD_FOLLOW_BUTTON:
-            Navigation.registerComponent(Screens.THREAD_FOLLOW_BUTTON, () => withServerDatabase(
+            screen = withServerDatabase(
                 require('@screens/thread/thread_follow_button').default,
-            ));
+            );
             break;
         case Screens.THREAD_OPTIONS:
             screen = withServerDatabase(require('@screens/thread_options').default);
@@ -334,20 +313,18 @@ Navigation.setLazyComponentRegistrator((screenName) => {
         case Screens.INFOMANIAK_REMINDER:
             screen = withServerDatabase(require('@screens/ik_reminder').default);
             break;
+        case Screens.DEBUG_PERFORMANCE:
+            screen = withServerDatabase(require('@screens/debug_performance').default);
+            break;
         case Screens.SCHEDULED_POST_OPTIONS:
             screen = withServerDatabase(require('@screens/scheduled_post_options').default);
             break;
         case Screens.INFOMANIAK_EVOLVE:
             screen = withServerDatabase(require('@screens/ik_evolve').default);
             break;
-    }
-
-    if (!screen) {
-        screen = loadAgentsScreen(screenName);
-    }
-
-    if (!screen) {
-        screen = loadPlaybooksScreen(screenName);
+        case Screens.AGENTS_REWRITE_OPTIONS:
+            screen = withServerDatabase(require('@agents/screens/rewrite_options').default);
+            break;
     }
 
     if (!screen) {
@@ -355,17 +332,17 @@ Navigation.setLazyComponentRegistrator((screenName) => {
     }
 
     if (screen) {
-        Navigation.registerComponent(screenName, () => withGestures(withSafeAreaInsets(withManagedConfig(screen))));
+        Navigation.registerComponent(screenName, () => withGestures(withSafeAreaInsets(screen)));
     }
 });
 
 export function registerScreens() {
     const homeScreen = require('@screens/home').default;
     const onboardingScreen = require('@screens/onboarding').default;
-    Navigation.registerComponent(Screens.ONBOARDING, () => withGestures(withIntl(withManagedConfig(onboardingScreen))));
-    Navigation.registerComponent(Screens.HOME, () => withGestures(withSafeAreaInsets(withServerDatabase(withManagedConfig(homeScreen)))));
+    Navigation.registerComponent(Screens.ONBOARDING, () => withGestures(withIntl(onboardingScreen)));
+    Navigation.registerComponent(Screens.HOME, () => withGestures(withSafeAreaInsets(withServerDatabase(homeScreen))));
     const infomaniakLoginScreen = require('@screens/ik_login').default;
-    const infomaniakNoTeams = require('@screens/ik_no_teams').default;
-    Navigation.registerComponent(Screens.INFOMANIAK_LOGIN, () => withGestures(withIntl(withManagedConfig(infomaniakLoginScreen))));
-    Navigation.registerComponent(Screens.INFOMANIAK_NO_TEAMS, () => withGestures(withIntl(withManagedConfig(infomaniakNoTeams))));
+    const infomaniakNoTeams = require('@screens/ik_no_teams/index').default;
+    Navigation.registerComponent(Screens.INFOMANIAK_LOGIN, () => withGestures(withIntl(infomaniakLoginScreen)));
+    Navigation.registerComponent(Screens.INFOMANIAK_NO_TEAMS, () => withGestures(withIntl(withServerDatabase(infomaniakNoTeams))));
 }

@@ -12,22 +12,6 @@
 #import "kChat-Swift.h"
 #import <os/log.h>
 
-#if __has_include(<MSAL/MSAL.h>)
-  #import <MSAL/MSAL.h>
-  #define HAS_MSAL 1
-#else
-  #define HAS_MSAL 0
-#endif
-
-#if __has_include(<mattermost_intune/IntuneAccess.h>)
-  #import <mattermost_intune/IntuneAccess.h>
-  #define HAS_INTUNE 1
-#else
-  #define HAS_INTUNE 0
-#endif
-
-#define INTUNE_AVAILABLE   ((HAS_MSAL) && (HAS_INTUNE))
-
 @implementation AppDelegate
 
 @synthesize orientationLock;
@@ -64,11 +48,6 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
   // Configure Gekidou to use TurboLog via wrapper
   [[GekidouWrapper default] configureTurboLogForGekidou];
   
-#if INTUNE_AVAILABLE
-  // Initialize Intune MAM delegates BEFORE React Native
-  [IntuneAccess initializeIntuneDelegates];
-#endif
-  
   OrientationManager.shared.delegate = self;
   
   // Clear keychain on first run in case of reinstallation
@@ -93,11 +72,6 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
   os_log(OS_LOG_DEFAULT, "Mattermost started!!");
   [ReactNativeNavigation bootstrapWithDelegate:self launchOptions:launchOptions];
 
-#if INTUNE_AVAILABLE
-  // Restore enrollments if needed (silent, non-blocking)
-  [IntuneAccess checkAndRestoreEnrollmentOnLaunch];
-#endif
-  
   return YES;
 }
 
@@ -192,20 +166,6 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
   return [RCTLinkingManager application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
 }
 
-// Helper method to handle MSAL URL schemes
-- (BOOL)handleMSALURL:(NSURL *)url {
-#if INTUNE_AVAILABLE
-  NSString *urlString = url.absoluteString;
-  NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
-  NSString *expectedPrefix = [NSString stringWithFormat:@"msauth.%@", bundleId];
-
-  if ([urlString hasPrefix:expectedPrefix]) {
-    [TurboLog writeWithLogLevel:TurboLogLevelInfo message:@[@"[Intune] MSAL URL handled"]];
-    return [MSALPublicClientApplication handleMSALResponse:url sourceApplication:nil];
-  }
-#endif
-  return NO;
-}
 
 // Only if your app is using [Universal Links](https://developer.apple.com/library/prerelease/ios/documentation/General/Conceptual/AppSearch/UniversalLinks.html).
 - (BOOL) application: (UIApplication *)application
@@ -242,19 +202,23 @@ continueUserActivity: (nonnull NSUserActivity *)userActivity
 
 -(void)applicationDidBecomeActive:(UIApplication *)application {
   [[GekidouWrapper default] setPreference:@"true" forKey:@"ApplicationIsForeground"];
+  [self endDatabaseLockProtection];
 }
 
 -(void)applicationWillResignActive:(UIApplication *)application {
   [[GekidouWrapper default] setPreference:@"false" forKey:@"ApplicationIsForeground"];
+  [self beginDatabaseLockProtection];
 }
 
 -(void)applicationDidEnterBackground:(UIApplication *)application {
   [[GekidouWrapper default] setPreference:@"false" forKey:@"ApplicationIsForeground"];
+  [self beginDatabaseLockProtection];
 }
 
 -(void)applicationWillTerminate:(UIApplication *)application {
   [[GekidouWrapper default] setPreference:@"false" forKey:@"ApplicationIsForeground"];
   [[GekidouWrapper default] setPreference:@"false" forKey:@"ApplicationIsRunning"];
+  [self endDatabaseLockProtection];
 }
 
 - (UIInterfaceOrientationMask)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window {
@@ -309,6 +273,23 @@ continueUserActivity: (nonnull NSUserActivity *)userActivity
 
 - (void)sendFindChannels:(UIKeyCommand *)sender {
   [MattermostHardwareKeyboardWrapper findChannels];
+}
+
+// MARK: - Database lock protection (prevents RUNNINGBOARD 0xdead10cc)
+
+- (void)beginDatabaseLockProtection {
+  if (self.databaseLockBackgroundTask != UIBackgroundTaskInvalid) return;
+  self.databaseLockBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithName:@"MMDatabaseLockProtection" expirationHandler:^{
+    [self endDatabaseLockProtection];
+  }];
+  [TurboLog writeWithLogLevel:TurboLogLevelInfo message:@[@"MMDatabaseLockProtection: begin taskId", @(self.databaseLockBackgroundTask)]];
+}
+
+- (void)endDatabaseLockProtection {
+  if (self.databaseLockBackgroundTask == UIBackgroundTaskInvalid) return;
+  [TurboLog writeWithLogLevel:TurboLogLevelInfo message:@[@"MMDatabaseLockProtection: end taskId", @(self.databaseLockBackgroundTask)]];
+  [[UIApplication sharedApplication] endBackgroundTask:self.databaseLockBackgroundTask];
+  self.databaseLockBackgroundTask = UIBackgroundTaskInvalid;
 }
 
 @end

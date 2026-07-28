@@ -12,7 +12,7 @@ export default tableSchema({
     columns: [
         {name: 'auth_service', type: 'string'},
         {name: 'delete_at', type: 'number'},
-        {name: 'email', type: 'string'},
+        {name: 'email', type: 'string', isIndexed: true},
         {name: 'first_name', type: 'string'},
         {name: 'is_bot', type: 'boolean'},
         {name: 'is_guest', type: 'boolean'},
@@ -28,7 +28,7 @@ export default tableSchema({
         {name: 'status', type: 'string'},
         {name: 'timezone', type: 'string'},
         {name: 'update_at', type: 'number'},
-        {name: 'username', type: 'string'},
+        {name: 'username', type: 'string', isIndexed: true},
         {name: 'terms_of_service_id', type: 'string'},
         {name: 'terms_of_service_create_at', type: 'number'},
     ],

@@ -10,12 +10,10 @@ import ConvertToChannelLabel from '@components/channel_actions/convert_to_channe
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import SecurityManager from '@managers/security_manager';
 import {dismissModal} from '@screens/navigation';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import Archive from './archive';
-import ChannelAutotranslation from './channel_autotranslation';
 import ChannelInfoOption from './channel_info';
 import ConvertPrivate from './convert_private';
 
@@ -33,9 +31,6 @@ type Props = {
     componentId: AvailableScreens;
     convertGMOptionAvailable: boolean;
     displayName: string;
-
-    // isCallsEnabledInChannel: boolean;
-    canManageAutotranslations: boolean;
     type?: ChannelType;
 }
 
@@ -68,9 +63,6 @@ const ChannelSettings = ({
     componentId,
     convertGMOptionAvailable,
     displayName,
-
-    // isCallsEnabledInChannel,
-    canManageAutotranslations,
     type,
 }: Props) => {
     const theme = useTheme();
@@ -88,7 +80,7 @@ const ChannelSettings = ({
     return (
         <View
             style={styles.flex}
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
         >
             <SafeAreaView
                 edges={edges}
@@ -119,9 +111,6 @@ const ChannelSettings = ({
                     } */}
                     {convertGMOptionAvailable &&
                         <ConvertToChannelLabel channelId={channelId}/>
-                    }
-                    {canManageAutotranslations &&
-                        <ChannelAutotranslation channelId={channelId}/>
                     }
                     {(canArchive || canUnarchive) &&
                         <>

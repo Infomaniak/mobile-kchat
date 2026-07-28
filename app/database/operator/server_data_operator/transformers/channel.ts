@@ -7,7 +7,6 @@ import {extractChannelDisplayName} from '@helpers/database';
 
 import type {TransformerArgs} from '@typings/database/database';
 import type ChannelModel from '@typings/database/models/servers/channel';
-import type ChannelBookmarkModel from '@typings/database/models/servers/channel_bookmark';
 import type ChannelInfoModel from '@typings/database/models/servers/channel_info';
 import type ChannelMembershipModel from '@typings/database/models/servers/channel_membership';
 import type MyChannelModel from '@typings/database/models/servers/my_channel';
@@ -15,7 +14,6 @@ import type MyChannelSettingsModel from '@typings/database/models/servers/my_cha
 
 const {
     CHANNEL,
-    CHANNEL_BOOKMARK,
     CHANNEL_INFO,
     CHANNEL_MEMBERSHIP,
     MY_CHANNEL,
@@ -53,7 +51,6 @@ export const transformChannelRecord = ({action, database, value}: TransformerArg
         channel.type = raw.type;
         channel.bannerInfo = raw.banner_info;
         channel.abacPolicyEnforced = Boolean(raw.policy_enforced);
-        channel.autotranslation = Boolean(raw.autotranslation);
     };
 
     return prepareBaseRecord({
@@ -157,7 +154,6 @@ export const transformMyChannelRecord = async ({action, database, value}: Transf
         myChannel.viewedAt = record?.viewedAt || 0;
         myChannel.lastFetchedAt = record?.lastFetchedAt || 0;
         myChannel.lastPlaybookRunsFetchAt = record?.lastPlaybookRunsFetchAt || 0;
-        myChannel.autotranslationDisabled = Boolean(raw.autotranslation_disabled);
     };
 
     return prepareBaseRecord({
@@ -202,46 +198,3 @@ export const transformChannelMembershipRecord = ({action, database, value}: Tran
     });
 };
 
-/**
- * transformChannelBookmarkRecord: Prepares a record of the SERVER database 'Channel' table for update or create actions.
- * @param {DataFactory} operator
- * @param {Database} operator.database
- * @param {RecordPair} operator.value
- * @returns {Promise<ChannelBookmarkModel>}
- */
-export const transformChannelBookmarkRecord = ({action, database, value}: TransformerArgs<ChannelBookmarkModel, ChannelBookmark>): Promise<ChannelBookmarkModel> => {
-    const raw = value.raw;
-    const record = value.record;
-    const isCreateAction = action === OperationType.CREATE;
-    if (!isCreateAction && !record) {
-        throw new Error('Record not found for non create action');
-    }
-
-    // If isCreateAction is true, we will use the id (API response) from the RAW, else we shall use the existing record id from the database
-    const fieldsMapper = (bookmark: ChannelBookmarkModel) => {
-        bookmark._raw.id = isCreateAction ? (raw?.id ?? bookmark.id) : record!.id;
-        bookmark.createAt = raw.create_at;
-        bookmark.deleteAt = raw.delete_at;
-        bookmark.updateAt = raw.update_at;
-        bookmark.channelId = raw.channel_id;
-        bookmark.ownerId = raw.owner_id;
-        bookmark.fileId = raw.file_id;
-
-        bookmark.displayName = raw.display_name;
-        bookmark.sortOrder = raw.sort_order;
-        bookmark.linkUrl = raw.link_url;
-        bookmark.imageUrl = raw.image_url;
-        bookmark.emoji = raw.emoji;
-        bookmark.type = raw.type;
-        bookmark.originalId = raw.original_id;
-        bookmark.parentId = raw.parent_id;
-    };
-
-    return prepareBaseRecord({
-        action,
-        database,
-        tableName: CHANNEL_BOOKMARK,
-        value,
-        fieldsMapper,
-    });
-};

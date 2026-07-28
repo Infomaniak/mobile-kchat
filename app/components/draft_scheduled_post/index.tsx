@@ -7,7 +7,6 @@ import {switchMap, of} from 'rxjs';
 
 import {observeChannel, observeChannelMembers} from '@queries/servers/channel';
 import {observeIsPostPriorityEnabled} from '@queries/servers/post';
-import {observeConfigIntValue} from '@queries/servers/system';
 import {observeCurrentUser, observeUser} from '@queries/servers/user';
 
 import DraftAndScheduledPost from './draft_scheduled_post';
@@ -78,14 +77,12 @@ const observePostReceiverUser = ({
 
 const enhance = withObservables(['channel', 'members', 'post'], ({channel, database, currentUser, members, post}: Props) => {
     const postReceiverUser = observePostReceiverUser({members, database, channelData: channel, currentUser});
-    const borUserTimeLimit = observeConfigIntValue(database, 'BurnOnReadDurationSeconds');
 
     return {
         post: post.observe(),
         channel,
         postReceiverUser,
         isPostPriorityEnabled: observeIsPostPriorityEnabled(database),
-        borUserTimeLimit,
     };
 });
 

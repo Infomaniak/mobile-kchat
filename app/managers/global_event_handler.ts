@@ -9,7 +9,7 @@ import semver from 'semver';
 import {switchToChannelById} from '@actions/remote/channel';
 import {switchToConferenceByChannelId} from '@actions/remote/conference';
 import {batchTeamThreadSync} from '@actions/remote/thread';
-import {Device, Events, Sso} from '@constants';
+import {Device, Events} from '@constants';
 import {MIN_REQUIRED_VERSION} from '@constants/supported_server';
 import DatabaseManager from '@database/manager';
 import {DEFAULT_LOCALE, getTranslations} from '@i18n';
@@ -83,10 +83,6 @@ class GlobalEventHandlerSingleton {
     };
 
     onDeepLink = async (event: LinkingCallbackArg) => {
-        if (event.url?.startsWith(Sso.REDIRECT_URL_SCHEME) || event.url?.startsWith(Sso.REDIRECT_URL_SCHEME_DEV)) {
-            return;
-        }
-
         if (event.url) {
             const {error} = await parseAndHandleDeepLink(event.url, undefined, undefined, true);
             if (error) {

@@ -4,23 +4,21 @@
 import {AppState, type AppStateStatus, DeviceEventEmitter, Platform} from 'react-native';
 
 import {storeGlobal, storeOnboardingViewedValue} from '@actions/app/global';
-import {cancelAllSessionNotifications, terminateSession} from '@actions/local/session';
-import {syncMultiTeam, syncServerData} from '@actions/remote/entry/ikcommon';
-import {logout, scheduleSessionNotification} from '@actions/remote/session';
+import {terminateSession} from '@actions/local/session';
+import {syncMultiTeam} from '@actions/remote/entry/ikcommon';
+import {handleFirstConnect, handleReconnect} from '@actions/websocket';
 import {Events, Launch} from '@constants';
 import {GLOBAL_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import {getAllServerCredentials} from '@init/credentials';
 import {relaunchApp} from '@init/launch';
-import IntuneManager from '@managers/intune_manager';
-import SecurityManager from '@managers/security_manager';
 import {queryGlobalValue} from '@queries/app/global';
-import {getAllServers, getServerDisplayName} from '@queries/app/servers';
-import {getThemeFromState} from '@screens/navigation';
+import {getAllServers} from '@queries/app/servers';
+import {resetToInfomaniakNoTeams} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import {deleteFileCacheByDir} from '@utils/file';
 import {isMainActivity} from '@utils/helpers';
-import {addNewServer} from '@utils/server';
+import {logError} from '@utils/log';
 
 import type {LaunchType} from '@typings/launch';
 
@@ -29,23 +27,29 @@ type LogoutCallbackArg = {
     removeServer: boolean;
 }
 
+type TriggerSyncOptions = {
+    queueIfRunning?: boolean;
+}
+
 export class SessionManagerSingleton {
     private previousAppState: AppStateStatus;
-    private scheduling = false;
     private terminatingSessionUrl = new Set<string>();
+    private firstSyncedUrls = new Set<string>();
+    private syncPromises = new Map<string, Promise<Error | undefined>>();
+    private pendingSyncUrls = new Set<string>();
 
     constructor() {
         AppState.addEventListener('change', this.onAppStateChange);
 
         DeviceEventEmitter.addListener(Events.SERVER_LOGOUT, this.onLogout);
-        DeviceEventEmitter.addListener(Events.SESSION_EXPIRED, this.onSessionExpired);
+        DeviceEventEmitter.addListener(Events.ACTIVE_SERVER_CHANGED, this.onActiveServerChanged);
+        DeviceEventEmitter.addListener(Events.WEBSOCKET_RECONNECTED, this.onWebsocketReconnected);
+        DeviceEventEmitter.addListener(Events.NO_TEAMS, this.onNoTeams);
 
         this.previousAppState = AppState.currentState;
     }
 
     init() {
-        cancelAllSessionNotifications();
-
         let updateToMigrationDone = false;
         queryGlobalValue(GLOBAL_IDENTIFIERS.CACHE_MIGRATION)?.fetch().then((records) => {
             const cacheMigrationDone = Boolean(records?.[0]?.value);
@@ -65,20 +69,6 @@ export class SessionManagerSingleton {
         });
     }
 
-    private scheduleAllSessionNotifications = async () => {
-        if (!this.scheduling) {
-            this.scheduling = true;
-            const serverCredentials = await getAllServerCredentials();
-            const promises: Array<Promise<{error: unknown} | {error?: undefined}>> = [];
-            for (const {serverUrl} of serverCredentials) {
-                promises.push(scheduleSessionNotification(serverUrl));
-            }
-
-            await Promise.all(promises);
-            this.scheduling = false;
-        }
-    };
-
     private onAppStateChange = async (appState: AppStateStatus) => {
         if (appState === this.previousAppState || !isMainActivity()) {
             return;
@@ -87,11 +77,8 @@ export class SessionManagerSingleton {
         this.previousAppState = appState;
         switch (appState) {
             case 'active':
-                if (!EphemeralStore.isLoggingIn()) {
-                    this.syncServerData();
-                    this.syncMultiTeam();
-                }
-                setTimeout(cancelAllSessionNotifications, 750);
+                this.syncMultiTeam();
+                this.resyncActiveServer();
                 break;
             case 'background':
             case 'inactive':
@@ -99,13 +86,10 @@ export class SessionManagerSingleton {
         }
     };
 
-    private syncServerData = async () => {
-        try {
-            await syncServerData();
-        } catch (error) {
-            // do nothing
-        }
-    };
+    triggerInitialResync() {
+        this.syncMultiTeam();
+        this.resyncActiveServer();
+    }
 
     private syncMultiTeam = async () => {
         try {
@@ -115,7 +99,108 @@ export class SessionManagerSingleton {
                 await syncMultiTeam(credentials[0].token);
             }
         } catch (error) {
-            // do nothing
+            logError('[SessionManager] syncMultiTeam failed', error);
+        }
+    };
+
+    private resyncActiveServer = async () => {
+        try {
+            const activeServerUrl = await DatabaseManager.getActiveServerUrl();
+            if (activeServerUrl) {
+                await this.triggerSync(activeServerUrl);
+            }
+        } catch (error) {
+            logError('[SessionManager] resyncActiveServer failed', error);
+        }
+    };
+
+    triggerSync = (serverUrl: string, options: TriggerSyncOptions = {}): Promise<Error | undefined> => {
+        const currentSync = this.syncPromises.get(serverUrl);
+        if (currentSync) {
+            if (options.queueIfRunning) {
+                this.pendingSyncUrls.add(serverUrl);
+                return currentSync.then((error) => {
+                    if (error || !this.pendingSyncUrls.has(serverUrl)) {
+                        return error;
+                    }
+
+                    return this.triggerSync(serverUrl);
+                });
+            }
+            return currentSync;
+        }
+
+        const syncPromise = this.runSync(serverUrl).finally(() => {
+            this.syncPromises.delete(serverUrl);
+        });
+        this.syncPromises.set(serverUrl, syncPromise);
+        return syncPromise;
+    };
+
+    private runSync = async (serverUrl: string): Promise<Error | undefined> => {
+        let syncError: Error | undefined;
+
+        try {
+            this.pendingSyncUrls.delete(serverUrl);
+
+            syncError = await this.performSync(serverUrl);
+            if (!syncError) {
+                syncError = await this.replayPendingSync(serverUrl);
+            }
+        } catch (error: unknown) {
+            logError('[SessionManager] triggerSync failed', error);
+            return error instanceof Error ? error : new Error(String(error));
+        }
+        return syncError;
+    };
+
+    private performSync = async (serverUrl: string): Promise<Error | undefined> => {
+        if (this.firstSyncedUrls.has(serverUrl)) {
+            return handleReconnect(serverUrl);
+        }
+
+        const error = await handleFirstConnect(serverUrl);
+        if (error) {
+            logError('[SessionManager] handleFirstConnect failed', error);
+            return error;
+        }
+
+        this.firstSyncedUrls.add(serverUrl);
+        return undefined;
+    };
+
+    private replayPendingSync = async (serverUrl: string): Promise<Error | undefined> => {
+        if (!this.pendingSyncUrls.has(serverUrl)) {
+            return undefined;
+        }
+
+        this.pendingSyncUrls.delete(serverUrl);
+        const error = await this.performSync(serverUrl);
+        if (error) {
+            return error;
+        }
+
+        return this.replayPendingSync(serverUrl);
+    };
+
+    private onActiveServerChanged = async ({serverUrl}: {serverUrl: string}) => {
+        try {
+            if (serverUrl) {
+                await this.triggerSync(serverUrl);
+            }
+        } catch (error) {
+            logError('[SessionManager] onActiveServerChanged failed', error);
+        }
+    };
+
+    private onWebsocketReconnected = async ({serverUrl}: {serverUrl: string}) => {
+        try {
+            const activeServerUrl = await DatabaseManager.getActiveServerUrl();
+            if (serverUrl && serverUrl === activeServerUrl) {
+                await this.triggerSync(serverUrl, {queueIfRunning: true});
+            }
+        } catch (error) {
+            logError('[SessionManager] onWebsocketReconnected failed', error);
         }
     };
 
@@ -126,13 +211,15 @@ export class SessionManagerSingleton {
         try {
             this.terminatingSessionUrl.add(serverUrl);
 
+            // Remove from synced urls so next login will trigger firstConnect again
+            this.firstSyncedUrls.delete(serverUrl);
+            this.pendingSyncUrls.delete(serverUrl);
+            this.syncPromises.delete(serverUrl);
+
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
             const activeServerDisplayName = await DatabaseManager.getActiveServerDisplayName();
 
-            // We do not unenroll with Wipe as we already removed all the data during terminateSession
-            await IntuneManager.unenrollServer(serverUrl, false);
             await terminateSession(serverUrl, removeServer);
-            SecurityManager.removeServer(serverUrl);
 
             if (activeServerUrl === serverUrl) {
                 let displayName = '';
@@ -159,31 +246,14 @@ export class SessionManagerSingleton {
         }
     };
 
-    private onSessionExpired = async (serverUrl: string) => {
-        this.terminatingSessionUrl.add(serverUrl);
-
+    private onNoTeams = async () => {
         try {
-        // logout is not doing anything in this scenario, but we keep it
-        // to keep the same flow as other logout scenarios.
-            await logout(serverUrl, undefined, {skipServerLogout: true, skipEvents: true});
-
-            await terminateSession(serverUrl, false);
-            SecurityManager.removeServer(serverUrl);
-            await IntuneManager.unenrollServer(serverUrl, true);
-
-            const activeServerUrl = await DatabaseManager.getActiveServerUrl();
-            const serverDisplayName = await getServerDisplayName(serverUrl);
-
-            await relaunchApp({launchType: Launch.Normal, serverUrl, displayName: serverDisplayName});
-            if (activeServerUrl) {
-                addNewServer(getThemeFromState(), serverUrl, serverDisplayName);
-            } else {
-                EphemeralStore.theme = undefined;
-            }
-        } finally {
-            this.terminatingSessionUrl.delete(serverUrl);
+            await resetToInfomaniakNoTeams();
+        } catch (error) {
+            logError('[SessionManager] onNoTeams failed', error);
         }
     };
+
 }
 
 const SessionManager = new SessionManagerSingleton();

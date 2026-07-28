@@ -5,7 +5,6 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
-import {observeIsChannelAutotranslated} from '@queries/servers/channel';
 import {queryAllCustomEmojis} from '@queries/servers/custom_emoji';
 import {observePinnedPostsInChannel} from '@queries/servers/post';
 import {observeConfigBooleanValue} from '@queries/servers/system';
@@ -34,7 +33,7 @@ const enhance = withObservables(['channelId'], ({channelId, database}: Props) =>
         ),
         isCRTEnabled: observeIsCRTEnabled(database),
         posts,
-        isChannelAutotranslated: observeIsChannelAutotranslated(database, channelId),
+        isChannelAutotranslated: of$(false),
     };
 });
 

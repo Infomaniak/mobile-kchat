@@ -18,12 +18,8 @@ function getBaseProps(): ComponentProps<typeof Notifications> {
     return {
         componentId: 'Settings' as const,
         currentUser: TestHelper.fakeUserModel({id: 'user1', username: 'username1'}),
-        emailInterval: '0',
         enableAutoResponder: false,
-        enableEmailBatching: false,
         isCRTEnabled: false,
-        sendEmailNotifications: false,
-        serverVersion: '10.3.0',
     };
 }
 

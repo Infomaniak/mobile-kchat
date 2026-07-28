@@ -2,17 +2,17 @@
 // See LICENSE.txt for license information.
 
 import {type ImageSource} from 'expo-image';
-import React, {useMemo} from 'react';
+import React, {useState, useMemo} from 'react';
 import {Grayscale} from 'react-native-color-matrix-image-filters';
 
 import CompassIcon from '@components/compass_icon';
 import {ExpoImageAnimated} from '@components/expo_image';
-import {ACCOUNT_OUTLINE_IMAGE} from '@constants/profile';
+import InitialsFallback from '@components/profile_picture/initials_fallback';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
-import {getLastPictureUpdate} from '@utils/user';
+import {extractDisplayName, getAvatarColor, getLastPictureUpdate} from '@utils/user';
 
 import type UserModel from '@typings/database/models/servers/user';
 
@@ -36,12 +36,12 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 
 const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Props) => {
     const theme = useTheme();
-    let serverUrl = useServerUrl();
-    serverUrl = url || serverUrl;
+    const contextServerUrl = useServerUrl();
+    const serverUrl = url || contextServerUrl;
 
     const style = getStyleSheet(theme);
     const lastPictureUpdateAt = author ? getLastPictureUpdate(author) : 0;
-
+    const [errorUserId, setErrorUserId] = useState('');
     const fIStyle = useMemo(() => ({
         borderRadius: size / 2,
         height: size,
@@ -74,6 +74,17 @@ const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Pro
         return undefined;
     }, [author, lastPictureUpdateAt]);
 
+    const currentId = id || '';
+    const hasImageError = errorUserId === currentId && errorUserId !== '';
+
+    const handleImageError = () => {
+        setErrorUserId(currentId);
+    };
+
+    const handleImageLoad = () => {
+        setErrorUserId('');
+    };
+
     if (typeof source === 'string') {
         return (
             <CompassIcon
@@ -84,44 +95,45 @@ const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Pro
         );
     }
 
-    const renderImage = () => {
-        if (!imgSource) {
+    const showFallback = !imgSource || hasImageError;
+
+    if (showFallback) {
+        if (!author) {
             return (
                 <CompassIcon
-                    name={ACCOUNT_OUTLINE_IMAGE}
+                    name='account-outline'
                     size={iconSize || size}
                     style={style.icon}
                 />
             );
         }
-
-        const imageSource = imgSource?.uri?.startsWith('file://')? {uri: imgSource.uri}: imgSource;
-
+        const extractedName = extractDisplayName(author);
+        const fallbackColor = author?.id ? getAvatarColor(author.id) : undefined;
         return (
-            <ExpoImageAnimated
-                id={id}
-                key={id}
-                ref={forwardRef}
-                style={fIStyle}
-                source={imageSource}
-            />
-        );
-    };
-
-    const image = renderImage();
-    if (imgSource) {
-        return (
-            <ExpoImageAnimated
-                id={id}
-                key={id}
-                ref={forwardRef}
-                style={fIStyle}
-                source={imgSource}
+            <InitialsFallback
+                name={extractedName}
+                size={size}
+                textColor={fallbackColor ? '#FFFFFF' : style.icon.color}
+                backgroundColor={fallbackColor}
             />
         );
     }
 
-    return grayscale ? <Grayscale>{image}</Grayscale> : image;
+    const imageSource = imgSource.uri?.startsWith('file://') ? {uri: imgSource.uri} : imgSource;
+
+    const content = (
+        <ExpoImageAnimated
+            id={id}
+            key={id}
+            ref={forwardRef}
+            style={fIStyle}
+            source={imageSource}
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+        />
+    );
+
+    return grayscale ? <Grayscale>{content}</Grayscale> : content;
 };
 
 export default Image;

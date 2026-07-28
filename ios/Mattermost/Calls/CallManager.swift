@@ -181,12 +181,54 @@ public class CallManager: NSObject {
       }
 
       self.currentCalls[call.localUUID] = call
+      self.startConferenceCancellationWatcher(for: call)
       completion()
       // Apply any cancellation that arrived before the VoIP push was processed
       if let reason = self.pendingCancellations[call.channelId] {
         self.pendingCancellations.removeValue(forKey: call.channelId)
         self.currentCalls[call.localUUID] = nil
         self.callProvider.reportCall(with: call.localUUID, endedAt: nil, reason: reason)
+      }
+    }
+  }
+
+  // Polls the conference endpoint every 5s for up to 2 min to detect remote cancellation
+  // when the app is backgrounded and the JS WebSocket is not connected.
+  private func startConferenceCancellationWatcher(for call: MeetCall) {
+    guard let conferenceId = call.conferenceId else { return }
+
+    Task {
+      for _ in 1...24 {
+        try? await Task.sleep(nanoseconds: 5_000_000_000)
+
+        guard let currentCall = currentCalls[call.localUUID], !currentCall.joined else { return }
+
+        do {
+          let (data, response) = try await Network.default.answerCall(forServerUrl: call.serverURL, conferenceId: conferenceId)
+          guard let http = response as? HTTPURLResponse else { continue }
+
+          if http.statusCode == 404 {
+            LegacyLogger.calls.log(message: "[CallManager.startConferenceCancellationWatcher] Conference \(conferenceId) deleted, cancelling CallKit call")
+            await MainActor.run {
+              currentCalls[call.localUUID] = nil
+              callProvider.reportCall(with: call.localUUID, endedAt: nil, reason: .remoteEnded)
+            }
+            return
+          }
+
+          if let status = try? JSONDecoder().decode(ConferenceStatus.self, from: data),
+             let currentUserId = try? Database.default.queryCurrentUserId(call.serverURL),
+             status.registrants?[currentUserId]?.present == true {
+            LegacyLogger.calls.log(message: "[CallManager.startConferenceCancellationWatcher] Conference \(conferenceId) answered elsewhere, cancelling CallKit call")
+            await MainActor.run {
+              currentCalls[call.localUUID] = nil
+              callProvider.reportCall(with: call.localUUID, endedAt: nil, reason: .answeredElsewhere)
+            }
+            return
+          }
+        } catch {
+          LegacyLogger.calls.log(level: .error, message: "[CallManager.startConferenceCancellationWatcher] Error checking conference \(conferenceId): \(error)")
+        }
       }
     }
   }

@@ -6,12 +6,10 @@ import {ScrollView, View} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import ChannelActions from '@components/channel_actions';
-import ChannelBookmarks from '@components/channel_bookmarks';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import SecurityManager from '@managers/security_manager';
 import {dismissModal} from '@screens/navigation';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
@@ -24,20 +22,14 @@ import Title from './title';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
-    canAddBookmarks: boolean;
     channelId: string;
     closeButtonId: string;
     componentId: AvailableScreens;
     type?: ChannelType;
-    isBookmarksEnabled: boolean;
     isCallsEnabledInChannel: boolean;
-    isPlaybooksEnabled: boolean;
-    groupCallsAllowed: boolean;
     canManageMembers: boolean;
     isCRTEnabled: boolean;
-    isGuestUser: boolean;
     hasChannelSettingsActions: boolean;
-    isAutotranslationEnabledForThisChannel: boolean;
 }
 
 const edges: Edge[] = ['bottom', 'left', 'right'];
@@ -58,22 +50,14 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 }));
 
 const ChannelInfo = ({
-    canAddBookmarks,
     canManageMembers,
     channelId,
     closeButtonId,
     componentId,
-    isBookmarksEnabled,
     isCallsEnabledInChannel,
-
-    // isConvertGMFeatureAvailable,
-    // isPlaybooksEnabled,
-
-    // groupCallsAllowed,
     isCRTEnabled,
     type,
     hasChannelSettingsActions,
-    isAutotranslationEnabledForThisChannel,
 }: Props) => {
     const theme = useTheme();
     const serverUrl = useServerUrl();
@@ -93,7 +77,7 @@ const ChannelInfo = ({
     return (
         <View
             style={styles.flex}
-            nativeID={SecurityManager.getShieldScreenId(componentId)}
+            nativeID={`${componentId}.screen`}
         >
             <SafeAreaView
                 edges={edges}
@@ -110,13 +94,6 @@ const ChannelInfo = ({
                         channelId={channelId}
                         type={type}
                     />
-                    {isBookmarksEnabled &&
-                        <ChannelBookmarks
-                            channelId={channelId}
-                            canAddBookmarks={canAddBookmarks}
-                            showInInfo={true}
-                        />
-                    }
                     <ChannelActions
                         channelId={channelId}
                         inModal={true}
@@ -131,27 +108,9 @@ const ChannelInfo = ({
                         callsEnabled={isCallsEnabledInChannel}
                         canManageMembers={canManageMembers}
                         isCRTEnabled={isCRTEnabled}
-
-                        // isPlaybooksEnabled={isPlaybooksEnabled}
                         hasChannelSettingsActions={hasChannelSettingsActions}
-                        isAutotranslationEnabledForThisChannel={isAutotranslationEnabledForThisChannel}
                     />
                     <View style={styles.separator}/>
-                    {/* {convertGMOptionAvailable &&
-                    <>
-                        <ConvertToChannelLabel channelId={channelId}/>
-                        <View style={styles.separator}/>
-                    </>
-                    } */}
-                    {/* {canEnableDisableCalls &&
-                        <>
-                            <ChannelInfoEnableCalls
-                                channelId={channelId}
-                                enabled={isCallsEnabledInChannel}
-                            />
-                            <View style={styles.separator}/>
-                        </>
-                    } */}
                     <ChannelInfoAppBindings
                         channelId={channelId}
                         serverUrl={serverUrl}

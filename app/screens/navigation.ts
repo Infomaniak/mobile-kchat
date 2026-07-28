@@ -5,7 +5,7 @@
 
 import RNUtils from '@mattermost/rnutils';
 import merge from 'deepmerge';
-import {Appearance, DeviceEventEmitter, Platform, Alert, type EmitterSubscription, Keyboard, StatusBar} from 'react-native';
+import {Appearance, DeviceEventEmitter, Platform, Alert, type EmitterSubscription, StatusBar} from 'react-native';
 import {type ComponentWillAppearEvent, type ImageResource, type LayoutOrientation, Navigation, type Options, OptionsModalPresentationStyle, type OptionsTopBarButton, type ScreenPoppedEvent, type EventSubscription, type OptionsStatusBar} from 'react-native-navigation';
 import tinyColor from 'tinycolor2';
 
@@ -16,8 +16,10 @@ import {getDefaultThemeByAppearance} from '@context/theme';
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {isTablet} from '@utils/helpers';
+import {dismissKeyboard} from '@utils/keyboard';
 import {logError} from '@utils/log';
 import {appearanceControlledScreens, mergeNavigationOptions} from '@utils/navigation';
+import {captureException} from '@utils/sentry';
 import {changeOpacity, setNavigatorStyles} from '@utils/theme';
 
 import type {BottomSheetFooterProps} from '@gorhom/bottom-sheet';
@@ -26,7 +28,6 @@ import type {LaunchProps} from '@typings/launch';
 import type {AvailableScreens, NavButtons} from '@typings/screens/navigation';
 import type {ComponentProps} from 'react';
 import type {IntlShape} from 'react-intl';
-import type {Asset} from 'react-native-image-picker';
 
 const alpha = {
     from: 0,
@@ -42,7 +43,6 @@ const loginFlowScreens = new Set<AvailableScreens>([
     Screens.ONBOARDING,
     Screens.SERVER,
     Screens.LOGIN,
-    Screens.SSO,
     Screens.MFA,
     Screens.FORGOT_PASSWORD,
 ]);
@@ -338,7 +338,6 @@ export function resetToHome(passProps: LaunchProps = {launchType: Launch.Normal}
 
     if (!passProps.coldStart && (passProps.launchType === Launch.AddServer || passProps.launchType === Launch.AddServerFromDeepLink)) {
         dismissModal({componentId: Screens.SERVER});
-        dismissModal({componentId: Screens.SSO});
         dismissModal({componentId: Screens.BOTTOM_SHEET});
         if (passProps.launchType === Launch.AddServerFromDeepLink) {
             Navigation.updateProps(Screens.HOME, {launchType: Launch.DeepLink, extra: passProps.extra});
@@ -603,6 +602,7 @@ export function resetToTeams() {
 
 export function goToScreen(name: AvailableScreens, title: string, passProps = {}, options: Options = {}) {
     if (!isScreenRegistered(name)) {
+        captureException(new Error(`[Navigation] Screen ${name} is not registered`));
         return '';
     }
 
@@ -651,17 +651,25 @@ export function goToScreen(name: AvailableScreens, title: string, passProps = {}
 
     if (NavigationStore.getScreensInStack().includes(name)) {
         Navigation.updateProps(name, passProps);
-        return Navigation.popTo(name, merge(defaultOptions, options));
+        if (NavigationStore.getVisibleScreen() !== name) {
+            return Navigation.popTo(name, merge(defaultOptions, options));
+        }
+        return '';
     }
 
-    return Navigation.push(componentId, {
-        component: {
-            id: name,
-            name,
-            passProps,
-            options: merge(defaultOptions, options),
-        },
-    });
+    try {
+        return Navigation.push(componentId, {
+            component: {
+                id: name,
+                name,
+                passProps,
+                options: merge(defaultOptions, options),
+            },
+        });
+    } catch (error) {
+        captureException(error);
+        return '';
+    }
 }
 
 export async function popTopScreen(screenId?: AvailableScreens) {
@@ -1011,9 +1019,10 @@ export function openAttachmentOptions(
     intl: IntlShape,
     theme: Theme,
     props: {
-        onUploadFiles: (files: Asset[]) => void;
+        onUploadFiles: (files: ExtractedFileInfo[]) => void;
         maxFilesReached: boolean;
         canUploadFiles: boolean;
+        showAttachLogs?: boolean;
         testID?: string;
         fileCount?: number;
         maxFileCount?: number;
@@ -1083,6 +1092,6 @@ export async function openUserProfileModal(
     const title = intl.formatMessage({id: 'mobile.routes.user_profile', defaultMessage: 'Profile'});
     const closeButtonId = 'close-user-profile';
 
-    Keyboard.dismiss();
+    dismissKeyboard();
     openAsBottomSheet({screen, title, theme, closeButtonId, props: {...props}});
 }

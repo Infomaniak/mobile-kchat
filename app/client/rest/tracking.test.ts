@@ -107,7 +107,7 @@ describe.skip('ClientTracking', () => {
         client.setClientCredentials(token);
 
         expect(client.requestHeaders[ClientConstants.HEADER_AUTH]).toBe(`${ClientConstants.HEADER_BEARER} ${token}`);
-        expect(require('@init/credentials').setServerCredentials).toHaveBeenCalledWith(apiClientMock.baseUrl, token, undefined);
+        expect(require('@init/credentials').setServerCredentials).toHaveBeenCalledWith(apiClientMock.baseUrl, token);
     });
 
     it('should set CSRF token', () => {
@@ -833,60 +833,6 @@ describe.skip('ClientTracking', () => {
 
             // Should return default latency of 100ms
             expect(result).toBe(100);
-        });
-    });
-
-    describe('setClientCredentials', () => {
-        it('should set shared password header when provided', () => {
-            client.setClientCredentials('bearer-token', 'shared-password');
-
-            expect(client.requestHeaders[ClientConstants.HEADER_AUTH]).toBe(`${ClientConstants.HEADER_BEARER} bearer-token`);
-            expect(client.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET]).toBe('shared-password');
-        });
-
-        it('should remove shared password header when undefined', () => {
-            // First set a shared password
-            client.setClientCredentials('bearer-token', 'shared-password');
-            expect(client.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET]).toBe('shared-password');
-
-            // Then remove it by setting undefined
-            client.setClientCredentials('bearer-token', undefined);
-            expect(client.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET]).toBeUndefined();
-        });
-
-        it('should remove shared password header when empty string', () => {
-            // First set a shared password
-            client.setClientCredentials('bearer-token', 'shared-password');
-            expect(client.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET]).toBe('shared-password');
-
-            // Then remove it by setting empty string
-            client.setClientCredentials('bearer-token', '');
-            expect(client.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET]).toBeUndefined();
-        });
-
-        it('should always set bearer token correctly', () => {
-            client.setClientCredentials('test-bearer', 'shared-password');
-            expect(client.requestHeaders[ClientConstants.HEADER_AUTH]).toBe(`${ClientConstants.HEADER_BEARER} test-bearer`);
-
-            client.setClientCredentials('new-bearer', undefined);
-            expect(client.requestHeaders[ClientConstants.HEADER_AUTH]).toBe(`${ClientConstants.HEADER_BEARER} new-bearer`);
-        });
-
-        it('should handle multiple header updates correctly', () => {
-            // Set initial credentials
-            client.setClientCredentials('bearer1', 'password1');
-            expect(client.requestHeaders[ClientConstants.HEADER_AUTH]).toBe(`${ClientConstants.HEADER_BEARER} bearer1`);
-            expect(client.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET]).toBe('password1');
-
-            // Update to new password
-            client.setClientCredentials('bearer2', 'password2');
-            expect(client.requestHeaders[ClientConstants.HEADER_AUTH]).toBe(`${ClientConstants.HEADER_BEARER} bearer2`);
-            expect(client.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET]).toBe('password2');
-
-            // Remove password
-            client.setClientCredentials('bearer3', undefined);
-            expect(client.requestHeaders[ClientConstants.HEADER_AUTH]).toBe(`${ClientConstants.HEADER_BEARER} bearer3`);
-            expect(client.requestHeaders[ClientConstants.HEADER_X_MATTERMOST_PREAUTH_SECRET]).toBeUndefined();
         });
     });
 

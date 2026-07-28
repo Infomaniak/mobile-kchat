@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {Calls} from '@constants';
-import {setServerCredentials} from '@init/credentials';
 
 import * as ClientConstants from './constants';
 import ClientTracking from './tracking';
@@ -10,11 +9,11 @@ import ClientTracking from './tracking';
 import type {APIClientInterface} from '@mattermost/react-native-network-client';
 
 export default class ClientBase extends ClientTracking {
-    constructor(apiClient: APIClientInterface, serverUrl: string, bearerToken?: string, csrfToken?: string, preauthSecret?: string) {
+    constructor(apiClient: APIClientInterface, serverUrl: string, bearerToken?: string, csrfToken?: string) {
         super(apiClient);
 
-        if (bearerToken || preauthSecret) {
-            this.setClientCredentials(bearerToken || '', preauthSecret || '');
+        if (bearerToken) {
+            this.setBearerToken(bearerToken);
         }
         if (csrfToken) {
             this.setCSRFToken(csrfToken);
@@ -49,7 +48,6 @@ export default class ClientBase extends ClientTracking {
 
     setBearerToken(bearerToken: string) {
         this.requestHeaders[ClientConstants.HEADER_AUTH] = `${ClientConstants.HEADER_BEARER} ${bearerToken}`;
-        setServerCredentials(this.apiClient.baseUrl, bearerToken);
     }
 
     getCurrentBearerToken(): string {
@@ -108,14 +106,6 @@ export default class ClientBase extends ClientTracking {
 
     getChannelRoute(channelId: string) {
         return `${this.getChannelsRoute()}/${channelId}`;
-    }
-
-    getChannelBookmarksRoute(channelId: string) {
-        return `${this.getChannelRoute(channelId)}/bookmarks`;
-    }
-
-    getChannelBookmarkRoute(channelId: string, bookmarkId: string) {
-        return `${this.getChannelBookmarksRoute(channelId)}/${bookmarkId}`;
     }
 
     getSharedChannelsRoute() {

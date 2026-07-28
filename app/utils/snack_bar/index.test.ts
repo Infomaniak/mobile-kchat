@@ -3,35 +3,14 @@
 
 import {showOverlay} from '@screens/navigation';
 
-import {showBoRPostErrorSnackbar, showPlaybookErrorSnackbar} from '.';
+import {showSnackBar} from '.';
 
 describe('snack bar', () => {
-    describe('showPlaybookErrorSnackbar', () => {
-        it('should show snackbar', () => {
-            showPlaybookErrorSnackbar();
+    describe('showSnackBar', () => {
+        it('should show snackbar with barType', () => {
+            showSnackBar({barType: 'MUTE_CHANNEL'});
 
-            expect(showOverlay).toHaveBeenCalledWith('SnackBar', {
-                barType: 'PLAYBOOK_ERROR',
-            });
-        });
-    });
-
-    describe('showBoRPostErrorSnackbar', () => {
-        it('should show snackbar', () => {
-            showBoRPostErrorSnackbar();
-
-            expect(showOverlay).toHaveBeenCalledWith('SnackBar', {
-                barType: 'BOR_POST_EXPIRED',
-            });
-        });
-
-        it('should show custom message when provided', () => {
-            showBoRPostErrorSnackbar('custom message');
-
-            expect(showOverlay).toHaveBeenCalledWith('SnackBar', {
-                barType: 'BOR_POST_EXPIRED',
-                customMessage: 'custom message',
-            });
+            expect(showOverlay).toHaveBeenCalledWith('SnackBar', {barType: 'MUTE_CHANNEL'});
         });
     });
 });

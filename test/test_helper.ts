@@ -16,20 +16,12 @@ import {Ringtone} from '@constants/calls';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import {PUSH_PROXY_STATUS_VERIFIED} from '@constants/push_proxy';
 import DatabaseManager from '@database/manager';
-import {PLAYBOOK_RUN_TYPES} from '@playbooks/constants/playbook_run';
 import {prepareCommonSystemValues} from '@queries/servers/system';
 
 import type {APIClientInterface} from '@mattermost/react-native-network-client';
 import type {Model, Query, Relation} from '@nozbe/watermelondb';
-import type PlaybookChecklistModel from '@playbooks/types/database/models/playbook_checklist';
-import type PlaybookChecklistItemModel from '@playbooks/types/database/models/playbook_checklist_item';
-import type PlaybookRunModel from '@playbooks/types/database/models/playbook_run';
-import type PlaybookRunAttributeModel from '@playbooks/types/database/models/playbook_run_attribute';
-import type PlaybookRunAttributeValueModel from '@playbooks/types/database/models/playbook_run_attribute_value';
-import type CategoryModel from '@typings/database/models/servers/category';
 import type CategoryChannelModel from '@typings/database/models/servers/category_channel';
 import type ChannelModel from '@typings/database/models/servers/channel';
-import type ChannelBookmarkModel from '@typings/database/models/servers/channel_bookmark';
 import type ChannelInfoModel from '@typings/database/models/servers/channel_info';
 import type ChannelMembershipModel from '@typings/database/models/servers/channel_membership';
 import type CustomProfileAttributeModel from '@typings/database/models/servers/custom_profile_attribute';
@@ -608,10 +600,8 @@ class TestHelperSingleton {
             shared: false,
             teamId: this.generateId(),
             type: 'O' as const,
-            autotranslation: false,
             members: this.fakeQuery([]),
             drafts: this.fakeQuery([]),
-            bookmarks: this.fakeQuery([]),
             posts: this.fakeQuery([]),
             postsInChannel: this.fakeQuery([]),
             team: this.fakeRelation(),
@@ -619,7 +609,6 @@ class TestHelperSingleton {
             info: this.fakeRelation(),
             membership: this.fakeRelation(),
             categoryChannel: this.fakeRelation(),
-            playbookRuns: this.fakeQuery([]),
             toApi: jest.fn(),
             ...overwrite,
         };
@@ -653,27 +642,6 @@ class TestHelperSingleton {
         };
     };
 
-    fakeCategoryModel = (overwrite?: Partial<CategoryModel>): CategoryModel => {
-        return {
-            ...this.fakeModel(),
-            displayName: this.generateId(),
-            type: 'custom',
-            sortOrder: 0,
-            sorting: 'alpha',
-            muted: false,
-            collapsed: false,
-            teamId: this.generateId(),
-            team: this.fakeRelation(),
-            categoryChannels: this.fakeQuery([]),
-            categoryChannelsBySortOrder: this.fakeQuery([]),
-            channels: this.fakeQuery([]),
-            myChannels: this.fakeQuery([]),
-            observeHasChannels: jest.fn(),
-            toCategoryWithChannels: jest.fn(),
-            ...overwrite,
-        };
-    };
-
     fakeDraftModel = (overwrite?: Partial<DraftModel>): DraftModel => {
         return {
             ...this.fakeModel(),
@@ -695,26 +663,6 @@ class TestHelperSingleton {
             earliest: 0,
             latest: 0,
             channel: this.fakeRelation(),
-            ...overwrite,
-        };
-    };
-
-    fakeChannelBookmarkModel = (overwrite?: Partial<ChannelBookmarkModel>): ChannelBookmarkModel => {
-        return {
-            ...this.fakeModel(),
-            channelId: this.generateId(),
-            ownerId: this.generateId(),
-            fileId: this.generateId(),
-            displayName: this.generateId(),
-            createAt: 0,
-            updateAt: 0,
-            deleteAt: 0,
-            sortOrder: 0,
-            type: 'file',
-            channel: this.fakeRelation(),
-            owner: this.fakeRelation(),
-            file: this.fakeRelation(),
-            toApi: jest.fn(),
             ...overwrite,
         };
     };
@@ -769,7 +717,6 @@ class TestHelperSingleton {
             teamChannelHistory: this.fakeRelation(),
             members: this.fakeQuery([]),
             teamSearchHistories: this.fakeQuery([]),
-            playbookRuns: this.fakeQuery([]),
             pack_name: '',
             ...overwrite,
         };
@@ -857,7 +804,6 @@ class TestHelperSingleton {
             roles: '',
             viewedAt: 0,
             lastPlaybookRunsFetchAt: 0,
-            autotranslationDisabled: false,
             channel: this.fakeRelation(),
             settings: this.fakeRelation(),
             resetPreparedState: jest.fn(),
@@ -1114,331 +1060,6 @@ class TestHelperSingleton {
             user_id: '1',
             transcript: {text: '', duration: 0, language: '', task: 'transcribe' as const, segments: [], words: []},
             post_id: '',
-            ...overwrite,
-        };
-    };
-
-    createPlaybookItem = (prefix: string, index: number): PlaybookChecklistItem => ({
-        id: `${prefix}-item_${index}`,
-        title: `Item ${index + 1} of Checklist ${prefix}`,
-        description: 'Item description',
-        state: '',
-        state_modified: 0,
-        assignee_id: '',
-        assignee_modified: 0,
-        command: '',
-        command_last_run: 0,
-        due_date: 0,
-        completed_at: 0,
-        task_actions: [],
-        condition_action: '',
-        condition_reason: '',
-        update_at: 0,
-    });
-
-    createPlaybookRunAttribute = (prefix: string, index: number): PlaybookRunPropertyField => ({
-        id: `${prefix}-attribute_${index}`,
-        group_id: 'group_1',
-        name: `Attribute ${index + 1}`,
-        type: 'text',
-        target_id: `${prefix}`,
-        target_type: 'playbook_run',
-        create_at: Date.now(),
-        update_at: Date.now(),
-        delete_at: 0,
-        attrs: '',
-    });
-
-    createPlaybookRunAttributeValue = (attributeId: string, runId: string, index: number): PlaybookRunPropertyValue => ({
-        id: `${runId}-${attributeId}-value_${index}`,
-        field_id: attributeId,
-        target_id: runId,
-        update_at: Date.now(),
-        value: `Value ${index + 1}`,
-    });
-
-    createPlaybookChecklist = (prefix: string, itemsCount: number, index: number): PlaybookChecklist => {
-        const items: PlaybookChecklistItem[] = [];
-        const id = `${prefix}-checklist_${index}`;
-        for (let k = 0; k < itemsCount; k++) {
-            items.push(this.createPlaybookItem(id, k));
-        }
-
-        return {
-            id: `${prefix}-checklist_${index}`,
-            title: `Checklist ${index + 1} of Playbook Run ${prefix}`,
-            update_at: 0,
-            items_order: items.map((item) => item.id),
-            items,
-        };
-    };
-
-    createPlaybookRuns = (runsCount = 1, maxChecklistCount = 1, maxItemsPerChecklist = 1, omitRandom = false): PlaybookRun[] => {
-        const playbookRuns: PlaybookRun[] = [];
-        for (let i = 0; i < runsCount; i++) {
-            const checklists: PlaybookChecklist[] = [];
-            const checklistCount = omitRandom ? maxChecklistCount : Math.floor(Math.random() * maxChecklistCount) + 1;
-            for (let j = 0; j < checklistCount; j++) {
-                const itemsCount = omitRandom ? maxItemsPerChecklist : Math.floor(Math.random() * maxItemsPerChecklist) + 1;
-                checklists.push(this.createPlaybookChecklist(`playbook_run_${i}`, itemsCount, j));
-            }
-            playbookRuns.push({
-                id: `playbook_run_${i}`,
-                name: `Playbook Run ${i + 1}`,
-                playbook_id: 'playbook_1',
-                post_id: 'post_1',
-                owner_user_id: 'user_1',
-                team_id: 'team_1',
-                channel_id: 'channel_1',
-                create_at: Date.now() + i,
-                end_at: 0,
-                description: 'This is a test playbook run',
-                is_active: true,
-                active_stage: 1,
-                active_stage_title: 'Stage 1',
-                participant_ids: ['user_1', 'user_2'],
-                summary: 'Test summary',
-                current_status: 'InProgress',
-                last_status_update_at: Date.now() + i,
-                retrospective_enabled: true,
-                retrospective: 'Test retrospective',
-                retrospective_published_at: Date.now() + i,
-                summary_modified_at: 0,
-                reported_user_id: '',
-                previous_reminder: 0,
-                status_update_enabled: false,
-                retrospective_was_canceled: false,
-                retrospective_reminder_interval_seconds: 0,
-                message_on_join: '',
-                category_name: '',
-                create_channel_member_on_new_participant: false,
-                remove_channel_member_on_removed_participant: false,
-                invited_user_ids: [],
-                invited_group_ids: [],
-                timeline_events: [],
-                broadcast_channel_ids: [],
-                webhook_on_creation_urls: [],
-                webhook_on_status_update_urls: [],
-                status_posts: [],
-                metrics_data: [],
-                checklists,
-                update_at: Date.now() + i,
-                items_order: checklists.map((checklist) => checklist.id),
-                status_update_broadcast_channels_enabled: false,
-                type: PLAYBOOK_RUN_TYPES.PlaybookType,
-            });
-        }
-        return playbookRuns;
-    };
-
-    fakePlaybook = (overwrite: Partial<Playbook> = {}): Playbook => {
-        return {
-            id: this.generateId(),
-            title: 'Test Playbook',
-            description: 'Test Description',
-            team_id: this.basicTeam?.id || '',
-            create_public_playbook_run: false,
-            delete_at: 0,
-            run_summary_template_enabled: false,
-            run_summary_template: '',
-            channel_name_template: '',
-            channel_mode: '',
-            public: false,
-            default_owner_id: '',
-            default_owner_enabled: false,
-            num_stages: 0,
-            num_steps: 0,
-            num_runs: 0,
-            num_actions: 0,
-            last_run_at: 0,
-            members: [],
-            default_playbook_member_role: '',
-            active_runs: 0,
-            ...overwrite,
-        };
-    };
-
-    fakePlaybookRun = (overwrite: Partial<PlaybookRun> = {}): PlaybookRun => {
-        const run = this.createPlaybookRuns(1, 0, 0);
-
-        return {
-            ...run[0],
-            ...overwrite,
-        };
-    };
-
-    fakePlaybookChecklist = (runId: string, overwrite: Partial<PlaybookChecklist>): PlaybookChecklist & WithRunId => {
-        const checklist = this.createPlaybookChecklist(runId, 1, 0);
-        return {
-            run_id: runId,
-            ...checklist,
-            ...overwrite,
-        };
-    };
-
-    fakePlaybookChecklistItem = (checklistId: string, overwrite: Partial<PlaybookChecklistItem>): PlaybookChecklistItem & WithChecklistId => {
-        const item = this.createPlaybookItem(checklistId, 0);
-        return {
-            checklist_id: checklistId,
-            ...item,
-            ...overwrite,
-        };
-    };
-
-    fakePlaybookRunMetadata = (overwrite: Partial<PlaybookRunMetadata> = {}): PlaybookRunMetadata => {
-        return {
-            channel_name: 'channel-name',
-            channel_display_name: 'Channel Display Name',
-            team_name: 'team-name',
-            num_participants: 5,
-            total_posts: 10,
-            followers: ['user-id-1', 'user-id-2'],
-            ...overwrite,
-        };
-    };
-
-    fakePlaybookRunModel = (overwrite: Partial<PlaybookRunModel> = {}): PlaybookRunModel => {
-        return {
-            ...this.fakeModel(),
-            playbookId: this.generateId(),
-            type: 'playbook',
-            postId: null,
-            ownerUserId: this.basicUser?.id || '',
-            teamId: this.basicTeam?.id || '',
-            channelId: this.basicChannel?.id || '',
-            createAt: Date.now(),
-            endAt: 0,
-            name: 'name',
-            description: 'description',
-            isActive: true,
-            activeStage: 1,
-            activeStageTitle: 'activeStageTitle',
-            participantIds: [],
-            summary: 'summary',
-            currentStatus: 'InProgress',
-            lastStatusUpdateAt: 0,
-            retrospectiveEnabled: false,
-            retrospective: '',
-            retrospectivePublishedAt: 0,
-            sync: 'synced',
-            lastSyncAt: 0,
-            post: this.fakeRelation(),
-            team: this.fakeRelation(),
-            channel: this.fakeRelation(),
-            owner: this.fakeRelation(),
-            checklists: this.fakeQuery([]),
-            prepareDestroyWithRelations: jest.fn().mockResolvedValue([]),
-            previousReminder: 0,
-            itemsOrder: [],
-            updateAt: 0,
-            ...overwrite,
-        };
-    };
-
-    fakePlaybookChecklistModel = (overwrite: Partial<PlaybookChecklistModel> = {}): PlaybookChecklistModel => {
-        return {
-            ...this.fakeModel(),
-            runId: this.generateId(),
-            title: 'title',
-            items: this.fakeQuery([]),
-            id: this.generateId(),
-            sync: 'synced',
-            lastSyncAt: 0,
-            run: this.fakeRelation(),
-            itemsOrder: [],
-            updateAt: 0,
-            prepareDestroyWithRelations: jest.fn().mockResolvedValue([]),
-            ...overwrite,
-        };
-    };
-
-    fakePlaybookChecklistItemModel = (overwrite: Partial<PlaybookChecklistItemModel> = {}): PlaybookChecklistItemModel => {
-        return {
-            ...this.fakeModel(),
-            checklistId: this.generateId(),
-            title: 'title',
-            state: '',
-            stateModified: 0,
-            assigneeId: null,
-            assigneeModified: 0,
-            command: null,
-            commandLastRun: 0,
-            description: 'description',
-            dueDate: 0,
-            completedAt: 0,
-            sync: 'synced',
-            lastSyncAt: 0,
-            taskActions: [],
-            conditionAction: '',
-            conditionReason: '',
-            checklist: this.fakeRelation(),
-            updateAt: 0,
-            ...overwrite,
-        };
-    };
-
-    fakePlaybookRunAttribute = (overwrite: Partial<PlaybookRunPropertyField> = {}): PlaybookRunPropertyField => {
-        return {
-            id: this.generateId(),
-            group_id: this.generateId(),
-            name: 'Test Attribute',
-            type: 'text',
-            target_id: this.generateId(),
-            target_type: 'playbook_run',
-            create_at: Date.now(),
-            update_at: Date.now(),
-            delete_at: 0,
-            attrs: '',
-            ...overwrite,
-        };
-    };
-
-    fakePlaybookRunAttributeValue = (attributeId: string, runId: string, overwrite: Partial<PlaybookRunPropertyValue> = {}): PlaybookRunPropertyValue => {
-        return {
-            id: this.generateId(),
-            field_id: attributeId,
-            target_id: runId,
-            update_at: Date.now(),
-            value: 'Test Value',
-            ...overwrite,
-        };
-    };
-
-    fakePlaybookRunAttributeModel = (overwrite: Partial<PlaybookRunAttributeModel> = {}): PlaybookRunAttributeModel => {
-        return {
-            ...this.fakeModel(),
-            groupId: this.generateId(),
-            name: 'Test Attribute',
-            type: 'text',
-            targetId: this.generateId(),
-            targetType: 'playbook_run',
-            createAt: Date.now(),
-            updateAt: Date.now(),
-            deleteAt: 0,
-            attrs: '',
-            ...overwrite,
-        };
-    };
-
-    fakePlaybookRunAttributeValueModel = (overwrite: Partial<PlaybookRunAttributeValueModel> = {}): PlaybookRunAttributeValueModel => {
-        return {
-            ...this.fakeModel(),
-            attributeId: this.generateId(),
-            runId: this.generateId(),
-            value: 'Test Value',
-            updateAt: Date.now(),
-            attribute: this.fakeRelation(),
-            run: this.fakeRelation(),
-            ...overwrite,
-        };
-    };
-
-    fakeWebsocketMessage = (overwrite: Partial<WebSocketMessage> = {}): WebSocketMessage => {
-        return {
-            event: 'test',
-            data: {
-                team_id: '',
-            },
             ...overwrite,
         };
     };
