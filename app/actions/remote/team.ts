@@ -421,7 +421,7 @@ export const removeUserFromTeam = async (serverUrl: string, teamId: string, user
     }
 };
 
-export async function handleTeamChange(serverUrl: string, teamId: string) {
+export async function handleTeamChange(serverUrl: string, teamId: string): Promise<{error?: unknown}> {
     const operator = DatabaseManager.serverDatabases[serverUrl]?.operator;
     if (!operator) {
         return {error: 'no database'};
@@ -469,7 +469,7 @@ export async function handleTeamChange(serverUrl: string, teamId: string) {
     }
 }
 
-export async function handleKickFromTeam(serverUrl: string, teamId: string) {
+export async function handleKickFromTeam(serverUrl: string, teamId: string): Promise<{error?: unknown}> {
     try {
         const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const currentTeamId = await getCurrentTeamId(database);
