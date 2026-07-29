@@ -532,7 +532,7 @@ describe('channel', () => {
             mockResolvedValueOnce({error: switchError}).
             mockResolvedValueOnce({models: []});
 
-        await expect(switchToChannelById(serverUrl, channelId)).rejects.toBe(switchError);
+        await expect(switchToChannelById(serverUrl, channelId)).resolves.toEqual({error: switchError});
         await expect(switchToChannelById(serverUrl, channelId)).resolves.toEqual({});
 
         expect(switchSpy).toHaveBeenCalledTimes(2);
@@ -798,4 +798,3 @@ describe('direct and group', () => {
         expect(updatedChannel).toBeDefined();
     });
 });
-

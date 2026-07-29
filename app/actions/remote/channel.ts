@@ -1191,7 +1191,7 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
 
         const {error} = await switchToChannel(serverUrl, channelId, teamId, skipLastUnread);
         if (error) {
-            throw error;
+            return {error};
         }
 
         openChannelIfNeeded(serverUrl, channelId, groupLabel);

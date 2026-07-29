@@ -436,34 +436,37 @@ export async function handleTeamChange(serverUrl: string, teamId: string) {
 
     let channelId = '';
     DeviceEventEmitter.emit(Events.TEAM_SWITCH, true);
-    if (isTablet()) {
-        channelId = await getNthLastChannelFromTeam(database, teamId);
-        if (channelId) {
-            await switchToChannelById(serverUrl, channelId, teamId);
-            DeviceEventEmitter.emit(Events.TEAM_SWITCH, false);
-            return {};
+
+    try {
+        if (isTablet()) {
+            channelId = await getNthLastChannelFromTeam(database, teamId);
+            if (channelId) {
+                const result = await switchToChannelById(serverUrl, channelId, teamId);
+                return result;
+            }
         }
-    }
 
-    const models = [];
-    const system = await prepareCommonSystemValues(operator, {currentChannelId: channelId, currentTeamId: teamId, lastUnreadChannelId: ''});
-    if (system?.length) {
-        models.push(...system);
-    }
-    const history = await addTeamToTeamHistory(operator, teamId, true);
-    if (history.length) {
-        models.push(...history);
-    }
+        const models = [];
+        const system = await prepareCommonSystemValues(operator, {currentChannelId: channelId, currentTeamId: teamId, lastUnreadChannelId: ''});
+        if (system?.length) {
+            models.push(...system);
+        }
+        const history = await addTeamToTeamHistory(operator, teamId, true);
+        if (history.length) {
+            models.push(...history);
+        }
 
-    if (models.length) {
-        await operator.batchRecords(models, 'handleTeamChange');
-    }
-    DeviceEventEmitter.emit(Events.TEAM_SWITCH, false);
+        if (models.length) {
+            await operator.batchRecords(models, 'handleTeamChange');
+        }
 
-    // Fetch Groups + GroupTeams
-    fetchGroupsForTeamIfConstrained(serverUrl, teamId);
-    fetchScheduledPosts(serverUrl, teamId, false);
-    return {};
+        // Fetch Groups + GroupTeams
+        fetchGroupsForTeamIfConstrained(serverUrl, teamId);
+        fetchScheduledPosts(serverUrl, teamId, false);
+        return {};
+    } finally {
+        DeviceEventEmitter.emit(Events.TEAM_SWITCH, false);
+    }
 }
 
 export async function handleKickFromTeam(serverUrl: string, teamId: string) {
