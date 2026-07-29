@@ -12,6 +12,7 @@ import {getMyChannel} from '@queries/servers/channel';
 import {getCommonSystemValues, getTeamHistory} from '@queries/servers/system';
 import {getTeamChannelHistory} from '@queries/servers/team';
 import {dismissAllModalsAndPopToRoot, dismissAllModalsAndPopToScreen} from '@screens/navigation';
+import EphemeralStore from '@store/ephemeral_store';
 import TestHelper from '@test/test_helper';
 
 import {
@@ -89,6 +90,8 @@ describe('switchToChannel', () => {
     });
 
     afterEach(async () => {
+        EphemeralStore.removeSwitchingToChannel(channelId);
+        EphemeralStore.removeSwitchingToChannel('channelId');
         await DatabaseManager.destroyServerDatabase(serverUrl);
         spyNow.mockRestore();
     });
@@ -103,6 +106,7 @@ describe('switchToChannel', () => {
         expect(dismissAllModalsAndPopToScreen).toHaveBeenCalledTimes(0);
         expect(dismissAllModalsAndPopToRoot).toHaveBeenCalledTimes(0);
         expect(listenerCallback).toHaveBeenCalledTimes(0);
+        expect(EphemeralStore.isSwitchingToChannel('channelId')).toBe(false);
     });
 
     it('handle no member', async () => {
@@ -125,6 +129,7 @@ describe('switchToChannel', () => {
         expect(dismissAllModalsAndPopToScreen).toHaveBeenCalledTimes(0);
         expect(dismissAllModalsAndPopToRoot).toHaveBeenCalledTimes(0);
         expect(listenerCallback).toHaveBeenCalledTimes(0);
+        expect(EphemeralStore.isSwitchingToChannel('channelId')).toBe(false);
     });
 
     it('switch to current channel', async () => {
@@ -150,6 +155,7 @@ describe('switchToChannel', () => {
         expect(dismissAllModalsAndPopToScreen).toHaveBeenCalledTimes(1);
         expect(dismissAllModalsAndPopToRoot).toHaveBeenCalledTimes(0);
         expect(listenerCallback).toHaveBeenCalledTimes(0);
+        expect(EphemeralStore.isSwitchingToChannel(channelId)).toBe(false);
     });
 
     it('switch to different channel in same team', async () => {
@@ -394,6 +400,7 @@ describe('switchToChannel', () => {
         expect(dismissAllModalsAndPopToScreen).toHaveBeenCalledTimes(0);
         expect(dismissAllModalsAndPopToRoot).toHaveBeenCalledTimes(0);
         expect(listenerCallback).toHaveBeenCalledTimes(0);
+        expect(EphemeralStore.isSwitchingToChannel(channelId)).toBe(false);
     });
 
     it('prepare records only does not change the database', async () => {
