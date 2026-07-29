@@ -43,6 +43,57 @@ class NavigationStoreSingleton {
         return this.state.screenStack.includes('(modals)');
     }
 
+    hasModalsOpened(): boolean {
+        return this.isModalOpen();
+    }
+
+    addScreenToStack(screenId: AvailableScreens) {
+        const screenStack = [...this.state.screenStack];
+        const index = screenStack.indexOf(screenId);
+        if (index > -1) {
+            screenStack.splice(index, 1);
+        }
+        screenStack.push(screenId);
+        this.stateSubject.next({...this.state, screenStack});
+        this.screenSubject.next(screenId);
+    }
+
+    addModalToStack(modalId: AvailableScreens) {
+        this.addScreenToStack(modalId);
+    }
+
+    removeScreenFromStack(screenId: AvailableScreens) {
+        const screenStack = this.state.screenStack.filter((s) => s !== screenId);
+        this.stateSubject.next({...this.state, screenStack});
+        this.screenSubject.next(screenStack[screenStack.length - 1]);
+    }
+
+    removeModalFromStack(modalId: AvailableScreens) {
+        this.removeScreenFromStack(modalId);
+    }
+
+    clearScreensFromStack() {
+        this.stateSubject.next({...this.state, screenStack: []});
+        this.screenSubject.next(undefined);
+    }
+
+    popTo(screenId: AvailableScreens) {
+        const index = this.state.screenStack.indexOf(screenId);
+        if (index > -1) {
+            const screenStack = this.state.screenStack.slice(0, index + 1);
+            this.stateSubject.next({...this.state, screenStack});
+            this.screenSubject.next(screenId);
+        }
+    }
+
+    getVisibleTab() {
+        return 'Home';
+    }
+
+    setVisibleTap(tab: string) {
+        // No-op
+    }
+
     reset() {
         this.stateSubject.next(initialState);
         this.screenSubject.next(undefined);

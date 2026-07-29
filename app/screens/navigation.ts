@@ -160,3 +160,158 @@ export async function dismissBottomSheet(alternativeScreen: AvailableScreens = S
     BottomSheetStore.reset();
     await new Promise((resolve) => setTimeout(resolve, 250));
 }
+
+// Compatibility wrappers for old RNN function names
+export function goToScreen(name: AvailableScreens, title: string, passProps: Record<string, any> = {}, options: any = {}) {
+    navigateToScreen(name, passProps);
+}
+
+export async function popTopScreen(screenId?: AvailableScreens) {
+    await navigateBack();
+}
+
+export async function popTo(screenId: AvailableScreens) {
+    try {
+        if (router) {
+            const route = getExpoRouterPath(screenId);
+            if (route) {
+                router.dismissTo(route);
+                await new Promise((resolve) => setTimeout(resolve, 250));
+            }
+        }
+    } catch (e) {
+        logError('popTo: Expo Router navigation failed', e);
+    }
+}
+
+export async function popToRoot() {
+    await navigateToRoot();
+}
+
+export function showModal(name: AvailableScreens, title: string, passProps: Record<string, any> = {}, options: any = {}) {
+    navigateToScreen(name, passProps);
+}
+
+export function showModalOverCurrentContext(name: AvailableScreens, passProps: Record<string, any> = {}, options: any = {}) {
+    navigateToScreen(name, passProps);
+}
+
+export async function dismissModal(options?: any) {
+    await navigateBack();
+}
+
+export async function dismissAllModals() {
+    await navigateToRoot();
+}
+
+export async function dismissAllModalsAndPopToRoot() {
+    await navigateToRoot();
+}
+
+export async function dismissAllModalsAndPopToScreen(screenId: AvailableScreens, title: string, passProps: Record<string, any> = {}, options: any = {}) {
+    await dismissAllRoutesAndPopToScreen(screenId, passProps);
+}
+
+export function showOverlay(name: AvailableScreens, passProps: Record<string, any> = {}, options: any = {}, id?: string) {
+    if (SCREENS_AS_BOTTOM_SHEET.has(name)) {
+        navigateToScreen(name, passProps);
+    }
+}
+
+export async function dismissOverlay(componentId: string) {
+    await navigateBack();
+}
+
+export async function dismissAllOverlays() {
+    // No-op with expo-router
+}
+
+export function openAsBottomSheet({closeButtonId, screen, theme, title, props}: {
+    closeButtonId: string;
+    props?: Record<string, any>;
+    screen: AvailableScreens;
+    theme: Theme;
+    title: string;
+}) {
+    navigateToScreen(screen, props);
+}
+
+export function openAttachmentOptions(props: Record<string, any>) {
+    navigateToScreen(Screens.ATTACHMENT_OPTIONS, props);
+}
+
+export function showAppForm(form: any, context: any) {
+    navigateToScreen(Screens.APPS_FORM, {form, context});
+}
+
+export function openUserProfileModal(intl: any, theme: Theme, props: Record<string, any>, screenToDismiss?: AvailableScreens) {
+    navigateToScreen(Screens.USER_PROFILE, props);
+}
+
+export function showReviewOverlay(hasAskedBefore: boolean) {
+    navigateToScreen(Screens.REVIEW_APP, {hasAskedBefore});
+}
+
+export function showShareFeedbackOverlay() {
+    navigateToScreen(Screens.SHARE_FEEDBACK);
+}
+
+export async function findChannels(title: string, theme: Theme) {
+    navigateToScreen(Screens.FIND_CHANNELS);
+}
+
+export function setButtons(componentId: AvailableScreens, buttons: any = {}) {
+    // No-op with expo-router — header buttons are handled by route layouts
+}
+
+export function setScreensOrientation(allowRotation: boolean) {
+    // No-op with expo-router
+}
+
+export function openToS() {
+    navigateToScreen(Screens.TERMS_OF_SERVICE);
+}
+
+export function bottomSheetModalOptions(theme: Theme, closeButtonId?: string) {
+    return {};
+}
+
+export function loginAnimationOptions() {
+    return {};
+}
+
+export function resetToHome(passProps: Record<string, any> = {}) {
+    navigateToScreen(Screens.HOME, passProps, true);
+}
+
+export function resetToOnboarding(passProps: Record<string, any> = {}) {
+    navigateToScreen(Screens.ONBOARDING, passProps, true);
+}
+
+export function resetToInfomaniakLogin(passProps: Record<string, any> = {}) {
+    navigateToScreen(Screens.IK_LOGIN, passProps, true);
+}
+
+export function resetToInfomaniakNoTeams() {
+    navigateToScreen(Screens.IK_NO_TEAMS, {}, true);
+}
+
+export function resetToSelectServer(passProps: Record<string, any> = {}) {
+    navigateToScreen(Screens.SERVER, passProps, true);
+}
+
+export function resetToTeams() {
+    navigateToScreen(Screens.SELECT_TEAM, {}, true);
+}
+
+export const allOrientations: string[] = ['sensor', 'sensorLandscape', 'sensorPortrait', 'landscape', 'portrait'];
+export const portraitOrientation: string[] = ['portrait'];
+
+export function registerNavigationListeners() {
+    // No-op with expo-router
+}
+
+export function getThemeFromState(): Theme {
+    const EphemeralStoreModule = require('@store/ephemeral_store').default;
+    return EphemeralStoreModule.getTheme();
+}
