@@ -315,3 +315,7 @@ export function getThemeFromState(): Theme {
     const EphemeralStoreModule = require('@store/ephemeral_store').default;
     return EphemeralStoreModule.getTheme();
 }
+
+export function buildNavigationButton(id: string, testID: string, icon?: any, text?: string) {
+    return {id, testID, icon, text};
+}

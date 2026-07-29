@@ -157,7 +157,7 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
         <BottomSheet
             renderContent={renderContent}
             closeButtonId={closeButtonId}
-            componentId={Screens.INFOMANIAK_QUOTA_EXCEEDED}
+            componentId={Screens.IK_QUOTA_EXCEEDED}
             initialSnapIndex={1}
             snapPoints={snapPoints}
             contentStyle={{paddingHorizontal: 0}}

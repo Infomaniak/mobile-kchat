@@ -94,6 +94,14 @@ class NavigationStoreSingleton {
         // No-op
     }
 
+    getSubject() {
+        return this.screenSubject;
+    }
+
+    getModalsInStack(): AvailableScreens[] {
+        return this.state.screenStack.filter((s) => s === '(modals)');
+    }
+
     reset() {
         this.stateSubject.next(initialState);
         this.screenSubject.next(undefined);

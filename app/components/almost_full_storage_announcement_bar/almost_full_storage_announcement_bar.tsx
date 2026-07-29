@@ -53,7 +53,7 @@ const AlmostFullStorageAnnouncementBar = ({
 
         openAsBottomSheet({
             closeButtonId: 'close-quota-exceeded',
-            screen: Screens.INFOMANIAK_QUOTA_EXCEEDED,
+            screen: Screens.IK_QUOTA_EXCEEDED,
             theme,
             title: '',
             props: {

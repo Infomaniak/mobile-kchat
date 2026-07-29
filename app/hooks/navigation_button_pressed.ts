@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {type DependencyList, type EffectCallback, useEffect} from 'react';
-import {Navigation} from 'react-native-navigation';
 
 type Callback = EffectCallback | (() => Promise<void>);
 const useNavButtonPressed = (navButtonId: string, componentId: string, callback: Callback, deps?: DependencyList) => {

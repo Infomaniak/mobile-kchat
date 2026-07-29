@@ -13,7 +13,6 @@ import {goToScreen} from '@screens/navigation';
 import {isTypeDMorGM} from '@utils/channel';
 import {changeOpacity} from '@utils/theme';
 
-import type {Options} from 'react-native-navigation';
 
 type Props = {
     channelId: string;

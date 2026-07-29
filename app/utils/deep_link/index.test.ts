@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {createIntl} from 'react-intl';
-import {Navigation} from 'react-native-navigation';
 
 import {joinIfNeededAndSwitchToChannel, makeDirectChannel} from '@actions/remote/channel';
 import {showPermalink} from '@actions/remote/permalink';

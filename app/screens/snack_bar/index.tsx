@@ -11,7 +11,6 @@ import {
     type ViewStyle,
 } from 'react-native';
 import {Gesture, GestureDetector, GestureHandlerRootView} from 'react-native-gesture-handler';
-import {type ComponentEvent, Navigation} from 'react-native-navigation';
 import Animated, {
     Extrapolation,
     FadeIn,

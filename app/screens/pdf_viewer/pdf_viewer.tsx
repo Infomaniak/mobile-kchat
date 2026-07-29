@@ -13,7 +13,6 @@ import {deleteAsync} from 'expo-file-system';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Alert} from 'react-native';
-import {Navigation} from 'react-native-navigation';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {setFileAsBlocked} from '@actions/local/file';

@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {useEffect} from 'react';
-import {Navigation} from 'react-native-navigation';
 
 const BACK_BUTTON = 'RNN.back';
 

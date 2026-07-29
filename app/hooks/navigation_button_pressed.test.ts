@@ -2,11 +2,9 @@
 // See LICENSE.txt for license information.
 
 import {renderHook} from '@testing-library/react-hooks';
-import {Navigation} from 'react-native-navigation';
 
 import useNavButtonPressed from './navigation_button_pressed';
 
-jest.mock('react-native-navigation', () => ({
     Navigation: {
         events: jest.fn().mockReturnValue({
             registerComponentListener: jest.fn(),

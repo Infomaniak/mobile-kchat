@@ -12,7 +12,6 @@ import BrowseChannels, {ARCHIVED, PUBLIC, SHARED} from './browse_channels';
 
 import type MyChannelModel from '@typings/database/models/servers/my_channel';
 import type {AvailableScreens} from '@typings/screens/navigation';
-import type {ImageResource} from 'react-native-navigation';
 
 type Props = {
 

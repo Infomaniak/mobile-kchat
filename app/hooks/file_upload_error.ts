@@ -21,7 +21,7 @@ const useFileUploadError = (currentPackName: PackName, isCurrentUserAdmin: boole
         if (error === 'Quota exceeded') {
             openAsBottomSheet({
                 closeButtonId: 'close-quota-exceeded',
-                screen: Screens.INFOMANIAK_QUOTA_EXCEEDED,
+                screen: Screens.IK_QUOTA_EXCEEDED,
                 theme,
                 title: '',
                 props: {

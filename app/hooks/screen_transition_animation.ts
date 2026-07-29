@@ -3,7 +3,6 @@
 
 import {useEffect} from 'react';
 import {Platform, useWindowDimensions} from 'react-native';
-import {Navigation} from 'react-native-navigation';
 import {useReducedMotion, useSharedValue, useAnimatedStyle, withTiming} from 'react-native-reanimated';
 
 export const useScreenTransitionAnimation = (componentId: string, animated: boolean = true) => {

@@ -11,7 +11,6 @@ import {
     type NavigationButtonPressedEvent,
     NavigationComponent,
     type Options,
-} from 'react-native-navigation';
 
 import {CustomStatusDurationEnum} from '@constants/custom_status';
 import {observeCurrentUser} from '@queries/servers/user';

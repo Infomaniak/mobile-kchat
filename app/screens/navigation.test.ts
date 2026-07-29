@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 import {DeviceEventEmitter, type EmitterSubscription} from 'react-native';
-import {Navigation} from 'react-native-navigation';
 
 import {Events, Preferences, Screens} from '@constants';
 import NavigationStore from '@store/navigation_store';

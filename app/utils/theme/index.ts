@@ -14,7 +14,6 @@ import NavigationStore from '@store/navigation_store';
 import {appearanceControlledScreens, mergeNavigationOptions} from '@utils/navigation';
 
 import type {NamedStyles} from '@typings/global/styles';
-import type {Options} from 'react-native-navigation';
 
 const rgbPattern = /^rgba?\((\d+),(\d+),(\d+)(?:,([\d.]+))?\)$/;
 

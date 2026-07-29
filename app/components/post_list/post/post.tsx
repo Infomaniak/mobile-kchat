@@ -244,7 +244,7 @@ const Post = ({
 
         openAsBottomSheet({
             closeButtonId: 'close-quota-exceeded',
-            screen: Screens.INFOMANIAK_REMINDER,
+            screen: Screens.IK_REMINDER,
             theme,
             title: '',
             props: {

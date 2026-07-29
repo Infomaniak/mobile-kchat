@@ -4,7 +4,6 @@
 import React, {useCallback, useRef, useState} from 'react';
 import {DeviceEventEmitter, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {GestureDetector, Gesture, GestureHandlerRootView} from 'react-native-gesture-handler';
-import {Navigation} from 'react-native-navigation';
 import Animated, {runOnJS, useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 import {initialWindowMetrics} from 'react-native-safe-area-context';
 

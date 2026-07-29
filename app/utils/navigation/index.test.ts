@@ -3,7 +3,6 @@
 
 import {createIntl} from 'react-intl';
 import {Alert} from 'react-native';
-import {Navigation} from 'react-native-navigation';
 
 import {ServerErrors} from '@constants';
 import {DEFAULT_LOCALE, getTranslations} from '@i18n';

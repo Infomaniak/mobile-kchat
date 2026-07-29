@@ -7,7 +7,6 @@ import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
 import React, {forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type ComponentProps, type MutableRefObject} from 'react';
 import {useIntl} from 'react-intl';
 import {ActivityIndicator, FlatList, Platform, View} from 'react-native';
-import {Navigation} from 'react-native-navigation';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 
 import {fetchChannelById, switchToChannelById} from '@actions/remote/channel';

@@ -26,7 +26,6 @@ import Summary from './summary';
 
 import type {EmailInvite, Result, SearchResult, SendOptions} from './types';
 import type {AvailableScreens, NavButtons} from '@typings/screens/navigation';
-import type {OptionsTopBarButton} from 'react-native-navigation';
 
 const CLOSE_BUTTON_ID = 'close-invite';
 const SEND_BUTTON_ID = 'send-invite';

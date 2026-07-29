@@ -3,7 +3,6 @@
 
 import {Image, ImageRef} from 'expo-image';
 import {DeviceEventEmitter, Keyboard, View} from 'react-native';
-import {Navigation} from 'react-native-navigation';
 import {measure, type AnimatedRef} from 'react-native-reanimated';
 
 import {waitFor} from '@test/intl-test-helper';

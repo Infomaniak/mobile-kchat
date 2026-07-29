@@ -93,7 +93,7 @@ const IKEvolve = () => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const handleClose = useCallback(() => {
-        dismissBottomSheet(Screens.INFOMANIAK_EVOLVE);
+        dismissBottomSheet(Screens.IK_EVOLVE);
     }, []);
 
     const allImages = {
@@ -201,7 +201,7 @@ const IKEvolve = () => {
     return (
         <BottomSheet
             renderContent={renderContent}
-            componentId={Screens.INFOMANIAK_EVOLVE}
+            componentId={Screens.IK_EVOLVE}
             initialSnapIndex={1}
             snapPoints={['10%', '80%']}
             contentStyle={{paddingHorizontal: 0}}

@@ -5,7 +5,6 @@ import RNUtils from '@mattermost/rnutils';
 import {Image} from 'expo-image';
 import React, {type RefObject} from 'react';
 import {DeviceEventEmitter, Keyboard, Platform, View} from 'react-native';
-import {Navigation, type Options, type OptionsLayout} from 'react-native-navigation';
 import {measure, type AnimatedRef} from 'react-native-reanimated';
 
 import {Events, Screens} from '@constants';

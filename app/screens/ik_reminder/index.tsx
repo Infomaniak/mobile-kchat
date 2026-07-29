@@ -101,7 +101,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
     ];
 
     const close = async () => {
-        await dismissBottomSheet(Screens.INFOMANIAK_REMINDER);
+        await dismissBottomSheet(Screens.IK_REMINDER);
     };
 
     const {reminder_custom_date: reminderCustomDate} = useGetUsageDeltas(usage, limits);
@@ -189,11 +189,11 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
     };
 
     const onPressEvolve = useCallback(async () => {
-        await dismissBottomSheet(Screens.INFOMANIAK_REMINDER);
+        await dismissBottomSheet(Screens.IK_REMINDER);
 
         openAsBottomSheet({
             closeButtonId: 'close-quota-exceeded',
-            screen: Screens.INFOMANIAK_EVOLVE,
+            screen: Screens.IK_EVOLVE,
             theme,
             title: '',
             props: {
@@ -262,7 +262,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         <BottomSheet
             renderContent={renderContent}
             closeButtonId={POST_OPTIONS_BUTTON}
-            componentId={Screens.INFOMANIAK_REMINDER}
+            componentId={Screens.IK_REMINDER}
             initialSnapIndex={1}
             snapPoints={snapPoints}
             testID='post_options'

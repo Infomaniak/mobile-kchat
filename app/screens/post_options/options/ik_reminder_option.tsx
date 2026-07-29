@@ -26,7 +26,7 @@ const IKReminderOption = ({bottomSheetId, post, usage, limits}: Props) => {
 
         openAsBottomSheet({
             closeButtonId: 'close-quota-exceeded',
-            screen: Screens.INFOMANIAK_REMINDER,
+            screen: Screens.IK_REMINDER,
             theme,
             title: '',
             props: {

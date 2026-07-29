@@ -3,7 +3,6 @@
 
 import React, {useCallback} from 'react';
 import {useIntl} from 'react-intl';
-import {Navigation} from 'react-native-navigation';
 
 import {logout} from '@actions/remote/session';
 import OptionItem from '@components/option_item';

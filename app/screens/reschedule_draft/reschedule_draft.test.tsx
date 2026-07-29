@@ -4,7 +4,6 @@
 import {act, fireEvent} from '@testing-library/react-native';
 import moment from 'moment-timezone';
 import React from 'react';
-import {Navigation} from 'react-native-navigation';
 
 import {updateScheduledPost} from '@actions/remote/scheduled_post';
 import {Screens} from '@constants';
@@ -39,7 +38,6 @@ jest.mock('@screens/navigation', () => ({
     setButtons: jest.fn(),
 }));
 
-jest.mock('react-native-navigation', () => {
     const registerComponentListenerMock = jest.fn();
     return {
         Navigation: {
