@@ -3,7 +3,7 @@
 module.exports = {
     presets: [
         ['@babel/preset-env', {targets: {node: 'current'}}],
-        'module:@react-native/babel-preset',
+        'babel-preset-expo',
         '@babel/preset-typescript',
     ],
     plugins: [
@@ -30,6 +30,7 @@ module.exports = {
                 '@managers': './app/managers',
                 '@playbooks': './app/products/playbooks',
                 '@queries': './app/queries',
+                '@routes': './app/routes',
                 '@screens': './app/screens',
                 '@share': './share_extension',
                 '@store': './app/store',
