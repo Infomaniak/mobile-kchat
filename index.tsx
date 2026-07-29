@@ -3,37 +3,25 @@
 
 import {RUNNING_E2E} from '@env';
 import TurboLogger from '@mattermost/react-native-turbo-log';
-import {Alert, AlertButton, AlertOptions, AppState, LogBox, Platform, UIManager} from 'react-native';
-import 'react-native-gesture-handler';
-import ViewReactNativeStyleAttributes from 'react-native/Libraries/Components/View/ReactNativeStyleAttributes';
-import {Navigation} from 'react-native-navigation';
+import {ExpoRoot} from 'expo-router';
+import React from 'react';
+import {Alert, AlertButton, AlertOptions, AppRegistry, LogBox, Platform, UIManager} from 'react-native';
 
-import {start} from './app/init/app';
-import setFontFamily from './app/utils/font_family';
+import ViewReactNativeStyleAttributes from 'react-native/Libraries/Components/View/ReactNativeStyleAttributes';
 import {logInfo} from './app/utils/log';
+import setFontFamily from './app/utils/font_family';
 
 declare const global: { HermesInternal: null | {} };
 
 export function installAlertSpy() {
     const originalAlert = Alert.alert;
-
     Alert.alert = ((title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) => {
         // eslint-disable-next-line no-console
-        console.log(
-            '[Alert.alert] called',
-            {title, message, buttons, options},
-        );
-
-        // Ik change : do not show alerts when app is in background https://trello.com/c/0h69EeHH/1468-ios-un-bouton-ok-apparait-sur-la-home
-        if (AppState.currentState === 'background') {
-            return undefined;
-        }
-
+        console.log('[Alert.alert] called', {title, message, buttons, options});
         return (originalAlert as any)(title, message, buttons, options);
     }) as typeof Alert.alert;
 }
 
-// Add scaleY back to work around its removal in React Native 0.70.
 ViewReactNativeStyleAttributes.scaleY = true;
 
 TurboLogger.configure({
@@ -44,11 +32,7 @@ TurboLogger.configure({
 });
 
 if (__DEV__) {
-    LogBox.ignoreLogs([
-        'new NativeEventEmitter',
-    ]);
-
-    // Ignore all notifications if running e2e
+    LogBox.ignoreLogs(['new NativeEventEmitter']);
     const isRunningE2e = RUNNING_E2E === 'true';
     logInfo(`RUNNING_E2E: ${RUNNING_E2E}, isRunningE2e: ${isRunningE2e}`);
     if (isRunningE2e) {
@@ -60,7 +44,6 @@ setFontFamily();
 installAlertSpy();
 
 if (global.HermesInternal) {
-    // Polyfills required to use Intl with Hermes engine
     require('@formatjs/intl-getcanonicallocales/polyfill-force');
     require('@formatjs/intl-locale/polyfill-force');
     require('@formatjs/intl-pluralrules/polyfill-force');
@@ -73,14 +56,19 @@ if (global.HermesInternal) {
 }
 
 if (Platform.OS === 'android') {
-    const ShareExtension = require('share_extension/index.tsx').default;
-    const AppRegistry = require('react-native/Libraries/ReactNative/AppRegistry');
+    const ShareExtension = require('./share_extension/index.tsx').default;
     AppRegistry.registerComponent('MattermostShare', () => ShareExtension);
     if (UIManager.setLayoutAnimationEnabledExperimental) {
         UIManager.setLayoutAnimationEnabledExperimental(true);
     }
 }
 
-Navigation.events().registerAppLaunchedListener(async () => {
-    start();
-});
+// eslint-disable-next-line no-process-env
+process.env.EXPO_OS = Platform.OS;
+
+export function App() {
+    const ctx = require.context('./app/routes');
+    return <ExpoRoot context={ctx}/>;
+}
+
+AppRegistry.registerComponent('kChat', () => App);
