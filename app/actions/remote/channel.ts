@@ -1161,6 +1161,11 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
         return switchToGlobalDrafts(serverUrl, teamId);
     }
 
+    if (EphemeralStore.isSwitchingToChannel(channelId)) {
+        logInfo('[switchToChannelById] Skipped duplicate switch to', channelId);
+        return {};
+    }
+
     try {
         const database = DatabaseManager.serverDatabases[serverUrl]?.database;
         if (!database) {
@@ -1169,6 +1174,7 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
         }
 
         DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, true);
+        logInfo('[switchToChannelById] Starting switch to', channelId, 'isTablet:', isTablet());
 
         // Detect switch that never completes (>15s)
         const switchTimeout = setTimeout(() => {

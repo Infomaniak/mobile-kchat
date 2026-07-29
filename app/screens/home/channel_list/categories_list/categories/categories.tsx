@@ -12,6 +12,7 @@ import {CHANNEL} from '@constants/screens';
 import {useServerUrl} from '@context/server';
 import {useIsTablet} from '@hooks/device';
 import {useTeamSwitch} from '@hooks/team_switch';
+import {usePreventDoubleTap} from '@hooks/utils';
 import PerformanceMetricsManager from '@managers/performance_metrics_manager';
 
 import CategoryBody from './body';
@@ -70,11 +71,11 @@ const Categories = ({
 
     const [initiaLoad, setInitialLoad] = useState(!categoriesToShow.length);
 
-    const onChannelSwitch = useCallback(async (c: Channel | ChannelModel) => {
+    const onChannelSwitch = usePreventDoubleTap(useCallback((c: Channel | ChannelModel) => {
         DeviceEventEmitter.emit(Events.ACTIVE_SCREEN, CHANNEL);
         PerformanceMetricsManager.startMetric('mobile_channel_switch');
         switchToChannelById(serverUrl, c.id);
-    }, [serverUrl]);
+    }, [serverUrl]));
 
     const renderCategory = useCallback((data: {item: CategoryModel | 'UNREADS'}) => {
         if (data.item === 'UNREADS') {
