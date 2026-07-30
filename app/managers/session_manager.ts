@@ -18,7 +18,7 @@ import {resetToInfomaniakNoTeams} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import {deleteFileCacheByDir} from '@utils/file';
 import {isMainActivity} from '@utils/helpers';
-import {logError} from '@utils/log';
+import {logError, logInfo} from '@utils/log';
 
 import type {LaunchType} from '@typings/launch';
 
@@ -197,6 +197,10 @@ export class SessionManagerSingleton {
         try {
             const activeServerUrl = await DatabaseManager.getActiveServerUrl();
             if (serverUrl && serverUrl === activeServerUrl) {
+                const currentSync = this.syncPromises.get(serverUrl);
+                if (currentSync) {
+                    logInfo('[SessionManager] onWebsocketReconnected: sync already running, queuing', serverUrl);
+                }
                 await this.triggerSync(serverUrl, {queueIfRunning: true});
             }
         } catch (error) {

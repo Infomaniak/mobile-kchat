@@ -22,9 +22,13 @@ const DEFAULT_OPTIONS = {
 Pusher.logToConsole = false;
 
 type PusherEvent = {[k: string]: any} | undefined;
+type WebSocketInitializeOptions = {
+    forceConnection?: boolean;
+};
 
 export default class WebSocketClient {
     private conn?: Pusher;
+    private initializationPromise?: Promise<void>;
 
     // Stable reference to the shared Pusher instance for callback cleanup.
     // this.conn is cleared by the 'disconnected' handler, but lastPusher persists
@@ -70,13 +74,31 @@ export default class WebSocketClient {
         this.serverUrl = serverUrl;
     }
 
-    public async initialize(opts = {}) {
+    public initialize(opts: WebSocketInitializeOptions = {}): Promise<void> {
         const {forceConnection} = Object.assign({}, DEFAULT_OPTIONS, opts);
 
         if (forceConnection) {
             this.stop = false;
         }
 
+        if (this.initializationPromise) {
+            return this.initializationPromise;
+        }
+
+        const initializationPromise = this.initializeConnection(opts);
+        this.initializationPromise = initializationPromise;
+
+        const clearInitializationPromise = () => {
+            if (this.initializationPromise === initializationPromise) {
+                this.initializationPromise = undefined;
+            }
+        };
+        initializationPromise.then(clearInitializationPromise, clearInitializationPromise);
+
+        return initializationPromise;
+    }
+
+    private async initializeConnection(opts: WebSocketInitializeOptions): Promise<void> {
         if (this.conn && this.connState !== WebSocketReadyState.CLOSED) {
             return;
         }
@@ -438,6 +460,10 @@ export default class WebSocketClient {
 
     public isConnected(): boolean {
         return this.connState === WebSocketReadyState.OPEN;
+    }
+
+    public isConnecting(): boolean {
+        return Boolean(this.initializationPromise) || this.connState === WebSocketReadyState.CONNECTING;
     }
 
     public getConnectionId(): string {
