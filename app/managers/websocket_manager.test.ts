@@ -76,7 +76,6 @@ describe('WebsocketManager - background/foreground reconnection', () => {
                 mockCallbacks.close = cb;
             }),
             isConnected: jest.fn().mockReturnValue(false),
-            isConnecting: jest.fn().mockReturnValue(false),
             close: jest.fn(),
             invalidate: jest.fn(),
         };
@@ -155,14 +154,6 @@ describe('WebsocketManager - background/foreground reconnection', () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
 
         expect(mockWebSocketClient.initialize).toHaveBeenCalled();
-    });
-
-    it('should not initialize a websocket client that is already connecting', async () => {
-        mockWebSocketClient.isConnecting.mockReturnValue(true);
-
-        await WebsocketManager.initializeClient(mockServerUrl);
-
-        expect(mockWebSocketClient.initialize).not.toHaveBeenCalled();
     });
 
     it('should skip inactive during active→background transition and only close on background', () => {

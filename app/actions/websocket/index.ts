@@ -95,7 +95,6 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
 
     const currentChannelId = await getCurrentChannelId(database);
 
-    logInfo('[doReconnect] Starting reconnect, currentChannelId:', currentChannelId, 'lastFullSync:', lastFullSync, 'groupLabel:', groupLabel);
     setTeamLoading(serverUrl, true);
     const entryData = await entry(serverUrl, currentTeamId, currentChannelId, lastFullSync, groupLabel);
     if ('error' in entryData) {

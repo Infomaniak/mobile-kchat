@@ -16,7 +16,7 @@ import {getCurrentUserId} from '@queries/servers/system';
 import {queryAllUsers} from '@queries/servers/user';
 import {toMilliseconds} from '@utils/datetime';
 import {isMainActivity} from '@utils/helpers';
-import {logError, logInfo} from '@utils/log';
+import {logError} from '@utils/log';
 
 const WAIT_UNTIL_NEXT = toMilliseconds({seconds: 5});
 
@@ -164,7 +164,7 @@ class WebsocketManagerSingleton {
         delete this.connectionTimerIDs[serverUrl];
         if (client.isConnected()) {
             this.getConnectedSubject(serverUrl).next('connected');
-        } else if (!client.isConnecting()) {
+        } else {
             client.initialize({});
         }
     };
@@ -175,8 +175,6 @@ class WebsocketManagerSingleton {
 
         const shouldSync = this.needsSyncOnConnectUrls.delete(serverUrl);
         this.connectedOnceUrls.add(serverUrl);
-
-        logInfo('[WebsocketManager] onConnected', serverUrl, 'shouldSync:', shouldSync);
 
         if (shouldSync) {
             DeviceEventEmitter.emit(Events.WEBSOCKET_RECONNECTED, {serverUrl});
