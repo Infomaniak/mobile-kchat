@@ -77,9 +77,9 @@ export function changeOpacity(oldColor: string, opacity: number): string {
     return `rgba(${red},${green},${blue},${alpha * opacity})`;
 }
 
-export function setNavigatorStyles(componentId: string, theme: Theme, additionalOptions: Options = {}, statusBarColor?: string) {
+export function setNavigatorStyles(componentId: string, theme: Theme, additionalOptions: Record<string, any> = {}, statusBarColor?: string) {
     const isDark = tinyColor(statusBarColor || theme.sidebarBg).isDark();
-    const options: Options = {
+    const options: Record<string, any> = {
         topBar: {
             title: {
                 color: theme.sidebarHeaderTextColor,

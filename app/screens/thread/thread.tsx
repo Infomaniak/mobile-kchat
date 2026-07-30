@@ -25,7 +25,7 @@ import type PostModel from '@typings/database/models/servers/post';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type ThreadProps = {
-    componentId: AvailableScreens;
+    componentId?: AvailableScreens;
     isCRTEnabled: boolean;
     rootId: string;
     rootPost?: PostModel;

@@ -44,7 +44,7 @@ describe('permalinkUtils', () => {
                 'Permalink',
                 {isPermalink: true, teamName: 'teamName', postId: 'postId'},
                 {
-                    modalPresentationStyle: OptionsModalPresentationStyle.overFullScreen,
+                    modalPresentationStyle: 'overFullScreen',
                     layout: {
                         componentBackgroundColor: 'rgba(0,0,0,0.2)',
                     },
@@ -65,7 +65,7 @@ describe('permalinkUtils', () => {
                 'Permalink',
                 {isPermalink: true, teamName: 'teamName', postId: 'postId'},
                 {
-                    modalPresentationStyle: OptionsModalPresentationStyle.overFullScreen,
+                    modalPresentationStyle: 'overFullScreen',
                     layout: {
                         componentBackgroundColor: 'rgba(0,0,0,0.2)',
                     },

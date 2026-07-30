@@ -22,7 +22,6 @@ import InAppNotificationContainer from '@screens/in_app_notification';
 import ReviewAppContainer from '@screens/review_app';
 import ShareFeedbackContainer from '@screens/share_feedback';
 import SnackBarContainer from '@screens/snack_bar';
-import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore, {useCurrentScreen} from '@store/navigation_store';
 
 import type {NativeStackNavigationOptions} from '@react-navigation/native-stack';
@@ -44,15 +43,14 @@ const styles = StyleSheet.create({
     },
 });
 
-SplashScreen.setOptions({fade: true});
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
     const [appReady, setAppReady] = useState(false);
     const navigationRef = useNavigationContainerRef();
     const currentScreen = useCurrentScreen();
-    const [theme, setTheme] = useState(EphemeralStore.getTheme());
     const appearanceTheme = useThemeByAppearanceWithDefault();
+    const [theme, setTheme] = useState(appearanceTheme);
 
     const setAndroidNavigationBarColor = useCallback(() => {
         if (Platform.OS === 'android') {
@@ -65,12 +63,7 @@ export default function RootLayout() {
     }, [theme, appearanceTheme, currentScreen]);
 
     useDidMount(() => {
-        const subscription = EphemeralStore.observeTheme().subscribe((newTheme) => {
-            setTheme(newTheme);
-        });
-        return () => {
-            subscription.unsubscribe();
-        };
+        setTheme(appearanceTheme);
     });
 
     useDidMount(() => {

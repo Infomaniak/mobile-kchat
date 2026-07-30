@@ -47,7 +47,7 @@ describe('AttachmentOptions', () => {
     const mockAttachFileFromFiles = jest.fn();
 
     const baseProps = {
-        componentId: 'Channel' as const,
+        componentId: 'channel' as const,
         onUploadFiles: jest.fn(),
         maxFileCount: 10,
         fileCount: 0,

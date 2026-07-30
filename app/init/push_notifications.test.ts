@@ -225,7 +225,7 @@ describe('PushNotifications', () => {
                     channel_id: 'channel1',
                 },
             };
-            jest.mocked(NavigationStore.getVisibleScreen).mockReturnValue('Settings');
+            jest.mocked(NavigationStore.getVisibleScreen).mockReturnValue('(settings)');
 
             await pushNotifications.handleInAppNotification(serverUrl, notification as any);
 
@@ -255,7 +255,7 @@ describe('PushNotifications', () => {
                     root_id: 'thread1',
                 },
             };
-            jest.mocked(NavigationStore.getVisibleScreen).mockReturnValue('Thread');
+            jest.mocked(NavigationStore.getVisibleScreen).mockReturnValue('thread');
             mockGetIsCRTEnabled.mockResolvedValue(true);
             jest.spyOn(EphemeralStore, 'getCurrentThreadId').mockReturnValue('thread1');
 

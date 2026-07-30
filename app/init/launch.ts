@@ -4,7 +4,7 @@
 import {AppState, DeviceEventEmitter, Linking, Platform} from 'react-native';
 import {Notifications} from 'react-native-notifications';
 
-import {removePosts} from '@actions/local/post';
+import {removePost} from '@actions/local/post';
 import {switchToChannelById} from '@actions/remote/channel';
 import {appEntry, pushNotificationEntry, upgradeEntry} from '@actions/remote/entry';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
@@ -13,7 +13,7 @@ import {DeepLink, Events, Launch, PushNotification, Screens} from '@constants';
 import {PostTypes} from '@constants/post';
 import {getDefaultThemeByAppearance} from '@context/theme';
 import DatabaseManager from '@database/manager';
-import {getActiveServerUrl, getServerCredentials, removeServerCredentials} from '@init/credentials';
+import {getActiveServerUrl, getServerCredentials} from '@init/credentials';
 import PerformanceMetricsManager from '@managers/performance_metrics_manager';
 import {getLastViewedChannelIdAndServer, getOnboardingViewed, getLastViewedThreadIdAndServer} from '@queries/app/global';
 import {getAllServers} from '@queries/app/servers';
@@ -23,7 +23,6 @@ import {getCurrentUserId} from '@queries/servers/system';
 import {getExpoRouterPath} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import {handleDeepLink, getLaunchPropsFromDeepLink} from '@utils/deep_link';
-import {logInfo} from '@utils/log';
 import {convertToNotificationData} from '@utils/notification';
 import {captureMessage} from '@utils/sentry';
 import {removeProtocol} from '@utils/url';
@@ -254,7 +253,52 @@ export async function cleanupEphemeralPosts() {
                 return Promise.resolve();
             }
             const posts = await queryPostsByType(database, PostTypes.EPHEMERAL).fetch();
-            return removePosts(server.url, posts);
+            return Promise.all(posts.map((post) => removePost(server.url, post)));
         }),
     );
+}
+
+export function relaunchApp(_props?: Partial<LaunchProps>) {
+    // With expo-router, relaunch is handled by redirecting to the initial route.
+    // The root index route will determine the correct screen based on credentials.
+    const {router} = require('@screens/navigation');
+    if (router) {
+        router.replace('/');
+    }
+}
+
+export async function launchToHome(props: LaunchProps) {
+    // With expo-router, navigation to home is handled by the root index route redirect.
+    // Perform the same entry logic as determineAuthenticatedRoute, then the router
+    // will navigate to the home screen.
+    if (props.serverUrl) {
+        switch (props.launchType) {
+            case Launch.DeepLink:
+                appEntry(props.serverUrl);
+                break;
+            case Launch.Notification: {
+                const extra = props.extra as NotificationWithData;
+                const openPushNotification = Boolean(props.serverUrl && !props.launchError && extra.userInteraction && extra.payload?.channel_id && !extra.payload?.userInfo?.local);
+                if (openPushNotification) {
+                    pushNotificationEntry(props.serverUrl, extra.payload!, 'Notification');
+                } else {
+                    appEntry(props.serverUrl);
+                }
+                break;
+            }
+            case Launch.Normal:
+                if (props.coldStart) {
+                    const lastViewedChannel = await getLastViewedChannelIdAndServer();
+                    const lastViewedThread = await getLastViewedThreadIdAndServer();
+
+                    if (lastViewedThread && lastViewedThread.server_url === props.serverUrl && lastViewedThread.thread_id) {
+                        fetchAndSwitchToThread(props.serverUrl, lastViewedThread.thread_id);
+                    } else if (lastViewedChannel && lastViewedChannel.server_url === props.serverUrl && lastViewedChannel.channel_id) {
+                        switchToChannelById(props.serverUrl, lastViewedChannel.channel_id);
+                    }
+                    appEntry(props.serverUrl);
+                }
+                break;
+        }
+    }
 }

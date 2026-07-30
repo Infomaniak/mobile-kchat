@@ -6,10 +6,10 @@ import TurboLogger from '@mattermost/react-native-turbo-log';
 import {ExpoRoot} from 'expo-router';
 import React from 'react';
 import {Alert, AlertButton, AlertOptions, AppRegistry, LogBox, Platform, UIManager} from 'react-native';
-
 import ViewReactNativeStyleAttributes from 'react-native/Libraries/Components/View/ReactNativeStyleAttributes';
-import {logInfo} from './app/utils/log';
+
 import setFontFamily from './app/utils/font_family';
+import {logInfo} from './app/utils/log';
 
 declare const global: { HermesInternal: null | {} };
 

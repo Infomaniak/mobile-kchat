@@ -3,7 +3,7 @@
 
 import React, {useCallback, useEffect, useMemo, useReducer, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {Keyboard, StyleSheet, View} from 'react-native';
+import {type ImageSourcePropType, Keyboard, StyleSheet, View} from 'react-native';
 
 import {createChannel, patchChannel as handlePatchChannel, switchToChannelById} from '@actions/remote/channel';
 import CompassIcon from '@components/compass_icon';
@@ -66,7 +66,7 @@ const isDirect = (channel?: ChannelModel): boolean => {
     return channel?.type === General.DM_CHANNEL || channel?.type === General.GM_CHANNEL;
 };
 
-const makeCloseButton = (icon: ImageResource) => {
+const makeCloseButton = (icon: ImageSourcePropType) => {
     return buildNavigationButton(CLOSE_BUTTON_ID, 'close.create_or_edit_channel.button', icon);
 };
 

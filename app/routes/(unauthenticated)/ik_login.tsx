@@ -11,5 +11,10 @@ export default function IkLoginRoute() {
     const {theme: themeProp, ...props} = usePropsFromParams<LaunchProps & {theme: Theme}>();
     const theme = useThemeByAppearanceWithDefault(themeProp);
 
-    return <IkLoginScreen {...props} theme={theme}/>;
+    return (
+        <IkLoginScreen
+            {...props}
+            theme={theme}
+        />
+    );
 }

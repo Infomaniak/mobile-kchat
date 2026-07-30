@@ -7,6 +7,6 @@ import {createIconSetFromFontello} from 'react-native-vector-icons';
 const CompassIcon = createIconSetFromFontello(fontelloConfig, 'compass-icons',
     'compass-icons.ttf');
 
-export type CompassIconName = keyof typeof fontelloConfig.glyphs;
+export type CompassIconName = string;
 
 export default CompassIcon;

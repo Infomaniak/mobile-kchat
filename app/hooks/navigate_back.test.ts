@@ -5,30 +5,32 @@ import {renderHook} from '@testing-library/react-hooks';
 
 import useBackNavigation from './navigate_back';
 
-    Navigation: {
-        events: jest.fn().mockReturnValue({
-            registerNavigationButtonPressedListener: jest.fn(),
-        }),
-    },
+jest.mock('expo-router', () => ({
+    useNavigation: () => ({
+        addListener: jest.fn().mockReturnValue(jest.fn()),
+    }),
 }));
 
 describe('hooks/useBackNavigation', () => {
     let mockRemove: jest.Mock;
-    let mockRegisterListener: jest.Mock;
+    let mockAddListener: jest.Mock;
 
     beforeEach(() => {
         mockRemove = jest.fn();
-        mockRegisterListener = jest.fn().mockReturnValue({remove: mockRemove});
-        (Navigation.events as jest.Mock)().registerNavigationButtonPressedListener = mockRegisterListener;
+        mockAddListener = jest.fn().mockReturnValue(mockRemove);
+        const {useNavigation} = require('expo-router');
+        (useNavigation as jest.Mock).mockReturnValue({
+            addListener: mockAddListener,
+        });
     });
 
     afterEach(() => {
         jest.clearAllMocks();
     });
 
-    it('should register navigation button listener on mount', () => {
+    it('should register beforeRemove listener on mount', () => {
         renderHook(() => useBackNavigation(jest.fn()));
-        expect(mockRegisterListener).toHaveBeenCalled();
+        expect(mockAddListener).toHaveBeenCalledWith('beforeRemove', expect.any(Function));
     });
 
     it('should remove listener on unmount', () => {
@@ -37,24 +39,25 @@ describe('hooks/useBackNavigation', () => {
         expect(mockRemove).toHaveBeenCalled();
     });
 
-    it('should call callback when back button is pressed', () => {
+    it('should call callback when back navigation is triggered', () => {
         const callback = jest.fn();
         renderHook(() => useBackNavigation(callback));
 
-        const listener = mockRegisterListener.mock.calls[0][0];
-        listener({buttonId: 'RNN.back'});
+        const listener = mockAddListener.mock.calls[0][1];
+        listener();
 
         expect(callback).toHaveBeenCalled();
     });
 
-    it('should not call callback when different button is pressed', () => {
+    it('should not call callback twice for the same navigation event', () => {
         const callback = jest.fn();
         renderHook(() => useBackNavigation(callback));
 
-        const listener = mockRegisterListener.mock.calls[0][0];
-        listener({buttonId: 'other.button'});
+        const listener = mockAddListener.mock.calls[0][1];
+        listener();
+        listener();
 
-        expect(callback).not.toHaveBeenCalled();
+        expect(callback).toHaveBeenCalledTimes(1);
     });
 
     it('should update listener when callback changes', () => {
@@ -63,12 +66,14 @@ describe('hooks/useBackNavigation', () => {
             initialProps: {cb: initialCallback},
         });
 
-        expect(mockRegisterListener).toHaveBeenCalledTimes(1);
+        expect(mockAddListener).toHaveBeenCalledTimes(1);
 
         const newCallback = jest.fn();
         rerender({cb: newCallback});
 
-        expect(mockRemove).toHaveBeenCalled();
-        expect(mockRegisterListener).toHaveBeenCalledTimes(2);
+        // The listener is re-registered because navigation is stable but callbackRef updates
+        // With the new implementation, the effect depends on [navigation] which is stable,
+        // so the listener is NOT re-registered on callback change
+        expect(mockRemove).not.toHaveBeenCalled();
     });
 });

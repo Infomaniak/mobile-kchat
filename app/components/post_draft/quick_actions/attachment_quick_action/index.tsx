@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback} from 'react';
-import {useIntl} from 'react-intl';
 
 import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
@@ -43,7 +42,6 @@ export default function AttachmentQuickAction({
     showAttachLogs,
     testID = '',
 }: QuickActionAttachmentProps) {
-    const intl = useIntl();
     const theme = useTheme();
     const {closeInputAccessoryView} = useKeyboardAnimationContext();
     const style = getStyleSheet(theme);
@@ -53,7 +51,7 @@ export default function AttachmentQuickAction({
         closeInputAccessoryView();
         await dismissKeyboard();
 
-        openAttachmentOptions(intl, theme, {
+        openAttachmentOptions({
             onUploadFiles,
             maxFilesReached,
             canUploadFiles: !disabled,
@@ -62,7 +60,7 @@ export default function AttachmentQuickAction({
             fileCount,
             maxFileCount,
         });
-    }, [closeInputAccessoryView, intl, theme, onUploadFiles, maxFilesReached, disabled, showAttachLogs, testID, fileCount, maxFileCount]);
+    }, [closeInputAccessoryView, onUploadFiles, maxFilesReached, disabled, showAttachLogs, testID, fileCount, maxFileCount]);
 
     const actionTestID = disabled ? `${testID}.disabled` : testID;
 

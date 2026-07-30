@@ -21,7 +21,7 @@ jest.mock('@hooks/device', () => ({
 describe.skip('UserAvatarsStack', () => {
     function getBaseProps(): ComponentProps<typeof UserAvatarsStack> {
         return {
-            location: 'Channel',
+            location: 'channel',
             users: [],
             bottomSheetTitle: {id: 'test', defaultMessage: 'bottom sheet title test text'},
         };

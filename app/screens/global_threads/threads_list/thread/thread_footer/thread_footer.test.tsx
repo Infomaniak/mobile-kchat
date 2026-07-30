@@ -55,7 +55,7 @@ describe('ThreadFooter', () => {
         return {
             fromBot: false,
             channelId: 'channel-id',
-            location: 'Channel',
+            location: 'channel',
             author: userModels[1],
             participants: userModels,
             testID: 'thread-footer',

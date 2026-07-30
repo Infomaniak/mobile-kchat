@@ -313,11 +313,11 @@ const Post = ({
             return;
         }
 
-        if (location !== 'Channel' && location !== 'Thread') {
+        if (location !== 'channel' && location !== 'thread') {
             return;
         }
 
-        PerformanceMetricsManager.finishLoad(location === 'Thread' ? 'THREAD' : 'CHANNEL', serverUrl);
+        PerformanceMetricsManager.finishLoad(location === 'thread' ? 'THREAD' : 'CHANNEL', serverUrl);
         PerformanceMetricsManager.endMetric('mobile_channel_switch', serverUrl);
     });
 

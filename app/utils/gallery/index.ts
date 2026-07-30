@@ -9,7 +9,7 @@ import {measure, type AnimatedRef} from 'react-native-reanimated';
 
 import {Events, Screens} from '@constants';
 import {SNACK_BAR_TYPE} from '@constants/snack_bar';
-import {allOrientations, showOverlay} from '@screens/navigation';
+import {navigateToScreen} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import {isImage, isVideo} from '@utils/file';
 import {generateId} from '@utils/general';
@@ -169,38 +169,13 @@ export function openGalleryAtIndex(galleryIdentifier: string, initialIndex: numb
         initialIndex,
         items,
     };
-    const layout: OptionsLayout = {
-        orientation: allOrientations,
-    };
-    const options: Options = {
-        layout,
-        topBar: {
-            background: {
-                color: '#000',
-            },
-            visible: Platform.OS === 'android',
-        },
-        statusBar: {
-            backgroundColor: '#000',
-            style: 'light',
-        },
-        animations: {
-            showModal: {
-                waitForRender: false,
-                enabled: false,
-            },
-            dismissModal: {
-                enabled: false,
-            },
-        },
-    };
 
     if (Platform.OS === 'ios') {
-        // on iOS we need both the navigation & the module
-        Navigation.setDefaultOptions({layout});
+        // on iOS we need to unlock orientation for the gallery
         RNUtils.unlockOrientation();
     }
-    showOverlay(Screens.GALLERY, props, options);
+
+    navigateToScreen(Screens.GALLERY, props);
 
     setTimeout(() => {
         freezeOtherScreens(true);

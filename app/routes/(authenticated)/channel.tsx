@@ -2,17 +2,14 @@
 // See LICENSE.txt for license information.
 
 import {useLocalSearchParams} from 'expo-router';
+
 import {useTheme} from '@context/theme';
-import {useServerUrl} from '@context/server';
 import {getHeaderOptions, useNavigationHeader} from '@hooks/navigation_header';
 import ChannelScreen from '@screens/channel';
-import {useIntl} from 'react-intl';
 
 export default function ChannelRoute() {
     const theme = useTheme();
-    const intl = useIntl();
-    const serverUrl = useServerUrl();
-    const {channelId, displayName} = useLocalSearchParams<{channelId: string; displayName?: string}>();
+    const {displayName} = useLocalSearchParams<{channelId: string; displayName?: string}>();
 
     useNavigationHeader({
         showWhenPushed: true,
@@ -23,9 +20,6 @@ export default function ChannelRoute() {
     });
 
     return (
-        <ChannelScreen
-            channelId={channelId}
-            serverUrl={serverUrl}
-        />
+        <ChannelScreen/>
     );
 }

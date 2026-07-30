@@ -1,18 +1,17 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useLocalSearchParams} from 'expo-router';
+import {useLocalSearchParams, useNavigation} from 'expo-router';
 import {useCallback, useEffect} from 'react';
 import {defineMessages, useIntl} from 'react-intl';
 
-import {useTheme} from '@context/theme';
+import Header from '@components/navigation_header/header';
 import {useServerUrl} from '@context/server';
+import {useTheme} from '@context/theme';
 import {useDefaultHeaderHeight} from '@hooks/header';
 import ThreadScreen from '@screens/thread';
-import Header from '@components/navigation_header/header';
 
 import type {NativeStackHeaderProps} from '@react-navigation/native-stack';
-import {useNavigation} from 'expo-router';
 
 const threadMessages = defineMessages({
     thread: {

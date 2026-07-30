@@ -1,13 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-
 import {doPing} from '@actions/remote/general';
 import {fetchConfigAndLicense} from '@actions/remote/systems';
-import {Screens} from '@constants';
 import DatabaseManager from '@database/manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {getServer, getServerByIdentifier} from '@queries/app/servers';
+import {updateParams} from '@screens/navigation';
 import {logError} from '@utils/log';
 import {canReceiveNotifications} from '@utils/push_proxy';
 import {alertServerAlreadyConnected, alertServerError} from '@utils/server';
@@ -21,7 +20,7 @@ export async function switchToServer(serverUrl: string, theme: Theme, intl: Intl
         return;
     }
     if (server.lastActiveAt) {
-        Navigation.updateProps(Screens.HOME, {extra: undefined});
+        updateParams({extra: undefined});
         DatabaseManager.setActiveServerDatabase(server.url);
         WebsocketManager.initializeClient(server.url);
         return;

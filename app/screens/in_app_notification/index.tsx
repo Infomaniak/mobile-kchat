@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {useNavigation} from 'expo-router';
 import React, {useCallback, useRef, useState} from 'react';
 import {DeviceEventEmitter, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {GestureDetector, Gesture, GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -24,10 +25,10 @@ import Title from './title';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type InAppNotificationProps = {
-    componentId: AvailableScreens;
-    notification: NotificationWithData;
+    componentId?: AvailableScreens;
+    notification?: NotificationWithData;
     serverName?: string;
-    serverUrl: string;
+    serverUrl?: string;
 }
 
 const AUTO_DISMISS_TIME_MILLIS = 5000;
@@ -69,6 +70,7 @@ const styles = StyleSheet.create({
 });
 
 const InAppNotification = ({componentId, serverName, serverUrl, notification}: InAppNotificationProps) => {
+    const navigation = useNavigation();
     const [animate, setAnimate] = useState(false);
     const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
     const initial = useSharedValue(-130);
@@ -90,7 +92,9 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
 
     const dismiss = useCallback(() => {
         cancelDismissTimer();
-        dismissOverlay(componentId);
+        if (componentId) {
+            dismissOverlay(componentId);
+        }
     }, [componentId]);
 
     const notificationTapped = usePreventDoubleTap(useCallback(() => {
@@ -111,8 +115,8 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
     });
 
     useDidMount(() => {
-        const didDismissListener = Navigation.events().registerComponentDidDisappearListener(async ({componentId: screen}) => {
-            if (componentId === screen && tapped.current && serverUrl) {
+        const beforeRemove = navigation.addListener('beforeRemove', () => {
+            if (tapped.current && serverUrl && notification) {
                 const {channel_id} = notification.payload || {};
                 if (channel_id) {
                     openNotification(serverUrl, notification);
@@ -120,7 +124,7 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
             }
         });
 
-        return () => didDismissListener.remove();
+        return () => beforeRemove();
     });
 
     useDidMount(() => {
@@ -138,10 +142,14 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
         };
     }, [animate, insetTop]);
 
-    const message = notification.payload?.body || notification.payload?.message;
+    const message = notification?.payload?.body || notification?.payload?.message;
     const gesture = Gesture.Pan().activeOffsetY(-20).onStart(() => runOnJS(animateDismissOverlay)());
 
-    const database = secureGetFromRecord(DatabaseManager.serverDatabases, serverUrl)?.database;
+    const database = serverUrl ? secureGetFromRecord(DatabaseManager.serverDatabases, serverUrl)?.database : undefined;
+
+    if (!notification) {
+        return null;
+    }
 
     return (
         <GestureHandlerRootView style={styles.gestureHandler}>
@@ -157,7 +165,7 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
                             onPress={notificationTapped}
                             activeOpacity={1}
                         >
-                            {Boolean(database) &&
+                            {Boolean(database) && serverUrl &&
                             <Icon
                                 database={database!}
                                 fromWebhook={notification.payload?.from_webhook === 'true'}

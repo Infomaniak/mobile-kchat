@@ -27,7 +27,7 @@ describe.skip('Markdown', () => {
         baseTextStyle: {},
         enableInlineLatex: true,
         enableLatex: true,
-        location: 'Channel',
+        location: 'channel',
         maxNodes: 2000,
         theme: Preferences.THEMES.denim,
     };

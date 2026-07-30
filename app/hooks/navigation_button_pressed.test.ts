@@ -5,11 +5,10 @@ import {renderHook} from '@testing-library/react-hooks';
 
 import useNavButtonPressed from './navigation_button_pressed';
 
-    Navigation: {
-        events: jest.fn().mockReturnValue({
-            registerComponentListener: jest.fn(),
-        }),
-    },
+jest.mock('expo-router', () => ({
+    useNavigation: () => ({
+        addListener: jest.fn().mockReturnValue(jest.fn()),
+    }),
 }));
 
 describe('hooks/useNavButtonPressed', () => {
@@ -17,12 +16,15 @@ describe('hooks/useNavButtonPressed', () => {
     const buttonId = 'test-button-id';
     let callback: jest.Mock;
     let unsubscribeMock: jest.Mock;
+    let mockAddListener: jest.Mock;
 
     beforeEach(() => {
         callback = jest.fn();
         unsubscribeMock = jest.fn();
-        (Navigation.events().registerComponentListener as jest.Mock).mockReturnValue({
-            remove: unsubscribeMock,
+        mockAddListener = jest.fn().mockReturnValue(unsubscribeMock);
+        const {useNavigation} = require('expo-router');
+        (useNavigation as jest.Mock).mockReturnValue({
+            addListener: mockAddListener,
         });
     });
 
@@ -30,31 +32,19 @@ describe('hooks/useNavButtonPressed', () => {
         jest.clearAllMocks();
     });
 
-    it('should register navigation button listener', () => {
+    it('should register beforeRemove listener', () => {
         renderHook(() => useNavButtonPressed(buttonId, componentId, callback));
 
-        expect(Navigation.events().registerComponentListener).toHaveBeenCalledWith(
-            expect.any(Object),
-            componentId,
-        );
+        expect(mockAddListener).toHaveBeenCalledWith('beforeRemove', expect.any(Function));
     });
 
-    it('should call callback when matching button is pressed', () => {
+    it('should call callback when beforeRemove fires', () => {
         renderHook(() => useNavButtonPressed(buttonId, componentId, callback));
 
-        const listener = (Navigation.events().registerComponentListener as jest.Mock).mock.calls[0][0];
-        listener.navigationButtonPressed({buttonId});
+        const listener = mockAddListener.mock.calls[0][1];
+        listener();
 
         expect(callback).toHaveBeenCalledTimes(1);
-    });
-
-    it('should not call callback when different button is pressed', () => {
-        renderHook(() => useNavButtonPressed(buttonId, componentId, callback));
-
-        const listener = (Navigation.events().registerComponentListener as jest.Mock).mock.calls[0][0];
-        listener.navigationButtonPressed({buttonId: 'different-button'});
-
-        expect(callback).not.toHaveBeenCalled();
     });
 
     it('should unsubscribe listener on unmount', () => {
@@ -73,7 +63,7 @@ describe('hooks/useNavButtonPressed', () => {
 
         rerender({dep: 2});
 
-        expect(Navigation.events().registerComponentListener).toHaveBeenCalledTimes(2);
+        expect(mockAddListener).toHaveBeenCalledTimes(2);
         expect(unsubscribeMock).toHaveBeenCalledTimes(1);
     });
 });

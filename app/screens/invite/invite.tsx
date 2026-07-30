@@ -32,13 +32,13 @@ const SEND_BUTTON_ID = 'send-invite';
 const TIMEOUT_MILLISECONDS = 200;
 const DEFAULT_RESULT = {sent: [], notSent: []};
 
-const makeLeftButton = (theme: Theme): OptionsTopBarButton => ({
+const makeLeftButton = (theme: Theme): Record<string, any> => ({
     id: CLOSE_BUTTON_ID,
     icon: CompassIcon.getImageSourceSync('close', 24, theme.sidebarHeaderTextColor),
     testID: 'invite.close.button',
 });
 
-const makeRightButton = (theme: Theme, formatMessage: IntlShape['formatMessage'], enabled: boolean): OptionsTopBarButton => ({
+const makeRightButton = (theme: Theme, formatMessage: IntlShape['formatMessage'], enabled: boolean): Record<string, any> => ({
     id: SEND_BUTTON_ID,
     text: formatMessage({id: 'invite.send_invite', defaultMessage: 'Send'}),
     showAsAction: 'always',

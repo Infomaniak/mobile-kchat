@@ -30,7 +30,7 @@ describe('Header', () => {
         isPendingOrFailed: false,
         isSystemPost: false,
         isWebHook: false,
-        location: 'About' as const,
+        location: 'about' as const,
         showPostPriority: false,
         teammateNameDisplay: '',
         hideGuestTags: false,

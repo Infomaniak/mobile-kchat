@@ -5,6 +5,6 @@ import {usePropsFromParams} from '@hooks/props_from_params';
 import SelectTeamScreen from '@screens/select_team';
 
 export default function SelectTeamRoute() {
-    const props = usePropsFromParams<Record<string, any>>();
+    const props = usePropsFromParams<any>();
     return <SelectTeamScreen {...props}/>;
 }

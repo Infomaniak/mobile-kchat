@@ -149,7 +149,7 @@ export const switchToConferenceByChannelId = async (
         };
 
         // - options
-        const options: Options = {
+        const options: Record<string, any> = {
             layout: {
                 backgroundColor: '#000',
                 componentBackgroundColor: '#000',

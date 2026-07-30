@@ -51,9 +51,6 @@ export function initializeSentry() {
         ...mmConfig,
         ...sentryOptions,
         enableCaptureFailedRequests: false,
-        integrations: [
-            Sentry.reactNativeNavigationIntegration({navigation: Navigation}),
-        ],
     });
 }
 

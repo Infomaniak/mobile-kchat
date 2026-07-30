@@ -4,10 +4,10 @@
 import {useThemeByAppearanceWithDefault} from '@context/theme';
 import {getLoginFlowHeaderOptions, useNavigationHeader} from '@hooks/navigation_header';
 import {usePropsFromParams} from '@hooks/props_from_params';
-import ForgotPasswordScreen from '@screens/login/forgot_password';
+import ForgotPasswordScreen, {type ForgotPasswordProps} from '@screens/forgot_password';
 
 export default function ForgotPasswordRoute() {
-    const {theme: themeProp, ...props} = usePropsFromParams<{theme: Theme}>();
+    const {theme: themeProp, serverUrl, ...props} = usePropsFromParams<ForgotPasswordProps>();
     const theme = useThemeByAppearanceWithDefault(themeProp);
 
     useNavigationHeader({
@@ -15,5 +15,11 @@ export default function ForgotPasswordRoute() {
         headerOptions: getLoginFlowHeaderOptions(theme),
     });
 
-    return <ForgotPasswordScreen {...props} theme={theme}/>;
+    const screenProps = {
+        theme,
+        serverUrl,
+        ...props,
+    };
+
+    return <ForgotPasswordScreen {...screenProps}/>;
 }

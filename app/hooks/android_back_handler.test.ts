@@ -13,7 +13,7 @@ jest.mock('@store/navigation_store', () => ({
 }));
 
 test('useAndroidHardwareBackHandler - calls callback when visible screen matches componentId', () => {
-    const componentId = 'About';
+    const componentId = 'about';
     const callback = jest.fn();
     const addEventListenerSpy = jest.spyOn(BackHandler, 'addEventListener');
 
@@ -28,7 +28,7 @@ test('useAndroidHardwareBackHandler - calls callback when visible screen matches
 });
 
 test('useAndroidHardwareBackHandler - does not call callback when visible screen does not match componentId', () => {
-    const componentId = 'About';
+    const componentId = 'about';
     const callback = jest.fn();
     const addEventListenerSpy = jest.spyOn(BackHandler, 'addEventListener');
     (NavigationStore.getVisibleScreen as jest.Mock).mockReturnValue('otherScreen');
@@ -42,7 +42,7 @@ test('useAndroidHardwareBackHandler - does not call callback when visible screen
 });
 
 test('useAndroidHardwareBackHandler - removes event listener on unmount', () => {
-    const componentId = 'About';
+    const componentId = 'about';
     const callback = jest.fn();
     const remove = jest.fn();
     const addEventListenerSpy = jest.spyOn(BackHandler, 'addEventListener');

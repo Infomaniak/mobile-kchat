@@ -5,6 +5,7 @@ import {Image, ImageRef} from 'expo-image';
 import {DeviceEventEmitter, Keyboard, View} from 'react-native';
 import {measure, type AnimatedRef} from 'react-native-reanimated';
 
+import {navigateToScreen} from '@screens/navigation';
 import {waitFor} from '@test/intl-test-helper';
 
 import {clamp, clampVelocity, fileToGalleryItem, freezeOtherScreens, friction, galleryItemToFileInfo, getImageSize, getShouldRender, measureItem, measureViewInWindow, openGalleryAtIndex, typedMemo} from '.';
@@ -12,6 +13,7 @@ import {clamp, clampVelocity, fileToGalleryItem, freezeOtherScreens, friction, g
 import type {GalleryItemType, GalleryManagerSharedValues} from '@typings/screens/gallery';
 
 jest.mock('@screens/navigation', () => ({
+    navigateToScreen: jest.fn(),
     showOverlay: jest.fn(),
 }));
 
@@ -200,7 +202,7 @@ describe.skip('Gallery utils', () => {
 
             openGalleryAtIndex(galleryIdentifier, initialIndex, items);
             expect(Keyboard.dismiss).toHaveBeenCalled();
-            expect(Navigation.setDefaultOptions).toHaveBeenCalled();
+            expect(navigateToScreen).toHaveBeenCalled();
 
             await waitFor(() => {
                 expect(emitSpy).toHaveBeenCalledWith('FREEZE_SCREEN', true);

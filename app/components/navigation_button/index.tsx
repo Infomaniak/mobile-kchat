@@ -1,14 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Pressable, Text} from 'react-native';
+import {Pressable, Text, type StyleProp, type ViewStyle} from 'react-native';
 
 import CompassIcon, {type CompassIconName} from '@components/compass_icon';
 import {useTheme} from '@context/theme';
 import {changeOpacity} from '@utils/theme';
 import {typography} from '@utils/typography';
-
-import type {StyleProp, ViewStyle} from 'react-native';
 
 export type NavigationButtonProps = {
     borderless?: boolean;

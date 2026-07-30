@@ -113,7 +113,7 @@ describe('MessageAttachment', () => {
         },
         channelId: 'channel-id',
         postId: 'post-id',
-        location: 'Channel',
+        location: 'channel',
         theme: Preferences.THEMES.denim,
         metadata: {
             images: {

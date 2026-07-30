@@ -147,7 +147,7 @@ function reducer(state: NewStatusType, action: {
     }
 }
 
-const dismissModalAndKeyboard = (isTablet: boolean, options?: Options & { componentId: AvailableScreens}) => {
+const dismissModalAndKeyboard = (isTablet: boolean, options?: Record<string, any> & { componentId: AvailableScreens}) => {
     if (isTablet) {
         DeviceEventEmitter.emit(Events.ACCOUNT_SELECT_TABLET_VIEW, '');
     } else {

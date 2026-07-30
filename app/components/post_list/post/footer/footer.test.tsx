@@ -31,7 +31,7 @@ describe('Footer', () => {
 
     const defaultProps = {
         channelId: 'channel-123',
-        location: 'Channel' as const,
+        location: 'channel' as const,
         participants: mockParticipants,
         teamId: 'team-123',
         thread: mockThread,

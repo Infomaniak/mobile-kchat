@@ -5,6 +5,6 @@ import {usePropsFromParams} from '@hooks/props_from_params';
 import Screen from '@screens/reactions';
 
 export default function Route() {
-    const props = usePropsFromParams<Record<string, any>>();
+    const props = usePropsFromParams<any>();
     return <Screen {...props}/>;
 }

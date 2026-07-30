@@ -4,10 +4,10 @@
 import {useThemeByAppearanceWithDefault} from '@context/theme';
 import {getLoginFlowHeaderOptions, useNavigationHeader} from '@hooks/navigation_header';
 import {usePropsFromParams} from '@hooks/props_from_params';
-import MfaScreen from '@screens/mfa';
+import MfaScreen, {type MFAProps} from '@screens/mfa';
 
 export default function MfaRoute() {
-    const {theme: themeProp, ...props} = usePropsFromParams<{theme: Theme}>();
+    const {theme: themeProp, ...props} = usePropsFromParams<MFAProps>();
     const theme = useThemeByAppearanceWithDefault(themeProp);
 
     useNavigationHeader({
@@ -15,5 +15,10 @@ export default function MfaRoute() {
         headerOptions: getLoginFlowHeaderOptions(theme),
     });
 
-    return <MfaScreen {...props} theme={theme}/>;
+    return (
+        <MfaScreen
+            {...props}
+            theme={theme}
+        />
+    );
 }

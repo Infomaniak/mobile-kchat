@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {usePathname} from 'expo-router';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {defineMessage, useIntl} from 'react-intl';
 import {
@@ -36,9 +37,9 @@ import type {AvailableScreens} from '@typings/screens/navigation';
 import type {ShowSnackBarArgs} from '@utils/snack_bar';
 
 type SnackBarProps = {
-    componentId: AvailableScreens;
-    sourceScreen: AvailableScreens;
-} & ShowSnackBarArgs;
+    componentId?: AvailableScreens;
+    sourceScreen?: AvailableScreens;
+} & Omit<ShowSnackBarArgs, 'barType'> & {barType?: ShowSnackBarArgs['barType']};
 
 const SNACK_BAR_WIDTH = 96;
 const SNACK_BAR_HEIGHT = 56;
@@ -107,6 +108,7 @@ const SnackBar = ({
     const theme = useTheme();
     const isTablet = useIsTablet();
     const {width: windowWidth, height: windowHeight} = useWindowDimensions();
+    const pathname = usePathname();
     const offset = useSharedValue(0);
     const isPanned = useSharedValue(false);
     const baseTimer = useRef<NodeJS.Timeout>();
@@ -150,7 +152,7 @@ const SnackBar = ({
                     width: (SNACK_BAR_WIDTH / 100) * diffWidth,
                 };
                 break;
-            case caseScreens.includes(sourceScreen):
+            case Boolean(sourceScreen) && caseScreens.includes(sourceScreen!):
                 tabletStyle = {
                     marginBottom: 0,
                     marginLeft: 0,
@@ -253,31 +255,37 @@ const SnackBar = ({
             if (userHasUndo?.current) {
                 onAction?.();
             }
-            dismissOverlay(componentId);
+            if (componentId) {
+                dismissOverlay(componentId);
+            }
         }
     }, [showSnackBar, onAction, componentId]);
 
     // This effect checks if we are navigating away and if so, it dismisses the snack bar
     useEffect(() => {
-        const onHideSnackBar = (event?: ComponentEvent) => {
-            const evtComponentId = event?.componentId;
-            if ((componentId !== evtComponentId) && (sourceScreen !== evtComponentId)) {
-                animateHiding(true);
-            }
+        const onHideSnackBar = () => {
+            animateHiding(true);
         };
 
-        const screenWillAppear = Navigation.events().registerComponentWillAppearListener(onHideSnackBar);
-        const screenDidDisappear = Navigation.events().registerComponentDidDisappearListener(onHideSnackBar);
         const tabPress = DeviceEventEmitter.addListener('tabPress', onHideSnackBar);
         const navigateToTab = DeviceEventEmitter.addListener(NavigationConstants.NAVIGATE_TO_TAB, onHideSnackBar);
 
         return () => {
-            screenWillAppear.remove();
-            screenDidDisappear.remove();
             tabPress.remove();
             navigateToTab.remove();
         };
-    }, [animateHiding, componentId, sourceScreen]);
+
+    // pathname is used to detect navigation changes - when it changes, the snack bar should hide
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [animateHiding, pathname, componentId, sourceScreen]);
+
+    // Hide the snack bar when the pathname changes (navigation away)
+    useEffect(() => {
+        animateHiding(true);
+
+    // Only re-run when pathname changes, not when animateHiding changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pathname]);
 
     const message = customMessage || intl.formatMessage(config.message, messageValues);
 

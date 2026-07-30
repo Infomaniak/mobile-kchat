@@ -1,20 +1,31 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useEffect} from 'react';
-
-const BACK_BUTTON = 'RNN.back';
+import {useNavigation} from 'expo-router';
+import {useEffect, useRef} from 'react';
 
 const useBackNavigation = (callback: () => void) => {
+    const navigation = useNavigation();
+    const callbackRef = useRef(callback);
+    const hasCalledRef = useRef(false);
+
     useEffect(() => {
-        const backListener = Navigation.events().registerNavigationButtonPressedListener(({buttonId}) => {
-            if (buttonId === BACK_BUTTON) {
-                callback();
+        callbackRef.current = callback;
+    }, [callback]);
+
+    useEffect(() => {
+        const backListener = navigation.addListener('beforeRemove', () => {
+            if (!hasCalledRef.current) {
+                hasCalledRef.current = true;
+                callbackRef.current();
             }
         });
 
-        return () => backListener.remove();
-    }, [callback]);
+        return () => {
+            backListener();
+            hasCalledRef.current = false;
+        };
+    }, [navigation]);
 };
 
 export default useBackNavigation;

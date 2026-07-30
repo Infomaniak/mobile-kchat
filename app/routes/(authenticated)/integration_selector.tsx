@@ -5,6 +5,6 @@ import {usePropsFromParams} from '@hooks/props_from_params';
 import IntegrationSelectorScreen from '@screens/integration_selector';
 
 export default function IntegrationSelectorRoute() {
-    const props = usePropsFromParams<Record<string, any>>();
+    const props = usePropsFromParams<any>();
     return <IntegrationSelectorScreen {...props}/>;
 }

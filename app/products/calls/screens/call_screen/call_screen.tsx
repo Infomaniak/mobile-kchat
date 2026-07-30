@@ -17,13 +17,13 @@ import RippleIcon from '@calls/screens/call_screen/ripple_icon';
 import NavigationHeader from '@components/navigation_header';
 import {postListRef} from '@components/post_list/post_list';
 import Image from '@components/profile_picture/image';
-import {Screens} from '@constants';
 import {useServerId} from '@context/server';
 import {useTheme} from '@context/theme';
 import DatabaseManager from '@database/manager';
 import {useCollapsibleHeader} from '@hooks/header';
 import {useMountedRef, useRerender, useTransientRef} from '@hooks/utils';
 import {getCommonSystemValues} from '@queries/servers/system';
+import {navigateBack} from '@screens/navigation';
 import CallManager from '@store/CallManager';
 import {isDMorGM as isChannelDMorGM} from '@utils/channel';
 import {logError} from '@utils/log';
@@ -351,8 +351,8 @@ const CallScreen = ({
             hasUpdatedRef(leavingRef, true)
         ) {
             // Remove the call screen, and in some situations it needs to be removed twice before actually being removed
-            Navigation.pop(Screens.CALL).catch(() => null);
-            Navigation.pop(Screens.CALL).catch(() => null);
+            navigateBack();
+            navigateBack();
 
             // Return back to the channel where this meeting has been started
             const database = DatabaseManager.serverDatabases[serverUrl]?.database;

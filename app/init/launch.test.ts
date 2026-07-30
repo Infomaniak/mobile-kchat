@@ -17,10 +17,10 @@ import {getAllServers} from '@queries/app/servers';
 import {queryPostsByType} from '@queries/servers/post';
 import {getCurrentUserId} from '@queries/servers/system';
 import {queryMyTeams} from '@queries/servers/team';
-import {resetToHome, resetToSelectServer, resetToOnboarding} from '@screens/navigation';
+import {resetToSelectServer, resetToOnboarding} from '@screens/navigation';
 import {getLaunchPropsFromDeepLink} from '@utils/deep_link';
 
-import {initialLaunch, launchToHome, cleanupEphemeralPosts, getLaunchPropsFromNotification} from './launch';
+import {launchToHome, cleanupEphemeralPosts, determineInitialExpoRoute} from './launch';
 
 import type ServersModel from '@typings/database/models/app/servers';
 import type {LaunchProps} from '@typings/launch';
@@ -60,7 +60,6 @@ jest.mock('@queries/servers/preference');
 jest.mock('@queries/servers/system');
 jest.mock('@queries/servers/team');
 jest.mock('@screens/navigation', () => ({
-    resetToHome: jest.fn().mockResolvedValue(''),
     resetToSelectServer: jest.fn().mockResolvedValue(''),
     resetToTeams: jest.fn().mockResolvedValue(''),
     resetToOnboarding: jest.fn().mockResolvedValue(''),
@@ -86,7 +85,7 @@ describe('Launch', () => {
         AppState.currentState = 'active';
     });
 
-    describe('initialLaunch', () => {
+    describe('determineInitialExpoRoute', () => {
         it.skip('should handle deep link launch', async () => {
             // IK change : skipped on CI temporarily, will fix later
             const deepLinkUrl = 'mattermost://server-1.com';
@@ -98,13 +97,12 @@ describe('Launch', () => {
 
             jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(deepLinkUrl);
             jest.mocked(getLaunchPropsFromDeepLink).mockReturnValue(launchProps);
-            jest.mocked(resetToSelectServer).mockResolvedValue('');
+            jest.mocked(resetToSelectServer).mockResolvedValue(undefined as never);
 
-            await initialLaunch();
+            await determineInitialExpoRoute();
 
             expect(Linking.getInitialURL).toHaveBeenCalled();
             expect(getLaunchPropsFromDeepLink).toHaveBeenCalledWith(deepLinkUrl, true);
-            expect(resetToSelectServer).toHaveBeenCalledWith(launchProps);
         });
 
         it.skip('should handle notification launch', async () => {
@@ -112,14 +110,13 @@ describe('Launch', () => {
             const payload = {type: PushNotification.NOTIFICATION_TYPE.SESSION, ack_id: 'ack1'};
 
             jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(null);
-            jest.mocked(resetToSelectServer).mockResolvedValue('');
+            jest.mocked(resetToSelectServer).mockResolvedValue(undefined as never);
 
             jest.mocked(Notifications.getInitialNotification).mockResolvedValueOnce({payload} as any);
 
-            await initialLaunch();
+            await determineInitialExpoRoute();
 
             expect(Linking.getInitialURL).toHaveBeenCalled();
-            expect(resetToSelectServer).toHaveBeenCalledWith(expect.objectContaining({launchType: Launch.Notification}));
         });
 
         it('should handle normal launch with active server', async () => {
@@ -132,21 +129,20 @@ describe('Launch', () => {
             jest.mocked(getCurrentUserId).mockResolvedValue('user1');
             jest.mocked(queryMyTeams).mockReturnValue({fetchCount: () => 1} as any);
 
-            await initialLaunch();
+            await determineInitialExpoRoute();
 
             expect(getActiveServerUrl).toHaveBeenCalled();
             expect(getServerCredentials).toHaveBeenCalledWith(serverUrl);
             expect(getCurrentUserId).toHaveBeenCalled();
             expect(appEntry).toHaveBeenCalledWith(serverUrl);
-            expect(resetToHome).toHaveBeenCalled();
         });
 
         it('should handle upgrade launch with no current user', async () => {
             jest.mocked(getCurrentUserId).mockResolvedValueOnce('');
 
-            await initialLaunch();
+            await determineInitialExpoRoute();
 
-            expect(resetToHome).toHaveBeenCalledWith(expect.objectContaining({launchType: Launch.Upgrade}));
+            expect(appEntry).toHaveBeenCalled();
         });
 
         it('should show onboarding when enabled and not viewed', async () => {
@@ -155,7 +151,7 @@ describe('Launch', () => {
             jest.mocked(getActiveServerUrl).mockResolvedValue(undefined);
             jest.mocked(getOnboardingViewed).mockResolvedValue(false);
 
-            await initialLaunch();
+            await determineInitialExpoRoute();
 
             expect(resetToOnboarding).toHaveBeenCalled();
         });
@@ -179,7 +175,6 @@ describe('Launch', () => {
             await launchToHome(props);
 
             expect(appEntry).toHaveBeenCalledWith(serverUrl);
-            expect(resetToHome).toHaveBeenCalledWith(props);
         });
 
         it('should handle notification launch', async () => {
@@ -198,7 +193,6 @@ describe('Launch', () => {
             await launchToHome(props);
 
             expect(pushNotificationEntry).toHaveBeenCalledWith(serverUrl, notification.payload, 'Notification');
-            expect(resetToHome).toHaveBeenCalledWith(props);
         });
 
         it('should handle cold start with last viewed channel', async () => {
@@ -239,73 +233,6 @@ describe('Launch', () => {
 
             expect(fetchAndSwitchToThread).toHaveBeenCalledWith(serverUrl, 'thread1');
             expect(appEntry).toHaveBeenCalledWith(serverUrl);
-        });
-    });
-
-    describe('getLaunchPropsFromNotification', () => {
-        DatabaseManager.getServerDatabaseAndOperator = jest.fn().mockReturnValue({
-            database: {},
-            operator: {},
-        });
-
-        it('should return launch props with server url from payload', async () => {
-            const notification = {
-                payload: {
-                    server_url: 'http://server-1.com',
-                    channel_id: 'channel1',
-                },
-                userInteraction: true,
-            } as NotificationWithData;
-
-            jest.mocked(DatabaseManager.searchUrl).mockReturnValue('http://server-1.com');
-
-            const result = await getLaunchPropsFromNotification(notification);
-
-            expect(result).toEqual({
-                launchType: Launch.Notification,
-                extra: notification,
-                serverUrl: 'http://server-1.com',
-                coldStart: false,
-            });
-        });
-
-        it('should return launch props with server url from server id', async () => {
-            const notification = {
-                payload: {
-                    server_id: 'server1',
-                    channel_id: 'channel1',
-                },
-                userInteraction: true,
-            } as NotificationWithData;
-
-            jest.mocked(DatabaseManager.getServerUrlFromIdentifier).mockResolvedValue('http://server-1.com');
-
-            const result = await getLaunchPropsFromNotification(notification);
-
-            expect(result).toEqual({
-                launchType: Launch.Notification,
-                extra: notification,
-                serverUrl: 'http://server-1.com',
-                coldStart: false,
-            });
-        });
-
-        it('should return launch props with error when server not found', async () => {
-            const notification = {
-                payload: {
-                    channel_id: 'channel1',
-                },
-                userInteraction: true,
-            } as NotificationWithData;
-
-            const result = await getLaunchPropsFromNotification(notification);
-
-            expect(result).toEqual({
-                launchType: Launch.Notification,
-                extra: notification,
-                launchError: true,
-                coldStart: false,
-            });
         });
     });
 

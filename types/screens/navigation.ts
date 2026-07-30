@@ -5,3 +5,5 @@ import type {Screens} from '@constants';
 
 type ScreenKeys = keyof typeof Screens;
 export type AvailableScreens = typeof Screens[ScreenKeys] | '(modals)';
+
+export type NavButtons = Record<string, any>;

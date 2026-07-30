@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useReducer, useRef, useState} from 'react';
+import {type ImageSourcePropType} from 'react-native';
 
 import {fetchArchivedChannels, fetchChannels, fetchSharedChannels, searchChannels} from '@actions/remote/channel';
 import {General} from '@constants';
@@ -18,7 +19,7 @@ type Props = {
     // Screen Props (do not change during the lifetime of the screen)
     componentId: AvailableScreens;
     categoryId?: string;
-    closeButton: ImageResource;
+    closeButton: ImageSourcePropType;
 
     // Properties not changing during the lifetime of the screen)
     currentUserId: string;

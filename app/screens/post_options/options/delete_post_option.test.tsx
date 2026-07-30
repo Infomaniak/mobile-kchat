@@ -44,7 +44,7 @@ describe('DeletePostOption', () => {
     });
 
     const getDefaultProps = () => ({
-        bottomSheetId: 'PostOptions' as const,
+        bottomSheetId: 'post_options' as const,
         post: mockPost,
     });
 

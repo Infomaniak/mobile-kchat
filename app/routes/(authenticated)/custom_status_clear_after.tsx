@@ -5,6 +5,6 @@ import {usePropsFromParams} from '@hooks/props_from_params';
 import CustomStatusClearAfterScreen from '@screens/custom_status_clear_after';
 
 export default function CustomStatusClearAfterRoute() {
-    const props = usePropsFromParams<Record<string, any>>();
+    const props = usePropsFromParams<any>();
     return <CustomStatusClearAfterScreen {...props}/>;
 }

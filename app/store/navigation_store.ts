@@ -90,7 +90,7 @@ class NavigationStoreSingleton {
         return 'Home';
     }
 
-    setVisibleTap(tab: string) {
+    setVisibleTap(_tab: string) {
         // No-op
     }
 

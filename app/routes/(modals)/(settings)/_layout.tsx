@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {Stack} from 'expo-router';
+
 import {withServerDatabase} from '@database/components';
 
 function SettingsLayout() {

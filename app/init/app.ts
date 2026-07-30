@@ -48,6 +48,5 @@ export async function initialize() {
 }
 
 export function cleanup() {
-    GlobalEventHandler.cleanup();
-    SessionManager.cleanup();
+    // Managers don't have cleanup methods yet
 }

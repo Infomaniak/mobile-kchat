@@ -34,7 +34,7 @@ const mockGoToScreen = goToScreen as jest.Mock;
 // Ik change : skip on CI, will fix later
 describe.skip('AdvancedSettings', () => {
     const defaultProps = {
-        componentId: 'SettingsAdvanced' as const,
+        componentId: 'settings_advanced' as const,
         isDevMode: false,
         lowConnectivityMonitorEnabled: false,
     };

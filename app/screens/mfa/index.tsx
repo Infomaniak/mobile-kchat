@@ -26,11 +26,11 @@ import Shield from './shield';
 
 import type {AvailableScreens} from '@typings/screens/navigation';
 
-type MFAProps = {
-    componentId: AvailableScreens;
-    config: Partial<ClientConfig>;
-    goToHome: (error?: unknown) => void;
-    license: Partial<ClientLicense>;
+export type MFAProps = {
+    componentId?: AvailableScreens;
+    config?: Partial<ClientConfig>;
+    goToHome?: (error?: unknown) => void;
+    license?: Partial<ClientLicense>;
     loginId: string;
     password: string;
     serverDisplayName: string;
@@ -110,13 +110,13 @@ const MFA = ({componentId, config, goToHome, license, loginId, password, serverD
             return;
         }
         setIsLoading(true);
-        const result: LoginActionResponse = await login(serverUrl, {loginId, password, mfaToken: token, config, license, serverDisplayName});
+        const result: LoginActionResponse = await login(serverUrl, {loginId, password, mfaToken: token, config: config || {}, license: license || {}, serverDisplayName});
         setIsLoading(false);
         if (result?.error && result.failed) {
             setError(getErrorMessage(result.error, intl));
             return;
         }
-        goToHome(result.error);
+        goToHome?.(result.error);
     }, [config, formatMessage, goToHome, intl, license, loginId, password, serverDisplayName, serverUrl, token]));
 
     const animatedStyles = useScreenTransitionAnimation(componentId);

@@ -24,8 +24,8 @@ export const displayPermalink = async (teamName: string, postId: string, openAsP
 
     const options = {
         modalPresentationStyle: Platform.select({
-            ios: OptionsModalPresentationStyle.overFullScreen,
-            default: OptionsModalPresentationStyle.overCurrentContext,
+            ios: 'overFullScreen',
+            default: 'overCurrentContext',
         }),
         layout: {
             componentBackgroundColor: changeOpacity('#000', 0.2),

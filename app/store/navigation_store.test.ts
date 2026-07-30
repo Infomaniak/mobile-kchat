@@ -54,7 +54,7 @@ describe('NavigationStore', () => {
             NavigationStore.addModalToStack(Screens.EDIT_PROFILE);
 
             expect(NavigationStore.getModalsInStack()).toEqual([Screens.EDIT_PROFILE, Screens.EDIT_POST]);
-            expect(NavigationStore.getVisibleModal()).toBe(Screens.EDIT_PROFILE);
+            expect(NavigationStore.getVisibleScreen()).toBe(Screens.EDIT_PROFILE);
             expect(NavigationStore.hasModalsOpened()).toBe(true);
         });
 
@@ -64,7 +64,7 @@ describe('NavigationStore', () => {
             NavigationStore.removeModalFromStack(Screens.EDIT_PROFILE);
 
             expect(NavigationStore.getModalsInStack()).toEqual([Screens.EDIT_POST]);
-            expect(NavigationStore.getVisibleModal()).toBe(Screens.EDIT_POST);
+            expect(NavigationStore.getVisibleScreen()).toBe(Screens.EDIT_POST);
         });
 
         it('should handle duplicate modal additions', () => {

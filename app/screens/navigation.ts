@@ -27,7 +27,7 @@ export function updateParams(props: Record<string, any>) {
     }
 }
 
-export function getExpoRouterPath(screen: AvailableScreens, props?: any): string | undefined {
+export function getExpoRouterPath(screen: AvailableScreens, _props?: any): string | undefined {
     if (UNAUTHENTICATED_SCREENS.has(screen)) {
         return `/(unauthenticated)/${screen}`;
     }
@@ -136,18 +136,26 @@ export function navigateToChannelInfoScreen(screen: AvailableScreens, props?: Re
     navigateToScreenWithBaseRoute(`/(modals)/${Screens.CHANNEL_INFO}`, screen, props);
 }
 
-export function bottomSheet(renderContent: () => React.ReactNode, snapPoints: Array<string | number>, footerComponent?: (props: BottomSheetFooterProps) => React.ReactNode) {
+export function bottomSheet(options: {
+    closeButtonId?: string;
+    renderContent: () => React.ReactNode;
+    snapPoints: Array<string | number>;
+    footerComponent?: (props: BottomSheetFooterProps) => React.ReactNode;
+    title?: string;
+    theme?: Theme;
+    initialSnapIndex?: number;
+}) {
     DeviceEventEmitter.emit(Events.BLUR_AND_DISMISS_KEYBOARD);
-    BottomSheetStore.setSnapPoints(snapPoints);
-    BottomSheetStore.setRenderContentCallback(renderContent);
-    if (footerComponent) {
-        BottomSheetStore.setFooterComponent(footerComponent);
+    BottomSheetStore.setSnapPoints(options.snapPoints);
+    BottomSheetStore.setRenderContentCallback(options.renderContent);
+    if (options.footerComponent) {
+        BottomSheetStore.setFooterComponent(options.footerComponent);
     }
 
     navigateToScreen(Screens.GENERIC_BOTTOM_SHEET);
 }
 
-export async function dismissBottomSheet(alternativeScreen: AvailableScreens = Screens.GENERIC_BOTTOM_SHEET) {
+export async function dismissBottomSheet(_alternativeScreen: AvailableScreens = Screens.GENERIC_BOTTOM_SHEET) {
     const hasRegularSheet = NavigationStore.isScreenInStack(Screens.BOTTOM_SHEET);
     const hasGenericSheet = NavigationStore.isScreenInStack(Screens.GENERIC_BOTTOM_SHEET);
     if (!hasRegularSheet && !hasGenericSheet) {
@@ -162,11 +170,11 @@ export async function dismissBottomSheet(alternativeScreen: AvailableScreens = S
 }
 
 // Compatibility wrappers for old RNN function names
-export function goToScreen(name: AvailableScreens, title: string, passProps: Record<string, any> = {}, options: any = {}) {
+export function goToScreen(name: AvailableScreens, _title: string, passProps: Record<string, any> = {}, _options: any = {}) {
     navigateToScreen(name, passProps);
 }
 
-export async function popTopScreen(screenId?: AvailableScreens) {
+export async function popTopScreen(_screenId?: AvailableScreens) {
     await navigateBack();
 }
 
@@ -188,15 +196,15 @@ export async function popToRoot() {
     await navigateToRoot();
 }
 
-export function showModal(name: AvailableScreens, title: string, passProps: Record<string, any> = {}, options: any = {}) {
+export function showModal(name: AvailableScreens, _title: string, passProps: Record<string, any> = {}, _options: any = {}) {
     navigateToScreen(name, passProps);
 }
 
-export function showModalOverCurrentContext(name: AvailableScreens, passProps: Record<string, any> = {}, options: any = {}) {
+export function showModalOverCurrentContext(name: AvailableScreens, passProps: Record<string, any> = {}, _options: any = {}) {
     navigateToScreen(name, passProps);
 }
 
-export async function dismissModal(options?: any) {
+export async function dismissModal(_options?: any) {
     await navigateBack();
 }
 
@@ -208,17 +216,17 @@ export async function dismissAllModalsAndPopToRoot() {
     await navigateToRoot();
 }
 
-export async function dismissAllModalsAndPopToScreen(screenId: AvailableScreens, title: string, passProps: Record<string, any> = {}, options: any = {}) {
+export async function dismissAllModalsAndPopToScreen(screenId: AvailableScreens, _title: string, passProps: Record<string, any> = {}, _options: any = {}) {
     await dismissAllRoutesAndPopToScreen(screenId, passProps);
 }
 
-export function showOverlay(name: AvailableScreens, passProps: Record<string, any> = {}, options: any = {}, id?: string) {
+export function showOverlay(name: AvailableScreens, passProps: Record<string, any> = {}, _options: any = {}, _id?: string) {
     if (SCREENS_AS_BOTTOM_SHEET.has(name)) {
         navigateToScreen(name, passProps);
     }
 }
 
-export async function dismissOverlay(componentId: string) {
+export async function dismissOverlay(_componentId: string) {
     await navigateBack();
 }
 
@@ -226,7 +234,7 @@ export async function dismissAllOverlays() {
     // No-op with expo-router
 }
 
-export function openAsBottomSheet({closeButtonId, screen, theme, title, props}: {
+export function openAsBottomSheet({screen, props}: {
     closeButtonId: string;
     props?: Record<string, any>;
     screen: AvailableScreens;
@@ -244,7 +252,7 @@ export function showAppForm(form: any, context: any) {
     navigateToScreen(Screens.APPS_FORM, {form, context});
 }
 
-export function openUserProfileModal(intl: any, theme: Theme, props: Record<string, any>, screenToDismiss?: AvailableScreens) {
+export function openUserProfileModal(intl: any, theme: Theme, props: Record<string, any>, _screenToDismiss?: AvailableScreens) {
     navigateToScreen(Screens.USER_PROFILE, props);
 }
 
@@ -256,15 +264,15 @@ export function showShareFeedbackOverlay() {
     navigateToScreen(Screens.SHARE_FEEDBACK);
 }
 
-export async function findChannels(title: string, theme: Theme) {
+export async function findChannels(_title: string, _theme: Theme) {
     navigateToScreen(Screens.FIND_CHANNELS);
 }
 
-export function setButtons(componentId: AvailableScreens, buttons: any = {}) {
+export function setButtons(componentId?: AvailableScreens, _buttons: any = {}) {
     // No-op with expo-router — header buttons are handled by route layouts
 }
 
-export function setScreensOrientation(allowRotation: boolean) {
+export function setScreensOrientation(_allowRotation: boolean) {
     // No-op with expo-router
 }
 
@@ -272,7 +280,7 @@ export function openToS() {
     navigateToScreen(Screens.TERMS_OF_SERVICE);
 }
 
-export function bottomSheetModalOptions(theme: Theme, closeButtonId?: string) {
+export function bottomSheetModalOptions(_theme: Theme, _closeButtonId?: string) {
     return {};
 }
 
@@ -317,5 +325,14 @@ export function getThemeFromState(): Theme {
 }
 
 export function buildNavigationButton(id: string, testID: string, icon?: any, text?: string) {
-    return {id, testID, icon, text};
+    const button: {
+        id: string;
+        testID: string;
+        icon?: any;
+        text?: string;
+        enabled?: boolean;
+        showAsAction?: string;
+        color?: string;
+    } = {id, testID, icon, text};
+    return button;
 }

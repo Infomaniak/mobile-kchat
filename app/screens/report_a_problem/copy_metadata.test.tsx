@@ -28,7 +28,7 @@ describe('screens/report_a_problem/copy_metadata', () => {
         appVersion: '2.0.0',
         appPlatform: 'ios',
     };
-    const componentId = 'ReportProblem';
+    const componentId = 'report_problem';
 
     beforeEach(() => {
         jest.clearAllMocks();
