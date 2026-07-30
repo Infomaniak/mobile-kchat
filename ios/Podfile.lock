@@ -18,7 +18,7 @@ PODS:
   - DoubleConversion (1.1.6)
   - EXApplication (6.0.2):
     - ExpoModulesCore
-  - EXConstants (17.0.8):
+  - EXConstants (16.0.2):
     - ExpoModulesCore
   - Expo (52.0.47):
     - ExpoModulesCore
@@ -32,6 +32,8 @@ PODS:
     - ExpoModulesCore
   - ExpoFileSystem (18.0.12):
     - ExpoModulesCore
+  - ExpoHead (4.0.20):
+    - ExpoModulesCore
   - ExpoImage (2.0.7):
     - ExpoModulesCore
     - SDWebImage (~> 5.19.1)
@@ -39,6 +41,8 @@ PODS:
   - ExpoKeepAwake (14.0.3):
     - ExpoModulesCore
   - ExpoLinearGradient (14.0.2):
+    - ExpoModulesCore
+  - ExpoLinking (7.0.5):
     - ExpoModulesCore
   - ExpoModulesCore (2.2.3):
     - DoubleConversion
@@ -70,6 +74,28 @@ PODS:
     - ExpoModulesCore
   - ExpoWebBrowser (14.0.2):
     - ExpoModulesCore
+  - EXSplashScreen (0.28.5):
+    - DoubleConversion
+    - ExpoModulesCore
+    - glog
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - fast_float (6.1.4)
   - FBLazyVector (0.77.3)
   - fmt (11.0.2)
@@ -109,7 +135,6 @@ PODS:
     - AppAuth/Core (~> 1.7)
     - GTMSessionFetcher/Core (< 4.0, >= 3.3)
   - GTMSessionFetcher/Core (3.5.0)
-  - HMSegmentedControl (1.5.6)
   - jitsi-meet-rnsdk (12.0.0):
     - ObjectiveDropboxOfficial (= 6.2.3)
     - React-Core
@@ -1980,19 +2005,6 @@ PODS:
     - React-Core
   - ReactNativeIncallManager (4.2.0):
     - React-Core
-  - ReactNativeNavigation (7.45.0):
-    - HMSegmentedControl
-    - React-Core
-    - React-CoreModules
-    - React-RCTImage
-    - React-RCTText
-    - ReactNativeNavigation/Core (= 7.45.0)
-  - ReactNativeNavigation/Core (7.45.0):
-    - HMSegmentedControl
-    - React-Core
-    - React-CoreModules
-    - React-RCTImage
-    - React-RCTText
   - RNCalendarEvents (2.2.0):
     - React-Core
   - RNCAsyncStorage (1.23.1):
@@ -2384,13 +2396,16 @@ DEPENDENCIES:
   - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
   - ExpoDevice (from `../node_modules/expo-device/ios`)
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
+  - ExpoHead (from `../node_modules/expo-router/ios`)
   - ExpoImage (from `../node_modules/expo-image/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
+  - ExpoLinking (from `../node_modules/expo-linking/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoStoreReview (from `../node_modules/expo-store-review/ios`)
   - ExpoVideoThumbnails (from `../node_modules/expo-video-thumbnails/ios`)
   - ExpoWebBrowser (from `../node_modules/expo-web-browser/ios`)
+  - EXSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - fast_float (from `../node_modules/react-native/third-party-podspecs/fast_float.podspec`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - fmt (from `../node_modules/react-native/third-party-podspecs/fmt.podspec`)
@@ -2490,7 +2505,6 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - ReactNativeExceptionHandler (from `../node_modules/react-native-exception-handler`)
   - ReactNativeIncallManager (from `../node_modules/react-native-incall-manager`)
-  - ReactNativeNavigation (from `../node_modules/react-native-navigation`)
   - RNCalendarEvents (from `../node_modules/react-native-calendar-events`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
@@ -2534,7 +2548,6 @@ SPEC REPOS:
     - GoogleSignIn
     - GTMAppAuth
     - GTMSessionFetcher
-    - HMSegmentedControl
     - JitsiWebRTC
     - KituraContracts
     - libwebp
@@ -2572,12 +2585,16 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-device/ios"
   ExpoFileSystem:
     :path: "../node_modules/expo-file-system/ios"
+  ExpoHead:
+    :path: "../node_modules/expo-router/ios"
   ExpoImage:
     :path: "../node_modules/expo-image/ios"
   ExpoKeepAwake:
     :path: "../node_modules/expo-keep-awake/ios"
   ExpoLinearGradient:
     :path: "../node_modules/expo-linear-gradient/ios"
+  ExpoLinking:
+    :path: "../node_modules/expo-linking/ios"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core"
   ExpoStoreReview:
@@ -2586,6 +2603,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-video-thumbnails/ios"
   ExpoWebBrowser:
     :path: "../node_modules/expo-web-browser/ios"
+  EXSplashScreen:
+    :path: "../node_modules/expo-splash-screen/ios"
   fast_float:
     :podspec: "../node_modules/react-native/third-party-podspecs/fast_float.podspec"
   FBLazyVector:
@@ -2779,8 +2798,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-exception-handler"
   ReactNativeIncallManager:
     :path: "../node_modules/react-native-incall-manager"
-  ReactNativeNavigation:
-    :path: "../node_modules/react-native-navigation"
   RNCalendarEvents:
     :path: "../node_modules/react-native-calendar-events"
   RNCAsyncStorage:
@@ -2859,19 +2876,22 @@ SPEC CHECKSUMS:
   CocoaLumberjack: 6a459bc897d6d80bd1b8c78482ec7ad05dffc3f0
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   EXApplication: 4c72f6017a14a65e338c5e74fca418f35141e819
-  EXConstants: fcfc75800824ac2d5c592b5bc74130bad17b146b
+  EXConstants: 89d35611505a8ce02550e64e43cd05565da35f9a
   Expo: 1687edb10c76b0c0f135306d6ae245379f50ed54
   ExpoAdapterGoogleSignIn: 3400db1f94651c59f123494ff66562e102922733
   ExpoCrypto: e97e864c8d7b9ce4a000bca45dddb93544a1b2b4
   ExpoDevice: d36ab4186b6799a28fd449bb9a1c77455f23fd1a
   ExpoFileSystem: 42d363d3b96f9afab980dcef60d5657a4443c655
+  ExpoHead: cee2d16ef197aaadb0ac481cf221a663636eb074
   ExpoImage: 043fcf882697fbcf4f50da1233b373d281f0456d
   ExpoKeepAwake: b0171a73665bfcefcfcc311742a72a956e6aa680
   ExpoLinearGradient: 35ebd83b16f80b3add053a2fd68cc328ed927f60
+  ExpoLinking: 8d12bee174ba0cdf31239706578e29e74a417402
   ExpoModulesCore: 6ba21f9f2cede2f5ebce9e3d2d41b0413e965ff2
   ExpoStoreReview: 92ad323dd14485e7aa67d5b47248fb22876ffaee
   ExpoVideoThumbnails: 7e9cd967393af9af0f7b0c62a4a00549f1860cab
   ExpoWebBrowser: a212e6b480d8857d3e441fba51e0c968333803b3
+  EXSplashScreen: 487e282758642f3f5c82908755b4506db8273a44
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FBLazyVector: 23d8c5470c648a635893dc0956c6dbaead54b656
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
@@ -2882,7 +2902,6 @@ SPEC CHECKSUMS:
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
-  HMSegmentedControl: 34c1f54d822d8308e7b24f5d901ec674dfa31352
   jitsi-meet-rnsdk: b38d6c73502e9d3616a199bb8e378c24b420260f
   JitsiMeetSDKLite: 7533568e61f16dbcbf821d17dd36b075090ca33c
   JitsiWebRTC: b47805ab5668be38e7ee60e2258f49badfe8e1d0
@@ -2980,7 +2999,6 @@ SPEC CHECKSUMS:
   ReactCommon: 8944ec645f3455118c0a822f2621b95cf5db0de9
   ReactNativeExceptionHandler: a23922ca00122b050ae9412f960061791c232c47
   ReactNativeIncallManager: ef7b845e166f04cf8ddf433d8a23227b01cef87a
-  ReactNativeNavigation: 6cef83673a08a51d426ff041c015da7c2a178a77
   RNCalendarEvents: 62e1ac89d3afbfa77cf2dafa8727af93fa70825f
   RNCAsyncStorage: aa75595c1aefa18f868452091fa0c411a516ce11
   RNCClipboard: 7c3e3b5f71d84ef61690ad377b6c50cf27864ff5
