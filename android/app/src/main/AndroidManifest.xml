@@ -108,12 +108,6 @@
         android:turnScreenOn="true"
       />
       <activity
-        android:name="com.reactnativenavigation.controllers.NavigationActivity"
-        android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
-        android:resizeableActivity="true"
-        android:exported="false"
-      />
-      <activity
         android:name="com.mattermost.rnshare.ShareActivity"
         android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
         android:windowSoftInputMode="adjustResize"

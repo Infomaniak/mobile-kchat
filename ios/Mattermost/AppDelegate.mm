@@ -5,7 +5,6 @@
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
 #import <RNKeychain/RNKeychainManager.h>
-#import <ReactNativeNavigation/ReactNativeNavigation.h>
 #import <UserNotifications/UserNotifications.h>
 #import <TurboLogIOSNative/TurboLog.h>
 
@@ -70,13 +69,8 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
   [RNNotifications startMonitorNotifications];
 
   os_log(OS_LOG_DEFAULT, "Mattermost started!!");
-  [ReactNativeNavigation bootstrapWithDelegate:self launchOptions:launchOptions];
-
-  return YES;
-}
-
--(BOOL)bridgelessEnabled {
-  return NO;
+  self.moduleName = @"kChat";
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
@@ -201,21 +195,25 @@ continueUserActivity: (nonnull NSUserActivity *)userActivity
 }
 
 -(void)applicationDidBecomeActive:(UIApplication *)application {
+  [super applicationDidBecomeActive:application];
   [[GekidouWrapper default] setPreference:@"true" forKey:@"ApplicationIsForeground"];
   [self endDatabaseLockProtection];
 }
 
 -(void)applicationWillResignActive:(UIApplication *)application {
+  [super applicationWillResignActive:application];
   [[GekidouWrapper default] setPreference:@"false" forKey:@"ApplicationIsForeground"];
   [self beginDatabaseLockProtection];
 }
 
 -(void)applicationDidEnterBackground:(UIApplication *)application {
+  [super applicationDidEnterBackground:application];
   [[GekidouWrapper default] setPreference:@"false" forKey:@"ApplicationIsForeground"];
   [self beginDatabaseLockProtection];
 }
 
 -(void)applicationWillTerminate:(UIApplication *)application {
+  [super applicationWillTerminate:application];
   [[GekidouWrapper default] setPreference:@"false" forKey:@"ApplicationIsForeground"];
   [[GekidouWrapper default] setPreference:@"false" forKey:@"ApplicationIsRunning"];
   [self endDatabaseLockProtection];
@@ -223,25 +221,6 @@ continueUserActivity: (nonnull NSUserActivity *)userActivity
 
 - (UIInterfaceOrientationMask)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window {
   return self.orientationLock;
-}
-
-- (NSArray<id<RCTBridgeModule>> *)extraModulesForBridge:(RCTBridge *)bridge
-{
-  NSMutableArray<id<RCTBridgeModule>> *extraModules = [NSMutableArray new];
-  [extraModules addObjectsFromArray:[ReactNativeNavigation extraModulesForBridge:bridge]];
-
-  // You can inject any extra modules that you would like here, more information at:
-  // https://facebook.github.io/react-native/docs/native-modules-ios.html#dependency-injection
-  return extraModules;
-}
-
-- (NSDictionary *)prepareInitialProps
-{
-  NSMutableDictionary *initProps = [NSMutableDictionary new];
-#ifdef RCT_NEW_ARCH_ENABLED
-  initProps[kRNConcurrentRoot] = @([self concurrentRootEnabled]);
-#endif
-  return initProps;
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge

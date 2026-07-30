@@ -1,11 +1,13 @@
 package com.mattermost.rnbeta
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import com.facebook.react.PackageList
+import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeHost
 import com.facebook.react.ReactPackage
@@ -27,7 +29,6 @@ import com.mattermost.rnshare.helpers.RealPathUtil
 import com.mattermost.turbolog.TurboLog
 import com.mattermost.turbolog.ConfigureOptions
 import com.nozbe.watermelondb.jsi.WatermelonDBJSIPackage
-import com.reactnativenavigation.NavigationApplication
 
 import com.wix.reactnativenotifications.core.AppLaunchHelper
 import com.wix.reactnativenotifications.core.AppLifecycleFacade
@@ -42,7 +43,7 @@ import expo.modules.image.okhttp.ExpoImageOkHttpClientGlideModule
 
 import java.io.File
 
-class MainApplication : NavigationApplication(), INotificationsApplication {
+class MainApplication : Application(), ReactApplication, INotificationsApplication {
     private var listenerAdded = false
 
     override val reactNativeHost: ReactNativeHost =
