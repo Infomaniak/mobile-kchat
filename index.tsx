@@ -5,22 +5,13 @@ import {RUNNING_E2E} from '@env';
 import TurboLogger from '@mattermost/react-native-turbo-log';
 import {ExpoRoot} from 'expo-router';
 import React from 'react';
-import {Alert, AlertButton, AlertOptions, AppRegistry, LogBox, Platform, UIManager} from 'react-native';
+import {AppRegistry, LogBox, Platform, UIManager} from 'react-native';
 import ViewReactNativeStyleAttributes from 'react-native/Libraries/Components/View/ReactNativeStyleAttributes';
 
 import setFontFamily from './app/utils/font_family';
 import {logInfo} from './app/utils/log';
 
 declare const global: { HermesInternal: null | {} };
-
-export function installAlertSpy() {
-    const originalAlert = Alert.alert;
-    Alert.alert = ((title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) => {
-        // eslint-disable-next-line no-console
-        console.log('[Alert.alert] called', {title, message, buttons, options});
-        return (originalAlert as any)(title, message, buttons, options);
-    }) as typeof Alert.alert;
-}
 
 ViewReactNativeStyleAttributes.scaleY = true;
 
@@ -32,7 +23,7 @@ TurboLogger.configure({
 });
 
 if (__DEV__) {
-    LogBox.ignoreLogs(['new NativeEventEmitter']);
+    LogBox.ignoreAllLogs(true);
     const isRunningE2e = RUNNING_E2E === 'true';
     logInfo(`RUNNING_E2E: ${RUNNING_E2E}, isRunningE2e: ${isRunningE2e}`);
     if (isRunningE2e) {
@@ -41,7 +32,6 @@ if (__DEV__) {
 }
 
 setFontFamily();
-installAlertSpy();
 
 if (global.HermesInternal) {
     require('@formatjs/intl-getcanonicallocales/polyfill-force');

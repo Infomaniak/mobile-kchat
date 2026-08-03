@@ -4,7 +4,6 @@
 import {PortalHost, PortalProvider} from '@gorhom/portal';
 import RNUtils from '@mattermost/rnutils';
 import {Stack, useNavigationContainerRef} from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {IntlProvider} from 'react-intl';
 import {Keyboard, Platform, StyleSheet} from 'react-native';
@@ -19,8 +18,6 @@ import useDidMount from '@hooks/did_mount';
 import {DEFAULT_LOCALE, getTranslations} from '@i18n';
 import {cleanup, initialize} from '@init/app';
 import InAppNotificationContainer from '@screens/in_app_notification';
-import ReviewAppContainer from '@screens/review_app';
-import ShareFeedbackContainer from '@screens/share_feedback';
 import SnackBarContainer from '@screens/snack_bar';
 import NavigationStore, {useCurrentScreen} from '@store/navigation_store';
 
@@ -43,8 +40,7 @@ const styles = StyleSheet.create({
     },
 });
 
-SplashScreen.preventAutoHideAsync();
-
+// SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
     const [appReady, setAppReady] = useState(false);
     const navigationRef = useNavigationContainerRef();
@@ -69,10 +65,16 @@ export default function RootLayout() {
     useDidMount(() => {
         async function initializeApp() {
             try {
+                // eslint-disable-next-line no-console
+                console.log('[Layout] initialize() starting...');
                 await initialize();
                 RNUtils.lockPortrait();
+                // eslint-disable-next-line no-console
+                console.log('[Layout] initialize() done, setting appReady=true');
                 setAppReady(true);
             } catch (error) {
+                // eslint-disable-next-line no-console
+                console.error('[Layout] initialize() failed', error);
                 setAppReady(true);
             }
         }
@@ -86,7 +88,7 @@ export default function RootLayout() {
 
     useEffect(() => {
         if (appReady) {
-            SplashScreen.hideAsync();
+            // SplashScreen.hideAsync();
         }
     }, [appReady]);
 
@@ -192,10 +194,6 @@ export default function RootLayout() {
                         </KeyboardProvider>
                         <PortalHost name='notification'/>
                         <InAppNotificationContainer/>
-                        <PortalHost name='review_app'/>
-                        <ReviewAppContainer/>
-                        <PortalHost name='share_feedback'/>
-                        <ShareFeedbackContainer/>
                     </PortalProvider>
                 </IntlProvider>
             </SafeAreaProvider>

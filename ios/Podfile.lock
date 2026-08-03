@@ -9,7 +9,7 @@ PODS:
   - AppAuth/ExternalUserAgent (1.7.6):
     - AppAuth/Core
   - BlueCryptor (1.0.32)
-  - BlueECC (1.2.5)
+  - BlueECC (1.2.201)
   - BlueRSA (1.0.203)
   - boost (1.84.0)
   - CocoaLumberjack (3.8.5):
@@ -26,6 +26,8 @@ PODS:
     - ExpoModulesCore
     - GoogleSignIn (~> 7.0)
     - React-Core
+  - ExpoAsset (11.0.5):
+    - ExpoModulesCore
   - ExpoCrypto (14.0.2):
     - ExpoModulesCore
   - ExpoDevice (7.0.3):
@@ -74,28 +76,6 @@ PODS:
     - ExpoModulesCore
   - ExpoWebBrowser (14.0.2):
     - ExpoModulesCore
-  - EXSplashScreen (0.28.5):
-    - DoubleConversion
-    - ExpoModulesCore
-    - glog
-    - RCT-Folly (= 2024.11.18.00)
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - Yoga
   - fast_float (6.1.4)
   - FBLazyVector (0.77.3)
   - fmt (11.0.2)
@@ -2393,6 +2373,7 @@ DEPENDENCIES:
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - Expo (from `../node_modules/expo`)
   - "ExpoAdapterGoogleSignIn (from `../node_modules/@react-native-google-signin/google-signin/expo/ios`)"
+  - ExpoAsset (from `../node_modules/expo-asset/ios`)
   - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
   - ExpoDevice (from `../node_modules/expo-device/ios`)
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
@@ -2405,7 +2386,6 @@ DEPENDENCIES:
   - ExpoStoreReview (from `../node_modules/expo-store-review/ios`)
   - ExpoVideoThumbnails (from `../node_modules/expo-video-thumbnails/ios`)
   - ExpoWebBrowser (from `../node_modules/expo-web-browser/ios`)
-  - EXSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - fast_float (from `../node_modules/react-native/third-party-podspecs/fast_float.podspec`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - fmt (from `../node_modules/react-native/third-party-podspecs/fmt.podspec`)
@@ -2579,6 +2559,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo"
   ExpoAdapterGoogleSignIn:
     :path: "../node_modules/@react-native-google-signin/google-signin/expo/ios"
+  ExpoAsset:
+    :path: "../node_modules/expo-asset/ios"
   ExpoCrypto:
     :path: "../node_modules/expo-crypto/ios"
   ExpoDevice:
@@ -2603,8 +2585,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-video-thumbnails/ios"
   ExpoWebBrowser:
     :path: "../node_modules/expo-web-browser/ios"
-  EXSplashScreen:
-    :path: "../node_modules/expo-splash-screen/ios"
   fast_float:
     :podspec: "../node_modules/react-native/third-party-podspecs/fast_float.podspec"
   FBLazyVector:
@@ -2862,7 +2842,7 @@ CHECKOUT OPTIONS:
     :git: https://github.com/jitsi/jitsi-meet-ios-sdk-releases.git
     :tag: 11.3.1-lite
   TurboLogIOSNative:
-    :commit: 44fa9abe32a74ce6206d6237c639e6382495d210
+    :commit: 4021fac1af04b31df8e19370267595134a0dbb2e
     :git: https://github.com/larkox/react-native-turbo-log-ios-native.git
 
 SPEC CHECKSUMS:
@@ -2870,7 +2850,7 @@ SPEC CHECKSUMS:
   amplitude-react-native: d0039a3ce502eb441ba818af1b8c8ba710ef16e7
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   BlueCryptor: b0aee3d9b8f367b49b30de11cda90e1735571c24
-  BlueECC: 0d18e93347d3ec6d41416de21c1ffa4d4cd3c2cc
+  BlueECC: c9662360a702839aa4d324f9f4cc8b899f6f7dd6
   BlueRSA: 893ae5412de48a508a487067564dbcf9cd49df71
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   CocoaLumberjack: 6a459bc897d6d80bd1b8c78482ec7ad05dffc3f0
@@ -2879,6 +2859,7 @@ SPEC CHECKSUMS:
   EXConstants: 89d35611505a8ce02550e64e43cd05565da35f9a
   Expo: 1687edb10c76b0c0f135306d6ae245379f50ed54
   ExpoAdapterGoogleSignIn: 3400db1f94651c59f123494ff66562e102922733
+  ExpoAsset: 48386d40d53a8c1738929b3ed509bcad595b5516
   ExpoCrypto: e97e864c8d7b9ce4a000bca45dddb93544a1b2b4
   ExpoDevice: d36ab4186b6799a28fd449bb9a1c77455f23fd1a
   ExpoFileSystem: 42d363d3b96f9afab980dcef60d5657a4443c655
@@ -2891,7 +2872,6 @@ SPEC CHECKSUMS:
   ExpoStoreReview: 92ad323dd14485e7aa67d5b47248fb22876ffaee
   ExpoVideoThumbnails: 7e9cd967393af9af0f7b0c62a4a00549f1860cab
   ExpoWebBrowser: a212e6b480d8857d3e441fba51e0c968333803b3
-  EXSplashScreen: 487e282758642f3f5c82908755b4506db8273a44
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FBLazyVector: 23d8c5470c648a635893dc0956c6dbaead54b656
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd

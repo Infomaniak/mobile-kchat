@@ -1,10 +1,10 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+const {getDefaultConfig: getExpoDefaultConfig} = require('@expo/metro-config');
+const {mergeConfig} = require('metro-config');
 
-const defaultConfig = getDefaultConfig(__dirname);
-const {assetExts, sourceExts} = defaultConfig.resolver;
+const defaultConfig = getExpoDefaultConfig(__dirname);
 
 /**
  * Metro configuration
@@ -13,19 +13,9 @@ const {assetExts, sourceExts} = defaultConfig.resolver;
  * @type {import('metro-config').MetroConfig}
  */
 const config = {
-    transformer: {
-        unstable_allowRequireContext: true,
-        babelTransformerPath: require.resolve('react-native-svg-transformer'),
-        getTransformOptions: async () => ({
-            transform: {
-                experimentalImportSupport: false,
-                inlineRequires: true,
-            },
-        }),
-    },
     resolver: {
-        assetExts: assetExts.filter((ext) => ext !== 'svg'),
-        sourceExts: [...sourceExts, 'svg'],
+        assetExts: defaultConfig.resolver.assetExts.filter((ext) => ext !== 'svg'),
+        sourceExts: [...defaultConfig.resolver.sourceExts, 'svg'],
     },
 };
 
