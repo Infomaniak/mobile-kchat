@@ -7,7 +7,7 @@ import {Events, Preferences, Screens} from '@constants';
 import NavigationStore from '@store/navigation_store';
 import {isTablet} from '@utils/helpers';
 
-import {openAsBottomSheet, openAttachmentOptions} from './navigation';
+import {dismissAllModalsAndPopToScreen, openAsBottomSheet, openAttachmentOptions} from './navigation';
 
 import type {FirstArgument} from '@typings/utils/utils';
 import type {IntlShape} from 'react-intl';
@@ -192,5 +192,25 @@ describe('openAttachmentOptions', () => {
             theme,
             props: minimalProps,
         }, false);
+    });
+});
+
+describe('dismissAllModalsAndPopToScreen', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        NavigationStore.reset();
+        (Navigation as unknown as {popTo: jest.Mock}).popTo = jest.fn();
+    });
+
+    afterEach(() => {
+        NavigationStore.reset();
+    });
+
+    it('does not issue a pop command when the target screen is already visible', async () => {
+        NavigationStore.addScreenToStack(Screens.CHANNEL);
+
+        await dismissAllModalsAndPopToScreen(Screens.CHANNEL, '');
+
+        expect(Navigation.popTo).not.toHaveBeenCalled();
     });
 });
