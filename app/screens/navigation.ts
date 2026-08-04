@@ -734,6 +734,12 @@ export async function dismissAllModalsAndPopToScreen(screenId: AvailableScreens,
                 },
             });
         }
+        if (NavigationStore.getVisibleScreen() === screenId) {
+            if (Object.keys(passProps).length > 0) {
+                Navigation.updateProps(screenId, passProps);
+            }
+            return;
+        }
         try {
             await Navigation.popTo(screenId, mergeOptions);
             if (Object.keys(passProps).length > 0) {

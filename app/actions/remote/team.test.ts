@@ -3,6 +3,9 @@
 
 /* eslint-disable max-lines */
 
+import {DeviceEventEmitter} from 'react-native';
+
+import {Events} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
@@ -135,6 +138,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+    jest.restoreAllMocks();
     await DatabaseManager.destroyServerDatabase(serverUrl);
 });
 
@@ -409,6 +413,20 @@ describe('teams', () => {
         expect(result).toBeDefined();
         expect(result?.error).toBeUndefined();
         expect(fetchScheduledPosts).toHaveBeenCalledWith(serverUrl, teamId, false);
+    });
+
+    it('handleTeamChange - should always clear the switching state on error', async () => {
+        const switchError = new Error('team switch failed');
+        const emitSpy = jest.spyOn(DeviceEventEmitter, 'emit');
+        jest.spyOn(operator, 'batchRecords').mockRejectedValueOnce(switchError);
+
+        await expect(handleTeamChange(serverUrl, teamId)).rejects.toBe(switchError);
+
+        const teamSwitchEvents = emitSpy.mock.calls.filter(([event]) => event === Events.TEAM_SWITCH);
+        expect(teamSwitchEvents).toEqual([
+            [Events.TEAM_SWITCH, true],
+            [Events.TEAM_SWITCH, false],
+        ]);
     });
 
     it('handleKickFromTeam - base case', async () => {

@@ -5,6 +5,7 @@
 
 import {createIntl} from 'react-intl';
 
+import * as LocalChannelActions from '@actions/local/channel';
 import {DeepLink} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
@@ -158,6 +159,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+    jest.restoreAllMocks();
     await DatabaseManager.destroyServerDatabase(serverUrl);
 });
 
@@ -507,6 +509,35 @@ describe('channel', () => {
         expect(result).not.toHaveProperty('error');
     });
 
+    it('switchToChannelById - should skip concurrent switches to the same channel', async () => {
+        type SwitchResult = Awaited<ReturnType<typeof LocalChannelActions.switchToChannel>>;
+        let resolveSwitch: (result: SwitchResult) => void = () => {};
+        const localSwitch = new Promise<SwitchResult>((resolve) => {
+            resolveSwitch = resolve;
+        });
+        const switchSpy = jest.spyOn(LocalChannelActions, 'switchToChannel').mockReturnValue(localSwitch);
+
+        const switches = Array.from({length: 8}, () => switchToChannelById(serverUrl, channelId));
+
+        expect(switchSpy).toHaveBeenCalledTimes(1);
+        await expect(Promise.all(switches.slice(1))).resolves.toEqual(Array(7).fill({}));
+
+        resolveSwitch({models: []});
+        await expect(switches[0]).resolves.toEqual({});
+    });
+
+    it('switchToChannelById - should allow retry after a failed switch', async () => {
+        const switchError = new Error('switch failed');
+        const switchSpy = jest.spyOn(LocalChannelActions, 'switchToChannel').
+            mockResolvedValueOnce({error: switchError}).
+            mockResolvedValueOnce({models: []});
+
+        await expect(switchToChannelById(serverUrl, channelId)).resolves.toEqual({error: switchError});
+        await expect(switchToChannelById(serverUrl, channelId)).resolves.toEqual({});
+
+        expect(switchSpy).toHaveBeenCalledTimes(2);
+    });
+
     it('switchToPenultimateChannel - handle not found database', async () => {
         const {error} = await switchToPenultimateChannel('foo') as {error: unknown};
         expect(error).toBeDefined();
@@ -767,4 +798,3 @@ describe('direct and group', () => {
         expect(updatedChannel).toBeDefined();
     });
 });
-
