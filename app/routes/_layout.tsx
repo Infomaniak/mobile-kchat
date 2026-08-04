@@ -13,6 +13,7 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import tinycolor from 'tinycolor2';
 
 import {Screens} from '@constants';
+import {isEdgeToEdge} from '@constants/device';
 import {useThemeByAppearanceWithDefault} from '@context/theme';
 import useDidMount from '@hooks/did_mount';
 import {DEFAULT_LOCALE, getTranslations} from '@i18n';
@@ -146,7 +147,7 @@ export default function RootLayout() {
         headerShown: false,
         animation: 'none',
         contentStyle: {backgroundColor: theme.centerChannelBg},
-        ...Platform.select({android: {statusBarBackgroundColor: theme.sidebarBg}}),
+        ...Platform.select({android: {statusBarBackgroundColor: theme.sidebarBg, statusBarTranslucent: isEdgeToEdge, statusBarStyle: tinycolor(theme.sidebarBg).isLight() ? 'dark' : 'light'}}),
     }), [theme.centerChannelBg, theme.sidebarBg]);
 
     const modalScreenOptions = useMemo<NativeStackNavigationOptions>(() => ({
@@ -160,7 +161,7 @@ export default function RootLayout() {
         animation: 'none',
         headerShown: false,
         contentStyle: {backgroundColor: 'transparent'},
-        ...Platform.select({android: {statusBarBackgroundColor: theme.sidebarBg}}),
+        ...Platform.select({android: {statusBarBackgroundColor: theme.sidebarBg, statusBarTranslucent: isEdgeToEdge}}),
     }), [theme.sidebarBg]);
 
     if (!appReady) {
@@ -175,7 +176,13 @@ export default function RootLayout() {
                     messages={getTranslations(DEFAULT_LOCALE)}
                 >
                     <PortalProvider>
-                        <KeyboardProvider>
+                        <KeyboardProvider
+                            enabled={isEdgeToEdge}
+                            statusBarTranslucent={isEdgeToEdge}
+                            navigationBarTranslucent={isEdgeToEdge}
+                            preserveEdgeToEdge={isEdgeToEdge}
+                            preload={true}
+                        >
                             <Stack screenOptions={stackScreenOptions}>
                                 <Stack.Screen name='(unauthenticated)'/>
                                 <Stack.Screen name='(authenticated)'/>

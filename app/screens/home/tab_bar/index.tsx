@@ -129,10 +129,10 @@ function TabBar({state, descriptors, navigation, theme}: BottomTabBarProps & {th
 
     const animatedStyle = useAnimatedStyle(() => {
         if (visible === undefined) {
-            return {transform: [{translateY: -safeareaInsets.bottom}]};
+            return {transform: [{translateY: 0}]};
         }
 
-        const height = visible ? withTiming(-safeareaInsets.bottom, {duration: 200}) : withTiming(52 + safeareaInsets.bottom, {duration: 150});
+        const height = visible ? withTiming(0, {duration: 200}) : withTiming(52 + safeareaInsets.bottom, {duration: 150});
         return {
             transform: [{translateY: height}],
         };

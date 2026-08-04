@@ -3,7 +3,7 @@
 
 import BottomSheetM, {BottomSheetBackdrop, BottomSheetScrollView, BottomSheetView, type BottomSheetBackdropProps} from '@gorhom/bottom-sheet';
 import React, {type ReactNode, useCallback, useEffect, useMemo, useRef} from 'react';
-import {DeviceEventEmitter, type Handle, InteractionManager, ScrollView, type StyleProp, View, type ViewStyle} from 'react-native';
+import {DeviceEventEmitter, ScrollView, type StyleProp, View, type ViewStyle} from 'react-native';
 import {ReduceMotion, useReducedMotion, type WithSpringConfig} from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
@@ -13,7 +13,8 @@ import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useBottomSheetListsFix} from '@hooks/bottom_sheet_lists_fix';
 import {useIsTablet} from '@hooks/device';
 import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import {dismissModal} from '@screens/navigation';
+import {navigateBack} from '@screens/navigation';
+import BottomSheetStore from '@store/bottom_sheet_store';
 import {hapticFeedback} from '@utils/general';
 import {dismissKeyboard} from '@utils/keyboard';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -108,14 +109,13 @@ const BottomSheet = ({
     keyboardBehavior = 'extend',
     keyboardBlurBehavior = 'restore',
 }: Props) => {
+    const isClosing = useRef(false);
     const reducedMotion = useReducedMotion();
     const sheetRef = useRef<BottomSheetM>(null);
     const isTablet = useIsTablet();
     const insets = useSafeAreaInsets();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
-    const interaction = useRef<Handle>();
-    const timeoutRef = useRef<NodeJS.Timeout>();
 
     const {enabled, panResponder} = useBottomSheetListsFix();
 
@@ -124,10 +124,6 @@ const BottomSheet = ({
         reduceMotion: reducedMotion ? ReduceMotion.Always : ReduceMotion.Never,
     }), [reducedMotion]);
 
-    useEffect(() => {
-        interaction.current = InteractionManager.createInteractionHandle();
-    }, []);
-
     const bottomSheetBackgroundStyle = useMemo(() => [
         styles.bottomSheetBackground,
         {borderWidth: isTablet ? 0 : 1},
@@ -135,14 +131,19 @@ const BottomSheet = ({
     ], [headerStyle, isTablet, styles.bottomSheetBackground]);
 
     const close = useCallback(() => {
-        dismissModal({componentId});
-    }, [componentId]);
+        if (isClosing.current) {
+            return;
+        }
+        isClosing.current = true;
+        BottomSheetStore.reset();
+        navigateBack();
+    }, []);
 
     useEffect(() => {
         const listener = DeviceEventEmitter.addListener(Events.CLOSE_BOTTOM_SHEET, () => {
             if (sheetRef.current) {
                 sheetRef.current.close();
-            } else {
+            } else if (!isClosing.current) {
                 close();
             }
         });
@@ -150,29 +151,16 @@ const BottomSheet = ({
         return () => listener.remove();
     }, [close]);
 
-    const handleAnimationStart = useCallback(() => {
-        if (!interaction.current) {
-            interaction.current = InteractionManager.createInteractionHandle();
-        }
-    }, []);
-
     const handleClose = useCallback(() => {
         if (sheetRef.current) {
             sheetRef.current.close();
-        } else {
+        } else if (!isClosing.current) {
             close();
         }
     }, [close]);
 
     const handleChange = useCallback((index: number) => {
-        timeoutRef.current = setTimeout(() => {
-            if (interaction.current) {
-                InteractionManager.clearInteractionHandle(interaction.current);
-                interaction.current = undefined;
-            }
-        });
-
-        if (index <= 0) {
+        if (index <= 0 && !isClosing.current) {
             close();
         }
     }, [close]);
@@ -183,16 +171,6 @@ const BottomSheet = ({
     useEffect(() => {
         hapticFeedback();
         dismissKeyboard();
-
-        return () => {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
-
-            if (interaction.current) {
-                InteractionManager.clearInteractionHandle(interaction.current);
-            }
-        };
     }, []);
 
     const renderBackdrop = useCallback((props: BottomSheetBackdropProps) => {
@@ -266,7 +244,6 @@ const BottomSheet = ({
             snapPoints={snapPoints}
             animateOnMount={true}
             backdropComponent={renderBackdrop}
-            onAnimate={handleAnimationStart}
             onChange={handleChange}
             animationConfigs={animationConfigs}
             handleComponent={Indicator}

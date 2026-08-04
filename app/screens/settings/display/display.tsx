@@ -11,7 +11,7 @@ import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useUserTimezoneProps from '@hooks/user_timezone';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {goToScreen, popTopScreen} from '@screens/navigation';
+import {popTopScreen} from '@screens/navigation';
 import {gotoSettingsScreen} from '@screens/settings/config';
 
 import type UserModel from '@typings/database/models/servers/user';
@@ -67,8 +67,7 @@ const Display = ({componentId, currentUser, hasMilitaryTimeFormat, isCRTEnabled,
 
     const goToThemeSettings = usePreventDoubleTap(useCallback(() => {
         const screen = Screens.SETTINGS_DISPLAY_THEME;
-        const title = intl.formatMessage({id: 'display_settings.theme', defaultMessage: 'Theme'});
-        goToScreen(screen, title);
+        gotoSettingsScreen(screen, intl.formatMessage({id: 'display_settings.theme', defaultMessage: 'Theme'}));
     }, [intl]));
 
     const goToClockDisplaySettings = usePreventDoubleTap(useCallback(() => {

@@ -4,12 +4,13 @@
 import React, {useMemo} from 'react';
 import {Platform, Text, View} from 'react-native';
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import ViewConstants from '@constants/view';
+import {useIsTablet} from '@hooks/device';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
-import {useTopInsetShared} from '@utils/top_inset_shared';
 import {typography} from '@utils/typography';
 
 export type HeaderRightButton = {
@@ -154,7 +155,8 @@ const Header = ({
     titleCompanion,
 }: Props) => {
     const styles = getStyleSheet(theme);
-    const topInsetShared = useTopInsetShared();
+    const insets = useSafeAreaInsets();
+    const isTablet = useIsTablet();
 
     const opacity = useAnimatedStyle(() => {
         if (!isLargeTitle) {
@@ -178,8 +180,8 @@ const Header = ({
 
     const containerAnimatedStyle = useAnimatedStyle(() => ({
         height: defaultHeight,
-        paddingTop: topInsetShared.value,
-    }), [defaultHeight]);
+        paddingTop: isTablet ? 0 : insets.top,
+    }), [defaultHeight, isTablet, insets.top]);
 
     const containerStyle = useMemo(() => (
         [styles.container, containerAnimatedStyle]), [styles, containerAnimatedStyle]);

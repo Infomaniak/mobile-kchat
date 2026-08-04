@@ -47,6 +47,7 @@ export default function UnauthenticatedLayout() {
         >
             <Stack screenOptions={stackScreenOptions}>
                 <Stack.Screen name={Screens.IK_LOGIN}/>
+                <Stack.Screen name={Screens.IK_NO_TEAMS}/>
                 <Stack.Screen name={Screens.MFA}/>
                 <Stack.Screen name={Screens.FORGOT_PASSWORD}/>
                 <Stack.Screen name={Screens.ONBOARDING}/>

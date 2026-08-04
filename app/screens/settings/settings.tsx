@@ -112,7 +112,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
     const goToThemeSettings = preventDoubleTap(() => {
         const screen = Screens.SETTINGS_DISPLAY_THEME;
         const title = intl.formatMessage({id: 'mobile.display_settings.theme', defaultMessage: 'Theme'});
-        goToScreen(screen, title);
+        gotoSettingsScreen(screen, title);
     });
 
     const goToNotificationSettings = preventDoubleTap(() => {

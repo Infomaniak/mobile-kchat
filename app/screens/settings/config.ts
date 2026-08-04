@@ -3,7 +3,7 @@
 
 import {defineMessages, type IntlShape} from 'react-intl';
 
-import {goToScreen} from '@screens/navigation';
+import {navigateToSettingsScreen} from '@screens/navigation';
 import {typography} from '@utils/typography';
 
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -18,16 +18,8 @@ export const getSaveButton = (buttonId: string, intl: IntlShape, color: string) 
     ...typography('Body', 100, 'SemiBold'),
 });
 
-export const gotoSettingsScreen = (screen: AvailableScreens, title: string) => {
-    const passProps = {};
-    const options = {
-        topBar: {
-            backButton: {
-                popStackOnPress: false,
-            },
-        },
-    };
-    return goToScreen(screen, title, passProps, options);
+export const gotoSettingsScreen = (screen: AvailableScreens, _title: string) => {
+    return navigateToSettingsScreen(screen);
 };
 
 type SettingConfigDetails = {
