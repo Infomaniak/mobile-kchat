@@ -80,16 +80,11 @@ test:unit-tests:
     - when: never
   script:
     - mkdir -p reports
-    - npm run test:ci -- --testResultsProcessor=jest-junit --coverage --coverageReporters=text-summary --coverageReporters=cobertura --coverageDirectory=./coverage
+    - npm run test:ci -- --testResultsProcessor=jest-junit
   artifacts:
     expire_in: 7 days
-    paths:
-      - coverage/
     reports:
       junit: reports/junit-jest.xml
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage/cobertura-coverage.xml
 
 code_quality:
   stage: test-unit
