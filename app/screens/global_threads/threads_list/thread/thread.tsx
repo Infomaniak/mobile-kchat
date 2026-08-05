@@ -319,4 +319,4 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
     );
 };
 
-export default React.memo(Thread);
+export default Thread;

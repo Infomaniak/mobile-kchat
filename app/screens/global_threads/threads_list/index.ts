@@ -24,7 +24,7 @@ const withTeamId = withObservables([], ({database}: WithDatabaseArgs) => ({
 const enhanced = withObservables(['tab', 'teamId'], ({database, tab, teamId}: Props) => {
     const getOnlyUnreads = tab !== 'all';
 
-    const teamThreadsSyncObserver = queryTeamThreadsSync(database, teamId).observeWithColumns(['earliest']);
+    const teamThreadsSyncObserver = queryTeamThreadsSync(database, teamId).observeWithColumns(['earliest', 'latest']);
 
     return {
         teammateNameDisplay: observeTeammateNameDisplay(database),
