@@ -127,6 +127,11 @@ export default class WebSocketClient {
 
             const {client} = await getOrCreateWebSocketClient(this.url, this.serverUrl, {headers, timeoutInterval: WEBSOCKET_TIMEOUT});
 
+            // Bail out if the client was closed/invalidated while we were connecting
+            if (this.stop) {
+                return;
+            }
+
             // Check again if the client is the same, to avoid race conditions
             if (this.conn === client) {
                 // In case turning on/off Wi-fi on Samsung devices

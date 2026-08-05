@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {getOrCreateWebSocketClient} from '@mattermost/react-native-network-client';
+import Pusher from 'pusher-js/react-native';
 
 import DatabaseManager from '@database/manager';
 import {getConfigValue} from '@queries/servers/system';
@@ -92,5 +93,36 @@ describe('WebSocketClient', () => {
         await client.initialize();
 
         expect(mockedGetOrCreateWebSocketClient).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not revive a connection if close(true) is called while connecting', async () => {
+        const wsDeferred = createDeferred<{client: Pusher; created: boolean}>();
+        mockedGetConfigValue.mockResolvedValue(serverUrl);
+        mockedGetOrCreateWebSocketClient.mockReturnValue(wsDeferred.promise as never);
+
+        const client = new WebSocketClient(serverUrl, token);
+        const initPromise = client.initialize();
+        expect(client.isConnecting()).toBe(true);
+
+        // Simulate close(true) while getOrCreateWebSocketClient is still pending
+        client.close(true);
+
+        // Now resolve the in-flight connection attempt
+        const mockPusher = {
+            connection: {
+                state: 'connecting',
+                callbacks: new Map([['connected', []], ['disconnected', []], ['error', []]]),
+            },
+            connect: jest.fn(),
+            disconnect: jest.fn(),
+            send_event: jest.fn(),
+        } as unknown as Pusher;
+        wsDeferred.resolve({client: mockPusher, created: true});
+
+        await initPromise;
+
+        // The connection should NOT have been established — no callbacks bound, no conn set
+        expect(mockPusher.connect).not.toHaveBeenCalled();
+        expect(client.isConnected()).toBe(false);
     });
 });
