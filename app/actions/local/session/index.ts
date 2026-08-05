@@ -52,7 +52,9 @@ export const terminateSession = async (serverUrl: string, removeServer: boolean)
 
     // Remove push notifications (synchronous, no error handling needed)
     PushNotifications.removeServerNotifications(serverUrl);
-    PushNotifications.clearAllNotifications();
+    if (removeServer) {
+        PushNotifications.clearAllNotifications();
+    }
 
     // Invalidate clients (synchronous, no error handling needed)
     NetworkManager.invalidateClient(serverUrl);

@@ -286,10 +286,6 @@ import React
             return dimensions
     }
 
-    @objc public func clearAllNotifications() {
-        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
-    }
-
     @objc public func setHasRegisteredLoad() {
         hasRegisteredLoad = true
     }

@@ -110,6 +110,7 @@ describe('session actions', () => {
             expect(DatabaseManager.deleteServerDatabase).toHaveBeenCalledWith(mockServerUrl);
             expect(DatabaseManager.destroyServerDatabase).not.toHaveBeenCalled();
             expect(removePushDisabledInServerAcknowledged).not.toHaveBeenCalled();
+            expect(PushNotifications.clearAllNotifications).not.toHaveBeenCalled();
         });
 
         it('should clear cookies for server', async () => {
