@@ -23,6 +23,7 @@ variables:
 
 .tests-node: &tests-node
   image: node:${NODE_VERSION}
+  tags: [shared, standard]
   cache:
     <<: *npm-cache
     policy: pull
@@ -30,6 +31,7 @@ variables:
 install:
   stage: install
   image: node:${NODE_VERSION}
+  tags: [shared, standard]
   rules:
     - *rule-mr
     - when: never
@@ -51,6 +53,7 @@ test:check:
   stage: check
   extends:
     - .tests-node
+  needs: ["install"]
   rules:
     - *rule-mr
     - when: never
@@ -61,6 +64,7 @@ test:i18n:
   stage: check
   extends:
     - .tests-node
+  needs: ["install"]
   rules:
     - *rule-mr
     - when: never
@@ -70,6 +74,7 @@ test:i18n:
 test:unit-tests:
   stage: test-unit
   extends: [.tests-node]
+  needs: ["install"]
   rules:
     - *rule-mr
     - when: never
@@ -89,6 +94,7 @@ test:unit-tests:
 code_quality:
   stage: test-unit
   extends: [.tests-node]
+  needs: ["install"]
   allow_failure: true
   rules:
     - *rule-mr
