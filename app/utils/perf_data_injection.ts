@@ -86,7 +86,7 @@ export async function injectPerfPostsAndThreads(serverUrl: string, count: number
         // id, _status, _changed, is_following, last_reply_at, last_viewed_at, reply_count,
         // unread_mentions, unread_replies, viewed_at, last_fetched_at
         threads.push([
-            id, 'synced', '', 0, createAt, 0, 0, 0, 0, 0, createAt,
+            id, 'synced', '', 1, createAt, 0, 1, 0, 0, 0, createAt,
         ]);
 
         // ThreadsInTeam table columns:

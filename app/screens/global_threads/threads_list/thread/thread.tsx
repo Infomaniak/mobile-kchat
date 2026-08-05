@@ -153,11 +153,11 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
         fetchAndSwitchToThread(serverUrl, thread.id);
     }, [serverUrl, thread.id]));
 
-    const onChannelNamePressed = useCallback(() => {
+    const onChannelNamePressed = usePreventDoubleTap(useCallback(() => {
         if (channel?.id) {
             switchToChannelById(serverUrl, channel?.id);
         }
-    }, [serverUrl, channel?.id]);
+    }, [serverUrl, channel?.id]));
 
     const showThreadOptions = useCallback(() => {
         const passProps = {thread};
@@ -319,4 +319,4 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
     );
 };
 
-export default Thread;
+export default React.memo(Thread);

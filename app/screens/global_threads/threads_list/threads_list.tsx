@@ -155,14 +155,15 @@ const ThreadsList = ({
             ListFooterComponent={listFooterComponent}
             contentContainerStyle={threads.length ? styles.messagesContainer : styles.empty}
             data={threads}
+            initialNumToRender={10}
             maxToRenderPerBatch={10}
             onEndReached={handleEndReached}
             onRefresh={handleRefresh}
             ref={flatListRef}
             refreshing={isRefreshing}
-            removeClippedSubviews={true}
             renderItem={renderItem}
             testID={`${testID}.flat_list`}
+            windowSize={7}
         />
     );
 };
