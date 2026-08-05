@@ -26,6 +26,7 @@ jest.mock('./thread', () => {
 
 jest.mock('@utils/log', () => ({
     logInfo: jest.fn(),
+    logDebug: jest.fn(),
 }));
 
 jest.mock('@context/server', () => ({

@@ -1161,6 +1161,7 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
         return switchToGlobalDrafts(serverUrl, teamId);
     }
 
+    const switchDt = Date.now();
     try {
         const database = DatabaseManager.serverDatabases[serverUrl]?.database;
         if (!database) {
@@ -1186,6 +1187,7 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
         }
 
         DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, false);
+        logDebug('[switchToChannelById] completed switch to', channelId, 'in', Date.now() - switchDt, 'ms');
 
         if (await AppsManager.isAppsEnabled(serverUrl)) {
             AppsManager.fetchBindings(serverUrl, channelId, false, groupLabel);

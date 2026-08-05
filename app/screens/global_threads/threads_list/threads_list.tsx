@@ -9,6 +9,7 @@ import Loading from '@components/loading';
 import {General, Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import {logDebug} from '@utils/log';
 
 import EmptyState from './empty_state';
 import EndOfList from './end_of_list';
@@ -61,6 +62,16 @@ const ThreadsList = ({
 
     const noThreads = !threads?.length;
     const lastThread = threads?.length > 0 ? threads[threads.length - 1] : null;
+
+    const mountTimeRef = useRef(Date.now());
+    const hasLoggedFirstRender = useRef(false);
+    useEffect(() => {
+        if (threads.length > 0 && !hasLoggedFirstRender.current) {
+            hasLoggedFirstRender.current = true;
+            const elapsed = Date.now() - mountTimeRef.current;
+            logDebug('[ThreadsList] first render:', threads.length, 'threads in', elapsed, 'ms');
+        }
+    }, [threads.length]);
 
     useEffect(() => {
         if (hasFetchedOnce.current || tab !== 'all') {
