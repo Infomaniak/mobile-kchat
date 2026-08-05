@@ -17,7 +17,7 @@ import {dismissAllModals, dismissAllModalsAndPopToRoot, dismissAllOverlays, goTo
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {isTablet} from '@utils/helpers';
-import {logDebug, logError} from '@utils/log';
+import {logDebug, logError, logInfo} from '@utils/log';
 import {changeOpacity} from '@utils/theme';
 
 import type Model from '@nozbe/watermelondb/Model';
@@ -52,7 +52,7 @@ export const switchToGlobalThreads = async (serverUrl: string, teamId?: string, 
             goToScreen(Screens.GLOBAL_THREADS, '', {}, {topBar: {visible: false}});
         }
 
-        logDebug('[switchToGlobalThreads] completed in', Date.now() - dt, 'ms');
+        logInfo('[switchToGlobalThreads] completed in', Date.now() - dt, 'ms');
         return {models};
     } catch (error) {
         logError('Failed switchToGlobalThreads', error);
