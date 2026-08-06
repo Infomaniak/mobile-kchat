@@ -40,15 +40,15 @@ const logoutMessages = defineMessages({
     },
     body: {
         id: 'logout.fail.message',
-        defaultMessage: 'You’re not fully logged out. Some data may continue to be accessible to this device once the device goes back online. What do you want to do?',
+        defaultMessage: 'We could not log you out of the server. Please check your connection and try again.',
     },
     cancel: {
         id: 'logout.fail.cancel',
         defaultMessage: 'Cancel',
     },
-    continue: {
-        id: 'logout.fail.continue_anyway',
-        defaultMessage: 'Continue Anyway',
+    retry: {
+        id: 'logout.fail.retry',
+        defaultMessage: 'Retry',
     },
     ok: {
         id: 'logout.fail.ok',
@@ -207,11 +207,11 @@ export const logout = async (
 
                         if (response.status === 'OK') {
                             loggedOut = true;
-                        }
-                        WebsocketManager.getClient(savedServerUrl)?.close(true);
+                            WebsocketManager.getClient(savedServerUrl)?.close(true);
 
-                        if (!skipEvents) {
-                            DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: savedServerUrl, removeServer});
+                            if (!skipEvents) {
+                                DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl: savedServerUrl, removeServer});
+                            }
                         }
                     } catch (error) {
                         logWarning('An error occurred logging out from the server', savedServerUrl, error);
@@ -226,7 +226,7 @@ export const logout = async (
             const title = intl?.formatMessage(logoutMessages.title) || logoutMessages.title.defaultMessage;
 
             const bodyMessage = logoutOnAlert ? logoutMessages.bodyForced : logoutMessages.body;
-            const confirmMessage = logoutOnAlert ? logoutMessages.ok : logoutMessages.continue;
+            const confirmMessage = logoutOnAlert ? logoutMessages.ok : logoutMessages.retry;
             const body = intl?.formatMessage(bodyMessage) || bodyMessage.defaultMessage;
             const cancel = intl?.formatMessage(logoutMessages.cancel) || logoutMessages.cancel.defaultMessage;
             const confirm = intl?.formatMessage(confirmMessage) || confirmMessage.defaultMessage;
@@ -235,7 +235,7 @@ export const logout = async (
             buttons.push({
                 text: confirm,
                 onPress: logoutOnAlert ? undefined : () => {
-                    logout(serverUrl, intl, {skipEvents, removeServer, logoutOnAlert, skipServerLogout: true});
+                    logout(serverUrl, intl, {skipEvents, removeServer});
                 },
             });
             Alert.alert(
@@ -250,12 +250,16 @@ export const logout = async (
         }
     }
 
-    WebsocketManager.getClient(serverUrl)?.close(true);
-    if (!skipEvents) {
-        DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl, removeServer});
+    if (skipServerLogout || loggedOut || logoutOnAlert) {
+        WebsocketManager.getClient(serverUrl)?.close(true);
+        if (!skipEvents) {
+            DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl, removeServer});
+        }
+
+        return {data: true};
     }
 
-    return {data: true};
+    return {data: false};
 };
 
 export const sendPasswordResetEmail = async (serverUrl: string, email: string) => {

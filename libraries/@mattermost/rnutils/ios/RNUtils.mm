@@ -111,10 +111,6 @@ RCT_REMAP_METHOD(removeServerNotifications, serverUrl:(NSString *)serverUrl) {
     [self removeServerNotifications:serverUrl];
 }
 
-RCT_REMAP_METHOD(clearAllNotifications, clearAll) {
-    [self clearAllNotifications];
-}
-
 RCT_EXPORT_METHOD(getRealFilePath:(NSString *)filePath
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject) {
@@ -224,10 +220,6 @@ RCT_EXPORT_METHOD(createZipFile:(NSArray<NSString *> *)paths
 
 - (void)removeServerNotifications:(NSString *)serverUrl {
     [[NotificationManager shared] removeServerNotificationsWithServerUrl:serverUrl];
-}
-
-- (void)clearAllNotifications {
-    [[NotificationManager shared] clearAllNotifications];
 }
 
 - (void)getRealFilePath:(NSString *)filePath resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
