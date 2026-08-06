@@ -344,5 +344,5 @@ export function registerScreens() {
     const infomaniakLoginScreen = require('@screens/ik_login').default;
     const infomaniakNoTeams = require('@screens/ik_no_teams/index').default;
     Navigation.registerComponent(Screens.INFOMANIAK_LOGIN, () => withGestures(withIntl(infomaniakLoginScreen)));
-    Navigation.registerComponent(Screens.INFOMANIAK_NO_TEAMS, () => withGestures(withIntl(withServerDatabase(infomaniakNoTeams))));
+    Navigation.registerComponent(Screens.INFOMANIAK_NO_TEAMS, () => withGestures(withIntl(infomaniakNoTeams)));
 }
