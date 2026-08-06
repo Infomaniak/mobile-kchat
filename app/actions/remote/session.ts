@@ -250,7 +250,7 @@ export const logout = async (
         }
     }
 
-    if (skipServerLogout || loggedOut || logoutOnAlert) {
+    if (skipServerLogout || loggedOut || logoutOnAlert || skipAlert) {
         WebsocketManager.getClient(serverUrl)?.close(true);
         if (!skipEvents) {
             DeviceEventEmitter.emit(Events.SERVER_LOGOUT, {serverUrl, removeServer});
