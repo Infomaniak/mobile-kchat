@@ -1163,6 +1163,7 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
         return switchToGlobalDrafts(serverUrl, teamId);
     }
 
+    const switchDt = Date.now();
     const switchKey = `${serverUrl}:${channelId}`;
     if (activeChannelSwitches.has(switchKey)) {
         logInfo('[switchToChannelById] Skipped duplicate switch to', channelId);
@@ -1194,6 +1195,7 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
             return {error};
         }
 
+        logDebug('[switchToChannelById] completed switch to', channelId, 'in', Date.now() - switchDt, 'ms');
         openChannelIfNeeded(serverUrl, channelId, groupLabel);
         markChannelAsRead(serverUrl, channelId, false, groupLabel);
         fetchChannelStats(serverUrl, channelId, false, groupLabel);

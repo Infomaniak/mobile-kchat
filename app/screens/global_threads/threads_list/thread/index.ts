@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
+import React from 'react';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
@@ -29,4 +30,4 @@ const enhanced = withObservables([], ({database, thread}: WithDatabaseArgs & {th
     };
 });
 
-export default withDatabase(enhanced(Thread));
+export default React.memo(withDatabase(enhanced(Thread)));
