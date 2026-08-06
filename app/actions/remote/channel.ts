@@ -1195,7 +1195,6 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
             return {error};
         }
 
-        DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, false);
         logDebug('[switchToChannelById] completed switch to', channelId, 'in', Date.now() - switchDt, 'ms');
         openChannelIfNeeded(serverUrl, channelId, groupLabel);
         markChannelAsRead(serverUrl, channelId, false, groupLabel);
