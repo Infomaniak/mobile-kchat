@@ -43,7 +43,6 @@ jest.mock('@i18n', () => ({
 jest.mock('@init/credentials');
 jest.mock('@init/push_notifications', () => ({
     removeServerNotifications: jest.fn(),
-    clearAllNotifications: jest.fn(),
     cancelScheduleNotification: jest.fn(),
 }));
 jest.mock('@managers/network_manager', () => ({
@@ -92,7 +91,6 @@ describe('session actions', () => {
             // Verify all cleanup functions called
             expect(removeServerCredentials).toHaveBeenCalledWith(mockServerUrl);
             expect(PushNotifications.removeServerNotifications).toHaveBeenCalledWith(mockServerUrl);
-            expect(PushNotifications.clearAllNotifications).toHaveBeenCalled();
             expect(NetworkManager.invalidateClient).toHaveBeenCalledWith(mockServerUrl);
             expect(WebsocketManager.invalidateClient).toHaveBeenCalledWith(mockServerUrl);
             expect(removePushDisabledInServerAcknowledged).toHaveBeenCalledWith(encodedServerUrl);
@@ -110,7 +108,6 @@ describe('session actions', () => {
             expect(DatabaseManager.deleteServerDatabase).toHaveBeenCalledWith(mockServerUrl);
             expect(DatabaseManager.destroyServerDatabase).not.toHaveBeenCalled();
             expect(removePushDisabledInServerAcknowledged).not.toHaveBeenCalled();
-            expect(PushNotifications.clearAllNotifications).not.toHaveBeenCalled();
         });
 
         it('should clear cookies for server', async () => {
