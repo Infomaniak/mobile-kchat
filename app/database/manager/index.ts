@@ -23,6 +23,7 @@ import {CategoryModel, CategoryChannelModel, ChannelModel, ChannelInfoModel, Cha
 } from '@database/models/server';
 import AppDataOperator from '@database/operator/app_data_operator';
 import ServerDataOperator from '@database/operator/server_data_operator';
+import {attemptServerDatabaseRecovery} from '@database/recovery';
 import {schema as appSchema} from '@database/schema/app';
 import {serverSchema} from '@database/schema/server';
 import {beforeUpgrade} from '@helpers/database/upgrade';
@@ -180,7 +181,7 @@ class DatabaseManagerSingleton {
 
                 const adapter = new SQLiteAdapter({
                     dbName: databaseFilePath,
-                    migrationEvents: this.buildMigrationCallbacks(databaseName),
+                    migrationEvents: this.buildMigrationCallbacks(databaseName, serverUrl),
                     migrations,
                     jsi: true,
                     schema,
@@ -204,6 +205,10 @@ class DatabaseManagerSingleton {
                 return serverDatabase;
             } catch (e) {
                 logError('Error initializing database', e);
+                const recovered = await attemptServerDatabaseRecovery(serverUrl, e, 'createServerDatabase', {resync: false});
+                if (recovered) {
+                    return this.serverDatabases[serverUrl];
+                }
             }
         }
 
@@ -368,6 +373,47 @@ class DatabaseManagerSingleton {
         }
 
         return server;
+    };
+
+    /**
+    * getServerUrlForDatabase: Get the server url for a given database instance.
+    * @param {Database} database
+    * @returns {string|undefined}
+    */
+    public getServerUrlForDatabase = (database: Database): string | undefined => {
+        const databaseName = (database.adapter as {dbName?: string} | undefined)?.dbName;
+
+        return Object.keys(this.serverDatabases).find((serverUrl) => {
+            const serverDatabase = this.serverDatabases[serverUrl];
+            if (!serverDatabase) {
+                return false;
+            }
+
+            if (serverDatabase.database === database) {
+                return true;
+            }
+
+            return (serverDatabase.database.adapter as {dbName?: string} | undefined)?.dbName === databaseName;
+        });
+    };
+
+    /**
+    * wipeServerData: Removes the server database files and recreates a fresh database.
+    * This is used for automatic recovery from database corruption.
+    * @param {string} serverUrl
+    * @returns {Promise<void>}
+    */
+    public wipeServerData = async (serverUrl: string): Promise<void> => {
+        if (this.serverDatabases[serverUrl]) {
+            delete this.serverDatabases[serverUrl];
+        }
+        await this.deleteServerDatabaseFiles(serverUrl);
+        await this.createServerDatabase({
+            config: {
+                dbName: serverUrl,
+                serverUrl,
+            },
+        });
     };
 
     /**
@@ -540,7 +586,7 @@ class DatabaseManagerSingleton {
     * @param {string} dbName
     * @returns {MigrationEvents}
     */
-    private buildMigrationCallbacks = (dbName: string) => {
+    private buildMigrationCallbacks = (dbName: string, serverUrl?: string) => {
         const migrationEvents = {
             onSuccess: () => {
                 logDebug('DB Migration success', dbName);
@@ -556,6 +602,9 @@ class DatabaseManagerSingleton {
             },
             onError: (error: Error) => {
                 logDebug('DB Migration error', dbName);
+                if (serverUrl) {
+                    attemptServerDatabaseRecovery(serverUrl, error, `migration:${dbName}`, {resync: false});
+                }
                 return DeviceEventEmitter.emit(MIGRATION_EVENTS.MIGRATION_ERROR, {
                     dbName,
                     error,

@@ -317,7 +317,37 @@ class DatabaseManagerSingleton {
         }
     };
 
-    factoryReset = async (shouldRemoveDirectory: boolean): Promise<boolean> => {
+    public getServerUrlForDatabase = (database: Database): string | undefined => {
+        const databaseName = (database.adapter as {dbName?: string} | undefined)?.dbName;
+
+        return Object.keys(this.serverDatabases).find((serverUrl) => {
+            const serverDatabase = this.serverDatabases[serverUrl];
+            if (!serverDatabase) {
+                return false;
+            }
+
+            if (serverDatabase.database === database) {
+                return true;
+            }
+
+            return (serverDatabase.database.adapter as {dbName?: string} | undefined)?.dbName === databaseName;
+        });
+    };
+
+    public wipeServerData = async (serverUrl: string): Promise<void> => {
+        if (this.serverDatabases[serverUrl]) {
+            delete this.serverDatabases[serverUrl];
+        }
+        await this.deleteServerDatabaseFiles(serverUrl);
+        await this.createServerDatabase({
+            config: {
+                dbName: serverUrl,
+                serverUrl,
+            },
+        });
+    };
+
+    public factoryReset = async (shouldRemoveDirectory: boolean): Promise<boolean> => {
         try {
         //On iOS, we'll delete the databases folder under the shared AppGroup folder
             if (Platform.OS === 'ios') {
