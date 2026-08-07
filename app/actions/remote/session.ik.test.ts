@@ -134,10 +134,14 @@ describe('logout - server failure', () => {
     it('should not emit SERVER_LOGOUT or close websocket when server logout fails', async () => {
         mockClient.logout.mockRejectedValue(new Error('Network error'));
 
+        const closeSpy = jest.fn();
+        (WebsocketManager.getClient as jest.Mock).mockReturnValue({close: closeSpy});
+
         const result = await logout('https://server1.com', undefined);
 
         expect(result).toEqual({data: false});
         expect(DeviceEventEmitter.emit).not.toHaveBeenCalled();
+        expect(closeSpy).not.toHaveBeenCalled();
         expect(Alert.alert).toHaveBeenCalled();
     });
 });
