@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {DeviceEventEmitter} from 'react-native';
+import {Alert, DeviceEventEmitter} from 'react-native';
 
 import {Events} from '@constants';
 import {getAllServerCredentials} from '@init/credentials';
@@ -18,7 +18,7 @@ jest.mock('@queries/app/global', () => ({getDeviceToken: jest.fn()}));
 jest.mock('@managers/network_manager', () => ({__esModule: true, default: {getClient: jest.fn()}}));
 jest.mock('@managers/websocket_manager', () => ({__esModule: true, default: {getClient: jest.fn().mockReturnValue({close: jest.fn()})}}));
 jest.mock('@database/manager', () => ({__esModule: true, default: {appDatabase: {database: {}}}}));
-jest.mock('react-native', () => ({DeviceEventEmitter: {emit: jest.fn()}, Platform: {OS: 'ios'}}));
+jest.mock('react-native', () => ({DeviceEventEmitter: {emit: jest.fn()}, Platform: {OS: 'ios'}, Alert: {alert: jest.fn()}}));
 
 jest.mock('@init/push_notifications', () => ({
     __esModule: true,
@@ -113,5 +113,35 @@ describe.skip('logout', () => {
                 expect.objectContaining({serverUrl: server.serverUrl}),
             );
         });
+    });
+});
+
+describe('logout - server failure', () => {
+    const mockClient = {logout: jest.fn()};
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        (NetworkManager.getClient as jest.Mock).mockReturnValue(mockClient);
+        (WebsocketManager.getClient as jest.Mock).mockReturnValue({close: jest.fn()});
+        DeviceEventEmitter.emit = jest.fn();
+        Alert.alert = jest.fn();
+        (getAllServerCredentials as jest.Mock).mockResolvedValue([
+            {serverUrl: 'https://server1.com'},
+        ]);
+        (getDeviceToken as jest.Mock).mockResolvedValue('token123');
+    });
+
+    it('should not emit SERVER_LOGOUT or close websocket when server logout fails', async () => {
+        mockClient.logout.mockRejectedValue(new Error('Network error'));
+
+        const closeSpy = jest.fn();
+        (WebsocketManager.getClient as jest.Mock).mockReturnValue({close: closeSpy});
+
+        const result = await logout('https://server1.com', undefined);
+
+        expect(result).toEqual({data: false});
+        expect(DeviceEventEmitter.emit).not.toHaveBeenCalled();
+        expect(closeSpy).not.toHaveBeenCalled();
+        expect(Alert.alert).toHaveBeenCalled();
     });
 });
