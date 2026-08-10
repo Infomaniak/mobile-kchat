@@ -33,6 +33,7 @@ variables:
       - package-lock.json
   paths:
     - node_modules/
+    - .npm/
 
 .tests-node: &tests-node
   image: node:${NODE_VERSION}
@@ -52,9 +53,14 @@ install:
     <<: *npm-cache
     policy: pull-push
   script:
-    - npm ci --ignore-scripts
-    - node node_modules/@sentry/cli/scripts/install.js
-    - npx patch-package
+    - |
+      if [ -f node_modules/.package-lock.json ] && diff -q node_modules/.package-lock.json package-lock.json > /dev/null 2>&1; then
+        echo "Cache hit — node_modules matches package-lock.json, skipping npm ci"
+      else
+        npm ci --ignore-scripts
+        node node_modules/@sentry/cli/scripts/install.js
+        npx patch-package
+      fi
     - node scripts/generate-assets.js
     - node scripts/jitsi-ts-nocheck.js
   artifacts:
