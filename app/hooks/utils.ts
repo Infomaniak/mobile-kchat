@@ -31,17 +31,19 @@ export const useMountedRef = () => {
     return mountedRef;
 };
 
-const DELAY = 750;
+const DELAY = 400;
 
 export const usePreventDoubleTap = <T extends Function>(callback: T) => {
-    const lastTapRef = useRef<number | null>(null);
+    const lastTapRef = useRef<{time: number; key: string | null}>({time: 0, key: null});
 
     return useCallback((...args: unknown[]) => {
         const now = Date.now();
-        if (lastTapRef.current && now - lastTapRef.current < DELAY) {
+        const key = args[0] && typeof args[0] === 'object' && 'id' in args[0] ? (args[0] as {id: string}).id : null;
+        const last = lastTapRef.current;
+        if (last.key === key && now - last.time < DELAY) {
             return;
         }
-        lastTapRef.current = now;
+        lastTapRef.current = {time: now, key};
         callback(...args);
     }, [callback]);
 };

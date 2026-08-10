@@ -52,7 +52,7 @@ describe('usePreventDoubleTap', () => {
         expect(callback).toHaveBeenCalledTimes(1);
 
         act(() => {
-            jest.advanceTimersByTime(750);
+            jest.advanceTimersByTime(400);
             result.current();
         });
 

@@ -96,7 +96,9 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
     const currentChannelId = await getCurrentChannelId(database);
 
     setTeamLoading(serverUrl, true);
+    const entryDt = Date.now();
     const entryData = await entry(serverUrl, currentTeamId, currentChannelId, lastFullSync, groupLabel);
+    logInfo('[perf] doReconnect entry', serverUrl, `${Date.now() - entryDt}ms`);
     if ('error' in entryData) {
         setTeamLoading(serverUrl, false);
         if (entryData.error instanceof Error) {
@@ -106,7 +108,9 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
     }
     const {models, initialTeamId, initialChannelId, prefData, teamData, chData, meData, gmConverted} = entryData;
 
+    const navDt = Date.now();
     await handleEntryAfterLoadNavigation(serverUrl, teamData.memberships || [], chData?.memberships || [], currentTeamId || '', currentChannelId || '', initialTeamId, initialChannelId, gmConverted);
+    logInfo('[perf] doReconnect handleEntryAfterLoadNavigation', serverUrl, `${Date.now() - navDt}ms`);
 
     const dt = Date.now();
     if (models?.length) {
@@ -115,7 +119,7 @@ async function doReconnect(serverUrl: string, groupLabel?: BaseRequestGroupLabel
 
     const batchDuration = Date.now() - dt;
     captureSlowReconnectBatch(serverUrl, groupLabel, models || [], batchDuration);
-    logInfo('WEBSOCKET RECONNECT MODELS BATCHING TOOK', `${batchDuration}ms`);
+    logInfo('[perf] doReconnect batchRecords', serverUrl, models?.length || 0, 'models in', `${batchDuration}ms`);
 
     await fetchPostDataIfNeeded(serverUrl, groupLabel);
 

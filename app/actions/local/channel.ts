@@ -82,7 +82,9 @@ export async function switchToChannel(serverUrl: string, channelId: string, team
                 }
 
                 if (models.length && !prepareRecordsOnly) {
+                    const batchDt = Date.now();
                     await operator.batchRecords(models, 'switchToChannel');
+                    logInfo('[perf] switchToChannel batchRecords', channelId, models.length, 'models in', Date.now() - batchDt, 'ms');
                 }
 
                 if (isTabletDevice) {

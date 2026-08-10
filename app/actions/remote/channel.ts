@@ -1188,6 +1188,12 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
 
         switchTimeout = setTimeout(() => {
             captureException(new Error(`[switchToChannelById] Switch never completed after 15s for ${channelId}`));
+            logError('[switchToChannelById] Recovering from stuck switch to', channelId);
+            activeChannelSwitches.delete(switchKey);
+            if (switchEventEmitted) {
+                DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, false);
+                switchEventEmitted = false;
+            }
         }, 15000);
 
         const {error} = await switchToChannel(serverUrl, channelId, teamId, skipLastUnread);
