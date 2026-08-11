@@ -21,6 +21,7 @@ default:
 
 variables:
   NODE_VERSION: 22.14.0
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
 
 .rule-mr: &rule-mr
   - if: &if-merge-request "$CI_MERGE_REQUEST_ID"
@@ -54,12 +55,13 @@ install:
     policy: pull-push
   script:
     - |
-      if [ -f node_modules/.package-lock.json ] && diff -q node_modules/.package-lock.json package-lock.json > /dev/null 2>&1; then
+      if [ -f node_modules/.ci-package-lock.json ] && diff -q node_modules/.ci-package-lock.json package-lock.json > /dev/null 2>&1; then
         echo "Cache hit — node_modules matches package-lock.json, skipping npm ci"
       else
         npm ci --ignore-scripts
         node node_modules/@sentry/cli/scripts/install.js
         npx patch-package
+        cp package-lock.json node_modules/.ci-package-lock.json
       fi
     - node scripts/generate-assets.js
     - node scripts/jitsi-ts-nocheck.js
