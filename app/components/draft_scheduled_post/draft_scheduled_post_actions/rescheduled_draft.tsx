@@ -15,10 +15,8 @@ import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 import type ScheduledPostModel from '@typings/database/models/servers/scheduled_post';
-import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
-    bottomSheetId: AvailableScreens;
     draft: ScheduledPostModel;
 }
 
@@ -37,14 +35,13 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 }));
 
 const RescheduledDraft: React.FC<Props> = ({
-    bottomSheetId,
     draft,
 }) => {
     const theme = useTheme();
     const style = getStyleSheet(theme);
     const intl = useIntl();
     const rescheduledDraft = useCallback(async () => {
-        await dismissBottomSheet(bottomSheetId);
+        await dismissBottomSheet();
         const title = intl.formatMessage({id: 'mobile.reschedule_draft.title', defaultMessage: 'Change Schedule'});
         const closeButton = CompassIcon.getImageSourceSync('close', 24, theme.sidebarHeaderTextColor);
         const closeButtonId = 'close-rescheduled-draft';
@@ -59,7 +56,7 @@ const RescheduledDraft: React.FC<Props> = ({
             },
         };
         showModal(Screens.RESCHEDULE_DRAFT, title, passProps, options);
-    }, [bottomSheetId, draft, intl, theme.sidebarHeaderTextColor]);
+    }, [draft, intl, theme.sidebarHeaderTextColor]);
 
     return (
         <TouchableWithFeedback

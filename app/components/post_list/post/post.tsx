@@ -279,7 +279,7 @@ const Post = ({
         }
 
         await blurAndDismissKeyboard();
-        const passProps = {sourceScreen: location, post, showAddReaction, serverUrl, isChannelMember};
+        const passProps = {sourceScreen: location, postId: post.id, showAddReaction, serverUrl, isChannelMember};
         const title = isTablet ? intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}) : '';
 
         openAsBottomSheet({
