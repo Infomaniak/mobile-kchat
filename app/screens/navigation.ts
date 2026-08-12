@@ -14,8 +14,26 @@ import type {BottomSheetFooterProps} from '@gorhom/bottom-sheet';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 export function propsToParams(props: any): Record<string, string> {
+    const seen = new WeakSet();
     return Object.keys(props || {}).reduce((params, key) => {
-        params[key] = typeof props[key] === 'string' ? props[key] : JSON.stringify(props[key]);
+        const value = props[key];
+        if (typeof value === 'string') {
+            params[key] = value;
+        } else {
+            try {
+                params[key] = JSON.stringify(value, (_k, v) => {
+                    if (typeof v === 'object' && v !== null) {
+                        if (seen.has(v)) {
+                            return undefined;
+                        }
+                        seen.add(v);
+                    }
+                    return v;
+                });
+            } catch {
+                params[key] = value?.id ? String(value.id) : '';
+            }
+        }
         return params;
     }, {} as Record<string, string>);
 }
@@ -79,8 +97,12 @@ export function navigateToScreenWithBaseRoute(baseRoute: string, screen: Availab
 }
 
 export async function navigateBack() {
-    if (router && router.canGoBack()) {
-        router.back();
+    if (router) {
+        if (router.canDismiss()) {
+            router.dismiss();
+        } else if (router.canGoBack()) {
+            router.back();
+        }
         await new Promise((resolve) => setTimeout(resolve, 250));
     }
 }
@@ -155,7 +177,7 @@ export function bottomSheet(options: {
     navigateToScreen(Screens.GENERIC_BOTTOM_SHEET);
 }
 
-export async function dismissBottomSheet(_alternativeScreen: AvailableScreens = Screens.GENERIC_BOTTOM_SHEET) {
+export async function dismissBottomSheet() {
     const hasRegularSheet = NavigationStore.isScreenInStack(Screens.BOTTOM_SHEET);
     const hasGenericSheet = NavigationStore.isScreenInStack(Screens.GENERIC_BOTTOM_SHEET);
     if (!hasRegularSheet && !hasGenericSheet) {
@@ -163,8 +185,7 @@ export async function dismissBottomSheet(_alternativeScreen: AvailableScreens = 
     }
     DeviceEventEmitter.emit(Events.CLOSE_BOTTOM_SHEET);
 
-    const screen = hasRegularSheet ? Screens.BOTTOM_SHEET : Screens.GENERIC_BOTTOM_SHEET;
-    await NavigationStore.waitUntilScreensIsRemoved(screen);
+    await NavigationStore.waitUntilScreensIsRemoved(hasRegularSheet ? Screens.BOTTOM_SHEET : Screens.GENERIC_BOTTOM_SHEET);
     BottomSheetStore.reset();
     await new Promise((resolve) => setTimeout(resolve, 250));
 }

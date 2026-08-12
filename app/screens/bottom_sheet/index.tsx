@@ -12,7 +12,6 @@ import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useBottomSheetListsFix} from '@hooks/bottom_sheet_lists_fix';
 import {useIsTablet} from '@hooks/device';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {navigateBack} from '@screens/navigation';
 import BottomSheetStore from '@store/bottom_sheet_store';
 import {hapticFeedback} from '@utils/general';
@@ -95,7 +94,7 @@ export const animatedConfig: Omit<WithSpringConfig, 'velocity'> = {
 };
 
 const BottomSheet = ({
-    closeButtonId,
+    closeButtonId: _closeButtonId,
     componentId,
     contentStyle,
     initialSnapIndex = 1,
@@ -131,9 +130,6 @@ const BottomSheet = ({
     ], [headerStyle, isTablet, styles.bottomSheetBackground]);
 
     const close = useCallback(() => {
-        if (isClosing.current) {
-            return;
-        }
         isClosing.current = true;
         BottomSheetStore.reset();
         navigateBack();
@@ -165,8 +161,13 @@ const BottomSheet = ({
         }
     }, [close]);
 
+    const onBottomSheetClose = useCallback(() => {
+        if (!isClosing.current) {
+            close();
+        }
+    }, [close]);
+
     useAndroidHardwareBackHandler(componentId, handleClose);
-    useNavButtonPressed(closeButtonId || '', componentId, close, [close]);
 
     useEffect(() => {
         hapticFeedback();
@@ -252,7 +253,7 @@ const BottomSheet = ({
             footerComponent={footerComponent}
             keyboardBehavior={keyboardBehavior}
             keyboardBlurBehavior={keyboardBlurBehavior}
-            onClose={close}
+            onClose={onBottomSheetClose}
             bottomInset={insets.bottom}
             enableDynamicSizing={enableDynamicSizing}
         >

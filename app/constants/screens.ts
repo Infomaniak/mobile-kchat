@@ -245,6 +245,7 @@ export const SCREENS_AS_BOTTOM_SHEET = new Set<string>([
     IK_QUOTA_EXCEEDED,
     IK_REMINDER,
     AGENTS_REWRITE_OPTIONS,
+    AI_OPTIONS,
 ]);
 
 export const UNAUTHENTICATED_SCREENS = new Set<string>([
