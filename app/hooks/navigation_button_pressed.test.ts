@@ -5,10 +5,13 @@ import {renderHook} from '@testing-library/react-hooks';
 
 import useNavButtonPressed from './navigation_button_pressed';
 
+const mockAddListener = jest.fn();
+const mockNavigation = {
+    addListener: mockAddListener,
+};
+
 jest.mock('expo-router', () => ({
-    useNavigation: () => ({
-        addListener: jest.fn().mockReturnValue(jest.fn()),
-    }),
+    useNavigation: jest.fn(() => mockNavigation),
 }));
 
 describe('hooks/useNavButtonPressed', () => {
@@ -16,16 +19,11 @@ describe('hooks/useNavButtonPressed', () => {
     const buttonId = 'test-button-id';
     let callback: jest.Mock;
     let unsubscribeMock: jest.Mock;
-    let mockAddListener: jest.Mock;
 
     beforeEach(() => {
         callback = jest.fn();
         unsubscribeMock = jest.fn();
-        mockAddListener = jest.fn().mockReturnValue(unsubscribeMock);
-        const {useNavigation} = require('expo-router');
-        (useNavigation as jest.Mock).mockReturnValue({
-            addListener: mockAddListener,
-        });
+        mockAddListener.mockReturnValue(unsubscribeMock);
     });
 
     afterEach(() => {

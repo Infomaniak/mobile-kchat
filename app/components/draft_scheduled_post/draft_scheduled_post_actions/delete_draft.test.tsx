@@ -4,7 +4,6 @@
 import {fireEvent, screen, waitFor} from '@testing-library/react-native';
 import React from 'react';
 
-import {Screens} from '@constants';
 import {DRAFT_TYPE_DRAFT, DRAFT_TYPE_SCHEDULED} from '@constants/draft';
 import {dismissBottomSheet} from '@screens/navigation';
 import {renderWithIntl} from '@test/intl-test-helper';
@@ -31,7 +30,6 @@ jest.mock('@screens/navigation', () => ({
 
 describe('screens/draft_scheduled_post_options/DeleteDraft', () => {
     const baseProps = {
-        bottomSheetId: Screens.DRAFT_SCHEDULED_POST_OPTIONS,
         channelId: 'channel-id',
         rootId: 'root-id',
     };
@@ -76,7 +74,7 @@ describe('screens/draft_scheduled_post_options/DeleteDraft', () => {
         const deleteButton = screen.getByTestId('delete_draft');
         fireEvent.press(deleteButton);
 
-        expect(dismissBottomSheet).toHaveBeenCalledWith(Screens.DRAFT_SCHEDULED_POST_OPTIONS);
+        await waitFor(() => expect(dismissBottomSheet).toHaveBeenCalledWith());
         await waitFor(() => expect(deleteDraftConfirmation).toHaveBeenCalledWith(expect.objectContaining({
             channelId: 'channel-id',
             rootId: 'root-id',
@@ -97,7 +95,7 @@ describe('screens/draft_scheduled_post_options/DeleteDraft', () => {
         const deleteButton = screen.getByTestId('delete_draft');
         fireEvent.press(deleteButton);
 
-        expect(dismissBottomSheet).toHaveBeenCalledWith(Screens.DRAFT_SCHEDULED_POST_OPTIONS);
+        await waitFor(() => expect(dismissBottomSheet).toHaveBeenCalledWith());
         await waitFor(() => expect(deleteScheduledPostConfirmation).toHaveBeenCalledWith(expect.objectContaining({
             scheduledPostId: 'post-id',
         })));

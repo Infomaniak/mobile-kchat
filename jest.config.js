@@ -34,12 +34,15 @@ module.exports = {
     transformIgnorePatterns: [
         'node_modules/(?!' +
         '(@react-native|react-native)|' +
-        'expo-*|' +
+        'expo(?:-[^/]+)?|@expo|expo-modules-core|' +
         '@sentry/react-native|' +
+        'react-intl|@formatjs/[^/]+|intl-messageformat|@messageformat/[^/]+|' +
         'validator|' +
         'hast-util-from-selector|hastscript|property-information|hast-util-parse-selector|space-separated-tokens|comma-separated-tokens|zwitch|' +
-        '@mattermost/calls|@mattermost/rnutils|@mattermost/hardware-keyboard|@mattermost/rnshare|@mattermost/secure-pdf-viewer|@voximplant/react-native-foreground-service|' +
+        '@mattermost/calls|@mattermost/rnutils|@mattermost/hardware-keyboard|@mattermost/rnshare|@mattermost/secure-pdf-viewer|@mattermost/compass-icons|' +
         '@rneui/base|' +
+        '@shopify/flash-list|' +
+        '@react-navigation|' +
         '@sayem314/react-native-keep-awake)',
     ],
     moduleNameMapper: {

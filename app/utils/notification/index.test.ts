@@ -14,6 +14,10 @@ import {
     emitNotificationError,
 } from '.';
 
+jest.mock('@screens/navigation', () => ({
+    popToRoot: jest.fn(),
+}));
+
 describe('Notification Utils', () => {
     const intl = createIntl({locale: DEFAULT_LOCALE, messages: getTranslations(DEFAULT_LOCALE)});
     const notification = {

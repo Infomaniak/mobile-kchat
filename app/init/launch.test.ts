@@ -2,23 +2,20 @@
 // See LICENSE.txt for license information.
 
 import {AppState, Linking, Platform} from 'react-native';
-import {Notifications} from 'react-native-notifications';
 
 import {removePost} from '@actions/local/post';
 import {switchToChannelById} from '@actions/remote/channel';
 import {appEntry, pushNotificationEntry} from '@actions/remote/entry';
 import {fetchAndSwitchToThread} from '@actions/remote/thread';
 import LocalConfig from '@assets/config.json';
-import {DeepLink, Launch, PushNotification} from '@constants';
+import {Launch} from '@constants';
 import DatabaseManager from '@database/manager';
 import {getActiveServerUrl, getServerCredentials} from '@init/credentials';
 import {getLastViewedChannelIdAndServer, getOnboardingViewed, getLastViewedThreadIdAndServer} from '@queries/app/global';
 import {getAllServers} from '@queries/app/servers';
 import {queryPostsByType} from '@queries/servers/post';
 import {getCurrentUserId} from '@queries/servers/system';
-import {queryMyTeams} from '@queries/servers/team';
-import {resetToSelectServer, resetToOnboarding} from '@screens/navigation';
-import {getLaunchPropsFromDeepLink} from '@utils/deep_link';
+import {getExpoRouterPath} from '@screens/navigation';
 
 import {launchToHome, cleanupEphemeralPosts, determineInitialExpoRoute} from './launch';
 
@@ -53,72 +50,53 @@ jest.mock('@database/manager', () => ({
     serverDatabases: {},
 }));
 jest.mock('@init/credentials');
+jest.mock('@managers/performance_metrics_manager', () => ({
+    setLoadTarget: jest.fn(),
+}));
 jest.mock('@queries/app/global');
 jest.mock('@queries/app/servers');
 jest.mock('@queries/servers/post');
 jest.mock('@queries/servers/preference');
 jest.mock('@queries/servers/system');
-jest.mock('@queries/servers/team');
 jest.mock('@screens/navigation', () => ({
-    resetToSelectServer: jest.fn().mockResolvedValue(''),
-    resetToTeams: jest.fn().mockResolvedValue(''),
-    resetToOnboarding: jest.fn().mockResolvedValue(''),
+    getExpoRouterPath: jest.fn((screen: string) => `/(authenticated)/${screen}`),
 }));
 jest.mock('@utils/deep_link');
 jest.mock('@store/ephemeral_store');
+jest.mock('@context/theme', () => ({
+    getDefaultThemeByAppearance: jest.fn(() => ({})),
+}));
+jest.mock('@utils/notification', () => ({
+    convertToNotificationData: jest.fn(),
+}));
+jest.mock('@utils/sentry', () => ({
+    captureMessage: jest.fn(),
+}));
+jest.mock('@utils/url', () => ({
+    removeProtocol: jest.fn((url: string) => url),
+    stripTrailingSlashes: jest.fn((url: string) => url),
+}));
 
 describe('Launch', () => {
     const mockServerUrl = 'http://server-1.com';
-    jest.mocked(DatabaseManager.getActiveServerUrl).mockResolvedValue(mockServerUrl);
-
     const mockDatabase = {};
     const mockServerDatabases = {
         [mockServerUrl]: {
             database: mockDatabase,
+            operator: {},
         },
-    } as any;
+    } as unknown as typeof DatabaseManager.serverDatabases;
 
     beforeEach(() => {
         jest.clearAllMocks();
         DatabaseManager.serverDatabases = mockServerDatabases;
         Platform.OS = 'ios';
         AppState.currentState = 'active';
+        jest.mocked(getAllServers).mockResolvedValue([]);
+        jest.mocked(getActiveServerUrl).mockResolvedValue(mockServerUrl);
     });
 
     describe('determineInitialExpoRoute', () => {
-        it.skip('should handle deep link launch', async () => {
-            // IK change : skipped on CI temporarily, will fix later
-            const deepLinkUrl = 'mattermost://server-1.com';
-            const launchProps = {
-                launchType: Launch.DeepLink,
-                serverUrl: 'server-1.com',
-                extra: {data: {serverUrl: 'server-1.com'}, type: DeepLink.Server},
-            } as LaunchProps;
-
-            jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(deepLinkUrl);
-            jest.mocked(getLaunchPropsFromDeepLink).mockReturnValue(launchProps);
-            jest.mocked(resetToSelectServer).mockResolvedValue(undefined as never);
-
-            await determineInitialExpoRoute();
-
-            expect(Linking.getInitialURL).toHaveBeenCalled();
-            expect(getLaunchPropsFromDeepLink).toHaveBeenCalledWith(deepLinkUrl, true);
-        });
-
-        it.skip('should handle notification launch', async () => {
-            // IK change : skipped on CI temporarily, will fix later
-            const payload = {type: PushNotification.NOTIFICATION_TYPE.SESSION, ack_id: 'ack1'};
-
-            jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(null);
-            jest.mocked(resetToSelectServer).mockResolvedValue(undefined as never);
-
-            jest.mocked(Notifications.getInitialNotification).mockResolvedValueOnce({payload} as any);
-
-            await determineInitialExpoRoute();
-
-            expect(Linking.getInitialURL).toHaveBeenCalled();
-        });
-
         it('should handle normal launch with active server', async () => {
             const serverUrl = 'http://server-1.com';
             const credentials = {token: 'token1'} as ServerCredential;
@@ -127,7 +105,6 @@ describe('Launch', () => {
             jest.mocked(getActiveServerUrl).mockResolvedValue(serverUrl);
             jest.mocked(getServerCredentials).mockResolvedValue(credentials);
             jest.mocked(getCurrentUserId).mockResolvedValue('user1');
-            jest.mocked(queryMyTeams).mockReturnValue({fetchCount: () => 1} as any);
 
             await determineInitialExpoRoute();
 
@@ -138,11 +115,17 @@ describe('Launch', () => {
         });
 
         it('should handle upgrade launch with no current user', async () => {
+            const {upgradeEntry} = require('@actions/remote/entry');
+            const credentials = {token: 'token1'} as ServerCredential;
+
+            jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(null);
+            jest.mocked(getActiveServerUrl).mockResolvedValue(mockServerUrl);
+            jest.mocked(getServerCredentials).mockResolvedValue(credentials);
             jest.mocked(getCurrentUserId).mockResolvedValueOnce('');
 
             await determineInitialExpoRoute();
 
-            expect(appEntry).toHaveBeenCalled();
+            expect(upgradeEntry).toHaveBeenCalledWith(mockServerUrl);
         });
 
         it('should show onboarding when enabled and not viewed', async () => {
@@ -151,9 +134,11 @@ describe('Launch', () => {
             jest.mocked(getActiveServerUrl).mockResolvedValue(undefined);
             jest.mocked(getOnboardingViewed).mockResolvedValue(false);
 
-            await determineInitialExpoRoute();
+            const result = await determineInitialExpoRoute();
 
-            expect(resetToOnboarding).toHaveBeenCalled();
+            expect(getOnboardingViewed).toHaveBeenCalled();
+            expect(getExpoRouterPath).toHaveBeenCalled();
+            expect(result.route).toBeDefined();
         });
     });
 
@@ -162,8 +147,8 @@ describe('Launch', () => {
 
         beforeEach(() => {
             DatabaseManager.serverDatabases = {
-                [serverUrl]: {database: {}} as any,
-            };
+                [serverUrl]: {database: {}, operator: {}},
+            } as unknown as typeof DatabaseManager.serverDatabases;
         });
 
         it('should handle deep link launch', async () => {
@@ -242,11 +227,11 @@ describe('Launch', () => {
             const ephemeralPosts = [{id: 'post1'}, {id: 'post2'}];
 
             DatabaseManager.serverDatabases = {
-                [serverUrl]: {database: {}} as any,
-            };
+                [serverUrl]: {database: {}, operator: {}},
+            } as unknown as typeof DatabaseManager.serverDatabases;
 
             jest.mocked(getAllServers).mockResolvedValue([{url: serverUrl} as ServersModel]);
-            jest.mocked(queryPostsByType).mockReturnValue({fetch: () => ephemeralPosts} as any);
+            jest.mocked(queryPostsByType).mockReturnValue({fetch: () => ephemeralPosts} as never);
 
             await cleanupEphemeralPosts();
 

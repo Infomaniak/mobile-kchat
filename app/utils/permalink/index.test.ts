@@ -3,6 +3,7 @@
 
 import {Keyboard, Platform} from 'react-native';
 
+import {Screens} from '@constants';
 import {dismissAllModals, showModalOverCurrentContext} from '@screens/navigation';
 
 import {displayPermalink, closePermalink} from '.';
@@ -41,7 +42,7 @@ describe('permalinkUtils', () => {
             await displayPermalink('teamName', 'postId');
             expect(dismiss).toHaveBeenCalled();
             expect(showModalOverCurrentContext).toHaveBeenCalledWith(
-                'Permalink',
+                Screens.PERMALINK,
                 {isPermalink: true, teamName: 'teamName', postId: 'postId'},
                 {
                     modalPresentationStyle: 'overFullScreen',
@@ -62,7 +63,7 @@ describe('permalinkUtils', () => {
         it('should handle platform specific options correctly', async () => {
             await displayPermalink('teamName', 'postId');
             expect(showModalOverCurrentContext).toHaveBeenCalledWith(
-                'Permalink',
+                Screens.PERMALINK,
                 {isPermalink: true, teamName: 'teamName', postId: 'postId'},
                 {
                     modalPresentationStyle: 'overFullScreen',

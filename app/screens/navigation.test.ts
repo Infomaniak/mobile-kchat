@@ -1,5 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
+import {router} from 'expo-router';
+
 import {Preferences, Screens} from '@constants';
 import {isTablet} from '@utils/helpers';
 
@@ -23,29 +25,9 @@ jest.mock('@components/compass_icon', () => {
     };
 });
 
-const mockNavigateToScreen = jest.fn();
-jest.mock('expo-router', () => ({
-    router: {
-        push: mockNavigateToScreen,
-        replace: jest.fn(),
-        back: jest.fn(),
-        dismiss: jest.fn(),
-        dismissAll: jest.fn(),
-        dismissTo: jest.fn(),
-        canGoBack: jest.fn(() => false),
-        canDismiss: jest.fn(() => false),
-        setParams: jest.fn(),
-    },
-    useNavigation: () => ({
-        addListener: jest.fn().mockReturnValue(jest.fn()),
-        setOptions: jest.fn(),
-    }),
-}));
-
 function expectNavigateToScreenCalledWith(screen: string, _props?: Record<string, unknown>) {
-    expect(mockNavigateToScreen).toHaveBeenCalledWith(
+    expect(router.push).toHaveBeenCalledWith(
         expect.objectContaining({pathname: expect.stringContaining(screen)}),
-        expect.any(Object),
     );
 }
 

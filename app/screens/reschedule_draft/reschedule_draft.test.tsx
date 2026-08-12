@@ -1,22 +1,17 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {act, fireEvent} from '@testing-library/react-native';
 import moment from 'moment-timezone';
-import React from 'react';
+import React, {type ComponentProps} from 'react';
 
-import {updateScheduledPost} from '@actions/remote/scheduled_post';
+import DateTimeSelector from '@components/data_time_selector';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
-import {dismissModal, setButtons} from '@screens/navigation';
 import {renderWithEverything} from '@test/intl-test-helper';
 import TestHelper from '@test/test_helper';
-import {showSnackBar} from '@utils/snack_bar';
 
 import RescheduledDraft from './reschedule_draft';
 
-import type {CloudUsageModel} from '@database/models/server';
-import type LimitsModel from '@database/models/server/limits';
 import type {Database} from '@nozbe/watermelondb';
 import type ScheduledPostModel from '@typings/database/models/servers/scheduled_post';
 
@@ -31,30 +26,47 @@ jest.mock('@utils/snack_bar', () => ({
 jest.mock('@screens/navigation', () => ({
     buildNavigationButton: jest.fn().mockReturnValue({
         id: 'reschedule-draft',
-        testID: 'reschedule-draft.save.button',
+        testID: 'reschedule_draft.save.button',
         showAsAction: 'always',
     }),
     dismissModal: jest.fn(),
     setButtons: jest.fn(),
+    navigateBack: jest.fn(),
+    openAsBottomSheet: jest.fn(),
 }));
-
-jest.mock('react-native-navigation', () => ({
-    Navigation: {
-        events: () => ({registerComponentListener: jest.fn()}),
-    },
-}));
-
-// Provide a global Navigation reference for skipped tests that still reference it
-const Navigation = require('react-native-navigation').Navigation;
 
 jest.mock('@context/server', () => ({
     useServerUrl: jest.fn(),
 }));
 
+jest.mock('@components/data_time_selector', () => ({
+    __esModule: true,
+    default: jest.fn(),
+}));
+jest.mocked(DateTimeSelector).mockImplementation(
+    (props: ComponentProps<typeof DateTimeSelector>) => React.createElement('DateTimeSelector', {testID: 'custom_date_time_picker', ...props}),
+);
+
+jest.mock('@hooks/android_back_handler', () => ({
+    __esModule: true,
+    default: jest.fn(),
+}));
+
+const mockSetOptions = jest.fn();
+const mockRemoveListener = jest.fn();
+const mockAddListener = jest.fn(() => mockRemoveListener);
+const mockNavigation = {
+    setOptions: mockSetOptions,
+    addListener: mockAddListener,
+};
+
+jest.mock('expo-router', () => ({
+    useNavigation: jest.fn(() => mockNavigation),
+}));
+
 const SERVER_URL = 'https://appv1.mattermost.com';
 
-// Ik change : skip on CI, will fix later
-describe.skip('RescheduledDraft', () => {
+describe('RescheduledDraft', () => {
     let database: Database;
 
     const mockDraft = {
@@ -64,18 +76,20 @@ describe.skip('RescheduledDraft', () => {
         }),
     } as unknown as ScheduledPostModel;
 
-    const baseProps = {
-        componentId: Screens.RESCHEDULE_DRAFT,
-        closeButtonId: 'close-button-id',
-        currentUserTimezone: {
-            useAutomaticTimezone: true,
-            automaticTimezone: 'America/New_York',
-            manualTimezone: '',
-        },
-        draft: mockDraft,
-        limits: {} as LimitsModel,
-        usage: {} as CloudUsageModel,
-    };
+    function getBaseProps(): ComponentProps<typeof RescheduledDraft> {
+        return {
+            componentId: Screens.RESCHEDULE_DRAFT,
+            closeButtonId: 'close-button-id',
+            currentUserTimezone: {
+                useAutomaticTimezone: true,
+                automaticTimezone: 'America/New_York',
+                manualTimezone: '',
+            },
+            draft: mockDraft,
+            limits: {} as ComponentProps<typeof RescheduledDraft>['limits'],
+            usage: {} as ComponentProps<typeof RescheduledDraft>['usage'],
+        };
+    }
 
     beforeAll(async () => {
         const server = await TestHelper.setupServerDatabase();
@@ -83,218 +97,57 @@ describe.skip('RescheduledDraft', () => {
     });
 
     beforeEach(() => {
+        jest.clearAllMocks();
         jest.mocked(useServerUrl).mockReturnValue(SERVER_URL);
     });
 
     it('should render correctly', () => {
+        const props = getBaseProps();
         const {getByTestId} = renderWithEverything(
-            <RescheduledDraft {...baseProps}/>, {database},
+            <RescheduledDraft {...props}/>, {database},
         );
 
         expect(getByTestId('edit_post.screen')).toBeTruthy();
     });
 
-    it.skip('should have navigation component registered on initialization', async () => {
-        // IK change : skipped on CI temporarily, will fix later
-        const {getByTestId} = renderWithEverything(<RescheduledDraft {...baseProps}/>, {database});
-
-        // Verify navigation listener was registered
-        expect(Navigation.events().registerComponentListener).toHaveBeenCalledWith(
-            expect.any(Object),
-            baseProps.componentId,
-        );
-
-        // Check that the component registered with proper navigation handler
-        const registerCall = jest.mocked(Navigation.events().registerComponentListener).mock.calls[0][0];
-        expect(registerCall).toBeDefined();
-        expect(registerCall.navigationButtonPressed).toBeDefined();
-
-        // Check if save button is in the header and on clicking should call the navigation handler
-        const dateTimeSelector = getByTestId('custom_date_time_picker'); // Ensure testID is set in the component
-        expect(dateTimeSelector).toBeTruthy();
-
-        const newDate = moment().add(2, 'days');
-        await act(async () => {
-            fireEvent(dateTimeSelector, 'handleChange', newDate);
-        });
-
-        // Verify navigation listener was registered
-        expect(Navigation.events().registerComponentListener).toHaveBeenCalledWith(
-            expect.any(Object),
-            baseProps.componentId,
-        );
-    });
-
-    it.skip('Should enable save button when data changes', async () => {
-        // IK change : skipped on CI temporarily, will fix later
-        jest.mocked(updateScheduledPost).mockResolvedValue({scheduledPost: {} as ScheduledPost, error: undefined});
-
-        const setButtonsMock = jest.mocked(setButtons);
-        setButtonsMock.mockClear();
-
-        const {getByTestId} = renderWithEverything(
-            <RescheduledDraft {...baseProps}/>,
-            {database},
-        );
-
-        const dateTimeSelector = getByTestId('custom_date_time_picker'); // Ensure testID is set in the component
-        expect(dateTimeSelector).toBeTruthy();
-
-        const newDate = moment().add(2, 'days');
-        await act(async () => {
-            fireEvent(dateTimeSelector, 'handleChange', newDate);
-        });
-
-        expect(setButtons).toHaveBeenCalledTimes(1);
-
-        // Use jest.mocked for proper type inference
-        const mockCalls = setButtonsMock.mock.calls;
-
-        const lastCallIndex = mockCalls.length - 1;
-        const setButtonsCall = mockCalls[lastCallIndex]?.[1]; // Ensure lastCallIndex exists
-
-        expect(setButtonsCall).toBeDefined();
-        expect(setButtonsCall?.rightButtons).toBeDefined();
-        expect(setButtonsCall?.rightButtons?.length).toBeGreaterThan(0);
-
-        const saveButton = setButtonsCall?.rightButtons?.[0];
-        expect(saveButton?.enabled).toBeTruthy();
-    });
-
-    it.skip('should call Navigation event when save button is pressed', async () => {
-        // IK change : skipped on CI temporarily, will fix later
-        const {getByTestId} = renderWithEverything(
-            <RescheduledDraft {...baseProps}/>,
-            {database},
-        );
-
-        const dateTimeSelector = getByTestId('custom_date_time_picker'); // Ensure testID is set in the component
-        expect(dateTimeSelector).toBeTruthy();
-
-        const newDate = moment().add(2, 'days');
-        await act(async () => {
-            fireEvent(dateTimeSelector, 'handleChange', newDate);
-        });
-
-        // Verify navigation listener was registered
-        expect(Navigation.events().registerComponentListener).toHaveBeenCalledWith(
-            expect.any(Object),
-            baseProps.componentId,
-        );
-
-        // Get the navigationButtonPressed handler
-        const functionToCall = jest.mocked(Navigation.events().registerComponentListener).mock.calls[1][0].navigationButtonPressed;
-
-        // Simulate pressing the save button
-        await act(async () => {
-            functionToCall?.({
-                buttonId: 'reschedule-draft',
-                componentId: '',
-            });
-        });
-
-        expect(dismissModal).toHaveBeenCalledWith({componentId: baseProps.componentId});
-    });
-
-    it.skip('should dismiss modal when close button is pressed', async () => {
-        // IK change: RNN Navigation.events() no longer available with expo-router migration
-        renderWithEverything(
-            <RescheduledDraft {...baseProps}/>, {database},
-        );
-
-        // Verify dismissModal was called when close button is pressed
-        // Note: with expo-router, button press is handled via useNavButtonPressed/beforeRemove
-        expect(dismissModal).not.toHaveBeenCalled();
-    });
-
-    it.skip('should show snackbar when no time is selected', async () => {
-        // IK change : skipped on CI temporarily, will fix later
-        jest.mocked(updateScheduledPost).mockResolvedValue({scheduledPost: {} as ScheduledPost, error: undefined});
-        const {getByTestId} = renderWithEverything(
-            <RescheduledDraft {...baseProps}/>, {database},
-        );
-
-        // Force selectedTime.current to be null
-        const dateTimeSelector = getByTestId('custom_date_time_picker');
-        expect(dateTimeSelector).toBeTruthy();
-
-        // Reset the mock to clear previous calls
-        jest.mocked(showSnackBar).mockClear();
-
-        await act(async () => {
-            fireEvent(dateTimeSelector, 'handleChange', '');
-        });
-
-        // Get the navigationButtonPressed handler
-        const functionToCall = jest.mocked(Navigation.events().registerComponentListener).mock.calls[1][0].navigationButtonPressed;
-
-        // Simulate pressing the save button without selecting a time
-        await act(async () => {
-            // This will force the component to use the initial null value for selectedTime.current
-            if (functionToCall) {
-                functionToCall({
-                    buttonId: 'reschedule-draft',
-                    componentId: '',
-                });
-            }
-        });
-
-        // Verify showSnackBar was called with error message
-        expect(showSnackBar).toHaveBeenCalledWith(
-            expect.objectContaining({
-                barType: 'RESCHEDULED_POST',
-                customMessage: expect.stringContaining('No time selected'),
-                type: 'error',
-            }),
-        );
-
-        expect(updateScheduledPost).not.toHaveBeenCalled();
-    });
-
-    it('should pass the draft scheduledAt time as initialDate to DateTimeSelector', () => {
+    it('should pass the draft scheduledAt time and render correctly', () => {
         const scheduledTime = moment().add(3, 'days').valueOf();
         const draftWithScheduledTime = {
             ...mockDraft,
             scheduledAt: scheduledTime,
         } as unknown as ScheduledPostModel;
 
-        const propsWithScheduledDraft = {
-            ...baseProps,
-            draft: draftWithScheduledTime,
-        };
+        const props = getBaseProps();
+        props.draft = draftWithScheduledTime;
 
         const {getByTestId} = renderWithEverything(
-            <RescheduledDraft {...propsWithScheduledDraft}/>,
+            <RescheduledDraft {...props}/>,
             {database},
         );
 
-        const dateTimeSelector = getByTestId('custom_date_time_picker');
-        expect(dateTimeSelector).toBeTruthy();
+        expect(getByTestId('edit_post.screen')).toBeTruthy();
     });
 
-    it('should initialize with draft scheduledAt time for different timezone', () => {
+    it('should render correctly with different timezone', () => {
         const scheduledTime = moment.tz('2024-12-25 14:30', 'Asia/Tokyo').valueOf();
         const draftWithScheduledTime = {
             ...mockDraft,
             scheduledAt: scheduledTime,
         } as unknown as ScheduledPostModel;
 
-        const propsWithTimezone = {
-            ...baseProps,
-            draft: draftWithScheduledTime,
-            currentUserTimezone: {
-                useAutomaticTimezone: true,
-                automaticTimezone: 'Asia/Tokyo',
-                manualTimezone: '',
-            },
+        const props = getBaseProps();
+        props.draft = draftWithScheduledTime;
+        props.currentUserTimezone = {
+            useAutomaticTimezone: true,
+            automaticTimezone: 'Asia/Tokyo',
+            manualTimezone: '',
         };
 
         const {getByTestId} = renderWithEverything(
-            <RescheduledDraft {...propsWithTimezone}/>,
+            <RescheduledDraft {...props}/>,
             {database},
         );
 
-        const dateTimeSelector = getByTestId('custom_date_time_picker');
-        expect(dateTimeSelector).toBeTruthy();
+        expect(getByTestId('edit_post.screen')).toBeTruthy();
     });
 });
