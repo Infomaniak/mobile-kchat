@@ -7,8 +7,8 @@ import {fireEvent, waitFor} from '@testing-library/react-native';
 import {getInfoAsync} from 'expo-file-system';
 import {Alert} from 'react-native';
 
-import {dismissBottomSheet} from '@screens/navigation';
 import {Screens} from '@constants';
+import {dismissBottomSheet} from '@screens/navigation';
 import {renderWithIntlAndTheme} from '@test/intl-test-helper';
 import PickerUtil from '@utils/file/file_picker';
 import {logError} from '@utils/log';
