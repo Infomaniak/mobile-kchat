@@ -1,9 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {Button} from '@rneui/base';
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Image, Linking, Text, View} from 'react-native';
 
@@ -13,14 +12,10 @@ import DatabaseManager from '@database/manager';
 import {getAllServerCredentials, removeServerCredentials} from '@init/credentials';
 import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
-import {observeCurrentUser} from '@queries/servers/user';
 import {resetToInfomaniakLogin} from '@screens/navigation';
 import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
-
-import type {WithDatabaseArgs} from '@typings/database/database';
-import type UserModel from '@typings/database/models/servers/user';
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     container: {
@@ -72,19 +67,13 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
 }));
 
-type Props = {
-    currentUser?: UserModel;
-}
-
-const InfomaniakNoTeams = ({currentUser}: Props) => {
+const InfomaniakNoTeams = () => {
     const theme = getDefaultThemeByAppearance();
 
     const styles = getStyleSheet(theme);
     const intl = useIntl();
 
-    const locale = useMemo(() => {
-        return currentUser?.locale?.split('-')[0] || intl.locale.split('-')[0];
-    }, [currentUser?.locale, intl.locale]);
+    const locale = intl.locale.split('-')[0];
 
     const onDiscoverKSuitePressed = useCallback(() => {
         Linking.openURL(`https://www.infomaniak.com/${locale}/ksuite`);
@@ -167,8 +156,4 @@ const InfomaniakNoTeams = ({currentUser}: Props) => {
     );
 };
 
-const withCurrentUser = withObservables([], ({database}: WithDatabaseArgs) => ({
-    currentUser: observeCurrentUser(database),
-}));
-
-export default withDatabase(withCurrentUser(InfomaniakNoTeams));
+export default InfomaniakNoTeams;

@@ -32,10 +32,11 @@ export async function switchToChannel(serverUrl: string, channelId: string, team
         let models: Model[] = [];
         const dt = Date.now();
         const isTabletDevice = isTablet();
-        const system = await getCommonSystemValues(database);
-        const member = await getMyChannel(database, channelId);
 
         EphemeralStore.addSwitchingToChannel(channelId);
+
+        const system = await getCommonSystemValues(database);
+        const member = await getMyChannel(database, channelId);
 
         if (member) {
             const channel = await member.channel.fetch();
@@ -101,6 +102,8 @@ export async function switchToChannel(serverUrl: string, channelId: string, team
     } catch (error) {
         logError('Failed to switch to channelId', channelId, 'teamId', teamId, 'error', error);
         return {error};
+    } finally {
+        EphemeralStore.removeSwitchingToChannel(channelId);
     }
 }
 

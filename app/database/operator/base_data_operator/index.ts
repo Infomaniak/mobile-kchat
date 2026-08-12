@@ -4,13 +4,17 @@
 // TODO UPDATE : check integration with kmeet ? https://gitlab.infomaniak.ch/kchat/mobile/-/commit/8d4ec058f119e1274867d6a7760910b815115584
 
 import {Database, Model, Q} from '@nozbe/watermelondb';
+import {DeviceEventEmitter} from 'react-native';
 
+import {Events} from '@constants';
 import {OperationType} from '@constants/database';
 import {
     getRangeOfValues,
     getValidRecordsForUpdate,
     retrieveRecords,
 } from '@database/operator/utils/general';
+import {isDatabaseCorruptionError} from '@utils/database_errors';
+import {getFullErrorMessage} from '@utils/errors';
 import {logWarning} from '@utils/log';
 
 import type {
@@ -196,6 +200,30 @@ export default class BaseDataOperator {
             }
         } catch (e) {
             logWarning('batchRecords error ', description, e as Error);
+            if (isDatabaseCorruptionError(e)) {
+                // Report corruption to Sentry for monitoring recovery effectiveness
+                try {
+                    const Sentry = require('@sentry/react-native');
+                    Sentry.captureException(e as Error, {
+                        tags: {
+                            source: 'database_corruption',
+                            recovery_source: description,
+                        },
+                        extra: {
+                            recovery_source: description,
+                            description: getFullErrorMessage(e),
+                        },
+                    });
+                } catch {
+                    // Sentry not available (dev, uninitialised, etc.), ignore quietly
+                }
+
+                DeviceEventEmitter.emit(Events.DATABASE_CORRUPTION_DETECTED, {
+                    database: this.database,
+                    error: e,
+                    source: description,
+                });
+            }
         }
     }
 

@@ -1154,12 +1154,26 @@ export async function getChannelTimezones(serverUrl: string, channelId: string) 
     }
 }
 
+const activeChannelSwitches = new Set<string>();
+
 export async function switchToChannelById(serverUrl: string, channelId: string, teamId?: string, skipLastUnread = false, groupLabel?: RequestGroupLabel) {
     if (channelId === Screens.GLOBAL_THREADS) {
         return switchToGlobalThreads(serverUrl, teamId);
     } else if (channelId === Screens.GLOBAL_DRAFTS) {
         return switchToGlobalDrafts(serverUrl, teamId);
     }
+
+    const switchDt = Date.now();
+    const switchKey = `${serverUrl}:${channelId}`;
+    if (activeChannelSwitches.has(switchKey)) {
+        logInfo('[switchToChannelById] Skipped duplicate switch to', channelId);
+        return {};
+    }
+
+    activeChannelSwitches.add(switchKey);
+
+    let switchEventEmitted = false;
+    let switchTimeout: ReturnType<typeof setTimeout> | undefined;
 
     try {
         const database = DatabaseManager.serverDatabases[serverUrl]?.database;
@@ -1169,23 +1183,26 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
         }
 
         DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, true);
+        switchEventEmitted = true;
+        logInfo('[switchToChannelById] Starting switch to', channelId, 'isTablet:', isTablet());
 
-        // Detect switch that never completes (>15s)
-        const switchTimeout = setTimeout(() => {
+        switchTimeout = setTimeout(() => {
             captureException(new Error(`[switchToChannelById] Switch never completed after 15s for ${channelId}`));
         }, 15000);
 
-        try {
-            await switchToChannel(serverUrl, channelId, teamId, skipLastUnread);
-            openChannelIfNeeded(serverUrl, channelId, groupLabel);
-            markChannelAsRead(serverUrl, channelId, false, groupLabel);
-            fetchChannelStats(serverUrl, channelId, false, groupLabel);
-            fetchGroupsForChannelIfConstrained(serverUrl, channelId, false);
-        } finally {
-            clearTimeout(switchTimeout);
+        const {error} = await switchToChannel(serverUrl, channelId, teamId, skipLastUnread);
+        if (error) {
+            return {error};
         }
 
-        DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, false);
+        logDebug('[switchToChannelById] completed switch to', channelId, 'in', Date.now() - switchDt, 'ms');
+        openChannelIfNeeded(serverUrl, channelId, groupLabel);
+        markChannelAsRead(serverUrl, channelId, false, groupLabel);
+        fetchChannelStats(serverUrl, channelId, false, groupLabel);
+        fetchGroupsForChannelIfConstrained(serverUrl, channelId, false);
+
+        clearTimeout(switchTimeout);
+        switchTimeout = undefined;
 
         if (await AppsManager.isAppsEnabled(serverUrl)) {
             AppsManager.fetchBindings(serverUrl, channelId, false, groupLabel);
@@ -1196,6 +1213,12 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
         logError('[switchToChannelById] Failed with error:', error);
         captureException(error as Error);
         throw error;
+    } finally {
+        clearTimeout(switchTimeout);
+        activeChannelSwitches.delete(switchKey);
+        if (switchEventEmitted) {
+            DeviceEventEmitter.emit(Events.CHANNEL_SWITCH, false);
+        }
     }
 }
 
