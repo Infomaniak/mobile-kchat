@@ -1,10 +1,42 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {usePropsFromParams} from '@hooks/props_from_params';
-import Screen from '@screens/channel_notification_preferences';
+import {useIntl} from 'react-intl';
 
-export default function Route() {
-    const props = usePropsFromParams<any>();
-    return <Screen {...props}/>;
+import NavigationHeaderTitle from '@components/navigation_header_title';
+import {Screens} from '@constants';
+import {useTheme} from '@context/theme';
+import {getHeaderOptions, useNavigationHeader} from '@hooks/navigation_header';
+import {usePropsFromParams} from '@hooks/props_from_params';
+import ChannelNotificationPreferencesScreen from '@screens/channel_notification_preferences';
+
+type ChannelNotificationPreferencesProps = {
+    channelId: string;
+    displayName?: string;
+}
+
+export default function ChannelNotificationPreferencesRoute() {
+    const theme = useTheme();
+    const intl = useIntl();
+    const {channelId, displayName} = usePropsFromParams<ChannelNotificationPreferencesProps>();
+
+    useNavigationHeader({
+        showWhenPushed: true,
+        headerOptions: {
+            headerTitle: () => (
+                <NavigationHeaderTitle
+                    title={intl.formatMessage({id: 'channel_info.mobile_notifications', defaultMessage: 'Mobile Notifications'})}
+                    subtitle={displayName}
+                />
+            ),
+            ...getHeaderOptions(theme),
+        },
+    });
+
+    return (
+        <ChannelNotificationPreferencesScreen
+            channelId={channelId}
+            componentId={Screens.CHANNEL_NOTIFICATION_PREFERENCES as any}
+        />
+    );
 }

@@ -1,10 +1,45 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {usePropsFromParams} from '@hooks/props_from_params';
-import Screen from '@screens/channel_settings';
+import {useIntl} from 'react-intl';
 
-export default function Route() {
-    const props = usePropsFromParams<any>();
-    return <Screen {...props}/>;
+import NavigationHeaderTitle from '@components/navigation_header_title';
+import {Screens} from '@constants';
+import {useServerUrl} from '@context/server';
+import {useTheme} from '@context/theme';
+import {getHeaderOptions, useNavigationHeader} from '@hooks/navigation_header';
+import {usePropsFromParams} from '@hooks/props_from_params';
+import ChannelSettingsScreen from '@screens/channel_settings';
+
+type ChannelSettingsProps = {
+    channelId: string;
+    subtitle: string;
+}
+
+export default function ChannelSettingsRoute() {
+    const theme = useTheme();
+    const serverUrl = useServerUrl();
+    const intl = useIntl();
+    const {channelId, subtitle} = usePropsFromParams<ChannelSettingsProps>();
+
+    useNavigationHeader({
+        showWhenPushed: true,
+        headerOptions: {
+            headerTitle: () => (
+                <NavigationHeaderTitle
+                    title={intl.formatMessage({id: 'channel_info.channel_settings', defaultMessage: 'Channel Settings'})}
+                    subtitle={subtitle}
+                />
+            ),
+            ...getHeaderOptions(theme),
+        },
+    });
+
+    return (
+        <ChannelSettingsScreen
+            channelId={channelId}
+            serverUrl={serverUrl}
+            componentId={Screens.CHANNEL_SETTINGS as any}
+        />
+    );
 }

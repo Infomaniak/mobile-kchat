@@ -196,9 +196,10 @@ export default function RootLayout() {
                                     options={bottomSheetScreenOptions}
                                 />
                             </Stack>
-                            <PortalHost name='snack_bar'/>
-                            <SnackBarContainer/>
+
                         </KeyboardProvider>
+                        <PortalHost name='snack_bar'/>
+                        <SnackBarContainer/>
                         <PortalHost name='notification'/>
                         <InAppNotificationContainer/>
                     </PortalProvider>

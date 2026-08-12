@@ -1,10 +1,25 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {usePropsFromParams} from '@hooks/props_from_params';
-import Screen from '@screens/custom_status';
+import {useIntl} from 'react-intl';
 
-export default function Route() {
-    const props = usePropsFromParams<any>();
-    return <Screen {...props}/>;
+import {Screens} from '@constants';
+import {useTheme} from '@context/theme';
+import {getModalHeaderOptions, useNavigationHeader} from '@hooks/navigation_header';
+import CustomStatusScreen from '@screens/custom_status';
+import {navigateBack} from '@screens/navigation';
+
+export default function CustomStatusRoute() {
+    const intl = useIntl();
+    const theme = useTheme();
+
+    useNavigationHeader({
+        showWhenPushed: true,
+        headerOptions: {
+            headerTitle: intl.formatMessage({id: 'mobile.routes.custom_status', defaultMessage: 'Set a custom status'}),
+            ...getModalHeaderOptions(theme, navigateBack, 'close.custom_status.button'),
+        },
+    });
+
+    return (<CustomStatusScreen componentId={Screens.CUSTOM_STATUS}/>);
 }

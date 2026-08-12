@@ -1,10 +1,25 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {usePropsFromParams} from '@hooks/props_from_params';
-import Screen from '@screens/invite';
+import {useIntl} from 'react-intl';
 
-export default function Route() {
-    const props = usePropsFromParams<any>();
-    return <Screen {...props}/>;
+import {Screens} from '@constants';
+import {useTheme} from '@context/theme';
+import {getModalHeaderOptions, useNavigationHeader} from '@hooks/navigation_header';
+import InviteScreen from '@screens/invite';
+import {navigateBack} from '@screens/navigation';
+
+export default function InviteRoute() {
+    const intl = useIntl();
+    const theme = useTheme();
+
+    useNavigationHeader({
+        showWhenPushed: true,
+        headerOptions: {
+            headerTitle: intl.formatMessage({id: 'invite.title', defaultMessage: 'Invite'}),
+            ...getModalHeaderOptions(theme, navigateBack, 'close.invite.button'),
+        },
+    });
+
+    return <InviteScreen componentId={Screens.INVITE}/>;
 }

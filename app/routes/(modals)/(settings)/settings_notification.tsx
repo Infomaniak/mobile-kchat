@@ -1,10 +1,24 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {usePropsFromParams} from '@hooks/props_from_params';
-import Screen from '@screens/settings/notifications';
+import {useIntl} from 'react-intl';
 
-export default function Route() {
-    const props = usePropsFromParams<any>();
-    return <Screen {...props}/>;
+import {Screens} from '@constants';
+import {useTheme} from '@context/theme';
+import {getHeaderOptions, useNavigationHeader} from '@hooks/navigation_header';
+import SettingsNotificationsScreen from '@screens/settings/notifications';
+
+export default function SettingsNotificationsRoute() {
+    const intl = useIntl();
+    const theme = useTheme();
+
+    useNavigationHeader({
+        showWhenPushed: true,
+        headerOptions: {
+            headerTitle: intl.formatMessage({id: 'settings.notifications', defaultMessage: 'Notifications'}),
+            ...getHeaderOptions(theme),
+        },
+    });
+
+    return (<SettingsNotificationsScreen componentId={Screens.SETTINGS_NOTIFICATION}/>);
 }

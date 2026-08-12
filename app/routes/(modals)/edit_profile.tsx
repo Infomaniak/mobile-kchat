@@ -1,10 +1,25 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {usePropsFromParams} from '@hooks/props_from_params';
-import Screen from '@screens/edit_profile';
+import {useIntl} from 'react-intl';
 
-export default function Route() {
-    const props = usePropsFromParams<any>();
-    return <Screen {...props}/>;
+import {Screens} from '@constants';
+import {useTheme} from '@context/theme';
+import {getModalHeaderOptions, useNavigationHeader} from '@hooks/navigation_header';
+import EditProfileScreen from '@screens/edit_profile';
+import {navigateBack} from '@screens/navigation';
+
+export default function EditProfileRoute() {
+    const intl = useIntl();
+    const theme = useTheme();
+
+    useNavigationHeader({
+        showWhenPushed: true,
+        headerOptions: {
+            headerTitle: intl.formatMessage({id: 'mobile.screen.your_profile', defaultMessage: 'Your Profile'}),
+            ...getModalHeaderOptions(theme, navigateBack, 'close.edit_profile.button'),
+        },
+    });
+
+    return <EditProfileScreen componentId={Screens.EDIT_PROFILE}/>;
 }

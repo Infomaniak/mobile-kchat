@@ -1,10 +1,33 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {usePropsFromParams} from '@hooks/props_from_params';
-import Screen from '@screens/join_team';
+import {useNavigation} from 'expo-router';
+import {useEffect} from 'react';
+import {useIntl} from 'react-intl';
 
-export default function Route() {
-    const props = usePropsFromParams<any>();
-    return <Screen {...props}/>;
+import {Screens} from '@constants';
+import {useTheme} from '@context/theme';
+import {getModalHeaderOptions} from '@hooks/navigation_header';
+import JoinTeamScreen from '@screens/join_team';
+import {navigateBack} from '@screens/navigation';
+
+export default function JoinTeamRoute() {
+    const navigation = useNavigation();
+    const theme = useTheme();
+    const intl = useIntl();
+
+    useEffect(() => {
+        navigation.setOptions({
+            headerShown: true,
+            headerTitle: intl.formatMessage({id: 'mobile.add_team.join_team', defaultMessage: 'Join Another Team'}),
+            ...getModalHeaderOptions(theme, navigateBack, 'close.join_team.button'),
+        });
+    }, [intl, navigation, theme]);
+
+    return (
+        <JoinTeamScreen
+            closeButtonId='close-join-team'
+            componentId={Screens.JOIN_TEAM}
+        />
+    );
 }
