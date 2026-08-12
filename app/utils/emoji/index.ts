@@ -17,6 +17,8 @@ export interface Emoji {
     texts: string[] | null;
     category: string;
     fileName: string;
+    skin_variations?: Record<string, unknown>;
+    skins?: string[];
 }
 
 export const Emojis = emojis as Emoji[];
