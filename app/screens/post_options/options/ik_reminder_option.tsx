@@ -5,37 +5,23 @@ import React, {useCallback} from 'react';
 
 import {BaseOption} from '@components/common_post_options';
 import {Screens} from '@constants';
-import {useTheme} from '@context/theme';
-import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
+import {dismissBottomSheet, navigateToScreen} from '@screens/navigation';
 
 import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
-import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
-    bottomSheetId: AvailableScreens;
     post: PostModel;
     limits: LimitModel;
     usage: CloudUsageModel;
 }
-const IKReminderOption = ({bottomSheetId, post, usage, limits}: Props) => {
-    const theme = useTheme();
 
+const IKReminderOption = ({post, usage, limits}: Props) => {
     const onPress = useCallback(async () => {
-        await dismissBottomSheet(bottomSheetId);
+        await dismissBottomSheet();
 
-        openAsBottomSheet({
-            closeButtonId: 'close-quota-exceeded',
-            screen: Screens.IK_REMINDER,
-            theme,
-            title: '',
-            props: {
-                post,
-                usage,
-                limits,
-            },
-        });
-    }, [bottomSheetId, limits, post, theme, usage]);
+        navigateToScreen(Screens.IK_REMINDER, {post, usage, limits});
+    }, [limits, post, usage]);
 
     return (
         <BaseOption

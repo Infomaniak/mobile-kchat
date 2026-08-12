@@ -12,10 +12,8 @@ import {dismissBottomSheet} from '@screens/navigation';
 
 import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
-import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
-    bottomSheetId: AvailableScreens;
     combinedPost?: Post | PostModel;
     post: PostModel;
     currentUser?: UserModel;
@@ -28,7 +26,7 @@ const messages = defineMessages({
     },
 });
 
-const DeletePostOption = ({bottomSheetId, combinedPost, post}: Props) => {
+const DeletePostOption = ({combinedPost, post}: Props) => {
     const serverUrl = useServerUrl();
     const {formatMessage} = useIntl();
 
@@ -49,13 +47,13 @@ const DeletePostOption = ({bottomSheetId, combinedPost, post}: Props) => {
                 text: formatMessage({id: 'post_info.del', defaultMessage: 'Delete'}),
                 style: 'destructive',
                 onPress: async () => {
-                    await dismissBottomSheet(bottomSheetId);
+                    await dismissBottomSheet();
                     deletePost(serverUrl, combinedPost || post);
                 },
             }],
         );
 
-    }, [bottomSheetId, combinedPost, formatMessage, post, serverUrl]);
+    }, [combinedPost, formatMessage, post, serverUrl]);
 
     return (
         <BaseOption

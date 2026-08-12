@@ -13,9 +13,7 @@ import {PostTypes} from '@constants/post';
 import {REACTION_PICKER_HEIGHT, REACTION_PICKER_MARGIN} from '@constants/reaction_picker';
 import {useBottomSheetListsFix} from '@hooks/bottom_sheet_lists_fix';
 import {useIsTablet} from '@hooks/device';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import BottomSheet from '@screens/bottom_sheet';
-import {dismissBottomSheet} from '@screens/navigation';
 import IKReminderOption from '@screens/post_options/options/ik_reminder_option';
 import IKTranslateOption from '@screens/post_options/options/ik_translate_option';
 import {bottomSheetSnapPoint} from '@utils/helpers';
@@ -51,7 +49,7 @@ type PostOptionsProps = {
     sourceScreen: AvailableScreens;
     post: PostModel;
     thread?: ThreadModel;
-    componentId: AvailableScreens;
+    componentId?: AvailableScreens;
     bindings: AppBinding[];
     serverUrl: string;
     limits: LimitModel;
@@ -61,7 +59,7 @@ type PostOptionsProps = {
 const PostOptions = ({
     canAddReaction, canDelete, canEdit,
     canMarkAsUnread, canPin, canReply, canViewTranslation,
-    combinedPost, componentId, isSaved,
+    combinedPost, isSaved,
     sourceScreen, post, thread, bindings, serverUrl,
     usage, limits,
     currentUser,
@@ -70,12 +68,6 @@ const PostOptions = ({
     const isTablet = useIsTablet();
     const {enabled, panResponder} = useBottomSheetListsFix();
     const Scroll = useMemo(() => (isTablet ? ScrollView : BottomSheetScrollView), [isTablet]);
-
-    const close = () => {
-        return dismissBottomSheet(Screens.POST_OPTIONS);
-    };
-
-    useNavButtonPressed(POST_OPTIONS_BUTTON, componentId, close, []);
 
     const isSystemPost = isSystemMessage(post);
 
@@ -135,38 +127,32 @@ const PostOptions = ({
                     <>
                         {canAddReaction &&
                             <ReactionBar
-                                bottomSheetId={Screens.POST_OPTIONS}
                                 postId={post.id}
                             />
                         }
                         {canReply &&
                             <ReplyOption
-                                bottomSheetId={Screens.POST_OPTIONS}
                                 post={post}
                             />
                         }
                         {shouldRenderFollow &&
                             <FollowThreadOption
-                                bottomSheetId={Screens.POST_OPTIONS}
                                 thread={thread}
                             />
                         }
                         {shouldRenderAi &&
                             <AskAi
-                                bottomSheetId={Screens.POST_OPTIONS}
                                 post={post}
                             />
                         }
                         {canMarkAsUnread && !isSystemPost &&
                         <MarkAsUnreadOption
-                            bottomSheetId={Screens.POST_OPTIONS}
                             post={post}
                             sourceScreen={sourceScreen}
                         />
                         }
                         {canShowReminder &&
                             <IKReminderOption
-                                bottomSheetId={Screens.POST_OPTIONS}
                                 post={post}
                                 usage={usage}
                                 limits={limits}
@@ -174,46 +160,39 @@ const PostOptions = ({
                         }
                         {canViewTranslation &&
                         <ShowTranslationOption
-                            bottomSheetId={Screens.POST_OPTIONS}
                             postId={post.id}
                         />
                         }
                         {canSavePost &&
                         <SaveOption
-                            bottomSheetId={Screens.POST_OPTIONS}
                             isSaved={isSaved}
                             postId={post.id}
                         />
                         }
                         {Boolean(canCopyText && post.message) &&
                         <CopyTextOption
-                            bottomSheetId={Screens.POST_OPTIONS}
                             postMessage={post.messageSource || post.message}
                             sourceScreen={sourceScreen}
                         />}
                         {canPin &&
                         <PinChannelOption
-                            bottomSheetId={Screens.POST_OPTIONS}
                             isPostPinned={post.isPinned}
                             postId={post.id}
                         />
                         }
                         {canTranslate &&
                             <IKTranslateOption
-                                bottomSheetId={Screens.POST_OPTIONS}
                                 post={post}
                             />
                         }
                         {canEdit && post.type !== PostTypes.VOICE_MESSAGE &&
                         <EditOption
-                            bottomSheetId={Screens.POST_OPTIONS}
                             post={post}
                             canDelete={canDelete}
                         />
                         }
                         {shouldShowBindings &&
                         <AppBindingsPostOptions
-                            bottomSheetId={Screens.POST_OPTIONS}
                             post={post}
                             serverUrl={serverUrl}
                             bindings={bindings}
@@ -224,7 +203,6 @@ const PostOptions = ({
 
                 {canCopyPermalink &&
                 <CopyPermalinkOption
-                    bottomSheetId={Screens.POST_OPTIONS}
                     post={post}
                     sourceScreen={sourceScreen}
                 />
@@ -233,7 +211,6 @@ const PostOptions = ({
                     <>
                         {canDelete &&
                         <DeletePostOption
-                            bottomSheetId={Screens.POST_OPTIONS}
                             combinedPost={combinedPost}
                             post={post}
                             currentUser={currentUser}

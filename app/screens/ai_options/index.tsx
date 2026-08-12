@@ -31,13 +31,11 @@ const AiOptions = (props: Props) => {
         return (
             <Scroll bounces={false}>
                 <SummarizeThread
-                    bottomSheetId={Screens.AI_OPTIONS}
                     post={post}
                 />
                 {/*React for me feature is disabled for the moment*/}
                 {/* <ReactForMe
                     post={post}
-                    bottomSheetId={Screens.AI_OPTIONS}
                 /> */}
             </Scroll>
         );

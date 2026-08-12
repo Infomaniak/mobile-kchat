@@ -12,20 +12,18 @@ import {dismissBottomSheet} from '@screens/navigation';
 import IconThreadSummarization from '../../../../components/illustrations/icon_thread_summarization';
 
 import type PostModel from '@typings/database/models/servers/post';
-import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
     post: PostModel;
-    bottomSheetId: AvailableScreens;
 }
 
-const SummarizeThread = ({post, bottomSheetId}: Props) => {
+const SummarizeThread = ({post}: Props) => {
     const serverUrl = useServerUrl();
     const theme = useTheme();
 
     const handleSummarizeThread = (async () => {
         const summarizePost = await summarizeThread(serverUrl, post.id, 'euria');
-        await dismissBottomSheet(bottomSheetId);
+        await dismissBottomSheet();
         fetchAndSwitchToThread(serverUrl, summarizePost.data.postid);
     });
 

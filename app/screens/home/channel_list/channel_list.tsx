@@ -6,7 +6,7 @@ import React, {useCallback, useEffect} from 'react';
 import {useIntl} from 'react-intl';
 import {BackHandler, DeviceEventEmitter, ToastAndroid, View} from 'react-native';
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {refetchCurrentUser} from '@actions/remote/user';
 import AlmostFullStorageAnnouncementBar from '@components/almost_full_storage_announcement_bar';
@@ -82,6 +82,7 @@ const ChannelListScreen = (props: ChannelProps) => {
     const route = useRoute();
     const isFocused = useIsFocused();
     const navigation = useNavigation();
+    const insets = useSafeAreaInsets();
     const serverUrl = useServerUrl();
     const params = route.params as {direction: string};
     const canAddOtherServers = true;
@@ -173,12 +174,17 @@ const ChannelListScreen = (props: ChannelProps) => {
         PerformanceMetricsManager.measureTimeToInteraction();
     }, [serverUrl]);
 
+    const top = useAnimatedStyle(() => {
+        return {height: insets.top, backgroundColor: theme.sidebarBg};
+    }, [theme, insets.top]);
+
     return (
         <>
-            <SafeAreaView
+            <View
                 style={[styles.flex, styles.background]}
                 testID='channel_list.screen'
             >
+                <Animated.View style={top}/>
                 <ConnectionBanner/>
                 {props.isLicensed &&
                     <AnnouncementBanner/>
@@ -207,7 +213,7 @@ const ChannelListScreen = (props: ChannelProps) => {
                         }
                     </Animated.View>
                 </View>
-            </SafeAreaView>
+            </View>
         </>
     );
 };

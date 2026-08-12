@@ -96,7 +96,7 @@ const PostPriorityPicker = ({
     const style = getStyleSheet(theme);
 
     const closeBottomSheet = useCallback(() => {
-        return dismissBottomSheet(Screens.POST_PRIORITY_PICKER);
+        return dismissBottomSheet();
     }, []);
 
     useNavButtonPressed(closeButtonId, componentId, closeBottomSheet, []);

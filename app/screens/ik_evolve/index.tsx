@@ -93,7 +93,7 @@ const IKEvolve = () => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
     const handleClose = useCallback(() => {
-        dismissBottomSheet(Screens.IK_EVOLVE);
+        dismissBottomSheet();
     }, []);
 
     const allImages = {

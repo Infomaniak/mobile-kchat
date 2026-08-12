@@ -58,7 +58,7 @@ export function ScheduledPostCoreOptions({userTimezone, isMilitaryTime, onSelect
     const {isQuotaExceeded} = quotaGate(scheduledDraftCustomDate);
 
     const onPressEvolve = useCallback(async () => {
-        await dismissBottomSheet(Screens.SCHEDULED_POST_OPTIONS);
+        await dismissBottomSheet();
 
         openAsBottomSheet({
             closeButtonId: 'close-quota-exceeded',

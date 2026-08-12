@@ -101,7 +101,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
     ];
 
     const close = async () => {
-        await dismissBottomSheet(Screens.IK_REMINDER);
+        await dismissBottomSheet();
     };
 
     const {reminder_custom_date: reminderCustomDate} = useGetUsageDeltas(usage, limits);
@@ -189,7 +189,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
     };
 
     const onPressEvolve = useCallback(async () => {
-        await dismissBottomSheet(Screens.IK_REMINDER);
+        await dismissBottomSheet();
 
         openAsBottomSheet({
             closeButtonId: 'close-quota-exceeded',
