@@ -15,12 +15,13 @@ import ConnectionBanner from '@components/connection_banner';
 import FullStorageAnnouncementBar from '@components/ik_full_annoucement_banner';
 import TeamSidebar from '@components/team_sidebar';
 import {Navigation as NavigationConstants, Screens} from '@constants';
+import {HOME_TAB_SCREENS} from '@constants/screens';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import PerformanceMetricsManager from '@managers/performance_metrics_manager';
 import {openToS} from '@screens/navigation';
-import NavigationStore from '@store/navigation_store';
+import NavigationStore, {useCurrentScreen} from '@store/navigation_store';
 import {isMainActivity} from '@utils/helpers';
 import {tryRunAppReview} from '@utils/reviews';
 import {addSentryContext} from '@utils/sentry';
@@ -82,10 +83,12 @@ const ChannelListScreen = (props: ChannelProps) => {
     const route = useRoute();
     const isFocused = useIsFocused();
     const navigation = useNavigation();
+    const currentScreen = useCurrentScreen();
     const insets = useSafeAreaInsets();
     const serverUrl = useServerUrl();
     const params = route.params as {direction: string};
     const canAddOtherServers = true;
+    const isTabScreen = currentScreen && HOME_TAB_SCREENS.has(currentScreen);
 
     const handleBackPress = useCallback(() => {
         const isHomeScreen = NavigationStore.getVisibleScreen() === Screens.HOME;
@@ -117,6 +120,10 @@ const ChannelListScreen = (props: ChannelProps) => {
     }, [intl, navigation]);
 
     const animated = useAnimatedStyle(() => {
+        if (!isTabScreen) {
+            return {};
+        }
+
         if (!isFocused) {
             let initial = 0;
             if (params?.direction) {
@@ -131,7 +138,7 @@ const ChannelListScreen = (props: ChannelProps) => {
             opacity: withTiming(1, {duration: 150}),
             transform: [{translateX: withTiming(0, {duration: 150})}],
         };
-    }, [isFocused, params]);
+    }, [isFocused, isTabScreen, params]);
 
     useEffect(() => {
         const back = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
