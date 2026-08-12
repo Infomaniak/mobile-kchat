@@ -3,7 +3,6 @@
 
 import {useIntl} from 'react-intl';
 
-import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {getModalHeaderOptions, useNavigationHeader} from '@hooks/navigation_header';
 import {navigateBack} from '@screens/navigation';
@@ -21,5 +20,5 @@ export default function SettingsRoute() {
         },
     });
 
-    return (<SettingsScreen componentId={Screens.SETTINGS}/>);
+    return (<SettingsScreen/>);
 }

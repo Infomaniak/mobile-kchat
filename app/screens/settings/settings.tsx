@@ -3,24 +3,21 @@
 
 import Clipboard from '@react-native-clipboard/clipboard';
 import {nativeApplicationVersion, nativeBuildVersion} from 'expo-application';
-import React, {useCallback, useEffect, useMemo} from 'react';
+import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {Alert, Platform, Text, TouchableOpacity, View} from 'react-native';
 
-import CompassIcon from '@components/compass_icon';
 import SettingContainer from '@components/settings/container';
 import SettingItem from '@components/settings/item';
 import {Screens} from '@constants';
 import {SNACK_BAR_TYPE} from '@constants/snack_bar';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {useIsInfomaniakServer} from '@hooks/network';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {dismissModal, goToScreen, setButtons} from '@screens/navigation';
+import {goToScreen, navigateBack} from '@screens/navigation';
 import {gotoSettingsScreen} from '@screens/settings/config';
 import {showSnackBar} from '@utils/snack_bar';
-import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {tryOpenURL} from '@utils/url';
@@ -30,8 +27,6 @@ import ReportProblem from './report_problem';
 
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
-
-const CLOSE_BUTTON_ID = 'close-settings';
 
 const TIMEZONE_FORMAT = [
     {
@@ -46,17 +41,11 @@ const TIMEZONE_FORMAT = [
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
-        containerStyle: {
-            paddingLeft: 8,
-            marginTop: 12,
-        },
         helpGroup: {
             width: '91%',
             backgroundColor: changeOpacity(theme.centerChannelColor, 0.08),
             height: 1,
             alignSelf: 'center',
-
-            // marginTop: 20,
         },
         group: {
             flexDirection: 'row',
@@ -75,66 +64,36 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 });
 
 type SettingsProps = {
-    componentId: AvailableScreens;
     helpLink: string;
     showHelp: boolean;
+    siteName: string;
     currentUser?: UserModel;
 }
 
-const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps) => {
+const Settings = ({helpLink, showHelp, siteName: _siteName, currentUser}: SettingsProps) => {
     const theme = useTheme();
     const intl = useIntl();
     const styles = getStyleSheet(theme);
     const timezone = useMemo(() => getUserTimezoneProps(currentUser), [currentUser]);
     const isInfomaniak = useIsInfomaniakServer();
 
-    const closeButton = useMemo(() => {
-        return {
-            id: CLOSE_BUTTON_ID,
-            icon: CompassIcon.getImageSourceSync('close', 24, theme.centerChannelColor),
-            testID: 'close.settings.button',
-        };
-    }, [theme.centerChannelColor]);
+    useAndroidHardwareBackHandler(Screens.SETTINGS, navigateBack);
 
-    const close = useCallback(() => {
-        dismissModal({componentId});
-    }, [componentId]);
+    const goToThemeSettings = usePreventDoubleTap(useCallback(() => {
+        gotoSettingsScreen(Screens.SETTINGS_DISPLAY_THEME, intl.formatMessage({id: 'mobile.display_settings.theme', defaultMessage: 'Theme'}));
+    }, [intl]));
 
-    useEffect(() => {
-        setButtons(componentId, {
-            leftButtons: [closeButton],
-        });
-    }, [closeButton, componentId]);
+    const goToNotificationSettings = usePreventDoubleTap(useCallback(() => {
+        gotoSettingsScreen(Screens.SETTINGS_NOTIFICATION, intl.formatMessage({id: 'mobile.notification_settings', defaultMessage: 'Notifications'}));
+    }, [intl]));
 
-    useAndroidHardwareBackHandler(componentId, close);
-    useNavButtonPressed(CLOSE_BUTTON_ID, componentId, close, []);
+    const goToTimezoneSettings = usePreventDoubleTap(useCallback(() => {
+        gotoSettingsScreen(Screens.SETTINGS_DISPLAY_TIMEZONE, intl.formatMessage({id: 'display_settings.timezone', defaultMessage: 'Timezone'}));
+    }, [intl]));
 
-    const goToThemeSettings = preventDoubleTap(() => {
-        const screen = Screens.SETTINGS_DISPLAY_THEME;
-        const title = intl.formatMessage({id: 'mobile.display_settings.theme', defaultMessage: 'Theme'});
-        gotoSettingsScreen(screen, title);
-    });
-
-    const goToNotificationSettings = preventDoubleTap(() => {
-        const screen = Screens.SETTINGS_NOTIFICATION;
-        const title = intl.formatMessage({
-            id: 'mobile.notification_settings',
-            defaultMessage: 'Notifications',
-        });
-
-        gotoSettingsScreen(screen, title);
-    });
-
-    const goToTimezoneSettings = preventDoubleTap(() => {
-        const screen = Screens.SETTINGS_DISPLAY_TIMEZONE;
-        const title = intl.formatMessage({id: 'display_settings.timezone', defaultMessage: 'Timezone'});
-        gotoSettingsScreen(screen, title);
-    });
-
-    const goToPerformanceDebug = preventDoubleTap(() => {
-        const screen = Screens.DEBUG_PERFORMANCE;
-        goToScreen(screen, 'Performance Monitor');
-    });
+    const goToPerformanceDebug = usePreventDoubleTap(useCallback(() => {
+        goToScreen(Screens.DEBUG_PERFORMANCE as AvailableScreens, 'Performance Monitor');
+    }, []));
 
     const openHelp = usePreventDoubleTap(useCallback(() => {
         if (helpLink) {
@@ -149,7 +108,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
         }
     }, [helpLink, intl]));
 
-    const openFeedback = preventDoubleTap(() => {
+    const openFeedback = usePreventDoubleTap(useCallback(() => {
         const feddbackLink = intl.formatMessage({id: 'infomaniak.feedback.url', defaultMessage: 'https://feedback.userreport.com/6b7737f6-0cc1-410f-993f-be2ffbf73a05#ideas/popular'});
         if (feddbackLink) {
             const onError = () => {
@@ -161,7 +120,7 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
 
             tryOpenURL(feddbackLink, onError);
         }
-    });
+    }, [intl]));
 
     const copyToClipboard = useCallback(
         () => {
@@ -169,9 +128,9 @@ const Settings = ({componentId, helpLink, showHelp, currentUser}: SettingsProps)
             const copiedString = `${appVersion}`;
 
             Clipboard.setString(copiedString);
-            showSnackBar({barType: SNACK_BAR_TYPE.INFO_COPIED, sourceScreen: componentId});
+            showSnackBar({barType: SNACK_BAR_TYPE.INFO_COPIED, sourceScreen: Screens.SETTINGS});
         },
-        [intl, componentId],
+        [intl],
     );
 
     return (
