@@ -116,7 +116,7 @@ const File = ({
         onOptionsPress?.(file);
     }, [file, onOptionsPress]);
 
-    const renderCardWithImage = (fileIcon: JSX.Element) => {
+    const renderCardWithImage = (fileIcon: React.JSX.Element) => {
         const fileInfo = (
             <FileInfo
                 disabled={isPressDisabled}

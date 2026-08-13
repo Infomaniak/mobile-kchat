@@ -4,7 +4,7 @@ import {useCallback, useRef} from 'react';
 import {Platform} from 'react-native';
 
 export function useInputPropagation(): [(v: string) => void, (v: string) => boolean] {
-    const waitForValue = useRef<string>();
+    const waitForValue = useRef<string | undefined>(undefined);
     const waitToPropagate = useCallback((value: string) => {
         waitForValue.current = value;
     }, []);

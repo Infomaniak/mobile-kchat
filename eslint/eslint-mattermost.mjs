@@ -3,7 +3,7 @@
 
 import {defineConfig} from 'eslint/config';
 import tseslint from "@typescript-eslint/eslint-plugin";
-import stylisticTs from "@stylistic/eslint-plugin-ts";
+import stylistic from "@stylistic/eslint-plugin";
 
 export default defineConfig([
   {
@@ -20,7 +20,7 @@ export default defineConfig([
     },
     plugins: {
       "@typescript-eslint": tseslint,
-      "@stylistic/ts": stylisticTs,
+      "@stylistic/ts":     stylistic,
     },
     rules: {
       "array-bracket-spacing": [2, "never"],

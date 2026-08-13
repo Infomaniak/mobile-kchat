@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {renderHook, act} from '@testing-library/react-hooks';
+import {renderHook, act} from '@testing-library/react-native';
 
 import * as ChannelAccessControlAttributesActions from '@actions/remote/channel_access_control_attributes';
 import {useServerUrl} from '@context/server';

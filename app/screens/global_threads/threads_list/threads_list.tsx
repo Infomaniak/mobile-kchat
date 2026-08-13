@@ -23,7 +23,7 @@ type Props = {
     teammateNameDisplay: string;
     testID: string;
     threads: ThreadModel[];
-    flatListRef: React.RefObject<FlatList<ThreadModel>>;
+    flatListRef: React.RefObject<FlatList<ThreadModel> | null>;
 };
 
 const styles = StyleSheet.create({

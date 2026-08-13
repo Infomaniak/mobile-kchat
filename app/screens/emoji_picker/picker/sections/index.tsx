@@ -257,7 +257,6 @@ export default function EmojiSectionList({customEmojis, customEmojisEnabled, fil
                 onEndReached={loadMoreCustomEmojis}
                 onStickyHeaderIndexChanged={handleStickyHeaderIndexChanged}
 
-                //@ts-expect-error type definition for ref
                 ref={list}
                 renderItem={renderItem}
                 stickyHeaderIndices={stickyHeaderIndices}

@@ -26,7 +26,7 @@ const isIOS = Platform.OS === 'ios';
 export const useKeyboardAwarePostDraft = (isThreadView = false, enabled = true) => {
     const [postInputContainerHeight, setPostInputContainerHeight] = useState(DEFAULT_POST_INPUT_HEIGHT);
     const listRef = useRef<FlatList<string | PostModel>>(null);
-    const inputRef = useRef<PasteInputRef>();
+    const inputRef = useRef<PasteInputRef | undefined>(undefined);
     const isTablet = useIsTablet();
     const insets = useSafeAreaInsets();
 

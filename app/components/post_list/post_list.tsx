@@ -64,7 +64,7 @@ type Props = {
     currentCallBarVisible?: boolean;
     savedPostIds: Set<string>;
     isChannelAutotranslated: boolean;
-    listRef?: React.RefObject<FlatList<string | PostModel>>;
+    listRef?: React.RefObject<FlatList<string | PostModel> | null>;
     onTouchMove?: (event: GestureResponderEvent) => void;
     onTouchEnd?: () => void;
 }
@@ -147,8 +147,8 @@ const PostList = ({
         isInputAccessoryViewMode,
     } = useKeyboardAnimationContext();
 
-    const onScrollEndIndexListener = useRef<onScrollEndIndexListenerEvent>();
-    const onViewableItemsChangedListener = useRef<ViewableItemsChangedListenerEvent>();
+    const onScrollEndIndexListener = useRef<onScrollEndIndexListenerEvent | undefined>(undefined);
+    const onViewableItemsChangedListener = useRef<ViewableItemsChangedListenerEvent | undefined>(undefined);
     const scrolledToHighlighted = useRef(false);
     const didHandleInitialHighlightedScroll = useRef(false);
     const hasUserTouchedList = useRef(false);
