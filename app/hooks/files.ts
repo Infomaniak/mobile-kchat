@@ -56,7 +56,7 @@ export const useDownloadFileAndPreview = (enableSecureFilePreview: boolean) => {
     const serverUrl = useServerUrl();
     const intl = useIntl();
     const theme = useTheme();
-    const downloadTask = useRef<ProgressPromise<ClientResponse>>();
+    const downloadTask = useRef<ProgressPromise<ClientResponse> | undefined>(undefined);
 
     const [progress, setProgress] = useState<number>(0);
 

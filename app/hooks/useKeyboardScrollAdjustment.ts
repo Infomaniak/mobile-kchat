@@ -13,7 +13,7 @@ import type {FlatList} from 'react-native';
  * Only enabled on iOS - Android uses native keyboard handling
  */
 export const useKeyboardScrollAdjustment = (
-    scrollViewRef: React.RefObject<FlatList<string | PostModel>>,
+    scrollViewRef: React.RefObject<FlatList<string | PostModel> | null>,
     scrollPosition: SharedValue<number>,
     scrollOffset: SharedValue<number>,
     enabled = true,

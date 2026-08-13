@@ -174,7 +174,7 @@ const CallScreen = ({
      */
     const jitsiMeetingRef = useRef<JitsiRefProps | null>(null);
     const jitsiMeetingMountedRef = useRef(false);
-    const jitsiMeetingMountedAtRef = useRef<number | undefined>();
+    const jitsiMeetingMountedAtRef = useRef<number | undefined | undefined>(undefined);
 
     /**
      * Audio/Video muted state can be altered before entering the <JitsiMeeting />
@@ -284,7 +284,7 @@ const CallScreen = ({
      * Lazily query the called users
      */
     const currentUserIdRef = useTransientRef(currentUserId);
-    const callUsersRef = useRef<UserProfile[]>();
+    const callUsersRef = useRef<UserProfile[] | undefined>(undefined);
     const getCallUsers = useCallback(async () => {
         if (
             typeof callUsersRef.current === 'undefined' &&

@@ -238,7 +238,7 @@ export const Sound = (
     {play = true, soundName = 'outgoingRinging.mp3'}:
     { play: boolean; soundName?: string },
 ) => {
-    const audioElementRef = useRef<AudioElement>();
+    const audioElementRef = useRef<AudioElement | undefined>(undefined);
 
     const playSound = useCallback(() => {
         if (typeof audioElementRef.current !== 'undefined') {

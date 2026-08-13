@@ -84,7 +84,7 @@ const DownloadWithAction = ({action, enableSecureFilePreview, item, onDownloadSu
     const [saved, setSaved] = useState(false);
     const [progress, setProgress] = useState(0);
     const mounted = useRef(false);
-    const downloadPromise = useRef<ProgressPromise<ClientResponse>>();
+    const downloadPromise = useRef<ProgressPromise<ClientResponse> | undefined>(undefined);
 
     let title;
     let iconName;

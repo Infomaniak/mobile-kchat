@@ -17,7 +17,7 @@ import type {AvailableScreens} from '@typings/screens/navigation';
 type Props = {
     componentId: AvailableScreens;
     renderAsFlex: boolean;
-    renderRows: (isFullView: boolean) => JSX.Element|null;
+    renderRows: (isFullView: boolean) => React.JSX.Element|null;
     width: number;
 }
 

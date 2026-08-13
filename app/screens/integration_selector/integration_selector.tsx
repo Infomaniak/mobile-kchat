@@ -450,7 +450,7 @@ function IntegrationSelector(
         );
     }, [style, dataSource, loading]);
 
-    const renderNoResults = useCallback((): JSX.Element | null => {
+    const renderNoResults = useCallback((): React.JSX.Element | null => {
         if (loading || page.current === -1) {
             return null;
         }
@@ -495,7 +495,7 @@ function IntegrationSelector(
         );
     }, [multiselectSelected, theme, isMultiselect]);
 
-    const getRenderItem = (): (itemProps: any) => JSX.Element => {
+    const getRenderItem = (): (itemProps: any) => React.JSX.Element => {
         switch (dataSource) {
             case ViewConstants.DATA_SOURCE_CHANNELS:
                 return renderChannelItem;

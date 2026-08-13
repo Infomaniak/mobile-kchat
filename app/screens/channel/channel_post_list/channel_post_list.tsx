@@ -32,7 +32,7 @@ type Props = {
     forceShowScrollToEndBtn?: boolean;
     highlightedPostId?: string;
     highlightedPostSelectedAt?: number;
-    listRef: React.RefObject<FlatList<string | PostModel>>;
+    listRef: React.RefObject<FlatList<string | PostModel> | null>;
     onTouchMove?: (event: GestureResponderEvent) => void;
     onTouchEnd?: () => void;
     requestMorePosts?: () => void;

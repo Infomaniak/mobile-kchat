@@ -10,7 +10,7 @@ import type {StyleProp, TextStyle, ViewStyle} from 'react-native';
 type Props = {
     math: string;
     onError?: (error: Error) => any;
-    renderError: ({error}: {error: Error}) => JSX.Element;
+    renderError: ({error}: {error: Error}) => React.JSX.Element;
     resizeMode: 'cover' | 'contain';
     style: StyleProp<ViewStyle & Pick<TextStyle, 'color'>>;
 }

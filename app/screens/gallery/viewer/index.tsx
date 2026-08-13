@@ -16,7 +16,7 @@ export interface GalleryViewerProps {
     items: GalleryItemType[];
     numToRender?: number;
     onIndexChange?: (nextIndex: number) => void;
-    renderPage?: (props: GalleryPagerItem, index: number) => JSX.Element | null;
+    renderPage?: (props: GalleryPagerItem, index: number) => React.JSX.Element | null;
     width: number;
     hideHeaderAndFooter: (hide: boolean) => void;
 }
