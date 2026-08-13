@@ -102,10 +102,6 @@ const categoryMessages = defineMessages({
         id: 'emoji_picker.custom',
         defaultMessage: 'Custom',
     },
-    component: {
-        id: 'emoji_picker.component',
-        defaultMessage: 'Component',
-    },
 });
 
 export function getCategoryMessage(category: string) {
@@ -115,31 +111,33 @@ export function getCategoryMessage(category: string) {
 
 export const CategoryTranslations = new Map([['recent', categoryMessages.recent.id],['smileys-emotion', categoryMessages.smileys.id],['people-body', categoryMessages.people.id],['animals-nature', categoryMessages.animals.id],['food-drink', categoryMessages.food.id],['travel-places', categoryMessages.travel.id],['activities', categoryMessages.activities.id],['objects', categoryMessages.objects.id],['symbols', categoryMessages.symbols.id],['flags', categoryMessages.flags.id],['custom', categoryMessages.custom.id]]);
 
-export const SkinToneMessage = defineMessages({
-    '00': {
-        id: 'emoji_picker.skin_tone.default',
-        defaultMessage: 'Default',
+const skinMessages = defineMessages({
+    default: {
+        id: 'emoji_skin.default',
+        defaultMessage: 'default skin tone',
     },
-    '1F3FB': {
-        id: 'emoji_picker.skin_tone.light',
-        defaultMessage: 'Light',
+    light: {
+        id: 'emoji_skin.light_skin_tone',
+        defaultMessage: 'light skin tone',
     },
-    '1F3FC': {
-        id: 'emoji_picker.skin_tone.medium_light',
-        defaultMessage: 'Medium-Light',
+    mediumLight: {
+        id: 'emoji_skin.medium_light_skin_tone',
+        defaultMessage: 'medium light skin tone',
     },
-    '1F3FD': {
-        id: 'emoji_picker.skin_tone.medium',
-        defaultMessage: 'Medium',
+    medium: {
+        id: 'emoji_skin.medium_skin_tone',
+        defaultMessage: 'medium skin tone',
     },
-    '1F3FE': {
-        id: 'emoji_picker.skin_tone.medium_dark',
-        defaultMessage: 'Medium-Dark',
+    mediumDark: {
+        id: 'emoji_skin.medium_dark_skin_tone',
+        defaultMessage: 'medium dark skin tone',
     },
-    '1F3FF': {
-        id: 'emoji_picker.skin_tone.dark',
-        defaultMessage: 'Dark',
+    dark: {
+        id: 'emoji_skin.dark_skin_tone',
+        defaultMessage: 'dark skin tone',
     },
 });
+
+export const SkinTranslations = new Map([['default', skinMessages.default.id], ['1F3FB', skinMessages.light.id], ['1F3FC', skinMessages.mediumLight.id], ['1F3FD', skinMessages.medium.id], ['1F3FE', skinMessages.mediumDark.id], ['1F3FF', skinMessages.dark.id]]);
 
 export const SkinTones = ['00', '1F3FB', '1F3FC', '1F3FD', '1F3FE', '1F3FF'];
