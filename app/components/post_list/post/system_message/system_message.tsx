@@ -354,7 +354,7 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme, cu
     const link = `[this message](${post.props.link})`;
 
     const timezone = getUserTimezone(currentUser);
-    const targetMoment = moment.tz(post.props.target_time, timezone as string);
+    const targetMoment = moment.tz(post.props.target_time as string, timezone as string);
     const startOfDay = moment().startOf('day');
     const diffInDays = startOfDay.diff(targetMoment, 'days');
 

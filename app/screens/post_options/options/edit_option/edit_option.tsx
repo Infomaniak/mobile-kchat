@@ -13,7 +13,7 @@ import type PostModel from '@typings/database/models/servers/post';
 type Props = {
     post: PostModel;
     canDelete: boolean;
-    files?: FileInfo[];
+    files: FileInfo[];
 }
 
 const messages = defineMessages({
