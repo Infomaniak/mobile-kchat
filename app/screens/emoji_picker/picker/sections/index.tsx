@@ -2,14 +2,14 @@
 // See LICENSE.txt for license information.
 
 import {BottomSheetFlashList} from '@gorhom/bottom-sheet';
-import {FlashList, type ListRenderItemInfo} from '@shopify/flash-list';
+import {FlashList, type FlashListRef, type ListRenderItemInfo} from '@shopify/flash-list';
 import {chunk} from 'lodash';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {View, StyleSheet} from 'react-native';
 
 import {fetchCustomEmojis} from '@actions/remote/custom_emoji';
 import EmojiCategoryBar from '@components/emoji_category_bar';
-import {EMOJI_CATEGORY_ICONS, EMOJI_ROW_MARGIN, EMOJI_SIZE, EMOJIS_PER_PAGE, EMOJIS_PER_ROW, EMOJIS_PER_ROW_TABLET} from '@constants/emoji';
+import {EMOJI_CATEGORY_ICONS, EMOJIS_PER_PAGE, EMOJIS_PER_ROW, EMOJIS_PER_ROW_TABLET} from '@constants/emoji';
 import {useServerUrl} from '@context/server';
 import {useIsTablet} from '@hooks/device';
 import {setEmojiCategoryBarIcons, setEmojiCategoryBarSection, useEmojiCategoryBar} from '@hooks/emoji_category_bar';
@@ -71,7 +71,7 @@ export default function EmojiSectionList({customEmojis, customEmojisEnabled, fil
     const isTablet = useIsTablet();
     const {currentIndex, selectedIndex} = useEmojiCategoryBar();
 
-    const list = useRef<FlashList<SectionListItem> | null>(null);
+    const list = useRef<FlashListRef<SectionListItem> | null>(null);
 
     const sections: SectionListItem[] = useMemo(() => {
         const emojisPerRow = isTablet ? EMOJIS_PER_ROW_TABLET : EMOJIS_PER_ROW;
@@ -249,15 +249,14 @@ export default function EmojiSectionList({customEmojis, customEmojisEnabled, fil
             <List
                 contentContainerStyle={styles.containerStyle}
                 data={sections}
-                estimatedItemSize={EMOJI_SIZE + EMOJI_ROW_MARGIN}
                 getItemType={getItemType}
                 keyExtractor={keyExtractor}
                 ListFooterComponent={renderFooter}
                 onEndReachedThreshold={0.5}
                 onEndReached={loadMoreCustomEmojis}
-                onStickyHeaderIndexChanged={handleStickyHeaderIndexChanged}
+                onChangeStickyIndex={(current: number) => handleStickyHeaderIndexChanged(current)}
 
-                ref={list}
+                ref={list as never}
                 renderItem={renderItem}
                 stickyHeaderIndices={stickyHeaderIndices}
             />
