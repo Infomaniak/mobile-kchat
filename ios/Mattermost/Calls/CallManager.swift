@@ -10,6 +10,7 @@ import AVFAudio
 import CallKit
 import Foundation
 import Gekidou
+import PushKit
 
 struct MeetCall {
   let localUUID: UUID
@@ -321,7 +322,9 @@ extension CallManager: CXProviderDelegate {
           completeCall = try await startCall(existingCall)
         }
 
-        if let rootWindowScene = (UIApplication.shared.delegate as? AppDelegate)?.window.windowScene {
+        if let rootWindowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive }) {
           LegacyLogger.calls.log(message: "Presenting call window")
           let callWindow = CallWindow(meetCall: completeCall, delegate: self, windowScene: rootWindowScene)
           self.callWindow = callWindow

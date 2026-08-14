@@ -9,9 +9,8 @@
 /* Begin PBXBuildFile section */
 		02860A1AC3334896837E96B7 /* OpenSans-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0DB14DFDF6E04FA69FE769DC /* OpenSans-SemiBoldItalic.ttf */; };
 		0F3C1FF064215E79632409E0 /* Pods_kChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 699C0B0BBF2FE1C8F835E86A /* Pods_kChat.framework */; };
-		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
+		13B07FBC1A68108700A75B9A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.swift */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		1AC06461F0B9867B11829943 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24C9C33C1C823BB8E1B3E161 /* ExpoModulesProvider.swift */; };
 		27C667A9295241B600E590D5 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C667A8295241B600E590D5 /* Sentry.swift */; };
 		27C667AA295241B600E590D5 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C667A8295241B600E590D5 /* Sentry.swift */; };
@@ -183,10 +182,9 @@
 		0DB14DFDF6E04FA69FE769DC /* OpenSans-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-SemiBoldItalic.ttf"; path = "../assets/fonts/OpenSans-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* kChat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = kChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Mattermost/AppDelegate.h; sourceTree = "<group>"; };
-		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = Mattermost/AppDelegate.mm; sourceTree = "<group>"; };
+		13B07FB01A68108700A75B9A /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Mattermost/AppDelegate.swift; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Mattermost/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Mattermost/Info.plist; sourceTree = "<group>"; };
-		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Mattermost/main.m; sourceTree = "<group>"; };
 		24C9C33C1C823BB8E1B3E161 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-kChat/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		27C667A8295241B600E590D5 /* Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sentry.swift; sourceTree = "<group>"; };
 		2E182D02FFF00C9FBA1DE744 /* Pods_kChatNotificationService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_kChatNotificationService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -418,12 +416,11 @@
 				374A99022BFCDC1D005517A1 /* Calls */,
 				7F537B2228A515400086D6B3 /* Wrappers */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
-				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
+				13B07FB01A68108700A75B9A /* AppDelegate.swift */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				A12CB4012E69D55E00C57BE6 /* kChat-AppIcon.icon */,
 				374AA56A2C64B90C00FA6D63 /* kchat-ringtone.wav */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
-				13B07FB71A68108700A75B9A /* main.m */,
 				7F63D2C21E6DD98A001FAE12 /* Mattermost.entitlements */,
 				7F151D43221B082A00FAD8F3 /* Mattermost-Bridging-Header.h */,
 				7F0F4B0924BA173900E14C60 /* LaunchScreen.storyboard */,
@@ -1367,10 +1364,9 @@
 			files = (
 				7F1EB88527FDE361002E7EEC /* GekidouWrapper.swift in Sources */,
 				7FCEFB9326B7934F006DC1DE /* SDWebImageDownloaderOperation+Swizzle.m in Sources */,
-				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
+				13B07FBC1A68108700A75B9A /* AppDelegate.swift in Sources */,
 				7F151D3E221B062700FAD8F3 /* RuntimeUtils.swift in Sources */,
 				7F537B2928A517580086D6B3 /* NotificationHelper.swift in Sources */,
-				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				536CC6C323E79287002C478C /* RNNotificationEventHandler+HandleReplyAction.m in Sources */,
 				374A99042BFCDC23005517A1 /* CallManager.swift in Sources */,
 				37407E422C32BD87005FB5D3 /* CallViewController.swift in Sources */,
