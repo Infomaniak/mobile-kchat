@@ -2,15 +2,16 @@
 // See LICENSE.txt for license information.
 
 import {LinearGradient} from 'expo-linear-gradient';
-import React, {PureComponent, type ReactNode} from 'react';
-import {injectIntl, type IntlShape} from 'react-intl';
+import React, {useRef, useState, type ReactNode} from 'react';
+import {useIntl} from 'react-intl';
 import {Dimensions, type EventSubscription, type LayoutChangeEvent, Platform, type ScaledSize, ScrollView, type StyleProp, TouchableOpacity, View, type ViewStyle} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
 import {CELL_MAX_WIDTH, CELL_MIN_WIDTH} from '@components/markdown/markdown_table_cell';
 import {Screens, Device} from '@constants';
+import useDidMount from '@hooks/did_mount';
+import {usePreventDoubleTap} from '@hooks/utils';
 import {goToScreen} from '@screens/navigation';
-import {preventDoubleTap} from '@utils/tap';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 const MAX_HEIGHT = 300;
@@ -26,11 +27,12 @@ type MarkdownTableState = {
 type MarkdownTableInputProps = {
     children: ReactNode;
     numColumns: number;
+    theme: Theme;
 }
 
-type MarkdownTableProps = MarkdownTableInputProps & {
-    intl: IntlShape;
-    theme: Theme;
+interface TableRowProps {
+    children: ReactNode;
+    [key: string]: unknown;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
@@ -107,75 +109,77 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
     };
 });
 
-class MarkdownTable extends PureComponent<MarkdownTableProps, MarkdownTableState> {
-    private rowsSliced: boolean | undefined;
-    private colsSliced: boolean | undefined;
-    private dimensionsListener: EventSubscription | undefined;
-
-    state = {
+const MarkdownTable = ({children, numColumns, theme}: MarkdownTableInputProps) => {
+    const intl = useIntl();
+    const [state, setState] = useState<MarkdownTableState>({
         containerWidth: 0,
         contentHeight: 0,
         cellWidth: 0,
         maxPreviewColumns: 0,
-    };
+    });
+    const rowsSlicedRef = useRef<boolean>(false);
+    const colsSlicedRef = useRef<boolean>(false);
+    const dimensionsListenerRef = useRef<EventSubscription | undefined>(undefined);
 
-    componentDidMount() {
-        this.dimensionsListener = Dimensions.addEventListener('change', this.setMaxPreviewColumns);
+    useDidMount(() => {
+        dimensionsListenerRef.current = Dimensions.addEventListener('change', setMaxPreviewColumns);
 
         const window = Dimensions.get('window');
-        this.setMaxPreviewColumns({window});
-    }
+        setMaxPreviewColumns({window});
+    });
 
-    componentWillUnmount() {
-        this.dimensionsListener?.remove();
-    }
+    useDidMount(() => {
+        return () => {
+            dimensionsListenerRef.current?.remove();
+        };
+    });
 
-    setMaxPreviewColumns = ({window}: {window: ScaledSize}) => {
+    const setMaxPreviewColumns = ({window}: {window: ScaledSize}) => {
         const maxPreviewColumns = Math.floor(window.width / CELL_MIN_WIDTH);
-        this.setState({maxPreviewColumns});
+        setState((prev) => ({...prev, maxPreviewColumns}));
     };
 
-    getTableWidth = (isFullView = false) => {
-        const maxPreviewColumns = this.state.maxPreviewColumns || MAX_PREVIEW_COLUMNS;
-        const columns = Math.min(this.props.numColumns, maxPreviewColumns);
+    const getTableWidth = (isFullView = false) => {
+        const maxPreviewColumns = state.maxPreviewColumns || MAX_PREVIEW_COLUMNS;
+        const columns = Math.min(numColumns, maxPreviewColumns);
 
         return (isFullView || columns === 1) ? columns * CELL_MAX_WIDTH : columns * CELL_MIN_WIDTH;
     };
 
-    handlePress = preventDoubleTap(() => {
-        const {intl} = this.props;
+    const handlePress = usePreventDoubleTap(() => {
         const screen = Screens.TABLE;
         const title = intl.formatMessage({
             id: 'mobile.routes.table',
             defaultMessage: 'Table',
         });
         const passProps = {
-            renderAsFlex: this.shouldRenderAsFlex(true),
-            renderRows: this.renderRows,
-            width: this.getTableWidth(true),
+            renderAsFlex: shouldRenderAsFlex(true),
+            renderRows,
+            width: getTableWidth(true),
         };
 
         goToScreen(screen, title, passProps);
     });
 
-    handleContainerLayout = (e: LayoutChangeEvent) => {
-        this.setState({
+    const handleContainerLayout = (e: LayoutChangeEvent) => {
+        setState((prev) => ({
+            ...prev,
             containerWidth: e.nativeEvent.layout.width,
-        });
+        }));
     };
 
-    handleContentSizeChange = (contentWidth: number, contentHeight: number) => {
-        this.setState({
+    const handleContentSizeChange = (_contentWidth: number, contentHeight: number) => {
+        setState((prev) => ({
+            ...prev,
             contentHeight,
-        });
+        }));
     };
 
-    renderPreviewRows = (isFullView = false) => {
-        return this.renderRows(isFullView, true);
+    const renderPreviewRows = (isFullView = false) => {
+        return renderRows(isFullView, true);
     };
 
-    shouldRenderAsFlex = (isFullView = false) => {
-        const {numColumns} = this.props;
+    const shouldRenderAsFlex = (isFullView = false) => {
         const {height, width} = Dimensions.get('window');
         const isLandscape = width > height;
 
@@ -200,43 +204,43 @@ class MarkdownTable extends PureComponent<MarkdownTableProps, MarkdownTableState
         return false;
     };
 
-    getTableStyle = (isFullView: boolean) => {
-        const {theme} = this.props;
+    const getTableStyle = (isFullView: boolean) => {
         const style = getStyleSheet(theme);
         const tableStyle: StyleProp<ViewStyle> = [style.table];
 
-        const renderAsFlex = this.shouldRenderAsFlex(isFullView);
+        const renderAsFlex = shouldRenderAsFlex(isFullView);
         if (renderAsFlex) {
             tableStyle.push(style.displayFlex);
             return tableStyle;
         }
 
-        tableStyle.push({width: this.getTableWidth(isFullView)});
+        tableStyle.push({width: getTableWidth(isFullView)});
         return tableStyle;
     };
 
-    renderRows = (isFullView = false, isPreview = false) => {
-        const tableStyle = this.getTableStyle(isFullView);
+    const renderRows = (isFullView = false, isPreview = false) => {
+        const tableStyle = getTableStyle(isFullView);
 
-        let rows = React.Children.toArray(this.props.children) as React.ReactElement[];
+        let rows = React.Children.toArray(children) as Array<React.ReactElement<TableRowProps>>;
 
         if (!rows.length) {
             return null;
         }
 
         if (isPreview) {
-            const {maxPreviewColumns} = this.state;
+            const {maxPreviewColumns} = state;
             const prevRowLength = rows.length;
 
             const prevColLength = React.Children.toArray(rows[0].props.children).length;
 
             rows = rows.slice(0, maxPreviewColumns).map((row) => {
-                const children = React.Children.toArray(row.props.children).slice(0, maxPreviewColumns);
+                const rowProps = row.props as TableRowProps;
+                const childElements = React.Children.toArray(rowProps.children).slice(0, maxPreviewColumns);
                 return {
                     ...row,
                     props: {
-                        ...row.props,
-                        children,
+                        ...rowProps,
+                        children: childElements,
                     },
                 };
             });
@@ -245,8 +249,8 @@ class MarkdownTable extends PureComponent<MarkdownTableProps, MarkdownTableState
                 return null;
             }
 
-            this.rowsSliced = prevRowLength > rows.length;
-            this.colsSliced = prevColLength > React.Children.toArray(rows[0].props.children).length;
+            rowsSlicedRef.current = prevRowLength > rows.length;
+            colsSlicedRef.current = prevColLength > React.Children.toArray((rows[0].props as TableRowProps).children).length;
         }
 
         // Add an extra prop to the last row of the table so that it knows not to render a bottom border
@@ -267,100 +271,97 @@ class MarkdownTable extends PureComponent<MarkdownTableProps, MarkdownTableState
         );
     };
 
-    render() {
-        const {containerWidth, contentHeight} = this.state;
-        const {theme} = this.props;
-        const style = getStyleSheet(theme);
-        const tableWidth = this.getTableWidth();
-        const renderAsFlex = this.shouldRenderAsFlex();
-        const previewRows = this.renderPreviewRows();
+    const {containerWidth, contentHeight} = state;
+    const style = getStyleSheet(theme);
+    const tableWidth = getTableWidth();
+    const renderAsFlex = shouldRenderAsFlex();
+    const previewRows = renderPreviewRows();
 
-        let leftOffset;
-        if (renderAsFlex || tableWidth > containerWidth) {
-            leftOffset = containerWidth - 20;
-        } else {
-            leftOffset = tableWidth - 20;
-        }
-        let expandButtonOffset = leftOffset;
-        if (Platform.OS === 'android') {
-            expandButtonOffset -= 10;
-        }
+    let leftOffset;
+    if (renderAsFlex || tableWidth > containerWidth) {
+        leftOffset = containerWidth - 20;
+    } else {
+        leftOffset = tableWidth - 20;
+    }
+    let expandButtonOffset = leftOffset;
+    if (Platform.OS === 'android') {
+        expandButtonOffset -= 10;
+    }
 
-        // Renders when the columns were sliced, or the table width exceeds the container,
-        // or if the columns exceed maximum allowed for previews
-        let moreRight = null;
-        if (this.colsSliced ||
-            (containerWidth && tableWidth > containerWidth && !renderAsFlex) ||
-            (this.props.numColumns > MAX_PREVIEW_COLUMNS)) {
-            moreRight = (
-                <LinearGradient
-                    colors={[
-                        changeOpacity(theme.centerChannelColor, 0.0),
-                        changeOpacity(theme.centerChannelColor, 0.1),
-                    ]}
-                    start={{x: 0, y: 0}}
-                    end={{x: 1, y: 0}}
-                    style={[style.moreRight, {height: contentHeight, left: leftOffset}]}
-                />
-            );
-        }
+    // Renders when the columns were sliced, or the table width exceeds the container,
+    // or if the columns exceed maximum allowed for previews
+    let moreRight = null;
+    if (colsSlicedRef.current ||
+        (containerWidth && tableWidth > containerWidth && !renderAsFlex) ||
+        (numColumns > MAX_PREVIEW_COLUMNS)) {
+        moreRight = (
+            <LinearGradient
+                colors={[
+                    changeOpacity(theme.centerChannelColor, 0.0),
+                    changeOpacity(theme.centerChannelColor, 0.1),
+                ]}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}
+                style={[style.moreRight, {height: contentHeight, left: leftOffset}]}
+            />
+        );
+    }
 
-        let moreBelow = null;
-        if (this.rowsSliced || contentHeight > MAX_HEIGHT) {
-            const width = renderAsFlex ? '100%' : Math.min(tableWidth, containerWidth);
+    let moreBelow = null;
+    if (rowsSlicedRef.current || contentHeight > MAX_HEIGHT) {
+        const width = renderAsFlex ? '100%' : Math.min(tableWidth, containerWidth);
 
-            moreBelow = (
-                <LinearGradient
-                    colors={[
-                        changeOpacity(theme.centerChannelColor, 0.0),
-                        changeOpacity(theme.centerChannelColor, 0.1),
-                    ]}
-                    style={[style.moreBelow, {width}]}
-                />
-            );
-        }
+        moreBelow = (
+            <LinearGradient
+                colors={[
+                    changeOpacity(theme.centerChannelColor, 0.0),
+                    changeOpacity(theme.centerChannelColor, 0.1),
+                ]}
+                style={[style.moreBelow, {width}]}
+            />
+        );
+    }
 
-        let expandButton = null;
-        if (expandButtonOffset > 0) {
-            expandButton = (
-                <TouchableOpacity
-                    onPress={this.handlePress}
-                    style={[style.expandButton, {left: expandButtonOffset}]}
-                    testID='markdown_table.expand.button'
-                >
-                    <View style={[style.iconContainer, {width: this.getTableWidth()}]}>
-                        <View style={style.iconButton}>
-                            <CompassIcon
-                                name='arrow-expand'
-                                style={style.icon}
-                            />
-                        </View>
-                    </View>
-                </TouchableOpacity>
-            );
-        }
-
-        return (
+    let expandButton = null;
+    if (expandButtonOffset > 0) {
+        expandButton = (
             <TouchableOpacity
-                style={style.tablePadding}
-                onPress={this.handlePress}
-                testID='markdown_table'
+                onPress={handlePress}
+                style={[style.expandButton, {left: expandButtonOffset}]}
+                testID='markdown_table.expand.button'
             >
-                <ScrollView
-                    onContentSizeChange={this.handleContentSizeChange}
-                    onLayout={this.handleContainerLayout}
-                    scrollEnabled={false}
-                    showsVerticalScrollIndicator={false}
-                    style={style.container}
-                >
-                    {previewRows}
-                </ScrollView>
-                {moreRight}
-                {moreBelow}
-                {expandButton}
+                <View style={[style.iconContainer, {width: getTableWidth()}]}>
+                    <View style={style.iconButton}>
+                        <CompassIcon
+                            name='arrow-expand'
+                            style={style.icon}
+                        />
+                    </View>
+                </View>
             </TouchableOpacity>
         );
     }
-}
 
-export default injectIntl(MarkdownTable);
+    return (
+        <TouchableOpacity
+            style={style.tablePadding}
+            onPress={handlePress}
+            testID='markdown_table'
+        >
+            <ScrollView
+                onContentSizeChange={handleContentSizeChange}
+                onLayout={handleContainerLayout}
+                scrollEnabled={false}
+                showsVerticalScrollIndicator={false}
+                style={style.container}
+            >
+                {previewRows}
+            </ScrollView>
+            {moreRight}
+            {moreBelow}
+            {expandButton}
+        </TouchableOpacity>
+    );
+};
+
+export default MarkdownTable;

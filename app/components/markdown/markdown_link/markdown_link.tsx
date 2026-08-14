@@ -23,6 +23,13 @@ type MarkdownLinkProps = {
     theme: Theme;
 }
 
+interface LinkChildProps {
+    literal?: string;
+    children?: React.ReactNode;
+    context?: string[];
+    [key: string]: unknown;
+}
+
 const messages = defineMessages({
     copyEmail: {
         id: 'mobile.markdown.link.copy_email',
@@ -114,16 +121,17 @@ const MarkdownLink = ({children, experimentalNormalizeMarkdownLinks, href, siteU
         }
 
         return Children.map(children, (child: ReactElement) => {
-            if (!child.props.literal || typeof child.props.literal !== 'string' || (child.props.context && child.props.context.length && !child.props.context.includes('link'))) {
+            const childProps = child.props as LinkChildProps;
+            if (!childProps.literal || typeof childProps.literal !== 'string' || (childProps.context && childProps.context.length && !childProps.context.includes('link'))) {
                 return child;
             }
 
             const {props, ...otherChildProps} = child;
 
-            const {literal, ...otherProps} = props;
+            const {literal, ...otherProps} = props as LinkChildProps;
 
             const nextProps = {
-                literal: parseLinkLiteral(literal),
+                literal: parseLinkLiteral(literal ?? ''),
                 ...otherProps,
             };
 
