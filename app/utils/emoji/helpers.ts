@@ -5,7 +5,7 @@ import emojiRegex from 'emoji-regex';
 
 import SystemModel from '@database/models/server/system';
 
-import {Emojis, EmojiIndicesByAlias, EmojiIndicesByUnicode} from '.';
+import {Emojis, EmojiIndicesByAlias, EmojiIndicesByUnicode, type Emoji} from '.';
 
 import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji';
 import type Fuse from 'fuse.js';
@@ -212,12 +212,17 @@ export const getEmojiFirstAlias = (emoji: string): string => {
     return getEmojiByName(emoji, [])?.short_names?.[0] || emoji;
 };
 
-export function getEmojiByName(emojiName: string, customEmojis: CustomEmojiModel[]) {
+export function getEmojiByName(emojiName: string, customEmojis: CustomEmojiModel[]): Emoji | undefined {
     if (EmojiIndicesByAlias.has(emojiName)) {
         return Emojis[EmojiIndicesByAlias.get(emojiName)!];
     }
 
-    return customEmojis.find((e) => e.name === emojiName);
+    const custom = customEmojis.find((e) => e.name === emojiName);
+    if (custom) {
+        return {name: custom.name, image: '', short_name: custom.name, short_names: [custom.name], text: null, texts: null, category: 'custom', fileName: ''} as Emoji;
+    }
+
+    return undefined;
 }
 
 export function mapCustomEmojiNames(customEmois: CustomEmojiModel[]) {
@@ -321,8 +326,8 @@ export const isCustomEmojiEnabled = (config: ClientConfig | SystemModel) => {
 export function fillEmoji(category: string, index: number) {
     const emoji = Emojis[index];
     return {
-        name: 'short_name' in emoji ? emoji.short_name : emoji.name,
-        aliases: 'short_names' in emoji ? emoji.short_names : [],
+        name: emoji.short_name,
+        aliases: emoji.short_names,
         category,
     };
 }
