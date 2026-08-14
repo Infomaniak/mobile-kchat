@@ -13,6 +13,11 @@ export type MarkdownTableRowProps = {
     theme: Theme;
 }
 
+interface MarkdownTableCellProps {
+    isLastCell?: boolean;
+    [key: string]: unknown;
+}
+
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
     return {
         row: {
@@ -43,7 +48,7 @@ const MarkdownTableRow = ({isFirstRow, isLastRow, children, theme}: MarkdownTabl
 
     // Add an extra prop to the last cell so that it knows not to render a right border since the container
     // will handle that
-    const renderChildren = React.Children.toArray(children) as ReactElement[];
+    const renderChildren = React.Children.toArray(children) as Array<ReactElement<MarkdownTableCellProps>>;
     if (renderChildren.length > 0) {
         renderChildren[renderChildren.length - 1] = React.cloneElement(renderChildren[renderChildren.length - 1], {
             isLastCell: true,
