@@ -136,7 +136,7 @@ const Autocomplete = ({
     }, [growDown, position]);
 
     const containerStyles = useMemo(() => {
-        const s: StyleProp<ViewStyle> = [style.base, {left: horizontalPadding, right: horizontalPadding}, containerAnimatedStyle];
+        const s: Array<StyleProp<ViewStyle>> = [style.base, {left: horizontalPadding, right: horizontalPadding}, containerAnimatedStyle as StyleProp<ViewStyle>];
         if (hasElements) {
             s.push(style.borders);
         }
