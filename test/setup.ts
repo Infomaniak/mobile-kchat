@@ -51,20 +51,28 @@ jest.mock('expo-device', () => {
     };
 });
 
-jest.mock('expo-file-system', () => ({
-    downloadAsync: jest.fn(() => Promise.resolve({md5: 'md5', uri: 'uri'})),
-    getInfoAsync: jest.fn(() => Promise.resolve({exists: true, md5: 'md5', uri: 'uri'})),
-    readAsStringAsync: jest.fn(() => Promise.resolve()),
-    writeAsStringAsync: jest.fn(() => Promise.resolve()),
-    deleteAsync: jest.fn(() => Promise.resolve()),
-    moveAsync: jest.fn(() => Promise.resolve()),
-    copyAsync: jest.fn(() => Promise.resolve()),
-    makeDirectoryAsync: jest.fn(() => Promise.resolve()),
-    readDirectoryAsync: jest.fn(() => Promise.resolve()),
-    createDownloadResumable: jest.fn(() => Promise.resolve()),
-    documentDirectory: 'file:///test-directory/',
-    cacheDirectory: 'file://test-cache-directory/',
-}));
+jest.mock('expo-file-system', () => {
+    const mockInfo = {exists: true, uri: 'file:///mock', size: 0, modificationTime: 0};
+
+    function makeFileInstance(uri: string) {
+        return {uri, exists: true, size: 0, delete: jest.fn(), info: jest.fn(() => mockInfo), move: jest.fn(), copy: jest.fn(), create: jest.fn(), write: jest.fn(), text: jest.fn(() => Promise.resolve(''))};
+    }
+    function makeDirectoryInstance(uri: string) {
+        return {uri, exists: true, size: 0, delete: jest.fn(), info: jest.fn(() => mockInfo), create: jest.fn(), list: jest.fn(() => []), move: jest.fn(), copy: jest.fn()};
+    }
+
+    const MockFile = jest.fn().mockImplementation((...args: string[]) => makeFileInstance(args.join('')));
+    (MockFile as jest.Mock & {downloadFileAsync: jest.Mock}).downloadFileAsync = jest.fn(() => Promise.resolve(makeFileInstance('file:///downloaded')));
+    const MockDirectory = jest.fn().mockImplementation((...args: string[]) => makeDirectoryInstance(args.join('')));
+    return {
+        File: MockFile,
+        Directory: MockDirectory,
+        Paths: {
+            cache: makeDirectoryInstance('file://test-cache-directory/'),
+            document: makeDirectoryInstance('file:///test-directory/'),
+        },
+    };
+});
 
 jest.mock('expo-web-browser', () => ({
     openAuthSessionAsync: jest.fn().mockResolvedValue(({
@@ -539,18 +547,38 @@ jest.mock('@mattermost/react-native-network-client', () => ({
 
 jest.mock('react-native-safe-area-context', () => mockSafeAreaContext);
 
+jest.mock('react-native-worklets', () => {
+    const mock = require('react-native-worklets/src/mock');
+    return {
+        ...mock,
+
+        // Override scheduleOnRN to call synchronously so state updates from
+        // useAnimatedReaction fire inside act() rather than via queueMicrotask.
+        scheduleOnRN: <Args extends unknown[]>(fn: (...args: Args) => unknown, ...args: Args) => {
+            fn(...args);
+        },
+    };
+});
+
 require('@shopify/flash-list/jestSetup');
 
 require('react-native-reanimated').setUpTests();
 jest.mock('react-native-permissions', () => require('react-native-permissions/mock'));
 
-jest.mock('react-native-haptic-feedback', () => {
-    const RNHF = jest.requireActual('react-native-haptic-feedback/src/types');
-    return {
-        ...RNHF,
-        trigger: () => '',
-    };
-});
+jest.mock('react-native-haptic-feedback', () => ({
+    trigger: () => '',
+    HapticFeedbackTypes: {
+        selection: 'selection',
+        impactLight: 'impactLight',
+        impactMedium: 'impactMedium',
+        impactHeavy: 'impactHeavy',
+        rigid: 'rigid',
+        soft: 'soft',
+        notificationSuccess: 'notificationSuccess',
+        notificationWarning: 'notificationWarning',
+        notificationError: 'notificationError',
+    },
+}));
 
 jest.mock('@utils/log', () => ({
     logError: jest.fn(),

@@ -34,7 +34,7 @@ module.exports = {
     transformIgnorePatterns: [
         'node_modules/(?!' +
         '(@react-native|react-native)|' +
-        'expo(?:-[^/]+)?|@expo|expo-modules-core|' +
+        'expo(?:-[^/]+)?|@expo|expo-modules-core|uuid|' +
         '@sentry/react-native|' +
         'react-intl|@formatjs/[^/]+|intl-messageformat|@messageformat/[^/]+|' +
         'validator|' +
@@ -43,11 +43,10 @@ module.exports = {
         '@rneui/base|' +
         '@shopify/flash-list|' +
         '@react-navigation|' +
-        '@sayem314/react-native-keep-awake)',
+        '@sayem314/react-native-keep-awake' +
+        '@jitsi/react-native-sdk|' +
+        'pusher-js|' +
+        'react-native-get-random-values' +
+        ')',
     ],
-    moduleNameMapper: {
-
-        // Force module uuid to resolve with the CJS entry point, because Jest does not support package.json.exports. See https://github.com/uuidjs/uuid/issues/451
-        uuid: require.resolve('uuid'),
-    },
 };
