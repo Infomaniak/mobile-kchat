@@ -57,6 +57,7 @@ export const ProfilePictureMessage = ({author, source}: ProfilePictureProps) => 
         if (
             typeof imgSource === 'object' &&
             !Array.isArray(imgSource) &&
+            'uri' in imgSource &&
             imgSource.uri?.startsWith('file://')
         ) {
             return (

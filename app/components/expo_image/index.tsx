@@ -17,6 +17,10 @@ type ExpoImageBackgroundPropsWithId = ImageBackgroundProps & {id: string};
 type ExpoImageBackgroundPropsMemoryOnly = ImageBackgroundProps & {cachePolicy: 'memory'; id?: string};
 type ExpoImageBackgroundProps = ExpoImageBackgroundPropsWithId | ExpoImageBackgroundPropsMemoryOnly;
 
+function isImageSource(source: unknown): source is ImageSource {
+    return typeof source === 'object' && source !== null && !Array.isArray(source) && !('nativeRefType' in source);
+}
+
 function shouldAttachServerAuthHeaders(uri: string | undefined, serverUrl: string) {
     if (!uri) {
         return false;
@@ -54,53 +58,63 @@ const ExpoImage = forwardRef<Image, ExpoImageProps>(({id, ...props}, ref) => {
      * for filesystem path compatibility (avoiding special characters in directory names).
      */
     const cachePath = useMemo(() => urlSafeBase64Encode(serverUrl), [serverUrl]);
-    const source: ImageSource = useMemo(() => {
+    const source: ImageProps['source'] = useMemo(() => {
         if (typeof props.source === 'number') {
             return props.source;
         }
 
-        const sourceHeaders = shouldAttachServerAuthHeaders(props.source?.uri, serverUrl) && requestHeaders ? {...requestHeaders, ...props.source?.headers} : props.source?.headers;
+        const sourceObj = isImageSource(props.source) ? props.source : undefined;
+        const sourceHeaders = shouldAttachServerAuthHeaders(sourceObj?.uri, serverUrl) && requestHeaders ? {...requestHeaders, ...sourceObj?.headers} : sourceObj?.headers;
         delete sourceHeaders?.Accept;
 
         // Only add cacheKey and cachePath if id is provided (i.e., not memory-only caching)
-        if (id) {
+        if (id && sourceObj) {
             return {
-                ...props.source,
+                ...sourceObj,
                 headers: sourceHeaders,
                 cacheKey: id,
                 cachePath,
             };
         }
 
-        return {
-            ...props.source,
-            headers: sourceHeaders,
-        };
+        if (sourceObj) {
+            return {
+                ...sourceObj,
+                headers: sourceHeaders,
+            };
+        }
+
+        return props.source;
     }, [id, props.source, cachePath, requestHeaders, serverUrl]);
 
     // Process placeholder to add cachePath and cacheKey if it has a uri
-    const placeholder: ImageSource | undefined = useMemo(() => {
+    const placeholder: ImageProps['placeholder'] = useMemo(() => {
         if (!props.placeholder || typeof props.placeholder === 'number' || typeof props.placeholder === 'string') {
             return props.placeholder;
         }
 
-        const placeholderHeaders = shouldAttachServerAuthHeaders(props.placeholder?.uri, serverUrl) && requestHeaders ? {...requestHeaders, ...props.placeholder?.headers} : props.placeholder?.headers;
+        const placeholderObj = isImageSource(props.placeholder) ? props.placeholder : undefined;
+        const placeholderHeaders = shouldAttachServerAuthHeaders(placeholderObj?.uri, serverUrl) && requestHeaders ? {...requestHeaders, ...placeholderObj?.headers} : placeholderObj?.headers;
         delete placeholderHeaders?.Accept;
 
         // If placeholder has a uri and id is provided, add cachePath and cacheKey
-        if (props.placeholder.uri && id) {
+        if (placeholderObj?.uri && id) {
             return {
-                ...props.placeholder,
+                ...placeholderObj,
                 headers: placeholderHeaders,
                 cacheKey: `${id}-thumb`,
                 cachePath,
             };
         }
 
-        return {
-            ...props.placeholder,
-            headers: placeholderHeaders,
-        };
+        if (placeholderObj) {
+            return {
+                ...placeholderObj,
+                headers: placeholderHeaders,
+            };
+        }
+
+        return props.placeholder;
     }, [props.placeholder, id, cachePath, requestHeaders, serverUrl]);
 
     return (
@@ -117,15 +131,17 @@ ExpoImage.displayName = 'ExpoImage';
 const ExpoImageBackground = ({id, ...props}: ExpoImageBackgroundProps) => {
     const serverUrl = useServerUrl();
     const cachePath = useMemo(() => urlSafeBase64Encode(serverUrl), [serverUrl]);
-    const source: ImageSource = useMemo(() => {
+    const source: ImageBackgroundProps['source'] = useMemo(() => {
         if (typeof props.source === 'number') {
             return props.source;
         }
 
+        const sourceObj = isImageSource(props.source) ? props.source : undefined;
+
         // Only add cacheKey and cachePath if id is provided (i.e., not memory-only caching)
-        if (id) {
+        if (id && sourceObj) {
             return {
-                ...props.source,
+                ...sourceObj,
                 cacheKey: id,
                 cachePath,
             };
@@ -135,15 +151,17 @@ const ExpoImageBackground = ({id, ...props}: ExpoImageBackgroundProps) => {
     }, [id, props.source, cachePath]);
 
     // Process placeholder to add cachePath and cacheKey if it has a uri
-    const placeholder: ImageSource | undefined = useMemo(() => {
+    const placeholder: ImageBackgroundProps['placeholder'] = useMemo(() => {
         if (!props.placeholder || typeof props.placeholder === 'number' || typeof props.placeholder === 'string') {
             return props.placeholder;
         }
 
+        const placeholderObj = isImageSource(props.placeholder) ? props.placeholder : undefined;
+
         // If placeholder has a uri and id is provided, add cachePath and cacheKey
-        if (props.placeholder.uri && id) {
+        if (placeholderObj?.uri && id) {
             return {
-                ...props.placeholder,
+                ...placeholderObj,
                 cacheKey: `${id}-thumb`,
                 cachePath,
             };
