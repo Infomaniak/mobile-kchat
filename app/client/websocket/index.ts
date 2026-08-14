@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {type ClientHeaders, getOrCreateWebSocketClient, WebSocketReadyState} from '@mattermost/react-native-network-client';
+import {type ClientHeaders, type WebSocketClientConfiguration, getOrCreateWebSocketClient, WebSocketReadyState} from '@mattermost/react-native-network-client';
 import Pusher, {ConnectionManager, type Channel} from 'pusher-js/react-native';
 
 import {WebsocketEvents} from '@constants';
@@ -103,10 +103,10 @@ export default class WebSocketClient {
             const headers: ClientHeaders = {};
             headers.Authorization = `Bearer ${this.token}`;
 
-            const {client} = await getOrCreateWebSocketClient(this.url, this.serverUrl, {headers, timeoutInterval: WEBSOCKET_TIMEOUT});
+            const {client} = await getOrCreateWebSocketClient(this.url, this.serverUrl, {headers, timeoutInterval: WEBSOCKET_TIMEOUT} as WebSocketClientConfiguration);
 
             // Check again if the client is the same, to avoid race conditions
-            if (this.conn === client) {
+            if (this.conn === client as unknown as Pusher) {
                 // In case turning on/off Wi-fi on Samsung devices
                 // the websocket will call onClose then onError then initialize again with readyState CLOSED, we need to open it again
                 if (this.connState === WebSocketReadyState.CLOSED) {
@@ -115,8 +115,8 @@ export default class WebSocketClient {
                 }
                 return;
             }
-            this.conn = client;
-            this.lastPusher = client;
+            this.conn = client as unknown as Pusher;
+            this.lastPusher = client as unknown as Pusher;
         } catch (error) {
             return;
         }

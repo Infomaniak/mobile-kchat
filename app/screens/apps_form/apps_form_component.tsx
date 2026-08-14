@@ -313,7 +313,7 @@ function AppsFormComponent({
             );
             if (newError) {
                 hasErrors = true;
-                fieldErrors[element.name] = intl.formatMessage({id: newError.id, defaultMessage: newError.defaultMessage}, newError.values);
+                fieldErrors[element.name] = intl.formatMessage(newError as any, newError.values);
             }
         });
 

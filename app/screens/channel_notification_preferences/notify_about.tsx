@@ -95,9 +95,9 @@ const NotifyAbout = ({
             headerRight={rightHeaderComponent}
         >
             {Object.keys(NOTIFY_OPTIONS).map((key) => {
-                const {id, defaultMessage, value, testID} = NOTIFY_OPTIONS[key];
+                const {value, testID} = NOTIFY_OPTIONS[key];
                 const defaultOption = key === defaultLevel ? formatMessage({id: 'channel_notification_preferences.default', defaultMessage: '(default)'}) : '';
-                const label = `${formatMessage({id, defaultMessage})} ${defaultOption}`;
+                const label = `${formatMessage(NOTIFY_OPTIONS[key] as any)} ${defaultOption}`;
 
                 return (
                     <View key={`notif_pref_option${key}`}>

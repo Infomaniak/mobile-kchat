@@ -6,7 +6,6 @@ import React, {useCallback} from 'react';
 import {defineMessages, useIntl} from 'react-intl';
 import {Text, View} from 'react-native';
 
-// Define messages for i18n extraction (used dynamically via quotaType)
 const messages = defineMessages({
     infomaniakSizeQuotaExceededTitle: {
         id: 'infomaniak.size_quota_exceeded.title',
@@ -21,6 +20,11 @@ const messages = defineMessages({
         defaultMessage: 'Change your plan from the web interface to get more storage.',
     },
 });
+
+const titleMessages = {
+    'infomaniak.size_quota_exceeded.title': messages.infomaniakSizeQuotaExceededTitle,
+    'infomaniak.size_quota_almost_exceeded.title': messages.infomaniakSizeQuotaAlmostExceededTitle,
+};
 
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
@@ -99,7 +103,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 }));
 
 export type IKQuotaExceeded = {
-    title: string;
+    title: 'infomaniak.size_quota_exceeded.title' | 'infomaniak.size_quota_almost_exceeded.title';
     description: string;
     image: 'channels' | 'storage';
 }
@@ -125,10 +129,10 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
 
                     <View>
                         <Text style={styles.title}>
-                            {intl.formatMessage({id: quotaType.title, defaultMessage: messages.infomaniakSizeQuotaExceededTitle.defaultMessage})}
+                            {intl.formatMessage(titleMessages[quotaType.title] ?? messages.infomaniakSizeQuotaExceededTitle)}
                         </Text>
                         <Text style={styles.description}>
-                            {intl.formatMessage({id: quotaType.description, defaultMessage: messages.infomaniakSizeQuotaExceededDescription.defaultMessage})}
+                            {intl.formatMessage(messages.infomaniakSizeQuotaExceededDescription)}
                         </Text>
                     </View>
 
@@ -149,7 +153,7 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
                 </View>
             </View>
         );
-    }, [intl, quotaType.description, quotaType.title, styles.content, styles.description, styles.discoverButton, styles.ikButton, styles.ikTextButton, styles.title, theme]);
+    }, [intl, quotaType.title, styles.content, styles.description, styles.discoverButton, styles.ikButton, styles.ikTextButton, styles.title, theme]);
 
     const snapPoints = [1, '55%'];
 
