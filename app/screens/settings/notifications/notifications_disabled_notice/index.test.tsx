@@ -11,6 +11,7 @@ import TestHelper from '@test/test_helper';
 import NotificationsDisabledNotice from './index';
 
 import type Database from '@nozbe/watermelondb/Database';
+import type {ReactTestInstance} from 'react-test-renderer';
 
 const Permissions = jest.mocked(require('react-native-permissions'));
 
@@ -50,7 +51,7 @@ describe('Notifications Disabled Notice', () => {
         );
         const button = queryByText('Enable notifications');
         expect(button).toBeVisible();
-        fireEvent.press(button);
+        fireEvent.press(button as ReactTestInstance);
         expect(Permissions.openSettings).toHaveBeenCalledWith('notifications');
     });
 

@@ -9,6 +9,8 @@ import {Preferences} from '@constants';
 
 import Button from './index';
 
+import type {ReactTestInstance} from 'react-test-renderer';
+
 describe('components/button', () => {
     const getBaseProps = (): ComponentProps<typeof Button> => ({
         onPress: jest.fn(),
@@ -61,13 +63,13 @@ describe('components/button', () => {
         const container = getByTestId('test-button-text-container');
 
         // When icon is on the left, it should be the first child
-        expect(within(container.children[0]).getByTestId('test-button-icon')).toBeVisible();
+        expect(within(container.children[0] as ReactTestInstance).getByTestId('test-button-icon')).toBeVisible();
 
         props.isIconOnTheRight = true;
         rerender(<Button {...props}/>);
 
         // When icon is on the right, it should be the last child
-        expect(within(container.children[1]).getByTestId('test-button-icon')).toBeVisible();
+        expect(within(container.children[1] as ReactTestInstance).getByTestId('test-button-icon')).toBeVisible();
     });
 
     it('should render custom icon component', () => {

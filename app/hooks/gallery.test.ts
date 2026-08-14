@@ -128,7 +128,7 @@ describe('gallery hooks', () => {
 
         const {result} = renderHook(() => useGalleryItem(identifier, index, onPress));
 
-        expect(result.current.styles.opacity).toBe(1);
+        expect((result.current.styles as unknown as {opacity: number}).opacity).toBe(1);
 
         act(() => {
             result.current.onGestureEvent();

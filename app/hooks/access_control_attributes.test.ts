@@ -73,14 +73,14 @@ describe('useAccessControlAttributes', () => {
             attributes: mockAttributes,
         });
 
-        const {result, waitForNextUpdate} = renderHook(() => useAccessControlAttributes('channel', mockEntityId, true));
+        const {result} = renderHook(() => useAccessControlAttributes('channel', mockEntityId, true));
 
         // Initial state might be false if the hook sets loading after the first render
         // expect(result.current.loading).toBe(true);
         expect(result.current.attributeTags).toEqual([]);
 
         // Wait for the fetch to complete
-        await waitForNextUpdate();
+        await act(async () => {});
 
         // Check that the fetch was called with the correct parameters
         expect(ChannelAccessControlAttributesActions.fetchChannelAccessControlAttributes).toHaveBeenCalledWith(

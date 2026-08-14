@@ -135,7 +135,7 @@ describe('screens/report_a_problem/app_logs', () => {
     });
 
     it('handles errors during file deletion', async () => {
-        jest.mocked(deleteFile).mockRejectedValue(new Error('Delete failed'));
+        jest.mocked(deleteFile).mockRejectedValue(new Error('Delete failed') as never);
         const {getByText} = renderWithIntl(
             <AppLogs/>,
         );
