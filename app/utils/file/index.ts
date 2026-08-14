@@ -3,13 +3,9 @@
 
 import Model from '@nozbe/watermelondb/Model';
 import {applicationName} from 'expo-application';
-import {
-    cacheDirectory, deleteAsync, documentDirectory, getInfoAsync,
-    type FileInfo as ExpoFileInfo,
-} from 'expo-file-system';
+import {Directory, File, Paths, type FileInfo as ExpoFileInfo} from 'expo-file-system';
 import mimeDB from 'mime-db';
 import {Alert, Linking, Platform} from 'react-native';
-import FileSystem from 'react-native-fs';
 import Permissions, {PERMISSIONS} from 'react-native-permissions';
 
 import {Files} from '@constants';
@@ -17,7 +13,6 @@ import {generateId} from '@utils/general';
 import keyMirror from '@utils/key_mirror';
 import {logError} from '@utils/log';
 import {deleteEntitiesFile, getIOSAppGroupDetails} from '@utils/mattermost_managed';
-import {allSettled} from '@utils/promise';
 import {urlSafeBase64Encode} from '@utils/security';
 
 import type {PastedFile} from '@mattermost/react-native-paste-input';
@@ -153,24 +148,24 @@ function populateMaps() {
 }
 
 export async function deleteV1Data() {
-    const dir = Platform.OS === 'ios' ? getIOSAppGroupDetails().appGroupSharedDirectory : documentDirectory;
+    const dir = Platform.OS === 'ios' ? getIOSAppGroupDetails().appGroupSharedDirectory : Paths.document.uri;
 
     try {
         const directory = `${dir}/mmkv`;
-        const mmkvDirInfo = await getInfoAsync(directory);
-        if (mmkvDirInfo.exists) {
-            await deleteAsync(directory);
+        const mmkvDir = new Directory(directory);
+        if (mmkvDir.exists) {
+            mmkvDir.delete();
         }
     } catch {
         // do nothing
     }
 
     try {
-        const entitiesInfo = await getInfoAsync(`${dir}/entities`);
-        if (entitiesInfo.exists) {
+        const entitiesDir = new Directory(`${dir}/entities`);
+        if (entitiesDir.exists) {
             deleteEntitiesFile();
         }
-    } catch (e) {
+    } catch {
         // do nothing
     }
 }
@@ -186,29 +181,27 @@ export async function deleteFileCacheByDir(dir: string) {
         await deleteFilesInDir(appGroupCacheDir);
     }
 
-    const cacheDir = `${cacheDirectory}/${dir}`;
+    const cacheDir = `${Paths.cache.uri}/${dir}`;
     await deleteFilesInDir(cacheDir);
 
     return true;
 }
 
-async function deleteFilesInDir(directory: string) {
+function deleteFilesInDir(directory: string) {
     if (directory) {
-        const cacheDirInfo = await getInfoAsync(directory);
-        if (cacheDirInfo.exists) {
-            await deleteAsync(directory, {idempotent: true});
+        const dir = new Directory(directory);
+        if (dir.exists) {
+            dir.delete();
         }
     }
 }
 
 export async function deleteDeviceFile(filePath: string): Promise<boolean> {
-    if (await fileExists(filePath)) {
-        try {
-            await FileSystem.unlink(filePath);
-            return true;
-        } catch (error) {
-            logError('Could not delete file', error, filePath);
-        }
+    try {
+        new File(pathWithPrefix('file://', filePath)).delete();
+        return true;
+    } catch (error) {
+        logError('Could not delete file', error, filePath);
     }
 
     return false;
@@ -460,11 +453,11 @@ export function getLocalFilePathFromFile(serverUrl: string, file: FileInfo | Fil
                 }
             }
 
-            return `${cacheDirectory}${server}/Files/${filename}-${fileIdPath}.${extension}`;
+            return `${Paths.cache.uri}${server}/Files/${filename}-${fileIdPath}.${extension}`;
         } else if (file?.id && hasValidExtension) {
-            return `${cacheDirectory}${server}/Files/${fileIdPath}.${file.extension}`;
+            return `${Paths.cache.uri}${server}/Files/${fileIdPath}.${file.extension}`;
         } else if (file?.id) {
-            return `${cacheDirectory}${server}/Files/${fileIdPath}`;
+            return `${Paths.cache.uri}${server}/Files/${fileIdPath}`;
         }
     }
 
@@ -493,11 +486,11 @@ export async function extractFileInfo(files: Array<Asset | DocumentPickerRespons
         } else {
             const localPath = file.uri || '';
             try {
-                const fileInfo = await getInfoAsync(localPath, {size: true});
+                const fileInfo = new File(localPath).info();
 
                 outFile.name = localPath.substring(localPath.lastIndexOf('/') + 1);
 
-                if ('size' in fileInfo) {
+                if (fileInfo.exists) {
                     outFile.size = fileInfo.size || 0;
                 }
             } catch (e) {
@@ -543,10 +536,9 @@ export function uploadDisabledWarning(intl: IntlShape) {
     });
 }
 
-export const fileExists = async (path: string) => {
+export const fileExists = (path: string) => {
     try {
-        const file = await getInfoAsync(path);
-        return file.exists;
+        return new File(path).exists;
     } catch {
         return false;
     }
@@ -603,32 +595,23 @@ export const hasWriteStoragePermission = async (intl: IntlShape) => {
     return true;
 };
 
-export const getAllFilesInCachesDirectory = async (serverUrl: string) => {
+export const getAllFilesInCachesDirectory = (serverUrl: string) => {
     try {
-        const files: ExpoFileInfo[] = [];
-
-        const promises = [getInfoAsync(`${cacheDirectory}/${urlSafeBase64Encode(serverUrl)}`, {size: true})];
+        const infos: ExpoFileInfo[] = [];
+        const paths = [`${Paths.cache.uri}/${urlSafeBase64Encode(serverUrl)}`];
         if (Platform.OS === 'ios') {
-            const cacheDir = `${getIOSAppGroupDetails().appGroupSharedDirectory}/Library/Caches/${urlSafeBase64Encode(serverUrl)}`;
-            promises.push(getInfoAsync(cacheDir, {size: true}));
+            paths.push(`${getIOSAppGroupDetails().appGroupSharedDirectory}/Library/Caches/${urlSafeBase64Encode(serverUrl)}`);
+        }
+        for (const p of paths) {
+            const info = new Directory(p).info();
+            if (info.exists) {
+                infos.push(info);
+            }
         }
 
-        const dirs = await allSettled(promises);
-        dirs.forEach((p) => {
-            if (p.status === 'fulfilled' && 'size' in p.value) {
-                files.push(p.value);
-            }
-        });
-
-        const flattenedFiles = files.flat();
-        const totalSize = flattenedFiles.reduce((acc, file) => {
-            if ('size' in file) {
-                return acc + file.size;
-            }
-            return acc;
-        }, 0);
+        const totalSize = infos.reduce((acc, info) => acc + (info.size ?? 0), 0);
         return {
-            files: flattenedFiles,
+            files: infos,
             totalSize,
         };
     } catch (error) {
@@ -641,16 +624,18 @@ export const pathWithPrefix = (prefix: string, path: string) => {
     return `${p}${path}`;
 };
 
-export const deleteFile = async (path: string) => {
-    await deleteAsync(pathWithPrefix('file://', path));
+export const deleteFile = (path: string) => {
+    try {
+        new File(pathWithPrefix('file://', path)).delete();
+    } catch { /* file may not exist */ }
 };
 
-export const filesLocalPathValidation = async (files: FileModel[], authorId: string) => {
+export const filesLocalPathValidation = (files: FileModel[], authorId: string) => {
     const filesInfo: FileInfo[] = [];
-    for await (const f of files) {
+    for (const f of files) {
         const info = f.toFileInfo(authorId);
         if (info.localPath) {
-            const exists = await fileExists(info.localPath);
+            const exists = fileExists(info.localPath);
             if (!exists) {
                 info.localPath = '';
             }
