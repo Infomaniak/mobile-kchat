@@ -25,7 +25,7 @@ class AppDelegate: ExpoAppDelegate, OrientationLockable, RNAppAuthAuthorizationF
     var reactNativeDelegate: ExpoReactNativeFactoryDelegate?
     var reactNativeFactory: RCTReactNativeFactory?
 
-    weak var authorizationFlowManagerDelegate: id<RNAppAuthAuthorizationFlowManagerDelegate>?
+    weak var authorizationFlowManagerDelegate: (any RNAppAuthAuthorizationFlowManagerDelegate)?
 
     private var databaseLockBackgroundTask: UIBackgroundTaskIdentifier = .invalid
 
