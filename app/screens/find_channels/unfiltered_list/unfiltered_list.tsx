@@ -57,7 +57,7 @@ const UnfilteredList = ({close, keyboardOverlap, recentChannels, showTeamName, t
     }, [serverUrl, close]);
 
     const renderSectionHeader = useCallback(({section}: SectionListRenderItemInfo<ChannelModel>) => (
-        <FindChannelsHeader sectionName={intl.formatMessage({id: section.id, defaultMessage: section.defaultMessage})}/>
+        <FindChannelsHeader sectionName={intl.formatMessage(section as any)}/>
     ), [intl]);
 
     const renderSectionItem = useCallback(({item}: SectionListRenderItemInfo<ChannelModel>) => {

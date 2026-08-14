@@ -132,7 +132,7 @@ const File_filter = ({initialFilter, setFilter, title}: FilterProps) => {
     const renderFilterItem = useCallback(({item}: ListRenderItemInfo<FilterItem>) => {
         return (
             <OptionItem
-                label={intl.formatMessage({id: item.id, defaultMessage: item.defaultMessage})}
+                label={intl.formatMessage(item as any)}
                 type={'select'}
                 action={() => handleOnPress(item.filterType)}
                 selected={initialFilter === item.filterType}

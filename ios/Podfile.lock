@@ -74,6 +74,8 @@ PODS:
     - SDWebImageWebPCoder (~> 0.14.6)
   - ExpoLinearGradient (55.0.13):
     - ExpoModulesCore
+  - ExpoLinking (55.0.15):
+    - ExpoModulesCore
   - ExpoLogBox (55.0.12):
     - React-Core
   - ExpoModulesCore (55.0.25):
@@ -178,8 +180,6 @@ PODS:
     - ObjectiveDropboxOfficial (= 6.2.3)
     - React-Core
     - react-native-webrtc
-  - JitsiMeetSDKLite (13.1.1-lite):
-    - JitsiWebRTC (~> 124.0)
   - JitsiWebRTC (124.0.2)
   - KituraContracts (1.2.1):
     - LoggerAPI (~> 1.7)
@@ -2372,6 +2372,34 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - react-native-get-random-values (2.0.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - react-native-image-picker (8.2.1):
     - boost
     - DoubleConversion
@@ -2556,7 +2584,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-paste-input (0.8.1):
+  - react-native-paste-input (2.0.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -4219,6 +4247,7 @@ DEPENDENCIES:
   - ExpoGlassEffect (from `../node_modules/expo-glass-effect/ios`)
   - ExpoImage (from `../node_modules/expo-image/ios`)
   - ExpoLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
+  - ExpoLinking (from `../node_modules/expo-linking/ios`)
   - "ExpoLogBox (from `../node_modules/@expo/log-box`)"
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoModulesJSI (from `../node_modules/expo-modules-core`)
@@ -4236,7 +4265,6 @@ DEPENDENCIES:
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - "jitsi-meet-rnsdk (from `../node_modules/@jitsi/react-native-sdk`)"
-  - JitsiMeetSDKLite (from `.`)
   - "mattermost-hardware-keyboard (from `../libraries/@mattermost/hardware-keyboard`)"
   - "mattermost-react-native-turbo-log (from `../node_modules/@mattermost/react-native-turbo-log`)"
   - "mattermost-rnutils (from `../libraries/@mattermost/rnutils`)"
@@ -4287,6 +4315,7 @@ DEPENDENCIES:
   - react-native-color-matrix-image-filters (from `../node_modules/react-native-color-matrix-image-filters`)
   - "react-native-cookies (from `../node_modules/@react-native-cookies/cookies`)"
   - react-native-document-picker (from `../node_modules/react-native-document-picker`)
+  - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - "react-native-keep-awake (from `../node_modules/@sayem314/react-native-keep-awake`)"
   - react-native-keyboard-controller (from `../node_modules/react-native-keyboard-controller`)
@@ -4432,6 +4461,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-image/ios"
   ExpoLinearGradient:
     :path: "../node_modules/expo-linear-gradient/ios"
+  ExpoLinking:
+    :path: "../node_modules/expo-linking/ios"
   ExpoLogBox:
     :path: "../node_modules/@expo/log-box"
   ExpoModulesCore:
@@ -4467,8 +4498,6 @@ EXTERNAL SOURCES:
     :tag: hermes-v0.14.1
   jitsi-meet-rnsdk:
     :path: "../node_modules/@jitsi/react-native-sdk"
-  JitsiMeetSDKLite:
-    :path: "."
   mattermost-hardware-keyboard:
     :path: "../libraries/@mattermost/hardware-keyboard"
   mattermost-react-native-turbo-log:
@@ -4565,6 +4594,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-cookies/cookies"
   react-native-document-picker:
     :path: "../node_modules/react-native-document-picker"
+  react-native-get-random-values:
+    :path: "../node_modules/react-native-get-random-values"
   react-native-image-picker:
     :path: "../node_modules/react-native-image-picker"
   react-native-keep-awake:
@@ -4755,6 +4786,7 @@ SPEC CHECKSUMS:
   ExpoGlassEffect: 2dedac2fe817f9b02d0dad29ce0aef7afebc5cd4
   ExpoImage: c3346af353a302ccea1251d9c2dbefd7b2338772
   ExpoLinearGradient: c654e92d726a6d64c588a0988bb22bea331d5e79
+  ExpoLinking: 40f36cf134ea6930f37867858c0643877b865d53
   ExpoLogBox: a678d36477ab9544fe63e0b5328a0716539b6774
   ExpoModulesCore: a0657acfb83a882b48f84492a095fd44fd43b26c
   ExpoModulesJSI: 1685389cde9f19c40f98ca0ad46d4804471486cc
@@ -4776,7 +4808,6 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   hermes-engine: 06c94d1c9ce4b5b5aca7558b219fa8a405509a02
   jitsi-meet-rnsdk: c91af74fddec052bedbb443b2a4e862aca6b9b19
-  JitsiMeetSDKLite: 09ab054a600bf037e9a574bcfb9093fda8037607
   JitsiWebRTC: b47805ab5668be38e7ee60e2258f49badfe8e1d0
   KituraContracts: e845e60dc8627ad0a76fa55ef20a45451d8f830b
   libwebp: af5937a13536ef73f3784d69cc342b98961acf33
@@ -4833,6 +4864,7 @@ SPEC CHECKSUMS:
   react-native-color-matrix-image-filters: 75c70b26363b8fac3b734d3fa2df339d30c53934
   react-native-cookies: d648ab7025833b977c0b19e142503034f5f29411
   react-native-document-picker: 9f54873c9ba2a6f23fefd96b206a13b26fb2a2f4
+  react-native-get-random-values: 5c2e7ce0c1eedefde8e97fe60152601887fcfa08
   react-native-image-picker: 6051cfd030121b880a58f1cc0e5e33e9887804e4
   react-native-keep-awake: a351e6f67006b47f316ae2b17ee8ee69386167f4
   react-native-keyboard-controller: f8979f50dc2752ff5dc1656bd315d58cd6e78bba
@@ -4841,7 +4873,7 @@ SPEC CHECKSUMS:
   react-native-notifications: e2d3c022d6077de7e420ba5c01b4bd9464f3941d
   react-native-orientation-locker: cc6f357b289a2e0dd2210fea0c52cb8e0727fdaa
   react-native-pager-view: 32f099d39205833b838da594efeab5aaaab9ad4f
-  react-native-paste-input: ddd780481d0da92a4c929ed2fd1794d4e2c28c06
+  react-native-paste-input: 4b1423c882afacf39d7e2617e6c94835dcefaf39
   react-native-performance: a7a65d0b0f3055c5db33e1433e4345143ef6a100
   react-native-restart: 0bc732f4461709022a742bb29bcccf6bbc5b4863
   react-native-safe-area-context: eda63a662750758c1fdd7e719c9f1026c8d161cb
@@ -4924,6 +4956,6 @@ SPEC CHECKSUMS:
   WatermelonDB: 4c846c8cb94eef3cba90fa034d15310163226703
   Yoga: e9fea23bf9b2766818ce9a8df72f584bf5ad36cd
 
-PODFILE CHECKSUM: ac670d91581c33d4fa7ae466587f4f2a0d408668
+PODFILE CHECKSUM: 5dccd243381b594abdbd2dda2dd738dac91ca167
 
 COCOAPODS: 1.16.1

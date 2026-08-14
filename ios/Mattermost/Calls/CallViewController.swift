@@ -6,6 +6,8 @@
 //  Copyright © 2024 Facebook. All rights reserved.
 //
 
+#if canImport(JitsiMeetSDK)
+
 import Gekidou
 import JitsiMeetSDK
 import UIKit
@@ -114,18 +116,14 @@ private class CallViewController: UIViewController {
 
       let avatarURL: URL?
       if let publicPictureUrl = userProfile.publicPictureUrl {
-        // Use the public_picture_url if available
         avatarURL = URL(string: publicPictureUrl)
       } else {
-        // Construct API URL if not
         let lastPictureUpdate = userProfile.lastPictureUpdate ?? 0
         avatarURL = URL(string: "\(meetCall.serverURL)/api/v4/users/\(userProfile.id)/image?_=\(lastPictureUpdate)")
       }
 
       let isDM = channel.type == "D"
-
       let isCurrentUserInitiator = meetCall.initiatorUserId == userProfile.id
-
       let isAppInBackground = UIApplication.shared.applicationState == .background
 
       let options = JitsiMeetConferenceOptions.fromBuilder { builder in
@@ -163,11 +161,11 @@ extension CallViewController: JitsiMeetViewDelegate {
     guard let conferenceId = meetCall.conferenceId else { return }
     delegate?.onVideoMuted(conferenceId: conferenceId, isMuted: (data["muted"] as? Int ?? 0) == 4)
   }
-  
+
   func ready(toClose data: [AnyHashable : Any]!) {
     closeCallScreen()
   }
-  
+
   func closeCallScreen() {
     let conferenceId = meetCall.conferenceId
     UIView.animate(withDuration: 0.25) { [weak self] in
@@ -177,3 +175,28 @@ extension CallViewController: JitsiMeetViewDelegate {
     }
   }
 }
+
+#else
+
+// Stubs when JitsiMeetSDK is not available
+protocol CallViewControllerDelegate: AnyObject {
+  func onConferenceTerminated(conferenceId: String?)
+  func onVideoMuted(conferenceId: String, isMuted: Bool)
+  func onAudioMuted(conferenceId: String, isMuted: Bool)
+}
+
+class CallWindow: UIWindow {
+  init(meetCall: MeetCall, delegate: CallViewControllerDelegate, windowScene: UIWindowScene) {
+    super.init(windowScene: windowScene)
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  func setCurrentCallMuted(_ isMuted: Bool) {}
+  func leaveCurrentCall() {}
+}
+
+#endif

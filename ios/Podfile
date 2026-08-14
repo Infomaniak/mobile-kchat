@@ -71,7 +71,7 @@ target 'kChat' do
   pod 'Gekidou', :path => './Gekidou'
   pod 'CocoaLumberjack', :modular_headers => true
   pod 'TurboLogIOSNative', :git => 'https://github.com/larkox/react-native-turbo-log-ios-native.git', :modular_headers => true
-  pod 'JitsiMeetSDKLite', :path => '.'
+  # pod 'JitsiMeetSDKLite', :podspec => './JitsiMeetSDKLite.podspec'
   
 end
 
@@ -175,4 +175,38 @@ post_install do |installer|
       Pod::UI.puts "Patched fmt/base.h for Xcode 26 compatibility".green
     end
   end
+
+  # # Strip JitsiMeetSDK internal JS bundle to prevent it from loading its own JS runtime
+  # jitsi_sdk_dir = File.join(Dir.pwd, 'Pods', 'JitsiMeetSDKLite', 'lite', 'Frameworks')
+  # jitsi_framework_paths = [
+  #   File.join(jitsi_sdk_dir, 'JitsiMeetSDK.xcframework/ios-arm64_x86_64-simulator/JitsiMeetSDK.framework'),
+  #   File.join(jitsi_sdk_dir, 'JitsiMeetSDK.xcframework/ios-arm64/JitsiMeetSDK.framework'),
+  # ]
+  #
+  # jitsi_framework_paths.each do |fw_dir|
+  #   fw_bundle = File.join(fw_dir, 'main.jsbundle')
+  #   if File.exist?(fw_bundle)
+  #     File.delete(fw_bundle)
+  #     Pod::UI.puts "Removed JitsiMeetSDK main.jsbundle from #{File.dirname(fw_dir)}".yellow
+  #   end
+  # end
+
+  # # Lazy-load JitsiMeetSDK framework so it doesn't initialize at app launch.
+  # # The framework is still embedded in the app bundle but dyld won't load it until
+  # # a symbol from it is first referenced (e.g. when joining a call).
+  # # This prevents the 178 +load methods in JitsiMeetSDK from running at startup.
+  # installer.aggregate_targets.each do |aggregate_target|
+  #   next unless aggregate_target.name == 'Pods-kChat'
+  #   aggregate_target.xcconfigs.each do |config_name, config|
+  #     flags = config.other_linker_flags[:simple]
+  #     flags.delete('-framework') if flags.include?('-framework')
+  #     # Remove JitsiMeetSDK from the -framework pair
+  #     flags.delete('JitsiMeetSDK') if flags.include?('JitsiMeetSDK')
+  #     flags.add('-lazy_framework')
+  #     flags.add('JitsiMeetSDK')
+  #     xcconfig_path = aggregate_target.xcconfig_path(config_name)
+  #     config.save_as(xcconfig_path)
+  #     Pod::UI.puts "Patched #{config_name} xcconfig for lazy JitsiMeetSDK loading".yellow
+  #   end
+  # end
 end
