@@ -12,7 +12,7 @@ import {useIsTablet} from '@hooks/device';
 import {useKeyboardAnimation} from './keyboardAnimation';
 import {useKeyboardScrollAdjustment} from './useKeyboardScrollAdjustment';
 
-import type {PasteInputRef} from '@mattermost/react-native-paste-input';
+import type {PasteTextInputInstance} from '@mattermost/react-native-paste-input';
 import type PostModel from '@typings/database/models/servers/post';
 
 /**
@@ -26,7 +26,7 @@ const isIOS = Platform.OS === 'ios';
 export const useKeyboardAwarePostDraft = (isThreadView = false, enabled = true) => {
     const [postInputContainerHeight, setPostInputContainerHeight] = useState(DEFAULT_POST_INPUT_HEIGHT);
     const listRef = useRef<FlatList<string | PostModel>>(null);
-    const inputRef = useRef<PasteInputRef | undefined>(undefined);
+    const inputRef = useRef<PasteTextInputInstance | null>(null);
     const isTablet = useIsTablet();
     const insets = useSafeAreaInsets();
 

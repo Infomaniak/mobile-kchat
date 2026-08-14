@@ -220,4 +220,4 @@ const Files = ({
     );
 };
 
-export default React.memo(Files);
+export default Files;

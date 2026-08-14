@@ -89,8 +89,6 @@ export const animatedConfig: Omit<WithSpringConfig, 'velocity'> = {
     mass: 0.3,
     stiffness: 121.6,
     overshootClamping: true,
-    restSpeedThreshold: 0.3,
-    restDisplacementThreshold: 0.3,
 };
 
 const BottomSheet = ({

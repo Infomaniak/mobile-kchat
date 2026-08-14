@@ -34,11 +34,17 @@ const CallPropsSchema = (() => {
         end_at: z.number().optional(),
     };
 
-    // Status fallback
+    const outputSchema = {
+        url: z.string().url(),
+        conference_id: z.string().uuid(),
+        start_at: z.number(),
+        end_at: z.number().optional(),
+    };
+
     return z.
         object({...baseSchema, status: CallStatus.optional()}).
         transform((x) => (typeof x.status === 'undefined' ? {...x, status: typeof x.end_at === 'number' ? 'ended' : 'calling'} : x)).
-        pipe(z.object({...baseSchema, status: CallStatus}));
+        pipe(z.object({...outputSchema, status: CallStatus}));
 })();
 
 type CallProps = z.infer<typeof CallPropsSchema>

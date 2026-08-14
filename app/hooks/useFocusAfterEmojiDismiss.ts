@@ -7,7 +7,7 @@ import {runOnUI} from 'react-native-reanimated';
 
 import {useKeyboardAnimationContext} from '@context/keyboard_animation';
 
-import type {PasteInputRef} from '@mattermost/react-native-paste-input';
+import type {PasteTextInputInstance} from '@mattermost/react-native-paste-input';
 
 /**
  * Hook to handle focusing input after emoji picker is dismissed on Android.
@@ -17,7 +17,7 @@ import type {PasteInputRef} from '@mattermost/react-native-paste-input';
  *
  */
 export const useFocusAfterEmojiDismiss = (
-    inputRef: React.MutableRefObject<PasteInputRef | undefined>,
+    inputRef: React.MutableRefObject<PasteTextInputInstance | null>,
     focusInput: () => void,
 ) => {
     const {

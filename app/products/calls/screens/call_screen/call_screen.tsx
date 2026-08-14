@@ -4,7 +4,7 @@
 /* eslint-disable react/jsx-max-props-per-line */
 
 import {JitsiMeeting, type JitsiRefProps} from '@jitsi/react-native-sdk';
-import React, {forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type ComponentProps, type MutableRefObject} from 'react';
+import React, {forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type ComponentProps, type ComponentType, type MutableRefObject} from 'react';
 import {useIntl} from 'react-intl';
 import {ActivityIndicator, FlatList, Platform, View} from 'react-native';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
@@ -73,6 +73,10 @@ type Props = PassedProps & InjectedProps
 const MINIMUM_CONFERENCE_DURATION = 2000; // ms
 
 const EDGES: Edge[] = ['bottom', 'left', 'right'];
+
+const MuteButton = AudioMuteButton as unknown as ComponentType<{audioMuted: boolean; disabled: boolean; onPress: () => void}>;
+const VButton = VideoMuteButton as unknown as ComponentType<{videoMuted: boolean; disabled: boolean; onPress: () => void}>;
+const HButton = HangupButton as unknown as ComponentType<{onPress: () => void}>;
 
 /**
  * Global styles
@@ -594,17 +598,17 @@ const CallScreen = ({
                             // <ContentContainer aspectRatio={isWide ? 'wide' : 'narrow'}>
                             <ContentContainer>
                                 <ToolboxContainer>
-                                    <AudioMuteButton
+                                    <MuteButton
                                         audioMuted={audioMuted}
                                         disabled={!micPermissionsGranted}
                                         onPress={toggleAudioMuted}
                                     />
-                                    <VideoMuteButton
+                                    <VButton
                                         videoMuted={videoMuted}
                                         disabled={false}
                                         onPress={toggleVideoMuted}
                                     />
-                                    <HangupButton
+                                    <HButton
                                         onPress={() => {
                                             leaveCall('internal');
                                         }}
