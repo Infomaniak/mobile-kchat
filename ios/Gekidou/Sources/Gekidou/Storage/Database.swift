@@ -151,6 +151,25 @@ public class Database: NSObject {
             throw error
         }
     }
+
+    public func getServerIdForServerUrl(_ serverUrl: String) throws -> String {
+        do {
+            let db = try Connection(DEFAULT_DB_PATH)
+            let url = Expression<String>("url")
+            let identifier = Expression<String>("identifier")
+            let query = serversTable.select(identifier).filter(url == serverUrl)
+
+            if let server = try db.pluck(query),
+               let id = try? server.get(identifier) {
+                return id
+            }
+
+            throw DatabaseError.NoResults(query.expression.description)
+        } catch {
+            GekidouLogger.shared.log(.error, "Gekidou Database: Failed to get server ID for URL %{public}@ from %{public}@ - %{public}@", serverUrl, DEFAULT_DB_PATH, String(describing: error))
+            throw error
+        }
+    }
     
     public func getAllActiveDatabases<T: Codable>() -> [T] {
         guard let db = try? Connection(DEFAULT_DB_PATH) else {return []}

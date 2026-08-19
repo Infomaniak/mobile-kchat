@@ -73,9 +73,10 @@ export const switchToConferenceByChannelId = async (
         // that has been deleted locally, but has not remotely
         await handleConferenceUpdatedById(serverUrl, call.id, {deleteAt: undefined});
 
-        // For iOS, trigger the nativeReporter only
-        // and let CallKit do the job 🚀
-        if (Platform.OS === 'ios') {
+        // For iOS outgoing calls from the UI, trigger CallKit via the nativeReporter
+        // Skip this when the call was initiated by CallKit (initiator === 'native')
+        // since CallKit is already active
+        if (Platform.OS === 'ios' && initiator !== 'native') {
             const database = DatabaseManager.serverDatabases[serverUrl]?.database;
             const [currentUserId, channel] = await Promise.all([
                 getCurrentUserId(database!),
@@ -86,9 +87,9 @@ export const switchToConferenceByChannelId = async (
                 throw new Error(`Channel not found ${channelId}`);
             }
 
-            // Triggering a call from the UI (ie. initiator === internal) on
-            // DMs or GMs will display the "Calling..." screen, so we can't let iOS
-            // handle it for now
+            // Only trigger CallKit for non-DM/GM calls or when the user is NOT the initiator
+            // For DM/GM calls where the user is the initiator, the "Calling..." screen
+            // is displayed in RN, so we don't need CallKit
             const isDMorGM = isChannelDMorGM(channel);
             const shouldDisplayCallingScreen = (
                 isDMorGM &&
@@ -98,8 +99,6 @@ export const switchToConferenceByChannelId = async (
             if (!shouldDisplayCallingScreen) {
                 const callName = await CallManager.getCallName(serverUrl, channel, currentUserId);
                 CallManager.nativeReporters.ios.callStarted(serverUrl, channelId, callName, call.id, conferenceJWT ?? call.jwt ?? '', call.url);
-
-                return;
             }
         }
 

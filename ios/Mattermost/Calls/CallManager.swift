@@ -60,8 +60,6 @@ public class CallManager: NSObject {
 
   @objc public private(set) var token: String?
 
-  private var callWindow: CallWindow?
-
   override private init() {
     let configuration: CXProviderConfiguration
     if #available(iOS 14.0, *) {
@@ -124,7 +122,7 @@ public class CallManager: NSObject {
     return call
   }
 
-  func reportCallEnded(conferenceId: String) {
+  @objc public func reportCallEnded(conferenceId: String) {
     guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
 
     let endCallAction = CXEndCallAction(call: existingCall.localUUID)
@@ -247,33 +245,31 @@ public class CallManager: NSObject {
     currentCalls[existingCall.localUUID] = nil
     callProvider.reportCall(with: existingCall.localUUID, endedAt: nil, reason: .remoteEnded)
   }
-}
 
-extension CallManager: CallViewControllerDelegate {
-  func onConferenceTerminated(conferenceId: String?) {
-    callWindow = nil
-
-    guard let conferenceId else { return }
-    reportCallEnded(conferenceId: conferenceId)
-  }
-
-  func onVideoMuted(conferenceId: String, isMuted: Bool) {
-    guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
-
-    let update = CXCallUpdate()
-    update.hasVideo = isMuted
-    callProvider.reportCall(with: existingCall.localUUID, updated: update)
-  }
-
-  func onAudioMuted(conferenceId: String, isMuted: Bool) {
-    guard let existingCall = currentCalls.first(where: { $0.value.conferenceId == conferenceId })?.value else { return }
-
-    let muteCallAction = CXSetMutedCallAction(call: existingCall.localUUID, muted: isMuted)
-    callController.requestTransaction(with: [muteCallAction]) { error in
-      if let error {
-        LegacyLogger.calls.log(level: .error, message: "An error occurred muting call \(error)")
-      }
+  private func emitCallAnswered(call: MeetCall) {
+    guard let conferenceJWT = call.conferenceJWT,
+          let serverId = try? Database.default.getServerIdForServerUrl(call.serverURL) else {
+      LegacyLogger.calls.log(level: .error, message: "[CallManager.emitCallAnswered] Missing conferenceJWT or serverId")
+      return
     }
+
+    CallManagerModule.callManagerSharedInstance()?.sendCallAnswered(
+      serverId,
+      channelId: call.channelId,
+      conferenceJWT: conferenceJWT
+    )
+  }
+
+  private func emitCallEnded(call: MeetCall) {
+    guard let conferenceId = call.conferenceId,
+          let serverId = try? Database.default.getServerIdForServerUrl(call.serverURL) else {
+      return
+    }
+
+    CallManagerModule.callManagerSharedInstance()?.sendCallEnded(
+      serverId,
+      conferenceId: conferenceId
+    )
   }
 }
 
@@ -322,16 +318,12 @@ extension CallManager: CXProviderDelegate {
           completeCall = try await startCall(existingCall)
         }
 
-        if let rootWindowScene = UIApplication.shared.connectedScenes
-            .compactMap({ $0 as? UIWindowScene })
-            .first(where: { $0.activationState == .foregroundActive }) {
-          LegacyLogger.calls.log(message: "Presenting call window")
-          let callWindow = CallWindow(meetCall: completeCall, delegate: self, windowScene: rootWindowScene)
-          self.callWindow = callWindow
-          currentCalls[action.callUUID] = completeCall
-          currentCalls[action.callUUID]?.joined = true
-          action.fulfill()
-        }
+        currentCalls[action.callUUID] = completeCall
+        currentCalls[action.callUUID]?.joined = true
+        action.fulfill()
+
+        // Notify JS to display the RN call screen (same flow as Android)
+        emitCallAnswered(call: completeCall)
       } catch {
         LegacyLogger.calls.log(level: .error, message: "Error while calling start call \(error)")
         action.fail()
@@ -345,24 +337,26 @@ extension CallManager: CXProviderDelegate {
         action.fail()
         return
       }
-      // The user is in the current call
-      if currentCalls[action.callUUID]?.joined == true {
-        callWindow?.leaveCurrentCall()
+      let wasJoined = currentCalls[action.callUUID]?.joined == true
+      currentCalls[action.callUUID]?.joined = false
+      currentCalls[existingCall.localUUID] = nil
+
+      if wasJoined {
+        // The user ended the call from the RN UI or from the CallKit UI
+        // The RN side will handle the API call to leave/end the conference
+        emitCallEnded(call: existingCall)
       } else {
         // The user declined the call from native UI
         Task {
           try await self.declineCall(existingCall)
         }
       }
-      currentCalls[action.callUUID]?.joined = false
-      currentCalls[existingCall.localUUID] = nil
       action.fulfill()
     }
   }
 
   public func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
     Task { @MainActor in
-      callWindow?.setCurrentCallMuted(action.isMuted)
       action.fulfill()
     }
   }

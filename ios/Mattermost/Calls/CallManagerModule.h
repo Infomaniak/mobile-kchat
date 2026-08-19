@@ -10,4 +10,10 @@
 #import <React/RCTEventEmitter.h>
 
 @interface CallManagerModule : RCTEventEmitter <RCTBridgeModule>
+
++ (instancetype)callManagerSharedInstance;
+
+- (void)sendCallAnswered:(NSString*)serverId channelId:(NSString*)channelId conferenceJWT:(NSString*)conferenceJWT;
+- (void)sendCallEnded:(NSString*)serverId conferenceId:(NSString*)conferenceId;
+
 @end
