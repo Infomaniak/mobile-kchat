@@ -149,7 +149,7 @@ const CallScreen = ({
     channelId,
     conferenceId,
     conferenceJWT,
-    conferenceURL,
+    conferenceURL: _conferenceURL,
     answered,
     initiator,
     serverUrl,
@@ -273,15 +273,6 @@ const CallScreen = ({
         isCurrentUserInitiator &&
         !hasAtLeastOneParticipantPresent &&
         jitsiMeetingMountedRef.current === false
-    );
-
-    /**
-     * iOS must handle calling screen natively
-     */
-    const shouldDisplayNativeCall = (
-        !shouldDisplayLoadingScreen &&
-        !shouldDisplayCallingScreen &&
-        Platform.OS === 'ios'
     );
 
     /**
@@ -536,22 +527,9 @@ const CallScreen = ({
         }
     }, [leaveCallRef, shouldLeaveCall]);
 
-    /**
-     * Trigger the native iOS calling screen
-     */
-    useEffect(() => {
-        if (shouldDisplayNativeCall) {
-            (async () => {
-                const callName = await CallManager.getCallName(serverUrl, channel, currentUserId!);
-                CallManager.nativeReporters.ios.callStarted(serverUrl, channelId, callName, conferenceId, conferenceJWT, conferenceURL);
-            })();
-        }
-    }, [channel, channelId, conferenceId, conferenceJWT, conferenceURL, currentUserId, serverUrl, shouldDisplayNativeCall]);
-
     if (
         shouldDisplayLoadingScreen ||
-        shouldDisplayCallingScreen ||
-        shouldDisplayNativeCall
+        shouldDisplayCallingScreen
     ) {
         return (
             <>
