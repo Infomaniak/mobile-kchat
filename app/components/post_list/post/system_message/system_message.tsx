@@ -392,6 +392,177 @@ const renderReminderSystemBotMessage = ({post, styles, location, intl, theme, cu
     return renderMessage({post, styles, intl, location, localeHolder, values, theme});
 };
 
+const joinChannelMessages = defineMessages({
+    joined: {
+        id: 'combined_system_message.joined_channel.one',
+        defaultMessage: '{firstUser} **joined the channel**.',
+    },
+});
+
+const renderJoinChannelMessage = ({post, author, location, styles, intl, theme}: RenderersProps) => {
+    const username = renderUsername(author?.username || ensureString(post.props?.username));
+    if (!username) {
+        return null;
+    }
+
+    const localeHolder = joinChannelMessages.joined;
+    const values = {firstUser: username};
+    return renderMessage({post, styles, intl, location, localeHolder, values, theme});
+};
+
+const leaveChannelMessages = defineMessages({
+    left: {
+        id: 'combined_system_message.left_channel.one',
+        defaultMessage: '{firstUser} **left the channel**.',
+    },
+});
+
+const renderLeaveChannelMessage = ({post, author, location, styles, intl, theme}: RenderersProps) => {
+    const username = renderUsername(author?.username || ensureString(post.props?.username));
+    if (!username) {
+        return null;
+    }
+
+    const localeHolder = leaveChannelMessages.left;
+    const values = {firstUser: username};
+    return renderMessage({post, styles, intl, location, localeHolder, values, theme});
+};
+
+const addToChannelMessages = defineMessages({
+    added: {
+        id: 'combined_system_message.added_to_channel.one',
+        defaultMessage: '{firstUser} **added to the channel** by {actor}.',
+    },
+});
+
+const renderAddToChannelMessage = ({post, author, location, styles, intl, theme}: RenderersProps) => {
+    const addedUsername = renderUsername(ensureString(post.props?.addedUsername));
+    const actor = renderUsername(author?.username || ensureString(post.props?.username));
+    if (!addedUsername || !actor) {
+        return null;
+    }
+
+    const localeHolder = addToChannelMessages.added;
+    const values = {firstUser: addedUsername, actor};
+    return renderMessage({post, styles, intl, location, localeHolder, values, theme});
+};
+
+const removeFromChannelMessages = defineMessages({
+    removed: {
+        id: 'combined_system_message.removed_from_channel.one',
+        defaultMessage: '{firstUser} was **removed from the channel**.',
+    },
+});
+
+const renderRemoveFromChannelMessage = ({post, author, location, styles, intl, theme}: RenderersProps) => {
+    const removedUsername = renderUsername(ensureString(post.props?.removedUsername));
+    const actor = renderUsername(author?.username || ensureString(post.props?.username));
+    if (!removedUsername) {
+        return null;
+    }
+
+    const localeHolder = removeFromChannelMessages.removed;
+    const values = {firstUser: removedUsername, actor};
+    return renderMessage({post, styles, intl, location, localeHolder, values, theme});
+};
+
+const joinTeamMessages = defineMessages({
+    joined: {
+        id: 'combined_system_message.joined_team.one',
+        defaultMessage: '{firstUser} **joined the team**.',
+    },
+});
+
+const renderJoinTeamMessage = ({post, author, location, styles, intl, theme}: RenderersProps) => {
+    const username = renderUsername(author?.username || ensureString(post.props?.username));
+    if (!username) {
+        return null;
+    }
+
+    const localeHolder = joinTeamMessages.joined;
+    const values = {firstUser: username};
+    return renderMessage({post, styles, intl, location, localeHolder, values, theme});
+};
+
+const leaveTeamMessages = defineMessages({
+    left: {
+        id: 'combined_system_message.left_team.one',
+        defaultMessage: '{firstUser} **left the team**.',
+    },
+});
+
+const renderLeaveTeamMessage = ({post, author, location, styles, intl, theme}: RenderersProps) => {
+    const username = renderUsername(author?.username || ensureString(post.props?.username));
+    if (!username) {
+        return null;
+    }
+
+    const localeHolder = leaveTeamMessages.left;
+    const values = {firstUser: username};
+    return renderMessage({post, styles, intl, location, localeHolder, values, theme});
+};
+
+const addToTeamMessages = defineMessages({
+    added: {
+        id: 'combined_system_message.added_to_team.one',
+        defaultMessage: '{firstUser} **added to the team** by {actor}.',
+    },
+});
+
+const renderAddToTeamMessage = ({post, author, location, styles, intl, theme}: RenderersProps) => {
+    const addedUsername = renderUsername(ensureString(post.props?.addedUsername));
+    const actor = renderUsername(author?.username || ensureString(post.props?.username));
+    if (!addedUsername || !actor) {
+        return null;
+    }
+
+    const localeHolder = addToTeamMessages.added;
+    const values = {firstUser: addedUsername, actor};
+    return renderMessage({post, styles, intl, location, localeHolder, values, theme});
+};
+
+const removeFromTeamMessages = defineMessages({
+    removed: {
+        id: 'combined_system_message.removed_from_team.one',
+        defaultMessage: '{firstUser} was **removed from the team**.',
+    },
+});
+
+const renderRemoveFromTeamMessage = ({post, author, location, styles, intl, theme}: RenderersProps) => {
+    const removedUsername = renderUsername(ensureString(post.props?.removedUsername));
+    const actor = renderUsername(author?.username || ensureString(post.props?.username));
+    if (!removedUsername) {
+        return null;
+    }
+
+    const localeHolder = removeFromTeamMessages.removed;
+    const values = {firstUser: removedUsername, actor};
+    return renderMessage({post, styles, intl, location, localeHolder, values, theme});
+};
+
+const renderJoinLeaveMessage = ({post, author, location, styles, intl, theme}: RenderersProps) => {
+    const username = renderUsername(author?.username || ensureString(post.props?.username));
+    if (!username) {
+        return null;
+    }
+
+    const localeHolder = joinChannelMessages.joined;
+    const values = {firstUser: username};
+    return renderMessage({post, styles, intl, location, localeHolder, values, theme});
+};
+
+const renderAddRemoveMessage = ({post, author, location, styles, intl, theme}: RenderersProps) => {
+    const addedUsername = renderUsername(ensureString(post.props?.addedUsername));
+    const actor = renderUsername(author?.username || ensureString(post.props?.username));
+    if (!addedUsername || !actor) {
+        return null;
+    }
+
+    const localeHolder = addToChannelMessages.added;
+    const values = {firstUser: addedUsername, actor};
+    return renderMessage({post, styles, intl, location, localeHolder, values, theme});
+};
+
 const systemMessageRenderers = {
     [Post.POST_TYPES.HEADER_CHANGE]: renderHeaderChangeMessage,
     [Post.POST_TYPES.DISPLAYNAME_CHANGE]: renderDisplayNameChangeMessage,
@@ -401,6 +572,16 @@ const systemMessageRenderers = {
     [Post.POST_TYPES.IK_SYSTEM_POST_REMINDER]: renderReminderSystemBotMessage,
     [Post.POST_TYPES.IK_SYSTEM_WELCOME_MESSAGE]: () => null,
     [Post.POST_TYPES.USER_MENTIONED_IN_CHANNEL]: renderUserMentionedInChannelMessage,
+    [Post.POST_TYPES.JOIN_CHANNEL]: renderJoinChannelMessage,
+    [Post.POST_TYPES.LEAVE_CHANNEL]: renderLeaveChannelMessage,
+    [Post.POST_TYPES.ADD_TO_CHANNEL]: renderAddToChannelMessage,
+    [Post.POST_TYPES.REMOVE_FROM_CHANNEL]: renderRemoveFromChannelMessage,
+    [Post.POST_TYPES.JOIN_TEAM]: renderJoinTeamMessage,
+    [Post.POST_TYPES.LEAVE_TEAM]: renderLeaveTeamMessage,
+    [Post.POST_TYPES.ADD_TO_TEAM]: renderAddToTeamMessage,
+    [Post.POST_TYPES.REMOVE_FROM_TEAM]: renderRemoveFromTeamMessage,
+    [Post.POST_TYPES.JOIN_LEAVE]: renderJoinLeaveMessage,
+    [Post.POST_TYPES.ADD_REMOVE]: renderAddRemoveMessage,
 };
 
 export const SystemMessage = ({post, location, author, hideGuestTags, currentUser}: SystemMessageProps & { hideGuestTags: boolean}) => {
