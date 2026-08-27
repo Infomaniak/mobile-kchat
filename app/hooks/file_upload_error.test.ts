@@ -7,11 +7,14 @@ import {UPLOAD_ERROR_SHOW_INTERVAL} from '@constants/files';
 
 import useFileUploadError from './file_upload_error';
 
-jest.useFakeTimers();
-
 describe('useFileUploadError', () => {
+    beforeEach(() => {
+        jest.useFakeTimers({doNotFake: ['nextTick']});
+    });
+
     afterEach(() => {
         jest.clearAllTimers();
+        jest.useRealTimers();
     });
 
     it('should initialize with no upload error', () => {
