@@ -98,6 +98,7 @@ const AppLogs = () => {
             </View>
             <View style={styles.buttonContainer}>
                 <Button
+                    testID='app_logs_download_button'
                     onPress={handleDownload}
                     text={intl.formatMessage({
                         id: 'screen.report_problem.logs.download',
