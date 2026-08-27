@@ -645,6 +645,19 @@ jest.mock('react-native-nitro-sound', () => ({
     })),
 }));
 
+jest.mock('@mattermost/react-native-paste-input', () => {
+    const React = require('react');
+    const MockedPasteTextInput = React.forwardRef((props: any, ref: any) => {
+        const {TextInput} = require('react-native');
+        return React.createElement(TextInput, {...props, ref});
+    });
+    MockedPasteTextInput.displayName = 'PasteTextInput';
+    return {
+        __esModule: true,
+        default: MockedPasteTextInput,
+    };
+});
+
 // IK MOCKS
 
 jest.mock('react-native-fs', () => ({

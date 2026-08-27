@@ -59,12 +59,13 @@ jest.mock('react', () => ({
 }));
 
 describe('setFontFamily', () => {
-    // @ts-expect-error renderer is not exposed to TS definition
-    const renderTextSpy = jest.spyOn(Text, 'render');
     let originalTextRender: any;
+    let renderTextSpy: jest.SpyInstance;
 
     beforeEach(() => {
-        // Capture the original Text.render before modification
+        // @ts-expect-error renderer is not exposed to TS definition
+        renderTextSpy = jest.spyOn(Text, 'render');
+
         // @ts-expect-error renderer is not exposed to TS definition
         originalTextRender = Text.render;
     });
