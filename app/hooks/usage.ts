@@ -4,7 +4,7 @@
 import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type {CloudUsage} from '@typings/components/cloud';
 
-export function useGetUsageDeltas(usage: CloudUsageModel, limits: LimitModel): CloudUsage {
+export function useGetUsageDeltas(usage?: CloudUsageModel | null, limits?: LimitModel | null): CloudUsage {
     const usageDelta = () => {
         if (!usage || !limits) {
             return {

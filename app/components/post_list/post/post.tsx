@@ -240,7 +240,7 @@ const Post = ({
     }, [handlePostPress, post]);
 
     const handlePostponePress = useCallback(async () => {
-        const postId = post.props?.post_id;
+        const postponePostId = post.props?.post_id;
 
         openAsBottomSheet({
             closeButtonId: 'close-quota-exceeded',
@@ -248,13 +248,12 @@ const Post = ({
             theme,
             title: '',
             props: {
-                post,
-                postId,
+                postId: post.id,
                 postpone: true,
-                currentUser,
+                postponePostId,
             },
         });
-    }, [currentUser, post, theme]);
+    }, [post, theme]);
 
     const handleMarkRemindAsDone = async () => {
         const postId = post.id;
@@ -535,7 +534,7 @@ const Post = ({
                 underlayColor={changeOpacity(theme.centerChannelColor, 0.1)}
                 style={styles.postContent}
             >
-                <>
+                <View>
                     <PreHeader
                         isConsecutivePost={isConsecutivePost}
                         isSaved={isSaved}
@@ -552,7 +551,7 @@ const Post = ({
                         </View>
                         {unreadDot}
                     </View>
-                </>
+                </View>
             </TouchableHighlight>
             <ShimmerAnimation {...shimmerAnimationProps}/>
         </View>

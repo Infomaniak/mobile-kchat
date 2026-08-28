@@ -7,21 +7,18 @@ import {BaseOption} from '@components/common_post_options';
 import {Screens} from '@constants';
 import {dismissBottomSheet, navigateToScreen} from '@screens/navigation';
 
-import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 
 type Props = {
     post: PostModel;
-    limits: LimitModel;
-    usage: CloudUsageModel;
 }
 
-const IKReminderOption = ({post, usage, limits}: Props) => {
+const IKReminderOption = ({post}: Props) => {
     const onPress = useCallback(async () => {
         await dismissBottomSheet();
 
-        navigateToScreen(Screens.IK_REMINDER, {post, usage, limits});
-    }, [limits, post, usage]);
+        navigateToScreen(Screens.IK_REMINDER, {postId: post.id});
+    }, [post.id]);
 
     return (
         <BaseOption
