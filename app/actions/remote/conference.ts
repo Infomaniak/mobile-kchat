@@ -23,6 +23,15 @@ import {forceLogoutIfNecessary} from './session';
 
 import type ConferenceModel from '@typings/database/models/servers/conference';
 
+/**
+ * Switches to the call screen currently in progress, per server URL and channel ID.
+ * Several UI elements can trigger a switch to the same conference within a short
+ * time frame (start call button, incoming call banner, auto-join on the call
+ * message, answered-elsewhere queue, ...); mounting two call screens would create
+ * two embedded Jitsi apps joining the same conference twice.
+ */
+const switchesInFlight = new Map<string, Promise<void>>();
+
 export const fetchConference = async (serverUrl: string, conferenceId: string) => {
     try {
         // Try to get the conference in the local DB
@@ -53,6 +62,25 @@ export const switchToConferenceByChannelId = async (
     serverUrl: string, channelId: string,
     {conferenceId, conferenceJWT, initiator}:
     { conferenceId?: string; conferenceJWT?: string; initiator?: 'native' | 'internal' } = {},
+): Promise<void> => {
+    const key = `${serverUrl}:${channelId}`;
+    const inFlight = switchesInFlight.get(key);
+    if (inFlight) {
+        logDebug('[switchToConferenceByChannelId] a switch is already in progress for channel', channelId, '- ignoring duplicate call');
+        return inFlight;
+    }
+
+    const promise = doSwitchToConferenceByChannelId(serverUrl, channelId, {conferenceId, conferenceJWT, initiator});
+    switchesInFlight.set(key, promise);
+    promise.finally(() => switchesInFlight.delete(key));
+
+    return promise;
+};
+
+const doSwitchToConferenceByChannelId = async (
+    serverUrl: string, channelId: string,
+    {conferenceId, conferenceJWT, initiator}:
+    { conferenceId?: string; conferenceJWT?: string; initiator?: 'native' | 'internal' } = {},
 ) => {
     /* eslint-disable multiline-ternary */
     try {
@@ -62,6 +90,13 @@ export const switchToConferenceByChannelId = async (
             await CallManager.startCall(serverUrl, channelId);
         if (call === null) {
             throw new Error('Call could not be started/answered');
+        }
+
+        // If a switch to this conference already completed, do not mount a second
+        // call screen (and a second Jitsi conference join)
+        if (CallManager.isConferenceJoined(serverUrl, call.id)) {
+            logDebug('[switchToConferenceByChannelId] already joined to conference', call.id, '- ignoring duplicate call');
+            return;
         }
 
         // If the call is "not answered" (ie. started) the current user
@@ -164,6 +199,10 @@ export const switchToConferenceByChannelId = async (
 
         // Pop the CALL screen
         await dismissAllModalsAndPopToScreen(Screens.CALL, title, passedProps, options);
+
+        // The call screen is now displayed: track it so duplicate switches
+        // to the same conference are ignored
+        CallManager.markConferenceJoined(serverUrl, call.id);
     } catch (err) {
         logError(err);
     }
