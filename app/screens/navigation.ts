@@ -138,8 +138,16 @@ export async function dismissAllRoutesAndPopToScreen(screenId: AvailableScreens,
             router.setParams(propsToParams(passProps));
             await new Promise((resolve) => setTimeout(resolve, 250));
         } else {
-            await navigateToRoot();
+            // Stacking a pop-to-home (navigateToRoot) before the push races with
+            // the push when the app is returning to the foreground (e.g. answering
+            // a CallKit call): the home navigation lands after the push and buries
+            // the target screen. Push the target on top of the current state
+            // instead; open modal stacks are dismissed first.
+            if (NavigationStore.hasModalsOpened()) {
+                router.dismissAll();
+            }
             navigateToScreen(screenId, passProps);
+            await new Promise((resolve) => setTimeout(resolve, 250));
         }
     } catch (e) {
         logError('dismissAllRoutesAndPopToScreen: Expo Router navigation failed', e);

@@ -113,9 +113,9 @@ RCT_EXPORT_METHOD(reportCallVideoMuted: (NSString*)conferenceId
 - (void)sendCallAnswered:(NSString*)serverId channelId:(NSString*)channelId conferenceJWT:(NSString*)conferenceJWT {
   if (hasListeners) {
     [self sendEventWithName:@"CallAnswered" body:@{
-      @"server_id": serverId,
-      @"channel_id": channelId,
-      @"conference_jwt": conferenceJWT,
+      @"serverId": serverId,
+      @"channelId": channelId,
+      @"conferenceJWT": conferenceJWT,
     }];
   }
 }
@@ -123,8 +123,8 @@ RCT_EXPORT_METHOD(reportCallVideoMuted: (NSString*)conferenceId
 - (void)sendCallEnded:(NSString*)serverId conferenceId:(NSString*)conferenceId {
   if (hasListeners) {
     [self sendEventWithName:@"CallEnded" body:@{
-      @"server_id": serverId,
-      @"conference_id": conferenceId,
+      @"serverId": serverId,
+      @"conferenceId": conferenceId,
     }];
   }
 }
