@@ -17,8 +17,8 @@ const AskAi = ({post}: {post: PostModel}) => {
 
     const onPress = useCallback(async () => {
         await dismissBottomSheet();
-        navigateToScreen(Screens.AI_OPTIONS, {post});
-    }, [post]);
+        navigateToScreen(Screens.AI_OPTIONS, {postId: post.id});
+    }, [post.id]);
 
     return (
         <BaseOption

@@ -16,17 +16,17 @@ import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
+import useDidMount from '@hooks/did_mount';
 import {usePreventDoubleTap} from '@hooks/utils';
 import BottomSheet from '@screens/bottom_sheet';
 import {dismissBottomSheet} from '@screens/navigation';
+import CallbackStore from '@store/callback_store';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {logWarning} from '@utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 import type {RewriteAction} from '@agents/types';
-import type {AvailableScreens} from '@typings/screens/navigation';
 
 const messages = defineMessages({
     errorTitle: {
@@ -79,11 +79,11 @@ const messages = defineMessages({
     },
 });
 
+export type updateValueFn = (value: string | ((prevValue: string) => string)) => void;
+
 type Props = {
-    closeButtonId: string;
-    componentId: AvailableScreens;
     originalMessage: string;
-    updateValue: (value: string | ((prevValue: string) => string)) => void;
+    updateValue?: updateValueFn;
 };
 
 const CUSTOM_PROMPT_INPUT_HEIGHT = 64;
@@ -155,8 +155,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 }));
 
 const RewriteOptions = ({
-    closeButtonId,
-    componentId,
     originalMessage,
     updateValue,
 }: Props) => {
@@ -180,11 +178,16 @@ const RewriteOptions = ({
         await dismissBottomSheet();
     }, []);
 
-    useNavButtonPressed(closeButtonId, componentId, closeBottomSheet, []);
-    useAndroidHardwareBackHandler(componentId, closeBottomSheet);
+    useAndroidHardwareBackHandler(Screens.AGENTS_REWRITE_OPTIONS, closeBottomSheet);
+
+    useDidMount(() => {
+        return () => {
+            CallbackStore.removeCallback();
+        };
+    });
 
     const handleRewriteSuccess = useCallback((rewrittenText: string) => {
-        updateValue(rewrittenText);
+        updateValue?.(rewrittenText);
     }, [updateValue]);
 
     const handleRewriteError = useCallback((errorMsg: string) => {
@@ -249,7 +252,7 @@ const RewriteOptions = ({
 
     const handleCancel = usePreventDoubleTap(useCallback(async () => {
         if (rewriteHistory) {
-            updateValue(rewriteHistory.originalText);
+            updateValue?.(rewriteHistory.originalText);
             rewriteStore.clearRewriteHistory();
         }
         await closeBottomSheet();
@@ -357,7 +360,6 @@ const RewriteOptions = ({
     return (
         <BottomSheet
             renderContent={renderContent}
-            closeButtonId={closeButtonId}
             componentId={Screens.AGENTS_REWRITE_OPTIONS}
             initialSnapIndex={1}
             snapPoints={snapPoints}
