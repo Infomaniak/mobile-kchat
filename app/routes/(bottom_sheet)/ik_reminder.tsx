@@ -2,9 +2,9 @@
 // See LICENSE.txt for license information.
 
 import {usePropsFromParams} from '@hooks/props_from_params';
-import Screen from '@screens/ik_reminder';
+import IKReminder, {type IKReminderProps} from '@screens/ik_reminder';
 
 export default function Route() {
-    const props = usePropsFromParams<any>();
-    return <Screen {...props}/>;
+    const props = usePropsFromParams<IKReminderProps>();
+    return <IKReminder {...props}/>;
 }
