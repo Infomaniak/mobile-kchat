@@ -1,11 +1,19 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import Screen from '@agents/screens/rewrite_options';
+import RewriteOptionsScreen, {type updateValueFn} from '@agents/screens/rewrite_options';
 
 import {usePropsFromParams} from '@hooks/props_from_params';
+import CallbackStore from '@store/callback_store';
 
 export default function Route() {
-    const props = usePropsFromParams<any>();
-    return <Screen {...props}/>;
+    const {originalMessage} = usePropsFromParams<{originalMessage: string}>();
+    const updateValue = CallbackStore.getCallback<updateValueFn>();
+
+    return (
+        <RewriteOptionsScreen
+            originalMessage={originalMessage}
+            updateValue={updateValue}
+        />
+    );
 }

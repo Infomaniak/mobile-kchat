@@ -11,18 +11,16 @@ import {dismissBottomSheet} from '@screens/navigation';
 
 import IconThreadSummarization from '../../../../components/illustrations/icon_thread_summarization';
 
-import type PostModel from '@typings/database/models/servers/post';
-
 type Props = {
-    post: PostModel;
+    postId: string;
 }
 
-const SummarizeThread = ({post}: Props) => {
+const SummarizeThread = ({postId}: Props) => {
     const serverUrl = useServerUrl();
     const theme = useTheme();
 
     const handleSummarizeThread = (async () => {
-        const summarizePost = await summarizeThread(serverUrl, post.id, 'euria');
+        const summarizePost = await summarizeThread(serverUrl, postId, 'euria');
         await dismissBottomSheet();
         fetchAndSwitchToThread(serverUrl, summarizePost.data.postid);
     });
