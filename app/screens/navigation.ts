@@ -17,7 +17,7 @@ import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import {isTablet} from '@utils/helpers';
 import {dismissKeyboard} from '@utils/keyboard';
-import {logError} from '@utils/log';
+import {logDebug, logError} from '@utils/log';
 import {appearanceControlledScreens, mergeNavigationOptions} from '@utils/navigation';
 import {captureException} from '@utils/sentry';
 import {changeOpacity, setNavigatorStyles} from '@utils/theme';
@@ -650,9 +650,29 @@ export function goToScreen(name: AvailableScreens, title: string, passProps = {}
     DeviceEventEmitter.emit(Events.TAB_BAR_VISIBLE, false);
 
     if (NavigationStore.getScreensInStack().includes(name)) {
+        const mergedOptions = merge(defaultOptions, options);
+
+        // RM-616000
+        logDebug('[Navigation.goToScreen] screen already in stack', JSON.stringify({
+            name,
+            visible: NavigationStore.getVisibleScreen(),
+            stack: NavigationStore.getScreensInStack(),
+        }));
+
         Navigation.updateProps(name, passProps);
         if (NavigationStore.getVisibleScreen() !== name) {
-            return Navigation.popTo(name, merge(defaultOptions, options));
+            return Navigation.popTo(name, mergedOptions).catch((error) => {
+                // RM-616000
+                logError('[Navigation.goToScreen] popTo failed, pushing a fresh screen instead', error);
+                return Navigation.push(componentId, {
+                    component: {
+                        id: name,
+                        name,
+                        passProps,
+                        options: mergedOptions,
+                    },
+                }).catch((pushError) => logError('[Navigation.goToScreen] fallback push also failed', pushError));
+            });
         }
         return '';
     }

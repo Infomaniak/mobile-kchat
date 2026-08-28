@@ -7,7 +7,7 @@ import {Events, Preferences, Screens} from '@constants';
 import NavigationStore from '@store/navigation_store';
 import {isTablet} from '@utils/helpers';
 
-import {dismissAllModalsAndPopToScreen, openAsBottomSheet, openAttachmentOptions} from './navigation';
+import {dismissAllModalsAndPopToScreen, goToScreen, openAsBottomSheet, openAttachmentOptions} from './navigation';
 
 import type {FirstArgument} from '@typings/utils/utils';
 import type {IntlShape} from 'react-intl';
@@ -212,5 +212,77 @@ describe('dismissAllModalsAndPopToScreen', () => {
         await dismissAllModalsAndPopToScreen(Screens.CHANNEL, '');
 
         expect(Navigation.popTo).not.toHaveBeenCalled();
+    });
+});
+
+describe('goToScreen', () => {
+    const goToScreenFn = jest.requireActual('./navigation').goToScreen as typeof goToScreen;
+    const mockPush = Navigation.push as unknown as jest.Mock;
+    const mockUpdateProps = Navigation.updateProps as unknown as jest.Mock;
+    let mockPopTo: jest.Mock;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        NavigationStore.reset();
+        mockPopTo = jest.fn();
+        mockPush.mockResolvedValue({});
+        (Navigation as unknown as {popTo: jest.Mock}).popTo = mockPopTo;
+    });
+
+    afterEach(() => {
+        NavigationStore.reset();
+    });
+
+    it('should push a fresh screen when popTo rejects because the navigation store is stale', async () => {
+        NavigationStore.addScreenToStack(Screens.HOME);
+        NavigationStore.addScreenToStack(Screens.THREAD);
+        NavigationStore.addScreenToStack(Screens.CHANNEL);
+        mockPopTo.mockRejectedValue(new Error('ComponentId does not exist'));
+
+        await goToScreenFn(Screens.THREAD, '', {rootId: 'root-post-id'});
+
+        expect(mockPush).toHaveBeenCalledWith(
+            Screens.CHANNEL,
+            expect.objectContaining({
+                component: expect.objectContaining({
+                    id: Screens.THREAD,
+                    name: Screens.THREAD,
+                    passProps: {rootId: 'root-post-id'},
+                }),
+            }),
+        );
+    });
+
+    it('should not throw when both popTo and the fallback push reject', async () => {
+        NavigationStore.addScreenToStack(Screens.HOME);
+        NavigationStore.addScreenToStack(Screens.THREAD);
+        NavigationStore.addScreenToStack(Screens.CHANNEL);
+        mockPopTo.mockRejectedValue(new Error('ComponentId does not exist'));
+        mockPush.mockRejectedValue(new Error('ComponentId does not exist'));
+
+        await expect(goToScreenFn(Screens.THREAD, '', {rootId: 'root-post-id'})).resolves.toBeUndefined();
+        expect(mockPush).toHaveBeenCalled();
+    });
+
+    it('should not push or pop when the target screen is already visible', async () => {
+        NavigationStore.addScreenToStack(Screens.HOME);
+        NavigationStore.addScreenToStack(Screens.CHANNEL);
+        NavigationStore.addScreenToStack(Screens.THREAD);
+
+        await goToScreenFn(Screens.THREAD, '', {rootId: 'root-post-id'});
+
+        expect(mockUpdateProps).toHaveBeenCalledWith(Screens.THREAD, {rootId: 'root-post-id'});
+        expect(mockPopTo).not.toHaveBeenCalled();
+        expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it('should push normally when the screen is not in the stack', async () => {
+        NavigationStore.addScreenToStack(Screens.HOME);
+        NavigationStore.addScreenToStack(Screens.CHANNEL);
+
+        await goToScreenFn(Screens.THREAD, '', {rootId: 'root-post-id'});
+
+        expect(mockPush).toHaveBeenCalledWith(Screens.CHANNEL, expect.anything());
+        expect(mockPopTo).not.toHaveBeenCalled();
     });
 });

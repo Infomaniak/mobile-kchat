@@ -30,6 +30,7 @@ import PerformanceMetricsManager from '@managers/performance_metrics_manager';
 import {openAsBottomSheet} from '@screens/navigation';
 import {buttonBackgroundStyle, buttonTextStyle} from '@utils/buttonStyles';
 import {hasJumboEmojiOnly} from '@utils/emoji/helpers';
+import {logDebug} from '@utils/log';
 import {
     fromAutoResponder,
     isFromWebhook,
@@ -218,8 +219,11 @@ const Post = ({
             removePost(serverUrl, post);
         } else if (isValidSystemMessage && !hasBeenDeleted && !isPendingOrFailed) {
             if ([Screens.CHANNEL, Screens.PERMALINK].includes(location)) {
-                await blurAndDismissKeyboard();
                 const postRootId = post.rootId || post.id;
+                logDebug('[post.handlePostPress] post tapped, dismissing keyboard', postRootId);
+                await blurAndDismissKeyboard();
+                logDebug('[post.handlePostPress] keyboard dismissed, switching to thread', postRootId);
+
                 fetchAndSwitchToThread(serverUrl, postRootId);
             }
         }
