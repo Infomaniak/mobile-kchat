@@ -45,6 +45,28 @@ class CallManager {
     MAX_CALLNAME_PARTICIPANT_USERNAMES = 5;
 
     /**
+     * Conference currently displayed in the call screen, per server URL.
+     * Used to prevent duplicate invocations of switchToConferenceByChannelId
+     * (button taps, incoming call banner, auto-join on the call message, ...)
+     * from mounting a second call screen and joining the conference twice.
+     */
+    private joinedConferences = new Map<string, string>();
+
+    isConferenceJoined = (serverUrl: string, conferenceId: string): boolean => (
+        this.joinedConferences.get(serverUrl) === conferenceId
+    );
+
+    markConferenceJoined = (serverUrl: string, conferenceId: string): void => {
+        this.joinedConferences.set(serverUrl, conferenceId);
+    };
+
+    clearJoinedConference = (serverUrl: string, conferenceId: string): void => {
+        if (this.joinedConferences.get(serverUrl) === conferenceId) {
+            this.joinedConferences.delete(serverUrl);
+        }
+    };
+
+    /**
      * Native reporters, notify native/OS about a state change
      */
     nativeReporters = {
@@ -182,6 +204,9 @@ class CallManager {
 
     handleCallTermination = (method: 'cancelCall' | 'declineCall' | 'leaveCall') => async (serverUrl: string, conferenceId: string): Promise<Conference | null> => {
         try {
+            // The call screen is gone, allow a future switch to the same conference
+            this.clearJoinedConference(serverUrl, conferenceId);
+
             // Delete the conference localy by updating it's 'delete_at' column
             handleConferenceDeletedById(serverUrl, conferenceId);
 

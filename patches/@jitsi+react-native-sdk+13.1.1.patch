@@ -1,0 +1,246 @@
+diff --git a/node_modules/@jitsi/react-native-sdk/index.tsx b/node_modules/@jitsi/react-native-sdk/index.tsx
+--- a/node_modules/@jitsi/react-native-sdk/index.tsx
++++ b/node_modules/@jitsi/react-native-sdk/index.tsx
+@@ -5,7 +5,6 @@
+ 
+ import React, {
+     forwardRef,
+-    useEffect,
+     useImperativeHandle,
+     useLayoutEffect,
+     useRef,
+@@ -66,7 +65,6 @@
+  * Main React Native SDK component that displays a Jitsi Meet conference and gets all required params as props
+  */
+ export const JitsiMeeting = forwardRef<JitsiRefProps, IAppProps>((props, ref) => {
+-    const [ appProps, setAppProps ] = useState({});
+     const app = useRef(null);
+     const {
+         config,
+@@ -108,57 +106,54 @@
+         }
+     }));
+ 
+-    useEffect(
+-        () => {
+-            const urlObj = {
+-                config,
+-                jwt: token
+-            };
++    // Build the App props synchronously: mounting the embedded App with empty
++    // props and updating them right after would make its componentDidUpdate
++    // dispatch a second appNavigate (the url goes from undefined to the room's)
++    // once the boot completes, loading the config and starting the connection
++    // twice.
++    const [ appProps ] = useState(() => {
++        const urlObj = {
++            config,
++            jwt: token
++        };
+ 
+-            let urlProps;
++        const urlProps = room.includes('://') ? {
++            ...urlObj,
++            url: room
++        } : {
++            ...urlObj,
++            room,
++            serverURL
++        };
+ 
+-            if (room.includes('://')) {
+-                urlProps = {
+-                    ...urlObj,
+-                    url: room
+-                };
+-            } else {
+-                urlProps = {
+-                    ...urlObj,
+-                    room,
+-                    serverURL
+-                };
+-            }
++        return {
++            'flags': flags,
++            'rnSdkHandlers': {
++                onAudioMutedChanged: eventListeners?.onAudioMutedChanged,
++                onVideoMutedChanged: eventListeners?.onVideoMutedChanged,
++                onConferenceBlurred: eventListeners?.onConferenceBlurred,
++                onConferenceFocused: eventListeners?.onConferenceFocused,
++                onConferenceJoined: eventListeners?.onConferenceJoined,
++                onConferenceWillJoin: eventListeners?.onConferenceWillJoin,
++                onConferenceLeft: eventListeners?.onConferenceLeft,
++                onEnterPictureInPicture: eventListeners?.onEnterPictureInPicture,
++                onEndpointMessageReceived: eventListeners?.onEndpointMessageReceived,
++                onParticipantJoined: eventListeners?.onParticipantJoined,
++                onParticipantLeft: eventListeners?.onParticipantLeft,
++                onReadyToClose: eventListeners?.onReadyToClose
++            },
++            'url': urlProps,
++            'userInfo': userInfo
++        };
++    });
+ 
+-            setAppProps({
+-                'flags': flags,
+-                'rnSdkHandlers': {
+-                    onAudioMutedChanged: eventListeners?.onAudioMutedChanged,
+-                    onVideoMutedChanged: eventListeners?.onVideoMutedChanged,
+-                    onConferenceBlurred: eventListeners?.onConferenceBlurred,
+-                    onConferenceFocused: eventListeners?.onConferenceFocused,
+-                    onConferenceJoined: eventListeners?.onConferenceJoined,
+-                    onConferenceWillJoin: eventListeners?.onConferenceWillJoin,
+-                    onConferenceLeft: eventListeners?.onConferenceLeft,
+-                    onEnterPictureInPicture: eventListeners?.onEnterPictureInPicture,
+-                    onEndpointMessageReceived: eventListeners?.onEndpointMessageReceived,
+-                    onParticipantJoined: eventListeners?.onParticipantJoined,
+-                    onParticipantLeft: eventListeners?.onParticipantLeft,
+-                    onReadyToClose: eventListeners?.onReadyToClose
+-                },
+-                'url': urlProps,
+-                'userInfo': userInfo
+-            });
+-        }, []
+-    );
+-
+     // eslint-disable-next-line arrow-body-style
+     useLayoutEffect(() => {
+         /**
+          * When you close the component you need to reset it.
+          * In some cases it needs to be added as the parent component may have been destroyed.
+          * Without this change the call remains active without having the jitsi screen.
+-        */
++         */
+         return () => {
+             const dispatch = app.current?.state?.store?.dispatch;
+ 
+diff --git a/node_modules/@jitsi/react-native-sdk/react/features/mobile/navigation/components/RootNavigationContainer.tsx b/node_modules/@jitsi/react-native-sdk/react/features/mobile/navigation/components/RootNavigationContainer.tsx
+--- a/node_modules/@jitsi/react-native-sdk/react/features/mobile/navigation/components/RootNavigationContainer.tsx
++++ b/node_modules/@jitsi/react-native-sdk/react/features/mobile/navigation/components/RootNavigationContainer.tsx
+@@ -1,6 +1,6 @@
+ import { NavigationContainer, Theme } from '@react-navigation/native';
+ import { createStackNavigator } from '@react-navigation/stack';
+-import React, { useCallback } from 'react';
++import React, { useCallback, useEffect, useRef } from 'react';
+ import { connect } from 'react-redux';
+ 
+ import { IReduxState, IStore } from '../../../app/types';
+@@ -50,6 +50,23 @@
+ const RootNavigationContainer = ({ dispatch, isWelcomePageAvailable }: IProps) => {
+     const initialRouteName = isWelcomePageAvailable
+         ? screen.welcome.main : screen.connecting;
++    const navigationRef = useRef(null);
++
++    // Assign the root navigation ref on mount and clear it on unmount only if
++    // still owned: the unmount of a previous App instance would otherwise null
++    // the shared ref after a newer container set it, leaving every navigation
++    // action without a container (UI stuck on the connecting screen).
++    useEffect(() => {
++        const assigned = navigationRef.current;
++        rootNavigationRef.current = assigned;
++
++        return () => {
++            if (rootNavigationRef.current === assigned) {
++                rootNavigationRef.current = null;
++            }
++        };
++    }, []);
++
+     const onReady = useCallback(() => {
+         dispatch({
+             type: _ROOT_NAVIGATION_READY,
+@@ -61,7 +78,7 @@
+         <NavigationContainer
+             independent = { true }
+             onReady = { onReady }
+-            ref = { rootNavigationRef }
++            ref = { navigationRef }
+             theme = { navigationContainerTheme as Theme }>
+             <RootStack.Navigator
+                 initialRouteName = { initialRouteName }>
+diff --git a/node_modules/@jitsi/react-native-sdk/react/features/mobile/navigation/rootNavigationContainerRef.ts b/node_modules/@jitsi/react-native-sdk/react/features/mobile/navigation/rootNavigationContainerRef.ts
+--- a/node_modules/@jitsi/react-native-sdk/react/features/mobile/navigation/rootNavigationContainerRef.ts
++++ b/node_modules/@jitsi/react-native-sdk/react/features/mobile/navigation/rootNavigationContainerRef.ts
+@@ -1,6 +1,7 @@
+ import { NavigationContainerRef, StackActions } from '@react-navigation/native';
+ import React from 'react';
+ 
++import logger from '../../app/logger';
+ import { IStore } from '../../app/types';
+ import { IStateful } from '../../base/app/types';
+ import { toState } from '../../base/redux/functions';
+@@ -11,16 +12,63 @@
+ 
+ export const rootNavigationRef = React.createRef<NavigationContainerRef<any>>();
+ 
++/**
++ * How long to wait for the root navigation container to register its
++ * navigator before dropping a navigation action, and the interval between
++ * attempts.
++ */
++const NAVIGATION_READY_TIMEOUT = 10000;
++const NAVIGATION_RETRY_INTERVAL = 50;
+ 
+ /**
++ * Executes a navigation action against the root navigation container as soon
++ * as it is ready.
++ *
++ * Under React 19 / bridgeless the container can be mounted but its navigator
++ * not registered yet when {@code appNavigate} dispatches (or a previous App
++ * instance's unmount may have nulled this module-level ref). In those cases
++ * the action used to be silently dropped and the UI stayed on the connecting
++ * screen forever, even though the conference itself joined successfully.
++ *
++ * @param {Function} perform - Receives the ready container ref and performs the navigation.
++ * @returns {void}
++ */
++function dispatchWhenReady(perform: (ref: NavigationContainerRef<any>) => void) {
++    const startedAt = Date.now();
++
++    const attempt = () => {
++        const current = rootNavigationRef.current;
++
++        if (current
++            && (typeof current.isReady !== 'function' || current.isReady())) {
++            perform(current);
++
++            return;
++        }
++
++        const reason = current == null ? 'ref is null' : 'isReady() is false';
++
++        if (Date.now() - startedAt >= NAVIGATION_READY_TIMEOUT) {
++            logger.warn(`Root navigation container not ready (${reason}), dropping navigation action`);
++
++            return;
++        }
++
++        setTimeout(attempt, NAVIGATION_RETRY_INTERVAL);
++    };
++
++    attempt();
++}
++
++/**
+  * User defined navigation action included inside the reference to the container.
+  *
+  * @param {string} name - Destination name of the route that has been defined somewhere.
+  * @param {Object} params - Params to pass to the destination route.
+- * @returns {Function}
++ * @returns {void}
+  */
+ export function navigateRoot(name: string, params?: Object) {
+-    return rootNavigationRef.current?.navigate(name, params);
++    dispatchWhenReady(current => current.navigate(name, params));
+ }
+ 
+ /**
+@@ -31,7 +79,7 @@
+  * @returns {void}
+  */
+ export function replaceRoot(name: string, params?: Object) {
+-    return rootNavigationRef.current?.dispatch(StackActions.replace(name, params));
++    dispatchWhenReady(current => current.dispatch(StackActions.replace(name, params)));
+ }
+ 
+ /**
