@@ -9,6 +9,7 @@ buildscript {
         kotlin_version = kotlinVersion
         firebaseVersion = "24.1.0"
         ndkVersion = "27.1.12297006"
+        gradlePluginVersion = "8.7.3"
     }
     repositories {
         mavenCentral()
@@ -44,6 +45,14 @@ allprojects {
 apply plugin: "expo-root-project"
 apply plugin: "com.facebook.react.rootproject"
 
-dependencyLocking {
-    lockAllConfigurations()
+// Gradle 9: fix implicit dependency for react-native-notifications resValues
+subprojects { subproject ->
+    if (subproject.path.contains('reactnativenotifications') || subproject.path.contains('react-native-notifications')) {
+        subproject.tasks.matching { it.name.contains('ReactNative60') && it.name.endsWith('Resources') && it.name.startsWith('package') }.configureEach { pkgTask ->
+            def genName = pkgTask.name.replace('package', 'generate').replace('Resources', 'ResValues')
+            subproject.tasks.matching { it.name == genName }.configureEach { genTask ->
+                pkgTask.dependsOn genTask
+            }
+        }
+    }
 }

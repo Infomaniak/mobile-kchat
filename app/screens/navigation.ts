@@ -97,12 +97,8 @@ export function navigateToScreenWithBaseRoute(baseRoute: string, screen: Availab
 }
 
 export async function navigateBack() {
-    if (router) {
-        if (router.canDismiss()) {
-            router.dismiss();
-        } else if (router.canGoBack()) {
-            router.back();
-        }
+    if (router && router.canGoBack()) {
+        router.back();
         await new Promise((resolve) => setTimeout(resolve, 250));
     }
 }
