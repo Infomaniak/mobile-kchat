@@ -1,4 +1,5 @@
-  {
+   {
+  "ai.actions": "Actions IA",
   "account.logout": "Se déconnecter",
   "account.logout_from": "Se déconnecter de {serverName}",
   "account.server_preprod": "Passer à la version NEXT",
@@ -437,6 +438,13 @@
   "infomaniak.no_team.title": "Vous ne possédez pas de kChat, découvrez le avec kSuite",
   "infomaniak.post_info.custom_reminder": "Définir le rappel",
   "infomaniak.post_info.post_reminder.menu": "Rappel",
+  "infomaniak.post_info.post_reminder.sub_menu.custom": "Personnalisé",
+  "infomaniak.post_info.post_reminder.sub_menu.monday": "Lundi",
+  "infomaniak.post_info.post_reminder.sub_menu.one_hour": "1 heure",
+  "infomaniak.post_info.post_reminder.sub_menu.thirty_minutes": "30 min",
+  "infomaniak.post_info.post_reminder.sub_menu.tomorrow": "Demain",
+  "infomaniak.post_info.post_reminder.sub_menu.two_hours": "2 heures",
+  "infomaniak.post_info.post_translate.menu": "Traduire",
   "infomaniak.post.reminder.completed": "Très bien, j'ai marqué le rappel pour {link} comme terminé !",
   "infomaniak.post.reminder.markAsCompleted": "Marquer comme terminé",
   "infomaniak.post.reminder.postpone": "Différer le rappel",
