@@ -374,10 +374,12 @@ const Markdown = ({
         const content = props.literal.replace(/\n$/, '');
 
         if (enableLatex && !isUnsafeLinksPost && props.language === 'latex') {
+            const baseFontSize = StyleSheet.flatten(baseTextStyle)?.fontSize;
             return (
                 <MarkdownLatexCodeBlock
                     content={content}
                     theme={theme}
+                    baseFontSize={baseFontSize}
                 />
             );
         }
@@ -390,7 +392,7 @@ const Markdown = ({
                 theme={theme}
             />
         );
-    }, [disableCodeBlock, enableLatex, isUnsafeLinksPost, textStyles.codeBlock, theme]);
+    }, [baseTextStyle, disableCodeBlock, enableLatex, isUnsafeLinksPost, textStyles.codeBlock, theme]);
 
     const renderCodeSpan = useCallback(({context, literal}: MarkdownBaseRenderer) => {
         const {code} = textStyles;
@@ -528,16 +530,18 @@ const Markdown = ({
             return renderText({context, literal: `$${latexCode}$`});
         }
 
+        const baseFontSize = StyleSheet.flatten(baseTextStyle)?.fontSize;
         return (
             <Text>
                 <MarkdownLatexInline
                     content={latexCode}
                     maxMathWidth={Dimensions.get('window').width * 0.75}
                     theme={theme}
+                    baseFontSize={baseFontSize}
                 />
             </Text>
         );
-    }, [enableInlineLatex, isUnsafeLinksPost, renderText, theme]);
+    }, [baseTextStyle, enableInlineLatex, isUnsafeLinksPost, renderText, theme]);
 
     const renderLink = useCallback(({children, href}: {children: ReactElement; href: string}) => {
         if (isUnsafeLinksPost) {

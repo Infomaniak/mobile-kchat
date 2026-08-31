@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {Alert} from 'react-native';
-import Exception from 'react-native-exception-handler';
 
 import {dismissAllModals, dismissAllOverlays} from '@screens/navigation';
 import testHelper from '@test/test_helper';
@@ -10,14 +9,6 @@ import * as Sentry from '@utils/sentry';
 
 import errorHandling from './error_handling';
 import * as Log from './log';
-
-jest.mock('react-native-exception-handler', () => ({
-    setJSExceptionHandler: jest.fn((callback: () => void, allowInDevMode: boolean) => {
-        if (!allowInDevMode) {
-            callback();
-        }
-    }),
-}));
 
 jest.mock('@utils/log', () => ({
     logError: jest.fn(),
@@ -32,28 +23,16 @@ describe.skip('JavascriptAndNativeErrorHandler', () => {
     const error = 'some error';
 
     test('Initialization', () => {
-        const setJSExceptionHandler = jest.spyOn(Exception, 'setJSExceptionHandler');
+        const setGlobalHandler = jest.spyOn(ErrorUtils, 'setGlobalHandler');
         const initializeSentry = jest.spyOn(Sentry, 'initializeSentry');
         errorHandling.initializeErrorHandling();
-        expect(setJSExceptionHandler).toHaveBeenCalledTimes(1);
+        expect(setGlobalHandler).toHaveBeenCalledTimes(1);
         expect(initializeSentry).toHaveBeenCalledTimes(1);
-        expect(setJSExceptionHandler).toHaveBeenCalledWith(errorHandling.errorHandler, false);
-    });
-
-    test('nativeErrorHander', () => {
-        const captureException = jest.spyOn(Sentry, 'captureException');
-        errorHandling.nativeErrorHandler(error);
-        expect(warning).toHaveBeenCalledTimes(1);
-        expect(warning).toHaveBeenCalledWith(`Handling native error ${error}`);
-        expect(captureException).toHaveBeenCalledTimes(1);
-        expect(captureException).toHaveBeenCalledWith(error);
+        expect(setGlobalHandler).toHaveBeenCalledWith(errorHandling.errorHandler);
     });
 
     test('errorHandler', async () => {
         const captureJSException = jest.spyOn(Sentry, 'captureJSException');
-
-        errorHandling.errorHandler(null, false);
-        expect(warning).toHaveBeenCalledTimes(0);
 
         errorHandling.errorHandler(error, true);
         expect(warning).toHaveBeenCalledTimes(1);
