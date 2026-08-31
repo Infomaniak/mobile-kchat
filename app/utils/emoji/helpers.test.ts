@@ -180,7 +180,7 @@ describe('helpers.ts tests', () => {
 
         it('should return emoji by name for custom emoji', () => {
             const customEmojis = [{name: 'custom_emoji'}] as CustomEmojiModel[];
-            expect(getEmojiByName('custom_emoji', customEmojis)).toEqual({name: 'custom_emoji'});
+            expect(getEmojiByName('custom_emoji', customEmojis)).toEqual(expect.objectContaining({name: 'custom_emoji', category: 'custom'}));
         });
 
         it('should return undefined for invalid emoji', () => {
