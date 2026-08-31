@@ -26,6 +26,11 @@ const refractorExact = {
 const jitsiNavRoot = path.resolve(__dirname, 'node_modules/@jitsi/react-native-sdk/node_modules');
 const jitsiStackOriginPattern = new RegExp(`${path.sep}node_modules${path.sep}@react-navigation${path.sep}stack${path.sep}`);
 
+// use-latest-callback@0.1.x (nested under react-native-tab-view@3.x via the Jitsi SDK) ships an
+// esm.mjs entry that breaks under Metro's interop (double `default` unwrap -> undefined).
+// Force every importer onto the single working top-level copy (0.2.x).
+const useLatestCallbackRoot = path.resolve(__dirname, 'node_modules/use-latest-callback');
+
 const formatjsLocalePattern = /^@formatjs\/(intl-(?:pluralrules|numberformat|datetimeformat|listformat|relativetimeformat|displaynames))\/locale-data\/([^/]+)$/;
 
 const config = {
@@ -58,6 +63,10 @@ const config = {
                 if (require('fs').existsSync(filePath)) {
                     return {type: 'sourceFile', filePath};
                 }
+            }
+
+            if (moduleName === 'use-latest-callback') {
+                return context.resolveRequest(context, useLatestCallbackRoot, platform);
             }
 
             if (
