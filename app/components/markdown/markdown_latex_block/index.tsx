@@ -25,6 +25,7 @@ const MAX_LINES = 2;
 type Props = {
     content: string;
     theme: Theme;
+    baseFontSize?: number;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
@@ -43,9 +44,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             borderWidth: StyleSheet.hairlineWidth,
             flexDirection: 'row',
             flex: 1,
-        },
-        mathStyle: {
-            color: theme.centerChannelColor,
         },
         rightColumn: {
             flexDirection: 'column',
@@ -86,7 +84,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const LatexCodeBlock = ({content, theme}: Props) => {
+const LatexCodeBlock = ({content, theme, baseFontSize}: Props) => {
     const intl = useIntl();
     const styles = getStyleSheet(theme);
     const languageDisplayName = getHighlightLanguageName('latex');
@@ -162,10 +160,6 @@ const LatexCodeBlock = ({content, theme}: Props) => {
         });
     }, [intl, theme, styles.bottomSheet, content]);
 
-    const onRenderErrorMessage = useCallback(({error}: {error: Error}) => {
-        return <Text style={styles.errorText}>{'Render error: ' + error.message}</Text>;
-    }, [styles.errorText]);
-
     let plusMoreLines = null;
     if (split.numberOfLines > MAX_LINES) {
         plusMoreLines = (
@@ -180,11 +174,6 @@ const LatexCodeBlock = ({content, theme}: Props) => {
         );
     }
 
-    /**
-     * Note on the error behavior of math view:
-     * - onError returns an Error object
-     * - renderError returns an options object with an error attribute that contains the real Error.
-     */
     return (
         <TouchableWithFeedback
             onPress={handlePress}
@@ -204,10 +193,9 @@ const LatexCodeBlock = ({content, theme}: Props) => {
                                 key={latexCode}
                             >
                                 <MathView
-                                    math={latexCode}
-                                    renderError={onRenderErrorMessage}
-                                    resizeMode={'cover'}
-                                    style={styles.mathStyle}
+                                    latexCode={latexCode}
+                                    fontSize={baseFontSize}
+                                    errorStyle={styles.errorText}
                                 />
                             </View>
                         ))}

@@ -3,13 +3,11 @@
 
 import {defineMessages} from 'react-intl';
 import {Alert} from 'react-native';
-import {setJSExceptionHandler} from 'react-native-exception-handler';
 
 import {DEFAULT_LOCALE, getTranslations} from '@i18n';
 import {dismissAllModals, dismissAllOverlays} from '@screens/navigation';
 import {isBetaApp} from '@utils/general';
 import {
-    captureException,
     captureJSException,
     initializeSentry,
 } from '@utils/sentry';
@@ -34,24 +32,10 @@ const messages = defineMessages({
 class JavascriptAndNativeErrorHandlerSingleton {
     initializeErrorHandling = () => {
         initializeSentry();
-        setJSExceptionHandler(this.errorHandler, false);
-
-        // setNativeExceptionHandler(this.nativeErrorHandler, false);
-    };
-
-    nativeErrorHandler = (e: string) => {
-        logWarning('Handling native error ' + e);
-        captureException(e);
+        ErrorUtils.setGlobalHandler(this.errorHandler);
     };
 
     errorHandler = (e: unknown, isFatal: boolean) => {
-        if (__DEV__ && !e && !isFatal) {
-            // react-native-exception-handler redirects console.error to call this, and React calls
-            // console.error without an exception when prop type validation fails, so this ends up
-            // being called with no arguments when the error handler is enabled in dev mode.
-            return;
-        }
-
         logWarning('Handling Javascript error', e, isFatal);
 
         if (isBetaApp || isFatal) {
