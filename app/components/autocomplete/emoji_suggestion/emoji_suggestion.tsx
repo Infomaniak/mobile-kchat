@@ -151,7 +151,7 @@ const EmojiSuggestion = ({
 
         updateValue(completedDraft);
 
-        if (Platform.OS === 'ios' && (!emojiData?.filename || emojiData.category !== 'custom')) {
+        if (Platform.OS === 'ios' && (!emojiData?.fileName || emojiData.category !== 'custom')) {
             // This is the second part of the hack were we replace the double : with just one
             // after the auto correct vanished
             setTimeout(() => {
