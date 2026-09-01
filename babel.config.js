@@ -28,6 +28,7 @@ module.exports = {
                 '@hooks': './app/hooks',
                 '@i18n': './app/i18n',
                 '@init': './app/init',
+                '@keyboard': './app/keyboard',
                 '@managers': './app/managers',
                 '@playbooks': './app/products/playbooks',
                 '@queries': './app/queries',
