@@ -3,6 +3,7 @@
 
 import {Database, Q} from '@nozbe/watermelondb';
 import React from 'react';
+import {of as of$} from 'rxjs';
 
 import {MM_TABLES} from '@constants/database';
 import {DEFAULT_LOCALE} from '@i18n';
@@ -37,6 +38,9 @@ describe('components/channel_list/categories/body', () => {
                 locale={DEFAULT_LOCALE}
                 isTablet={false}
                 onChannelSwitch={() => undefined}
+                unreadsOnTop={false}
+                manuallyClosedPrefs$={of$([])}
+                autoclosePrefs$={of$([])}
             />,
             {database},
         );
