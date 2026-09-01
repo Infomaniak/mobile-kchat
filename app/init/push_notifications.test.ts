@@ -12,6 +12,7 @@ import DatabaseManager from '@database/manager';
 import {getCurrentChannelId} from '@queries/servers/system';
 import {getIsCRTEnabled, getThreadById} from '@queries/servers/thread';
 import EphemeralStore from '@store/ephemeral_store';
+import InAppNotificationStore from '@store/in_app_notification_store';
 import NavigationStore from '@store/navigation_store';
 import {isMainActivity} from '@utils/helpers';
 
@@ -216,9 +217,12 @@ describe('PushNotifications', () => {
                 },
             };
 
+            const spy = jest.spyOn(InAppNotificationStore, 'show').mockImplementation();
+
             await pushNotifications.handleInAppNotification(serverUrl, notification as any);
 
-            expect(DeviceEventEmitter.emit).toHaveBeenCalled();
+            expect(spy).toHaveBeenCalledWith(expect.objectContaining({serverUrl}));
+            spy.mockRestore();
         });
 
         it('should show notification when not in channel screen', async () => {
@@ -230,9 +234,12 @@ describe('PushNotifications', () => {
             };
             jest.mocked(NavigationStore.getVisibleScreen).mockReturnValue(Screens.SETTINGS);
 
+            const spy = jest.spyOn(InAppNotificationStore, 'show').mockImplementation();
+
             await pushNotifications.handleInAppNotification(serverUrl, notification as any);
 
-            expect(DeviceEventEmitter.emit).toHaveBeenCalled();
+            expect(spy).toHaveBeenCalledWith(expect.objectContaining({serverUrl}));
+            spy.mockRestore();
         });
 
         it('should show notification for thread in CRT mode', async () => {
@@ -245,9 +252,12 @@ describe('PushNotifications', () => {
             };
             mockGetIsCRTEnabled.mockResolvedValue(true);
 
+            const spy = jest.spyOn(InAppNotificationStore, 'show').mockImplementation();
+
             await pushNotifications.handleInAppNotification(serverUrl, notification as any);
 
-            expect(DeviceEventEmitter.emit).toHaveBeenCalled();
+            expect(spy).toHaveBeenCalledWith(expect.objectContaining({serverUrl}));
+            spy.mockRestore();
         });
 
         it('should not show notification for same thread in thread screen', async () => {

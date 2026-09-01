@@ -8,7 +8,7 @@ import {Events, Navigation, Screens} from '@constants';
 import {UNAUTHENTICATED_SCREENS, HOME_TAB_SCREENS, SCREENS_AS_BOTTOM_SHEET, MODAL_SCREENS} from '@constants/screens';
 import BottomSheetStore from '@store/bottom_sheet_store';
 import {NavigationStore} from '@store/navigation_store';
-import {logError} from '@utils/log';
+import {logDebug, logError} from '@utils/log';
 
 import type {BottomSheetFooterProps} from '@gorhom/bottom-sheet';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -240,6 +240,8 @@ export async function dismissAllModalsAndPopToScreen(screenId: AvailableScreens,
 export function showOverlay(name: AvailableScreens, passProps: Record<string, any> = {}, _options: any = {}, _id?: string) {
     if (SCREENS_AS_BOTTOM_SHEET.has(name)) {
         navigateToScreen(name, passProps);
+    } else {
+        logDebug(`showOverlay: screen ${name} is not a bottom sheet, ignoring`);
     }
 }
 

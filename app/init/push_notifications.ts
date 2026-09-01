@@ -3,7 +3,7 @@
 
 import RNUtils from '@mattermost/rnutils/src';
 import {defineMessages} from 'react-intl';
-import {AppState, DeviceEventEmitter, Platform, type EmitterSubscription} from 'react-native';
+import {AppState, Platform, type EmitterSubscription} from 'react-native';
 import {
     Notification,
     NotificationAction,
@@ -21,14 +21,14 @@ import {storeDeviceToken} from '@actions/app/global';
 import {markChannelAsViewed} from '@actions/local/channel';
 import {updateThread} from '@actions/local/thread';
 import {backgroundNotification, openNotification} from '@actions/remote/notifications';
-import {Device, Navigation, PushNotification, Screens} from '@constants';
+import {Device, PushNotification, Screens} from '@constants';
 import DatabaseManager from '@database/manager';
 import {DEFAULT_LOCALE, getLocalizedMessage} from '@i18n';
 import {getServerDisplayName} from '@queries/app/servers';
 import {getCurrentChannelId} from '@queries/servers/system';
 import {getIsCRTEnabled, getThreadById} from '@queries/servers/thread';
-import {showOverlay} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
+import InAppNotificationStore from '@store/in_app_notification_store';
 import NavigationStore from '@store/navigation_store';
 import {isBetaApp} from '@utils/general';
 import {isMainActivity, isTablet} from '@utils/helpers';
@@ -168,16 +168,7 @@ class PushNotificationsSingleton {
 
             if (condition1 || condition2 || condition3) {
                 // Dismiss the screen if it's already visible or else it blocks the navigation
-                DeviceEventEmitter.emit(Navigation.NAVIGATION_SHOW_OVERLAY);
-
-                const screen = Screens.IN_APP_NOTIFICATION;
-                const passProps = {
-                    notification,
-                    serverName,
-                    serverUrl,
-                };
-
-                showOverlay(screen, passProps);
+                InAppNotificationStore.show({notification, serverName, serverUrl});
             }
         }
     };
