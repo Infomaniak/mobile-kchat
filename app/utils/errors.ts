@@ -78,7 +78,7 @@ export const getErrorMessage = (error: unknown, intl?: IntlShape) => {
         return error;
     }
     if (isErrorWithIntl(error)) {
-        return intl ? intl.formatMessage(error.intl as any, error.intl.values) : error.intl.defaultMessage!;
+        return intl ? intl.formatMessage(error.intl, error.intl.values) : error.intl.defaultMessage!;
     }
 
     if (isErrorWithMessage(error)) {
