@@ -465,6 +465,11 @@ jest.mock('react-native-keyboard-controller', () => {
             isVisible: false,
         })),
         KeyboardGestureArea: ({children}: {children: React.ReactNode}) => children,
+        useAnimatedKeyboard: jest.fn(() => ({
+            height: {value: 0},
+            progress: {value: 0},
+            state: {value: 0},
+        })),
     };
 });
 
