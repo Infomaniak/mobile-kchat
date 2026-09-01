@@ -3,7 +3,7 @@
 
 import {Button} from '@rneui/base';
 import React, {useCallback} from 'react';
-import {defineMessages, useIntl} from 'react-intl';
+import {defineMessages, useIntl, type MessageDescriptor} from 'react-intl';
 import {Text, View} from 'react-native';
 
 const messages = defineMessages({
@@ -19,11 +19,29 @@ const messages = defineMessages({
         id: 'infomaniak.size_quota_exceeded.description',
         defaultMessage: 'Change your plan from the web interface to get more storage.',
     },
+    fileUploadQuotaExceeded: {
+        id: 'file_upload.quota.exceeded',
+        defaultMessage: 'Contact an administrator to upgrade.',
+    },
+    fileUploadQuotaExceededPaidPlanAdmin: {
+        id: 'file_upload.quota.exceeded.paidPlan.admin',
+        defaultMessage: 'Change your plan from the web interface to get more storage.',
+    },
+    fileUploadQuotaExceededFreePlanAdmin: {
+        id: 'file_upload.quota.exceeded.freePlan.admin',
+        defaultMessage: 'Change your plan from the web interface and get more storage and new features.',
+    },
 });
 
 const titleMessages = {
     'infomaniak.size_quota_exceeded.title': messages.infomaniakSizeQuotaExceededTitle,
     'infomaniak.size_quota_almost_exceeded.title': messages.infomaniakSizeQuotaAlmostExceededTitle,
+};
+
+const descriptionMessages: Record<string, MessageDescriptor> = {
+    'file_upload.quota.exceeded': messages.fileUploadQuotaExceeded,
+    'file_upload.quota.exceeded.paidPlan.admin': messages.fileUploadQuotaExceededPaidPlanAdmin,
+    'file_upload.quota.exceeded.freePlan.admin': messages.fileUploadQuotaExceededFreePlanAdmin,
 };
 
 import {Screens} from '@constants';
@@ -132,7 +150,7 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
                             {intl.formatMessage(titleMessages[quotaType.title] ?? messages.infomaniakSizeQuotaExceededTitle)}
                         </Text>
                         <Text style={styles.description}>
-                            {intl.formatMessage(messages.infomaniakSizeQuotaExceededDescription)}
+                            {intl.formatMessage(descriptionMessages[quotaType.description] ?? messages.infomaniakSizeQuotaExceededDescription)}
                         </Text>
                     </View>
 
@@ -153,7 +171,7 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
                 </View>
             </View>
         );
-    }, [intl, quotaType.title, styles.content, styles.description, styles.discoverButton, styles.ikButton, styles.ikTextButton, styles.title, theme]);
+    }, [intl, quotaType.title, quotaType.description, styles.content, styles.description, styles.discoverButton, styles.ikButton, styles.ikTextButton, styles.title, theme]);
 
     const snapPoints = [1, '55%'];
 
