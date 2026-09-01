@@ -4,7 +4,7 @@
 
 export NODE_OPTIONS=--max_old_space_size=12000
 export BUNDLE_COMMAND="bundle"
-export ENTRY_FILE="index.ts"
+export ENTRY_FILE="index.tsx"
 
 set -e
 WITH_ENVIRONMENT="../node_modules/react-native/scripts/xcode/with-environment.sh"
