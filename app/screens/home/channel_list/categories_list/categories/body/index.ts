@@ -7,9 +7,8 @@ import {switchMap, combineLatestWith, distinctUntilChanged} from 'rxjs/operators
 
 import {Preferences} from '@constants';
 import {DMS_CATEGORY} from '@constants/categories';
-import {getSidebarPreferenceAsBool} from '@helpers/api/preference';
 import {observeNotifyPropsByChannels} from '@queries/servers/channel';
-import {queryPreferencesByCategoryAndName, querySidebarPreferences} from '@queries/servers/preference';
+import {querySidebarPreferences} from '@queries/servers/preference';
 import {observeCurrentChannelId, observeCurrentUserId, observeLastUnreadChannelId} from '@queries/servers/system';
 import {observeDeactivatedUsers} from '@queries/servers/user';
 import {type ChannelWithMyChannel, filterArchivedChannels, filterAutoclosedDMs, filterManuallyClosedDms, getUnreadIds, sortChannels} from '@utils/categories';
@@ -27,6 +26,9 @@ type EnhanceProps = {
     locale: string;
     currentUserId: string;
     isTablet: boolean;
+    unreadsOnTop: boolean;
+    manuallyClosedPrefs$: Observable<PreferenceModel[]>;
+    autoclosePrefs$: Observable<PreferenceModel[]>;
 } & WithDatabaseArgs
 
 const withUserId = withObservables([], ({database}: WithDatabaseArgs) => ({currentUserId: observeCurrentUserId(database)}));
@@ -56,17 +58,11 @@ const observeCategoryChannels = (category: CategoryModel, myChannels: Observable
     );
 };
 
-const enhanced = withObservables([], ({category, currentUserId, database, isTablet, locale}: EnhanceProps) => {
+const enhanced = withObservables(['unreadsOnTop'], ({category, currentUserId, database, isTablet, locale, unreadsOnTop, manuallyClosedPrefs$, autoclosePrefs$}: EnhanceProps) => {
     const categoryMyChannels = category.myChannels.observeWithColumns(['is_unread']);
     const channelsWithMyChannel = observeCategoryChannels(category, categoryMyChannels);
     const currentChannelId = isTablet ? observeCurrentChannelId(database) : of$('');
     const lastUnreadId = isTablet ? observeLastUnreadChannelId(database) : of$(undefined);
-
-    const unreadsOnTop = querySidebarPreferences(database, Preferences.CHANNEL_SIDEBAR_GROUP_UNREADS).
-        observeWithColumns(['value']).
-        pipe(
-            switchMap((prefs: PreferenceModel[]) => of$(getSidebarPreferenceAsBool(prefs, Preferences.CHANNEL_SIDEBAR_GROUP_UNREADS))),
-        );
 
     let limit = of$(Preferences.CHANNEL_SIDEBAR_LIMIT_DMS_DEFAULT);
     if (category.type === DMS_CATEGORY) {
@@ -82,24 +78,6 @@ const enhanced = withObservables([], ({category, currentUserId, database, isTabl
         switchMap((mc) => observeNotifyPropsByChannels(database, mc)),
     );
 
-    const hiddenDmPrefs = queryPreferencesByCategoryAndName(database, Preferences.CATEGORIES.DIRECT_CHANNEL_SHOW, undefined, 'false').
-        observeWithColumns(['value']);
-    const hiddenGmPrefs = queryPreferencesByCategoryAndName(database, Preferences.CATEGORIES.GROUP_CHANNEL_SHOW, undefined, 'false').
-        observeWithColumns(['value']);
-    const manuallyClosedPrefs = hiddenDmPrefs.pipe(
-        combineLatestWith(hiddenGmPrefs),
-        switchMap(([dms, gms]) => of$(dms.concat(gms))),
-    );
-
-    const approxViewTimePrefs = queryPreferencesByCategoryAndName(database, Preferences.CATEGORIES.CHANNEL_APPROXIMATE_VIEW_TIME, undefined).
-        observeWithColumns(['value']);
-    const openTimePrefs = queryPreferencesByCategoryAndName(database, Preferences.CATEGORIES.CHANNEL_OPEN_TIME, undefined).
-        observeWithColumns(['value']);
-    const autoclosePrefs = approxViewTimePrefs.pipe(
-        combineLatestWith(openTimePrefs),
-        switchMap(([viewTimes, openTimes]) => of$(viewTimes.concat(openTimes))),
-    );
-
     const categorySorting = category.observe().pipe(
         switchMap((c) => of$(c.sorting)),
         distinctUntilChanged(),
@@ -107,7 +85,7 @@ const enhanced = withObservables([], ({category, currentUserId, database, isTabl
 
     const deactivated = (category.type === DMS_CATEGORY) ? observeDeactivatedUsers(database) : of$(undefined);
     const sortedChannels = channelsWithMyChannel.pipe(
-        combineLatestWith(categorySorting, currentChannelId, lastUnreadId, notifyPropsPerChannel, manuallyClosedPrefs, autoclosePrefs, deactivated, limit),
+        combineLatestWith(categorySorting, currentChannelId, lastUnreadId, notifyPropsPerChannel, manuallyClosedPrefs$, autoclosePrefs$, deactivated, limit),
         switchMap(([cwms, sorting, channelId, unreadId, notifyProps, manuallyClosedDms, autoclose, deactivatedUsers, maxDms]) => {
             let channelsW = cwms;
 
@@ -130,7 +108,7 @@ const enhanced = withObservables([], ({category, currentUserId, database, isTabl
         category,
         sortedChannels,
         unreadIds,
-        unreadsOnTop,
+        unreadsOnTop: of$(unreadsOnTop),
     };
 });
 
