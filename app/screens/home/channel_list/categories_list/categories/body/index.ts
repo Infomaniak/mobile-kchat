@@ -7,9 +7,8 @@ import {switchMap, combineLatestWith, distinctUntilChanged} from 'rxjs/operators
 
 import {Preferences} from '@constants';
 import {DMS_CATEGORY} from '@constants/categories';
-import {observeNotifyPropsByChannels} from '@queries/servers/channel';
 import {querySidebarPreferences} from '@queries/servers/preference';
-import {observeCurrentChannelId, observeCurrentUserId, observeLastUnreadChannelId} from '@queries/servers/system';
+import {observeCurrentUserId, observeLastUnreadChannelId} from '@queries/servers/system';
 import {observeDeactivatedUsers} from '@queries/servers/user';
 import {type ChannelWithMyChannel, filterArchivedChannels, filterAutoclosedDMs, filterManuallyClosedDms, getUnreadIds, sortChannels} from '@utils/categories';
 
@@ -29,6 +28,8 @@ type EnhanceProps = {
     unreadsOnTop: boolean;
     manuallyClosedPrefs$: Observable<PreferenceModel[]>;
     autoclosePrefs$: Observable<PreferenceModel[]>;
+    currentChannelId$: Observable<string>;
+    notifyPropsByChannelId$: Observable<Record<string, Partial<ChannelNotifyProps>>>;
 } & WithDatabaseArgs
 
 const withUserId = withObservables([], ({database}: WithDatabaseArgs) => ({currentUserId: observeCurrentUserId(database)}));
@@ -58,10 +59,10 @@ const observeCategoryChannels = (category: CategoryModel, myChannels: Observable
     );
 };
 
-const enhanced = withObservables(['unreadsOnTop'], ({category, currentUserId, database, isTablet, locale, unreadsOnTop, manuallyClosedPrefs$, autoclosePrefs$}: EnhanceProps) => {
+const enhanced = withObservables(['unreadsOnTop'], ({category, currentUserId, database, isTablet, locale, unreadsOnTop, manuallyClosedPrefs$, autoclosePrefs$, currentChannelId$, notifyPropsByChannelId$}: EnhanceProps) => {
     const categoryMyChannels = category.myChannels.observeWithColumns(['is_unread']);
     const channelsWithMyChannel = observeCategoryChannels(category, categoryMyChannels);
-    const currentChannelId = isTablet ? observeCurrentChannelId(database) : of$('');
+    const currentChannelId = isTablet ? currentChannelId$ : of$('');
     const lastUnreadId = isTablet ? observeLastUnreadChannelId(database) : of$(undefined);
 
     let limit = of$(Preferences.CHANNEL_SIDEBAR_LIMIT_DMS_DEFAULT);
@@ -74,10 +75,6 @@ const enhanced = withObservables(['unreadsOnTop'], ({category, currentUserId, da
             );
     }
 
-    const notifyPropsPerChannel = categoryMyChannels.pipe(
-        switchMap((mc) => observeNotifyPropsByChannels(database, mc)),
-    );
-
     const categorySorting = category.observe().pipe(
         switchMap((c) => of$(c.sorting)),
         distinctUntilChanged(),
@@ -85,7 +82,7 @@ const enhanced = withObservables(['unreadsOnTop'], ({category, currentUserId, da
 
     const deactivated = (category.type === DMS_CATEGORY) ? observeDeactivatedUsers(database) : of$(undefined);
     const sortedChannels = channelsWithMyChannel.pipe(
-        combineLatestWith(categorySorting, currentChannelId, lastUnreadId, notifyPropsPerChannel, manuallyClosedPrefs$, autoclosePrefs$, deactivated, limit),
+        combineLatestWith(categorySorting, currentChannelId, lastUnreadId, notifyPropsByChannelId$, manuallyClosedPrefs$, autoclosePrefs$, deactivated, limit),
         switchMap(([cwms, sorting, channelId, unreadId, notifyProps, manuallyClosedDms, autoclose, deactivatedUsers, maxDms]) => {
             let channelsW = cwms;
 
@@ -98,7 +95,7 @@ const enhanced = withObservables(['unreadsOnTop'], ({category, currentUserId, da
     );
 
     const unreadIds = channelsWithMyChannel.pipe(
-        combineLatestWith(notifyPropsPerChannel, lastUnreadId),
+        combineLatestWith(notifyPropsByChannelId$, lastUnreadId),
         switchMap(([cwms, notifyProps, unreadId]) => {
             return of$(getUnreadIds(cwms, notifyProps, unreadId));
         }),

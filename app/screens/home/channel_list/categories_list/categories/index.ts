@@ -8,8 +8,9 @@ import {switchMap, combineLatestWith} from 'rxjs/operators';
 import {Preferences} from '@constants';
 import {getPreferenceValue} from '@helpers/api/preference';
 import {queryCategoriesByTeamIds} from '@queries/servers/categories';
+import {observeAllMyChannelNotifyProps} from '@queries/servers/channel';
 import {queryPreferencesByCategoryAndName, querySidebarPreferences} from '@queries/servers/preference';
-import {observeConfigBooleanValue, observeCurrentTeamId, observeOnlyUnreads} from '@queries/servers/system';
+import {observeConfigBooleanValue, observeCurrentChannelId, observeCurrentTeamId, observeOnlyUnreads} from '@queries/servers/system';
 
 import Categories from './categories';
 
@@ -58,12 +59,19 @@ const enhanced = withObservables(
                 switchMap(([viewTimes, openTimes]) => of$(viewTimes.concat(openTimes))),
             ));
 
+        // Ik change : written on every channel switch, so observe these once at this level instead
+        // of once per category header/body to avoid re-querying the same tables N times per switch
+        const currentChannelId$ = of$(observeCurrentChannelId(database));
+        const notifyPropsByChannelId$ = of$(observeAllMyChannelNotifyProps(database));
+
         return {
             categories,
             onlyUnreads: observeOnlyUnreads(database),
             unreadsOnTop,
             manuallyClosedPrefs$,
             autoclosePrefs$,
+            currentChannelId$,
+            notifyPropsByChannelId$,
         };
     });
 
