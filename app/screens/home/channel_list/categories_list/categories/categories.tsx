@@ -22,11 +22,15 @@ import UnreadCategories from './unreads';
 
 import type CategoryModel from '@typings/database/models/servers/category';
 import type ChannelModel from '@typings/database/models/servers/channel';
+import type PreferenceModel from '@typings/database/models/servers/preference';
+import type {Observable} from 'rxjs';
 
 type Props = {
     categories: CategoryModel[];
     onlyUnreads: boolean;
     unreadsOnTop: boolean;
+    manuallyClosedPrefs$: Observable<PreferenceModel[]>;
+    autoclosePrefs$: Observable<PreferenceModel[]>;
 }
 
 const styles = StyleSheet.create({
@@ -46,6 +50,8 @@ const Categories = ({
     categories,
     onlyUnreads,
     unreadsOnTop,
+    manuallyClosedPrefs$,
+    autoclosePrefs$,
 }: Props) => {
     const intl = useIntl();
     const listRef = useRef<FlatList>(null);
@@ -85,6 +91,7 @@ const Categories = ({
                     isTablet={isTablet}
                     onChannelSwitch={onChannelSwitch}
                     onlyUnreads={showOnlyUnreadsCategory}
+                    unreadsOnTop={unreadsOnTop}
                 />
             );
         }
@@ -96,10 +103,13 @@ const Categories = ({
                     isTablet={isTablet}
                     locale={intl.locale}
                     onChannelSwitch={onChannelSwitch}
+                    unreadsOnTop={unreadsOnTop}
+                    manuallyClosedPrefs$={manuallyClosedPrefs$}
+                    autoclosePrefs$={autoclosePrefs$}
                 />
             </>
         );
-    }, [teamId, intl.locale, isTablet, onChannelSwitch, showOnlyUnreadsCategory]);
+    }, [teamId, intl.locale, isTablet, onChannelSwitch, showOnlyUnreadsCategory, unreadsOnTop, manuallyClosedPrefs$, autoclosePrefs$]);
 
     useEffect(() => {
         const t = setTimeout(() => {
@@ -130,6 +140,7 @@ const Categories = ({
                     isTablet={isTablet}
                     onChannelSwitch={onChannelSwitch}
                     onlyUnreads={showOnlyUnreadsCategory}
+                    unreadsOnTop={unreadsOnTop}
                 />
             </View>
             }
