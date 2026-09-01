@@ -70,7 +70,6 @@
   "ai_rewrite.shorten": "Verkürzen",
   "ai_rewrite.simplify": "Vereinfachen",
   "ai_rewrite.summarize": "Zusammenfassen",
-  "ai_rewrite.title": "KI Umschreiben",
   "alert.channel_deleted.description": "Der Kanal {displayName} wurde archiviert.",
   "alert.channel_deleted.title": "Archivierter Kanal",
   "alert.push_proxy_error.description": "Aufgrund der Konfiguration deines Servers können keine Benachrichtigungen in der mobilen App empfangen werden. Wende dich für weitere Informationen an deinen Systemadministrator.",

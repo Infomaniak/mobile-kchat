@@ -4,6 +4,7 @@
 import {BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import moment from 'moment';
 import React, {useCallback, useMemo, useState} from 'react';
+import {defineMessage} from 'react-intl';
 import {Platform, ScrollView, TouchableOpacity, View} from 'react-native';
 
 import {BaseOption} from '@components/common_post_options';
@@ -74,6 +75,51 @@ const IkPostReminder = {
 
 export type PredefinedTimestamp = typeof IkPostReminder[keyof typeof IkPostReminder];
 
+const postReminderTimes = [
+    {
+        id: 'thirty_minutes',
+        message: defineMessage({
+            id: 'infomaniak.post_info.post_reminder.sub_menu.thirty_minutes',
+            defaultMessage: '30 mins',
+        }),
+    },
+    {
+        id: 'one_hour',
+        message: defineMessage({
+            id: 'infomaniak.post_info.post_reminder.sub_menu.one_hour',
+            defaultMessage: '1 hour',
+        }),
+    },
+    {
+        id: 'two_hours',
+        message: defineMessage({
+            id: 'infomaniak.post_info.post_reminder.sub_menu.two_hours',
+            defaultMessage: '2 hours',
+        }),
+    },
+    {
+        id: 'tomorrow',
+        message: defineMessage({
+            id: 'infomaniak.post_info.post_reminder.sub_menu.tomorrow',
+            defaultMessage: 'Tomorrow',
+        }),
+    },
+    {
+        id: 'monday',
+        message: defineMessage({
+            id: 'infomaniak.post_info.post_reminder.sub_menu.monday',
+            defaultMessage: 'Monday',
+        }),
+    },
+    {
+        id: 'custom',
+        message: defineMessage({
+            id: 'infomaniak.post_info.post_reminder.sub_menu.custom',
+            defaultMessage: 'Custom',
+        }),
+    },
+];
+
 const IKReminder = ({postId, postpone = false, postponePostId, componentId = Screens.IK_REMINDER, currentUser, limits, usage}: Props) => {
     const serverUrl = useServerUrl();
     const isTablet = useIsTablet();
@@ -86,19 +132,6 @@ const IKReminder = ({postId, postpone = false, postponePostId, componentId = Scr
     const [duration, setDuration] = useState<string>('');
     const isAndroid = Platform.OS === 'android';
     const showExpiryTime = Boolean(expiresAt);
-
-    const postReminderTimes = [
-        {
-            id: 'thirty_minutes',
-            label: 'infomaniak.post_info.post_reminder.sub_menu.thirty_minutes',
-            labelDefault: '30 mins',
-        },
-        {id: 'one_hour', label: 'infomaniak.post_info.post_reminder.sub_menu.one_hour', labelDefault: '1 hour'},
-        {id: 'two_hours', label: 'infomaniak.post_info.post_reminder.sub_menu.two_hours', labelDefault: '2 hours'},
-        {id: 'tomorrow', label: 'infomaniak.post_info.post_reminder.sub_menu.tomorrow', labelDefault: 'Tomorrow'},
-        {id: 'monday', label: 'infomaniak.post_info.post_reminder.sub_menu.monday', labelDefault: 'Monday'},
-        {id: 'custom', label: 'infomaniak.post_info.post_reminder.sub_menu.custom', labelDefault: 'Custom'},
-    ];
 
     const close = async () => {
         await dismissBottomSheet();
@@ -122,7 +155,7 @@ const IKReminder = ({postId, postpone = false, postponePostId, componentId = Scr
         }
         items.push(bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT) + space);
         return items;
-    }, [postReminderTimes.length, showCustomPicker, isAndroid]);
+    }, [showCustomPicker, isAndroid]);
 
     const handleCustomValidate = () => {
         if (!expiresAt) {
@@ -218,7 +251,7 @@ const IKReminder = ({postId, postpone = false, postponePostId, componentId = Scr
                     return (
                         <BaseOption
                             key={item.id}
-                            message={{id: item.label, defaultMessage: item.labelDefault}}
+                            message={item.message}
                             onPress={shouldUpgrade ? onPressEvolve : () => onPress(item.id)}
                             iconName=''
                             testID={item.id}

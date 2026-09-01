@@ -83,7 +83,6 @@
     "ai_rewrite.shorten": "Förkorta",
     "ai_rewrite.simplify": "Förenkla",
     "ai_rewrite.summarize": "Sammanfatta",
-    "ai_rewrite.title": "AI-omskrivning",
     "alert.channel_deleted.description": "Kanalen {displayName} har arkiverats.",
     "alert.channel_deleted.title": "Arkiverad kanal",
     "alert.push_proxy_error.description": "På grund av serverns konfiguration kan aviseringar inte tas emot i mobilappen. Kontakta din systemadministratör för mer information.",

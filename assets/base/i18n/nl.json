@@ -83,7 +83,6 @@
     "ai_rewrite.shorten": "Inkorten",
     "ai_rewrite.simplify": "Vereenvoudig",
     "ai_rewrite.summarize": "Samenvatten",
-    "ai_rewrite.title": "AI-herschrijving",
     "alert.channel_deleted.description": "Het kanaal {displayName} is gearchiveerd.",
     "alert.channel_deleted.title": "Gearchiveerd kanaal",
     "alert.push_proxy_error.description": "Vanwege de configuratie van deze server kunnen er geen meldingen worden ontvangen in de mobiele app. Neem contact op met uw systeembeheerder voor meer informatie.",

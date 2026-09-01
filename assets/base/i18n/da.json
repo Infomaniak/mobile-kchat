@@ -83,7 +83,6 @@
     "ai_rewrite.shorten": "Forkort",
     "ai_rewrite.simplify": "Forenkle",
     "ai_rewrite.summarize": "Opsummer",
-    "ai_rewrite.title": "AI-omskrivning",
     "alert.channel_deleted.description": "Kanalen {displayName} er blevet arkiveret.",
     "alert.channel_deleted.title": "Arkiveret kanal",
     "alert.push_proxy_error.description": "På grund af serverens konfiguration kan notifikationer ikke modtages i mobilappen. Kontakt din systemadministrator for yderligere information.",

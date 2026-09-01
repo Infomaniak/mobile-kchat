@@ -83,7 +83,6 @@
     "ai_rewrite.shorten": "Συντομεύστε",
     "ai_rewrite.simplify": "Απλοποιήστε",
     "ai_rewrite.summarize": "Συνοψίστε",
-    "ai_rewrite.title": "Επαναδιατύπωση με χρήση Τεχνητής Νοημοσύνης",
     "alert.channel_deleted.description": "Το κανάλι {displayName} έχει αρχειοθετηθεί.",
     "alert.channel_deleted.title": "Αρχειοθετημένο κανάλι",
     "alert.push_proxy_error.description": "Λόγω της διαμόρφωσης αυτού του διακομιστή, δεν είναι δυνατή η λήψη ειδοποιήσεων στην εφαρμογή για κινητά. Επικοινωνήστε με τον διαχειριστή του συστήματός σας για περισσότερες πληροφορίες.",

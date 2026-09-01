@@ -83,7 +83,6 @@
     "ai_rewrite.shorten": "Lyhentää",
     "ai_rewrite.simplify": "Yksinkertaista",
     "ai_rewrite.summarize": "Tiivistä",
-    "ai_rewrite.title": "AI-uudelleenkirjoitus",
     "alert.channel_deleted.description": "Kanava {displayName} on arkistoitu.",
     "alert.channel_deleted.title": "Arkistoitu kanava",
     "alert.push_proxy_error.description": "Tämän palvelimen kokoonpanon vuoksi ilmoituksia ei voida vastaanottaa mobiilisovelluksessa. Ota yhteyttä järjestelmänvalvojaan saadaksesi lisätietoja.",

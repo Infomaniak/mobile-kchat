@@ -32,7 +32,6 @@
   "ai_rewrite.shorten": "Raccourcir",
   "ai_rewrite.simplify": "Simplifier",
   "ai_rewrite.summarize": "Résumer",
-  "ai_rewrite.title": "Réécriture IA",
   "alert.channel_deleted.description": "Le canal {displayName} a été archivé.",
   "alert.channel_deleted.title": "Canal archivé",
   "alert.push_proxy_error.description": "En raison de la configuration de ce serveur, l'application mobile ne peut pas recevoir de notifications. Contactez votre administrateur système pour plus d'informations.",

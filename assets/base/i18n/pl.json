@@ -83,7 +83,6 @@
     "ai_rewrite.shorten": "Skróć",
     "ai_rewrite.simplify": "Uprość",
     "ai_rewrite.summarize": "Podsumuj",
-    "ai_rewrite.title": "Przepisywanie za pomocą sztucznej inteligencji",
     "alert.channel_deleted.description": "Kanał {displayName} został zarchiwizowany.",
     "alert.channel_deleted.title": "Zarchiwizowany kanał",
     "alert.push_proxy_error.description": "Ze względu na konfigurację tego serwera aplikacja mobilna nie może odbierać powiadomień. W celu uzyskania dodatkowych informacji skontaktuj się z administratorem systemu.",

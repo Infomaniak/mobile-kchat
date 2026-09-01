@@ -83,7 +83,6 @@
     "ai_rewrite.shorten": "Encurtar",
     "ai_rewrite.simplify": "Simplifique",
     "ai_rewrite.summarize": "Resumir",
-    "ai_rewrite.title": "Reescrita com IA",
     "alert.channel_deleted.description": "O canal {displayName} foi arquivado.",
     "alert.channel_deleted.title": "Canal arquivado",
     "alert.push_proxy_error.description": "Devido à configuração deste servidor, as notificações não podem ser recebidas no aplicativo móvel. Entre em contato com o administrador do sistema para obter mais informações.",

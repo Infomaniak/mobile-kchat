@@ -83,7 +83,6 @@
     "ai_rewrite.shorten": "Forkort",
     "ai_rewrite.simplify": "Forenkle",
     "ai_rewrite.summarize": "Oppsummer",
-    "ai_rewrite.title": "AI-omskriving",
     "alert.channel_deleted.description": "Kanelen {displayName} er arkivert.",
     "alert.channel_deleted.title": "Arkivert kanal",
     "alert.push_proxy_error.description": "På grunn av konfigurasjonen av denne serveren, kan ikke varsler mottas i mobilappen. Kontakt systemadministratoren din for mer informasjon.",
