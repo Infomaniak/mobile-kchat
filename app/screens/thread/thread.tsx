@@ -3,15 +3,14 @@
 
 import {useIsFocused} from '@react-navigation/native';
 import {useNavigation} from 'expo-router';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {Platform, type LayoutChangeEvent, StyleSheet} from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {type LayoutChangeEvent, StyleSheet} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {storeLastViewedThreadIdAndServer, removeLastViewedThreadIdAndServer} from '@actions/app/global';
 import RoundedHeaderContext from '@components/rounded_header_context';
 import {Screens} from '@constants';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import {useIsTablet} from '@hooks/device';
 import useDidUpdate from '@hooks/did_update';
 import EphemeralStore from '@store/ephemeral_store';
 import {NavigationStore} from '@store/navigation_store';
@@ -32,6 +31,8 @@ const styles = StyleSheet.create({
     flex: {flex: 1},
 });
 
+const safeAreaViewEdges: Edge[] = ['left', 'right', 'bottom'];
+
 const Thread = ({
     isCRTEnabled,
     rootId,
@@ -41,24 +42,8 @@ const Thread = ({
     const [containerHeight, setContainerHeight] = useState(0);
     const navigation = useNavigation();
     const isVisible = useIsFocused();
-    const isTablet = useIsTablet();
-    const [isEmojiSearchFocused, setIsEmojiSearchFocused] = useState(false);
 
-    const safeAreaViewEdges: Edge[] = useMemo(() => {
-        if (isTablet) {
-            return ['left', 'right'];
-        }
-        if (isEmojiSearchFocused) {
-            return ['left', 'right'];
-        }
-        return ['left', 'right', 'bottom'];
-    }, [isTablet, isEmojiSearchFocused]);
-
-    const close = useCallback(() => {
-        navigation.goBack();
-    }, [navigation]);
-
-    useAndroidHardwareBackHandler(Screens.THREAD, close);
+    useAndroidHardwareBackHandler(Screens.THREAD, navigation.goBack);
 
     useEffect(() => {
         if (isCRTEnabled && rootId) {
@@ -75,6 +60,8 @@ const Thread = ({
     }, [rootId, isCRTEnabled, navigation]);
 
     useEffect(() => {
+        // when opened from notification, first screen in stack is HOME
+        // if last screen was global thread or thread opened from notification, store the last viewed thread id
         const isFromGlobalOrNotification = NavigationStore.getScreensInStack()[1] === Screens.GLOBAL_THREADS || NavigationStore.getScreensInStack()[1] === Screens.HOME;
         if (isCRTEnabled && isFromGlobalOrNotification) {
             storeLastViewedThreadIdAndServer(rootId);
@@ -95,7 +82,7 @@ const Thread = ({
 
     useDidUpdate(() => {
         if (!rootPost) {
-            close();
+            navigation.goBack();
         }
     }, [rootPost]);
 
@@ -111,27 +98,15 @@ const Thread = ({
             onLayout={onLayout}
         >
             <RoundedHeaderContext/>
-            {Boolean(rootPost) &&
-            (Platform.OS === 'ios' ? (
+            {Boolean(rootPost) && (
                 <ThreadContent
                     rootId={rootId}
                     rootPost={rootPost!}
                     scheduledPostCount={scheduledPostCount}
                     containerHeight={containerHeight}
                     enabled={isVisible}
-                    onEmojiSearchFocusChange={setIsEmojiSearchFocused}
                 />
-            ) : (
-                <ThreadContent
-                    rootId={rootId}
-                    rootPost={rootPost!}
-                    scheduledPostCount={scheduledPostCount}
-                    containerHeight={containerHeight}
-                    enabled={isVisible}
-                    onEmojiSearchFocusChange={setIsEmojiSearchFocused}
-                />
-            ))
-            }
+            )}
         </SafeAreaView>
     );
 };

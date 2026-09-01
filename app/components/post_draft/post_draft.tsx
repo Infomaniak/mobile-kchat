@@ -31,6 +31,7 @@ type Props = {
     canShowPostPriority?: boolean;
     location: AvailableScreens;
     onPostCreated?: (postId: string) => void;
+    portalName?: string;
 }
 
 function PostDraft({
@@ -49,6 +50,7 @@ function PostDraft({
     canShowPostPriority,
     location,
     onPostCreated,
+    portalName,
 }: Props) {
     const [value, setValue] = useState(message);
     const [cursorPosition, setCursorPosition] = useState(message.length);
@@ -120,6 +122,7 @@ function PostDraft({
             availableSpace={animatedAutocompleteAvailableSpace}
             serverUrl={serverUrl}
             usePortal={true}
+            portalName={portalName}
         />
     ) : null;
 

@@ -1,10 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {DEFAULT_INPUT_ACCESSORY_HEIGHT} from '@keyboard';
 import React, {type ReactElement, useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {DeviceEventEmitter, FlatList, type GestureResponderEvent, type ListRenderItemInfo, Platform, type StyleProp, StyleSheet, type ViewStyle, type NativeSyntheticEvent, type NativeScrollEvent} from 'react-native';
-import {useKeyboardState} from 'react-native-keyboard-controller';
-import Animated, {runOnJS, useAnimatedProps, useAnimatedReaction, useSharedValue, type AnimatedStyle} from 'react-native-reanimated';
+import {DeviceEventEmitter, type ListRenderItemInfo, Platform, type StyleProp, StyleSheet, type ViewStyle, type NativeSyntheticEvent, type NativeScrollEvent} from 'react-native';
+import {Gesture, GestureDetector} from 'react-native-gesture-handler';
+import {KeyboardState, useAnimatedKeyboard, useKeyboardState as useControllerKeyboardState} from 'react-native-keyboard-controller';
+import Animated, {scrollTo, useAnimatedProps, useAnimatedReaction, useAnimatedStyle, type AnimatedStyle} from 'react-native-reanimated';
+import {scheduleOnRN, scheduleOnUI} from 'react-native-worklets';
 
 import {removePost} from '@actions/local/post';
 import {fetchPosts, fetchPostThread} from '@actions/remote/post';
@@ -15,11 +18,12 @@ import NewMessagesLine from '@components/post_list/new_message_line';
 import Post from '@components/post_list/post';
 import ThreadOverview from '@components/post_list/thread_overview';
 import {Events, Screens} from '@constants';
+import {isAndroidEdgeToEdge, isEdgeToEdge} from '@constants/device';
 import {PostTypes} from '@constants/post';
-import {useKeyboardAnimationContext} from '@context/keyboard_animation';
+import {useKeyboardState} from '@context/keyboard_state';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
-import {DEFAULT_INPUT_ACCESSORY_HEIGHT} from '@hooks/useInputAccessoryView';
+import {useInputAccessoryViewGesture} from '@hooks/use_input_accessory_view_gesture';
 import EphemeralStore from '@store/ephemeral_store';
 import {logDebug} from '@utils/log';
 import {getDateForDateLine, preparePostList} from '@utils/post_list';
@@ -60,12 +64,8 @@ type Props = {
     footer?: ReactElement;
     header?: ReactElement;
     testID: string;
-    currentCallBarVisible?: boolean;
     savedPostIds: Set<string>;
     isChannelAutotranslated: boolean;
-    listRef?: React.RefObject<FlatList<string | PostModel> | null>;
-    onTouchMove?: (event: GestureResponderEvent) => void;
-    onTouchEnd?: () => void;
 }
 
 type onScrollEndIndexListenerEvent = (endIndex: number) => void;
@@ -76,9 +76,7 @@ type ScrollIndexFailed = {
     averageItemLength: number;
 };
 
-export type PostListHandle = {
-  scrollToEnd: () => void;
-};
+export type PostListHandle = {scrollToEnd: () => void};
 
 export const postListRef = React.createRef<PostListHandle>();
 
@@ -128,23 +126,37 @@ const PostList = ({
     testID,
     savedPostIds,
     isChannelAutotranslated,
-    listRef,
-    onTouchMove,
-    onTouchEnd,
 }: Props) => {
     const firstIdInPosts = posts[0]?.id;
+    const {panGesture: emojiPickerGesture} = useInputAccessoryViewGesture();
 
-    const {
-        keyboardTranslateY: keyboardHeightValue,
-        bottomInset: contentInset,
-        onScroll: onScrollProp,
-        postInputContainerHeight,
-        keyboardHeight,
-        isKeyboardFullyOpen,
-        isKeyboardFullyClosed,
-        inputAccessoryViewAnimatedHeight,
-        isInputAccessoryViewMode,
-    } = useKeyboardAnimationContext();
+    const {stateContext, onScroll: onScrollProp, postInputContainerHeight, stateMachine, listRef, isEmojiSearchFocused} = useKeyboardState();
+    const {postInputTranslateY, inputAccessoryHeight} = stateContext;
+
+    useAnimatedReaction(
+        () => ({
+            scrollOffset: stateContext.scrollOffset.value,
+            scrollPosition: stateContext.scrollPosition.value,
+            isReconcilerPaused: stateContext.isReconcilerPaused.value,
+        }),
+        (current, previous) => {
+            'worklet';
+
+            // Skip scroll compensation if reconciler is paused (exit actions adjust scrollPosition manually)
+            if (current.isReconcilerPaused || !listRef) {
+                return;
+            }
+
+            const offsetChanged = previous === null || Math.abs(current.scrollOffset - (previous?.scrollOffset || 0)) > 0.5;
+
+            if (!offsetChanged) {
+                return;
+            }
+
+            scrollTo(listRef, 0, -current.scrollOffset + current.scrollPosition, false);
+        },
+        [listRef],
+    );
 
     const onScrollEndIndexListener = useRef<onScrollEndIndexListenerEvent | undefined>(undefined);
     const onViewableItemsChangedListener = useRef<ViewableItemsChangedListenerEvent | undefined>(undefined);
@@ -160,44 +172,31 @@ const PostList = ({
     const [emojiPickerPadding, setEmojiPickerPadding] = useState(0);
     const theme = useTheme();
     const serverUrl = useServerUrl();
-    const {isVisible: isKeyboardVisible} = useKeyboardState();
-    const internalRef = useRef<FlatList<string | PostModel>>(null);
-    const flatListRef = listRef || internalRef;
+    const {isVisible: isControllerKeyboardVisible} = useControllerKeyboardState();
+    const {state} = useAnimatedKeyboard();
     const activeScrollTargetId = scrollTargetId ?? highlightedId;
     const shouldUseInitialScrollIndex = !scrollTargetId;
     const previousScrollTargetId = useRef(activeScrollTargetId);
 
-    // Update progressViewOffset to position RefreshControl correctly when keyboard-aware props are applied.
-    // Only update when keyboard state changes (fully open ↔ fully closed) to prevent flickering during animation.
-    const prevIsFullyOpen = useSharedValue(false);
-    const prevIsFullyClosed = useSharedValue(true);
     useAnimatedReaction(
-        () => ({
-            isFullyOpen: isKeyboardFullyOpen.value,
-            isFullyClosed: isKeyboardFullyClosed.value,
-            keyboardTranslateY: keyboardHeightValue.value,
-        }),
-        ({isFullyOpen, isFullyClosed, keyboardTranslateY}) => {
-            // Only update when state actually changes (transition detected)
-            const stateChanged = (prevIsFullyClosed.value !== isFullyClosed) || (prevIsFullyOpen.value !== isFullyOpen);
-
-            if (stateChanged && (isFullyOpen || isFullyClosed)) {
-                const offset = postInputContainerHeight + keyboardTranslateY;
-                runOnJS(setProgressViewOffset)(offset);
-            }
-            prevIsFullyOpen.value = isFullyOpen;
-            prevIsFullyClosed.value = isFullyClosed;
+        () => {
+            return {
+                state: state.value,
+            };
         },
-        [postInputContainerHeight],
+        ({state: kbState}) => {
+            if (!isAndroidEdgeToEdge && (kbState === KeyboardState.CLOSED || kbState === KeyboardState.OPEN)) {
+                scheduleOnRN(setProgressViewOffset, stateContext.postInputContainerHeight.value + postInputTranslateY.value);
+            }
+        },
+        [],
     );
 
     const orderedPosts = useMemo(() => {
         return preparePostList(posts, lastViewedAt, showNewMessageLine, currentUserId, currentUsername, shouldShowJoinLeaveMessages, currentTimezone, location === Screens.THREAD, savedPostIds);
     }, [posts, lastViewedAt, showNewMessageLine, currentUserId, currentUsername, shouldShowJoinLeaveMessages, currentTimezone, location, savedPostIds]);
 
-    const initialIndex = useMemo(() => {
-        return orderedPosts.findIndex((i) => i.type === 'start-of-new-messages');
-    }, [orderedPosts]);
+    const initialIndex = orderedPosts.findIndex((i) => i.type === 'start-of-new-messages');
 
     const scrollTargetIndex = useMemo(() => {
         if (!activeScrollTargetId) {
@@ -218,13 +217,16 @@ const PostList = ({
     const isNewMessage = lastPostId ? firstIdInPosts !== lastPostId : false;
 
     const scrollToEnd = useCallback(() => {
-        const activeHeight = Math.max(keyboardHeight.value, inputAccessoryViewAnimatedHeight.value);
-        const targetOffset = -activeHeight;
-
-        flatListRef?.current?.scrollToOffset({offset: targetOffset, animated: true});
-
+        if (listRef) {
+            scheduleOnUI(() => {
+                scrollTo(listRef, 0, -postInputTranslateY.value, true);
+            });
+        }
         setShowScrollToEndBtn(false);
-    }, [inputAccessoryViewAnimatedHeight, keyboardHeight, flatListRef]);
+
+        // postInputTranslateY is a SharedValue
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [listRef]);
 
     const handleScrollToEndPress = useCallback(() => {
         const resetToRecentPosts = onScrollToEnd?.();
@@ -303,30 +305,29 @@ const PostList = ({
     }, [disablePullToRefresh, location, channelId, rootId, posts, serverUrl]);
 
     const scrollToIndex = useCallback((index: number, animated = true, applyOffset = true) => {
-        if (index < 0 || !flatListRef?.current) {
+        if (index < 0 || !listRef?.current) {
             return;
         }
 
-        flatListRef?.current?.scrollToIndex({
+        listRef?.current?.scrollToIndex({
             animated,
             index,
             viewOffset: applyOffset ? Platform.select({ios: -45, default: 0}) : 0,
-            viewPosition: 1, // 0 is at bottom
+            viewPosition: 1,
         });
-    }, [flatListRef]);
+    }, [listRef]);
 
     const scrollToHighlightedIndex = useCallback((index: number, animated = true) => {
-        if (index < 0 || !flatListRef?.current) {
+        if (index < 0 || !listRef?.current) {
             return;
         }
 
-        flatListRef.current.scrollToIndex({animated, index, viewOffset: 0, viewPosition: 0.5});
-    }, [flatListRef]);
+        listRef.current.scrollToIndex({animated, index, viewOffset: 0, viewPosition: 0.5});
+    }, [listRef]);
 
-    const handleTouchMove = useCallback((event: GestureResponderEvent) => {
+    const handleTouchMove = useCallback(() => {
         hasUserTouchedList.current = true;
-        onTouchMove?.(event);
-    }, [onTouchMove]);
+    }, []);
 
     const internalOnScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const {y} = event.nativeEvent.contentOffset;
@@ -510,7 +511,7 @@ const PostList = ({
                     orderedPostsCount: orderedPosts.length,
                     location,
                 });
-                if (scrollTargetIndex >= 0 && flatListRef?.current) {
+                if (scrollTargetIndex >= 0 && listRef?.current) {
                     scrollToHighlightedIndex(scrollTargetIndex);
                 }
             }
@@ -518,81 +519,81 @@ const PostList = ({
 
         return () => clearTimeout(t);
 
-    // - listRef is a ref (stable reference, doesn't need to be in deps)
-    // - scrolledToHighlighted is a ref (stable reference, doesn't need to be in deps)
-    // - We only need to re-run when the posts list changes or the highlighted post changes
+    // - listRef and scrolledToHighlighted are stable refs; only re-run when posts/highlighted post change
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeScrollTargetId, scrollTargetId, scrollTargetIndex, orderedPosts, shouldUseInitialScrollIndex]);
 
-    // Sync emoji picker padding from SharedValue to React state
-    // This ensures the padding updates when SharedValues change
     useAnimatedReaction(
         () => {
-            const shouldAddEmojiPickerPadding = Platform.OS === 'android' && !isKeyboardVisible && isInputAccessoryViewMode.value;
-            const emojiPickerHeight = shouldAddEmojiPickerPadding ? (inputAccessoryViewAnimatedHeight.value || DEFAULT_INPUT_ACCESSORY_HEIGHT) : 0;
-            return emojiPickerHeight;
+            const shouldAddEmojiPickerPadding = Platform.OS === 'android' && !isAndroidEdgeToEdge && !isControllerKeyboardVisible && stateMachine.isEmojiPickerActive();
+            return shouldAddEmojiPickerPadding ? (inputAccessoryHeight.value || DEFAULT_INPUT_ACCESSORY_HEIGHT) : 0;
         },
         (emojiPickerHeight) => {
-            runOnJS(setEmojiPickerPadding)(emojiPickerHeight);
+            scheduleOnRN(setEmojiPickerPadding, emojiPickerHeight);
         },
-        [isKeyboardVisible],
+        [isControllerKeyboardVisible],
     );
 
-    // Combine contentContainerStyle with padding style
-    // Use regular style with state value synced from SharedValues
-    const contentContainerStyleWithPadding = useMemo(() => {
-        const paddingStyle = {paddingTop: location === Screens.PERMALINK ? 0 : postInputContainerHeight + emojiPickerPadding};
-        return contentContainerStyle ? [contentContainerStyle, paddingStyle] : paddingStyle;
+    const contentContainerStyleWithMargin = useMemo(() => {
+        const marginStyle = {marginTop: location === Screens.PERMALINK || !isEdgeToEdge ? 0 : postInputContainerHeight + emojiPickerPadding};
+        return contentContainerStyle ? [contentContainerStyle, marginStyle] : marginStyle;
     }, [location, postInputContainerHeight, emojiPickerPadding, contentContainerStyle]);
 
-    // contentInset only for dynamic keyboard height
     const animatedProps = useAnimatedProps(
         () => ({
             contentInset: {
-                top: contentInset.value, // For inverted FlatList, applies to visual bottom
+                top: Math.max(postInputTranslateY.value, 0),
             },
         }),
-        [contentInset],
+        [postInputTranslateY],
     );
+
+    const androidExtra = useAnimatedStyle(() => (isAndroidEdgeToEdge ? {marginBottom: Math.max(postInputTranslateY.value, 0)} : {}));
+
+    const nativeGesture = Gesture.Native();
+    const composedGesture = emojiPickerGesture ? Gesture.Simultaneous(nativeGesture, emojiPickerGesture) : nativeGesture;
 
     return (
         <>
-            <Animated.FlatList
-                animatedProps={animatedProps}
-                automaticallyAdjustContentInsets={false}
-                contentInsetAdjustmentBehavior='never'
-                contentContainerStyle={contentContainerStyleWithPadding}
-                data={orderedPosts}
-                keyboardDismissMode='interactive'
-                keyboardShouldPersistTaps='handled'
-                keyExtractor={keyExtractor}
-                initialNumToRender={initialNumToRender}
-                initialScrollIndex={shouldUseInitialScrollIndex && scrollTargetIndex >= 0 ? scrollTargetIndex : undefined}
-                ListHeaderComponent={header}
-                ListFooterComponent={footer}
-                maintainVisibleContentPosition={SCROLL_POSITION_CONFIG}
-                maxToRenderPerBatch={10}
-                windowSize={10}
-                onEndReached={onEndReached}
-                onEndReachedThreshold={0.9}
-                onScroll={onScrollProp}
-                onMomentumScrollEnd={internalOnScroll}
-                onScrollToIndexFailed={onScrollToIndexFailed}
-                onViewableItemsChanged={onViewableItemsChanged}
-                progressViewOffset={progressViewOffset}
-                ref={flatListRef}
-                removeClippedSubviews={Platform.OS === 'android'}
-                renderItem={renderItem}
-                scrollEventThrottle={SCROLL_EVENT_THROTTLE}
-                style={styles.flex}
-                viewabilityConfig={VIEWABILITY_CONFIG}
-                testID={`${testID}.flat_list`}
-                inverted={true}
-                refreshing={refreshing}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={onTouchEnd}
-                onRefresh={onRefresh}
-            />
+            <Animated.View style={[styles.flex, androidExtra]}>
+                <GestureDetector gesture={composedGesture}>
+                    <Animated.FlatList
+                        animatedProps={animatedProps}
+                        automaticallyAdjustContentInsets={false}
+                        contentInsetAdjustmentBehavior='never'
+                        contentContainerStyle={contentContainerStyleWithMargin}
+                        data={orderedPosts}
+                        keyboardDismissMode={isEmojiSearchFocused ? 'none' : 'interactive'}
+                        keyboardShouldPersistTaps='handled'
+                        keyExtractor={keyExtractor}
+                        initialNumToRender={initialNumToRender}
+                        initialScrollIndex={shouldUseInitialScrollIndex && scrollTargetIndex >= 0 ? scrollTargetIndex : undefined}
+                        ListHeaderComponent={header}
+                        ListFooterComponent={footer}
+                        maintainVisibleContentPosition={SCROLL_POSITION_CONFIG}
+                        maxToRenderPerBatch={10}
+                        windowSize={10}
+                        onEndReached={onEndReached}
+                        onEndReachedThreshold={0.9}
+                        onScroll={onScrollProp}
+                        onMomentumScrollEnd={internalOnScroll}
+                        onScrollToIndexFailed={onScrollToIndexFailed}
+                        onViewableItemsChanged={onViewableItemsChanged}
+                        progressViewOffset={progressViewOffset}
+                        ref={listRef}
+                        removeClippedSubviews={Platform.OS === 'android'}
+                        renderItem={renderItem}
+                        scrollEventThrottle={SCROLL_EVENT_THROTTLE}
+                        style={styles.flex}
+                        viewabilityConfig={VIEWABILITY_CONFIG}
+                        testID={`${testID}.flat_list`}
+                        inverted={true}
+                        refreshing={refreshing}
+                        onTouchMove={handleTouchMove}
+                        onRefresh={onRefresh}
+                    />
+                </GestureDetector>
+            </Animated.View>
             {location !== Screens.PERMALINK &&
             <ScrollToEndView
                 onPress={handleScrollToEndPress}

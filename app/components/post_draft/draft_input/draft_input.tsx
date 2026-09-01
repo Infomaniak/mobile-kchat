@@ -10,7 +10,7 @@ import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {userTyping} from '@actions/websocket/users';
 import {Screens} from '@constants';
-import {useKeyboardAnimationContext} from '@context/keyboard_animation';
+import {useKeyboardState} from '@context/keyboard_state';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
@@ -156,7 +156,13 @@ function DraftInput({
     const theme = useTheme();
     const isTablet = useIsTablet();
 
-    const {inputRef, focusInput: focus, blurAndDismissKeyboard} = useKeyboardAnimationContext();
+    const {inputRef, blurAndDismissKeyboard} = useKeyboardState();
+
+    const focus = useCallback(() => {
+        inputRef.current?.focus();
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleLayout = useCallback((e: LayoutChangeEvent) => {
         updatePostInputTop(e.nativeEvent.layout.height);
@@ -325,7 +331,6 @@ function DraftInput({
                             value={value}
                             addFiles={addFiles}
                             sendMessage={handleSendMessage}
-                            inputRef={inputRef}
                             setIsFocused={setIsFocused}
                         />
                     )}

@@ -457,14 +457,26 @@ jest.mock('react-native-keyboard-controller', () => {
     return {
         KeyboardProvider: ({children}: {children: React.ReactNode}) => children,
         KeyboardController: {
-            dismiss: jest.fn(),
+            setInputMode: jest.fn(),
+            setDefaultMode: jest.fn(),
+            dismiss: jest.fn(() => Promise.resolve()),
             isVisible: jest.fn(() => false),
         },
         useKeyboardHandler: jest.fn(),
+        useReanimatedFocusedInput: jest.fn(() => ({input: {value: null}})),
         useKeyboardState: jest.fn(() => ({
             isVisible: false,
         })),
         KeyboardGestureArea: ({children}: {children: React.ReactNode}) => children,
+        KeyboardAwareScrollView: 'KeyboardAwareScrollView',
+        KeyboardAvoidingView: 'KeyboardAvoidingView',
+        KeyboardState: {
+            UNKNOWN: 0,
+            OPENING: 1,
+            OPEN: 2,
+            CLOSING: 3,
+            CLOSED: 4,
+        },
         useAnimatedKeyboard: jest.fn(() => ({
             height: {value: 0},
             progress: {value: 0},
