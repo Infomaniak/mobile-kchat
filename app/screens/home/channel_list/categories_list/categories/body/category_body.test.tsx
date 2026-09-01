@@ -41,6 +41,8 @@ describe('components/channel_list/categories/body', () => {
                 unreadsOnTop={false}
                 manuallyClosedPrefs$={of$([])}
                 autoclosePrefs$={of$([])}
+                currentChannelId$={of$('')}
+                notifyPropsByChannelId$={of$({})}
             />,
             {database},
         );

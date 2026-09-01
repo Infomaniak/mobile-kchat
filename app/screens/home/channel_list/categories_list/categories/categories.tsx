@@ -31,6 +31,8 @@ type Props = {
     unreadsOnTop: boolean;
     manuallyClosedPrefs$: Observable<PreferenceModel[]>;
     autoclosePrefs$: Observable<PreferenceModel[]>;
+    currentChannelId$: Observable<string>;
+    notifyPropsByChannelId$: Observable<Record<string, Partial<ChannelNotifyProps>>>;
 }
 
 const styles = StyleSheet.create({
@@ -52,6 +54,8 @@ const Categories = ({
     unreadsOnTop,
     manuallyClosedPrefs$,
     autoclosePrefs$,
+    currentChannelId$,
+    notifyPropsByChannelId$,
 }: Props) => {
     const intl = useIntl();
     const listRef = useRef<FlatList>(null);
@@ -92,12 +96,16 @@ const Categories = ({
                     onChannelSwitch={onChannelSwitch}
                     onlyUnreads={showOnlyUnreadsCategory}
                     unreadsOnTop={unreadsOnTop}
+                    notifyPropsByChannelId$={notifyPropsByChannelId$}
                 />
             );
         }
         return (
             <>
-                <CategoryHeader category={data.item}/>
+                <CategoryHeader
+                    category={data.item}
+                    currentChannelId$={currentChannelId$}
+                />
                 <CategoryBody
                     category={data.item}
                     isTablet={isTablet}
@@ -106,10 +114,12 @@ const Categories = ({
                     unreadsOnTop={unreadsOnTop}
                     manuallyClosedPrefs$={manuallyClosedPrefs$}
                     autoclosePrefs$={autoclosePrefs$}
+                    currentChannelId$={currentChannelId$}
+                    notifyPropsByChannelId$={notifyPropsByChannelId$}
                 />
             </>
         );
-    }, [teamId, intl.locale, isTablet, onChannelSwitch, showOnlyUnreadsCategory, unreadsOnTop, manuallyClosedPrefs$, autoclosePrefs$]);
+    }, [teamId, intl.locale, isTablet, onChannelSwitch, showOnlyUnreadsCategory, unreadsOnTop, manuallyClosedPrefs$, autoclosePrefs$, currentChannelId$, notifyPropsByChannelId$]);
 
     useEffect(() => {
         const t = setTimeout(() => {
@@ -141,6 +151,7 @@ const Categories = ({
                     onChannelSwitch={onChannelSwitch}
                     onlyUnreads={showOnlyUnreadsCategory}
                     unreadsOnTop={unreadsOnTop}
+                    notifyPropsByChannelId$={notifyPropsByChannelId$}
                 />
             </View>
             }
