@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {useNavigation} from 'expo-router';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Alert, Keyboard, type LayoutChangeEvent, Platform, View, StyleSheet} from 'react-native';
@@ -10,6 +11,7 @@ import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 import {deletePost, editPost} from '@actions/remote/post';
 import Autocomplete from '@components/autocomplete';
 import Loading from '@components/loading';
+import NavigationButton from '@components/navigation_button';
 import {QUICK_ACTIONS_HEIGHT} from '@components/post_draft/quick_actions/quick_actions';
 import {EditPostProvider} from '@context/edit_post';
 import {ExtraKeyboardProvider} from '@context/extra_keyboard';
@@ -21,12 +23,10 @@ import {useKeyboardOverlap} from '@hooks/device';
 import useDidMount from '@hooks/did_mount';
 import useDidUpdate from '@hooks/did_update';
 import {useInputPropagation} from '@hooks/input';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import DraftEditPostUploadManager from '@managers/draft_upload_manager';
 import PostError from '@screens/edit_post/post_error';
-import {buildNavigationButton, dismissModal, setButtons} from '@screens/navigation';
+import {dismissModal} from '@screens/navigation';
 import {fileMaxWarning, fileSizeWarning, uploadDisabledWarning} from '@utils/file';
-import {changeOpacity} from '@utils/theme';
 
 import EditPostInput from './edit_post_input';
 
@@ -54,8 +54,6 @@ const styles = StyleSheet.create({
     },
 });
 
-const RIGHT_BUTTON = buildNavigationButton('edit-post', 'edit_post.save.button');
-
 // Exclude bottom edge from SafeAreaView to prevent gap between attachments and keyboard.
 const safeAreaEdges: Edge[] = ['top', 'left', 'right'];
 
@@ -75,7 +73,6 @@ const EditPost = ({
     componentId,
     maxPostSize,
     post,
-    closeButtonId,
     canDelete,
     files,
     maxFileCount,
@@ -98,7 +95,10 @@ const EditPost = ({
     const postInputRef = useRef<PasteTextInputInstance | null>(null);
     const theme = useTheme();
     const intl = useIntl();
+    const navigation = useNavigation();
     const serverUrl = useServerUrl();
+
+    const [saveEnabled, setSaveEnabled] = useState(false);
 
     const hasNoCurrentFiles = postFiles.length === 0;
     const shouldDeleteOnSave = !postMessage && canDelete && hasNoCurrentFiles;
@@ -153,16 +153,8 @@ const EditPost = ({
     }, [cursorPosition]);
 
     const toggleSaveButton = useCallback((enabled = true) => {
-        setButtons(componentId, {
-            rightButtons: [{
-                ...RIGHT_BUTTON,
-                color: theme.sidebarHeaderTextColor,
-                disabledColor: changeOpacity(theme.sidebarHeaderTextColor, 0.32),
-                text: intl.formatMessage({id: 'edit_post.save', defaultMessage: 'Save'}),
-                enabled,
-            }],
-        });
-    }, [componentId, intl, theme]);
+        setSaveEnabled(enabled);
+    }, []);
 
     const updateFileInPostFiles = useCallback((updatedFile: FileInfo) => {
         const hasSameClientId = (file: FileInfo) => {
@@ -417,8 +409,19 @@ const EditPost = ({
         setContainerHeight(e.nativeEvent.layout.height);
     }, []);
 
-    useNavButtonPressed(RIGHT_BUTTON.id, componentId, onSavePostMessage, [postMessage, postFiles]);
-    useNavButtonPressed(closeButtonId, componentId, onClose, []);
+    useEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <NavigationButton
+                    onPress={onSavePostMessage}
+                    disabled={!saveEnabled}
+                    testID={'edit_post.save.button'}
+                    text={intl.formatMessage({id: 'edit_post.save', defaultMessage: 'Save'})}
+                />
+            ),
+        });
+    }, [navigation, onSavePostMessage, saveEnabled, intl]);
+
     useAndroidHardwareBackHandler(componentId, onClose);
 
     const overlap = useKeyboardOverlap(mainView, containerHeight);
