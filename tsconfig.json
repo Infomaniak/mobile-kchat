@@ -1,94 +1,160 @@
 {
-    "compilerOptions": {
-        "experimentalDecorators": true,
-        "target": "esnext",
-        "lib": [
-            "es6", "ES2019"
-        ],
-        "allowJs": false,
-        "skipLibCheck": true,
-        "allowSyntheticDefaultImports": true,
-        "allowUnreachableCode": false,
-        "allowUnusedLabels": false,
-        "esModuleInterop": true,
-        "jsx": "react-native",
-        "types": ["react-native", "jest"],
-        "moduleResolution": "node",
-        "noEmit": true,
-        "allowImportingTsExtensions": true,
-        "strict": true,
-        "importHelpers": true,
-        "verbatimModuleSyntax": true,
-        "forceConsistentCasingInFileNames": true,
-        "declaration": true,
-        "sourceMap": false,
-        "rootDir": "./",
-        "outDir": "./",
-        "noImplicitAny": true,
-        "strictNullChecks": true,
-        "strictFunctionTypes": false,
-        "strictPropertyInitialization": true,
-        "noImplicitThis": false,
-        "alwaysStrict": true,
-        "noUnusedLocals": false,
-        "downlevelIteration": true,
-        "noUnusedParameters": false,
-        "noImplicitReturns": true,
-        "noImplicitUseStrict": false,
-        "noFallthroughCasesInSwitch": true,
-        "resolveJsonModule": true,
-        "ignoreDeprecations": "6.0",
-        "baseUrl": ".",
-        "paths": {
-            "@actions/*": ["app/actions/*"],
-            "@agents/*": ["app/products/agents/*"],
-            "@assets/*": ["dist/assets/*"],
-            "@calls/*": ["app/products/calls/*"],
-            "@client/*": ["app/client/*"],
-            "@components/*": ["app/components/*"],
-            "@constants": ["app/constants/index"],
-            "@constants/*": ["app/constants/*"],
-            "@context/*": ["app/context/*"],
-            "@database/*": ["app/database/*"],
-            "@helpers/*": ["app/helpers/*"],
-            "@hooks/*": ["app/hooks/*"],
-            "@i18n": ["app/i18n/index"],
-            "@i18n/*": ["app/i18n/*"],
-            "@init/*": ["app/init/*"],
-            "@keyboard": ["app/keyboard/index"],
-            "@keyboard/*": ["app/keyboard/*"],
-            "@managers/*": ["app/managers/*"],
-            "@playbooks/*": ["app/products/playbooks/*"],
-            "@queries/*": ["app/queries/*"],
-            "@routes/*": ["app/routes/*"],
-            "@screens/*": ["app/screens/*"],
-            "@selectors/*": ["app/selectors/*"],
-            "@share/*": ["share_extension/*"],
-            "@store": ["app/store/index"],
-            "@store/*": ["app/store/*"],
-            "@telemetry/*": ["/app/telemetry/*"],
-            "@typings/*": ["types/*"],
-            "@test/*": ["test/*"],
-            "@utils/*": ["app/utils/*"],
-            "@websocket": ["app/client/websocket"],
-        }
-    },
-    "include": [
-        "app/**/*.ts",
-        "app/**/*.tsx",
-        "share_extension/**/*.ts",
-        "share_extension/**/*.tsx",
-        "test/**/*.ts",
-        "test/**/*.tsx",
-        "types/**/*.ts",
-        "types/**/*.tsx"
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "target": "esnext",
+    "lib": [
+      "es6",
+      "ES2019"
     ],
-    "exclude": [
-        "node_modules",
-        "build",
-        "babel.config.js",
-        "metro.config.js",
-        "jest.config.js",
-        "detox/**/*",
+    "allowJs": false,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "esModuleInterop": true,
+    "jsx": "react-native",
+    "types": [
+      "react-native",
+      "jest"
     ],
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "strict": true,
+    "importHelpers": true,
+    "verbatimModuleSyntax": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "sourceMap": false,
+    "rootDir": "./",
+    "outDir": "./",
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": false,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": false,
+    "alwaysStrict": true,
+    "noUnusedLocals": false,
+    "downlevelIteration": true,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noImplicitUseStrict": false,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@actions/*": [
+        "app/actions/*"
+      ],
+      "@agents/*": [
+        "app/products/agents/*"
+      ],
+      "@assets/*": [
+        "dist/assets/*"
+      ],
+      "@calls/*": [
+        "app/products/calls/*"
+      ],
+      "@client/*": [
+        "app/client/*"
+      ],
+      "@components/*": [
+        "app/components/*"
+      ],
+      "@constants": [
+        "app/constants/index"
+      ],
+      "@constants/*": [
+        "app/constants/*"
+      ],
+      "@context/*": [
+        "app/context/*"
+      ],
+      "@database/*": [
+        "app/database/*"
+      ],
+      "@helpers/*": [
+        "app/helpers/*"
+      ],
+      "@hooks/*": [
+        "app/hooks/*"
+      ],
+      "@i18n": [
+        "app/i18n/index"
+      ],
+      "@i18n/*": [
+        "app/i18n/*"
+      ],
+      "@init/*": [
+        "app/init/*"
+      ],
+      "@keyboard": [
+        "app/keyboard/index"
+      ],
+      "@keyboard/*": [
+        "app/keyboard/*"
+      ],
+      "@managers/*": [
+        "app/managers/*"
+      ],
+      "@playbooks/*": [
+        "app/products/playbooks/*"
+      ],
+      "@queries/*": [
+        "app/queries/*"
+      ],
+      "@routes/*": [
+        "app/routes/*"
+      ],
+      "@screens/*": [
+        "app/screens/*"
+      ],
+      "@selectors/*": [
+        "app/selectors/*"
+      ],
+      "@share/*": [
+        "share_extension/*"
+      ],
+      "@store": [
+        "app/store/index"
+      ],
+      "@store/*": [
+        "app/store/*"
+      ],
+      "@telemetry/*": [
+        "/app/telemetry/*"
+      ],
+      "@typings/*": [
+        "types/*"
+      ],
+      "@test/*": [
+        "test/*"
+      ],
+      "@utils/*": [
+        "app/utils/*"
+      ],
+      "@websocket": [
+        "app/client/websocket"
+      ]
+    }
+  },
+  "include": [
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "share_extension/**/*.ts",
+    "share_extension/**/*.tsx",
+    "test/**/*.ts",
+    "test/**/*.tsx",
+    "types/**/*.ts",
+    "types/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js",
+    "detox/**/*"
+  ],
+  "extends": "expo/tsconfig.base"
 }
