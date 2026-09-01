@@ -18,7 +18,6 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useKeyboardOverlap} from '@hooks/device';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {dismissAllModalsAndPopToRoot, dismissModal} from '@screens/navigation';
 import {mergeNavigationOptions} from '@utils/navigation';
 import {showLeaveChannelMembersSnackbar} from '@utils/snack_bar';
@@ -236,7 +235,6 @@ export default function LeaveChannelModal({
         };
     }, []);
 
-    useNavButtonPressed(CLOSE_BUTTON_ID, componentId, close, [close]);
     useAndroidHardwareBackHandler(componentId, close);
 
     useEffect(() => {

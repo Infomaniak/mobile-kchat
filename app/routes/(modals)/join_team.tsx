@@ -26,7 +26,6 @@ export default function JoinTeamRoute() {
 
     return (
         <JoinTeamScreen
-            closeButtonId='close-join-team'
             componentId={Screens.JOIN_TEAM}
         />
     );

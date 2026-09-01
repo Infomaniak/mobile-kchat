@@ -13,7 +13,6 @@ import {PostPriorityColors, PostPriorityType} from '@constants/post';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useIsTablet} from '@hooks/device';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import BottomSheet from '@screens/bottom_sheet';
 import {dismissBottomSheet} from '@screens/navigation';
 import {bottomSheetSnapPoint} from '@utils/helpers';
@@ -99,7 +98,6 @@ const PostPriorityPicker = ({
         return dismissBottomSheet();
     }, []);
 
-    useNavButtonPressed(closeButtonId, componentId, closeBottomSheet, []);
     useAndroidHardwareBackHandler(componentId, closeBottomSheet);
 
     const displayPersistentNotifications = isPersistenNotificationsEnabled && data.priority === PostPriorityType.URGENT;

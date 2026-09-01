@@ -26,7 +26,6 @@ export default function FindChannelsRoute() {
 
     return (
         <FindChannelsScreen
-            closeButtonId='close-find-channels'
             componentId={Screens.FIND_CHANNELS}
         />
     );

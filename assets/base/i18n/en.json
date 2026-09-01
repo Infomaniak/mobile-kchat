@@ -501,7 +501,6 @@
   "invite.summary.some_not_sent": "{notSentCount, plural, one {An invitation was} other {Some invitations were}} not sent",
   "invite.summary.try_again": "Try again",
   "invite.title": "Invite",
-  "invite.title.summary": "Invite summary",
   "join_team.error.group_error": "You need to be a member of a linked group to join this team.",
   "join_team.error.message": "There has been an error joining the team",
   "join_team.error.title": "Error joining a team",

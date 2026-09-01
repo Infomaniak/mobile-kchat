@@ -9,7 +9,6 @@ import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 import ConvertToChannelLabel from '@components/channel_actions/convert_to_channel/convert_to_channel_label';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {dismissModal} from '@screens/navigation';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
@@ -27,7 +26,6 @@ type Props = {
     canManageSettings: boolean;
     canUnarchive: boolean;
     channelId: string;
-    closeButtonId?: string;
     componentId: AvailableScreens;
     convertGMOptionAvailable: boolean;
     displayName: string;
@@ -59,7 +57,6 @@ const ChannelSettings = ({
     canManageSettings,
     canUnarchive,
     channelId,
-    closeButtonId,
     componentId,
     convertGMOptionAvailable,
     displayName,
@@ -72,9 +69,6 @@ const ChannelSettings = ({
         return dismissModal({componentId});
     }, [componentId]);
 
-    if (closeButtonId) {
-        useNavButtonPressed(closeButtonId, componentId, onPressed, [onPressed]);
-    }
     useAndroidHardwareBackHandler(componentId, onPressed);
 
     return (

@@ -10,9 +10,7 @@ import {ITEM_HEIGHT} from '@components/option_item';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import BottomSheet from '@screens/bottom_sheet';
-import {dismissBottomSheet} from '@screens/navigation';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -49,7 +47,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 const THREAD_OPTIONS_BUTTON = 'close-thread-options';
 
 const ThreadOptions = ({
-    componentId,
     isSaved,
     post,
     team,
@@ -58,12 +55,6 @@ const ThreadOptions = ({
     const theme = useTheme();
     const isTablet = useIsTablet();
     const style = getStyleSheet(theme);
-
-    const close = () => {
-        return dismissBottomSheet();
-    };
-
-    useNavButtonPressed(THREAD_OPTIONS_BUTTON, componentId, close, []);
 
     const options = [
         <ReplyOption

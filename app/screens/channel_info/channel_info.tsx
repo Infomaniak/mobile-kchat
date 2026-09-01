@@ -9,7 +9,6 @@ import ChannelActions from '@components/channel_actions';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {dismissModal} from '@screens/navigation';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
@@ -23,7 +22,6 @@ import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
     channelId: string;
-    closeButtonId: string;
     componentId: AvailableScreens;
     type?: ChannelType;
     isCallsEnabledInChannel: boolean;
@@ -52,7 +50,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 const ChannelInfo = ({
     canManageMembers,
     channelId,
-    closeButtonId,
     componentId,
     isCallsEnabledInChannel,
     isCRTEnabled,
@@ -71,7 +68,6 @@ const ChannelInfo = ({
         return dismissModal({componentId});
     }, [componentId]);
 
-    useNavButtonPressed(closeButtonId, componentId, onPressed, [onPressed]);
     useAndroidHardwareBackHandler(componentId, onPressed);
 
     return (

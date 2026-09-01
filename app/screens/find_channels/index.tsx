@@ -8,7 +8,6 @@ import SearchBar from '@components/search';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useKeyboardOverlap} from '@hooks/device';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {dismissModal} from '@screens/navigation';
 import {changeOpacity, getKeyboardAppearanceFromTheme, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -20,7 +19,6 @@ import UnfilteredList from './unfiltered_list';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
-    closeButtonId: string;
     componentId: AvailableScreens;
 }
 
@@ -42,7 +40,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
 }));
 
-const FindChannels = ({closeButtonId, componentId}: Props) => {
+const FindChannels = ({componentId}: Props) => {
     const theme = useTheme();
     const [term, setTerm] = useState('');
     const [loading, setLoading] = useState(false);
@@ -80,7 +78,6 @@ const FindChannels = ({closeButtonId, componentId}: Props) => {
         }
     }, []);
 
-    useNavButtonPressed(closeButtonId, componentId, close, []);
     useAndroidHardwareBackHandler(componentId, close);
 
     return (

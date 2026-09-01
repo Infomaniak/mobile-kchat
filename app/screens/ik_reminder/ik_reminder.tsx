@@ -15,7 +15,6 @@ import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {quotaGate} from '@hooks/plans';
 import {useGetUsageDeltas} from '@hooks/usage';
 import NetworkManager from '@managers/network_manager';
@@ -120,7 +119,7 @@ const postReminderTimes = [
     },
 ];
 
-const IKReminder = ({postId, postpone = false, postponePostId, componentId = Screens.IK_REMINDER, currentUser, limits, usage}: Props) => {
+const IKReminder = ({postId, postpone = false, postponePostId, currentUser, limits, usage}: Props) => {
     const serverUrl = useServerUrl();
     const isTablet = useIsTablet();
     const theme = useTheme();
@@ -138,8 +137,6 @@ const IKReminder = ({postId, postpone = false, postponePostId, componentId = Scr
     };
 
     const {reminder_custom_date: reminderCustomDate} = useGetUsageDeltas(usage, limits);
-
-    useNavButtonPressed(POST_OPTIONS_BUTTON, componentId, close, []);
 
     const handleItemClick = useCallback((dur: string, expires: string) => {
         setExpiresAt(expires);

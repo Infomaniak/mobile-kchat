@@ -31,7 +31,6 @@ export default function ChannelInfoRoute() {
         <ChannelInfoScreen
             channelId={channelId}
             componentId={Screens.CHANNEL_INFO as any}
-            closeButtonId='close-channel-info'
         />
     );
 }
