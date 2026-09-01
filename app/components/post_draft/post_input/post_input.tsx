@@ -3,25 +3,26 @@
 
 import {useRewrite} from '@agents/hooks';
 import {useHardwareKeyboardEvents} from '@mattermost/hardware-keyboard';
-import PasteableTextInput, {type PastedFile, type PasteTextInputInstance} from '@mattermost/react-native-paste-input';
+import PasteableTextInput, {type PastedFile} from '@mattermost/react-native-paste-input';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {defineMessage, type IntlShape, useIntl} from 'react-intl';
 import {
-    Alert, AppState, type AppStateStatus, DeviceEventEmitter, type EmitterSubscription, Keyboard,
-    type NativeSyntheticEvent, Platform, type TextInputSelectionChangeEventData,
+    Alert, AppState, type AppStateStatus, DeviceEventEmitter,
+    Platform, type TextInputSelectionChangeEvent,
 } from 'react-native';
-import Animated, {cancelAnimation, Easing, runOnUI, useAnimatedStyle, useSharedValue, withRepeat, withTiming} from 'react-native-reanimated';
+import {useAnimatedKeyboard} from 'react-native-keyboard-controller';
+import Animated, {cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming} from 'react-native-reanimated';
 
 import {updateDraftMessage} from '@actions/local/draft';
 import {userTyping} from '@actions/websocket/users';
 import {Events, Screens} from '@constants';
-import {useKeyboardAnimationContext} from '@context/keyboard_animation';
+import {isAndroidEdgeToEdge} from '@constants/device';
+import {useKeyboardState} from '@context/keyboard_state';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import {useInputPropagation} from '@hooks/input';
-import {useFocusAfterEmojiDismiss} from '@hooks/useFocusAfterEmojiDismiss';
-import {DEFAULT_INPUT_ACCESSORY_HEIGHT} from '@hooks/useInputAccessoryView';
+import {useFocusAfterEmojiDismiss} from '@hooks/use_focus_after_emoji_dismiss';
 import NavigationStore from '@store/navigation_store';
 import {handleDraftUpdate} from '@utils/draft';
 import {extractFileInfo} from '@utils/file';
@@ -45,7 +46,6 @@ type Props = {
     cursorPosition: number;
     updateCursorPosition: React.Dispatch<React.SetStateAction<number>>;
     sendMessage: () => void;
-    inputRef: React.MutableRefObject<PasteTextInputInstance | null>;
     setIsFocused: (isFocused: boolean) => void;
 }
 
@@ -116,7 +116,6 @@ export default function PostInput({
     cursorPosition,
     updateCursorPosition,
     sendMessage,
-    inputRef,
     setIsFocused,
 }: Props) {
     const intl = useIntl();
@@ -124,44 +123,39 @@ export default function PostInput({
     const theme = useTheme();
     const style = getStyleSheet(theme);
     const serverUrl = useServerUrl();
+    const animatedKeyboard = useAnimatedKeyboard();
 
     const {
-        setShowInputAccessoryView,
         showInputAccessoryView,
-        isInputAccessoryViewMode,
-        inputAccessoryViewAnimatedHeight,
-        keyboardTranslateY,
-        isTransitioningFromCustomView,
-        setIsEmojiSearchFocused,
         isEmojiSearchFocused,
-        keyboardHeight,
-        lastKeyboardHeight,
-        bottomInset,
-        scrollOffset,
-        registerCursorPosition,
+        setCursorPosition,
         registerPostInputCallbacks,
-        isInEmojiPickerTransition,
-        getPreservedCursorPosition,
-        clearCursorPositionPreservation,
-    } = useKeyboardAnimationContext();
+        inputRef,
+        stateMachine,
+        stateContext,
+    } = useKeyboardState();
 
     // Register cursor position updates with context
     // Always update cursorPositionRef, even when input accessory view is shown,
     // so emoji insertion works correctly at cursor position
     useEffect(() => {
-        if (registerCursorPosition) {
-            // Pass value length so registerCursorPosition can check if cursor is reset to end
-            registerCursorPosition(cursorPosition, value.length);
+        if (showInputAccessoryView) {
+            return;
         }
-    }, [registerCursorPosition, cursorPosition, showInputAccessoryView, value]);
+        if (setCursorPosition) {
+            setCursorPosition(cursorPosition);
+        }
+    }, [setCursorPosition, cursorPosition, showInputAccessoryView]);
 
     // Register updateValue and updateCursorPosition with context
     useEffect(() => {
         if (registerPostInputCallbacks) {
-            registerPostInputCallbacks(updateValue, updateCursorPosition);
+            registerPostInputCallbacks(updateValue, updateCursorPosition, value);
         }
 
-        // updateValue and updateCursorPosition are stable setState functions, don't need to be in deps
+        // updateValue and updateCursorPosition are stable setState functions — no need in deps.
+        // value is intentionally excluded: we only want to seed cursorPosition once at registration
+        // time, not on every keystroke. Ongoing cursor tracking is handled by setCursorPosition.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [registerPostInputCallbacks]);
 
@@ -180,12 +174,7 @@ export default function PostInput({
         inputRef.current?.focus();
     }, [inputRef]);
 
-    const {
-        focus: focusWithEmojiDismiss,
-        isDismissingEmojiPicker,
-        focusTimeoutRef,
-        isManuallyFocusingAfterEmojiDismiss,
-    } = useFocusAfterEmojiDismiss(inputRef, focusInput);
+    const {focus: focusWithEmojiDismiss, isManuallyFocusingAfterEmojiDismiss} = useFocusAfterEmojiDismiss(inputRef, focusInput);
     const maxHeight = isTablet ? 150 : 88;
     const pasteInputStyle = useMemo(() => {
         return {...style.input, maxHeight};
@@ -229,114 +218,33 @@ export default function PostInput({
     }, [focusWithEmojiDismiss]);
 
     const onFocus = useCallback(() => {
-        // Ignore focus events during emoji picker dismissal - handled manually
-        if (Platform.OS === 'android' && (isDismissingEmojiPicker.current || focusTimeoutRef.current || isManuallyFocusingAfterEmojiDismiss)) {
-            return;
-        }
-
-        // On Android, ignore focus events when emoji search is focused
-        // This prevents the emoji picker from closing when the search bar gets focus
-        if (Platform.OS === 'android' && isEmojiSearchFocused) {
+        // On edge-to-edge Android, ignore focus events when emoji search is focused.
+        // This prevents the emoji picker from closing when the search bar gets focus.
+        // On non-edge-to-edge, we cannot skip: no keyboard events fire, so this is the
+        // only place USER_FOCUS_INPUT is dispatched when tapping post input from search state.
+        if (isAndroidEdgeToEdge && isEmojiSearchFocused) {
             return;
         }
 
         setIsFocused(true);
 
-        // Reset emoji search focus immediately to prevent jumping
-        // This must happen before closing the emoji picker
-        setIsEmojiSearchFocused(false);
+        // With hardware keyboard, keyboard events never fire so USER_FOCUS_INPUT is never
+        // dispatched via useKeyboardEvents. Dispatch it here to close the emoji picker.
+        // With software keyboard, useKeyboardEvents.onStart dispatches it on the UI thread.
+        const isKeyboardClosed = animatedKeyboard.height.value === 0 && animatedKeyboard.state.value === 0;
+        const asHardwareKeyboard = Platform.OS === 'ios' && isTablet && isKeyboardClosed;
 
-        const wasEmojiPickerOpen = showInputAccessoryView;
-        if (wasEmojiPickerOpen) {
-            updateCursorPosition(value.length);
-            clearCursorPositionPreservation?.();
+        // On non-edge-to-edge Android, hasZeroKeyboardHeight is never set (KeyboardProvider disabled),
+        // so we dispatch USER_FOCUS_INPUT whenever the emoji picker is active.
+        // On edge-to-edge, only dispatch when keyboard is not expected to appear (hasZeroKeyboardHeight).
+        const isNonEdgeToEdgeAndroid = Platform.OS === 'android' && !isAndroidEdgeToEdge;
+        const hasZeroKbHeight = stateContext.hasZeroKeyboardHeight.value;
+        const isPickerActive = stateMachine.isEmojiPickerActive();
+        const shouldDispatch = (hasZeroKbHeight || isNonEdgeToEdgeAndroid) && isPickerActive;
+        if (shouldDispatch || asHardwareKeyboard) {
+            stateMachine.onUserFocusInput(asHardwareKeyboard);
         }
-        setShowInputAccessoryView(false);
-
-        if (Platform.OS === 'android') {
-
-            keyboardTranslateY.value = inputAccessoryViewAnimatedHeight.value;
-            inputAccessoryViewAnimatedHeight.value = 0;
-            isInputAccessoryViewMode.value = false;
-
-            // IMPORTANT: Reset isTransitioningFromCustomView when keyboard opens
-            // This ensures emoji picker can be opened again after keyboard appears
-            isTransitioningFromCustomView.value = false;
-
-            // Reset bottomInset and scrollOffset so the scroll restoration can trigger when emoji picker closes
-            bottomInset.value = 0;
-            scrollOffset.value = 0;
-
-            return;
-        }
-
-        // Transition from emoji picker to keyboard
-        if (showInputAccessoryView) {
-            // Use actual keyboard height instead of emoji picker height to ensure consistency
-            // This prevents height accumulation when transitioning multiple times
-            // Use default keyboard height if no keyboard height has been recorded yet
-            // This prevents input container from going to bottom when keyboard hasn't been opened
-            const targetKeyboardHeight = keyboardHeight.value || lastKeyboardHeight || DEFAULT_INPUT_ACCESSORY_HEIGHT;
-
-            // Set transition flag FIRST synchronously to prevent keyboard handlers from interfering
-            // This must be set before disabling input accessory view mode to avoid race conditions
-            isTransitioningFromCustomView.value = true;
-
-            // Collapse emoji picker instantly
-            inputAccessoryViewAnimatedHeight.value = 0;
-
-            // Set input container height to keyboard height to ensure correct final position
-            // This ensures the height always matches the keyboard, preventing accumulation
-            keyboardTranslateY.value = targetKeyboardHeight;
-
-            // Use runOnUI to disable input accessory view mode atomically
-            // This ensures the transition flag is visible when keyboard handlers start processing
-            runOnUI(() => {
-                'worklet';
-
-                // Disable custom view mode to allow keyboard handlers to work
-                // This is done AFTER setting transition flag to prevent race conditions
-                isInputAccessoryViewMode.value = false;
-            })();
-
-            // Safety net: In rare cases (app backgrounding, system interruptions, rapid toggling),
-            // the keyboard onEnd event might not fire, leaving us stuck in transition state.
-            // This timeout ensures we recover after 1 second if that happens.
-            setTimeout(() => {
-                if (isTransitioningFromCustomView.value) {
-                    isTransitioningFromCustomView.value = false;
-                }
-            }, 1000);
-        }
-    }, [
-        isDismissingEmojiPicker,
-        focusTimeoutRef,
-        isManuallyFocusingAfterEmojiDismiss,
-        isEmojiSearchFocused,
-        setIsFocused,
-        setIsEmojiSearchFocused,
-        showInputAccessoryView,
-        setShowInputAccessoryView,
-        updateCursorPosition,
-        value.length,
-        clearCursorPositionPreservation,
-        keyboardTranslateY,
-        inputAccessoryViewAnimatedHeight,
-        isInputAccessoryViewMode,
-        isTransitioningFromCustomView,
-        bottomInset,
-        scrollOffset,
-        keyboardHeight,
-        lastKeyboardHeight,
-    ]);
-
-    const handleAndroidKeyboardHide = useCallback(() => {
-        onBlur();
-    }, [onBlur]);
-
-    const handleAndroidKeyboardShow = useCallback(() => {
-        onFocus();
-    }, [onFocus]);
+    }, [isEmojiSearchFocused, setIsFocused, stateMachine, stateContext, isTablet, animatedKeyboard]);
 
     const checkMessageLength = useCallback((newValue: string) => {
         const valueLength = newValue.trim().length;
@@ -364,37 +272,14 @@ export default function PostInput({
         }
     }, [intl, longMessageAlertShown, maxMessageLength]);
 
-    const handlePostDraftSelectionChanged = useCallback((event: NativeSyntheticEvent<TextInputSelectionChangeEventData> | null, fromHandleTextChange = false) => {
-        // Always update cursor position, even when input accessory view is shown,
-        // so emoji insertion works correctly at cursor position
+    const handlePostDraftSelectionChanged = useCallback((event: TextInputSelectionChangeEvent | null, fromHandleTextChange = false) => {
+        if (showInputAccessoryView && !fromHandleTextChange) {
+            return;
+        }
         const cp = fromHandleTextChange ? cursorPosition : event!.nativeEvent.selection.end;
 
-        // Check if cursor is being reset to end when we're transitioning to emoji picker
-        // This happens when keyboard is dismissed - the TextInput selection resets to end
-        // Only block if we're actually in a transition period (emoji picker opening or just opened)
-        const isInTransition = isInEmojiPickerTransition?.();
-        const preservedPosition = isInTransition ? getPreservedCursorPosition?.() : null;
-
-        const isCursorAtEnd = cp === value.length;
-        const cursorPositionChanged = cp !== cursorPosition;
-        const hasPreservedPosition = preservedPosition !== null;
-        const preservedPositionChanged = preservedPosition !== cp;
-        const isResettingToEnd = isCursorAtEnd && cursorPositionChanged && hasPreservedPosition && preservedPositionChanged;
-        const isPreservedPositionWithinBounds = hasPreservedPosition && preservedPosition! < value.length;
-
-        // If we're opening emoji picker and cursor is being reset to end, ignore it and keep the preserved position
-        if (!fromHandleTextChange && isResettingToEnd && isInTransition && isPreservedPositionWithinBounds) {
-            return;
-        }
-
-        // When emoji picker is open, ignore cursor position updates that move to the end
-        // unless the value length changed (user typed something).
-        if (showInputAccessoryView && !fromHandleTextChange && isCursorAtEnd && cursorPositionChanged) {
-            return;
-        }
-
         updateCursorPosition(cp);
-    }, [cursorPosition, updateCursorPosition, showInputAccessoryView, value.length, isInEmojiPickerTransition, getPreservedCursorPosition]);
+    }, [showInputAccessoryView, cursorPosition, updateCursorPosition]);
 
     const handleTextChange = useCallback((newValue: string) => {
         if (!shouldProcessEvent(newValue)) {
@@ -475,20 +360,6 @@ export default function PostInput({
 
         previousAppState.current = appState;
     }, [serverUrl, channelId, rootId, value]);
-
-    useEffect(() => {
-        let keyboardHideListener: EmitterSubscription | undefined;
-        let keyboardShowListener: EmitterSubscription | undefined;
-        if (Platform.OS === 'android') {
-            keyboardHideListener = Keyboard.addListener('keyboardDidHide', handleAndroidKeyboardHide);
-            keyboardShowListener = Keyboard.addListener('keyboardDidShow', handleAndroidKeyboardShow);
-        }
-
-        return (() => {
-            keyboardShowListener?.remove();
-            keyboardHideListener?.remove();
-        });
-    }, [handleAndroidKeyboardHide, handleAndroidKeyboardShow]);
 
     useEffect(() => {
         const listener = AppState.addEventListener('change', onAppStateChange);

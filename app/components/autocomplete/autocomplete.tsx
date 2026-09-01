@@ -67,6 +67,7 @@ type Props = {
     useAllAvailableSpace?: boolean;
     horizontalPadding?: number;
     usePortal?: boolean;
+    portalName?: string;
 }
 
 type AutocompleteProviders = {
@@ -104,6 +105,7 @@ const Autocomplete = ({
     useAllAvailableSpace = false,
     horizontalPadding = 8,
     usePortal = false,
+    portalName = 'autocomplete',
 }: Props) => {
     const theme = useTheme();
     const isTablet = useIsTablet();
@@ -230,7 +232,7 @@ const Autocomplete = ({
 
     if (usePortal && Platform.OS === 'android') {
         return (
-            <Portal>
+            <Portal hostName={portalName}>
                 {component}
             </Portal>
         );

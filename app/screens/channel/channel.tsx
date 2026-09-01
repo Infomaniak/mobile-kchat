@@ -2,8 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useState, useMemo} from 'react';
-import {Platform, DeviceEventEmitter, type LayoutChangeEvent, StyleSheet} from 'react-native';
-import {KeyboardProvider} from 'react-native-keyboard-controller';
+import {DeviceEventEmitter, type LayoutChangeEvent, StyleSheet} from 'react-native';
 import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {storeLastViewedChannelIdAndServer, removeLastViewedChannelIdAndServer} from '@actions/app/global';
@@ -71,17 +70,13 @@ const Channel = ({
     const serverUrl = useServerUrl();
     const shouldRender = !switchingTeam && !switchingChannels && shouldRenderPosts && Boolean(channelId);
     const isVisible = useIsScreenVisible(componentId);
-    const [isEmojiSearchFocused, setIsEmojiSearchFocused] = useState(false);
 
     const safeAreaViewEdges: Edge[] = useMemo(() => {
         if (isTablet) {
             return ['left', 'right'];
         }
-        if (isEmojiSearchFocused) {
-            return ['left', 'right'];
-        }
         return ['left', 'right', 'bottom'];
-    }, [isTablet, isEmojiSearchFocused]);
+    }, [isTablet]);
 
     const handleBack = useCallback(() => {
         // Ik change : sometimes componentId is undefined and it crashes the app only on tablet
@@ -151,30 +146,14 @@ const Channel = ({
                     isTabletView={isTabletView}
                     shouldRenderChannelBanner={includeChannelBanner}
                 />
-                {Platform.OS === 'ios' ? (
-                    <KeyboardProvider>
-                        {shouldRender && (
-                            <ChannelContent
-                                channelId={channelId}
-                                marginTop={marginTop}
-                                scheduledPostCount={scheduledPostCount}
-                                containerHeight={containerHeight}
-                                enabled={isVisible || shouldRender}
-                                onEmojiSearchFocusChange={setIsEmojiSearchFocused}
-                            />
-                        )}
-                    </KeyboardProvider>
-                ) : (
-                    shouldRender && (
-                        <ChannelContent
-                            channelId={channelId}
-                            marginTop={marginTop}
-                            scheduledPostCount={scheduledPostCount}
-                            containerHeight={containerHeight}
-                            enabled={isVisible || shouldRender}
-                            onEmojiSearchFocusChange={setIsEmojiSearchFocused}
-                        />
-                    )
+                {shouldRender && (
+                    <ChannelContent
+                        channelId={channelId}
+                        marginTop={marginTop}
+                        scheduledPostCount={scheduledPostCount}
+                        containerHeight={containerHeight}
+                        enabled={isVisible || shouldRender}
+                    />
                 )}
             </SafeAreaView>
         </FreezeScreen>

@@ -21,7 +21,7 @@ import SystemAvatar from '@components/system_avatar';
 import SystemHeader from '@components/system_header';
 import {POST_TIME_TO_FAIL, PostTypes} from '@constants/post';
 import * as Screens from '@constants/screens';
-import {useKeyboardAnimationContext} from '@context/keyboard_animation';
+import {useKeyboardState} from '@context/keyboard_state';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
@@ -176,7 +176,7 @@ const Post = ({
     const serverUrl = useServerUrl();
     const theme = useTheme();
     const isTablet = useIsTablet();
-    const {blurAndDismissKeyboard, closeInputAccessoryView, showInputAccessoryView} = useKeyboardAnimationContext();
+    const {blurAndDismissKeyboard, closeInputAccessoryView, showInputAccessoryView} = useKeyboardState();
     const styles = getStyleSheet(theme);
     const isAutoResponder = fromAutoResponder(post);
     const isPendingOrFailed = isPostPendingOrFailed(post);

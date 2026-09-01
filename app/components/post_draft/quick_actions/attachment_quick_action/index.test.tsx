@@ -2,34 +2,25 @@
 // See LICENSE.txt for license information.
 
 import {fireEvent, waitFor} from '@testing-library/react-native';
-import {KeyboardController} from 'react-native-keyboard-controller';
 
-import {useKeyboardAnimationContext} from '@context/keyboard_animation';
+import {useKeyboardState} from '@context/keyboard_state';
 import {openAttachmentOptions} from '@screens/navigation';
 import {renderWithIntlAndTheme} from '@test/intl-test-helper';
 
-import AttachmentQuickAction from '.';
+import AttachmentQuickAction from './index';
 
-jest.mock('react-native-keyboard-controller', () => ({
-    KeyboardController: {
-        dismiss: jest.fn(() => Promise.resolve()),
-    },
-}));
-
-jest.mock('@context/keyboard_animation', () => ({
-    useKeyboardAnimationContext: jest.fn(),
+jest.mock('@context/keyboard_state', () => ({
+    useKeyboardState: jest.fn(),
 }));
 
 jest.mock('@screens/navigation', () => ({
     openAttachmentOptions: jest.fn(),
 }));
 
-// Ik change : skip on CI, will fix later
-describe.skip('AttachmentQuickAction', () => {
-    const mockCloseInputAccessoryView = jest.fn();
-    const mockKeyboardControllerDismiss = jest.mocked(KeyboardController.dismiss);
+describe('AttachmentQuickAction', () => {
+    const mockBlurAndDismissKeyboard = jest.fn(() => Promise.resolve());
     const mockOpenAttachmentOptions = jest.mocked(openAttachmentOptions);
-    const mockUseKeyboardAnimationContext = jest.mocked(useKeyboardAnimationContext);
+    const mockUseKeyboardState = jest.mocked(useKeyboardState);
 
     const baseProps = {
         disabled: false,
@@ -42,94 +33,50 @@ describe.skip('AttachmentQuickAction', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        mockUseKeyboardAnimationContext.mockReturnValue({
-            closeInputAccessoryView: mockCloseInputAccessoryView,
-        } as unknown as ReturnType<typeof useKeyboardAnimationContext>);
+        mockUseKeyboardState.mockReturnValue({
+            blurAndDismissKeyboard: mockBlurAndDismissKeyboard,
+        } as unknown as ReturnType<typeof useKeyboardState>);
     });
 
     describe('user interactions', () => {
-        it('should call onUploadFiles when button is pressed', async () => {
-            const onUploadFiles = jest.fn();
+        it('should call blurAndDismissKeyboard and openAttachmentOptions when button is pressed', async () => {
             const {getByTestId} = renderWithIntlAndTheme(
-                <AttachmentQuickAction
-                    {...baseProps}
-                    onUploadFiles={onUploadFiles}
-                />,
+                <AttachmentQuickAction {...baseProps}/>,
             );
 
-            const button = getByTestId('test-attachment');
-            fireEvent.press(button);
+            fireEvent.press(getByTestId('test-attachment'));
 
             await waitFor(() => {
-                expect(mockCloseInputAccessoryView).toHaveBeenCalledTimes(1);
-                expect(mockKeyboardControllerDismiss).toHaveBeenCalledTimes(1);
+                expect(mockBlurAndDismissKeyboard).toHaveBeenCalledTimes(1);
                 expect(mockOpenAttachmentOptions).toHaveBeenCalledTimes(1);
             });
         });
 
-        it('should not call onUploadFiles when button is disabled', async () => {
-            const onUploadFiles = jest.fn();
+        it('should not call blurAndDismissKeyboard or openAttachmentOptions when disabled', () => {
             const {getByTestId} = renderWithIntlAndTheme(
                 <AttachmentQuickAction
                     {...baseProps}
                     disabled={true}
-                    onUploadFiles={onUploadFiles}
                 />,
             );
 
-            const button = getByTestId('test-attachment.disabled');
-            fireEvent.press(button);
+            fireEvent.press(getByTestId('test-attachment.disabled'));
 
-            // Should not trigger any actions when disabled
-            expect(mockCloseInputAccessoryView).not.toHaveBeenCalled();
-            expect(mockKeyboardControllerDismiss).not.toHaveBeenCalled();
+            expect(mockBlurAndDismissKeyboard).not.toHaveBeenCalled();
             expect(mockOpenAttachmentOptions).not.toHaveBeenCalled();
-        });
-
-        it('should close input accessory view before opening bottom sheet', async () => {
-            const {getByTestId} = renderWithIntlAndTheme(
-                <AttachmentQuickAction {...baseProps}/>,
-            );
-
-            const button = getByTestId('test-attachment');
-            fireEvent.press(button);
-
-            await waitFor(() => {
-                // closeInputAccessoryView should be called before openAttachmentOptions
-                expect(mockCloseInputAccessoryView).toHaveBeenCalledTimes(1);
-                expect(mockOpenAttachmentOptions).toHaveBeenCalledTimes(1);
-            });
-        });
-
-        it('should dismiss keyboard before opening bottom sheet', async () => {
-            const {getByTestId} = renderWithIntlAndTheme(
-                <AttachmentQuickAction {...baseProps}/>,
-            );
-
-            const button = getByTestId('test-attachment');
-            fireEvent.press(button);
-
-            await waitFor(() => {
-                expect(mockKeyboardControllerDismiss).toHaveBeenCalledTimes(1);
-                expect(mockOpenAttachmentOptions).toHaveBeenCalledTimes(1);
-            });
         });
     });
 
     describe('bottom sheet opening', () => {
-        it('should call openAttachmentOptions with intl, theme, and props', async () => {
+        it('should call openAttachmentOptions with correct props', async () => {
             const {getByTestId} = renderWithIntlAndTheme(
                 <AttachmentQuickAction {...baseProps}/>,
             );
 
-            const button = getByTestId('test-attachment');
-            fireEvent.press(button);
+            fireEvent.press(getByTestId('test-attachment'));
 
             await waitFor(() => {
-                expect(mockOpenAttachmentOptions).toHaveBeenCalledTimes(1);
                 expect(mockOpenAttachmentOptions).toHaveBeenCalledWith(
-                    expect.any(Object), // intl
-                    expect.any(Object), // theme
                     expect.objectContaining({
                         onUploadFiles: baseProps.onUploadFiles,
                         maxFilesReached: false,
@@ -142,40 +89,7 @@ describe.skip('AttachmentQuickAction', () => {
             });
         });
 
-        it('should pass correct props to openAttachmentOptions', async () => {
-            const onUploadFiles = jest.fn();
-            const {getByTestId} = renderWithIntlAndTheme(
-                <AttachmentQuickAction
-                    {...baseProps}
-                    onUploadFiles={onUploadFiles}
-                    fileCount={5}
-                    maxFilesReached={false}
-                    maxFileCount={10}
-                    disabled={false}
-                    testID='custom-test-id'
-                />,
-            );
-
-            const button = getByTestId('custom-test-id');
-            fireEvent.press(button);
-
-            await waitFor(() => {
-                expect(mockOpenAttachmentOptions).toHaveBeenCalledWith(
-                    expect.any(Object), // intl
-                    expect.any(Object), // theme
-                    expect.objectContaining({
-                        onUploadFiles,
-                        fileCount: 5,
-                        maxFilesReached: false,
-                        canUploadFiles: true,
-                        testID: 'custom-test-id',
-                        maxFileCount: 10,
-                    }),
-                );
-            });
-        });
-
-        it('should pass canUploadFiles as false when disabled', async () => {
+        it('should pass canUploadFiles as false when disabled', () => {
             const {getByTestId} = renderWithIntlAndTheme(
                 <AttachmentQuickAction
                     {...baseProps}
@@ -183,37 +97,14 @@ describe.skip('AttachmentQuickAction', () => {
                 />,
             );
 
-            const button = getByTestId('test-attachment.disabled');
-            fireEvent.press(button);
+            fireEvent.press(getByTestId('test-attachment.disabled'));
 
-            // When disabled, openAttachmentOptions should not be called
             expect(mockOpenAttachmentOptions).not.toHaveBeenCalled();
-        });
-
-        it('should pass intl and theme to openAttachmentOptions', async () => {
-            const {getByTestId} = renderWithIntlAndTheme(
-                <AttachmentQuickAction {...baseProps}/>,
-            );
-
-            const button = getByTestId('test-attachment');
-            fireEvent.press(button);
-
-            await waitFor(() => {
-                expect(mockOpenAttachmentOptions).toHaveBeenCalledWith(
-                    expect.objectContaining({
-                        formatMessage: expect.any(Function),
-                    }), // intl
-                    expect.objectContaining({
-                        centerChannelColor: expect.anything(),
-                    }), // theme
-                    expect.any(Object), // props
-                );
-            });
         });
     });
 
     describe('edge cases', () => {
-        it('should handle fileCount prop correctly', async () => {
+        it('should pass fileCount to openAttachmentOptions', async () => {
             const {getByTestId} = renderWithIntlAndTheme(
                 <AttachmentQuickAction
                     {...baseProps}
@@ -221,21 +112,16 @@ describe.skip('AttachmentQuickAction', () => {
                 />,
             );
 
-            const button = getByTestId('test-attachment');
-            fireEvent.press(button);
+            fireEvent.press(getByTestId('test-attachment'));
 
             await waitFor(() => {
                 expect(mockOpenAttachmentOptions).toHaveBeenCalledWith(
-                    expect.any(Object), // intl
-                    expect.any(Object), // theme
-                    expect.objectContaining({
-                        fileCount: 3,
-                    }),
+                    expect.objectContaining({fileCount: 3}),
                 );
             });
         });
 
-        it('should handle maxFilesReached prop correctly', async () => {
+        it('should pass maxFilesReached to openAttachmentOptions', async () => {
             const {getByTestId} = renderWithIntlAndTheme(
                 <AttachmentQuickAction
                     {...baseProps}
@@ -243,25 +129,39 @@ describe.skip('AttachmentQuickAction', () => {
                 />,
             );
 
-            const button = getByTestId('test-attachment');
-            fireEvent.press(button);
+            fireEvent.press(getByTestId('test-attachment'));
 
             await waitFor(() => {
                 expect(mockOpenAttachmentOptions).toHaveBeenCalledWith(
-                    expect.any(Object), // intl
-                    expect.any(Object), // theme
+                    expect.objectContaining({maxFilesReached: true}),
+                );
+            });
+        });
+
+        it('should pass maxFileCount to openAttachmentOptions', async () => {
+            const {getByTestId} = renderWithIntlAndTheme(
+                <AttachmentQuickAction
+                    {...baseProps}
+                    maxFileCount={20}
+                />,
+            );
+
+            fireEvent.press(getByTestId('test-attachment'));
+
+            await waitFor(() => {
+                expect(mockOpenAttachmentOptions).toHaveBeenCalledWith(
                     expect.objectContaining({
-                        maxFilesReached: true,
+                        maxFileCount: 20,
                     }),
                 );
             });
         });
 
-        it('should handle maxFileCount prop correctly', async () => {
+        it('should pass showAttachLogs to openAttachmentOptions', async () => {
             const {getByTestId} = renderWithIntlAndTheme(
                 <AttachmentQuickAction
                     {...baseProps}
-                    maxFileCount={20}
+                    showAttachLogs={true}
                 />,
             );
 
@@ -270,10 +170,8 @@ describe.skip('AttachmentQuickAction', () => {
 
             await waitFor(() => {
                 expect(mockOpenAttachmentOptions).toHaveBeenCalledWith(
-                    expect.any(Object), // intl
-                    expect.any(Object), // theme
                     expect.objectContaining({
-                        maxFileCount: 20,
+                        showAttachLogs: true,
                     }),
                 );
             });
@@ -294,8 +192,6 @@ describe.skip('AttachmentQuickAction', () => {
 
             await waitFor(() => {
                 expect(mockOpenAttachmentOptions).toHaveBeenCalledWith(
-                    expect.any(Object), // intl
-                    expect.any(Object), // theme
                     expect.objectContaining({
                         fileCount: 0,
                     }),
@@ -304,4 +200,3 @@ describe.skip('AttachmentQuickAction', () => {
         });
     });
 });
-
