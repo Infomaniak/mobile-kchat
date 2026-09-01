@@ -2,7 +2,8 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useState, useMemo} from 'react';
-import {DeviceEventEmitter, type LayoutChangeEvent, StyleSheet} from 'react-native';
+import {Platform, DeviceEventEmitter, type LayoutChangeEvent, StyleSheet} from 'react-native';
+import {KeyboardProvider} from 'react-native-keyboard-controller';
 import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {storeLastViewedChannelIdAndServer, removeLastViewedChannelIdAndServer} from '@actions/app/global';
@@ -133,7 +134,6 @@ const Channel = ({
         <FreezeScreen>
             <SafeAreaView
                 style={styles.flex}
-                mode='margin'
                 edges={safeAreaViewEdges}
                 testID='channel.screen'
                 onLayout={onLayout}
@@ -146,7 +146,17 @@ const Channel = ({
                     isTabletView={isTabletView}
                     shouldRenderChannelBanner={includeChannelBanner}
                 />
-                {shouldRender && (
+                {shouldRender && (Platform.OS === 'ios' ? (
+                    <KeyboardProvider>
+                        <ChannelContent
+                            channelId={channelId}
+                            marginTop={marginTop}
+                            scheduledPostCount={scheduledPostCount}
+                            containerHeight={containerHeight}
+                            enabled={isVisible || shouldRender}
+                        />
+                    </KeyboardProvider>
+                ) : (
                     <ChannelContent
                         channelId={channelId}
                         marginTop={marginTop}
@@ -154,7 +164,7 @@ const Channel = ({
                         containerHeight={containerHeight}
                         enabled={isVisible || shouldRender}
                     />
-                )}
+                ))}
             </SafeAreaView>
         </FreezeScreen>
     );

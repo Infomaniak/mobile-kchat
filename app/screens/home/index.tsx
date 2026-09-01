@@ -7,7 +7,7 @@ import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
 import React, {useCallback, useEffect, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {DeviceEventEmitter, Platform, StyleSheet, View} from 'react-native';
-import {useKeyboardState} from 'react-native-keyboard-controller';
+import {KeyboardEvents} from 'react-native-keyboard-controller';
 import {enableFreeze, enableScreens} from 'react-native-screens';
 
 import {autoUpdateTimezone} from '@actions/remote/user';
@@ -67,13 +67,25 @@ export function HomeScreen(props: HomeProps) {
     const theme = useTheme();
     const intl = useIntl();
     const appState = useAppState();
-    const keyboardState = useKeyboardState();
     const [isEmojiSearchFocused, setIsEmojiSearchFocused] = React.useState(false);
 
+    // Imperative keyboard listeners (no state, no re-render): emitting
+    // TAB_BAR_VISIBLE from useKeyboardState() re-rendered this screen on
+    // every keyboard event, which oscillated with the keyboard state
+    // machine and blew past React's nested update limit.
     useEffect(() => {
-        // Hide tab bar when keyboard opens, show when it closes
-        DeviceEventEmitter.emit(Events.TAB_BAR_VISIBLE, !keyboardState.isVisible);
-    }, [keyboardState.isVisible]);
+        const showListener = KeyboardEvents.addListener('keyboardDidShow', () => {
+            DeviceEventEmitter.emit(Events.TAB_BAR_VISIBLE, false);
+        });
+        const hideListener = KeyboardEvents.addListener('keyboardDidHide', () => {
+            DeviceEventEmitter.emit(Events.TAB_BAR_VISIBLE, true);
+        });
+
+        return () => {
+            showListener.remove();
+            hideListener.remove();
+        };
+    }, []);
 
     const handleFindChannels = useCallback(() => {
         if (!NavigationStore.getScreensInStack().includes(Screens.FIND_CHANNELS)) {
