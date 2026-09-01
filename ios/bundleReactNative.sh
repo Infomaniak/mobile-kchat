@@ -11,6 +11,11 @@ WITH_ENVIRONMENT="../node_modules/react-native/scripts/xcode/with-environment.sh
 REACT_NATIVE_XCODE="../node_modules/react-native/scripts/react-native-xcode.sh"
 SENTRY_XCODE="../node_modules/@sentry/react-native/scripts/sentry-xcode.sh"
 
+set -e
+WITH_ENVIRONMENT="../node_modules/react-native/scripts/xcode/with-environment.sh"
+REACT_NATIVE_XCODE="../node_modules/react-native/scripts/react-native-xcode.sh"
+SENTRY_XCODE="../node_modules/@sentry/react-native/scripts/sentry-xcode.sh"
+
 if [[ "${SENTRY_ENABLED}" = "true" ]]; then
 	echo "Sentry native integration is enabled"
 	chmod +x $SENTRY_XCODE
