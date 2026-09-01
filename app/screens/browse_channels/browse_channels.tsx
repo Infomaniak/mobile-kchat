@@ -1,53 +1,32 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {useNavigation} from 'expo-router';
 import React, {useCallback, useEffect, useState} from 'react';
-import {type IntlShape, useIntl} from 'react-intl';
-import {type ImageSourcePropType, Keyboard, Platform, StyleSheet, View} from 'react-native';
+import {useIntl} from 'react-intl';
+import {Keyboard, Platform, StyleSheet, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {joinChannel, switchToChannelById} from '@actions/remote/channel';
 import Loading from '@components/loading';
+import NavigationButton from '@components/navigation_button';
 import Search from '@components/search';
 import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import {dismissModal, goToScreen, setButtons} from '@screens/navigation';
+import {dismissModal, goToScreen} from '@screens/navigation';
 import {alertErrorWithFallback} from '@utils/draft';
 import {changeOpacity, getKeyboardAppearanceFromTheme} from '@utils/theme';
 
 import ChannelDropdown from './channel_dropdown';
 import ChannelList from './channel_list';
 
-import type {AvailableScreens, NavButtons} from '@typings/screens/navigation';
-
-const CLOSE_BUTTON_ID = 'close-browse-channels';
-const CREATE_BUTTON_ID = 'create-pub-channel';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
 export const PUBLIC = 'public';
 export const SHARED = 'shared';
 export const ARCHIVED = 'archived';
-
-const makeLeftButton = (icon: ImageSourcePropType): Record<string, any> => {
-    return {
-        id: CLOSE_BUTTON_ID,
-        icon,
-        testID: 'close.browse_channels.button',
-    };
-};
-
-const makeRightButton = (theme: Theme, formatMessage: IntlShape['formatMessage'], enabled: boolean): Record<string, any> => {
-    return {
-        color: theme.sidebarHeaderTextColor,
-        id: CREATE_BUTTON_ID,
-        text: formatMessage({id: 'mobile.create_channel', defaultMessage: 'Create'}),
-        showAsAction: 'always',
-        testID: 'browse_channels.create.button',
-        enabled,
-    };
-};
 
 const close = () => {
     Keyboard.dismiss();
@@ -74,7 +53,6 @@ type Props = {
 
     // Screen Props (do not change during the lifetime of the screen)
     componentId: AvailableScreens;
-    closeButton: ImageSourcePropType;
 
     // Properties not changing during the lifetime of the screen)
     currentTeamId: string;
@@ -100,7 +78,6 @@ export default function BrowseChannels(props: Props) {
         componentId,
         canCreateChannels,
         sharedChannelsEnabled,
-        closeButton,
         currentTeamId,
         canShowArchivedChannels,
         typeOfChannels,
@@ -114,22 +91,30 @@ export default function BrowseChannels(props: Props) {
     } = props;
     const intl = useIntl();
     const theme = useTheme();
+    const navigation = useNavigation();
     const serverUrl = useServerUrl();
 
     const [adding, setAdding] = useState(false);
 
+    const handleCreate = useCallback(() => {
+        const screen = Screens.CREATE_OR_EDIT_CHANNEL;
+        const title = intl.formatMessage({id: 'mobile.create_channel.title', defaultMessage: 'New channel'});
+        goToScreen(screen, title);
+    }, [intl]);
+
     const setHeaderButtons = useCallback((createEnabled: boolean) => {
-        const buttons: NavButtons = {
-            leftButtons: [makeLeftButton(closeButton)],
-            rightButtons: [],
-        };
-
-        if (canCreateChannels) {
-            buttons.rightButtons = [makeRightButton(theme, intl.formatMessage, createEnabled)];
-        }
-
-        setButtons(componentId, buttons);
-    }, [closeButton, canCreateChannels, componentId, theme, intl]);
+        navigation.setOptions({
+            headerRight: canCreateChannels ? () => (
+                <NavigationButton
+                    onPress={handleCreate}
+                    text={intl.formatMessage({id: 'mobile.create_channel', defaultMessage: 'Create'})}
+                    testID='browse_channels.create.button'
+                    color={theme.sidebarHeaderTextColor}
+                    disabled={!createEnabled}
+                />
+            ) : undefined,
+        });
+    }, [navigation, canCreateChannels, handleCreate, intl, theme.sidebarHeaderTextColor]);
 
     const onSelectChannel = useCallback(async (channel: Channel) => {
         setHeaderButtons(false);
@@ -161,14 +146,6 @@ export default function BrowseChannels(props: Props) {
         searchChannels(term);
     }, [term, searchChannels]);
 
-    const handleCreate = useCallback(() => {
-        const screen = Screens.CREATE_OR_EDIT_CHANNEL;
-        const title = intl.formatMessage({id: 'mobile.create_channel.title', defaultMessage: 'New channel'});
-        goToScreen(screen, title);
-    }, [intl]);
-
-    useNavButtonPressed(CLOSE_BUTTON_ID, componentId, close, [close]);
-    useNavButtonPressed(CREATE_BUTTON_ID, componentId, handleCreate, [handleCreate]);
     useAndroidHardwareBackHandler(componentId, close);
 
     useEffect(() => {

@@ -8,7 +8,6 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {makeDirectChannel, makeGroupChannel} from '@actions/remote/channel';
 import {fetchProfiles, fetchProfilesInTeam, searchProfiles} from '@actions/remote/user';
-import CompassIcon from '@components/compass_icon';
 import Loading from '@components/loading';
 import Search from '@components/search';
 import SelectedUsers from '@components/selected_users';
@@ -18,8 +17,7 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useKeyboardOverlap} from '@hooks/device';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import {dismissModal, setButtons} from '@screens/navigation';
+import {dismissModal} from '@screens/navigation';
 import {alertErrorWithFallback} from '@utils/draft';
 import {changeOpacity, getKeyboardAppearanceFromTheme, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -44,8 +42,6 @@ const messages = defineMessages({
         defaultMessage: 'Group messages are limited to {maxCount} members',
     },
 });
-
-const CLOSE_BUTTON = 'close-dms';
 
 type Props = {
     componentId: AvailableScreens;
@@ -202,17 +198,6 @@ export default function CreateDirectMessage({
         setContainerHeight(e.nativeEvent.layout.height);
     }, []);
 
-    const updateNavigationButtons = useCallback(async () => {
-        const closeIcon = await CompassIcon.getImageSource('close', 24, theme.sidebarHeaderTextColor);
-        setButtons(componentId, {
-            leftButtons: [{
-                id: CLOSE_BUTTON,
-                icon: closeIcon,
-                testID: 'close.create_direct_message.button',
-            }],
-        });
-    }, [componentId, theme.sidebarHeaderTextColor]);
-
     const onChangeText = useCallback((searchTerm: string) => {
         setTerm(searchTerm);
     }, []);
@@ -263,13 +248,7 @@ export default function CreateDirectMessage({
         };
     }, [currentUserId, selectedCount]);
 
-    useNavButtonPressed(CLOSE_BUTTON, componentId, close, [close]);
     useAndroidHardwareBackHandler(componentId, close);
-
-    useEffect(() => {
-        updateNavigationButtons();
-    }, [updateNavigationButtons]);
-
     useEffect(() => {
         setShowToast(selectedCount >= General.MAX_USERS_IN_GM);
     }, [selectedCount]);

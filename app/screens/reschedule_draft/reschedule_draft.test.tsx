@@ -79,7 +79,6 @@ describe('RescheduledDraft', () => {
     function getBaseProps(): ComponentProps<typeof RescheduledDraft> {
         return {
             componentId: Screens.RESCHEDULE_DRAFT,
-            closeButtonId: 'close-button-id',
             currentUserTimezone: {
                 useAutomaticTimezone: true,
                 automaticTimezone: 'America/New_York',

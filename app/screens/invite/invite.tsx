@@ -1,23 +1,22 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {useNavigation} from 'expo-router';
 import React, {useCallback, useEffect, useState, useRef} from 'react';
-import {type IntlShape, useIntl} from 'react-intl';
+import {useIntl} from 'react-intl';
 import {Keyboard, View, type LayoutChangeEvent} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {searchProfiles} from '@actions/remote/user';
-import CompassIcon from '@components/compass_icon';
 import Loading from '@components/loading';
+import NavigationButton from '@components/navigation_button';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useKeyboardOverlap} from '@hooks/device';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import {dismissModal, setButtons} from '@screens/navigation';
+import {dismissModal} from '@screens/navigation';
 import {isEmail} from '@utils/helpers';
-import {mergeNavigationOptions} from '@utils/navigation';
-import {makeStyleSheetFromTheme, changeOpacity} from '@utils/theme';
+import {makeStyleSheetFromTheme} from '@utils/theme';
 import {secureGetFromRecord} from '@utils/types';
 
 import {sendGuestInvites, sendMembersInvites} from './actions';
@@ -25,28 +24,10 @@ import Selection from './selection';
 import Summary from './summary';
 
 import type {EmailInvite, Result, SearchResult, SendOptions} from './types';
-import type {AvailableScreens, NavButtons} from '@typings/screens/navigation';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
-const CLOSE_BUTTON_ID = 'close-invite';
-const SEND_BUTTON_ID = 'send-invite';
 const TIMEOUT_MILLISECONDS = 200;
 const DEFAULT_RESULT = {sent: [], notSent: []};
-
-const makeLeftButton = (theme: Theme): Record<string, any> => ({
-    id: CLOSE_BUTTON_ID,
-    icon: CompassIcon.getImageSourceSync('close', 24, theme.sidebarHeaderTextColor),
-    testID: 'invite.close.button',
-});
-
-const makeRightButton = (theme: Theme, formatMessage: IntlShape['formatMessage'], enabled: boolean): Record<string, any> => ({
-    id: SEND_BUTTON_ID,
-    text: formatMessage({id: 'invite.send_invite', defaultMessage: 'Send'}),
-    showAsAction: 'always',
-    testID: 'invite.send.button',
-    color: theme.sidebarHeaderTextColor,
-    disabledColor: changeOpacity(theme.sidebarHeaderTextColor, 0.4),
-    enabled,
-});
 
 const closeModal = async () => {
     Keyboard.dismiss();
@@ -101,6 +82,7 @@ export default function Invite({
     const intl = useIntl();
     const {formatMessage} = intl;
     const theme = useTheme();
+    const navigation = useNavigation();
     const styles = getStyleSheet(theme);
     const serverUrl = useServerUrl();
 
@@ -127,7 +109,6 @@ export default function Invite({
         guestMagicLink: false,
     });
 
-    const isResult = stage === Stage.RESULT;
     const isSelecting = stage === Stage.SELECTION;
 
     const selectedCount = Object.keys(selectedIds).length;
@@ -232,32 +213,19 @@ export default function Invite({
         }, TIMEOUT_MILLISECONDS);
     }, [handleSend]);
 
-    useNavButtonPressed(CLOSE_BUTTON_ID, componentId, closeModal, [closeModal]);
-    useNavButtonPressed(SEND_BUTTON_ID, componentId, handleSend, [handleSend]);
-
     useEffect(() => {
-        const buttons: NavButtons = {
-            leftButtons: [makeLeftButton(theme)],
-            rightButtons: isSelecting ? [makeRightButton(theme, formatMessage, hasSelection)] : [],
-        };
-
-        setButtons(componentId, buttons);
-    }, [theme, componentId, hasSelection, isSelecting, formatMessage]);
-
-    useEffect(() => {
-        mergeNavigationOptions(componentId, {
-            topBar: {
-                title: {
-                    color: theme.sidebarHeaderTextColor,
-                    text: isResult ? (
-                        formatMessage({id: 'invite.title.summary', defaultMessage: 'Invite summary'})
-                    ) : (
-                        formatMessage({id: 'invite.title', defaultMessage: 'Invite'})
-                    ),
-                },
-            },
+        navigation.setOptions({
+            headerRight: isSelecting ? () => (
+                <NavigationButton
+                    onPress={handleSend}
+                    text={formatMessage({id: 'invite.send_invite', defaultMessage: 'Send'})}
+                    testID='invite.send.button'
+                    color={theme.sidebarHeaderTextColor}
+                    disabled={!hasSelection}
+                />
+            ) : undefined,
         });
-    }, [componentId, formatMessage, isResult, theme]);
+    }, [navigation, isSelecting, handleSend, hasSelection, formatMessage, theme.sidebarHeaderTextColor]);
 
     useEffect(() => {
         return () => {

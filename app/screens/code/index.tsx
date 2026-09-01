@@ -2,17 +2,17 @@
 // See LICENSE.txt for license information.
 
 import Clipboard from '@react-native-clipboard/clipboard';
+import {useNavigation} from 'expo-router';
 import React, {useCallback, useEffect} from 'react';
 import {StyleSheet, type TextStyle} from 'react-native';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 
-import CompassIcon from '@components/compass_icon';
+import NavigationButton from '@components/navigation_button';
 import SyntaxHiglight from '@components/syntax_highlight';
 import {SNACK_BAR_TYPE} from '@constants/snack_bar';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import {popTopScreen, setButtons} from '@screens/navigation';
+import {popTopScreen} from '@screens/navigation';
 import {showSnackBar} from '@utils/snack_bar';
 
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -24,8 +24,6 @@ type Props = {
     textStyle: TextStyle;
 }
 
-const COPY_CODE_BUTTON = 'copy-code';
-
 const edges: Edge[] = ['left', 'right'];
 
 const styles = StyleSheet.create({
@@ -34,6 +32,7 @@ const styles = StyleSheet.create({
 
 const Code = ({code, componentId, language, textStyle}: Props) => {
     const theme = useTheme();
+    const navigation = useNavigation();
     useAndroidHardwareBackHandler(componentId, popTopScreen);
 
     const copyToClipboard = useCallback(() => {
@@ -45,18 +44,19 @@ const Code = ({code, componentId, language, textStyle}: Props) => {
         showSnackBar({barType: SNACK_BAR_TYPE.CODE_COPIED, sourceScreen: componentId});
     }, [code, componentId]);
 
-    useNavButtonPressed(COPY_CODE_BUTTON, componentId, copyToClipboard, [componentId, copyToClipboard]);
-
     useEffect(() => {
-        setButtons(componentId, {
-            rightButtons: [
-                {
-                    id: COPY_CODE_BUTTON,
-                    icon: CompassIcon.getImageSourceSync('content-copy', 24, theme.centerChannelColor),
-                },
-            ],
+        navigation.setOptions({
+            headerRight: () => (
+                <NavigationButton
+                    onPress={copyToClipboard}
+                    iconName='content-copy'
+                    iconSize={24}
+                    color={theme.centerChannelColor}
+                    testID='code.copy.button'
+                />
+            ),
         });
-    }, [theme.centerChannelColor, componentId]);
+    }, [navigation, copyToClipboard, theme.centerChannelColor]);
 
     return (
         <SafeAreaView

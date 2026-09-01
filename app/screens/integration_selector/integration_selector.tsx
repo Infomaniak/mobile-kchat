@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {useNavigation} from 'expo-router';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {defineMessages, useIntl} from 'react-intl';
 import {View} from 'react-native';
@@ -9,6 +10,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {fetchChannels, searchChannels} from '@actions/remote/channel';
 import {fetchProfiles, searchProfiles} from '@actions/remote/user';
 import FormattedText from '@components/formatted_text';
+import NavigationButton from '@components/navigation_button';
 import SearchBar from '@components/search';
 import ServerUserList from '@components/server_user_list';
 import {General, Screens, View as ViewConstants} from '@constants';
@@ -16,12 +18,8 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useDidMount from '@hooks/did_mount';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {useDebounce} from '@hooks/utils';
-import {
-    buildNavigationButton,
-    popTopScreen, setButtons,
-} from '@screens/navigation';
+import {popTopScreen} from '@screens/navigation';
 import {filterChannelsMatchingTerm} from '@utils/channel';
 import {filterOptions} from '@utils/message_attachment';
 import {changeOpacity, getKeyboardAppearanceFromTheme, makeStyleSheetFromTheme} from '@utils/theme';
@@ -44,7 +42,6 @@ const VALID_DATASOURCES = [
     ViewConstants.DATA_SOURCE_CHANNELS,
     ViewConstants.DATA_SOURCE_USERS,
     ViewConstants.DATA_SOURCE_DYNAMIC];
-const SUBMIT_BUTTON_ID = 'submit-integration-selector-multiselect';
 
 const close = () => {
     popTopScreen();
@@ -181,6 +178,7 @@ function IntegrationSelector(
     const theme = useTheme();
     const searchTimeoutId = useRef<NodeJS.Timeout | null>(null);
     const style = getStyleSheet(theme);
+    const navigation = useNavigation();
     const intl = useIntl();
 
     // HOOKS
@@ -220,20 +218,6 @@ function IntegrationSelector(
         setTerm('');
         setSearchResults([]);
     }, []);
-
-    // This is the button to submit multiselect options
-    const rightButton = useMemo(() => {
-        const base = buildNavigationButton(
-            SUBMIT_BUTTON_ID,
-            'integration_selector.multiselect.submit.button',
-            undefined,
-            intl.formatMessage({id: 'integration_selector.multiselect.submit', defaultMessage: 'Done'}),
-        );
-        base.enabled = true;
-        base.showAsAction = 'always';
-        base.color = theme.sidebarHeaderTextColor;
-        return base;
-    }, [theme.sidebarHeaderTextColor, intl]);
 
     const handleSelectItem = useCallback((item: Selection) => {
         if (!isMultiselect) {
@@ -376,7 +360,6 @@ function IntegrationSelector(
     }, [clearSearch, dataSource, integrationData, serverUrl, currentTeamId, searchDynamicOptions]);
 
     // Effects
-    useNavButtonPressed(SUBMIT_BUTTON_ID, componentId, onHandleMultiselectSubmit, [onHandleMultiselectSubmit]);
     useAndroidHardwareBackHandler(componentId, close);
 
     useEffect(() => {
@@ -415,14 +398,17 @@ function IntegrationSelector(
     }, [searchResults, integrationData]);
 
     useEffect(() => {
-        if (!isMultiselect) {
-            return;
-        }
-
-        setButtons(componentId, {
-            rightButtons: [rightButton],
+        navigation.setOptions({
+            headerRight: isMultiselect ? () => (
+                <NavigationButton
+                    onPress={onHandleMultiselectSubmit}
+                    text={intl.formatMessage({id: 'integration_selector.multiselect.submit', defaultMessage: 'Done'})}
+                    testID='integration_selector.multiselect.submit.button'
+                    color={theme.sidebarHeaderTextColor}
+                />
+            ) : undefined,
         });
-    }, [rightButton, componentId, isMultiselect]);
+    }, [navigation, isMultiselect, onHandleMultiselectSubmit, intl, theme.sidebarHeaderTextColor]);
 
     // Renders
     const renderLoading = useCallback(() => {

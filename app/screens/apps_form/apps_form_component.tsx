@@ -1,21 +1,21 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {useNavigation} from 'expo-router';
 import React, {useCallback, useEffect, useMemo, useReducer, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {type ImageSourcePropType, Keyboard, ScrollView, View} from 'react-native';
+import {Keyboard, ScrollView, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {handleGotoLocation} from '@actions/remote/command';
 import Button from '@components/button';
-import CompassIcon from '@components/compass_icon';
 import Markdown from '@components/markdown';
+import NavigationButton from '@components/navigation_button';
 import {Screens} from '@constants';
 import {AppCallResponseTypes} from '@constants/apps';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useDidUpdate from '@hooks/did_update';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {filterEmptyOptions} from '@utils/apps';
 import {mapAppFieldTypeToDialogType, getDataSourceForAppFieldType} from '@utils/dialog_utils';
 import {checkDialogElementForError, checkIfErrorsMatchElements} from '@utils/integrations';
@@ -24,7 +24,7 @@ import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {secureGetFromRecord} from '@utils/types';
 
 import DialogIntroductionText from '../interactive_dialog/dialog_introduction_text';
-import {buildNavigationButton, dismissModal, setButtons} from '../navigation';
+import {dismissModal} from '../navigation';
 
 import AppsFormField from './apps_form_field';
 
@@ -85,10 +85,6 @@ const close = () => {
     dismissModal();
 };
 
-const makeCloseButton = (icon: ImageSourcePropType) => {
-    return buildNavigationButton(CLOSE_BUTTON_ID, 'close.more_direct_messages.button', icon);
-};
-
 export type Props = {
     form: AppForm;
     componentId: AvailableScreens;
@@ -133,9 +129,6 @@ function initValues(fields?: AppField[]) {
     return values;
 }
 
-const CLOSE_BUTTON_ID = 'close-app-form';
-const SUBMIT_BUTTON_ID = 'submit-app-form';
-
 function AppsFormComponent({
     form,
     componentId,
@@ -153,6 +146,7 @@ function AppsFormComponent({
     const [values, dispatchValues] = useReducer(valuesReducer, form.fields, initValues);
     const theme = useTheme();
     const style = getStyleFromTheme(theme);
+    const navigation = useNavigation();
 
     useDidUpdate(() => {
         dispatchValues({elements: form.fields});
@@ -161,44 +155,6 @@ function AppsFormComponent({
     const submitButtons = useMemo(() => {
         return form.fields && form.fields.find((f) => f.name === form.submit_buttons);
     }, [form]);
-
-    const rightButton = useMemo(() => {
-        if (submitButtons) {
-            return undefined;
-        }
-        return {
-            ...buildNavigationButton(
-                SUBMIT_BUTTON_ID,
-                'interactive_dialog.submit.button',
-                undefined,
-                intl.formatMessage({id: 'interactive_dialog.submit', defaultMessage: 'Submit'}),
-            ),
-            enabled: !submitting,
-            showAsAction: 'always' as const,
-            color: theme.sidebarHeaderTextColor,
-        };
-    }, [theme.sidebarHeaderTextColor, submitButtons, submitting, intl]);
-
-    const rightButtons = useMemo(() => (rightButton ? [rightButton] : []), [rightButton]);
-
-    const leftButton = useMemo(() => {
-        const icon = CompassIcon.getImageSourceSync('close', 24, theme.sidebarHeaderTextColor);
-        return makeCloseButton(icon);
-    }, [theme.sidebarHeaderTextColor]);
-
-    const leftButtons = useMemo(() => [leftButton], [leftButton]);
-
-    useEffect(() => {
-        setButtons(componentId, {
-            rightButtons,
-        });
-    }, [componentId, rightButtons]);
-
-    useEffect(() => {
-        setButtons(componentId, {
-            leftButtons,
-        });
-    }, [componentId, leftButtons]);
 
     const updateErrors = useCallback((elements: DialogElement[], fieldErrors?: {[x: string]: string}, formError?: string): boolean => {
         let hasErrors = false;
@@ -431,8 +387,28 @@ function AppsFormComponent({
         }
     }, [form, values, performLookupCall, intl]);
 
-    useNavButtonPressed(CLOSE_BUTTON_ID, componentId, close, [close]);
-    useNavButtonPressed(SUBMIT_BUTTON_ID, componentId, handleSubmit, [handleSubmit]);
+    useEffect(() => {
+        navigation.setOptions({
+            headerLeft: () => (
+                <NavigationButton
+                    onPress={close}
+                    iconName='close'
+                    iconSize={24}
+                    color={theme.sidebarHeaderTextColor}
+                    testID='close.apps_form.button'
+                />
+            ),
+            headerRight: submitButtons ? undefined : () => (
+                <NavigationButton
+                    onPress={handleSubmit}
+                    text={intl.formatMessage({id: 'interactive_dialog.submit', defaultMessage: 'Submit'})}
+                    testID='interactive_dialog.submit.button'
+                    color={theme.sidebarHeaderTextColor}
+                    disabled={submitting}
+                />
+            ),
+        });
+    }, [navigation, handleSubmit, submitButtons, submitting, intl, theme.sidebarHeaderTextColor]);
 
     // Cleanup on unmount to prevent memory leaks
     useEffect(() => {
