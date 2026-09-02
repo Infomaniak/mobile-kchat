@@ -85,6 +85,8 @@ jest.mock('@mattermost/react-native-turbo-log', () => ({
     getLogPaths: jest.fn(),
 }));
 
+jest.mock('react-native-device-info', () => require('react-native-device-info/jest/react-native-device-info-mock'));
+
 jest.mock('@nozbe/watermelondb/utils/common/randomId/randomId', () => ({}));
 jest.mock('@nozbe/watermelondb/react/withObservables/garbageCollector', () => {
     return {

@@ -4,6 +4,7 @@
 // Import necessary dependencies and functions
 import Sentry from '@sentry/react-native'; // Importing Sentry as module mock
 import {Platform} from 'react-native';
+import DeviceInfo from 'react-native-device-info';
 
 import Config from '@assets/config.json';
 import ClientError from '@client/rest/error';
@@ -20,16 +21,22 @@ jest.mock('@sentry/react-native', () => ({
     captureException: jest.fn(),
     addBreadcrumb: jest.fn(),
     setContext: jest.fn(),
+    setTag: jest.fn(),
     ReactNativeTracing: jest.fn(),
     reactNativeNavigationIntegration: jest.fn().mockImplementation(() => ({
         name: 'reactNativeNavigation',
     })),
 }));
 
+jest.mock('react-native-device-info', () => ({
+    getInstallerPackageNameSync: jest.fn().mockReturnValue('AppStore'),
+}));
+
 jest.mock('@assets/config.json', () => ({
     SentryEnabled: true,
     SentryDsnAndroid: 'YOUR_ANDROID_DSN_HERE',
     SentryDsnIos: 'YOUR_IOS_DSN_HERE',
+    SentryEnvironment: 'production',
     SentryOptions: {
         severityLevelFilter: ['error', 'warning'],
     },
@@ -89,6 +96,56 @@ describe('initializeSentry function', () => {
         initializeSentry();
 
         expect(log.logWarning).toHaveBeenCalledWith('Sentry is enabled, but not configured on this platform');
+    });
+
+    it('should resolve TestFlight installs to beta on iOS', () => {
+        const originalDev = __DEV__;
+        (global as any).__DEV__ = false;
+        Config.SentryEnabled = true;
+        Config.SentryDsnIos = 'YOUR_IOS_DSN_HERE';
+        (DeviceInfo.getInstallerPackageNameSync as jest.Mock).mockReturnValue('TestFlight');
+
+        try {
+            initializeSentry();
+
+            expect(Sentry.init).toHaveBeenCalledWith(expect.objectContaining({environment: 'beta'}));
+            expect(Sentry.setTag).toHaveBeenCalledWith('install_source', 'testflight');
+        } finally {
+            (global as any).__DEV__ = originalDev;
+        }
+    });
+
+    it('should resolve App Store installs to production on iOS', () => {
+        const originalDev = __DEV__;
+        (global as any).__DEV__ = false;
+        Config.SentryEnabled = true;
+        Config.SentryDsnIos = 'YOUR_IOS_DSN_HERE';
+        (DeviceInfo.getInstallerPackageNameSync as jest.Mock).mockReturnValue('AppStore');
+
+        try {
+            initializeSentry();
+
+            expect(Sentry.init).toHaveBeenCalledWith(expect.objectContaining({environment: 'production'}));
+            expect(Sentry.setTag).toHaveBeenCalledWith('install_source', 'appstore');
+        } finally {
+            (global as any).__DEV__ = originalDev;
+        }
+    });
+
+    it('should fail safe to beta when the install source is unknown on iOS', () => {
+        const originalDev = __DEV__;
+        (global as any).__DEV__ = false;
+        Config.SentryEnabled = true;
+        Config.SentryDsnIos = 'YOUR_IOS_DSN_HERE';
+        (DeviceInfo.getInstallerPackageNameSync as jest.Mock).mockReturnValue('Other');
+
+        try {
+            initializeSentry();
+
+            expect(Sentry.init).toHaveBeenCalledWith(expect.objectContaining({environment: 'beta'}));
+        } finally {
+            (global as any).__DEV__ = originalDev;
+        }
     });
 
     it.skip('should initialize Sentry correctly', () => {

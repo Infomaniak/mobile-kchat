@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {Platform} from 'react-native';
+import DeviceInfo from 'react-native-device-info';
 import {Navigation} from 'react-native-navigation';
 
 import Config from '@assets/config.json';
@@ -37,7 +38,7 @@ export function initializeSentry() {
     }
 
     const mmConfig = {
-        environment: 'production',
+        environment: resolveSentryEnvironment(),
         tracesSampleRate: 0.2,
         sampleRate: 0.2,
         attachStacktrace: false,
@@ -56,6 +57,24 @@ export function initializeSentry() {
             Sentry.reactNativeNavigationIntegration({navigation: Navigation}),
         ],
     });
+
+    const installSource = DeviceInfo.getInstallerPackageNameSync();
+    Sentry.setTag('install_source', installSource?.toLowerCase() ?? 'other');
+}
+
+// Beta and App Store builds share the same bundle id, so the install source is
+// the only iOS discriminator: TestFlight installs resolve to "beta", App Store
+// installs to "production", whatever the binary was originally built for.
+function resolveSentryEnvironment() {
+    if (__DEV__) {
+        return 'development';
+    }
+
+    if (Platform.OS === 'ios') {
+        return DeviceInfo.getInstallerPackageNameSync() === 'AppStore' ? 'production' : 'beta';
+    }
+
+    return Config.SentryEnvironment;
 }
 
 function getDsn() {
