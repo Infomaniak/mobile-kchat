@@ -20,7 +20,7 @@ default:
   interruptible: true
 
 variables:
-  NODE_VERSION: 22.14.0
+  NODE_VERSION: 24.15.0
   npm_config_cache: "$CI_PROJECT_DIR/.npm"
 
 .rule-mr: &rule-mr
