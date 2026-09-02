@@ -3730,7 +3730,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNReanimated (4.4.0):
+  - RNReanimated (4.3.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -3757,12 +3757,12 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/apple (= 4.4.0)
-    - RNReanimated/common (= 4.4.0)
+    - RNReanimated/apple (= 4.3.1)
+    - RNReanimated/common (= 4.3.1)
     - RNWorklets
     - SocketRocket
     - Yoga
-  - RNReanimated/apple (4.4.0):
+  - RNReanimated/apple (4.3.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -3792,7 +3792,7 @@ PODS:
     - RNWorklets
     - SocketRocket
     - Yoga
-  - RNReanimated/common (4.4.0):
+  - RNReanimated/common (4.3.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -4054,7 +4054,7 @@ PODS:
     - Yoga
   - RNWatch (1.1.0):
     - React
-  - RNWorklets (0.9.1):
+  - RNWorklets (0.8.3):
     - boost
     - DoubleConversion
     - fast_float
@@ -4081,11 +4081,11 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNWorklets/apple (= 0.9.1)
-    - RNWorklets/common (= 0.9.1)
+    - RNWorklets/apple (= 0.8.3)
+    - RNWorklets/common (= 0.8.3)
     - SocketRocket
     - Yoga
-  - RNWorklets/apple (0.9.1):
+  - RNWorklets/apple (0.8.3):
     - boost
     - DoubleConversion
     - fast_float
@@ -4114,7 +4114,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNWorklets/common (0.9.1):
+  - RNWorklets/common (0.8.3):
     - boost
     - DoubleConversion
     - fast_float
@@ -4931,7 +4931,7 @@ SPEC CHECKSUMS:
   RNLocalize: c46dd4008dc8990a098fcafd6ee051122a1ccfda
   RNPermissions: c77c13e6759e37275f4e0553cf9909f5b3f9e999
   RNReactNativeHapticFeedback: 8f6dc89cf13406a754487d8f8bd6df4d6feb789b
-  RNReanimated: 4405484a956444df1df51a49493ca2824a281226
+  RNReanimated: 879497d7fcda8c61e52b1f00ebc7ce9fd97e3cc0
   RNScreens: e902eba58a27d3ad399a495d578e8aba3ea0f490
   RNSentry: f7b79e2c2078ff7c1cf62960e8f52db686717546
   RNShare: 61cad1e65b8e3788c97ee7c5cac4bcbb25a8df40
@@ -4939,7 +4939,7 @@ SPEC CHECKSUMS:
   RNSVG: 4a2ac4d20e011e0168f79adc3c04d42bcd69f7b5
   RNVectorIcons: b822419238727deba7f1e9a2695b5b62007aca6d
   RNWatch: 28fe1f5e0c6410d45fd20925f4796fce05522e3f
-  RNWorklets: c8478950982ef7542807c9219a9f86b561fa8bd1
+  RNWorklets: 534af667da0c0049e0060ae43f03c7df8cc9a6e0
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
