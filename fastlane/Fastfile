@@ -1289,6 +1289,10 @@ def submit_to_google_play(file_path)
   version_number = android_get_version_name(gradle_file: './android/app/build.gradle')
   build_number = android_get_version_code(gradle_file: './android/app/build.gradle')
 
+  # 'completed' publishes to the track immediately (internal testing),
+  # 'draft' leaves the release in the Play Console for a manual rollout
+  release_status = ENV['SUPPLY_RELEASE_STATUS'] || 'completed'
+
   if(file_path.include?("aab"))
     aab_filename = Dir.glob(file_path).select { |f| File.file? f}.first
     unless ENV['SUPPLY_JSON_KEY'].nil? || ENV['SUPPLY_JSON_KEY'].empty?
@@ -1296,6 +1300,7 @@ def submit_to_google_play(file_path)
           package_name: ENV['MAIN_APP_IDENTIFIER'] || ENV['SUPPLY_PACKAGE_NAME'],
           version_name: "#{build_number.gsub('_', '')} (#{version_number})",
           track: ENV['SUPPLY_TRACK'] || 'alpha',
+          release_status: release_status,
           aab: aab_filename,
           skip_upload_apk: true,
           skip_upload_metadata: true,
@@ -1316,6 +1321,7 @@ def submit_to_google_play(file_path)
             package_name: ENV['MAIN_APP_IDENTIFIER'] || ENV['SUPPLY_PACKAGE_NAME'],
             version_name: "#{build_number.gsub('_', '')} (#{version_number})",
             track: ENV['SUPPLY_TRACK'] || 'alpha',
+            release_status: release_status,
             apk_paths: apks,
             skip_upload_aab: true,
             skip_upload_metadata: true,
@@ -1336,8 +1342,8 @@ def submit_to_google_play(file_path)
   links = (filenames.map { |f| "* #{public_path}/#{f}"}).join("\n")
 
   # Send a build message to Mattermost
-  pretext = '#### New Android released ready to be published'
-  msg = "Release has been cut and is on the Beta track ready to be published.\nDownload links:\n#{links}"
+  pretext = '#### New Android release ready to be published'
+  msg = "Release has been cut and is awaiting manual rollout in the Play Console.\nDownload links:\n#{links}"
 
   if ENV['BETA_BUILD'] == 'true'
     pretext = '#### New Android beta published to Google Play'
