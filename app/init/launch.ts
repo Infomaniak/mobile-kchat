@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {router} from 'expo-router';
 import {AppState, DeviceEventEmitter, Linking, Platform} from 'react-native';
 import {Notifications} from 'react-native-notifications';
 
@@ -20,9 +21,10 @@ import {getAllServers} from '@queries/app/servers';
 import {queryPostsByType} from '@queries/servers/post';
 import {getThemeForCurrentTeam} from '@queries/servers/preference';
 import {getCurrentUserId} from '@queries/servers/system';
-import {getExpoRouterPath} from '@screens/navigation';
+import {getExpoRouterPath, propsToParams} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import {handleDeepLink, getLaunchPropsFromDeepLink} from '@utils/deep_link';
+import {logError} from '@utils/log';
 import {convertToNotificationData} from '@utils/notification';
 import {captureMessage} from '@utils/sentry';
 import {removeProtocol} from '@utils/url';
@@ -258,12 +260,14 @@ export async function cleanupEphemeralPosts() {
     );
 }
 
-export function relaunchApp(_props?: Partial<LaunchProps>) {
-    // With expo-router, relaunch is handled by redirecting to the initial route.
-    // The root index route will determine the correct screen based on credentials.
-    const {router} = require('@screens/navigation');
-    if (router) {
-        router.replace('/');
+export async function relaunchApp(props?: Partial<LaunchProps>) {
+    try {
+        const launchRoute = await determineRouteFromLaunchProps({launchType: Launch.Normal, coldStart: false, ...props});
+        requestAnimationFrame(() => {
+            router.replace({pathname: launchRoute.route, params: propsToParams(launchRoute.params)});
+        });
+    } catch (error) {
+        logError('[launch] relaunchApp failed to determine the route', error);
     }
 }
 
