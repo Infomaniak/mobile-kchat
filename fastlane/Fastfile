@@ -1343,7 +1343,8 @@ def submit_to_google_play(file_path)
 
   # Send a build message to Mattermost
   pretext = '#### New Android release ready to be published'
-  msg = "Release has been cut and is awaiting manual rollout in the Play Console.\nDownload links:\n#{links}"
+  release_msg = release_status == 'draft' ? 'Release has been cut and is awaiting manual rollout in the Play Console.' : 'Release has been cut and published.'
+  msg = "#{release_msg}\nDownload links:\n#{links}"
 
   if ENV['BETA_BUILD'] == 'true'
     pretext = '#### New Android beta published to Google Play'
@@ -1371,10 +1372,10 @@ def qa_build_message(options)
     os_type = options[:os_type]
 
     if os_type == 'android'
-      msg = "QA build [#{abbreviated_commit_hash}](https://github.com/mattermost/mattermost-mobile/commit/#{abbreviated_commit_hash}) — [Android APK Link](#{install_url})"
+      msg = "QA build [#{abbreviated_commit_hash}](https://github.com/mattermost/mattermost-mobile/commit/#{abbreviated_commit_hash}) - [Android APK Link](#{install_url})"
       mattermost(message: msg, username: 'Fastlane', icon_url: 'https://lh3.ggpht.com/XL0CrI8skkxnboGct-duyg-bZ_MxJDTrjczyjdU8OP2PM1dmj7SP4jL1K8JQeMIB3AM=w300')
     elsif os_type == 'ios'
-      msg = "QA build [#{abbreviated_commit_hash}](https://github.com/mattermost/mattermost-mobile/commit/#{abbreviated_commit_hash}) — [iOS pList Link](#{install_url})"
+      msg = "QA build [#{abbreviated_commit_hash}](https://github.com/mattermost/mattermost-mobile/commit/#{abbreviated_commit_hash}) - [iOS pList Link](#{install_url})"
       mattermost(message: msg, username: 'Fastlane', icon_url: 'https://support.apple.com/library/content/dam/edam/applecare/images/en_US/iOS/move-to-ios-icon.png')
     end
   else

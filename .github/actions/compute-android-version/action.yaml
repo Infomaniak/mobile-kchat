@@ -25,24 +25,26 @@ runs:
         TAG="${{ inputs.tag }}"
         echo "Parsing tag: $TAG"
 
-        # Extract version parts from tag (e.g., 1.0.46-alpha.1.android or 1.0.46-beta.1.android)
+        emit_version_code() {
+          local major="$1" minor="$2" patch="$3" candidate="$4" detail="$5"
+          # versionCode = major + 2-digit minor + 3-digit patch + 3-digit candidate
+          local version_code="${major}$(printf '%02d' "$minor")$(printf '%03d' "$patch")$(printf '%03d' "$candidate")"
+          local display_code="${major}_$(printf '%02d' "$minor")_$(printf '%03d' "$patch")_$(printf '%03d' "$candidate")"
+          [[ "$version_code" -gt 2100000000 ]] && { echo "❌ versionCode $version_code exceeds the Play limit (2100000000): major must stay <= 20"; exit 1; }
+          [[ -n "$detail" ]] && display_code="$display_code, $detail"
+          echo "version-code=$version_code" >> "$GITHUB_OUTPUT"
+          echo "version-name=${major}.${minor}.${patch}" >> "$GITHUB_OUTPUT"
+          echo "✅ Computed versionCode: $version_code (readable: $display_code)"
+          echo "✅ Computed versionName: ${major}.${minor}.${patch}"
+        }
+
         if [[ "$TAG" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-(alpha|beta)\.([0-9]+)\.android$ ]]; then
           MAJOR="${BASH_REMATCH[1]}"
           MINOR="${BASH_REMATCH[2]}"
           PATCH="${BASH_REMATCH[3]}"
           CANDIDATE="${BASH_REMATCH[5]}"
 
-          # Format: 100046001 (Android requires pure integer)
-          # For display: 1_00_046_001 (Major: 1, Minor: 2 digits, Patch: 3 digits, Candidate: 3 digits)
-          VERSION_CODE="${MAJOR}$(printf '%02d' "$MINOR")$(printf '%03d' "$PATCH")$(printf '%03d' "$CANDIDATE")"
-          DISPLAY_VERSION_CODE="${MAJOR}_$(printf '%02d' "$MINOR")_$(printf '%03d' "$PATCH")_$(printf '%03d' "$CANDIDATE")"
-          VERSION_NAME="${MAJOR}.${MINOR}.${PATCH}"
-          [[ "$VERSION_CODE" -gt 2100000000 ]] && { echo "❌ versionCode $VERSION_CODE exceeds the Play limit (2100000000): major must stay <= 20"; exit 1; }
-
-          echo "version-code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
-          echo "version-name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
-          echo "✅ Computed versionCode: $VERSION_CODE (readable: $DISPLAY_VERSION_CODE)"
-          echo "✅ Computed versionName: $VERSION_NAME"
+          emit_version_code "$MAJOR" "$MINOR" "$PATCH" "$CANDIDATE"
         elif [[ "$TAG" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)\.android$ ]]; then
           # Store build: continue the versionCode numbering after the highest alpha/beta tag of this version
           MAJOR="${BASH_REMATCH[1]}"
@@ -51,20 +53,10 @@ runs:
 
           LAST=$(git tag --list "${MAJOR}.${MINOR}.${PATCH}-*.*.android" | sed -En 's/.*-(alpha|beta)\.([0-9]+)\.android$/\2/p' | sort -n | tail -1)
           CANDIDATE=$(( ${LAST:-0} + 1 ))
-          # A later beta.N tag with this N would collide in Play: cut remaining betas before the store tag
-          echo "⚠️ Store build takes candidate $CANDIDATE: tag any remaining ${MAJOR}.${MINOR}.${PATCH}-beta.N.android BEFORE this tag, or use a higher N"
+          # A later alpha.N or beta.N tag with this N would collide in Play: cut remaining candidates before the store tag
+          echo "⚠️ Store build takes candidate $CANDIDATE: tag any remaining ${MAJOR}.${MINOR}.${PATCH}-alpha.N.android or -beta.N.android BEFORE this tag, or use a higher N"
 
-          # Format: 100046001 (Android requires pure integer)
-          # For display: 1_00_046_001 (Major: 1, Minor: 2 digits, Patch: 3 digits, Candidate: 3 digits)
-          VERSION_CODE="${MAJOR}$(printf '%02d' "$MINOR")$(printf '%03d' "$PATCH")$(printf '%03d' "$CANDIDATE")"
-          DISPLAY_VERSION_CODE="${MAJOR}_$(printf '%02d' "$MINOR")_$(printf '%03d' "$PATCH")_$(printf '%03d' "$CANDIDATE")"
-          VERSION_NAME="${MAJOR}.${MINOR}.${PATCH}"
-          [[ "$VERSION_CODE" -gt 2100000000 ]] && { echo "❌ versionCode $VERSION_CODE exceeds the Play limit (2100000000): major must stay <= 20"; exit 1; }
-
-          echo "version-code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
-          echo "version-name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
-          echo "✅ Computed versionCode: $VERSION_CODE (readable: $DISPLAY_VERSION_CODE, next after ${LAST:-none})"
-          echo "✅ Computed versionName: $VERSION_NAME"
+          emit_version_code "$MAJOR" "$MINOR" "$PATCH" "$CANDIDATE" "next after ${LAST:-none}"
         else
           echo "❌ Error: Tag format invalid. Expected: X.Y.Z-alpha.N.android, X.Y.Z-beta.N.android or X.Y.Z.android"
           echo "   Got: $TAG"
