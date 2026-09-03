@@ -148,6 +148,25 @@ describe('initializeSentry function', () => {
         }
     });
 
+    it('should use the configured environment on Android', () => {
+        const originalDev = __DEV__;
+        const originalPlatform = Platform.OS;
+        (global as any).__DEV__ = false;
+        Platform.OS = 'android';
+        Config.SentryEnabled = true;
+        Config.SentryDsnAndroid = 'YOUR_ANDROID_DSN_HERE';
+        (DeviceInfo.getInstallerPackageNameSync as jest.Mock).mockReturnValue('AppStore');
+
+        try {
+            initializeSentry();
+
+            expect(Sentry.init).toHaveBeenCalledWith(expect.objectContaining({environment: Config.SentryEnvironment}));
+        } finally {
+            (global as any).__DEV__ = originalDev;
+            Platform.OS = originalPlatform;
+        }
+    });
+
     it.skip('should initialize Sentry correctly', () => {
         // IK change : skipped on CI temporarily, will fix later
         Config.SentryEnabled = true;
