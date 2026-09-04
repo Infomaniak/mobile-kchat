@@ -1,0 +1,20 @@
+diff --git a/node_modules/@sentry/react-native/sentry.gradle b/node_modules/@sentry/react-native/sentry.gradle
+index fbbf567..af06060 100644
+--- a/node_modules/@sentry/react-native/sentry.gradle
++++ b/node_modules/@sentry/react-native/sentry.gradle
+@@ -129,6 +129,7 @@ gradle.projectsEvaluated {
+                           sourcemapOutput]
+                       def osCompatibilityCopyCommand = Os.isFamily(Os.FAMILY_WINDOWS) ? ['cmd', '/c'] : []
+                       commandLine(*osCompatibilityCopyCommand, *args)
++                      ignoreExitValue true
+                   }
+ 
+                   // Add release and dist for backward compatibility if no Debug ID detected in output soruce map
+@@ -207,6 +208,7 @@ gradle.projectsEvaluated {
+                           environment('SENTRY_DOTENV_PATH', "$reactRoot/.env.sentry-build-plugin")
+                       }
+                       commandLine(*osCompatibility, *args)
++                      ignoreExitValue true
+                   }
+               }
+ 
