@@ -155,6 +155,7 @@ describe('initializeSentry function', () => {
         Platform.OS = 'android';
         Config.SentryEnabled = true;
         Config.SentryDsnAndroid = 'YOUR_ANDROID_DSN_HERE';
+        Config.SentryEnvironment = 'staging';
         (DeviceInfo.getInstallerPackageNameSync as jest.Mock).mockReturnValue('AppStore');
 
         try {
