@@ -53,6 +53,7 @@ runs:
 
           LAST=$(git tag --list "${MAJOR}.${MINOR}.${PATCH}-*.*.android" | sed -En 's/.*-(alpha|beta)\.([0-9]+)\.android$/\2/p' | sort -n | tail -1)
           CANDIDATE=$(( ${LAST:-0} + 1 ))
+          [[ -n "$(git tag --list "${MAJOR}.${MINOR}.${PATCH}.android")" ]] && { echo "❌ store tag ${MAJOR}.${MINOR}.${PATCH}.android already exists: its versionCode is reserved, bump the beta candidate N"; exit 1; }
           # A later alpha.N or beta.N tag with this N would collide in Play: cut remaining candidates before the store tag
           echo "⚠️ Store build takes candidate $CANDIDATE: tag any remaining ${MAJOR}.${MINOR}.${PATCH}-alpha.N.android or -beta.N.android BEFORE this tag, or use a higher N"
 
