@@ -30,8 +30,10 @@ jobs:
           ref: ${{ inputs.tag }}
 
       - name: ci/check-recoverable-tag
+        env:
+          TAG: ${{ inputs.tag }}
         run: |
-          if ! echo "${{ inputs.tag }}" | grep -Eq -- '-(beta|alpha)\.[0-9]+\.android$'; then
+          if ! echo "$TAG" | grep -Eq -- '-(beta|alpha)\.[0-9]+\.android$'; then
             echo "::error::Only beta/alpha tags are supported for now, store tags need !435"
             exit 1
           fi

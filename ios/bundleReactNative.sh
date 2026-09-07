@@ -10,12 +10,12 @@ if [[ "${SENTRY_ENABLED}" = "true" ]]; then
 	echo "Sentry native integration is enabled"
 
 	export SENTRY_PROPERTIES=sentry.properties
-	export SENTRY_FORCE_FOREGROUND=true
+	BUILD_START=$(date +%s)
 	../node_modules/@sentry/cli/bin/sentry-cli react-native xcode \
     ../node_modules/react-native/scripts/react-native-xcode.sh \
     || {
 		BUNDLE_PATH="${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/main.jsbundle"
-		if [[ -s "$BUNDLE_PATH" ]]; then
+		if [[ -s "$BUNDLE_PATH" && $(stat -f %m "$BUNDLE_PATH") -ge $BUILD_START ]]; then
 			echo "WARNING: Sentry upload failed but the JS bundle was produced, continuing build"
 		else
 			echo "ERROR: Sentry integration failed and no JS bundle was produced"
