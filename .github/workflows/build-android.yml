@@ -4,7 +4,6 @@ name: build-android
 on:
   push:
     tags:
-      - '[0-9]+.[0-9]+.[0-9]+-alpha.[0-9]+.android'
       - '[0-9]+.[0-9]+.[0-9]+-beta.[0-9]+.android'
 
 env:
@@ -22,10 +21,7 @@ jobs:
         id: env
         run: |
           TAG="${{ github.ref_name }}"
-          if [[ "$TAG" =~ -alpha\. ]]; then
-            echo "environment=alpha" >> "$GITHUB_OUTPUT"
-            echo "track=alpha" >> "$GITHUB_OUTPUT"
-          elif [[ "$TAG" =~ -beta\. ]]; then
+          if [[ "$TAG" =~ -beta\. ]]; then
             echo "environment=beta" >> "$GITHUB_OUTPUT"
             echo "track=internal" >> "$GITHUB_OUTPUT"
           fi
