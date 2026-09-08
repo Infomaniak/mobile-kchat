@@ -4,6 +4,7 @@
 import EuriaIcon from '@agents/components/euria_icon';
 import {useRewrite} from '@agents/hooks';
 import {rewriteStore} from '@agents/store';
+import {BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {defineMessages, useIntl} from 'react-intl';
 import {Alert, Keyboard, Pressable, TextInput, View} from 'react-native';
@@ -284,86 +285,90 @@ const RewriteOptions = ({
     }, [insets.bottom, hasHistory]);
 
     const renderContent = useCallback(() => (
-        <View style={styles.container}>
-            <View style={styles.headerContainer}>
-                <View style={styles.customPromptContainer}>
-                    <View style={styles.customPromptInputWrapper}>
-                        <EuriaIcon size={20}/>
-                        <TextInput
-                            ref={textInputRef}
-                            style={styles.customPromptInput}
-                            placeholder={intl.formatMessage(isInGenerationMode ? messages.generatePrompt : messages.customPrompt)}
-                            placeholderTextColor={changeOpacity(theme.centerChannelColor, 0.64)}
-                            value={customPrompt}
-                            onChangeText={setCustomPrompt}
-                            onSubmitEditing={handleCustomPromptSubmit}
-                            returnKeyType='send'
-                            multiline={false}
-                            autoCapitalize='none'
-                        />
+        <BottomSheetScrollView
+            bounces={false}
+            showsVerticalScrollIndicator={false}
+        >
+            <View style={styles.container}>
+                <View style={styles.headerContainer}>
+                    <View style={styles.customPromptContainer}>
+                        <View style={styles.customPromptInputWrapper}>
+                            <EuriaIcon size={20}/>
+                            <TextInput
+                                ref={textInputRef}
+                                style={styles.customPromptInput}
+                                placeholder={intl.formatMessage(isInGenerationMode ? messages.generatePrompt : messages.customPrompt)}
+                                placeholderTextColor={changeOpacity(theme.centerChannelColor, 0.64)}
+                                value={customPrompt}
+                                onChangeText={setCustomPrompt}
+                                onSubmitEditing={handleCustomPromptSubmit}
+                                returnKeyType='send'
+                                multiline={false}
+                                autoCapitalize='none'
+                            />
+                        </View>
                     </View>
                 </View>
+
+                {hasHistory && (
+                    <View style={styles.historyButtonsContainer}>
+                        <Pressable
+                            onPress={handleCancel}
+                            style={({pressed}) => [styles.historyButton, pressed && {opacity: 0.72}]}
+                            testID='ai_rewrite.cancel'
+                        >
+                            <CompassIcon
+                                name='close'
+                                size={16}
+                                color={theme.centerChannelColor}
+                            />
+                            <FormattedText
+                                {...messages.cancel}
+                                style={styles.historyButtonText}
+                            />
+                        </Pressable>
+                        <Pressable
+                            onPress={handleRegenerate}
+                            style={({pressed}) => [styles.historyButton, pressed && {opacity: 0.72}]}
+                            testID='ai_rewrite.regenerate'
+                        >
+                            <CompassIcon
+                                name='refresh'
+                                size={16}
+                                color={theme.centerChannelColor}
+                            />
+                            <FormattedText
+                                {...messages.regenerate}
+                                style={styles.historyButtonText}
+                            />
+                        </Pressable>
+                    </View>
+                )}
+
+                {!isInGenerationMode && (
+                    <View style={styles.optionsContainer}>
+                        {options.map((option) => (
+                            <OptionItem
+                                key={option.action}
+                                label={intl.formatMessage(option.message)}
+                                icon={option.icon}
+                                action={() => handleRewrite(option.action)}
+                                type='default'
+                                testID={`ai_rewrite.option.${option.action}`}
+                            />
+                        ))}
+                    </View>
+                )}
             </View>
-
-            {hasHistory && (
-                <View style={styles.historyButtonsContainer}>
-                    <Pressable
-                        onPress={handleCancel}
-                        style={({pressed}) => [styles.historyButton, pressed && {opacity: 0.72}]}
-                        testID='ai_rewrite.cancel'
-                    >
-                        <CompassIcon
-                            name='close'
-                            size={16}
-                            color={theme.centerChannelColor}
-                        />
-                        <FormattedText
-                            {...messages.cancel}
-                            style={styles.historyButtonText}
-                        />
-                    </Pressable>
-                    <Pressable
-                        onPress={handleRegenerate}
-                        style={({pressed}) => [styles.historyButton, pressed && {opacity: 0.72}]}
-                        testID='ai_rewrite.regenerate'
-                    >
-                        <CompassIcon
-                            name='refresh'
-                            size={16}
-                            color={theme.centerChannelColor}
-                        />
-                        <FormattedText
-                            {...messages.regenerate}
-                            style={styles.historyButtonText}
-                        />
-                    </Pressable>
-                </View>
-            )}
-
-            {!isInGenerationMode && (
-                <View style={styles.optionsContainer}>
-                    {options.map((option) => (
-                        <OptionItem
-                            key={option.action}
-                            label={intl.formatMessage(option.message)}
-                            icon={option.icon}
-                            action={() => handleRewrite(option.action)}
-                            type='default'
-                            testID={`ai_rewrite.option.${option.action}`}
-                        />
-                    ))}
-                </View>
-            )}
-        </View>
+        </BottomSheetScrollView>
     ), [styles, intl, theme, isInGenerationMode, customPrompt, handleCustomPromptSubmit, handleRewrite, hasHistory, handleCancel, handleRegenerate]);
 
     return (
         <BottomSheet
             renderContent={renderContent}
-            componentId={Screens.AGENTS_REWRITE_OPTIONS}
+            screen={Screens.AGENTS_REWRITE_OPTIONS}
             initialSnapIndex={1}
             snapPoints={snapPoints}
-            scrollable={true}
             keyboardBehavior='fillParent'
             keyboardBlurBehavior='none'
             testID='ai_rewrite_options'

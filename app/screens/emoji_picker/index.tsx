@@ -5,7 +5,6 @@ import React, {useCallback} from 'react';
 import {DeviceEventEmitter, StyleSheet} from 'react-native';
 
 import {Events, Screens} from '@constants';
-import {useIsTablet} from '@hooks/device';
 import BottomSheet from '@screens/bottom_sheet';
 import CallbackStore from '@store/callback_store';
 
@@ -24,8 +23,6 @@ const style = StyleSheet.create({
 });
 
 const EmojiPickerScreen = ({file, imageUrl}: EmojiPickerProps) => {
-    const isTablet = useIsTablet();
-
     const handleEmojiPress = useCallback((emoji: string) => {
         const callback = CallbackStore.getCallback<((emoji: string) => void)>();
         if (callback) {
@@ -49,10 +46,10 @@ const EmojiPickerScreen = ({file, imageUrl}: EmojiPickerProps) => {
     return (
         <BottomSheet
             renderContent={renderContent}
-            componentId={Screens.EMOJI_PICKER}
+            screen={Screens.EMOJI_PICKER}
             contentStyle={style.contentStyle}
             initialSnapIndex={1}
-            footerComponent={isTablet ? undefined : PickerFooter}
+            footerComponent={PickerFooter}
             testID='post_options'
         />
     );

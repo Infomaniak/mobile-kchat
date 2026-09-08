@@ -55,7 +55,6 @@ import {typography} from '@utils/typography';
 
 type Props = {
     quotaType: IKQuotaExceeded;
-    closeButtonId: string;
 };
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
@@ -126,7 +125,7 @@ export type IKQuotaExceeded = {
     image: 'channels' | 'storage';
 }
 
-const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
+const IKChannelQuotaExceeded = ({quotaType = {
     title: 'infomaniak.size_quota_exceeded.title',
     description: 'infomaniak.size_quota_exceeded.description',
     image: 'storage',
@@ -178,8 +177,7 @@ const IKChannelQuotaExceeded = ({closeButtonId, quotaType = {
     return (
         <BottomSheet
             renderContent={renderContent}
-            closeButtonId={closeButtonId}
-            componentId={Screens.IK_QUOTA_EXCEEDED}
+            screen={Screens.IK_QUOTA_EXCEEDED}
             initialSnapIndex={1}
             snapPoints={snapPoints}
             contentStyle={{paddingHorizontal: 0}}

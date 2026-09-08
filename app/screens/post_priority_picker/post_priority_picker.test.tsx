@@ -14,7 +14,6 @@ const mockedIsTablet = jest.mocked(useIsTablet);
 
 function getBaseProps(): ComponentProps<typeof PostPriorityPicker> {
     return {
-        closeButtonId: '',
         componentId: '(bottom_sheet)',
         isPersistenNotificationsEnabled: true,
         isPostAcknowledgementEnabled: true,

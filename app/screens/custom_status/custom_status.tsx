@@ -19,7 +19,8 @@ import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useIsTablet} from '@hooks/device';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {dismissModal, goToScreen, openAsBottomSheet, showModal} from '@screens/navigation';
+import {dismissModal, goToScreen, navigateToScreen, showModal} from '@screens/navigation';
+import CallbackStore from '@store/callback_store';
 import {getCurrentMomentForTimezone, getRoundedTime} from '@utils/helpers';
 import {logDebug} from '@utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -308,14 +309,9 @@ const CustomStatus = ({
     ]);
 
     const openEmojiPicker = usePreventDoubleTap(useCallback(() => {
-        openAsBottomSheet({
-            closeButtonId: 'close-emoji-picker',
-            screen: Screens.EMOJI_PICKER,
-            theme,
-            title: intl.formatMessage({id: 'mobile.custom_status.choose_emoji', defaultMessage: 'Choose an emoji'}),
-            props: {onEmojiPress: handleEmojiClick},
-        });
-    }, [theme, intl, handleEmojiClick]));
+        CallbackStore.setCallback(handleEmojiClick);
+        navigateToScreen(Screens.EMOJI_PICKER);
+    }, [handleEmojiClick]));
 
     const handleBackButton = useCallback(() => {
         dismissModalAndKeyboard(isTablet, {componentId});

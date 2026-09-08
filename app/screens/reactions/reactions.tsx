@@ -89,8 +89,7 @@ const Reactions = ({initialEmoji, location, reactions}: Props) => {
     return (
         <BottomSheet
             renderContent={renderContent}
-            closeButtonId='close-post-reactions'
-            componentId={Screens.REACTIONS}
+            screen={Screens.REACTIONS}
             initialSnapIndex={1}
             snapPoints={[1, '50%', '80%']}
             testID='reactions'

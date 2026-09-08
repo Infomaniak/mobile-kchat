@@ -26,7 +26,6 @@ import type UserModel from '@typings/database/models/servers/user';
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 
 type Props = {
-    closeButtonId: string;
     groupId: string;
     group: GroupModel | undefined;
     members: UserModel[];
@@ -86,7 +85,7 @@ const MEMBERS_PER_PAGE = 60;
 
 const keyExtractor = (item: UserModel) => item.id;
 
-const GroupMembers = ({closeButtonId, groupId, group, members}: Props) => {
+const GroupMembers = ({groupId, group, members}: Props) => {
     const serverUrl = useServerUrl();
     const theme = useTheme();
     const intl = useIntl();
@@ -313,8 +312,7 @@ const GroupMembers = ({closeButtonId, groupId, group, members}: Props) => {
     return (
         <BottomSheet
             renderContent={renderContent}
-            closeButtonId={closeButtonId}
-            componentId={Screens.GROUP_MEMBERS}
+            screen={Screens.GROUP_MEMBERS}
             initialSnapIndex={1}
             snapPoints={snapPoints}
             testID='group_members'

@@ -13,7 +13,8 @@ import {useServerUrl} from '@context/server';
 import {useIsTablet} from '@hooks/device';
 import useDidUpdate from '@hooks/did_update';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {bottomSheetModalOptions, openAsBottomSheet, showModal, showModalOverCurrentContext} from '@screens/navigation';
+import {bottomSheetModalOptions, navigateToScreen, showModal, showModalOverCurrentContext} from '@screens/navigation';
+import CallbackStore from '@store/callback_store';
 import {getEmojiFirstAlias} from '@utils/emoji/helpers';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
@@ -105,14 +106,9 @@ const Reactions = ({currentUserId, canAddReaction, canRemoveReaction, disabled, 
     }, [postId, serverUrl]);
 
     const handleAddReaction = usePreventDoubleTap(useCallback(() => {
-        openAsBottomSheet({
-            closeButtonId: 'close-add-reaction',
-            screen: Screens.EMOJI_PICKER,
-            theme,
-            title: formatMessage({id: 'mobile.post_info.add_reaction', defaultMessage: 'Add Reaction'}),
-            props: {onEmojiPress: handleToggleReactionToPost},
-        });
-    }, [formatMessage, handleToggleReactionToPost, theme]));
+        CallbackStore.setCallback(handleToggleReactionToPost);
+        navigateToScreen(Screens.EMOJI_PICKER);
+    }, [handleToggleReactionToPost]));
 
     const handleReactionPress = useCallback(async (emoji: string, remove: boolean) => {
         pressed.current = true;

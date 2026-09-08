@@ -31,8 +31,6 @@ import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
-const POST_OPTIONS_BUTTON = 'close-post-options';
-
 type Props = {
     componentId?: AvailableScreens;
     currentUser?: UserModel;
@@ -290,8 +288,7 @@ const IKReminder = ({postId, postpone = false, postponePostId, currentUser, limi
     return (
         <BottomSheet
             renderContent={renderContent}
-            closeButtonId={POST_OPTIONS_BUTTON}
-            componentId={Screens.IK_REMINDER}
+            screen={Screens.IK_REMINDER}
             initialSnapIndex={1}
             snapPoints={snapPoints}
             testID='post_options'

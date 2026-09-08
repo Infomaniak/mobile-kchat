@@ -13,8 +13,6 @@ import {dismissBottomSheet} from '@screens/navigation';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {typography} from '@utils/typography';
 
-const CLOSE_BUTTON_ID = 'close-feedback-options';
-
 type Props = {
     componentId: string;
     options: Array<{text: string; value: string}>;
@@ -55,8 +53,7 @@ const FeedbackOptions = ({options, selected, eventName, title}: Props) => {
                     </View>
                 </BottomSheetScrollView>
             )}
-            closeButtonId={CLOSE_BUTTON_ID}
-            componentId={Screens.FEEDBACK_OPTIONS}
+            screen={Screens.FEEDBACK_OPTIONS}
             initialSnapIndex={1}
             snapPoints={snapPoints}
             testID='feedback_options'
