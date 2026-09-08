@@ -4,6 +4,7 @@
 import {RUNNING_E2E} from '@env';
 import TurboLogger from '@mattermost/react-native-turbo-log';
 import {ExpoRoot} from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import React from 'react';
 import {AppRegistry, LogBox, Platform, UIManager} from 'react-native';
 import ViewReactNativeStyleAttributes from 'react-native/Libraries/Components/View/ReactNativeStyleAttributes';
@@ -55,6 +56,10 @@ if (Platform.OS === 'android') {
 
 // eslint-disable-next-line no-process-env
 process.env.EXPO_OS = Platform.OS;
+
+// Before ExpoRoot; NavigationContainer onReady otherwise hides splash.
+SplashScreen.setOptions({fade: true});
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export function App() {
     const ctx = require.context('./app/routes');
