@@ -302,14 +302,14 @@ public class CallManager: NSObject {
   /// booted can be replayed (the module then queues them again until JS listeners attach).
   @objc public func nativeModuleDidInitialize() {
     nativeEventLock.lock()
-    let pending = pendingNativeEvents
-    pendingNativeEvents.removeAll()
-    nativeEventLock.unlock()
+    defer { nativeEventLock.unlock() }
 
+    // Replay under the lock so a concurrent emit can't overtake queued events
     guard let module = CallManagerModule.callManagerSharedInstance() else { return }
-    for event in pending {
+    for event in pendingNativeEvents {
       event.send(module)
     }
+    pendingNativeEvents.removeAll()
   }
 }
 
