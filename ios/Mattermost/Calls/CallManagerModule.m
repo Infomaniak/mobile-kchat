@@ -14,6 +14,9 @@
 @implementation CallManagerModule
 {
   bool hasListeners;
+  // Events emitted before JS attached its listener (cold start, e.g. answering
+  // a CallKit call from the lock screen). Replayed on startObserving.
+  NSMutableArray<NSDictionary *> *pendingEvents;
 }
 
 static CallManagerModule *sharedModule = nil;
@@ -28,7 +31,9 @@ RCT_EXPORT_MODULE();
   self = [super init];
   if (self) {
     sharedModule = self;
+    pendingEvents = [NSMutableArray array];
     [CallManager shared]; // ensure singleton exists early
+    [[CallManager shared] nativeModuleDidInitialize];
   }
   return self;
 }
@@ -100,6 +105,7 @@ RCT_EXPORT_METHOD(reportCallVideoMuted: (NSString*)conferenceId
 
 -(void)startObserving {
     hasListeners = YES;
+    [self flushPendingEvents];
 }
 
 -(void)stopObserving {
@@ -111,21 +117,41 @@ RCT_EXPORT_METHOD(reportCallVideoMuted: (NSString*)conferenceId
 }
 
 - (void)sendCallAnswered:(NSString*)serverId channelId:(NSString*)channelId conferenceJWT:(NSString*)conferenceJWT {
-  if (hasListeners) {
-    [self sendEventWithName:@"CallAnswered" body:@{
-      @"serverId": serverId,
-      @"channelId": channelId,
-      @"conferenceJWT": conferenceJWT,
-    }];
-  }
+  [self dispatchEventWithName:@"CallAnswered" body:@{
+    @"serverId": serverId,
+    @"channelId": channelId,
+    @"conferenceJWT": conferenceJWT,
+  }];
 }
 
 - (void)sendCallEnded:(NSString*)serverId conferenceId:(NSString*)conferenceId {
-  if (hasListeners) {
-    [self sendEventWithName:@"CallEnded" body:@{
-      @"serverId": serverId,
-      @"conferenceId": conferenceId,
-    }];
+  [self dispatchEventWithName:@"CallEnded" body:@{
+    @"serverId": serverId,
+    @"conferenceId": conferenceId,
+  }];
+}
+
+// Sends immediately when JS is listening, otherwise queues the event until
+// startObserving. Dropping CallAnswered/CallEnded here would strand the user
+// in a call with no in-app UI (no way to hang up) after a cold-start answer.
+- (void)dispatchEventWithName:(NSString*)name body:(NSDictionary*)body {
+  @synchronized (self) {
+    if (!hasListeners) {
+      [pendingEvents addObject:@{@"name": name, @"body": body}];
+      return;
+    }
+  }
+  [self sendEventWithName:name body:body];
+}
+
+- (void)flushPendingEvents {
+  NSArray<NSDictionary *> *queued;
+  @synchronized (self) {
+    queued = [pendingEvents copy];
+    [pendingEvents removeAllObjects];
+  }
+  for (NSDictionary *event in queued) {
+    [self sendEventWithName:event[@"name"] body:event[@"body"]];
   }
 }
 
