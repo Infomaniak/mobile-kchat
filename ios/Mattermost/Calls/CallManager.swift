@@ -58,6 +58,15 @@ public class CallManager: NSObject {
   // Cancellations received before the VoIP push registered the call in currentCalls
   private var pendingCancellations = [String: CXCallEndedReason]() // channelId → reason
 
+  // Native→JS events emitted before CallManagerModule was instantiated by the
+  // RN bridge (lazy init under the new architecture). Replayed when the module registers.
+  private struct PendingNativeEvent {
+    let send: (CallManagerModule) -> Void
+  }
+
+  private let nativeEventLock = NSLock()
+  private var pendingNativeEvents: [PendingNativeEvent] = []
+
   @objc public private(set) var token: String?
 
   override private init() {
@@ -253,11 +262,13 @@ public class CallManager: NSObject {
       return
     }
 
-    CallManagerModule.callManagerSharedInstance()?.sendCallAnswered(
-      serverId,
-      channelId: call.channelId,
-      conferenceJWT: conferenceJWT
-    )
+    sendNativeEvent { module in
+      module.sendCallAnswered(
+        serverId,
+        channelId: call.channelId,
+        conferenceJWT: conferenceJWT
+      )
+    }
   }
 
   private func emitCallEnded(call: MeetCall) {
@@ -266,10 +277,39 @@ public class CallManager: NSObject {
       return
     }
 
-    CallManagerModule.callManagerSharedInstance()?.sendCallEnded(
-      serverId,
-      conferenceId: conferenceId
-    )
+    sendNativeEvent { module in
+      module.sendCallEnded(
+        serverId,
+        conferenceId: conferenceId
+      )
+    }
+  }
+
+  /// Sends a native→JS event through CallManagerModule, queueing it if the
+  /// module hasn't been instantiated by the RN bridge yet (cold start).
+  private func sendNativeEvent(_ send: @escaping (CallManagerModule) -> Void) {
+    nativeEventLock.lock()
+    if let module = CallManagerModule.callManagerSharedInstance() {
+      nativeEventLock.unlock()
+      send(module)
+      return
+    }
+    pendingNativeEvents.append(PendingNativeEvent(send: send))
+    nativeEventLock.unlock()
+  }
+
+  /// Called by CallManagerModule on init so events queued before the bridge
+  /// booted can be replayed (the module then queues them again until JS listeners attach).
+  @objc public func nativeModuleDidInitialize() {
+    nativeEventLock.lock()
+    defer { nativeEventLock.unlock() }
+
+    // Replay under the lock so a concurrent emit can't overtake queued events
+    guard let module = CallManagerModule.callManagerSharedInstance() else { return }
+    for event in pendingNativeEvents {
+      event.send(module)
+    }
+    pendingNativeEvents.removeAll()
   }
 }
 

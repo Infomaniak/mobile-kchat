@@ -15,24 +15,12 @@ type MathViewProps = {
     errorStyle?: StyleProp<ViewStyle>;
 }
 
-type ContentSizeChangeEvent = {
-    nativeEvent: {
-        width: number;
-        height: number;
-    };
-}
-
 const MathView = ({latexCode, fontSize = 14, displayMode = true, style, errorStyle}: MathViewProps) => {
     const theme = useTheme();
     const [renderError, setRenderError] = useState<string | null>(null);
-    const [size, setSize] = useState<{width: number; height: number} | null>(null);
 
     const handleError = useCallback((e: {nativeEvent: {error: string}}) => {
         setRenderError(e.nativeEvent.error);
-    }, []);
-
-    const onContentSizeChange = useCallback(({nativeEvent}: ContentSizeChangeEvent) => {
-        setSize(nativeEvent);
     }, []);
 
     if (renderError) {
@@ -41,12 +29,11 @@ const MathView = ({latexCode, fontSize = 14, displayMode = true, style, errorSty
 
     return (
         <RaTeXView
-            onContentSizeChange={onContentSizeChange}
             latex={latexCode}
             color={theme.centerChannelColor}
             fontSize={fontSize}
             displayMode={displayMode}
-            style={[style, size]}
+            style={style}
             onError={handleError}
         />
     );

@@ -344,8 +344,10 @@ const CallScreen = ({
     const leaveCallRef = useTransientRef((leaveInitiator: 'api' | 'internal' | 'native' = 'internal') => {
         // The <JitsiMeeting /> component is mounted (and joins) as soon as the channel
         // is loaded, even while the calling screen overlay is displayed: "inside the
-        // call" means the conference interface has actually been displayed
-        const isUserInsideCall = meetingDisplayedRef.current;
+        // call" means the conference interface has actually been displayed, i.e. the
+        // meeting UI is shown AND onConferenceJoined has fired. Until then, hanging up
+        // must cancel the call rather than silently no-op
+        const isUserInsideCall = meetingDisplayedRef.current && typeof jitsiMeetingMountedAtRef.current === 'number';
 
         if (
             mountedRef.current &&
