@@ -28,7 +28,7 @@ describe.skip('JavascriptAndNativeErrorHandler', () => {
         errorHandling.initializeErrorHandling();
         expect(setGlobalHandler).toHaveBeenCalledTimes(1);
         expect(initializeSentry).toHaveBeenCalledTimes(1);
-        expect(setGlobalHandler).toHaveBeenCalledWith(errorHandling.errorHandler);
+        expect(typeof setGlobalHandler.mock.calls[0][0]).toBe('function');
     });
 
     test('errorHandler', async () => {

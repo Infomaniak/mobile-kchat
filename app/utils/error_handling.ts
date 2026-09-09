@@ -32,7 +32,14 @@ const messages = defineMessages({
 class JavascriptAndNativeErrorHandlerSingleton {
     initializeErrorHandling = () => {
         initializeSentry();
-        ErrorUtils.setGlobalHandler(this.errorHandler);
+
+        // Chain the previously-installed handler so RN's own handling (dev RedBox,
+        // fatal-crash reporting) still runs, as react-native-exception-handler did
+        const previousHandler = ErrorUtils.getGlobalHandler();
+        ErrorUtils.setGlobalHandler((e, isFatal) => {
+            this.errorHandler(e, isFatal ?? false);
+            previousHandler?.(e, isFatal);
+        });
     };
 
     errorHandler = (e: unknown, isFatal: boolean) => {
