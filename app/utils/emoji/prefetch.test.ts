@@ -13,7 +13,7 @@ import type {Client} from '@client/rest';
 
 jest.mock('expo-image', () => ({
     Image: {
-        prefetch: jest.fn(),
+        prefetch: jest.fn(() => Promise.resolve()),
     },
 }));
 
@@ -59,9 +59,21 @@ describe('prefetchCustomEmojiImages', () => {
         Platform.OS = 'android';
 
         prefetchCustomEmojiImages(mockClient, emojis);
-        const expectedUrls = ['url/emoji1', 'url/emoji2'];
+        const expectedSources = [{uri: 'url/emoji1'}, {uri: 'url/emoji2'}];
 
         expect(logDebug).toHaveBeenCalledWith('Prefetching 2 custom emoji images');
-        expect(ExpoImage.prefetch).toHaveBeenCalledWith(expectedUrls, {cachePolicy: 'disk'});
+        expect(ExpoImage.prefetch).toHaveBeenCalledWith(expectedSources, {cachePolicy: 'disk'});
+    });
+
+    it('should not break the calling flow when prefetch rejects', async () => {
+        Platform.OS = 'ios';
+        const error = new Error('prefetchWithSources is not available');
+        (ExpoImage.prefetch as jest.Mock).mockRejectedValueOnce(error);
+
+        prefetchCustomEmojiImages(mockClient, emojis);
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(logDebug).toHaveBeenCalledWith('prefetchCustomEmojiImages: failed to prefetch images', String(error));
     });
 });
