@@ -24,11 +24,19 @@ describe.skip('JavascriptAndNativeErrorHandler', () => {
 
     test('Initialization', () => {
         const setGlobalHandler = jest.spyOn(ErrorUtils, 'setGlobalHandler');
+        const previousHandler = jest.fn();
+        jest.spyOn(ErrorUtils, 'getGlobalHandler').mockReturnValue(previousHandler);
         const initializeSentry = jest.spyOn(Sentry, 'initializeSentry');
         errorHandling.initializeErrorHandling();
         expect(setGlobalHandler).toHaveBeenCalledTimes(1);
         expect(initializeSentry).toHaveBeenCalledTimes(1);
-        expect(typeof setGlobalHandler.mock.calls[0][0]).toBe('function');
+        const wrappedHandler = setGlobalHandler.mock.calls[0][0] as (e: unknown, isFatal: boolean) => void;
+
+        // The installed wrapper must chain both ways: our handler and the previous one
+        const thrown = new Error('boom');
+        wrappedHandler(thrown, false);
+        expect(warning).toHaveBeenCalledWith('Handling Javascript error', thrown, false);
+        expect(previousHandler).toHaveBeenCalledWith(thrown, false);
     });
 
     test('errorHandler', async () => {
