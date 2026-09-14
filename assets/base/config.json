@@ -15,6 +15,7 @@
     "SentryEnabled": false,
     "SentryDsnIos": "",
     "SentryDsnAndroid": "",
+    "SentryEnvironment": "production",
     "SentryOptions": {
         "deactivateStacktraceMerging": true,
         "autoBreadcrumbs": {

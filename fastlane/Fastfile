@@ -191,6 +191,7 @@ lane :configure do
     json['SentryProjectAndroid'] = ENV['SENTRY_PROJECT_ANDROID']
     json['SentryDsnIos'] = ENV['SENTRY_DSN_IOS']
     json['SentryDsnAndroid'] = ENV['SENTRY_DSN_ANDROID']
+    json['SentryEnvironment'] = ENV['SENTRY_ENVIRONMENT'] || 'production'
   end
 
   # Configure show app review
