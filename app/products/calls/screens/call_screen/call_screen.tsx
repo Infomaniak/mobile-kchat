@@ -84,6 +84,16 @@ const HButton = HangupButton as unknown as ComponentType<{onPress: () => void}>;
 const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
     flex: {flex: 1},
     wrapper: {flex: 1},
+
+    /** Opaque overlay covering the meeting while loading/calling screens are shown */
+    overlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: '#000',
+    },
     container: {
         flex: 1,
         alignItems: 'center',
@@ -149,7 +159,7 @@ const CallScreen = ({
     channelId,
     conferenceId,
     conferenceJWT,
-    conferenceURL,
+    conferenceURL: _conferenceURL,
     answered,
     initiator,
     serverUrl,
@@ -262,6 +272,12 @@ const CallScreen = ({
     const shouldDisplayLoadingScreen = typeof channel === 'undefined';
 
     /**
+     * Latch the first display of the conference interface: the "Calling..." screen
+     * must never come back once the meeting has been displayed
+     */
+    const meetingDisplayedRef = useRef(false);
+
+    /**
      * The "Calling..." screen should only be displayed if :
      *  - the current channel is a DM
      *  - the current user is the call initiator (the caller)
@@ -272,16 +288,7 @@ const CallScreen = ({
         isDMorGM &&
         isCurrentUserInitiator &&
         !hasAtLeastOneParticipantPresent &&
-        jitsiMeetingMountedRef.current === false
-    );
-
-    /**
-     * iOS must handle calling screen natively
-     */
-    const shouldDisplayNativeCall = (
-        !shouldDisplayLoadingScreen &&
-        !shouldDisplayCallingScreen &&
-        Platform.OS === 'ios'
+        meetingDisplayedRef.current === false
     );
 
     /**
@@ -335,7 +342,12 @@ const CallScreen = ({
      */
     const leavingRef = useRef(false);
     const leaveCallRef = useTransientRef((leaveInitiator: 'api' | 'internal' | 'native' = 'internal') => {
-        const isUserInsideCall = jitsiMeetingMountedRef.current;
+        // The <JitsiMeeting /> component is mounted (and joins) as soon as the channel
+        // is loaded, even while the calling screen overlay is displayed: "inside the
+        // call" means the conference interface has actually been displayed, i.e. the
+        // meeting UI is shown AND onConferenceJoined has fired. Until then, hanging up
+        // must cancel the call rather than silently no-op
+        const isUserInsideCall = meetingDisplayedRef.current && typeof jitsiMeetingMountedAtRef.current === 'number';
 
         if (
             mountedRef.current &&
@@ -414,6 +426,12 @@ const CallScreen = ({
             // Update the jitsiMeetingMountedAtRef date
             jitsiMeetingMountedRef.current = true;
             jitsiMeetingMountedAtRef.current = Date.now();
+
+            // The <JitsiMeeting /> is mounted while the calling screen overlay may
+            // still be displayed: re-apply the mute states the user could have
+            // toggled between the mount (where the config is frozen) and the join
+            jitsiMeetingRef.current?.setAudioMuted?.(audioMutedRef.current);
+            jitsiMeetingRef.current?.setVideoMuted?.(videoMutedRef.current);
 
             // Report that the call started only if the initiator is not native
             //  -> 'internal' initiator means react-native
@@ -536,166 +554,168 @@ const CallScreen = ({
         }
     }, [leaveCallRef, shouldLeaveCall]);
 
-    /**
-     * Trigger the native iOS calling screen
-     */
+    // Latch the conference interface as displayed: never go back to the calling screen
     useEffect(() => {
-        if (shouldDisplayNativeCall) {
-            (async () => {
-                const callName = await CallManager.getCallName(serverUrl, channel, currentUserId!);
-                CallManager.nativeReporters.ios.callStarted(serverUrl, channelId, callName, conferenceId, conferenceJWT, conferenceURL);
-            })();
+        if (!shouldDisplayLoadingScreen && !shouldDisplayCallingScreen) {
+            meetingDisplayedRef.current = true;
         }
-    }, [channel, channelId, conferenceId, conferenceJWT, conferenceURL, currentUserId, serverUrl, shouldDisplayNativeCall]);
+    }, [shouldDisplayCallingScreen, shouldDisplayLoadingScreen]);
 
-    if (
-        shouldDisplayLoadingScreen ||
-        shouldDisplayCallingScreen ||
-        shouldDisplayNativeCall
-    ) {
-        return (
-            <>
-                <NavigationHeader
-                    isLargeTitle={true}
-                    showBackButton={true}
-                    onBackPress={eventListeners.onReadyToClose}
-                    hasSearch={false}
-                    title={formatMessage({id: 'screen.call.calling', defaultMessage: 'Call in progress'})}
-                    subtitle={hasCallName ? `${callNameRef.current}${isDMorGM ? '' : ` (${participantCountString})`}` : '...'}
-                    scrollValue={scrollValue}
-                />
-                <SafeAreaView
-                    style={styles.flex}
-                    edges={EDGES}
-                >
-                    <View style={paddingTop}>
-                        {/* Recipient avatar */}
-                        <View style={styles.container}>
-                            {
-                                (shouldDisplayLoadingScreen || typeof recipient === 'undefined') ? (
-                                    <ActivityIndicator
-                                        color='white'
-                                        size='large'
-                                    />
-                                ) : (
-                                    <>
-                                        <RippleIcon/>
-                                        <Image
-                                            author={recipient}
-                                            iconSize={48}
-                                            size={178}
-                                            url={serverUrl}
-                                        />
-                                    </>
-                                )
-                            }
-                        </View>
-
-                        {/* Toolbox buttons */}
-                        {
-                            !shouldDisplayLoadingScreen &&
-
-                            // <ContentContainer aspectRatio={isWide ? 'wide' : 'narrow'}>
-                            <ContentContainer>
-                                <ToolboxContainer>
-                                    <MuteButton
-                                        audioMuted={audioMuted}
-                                        disabled={!micPermissionsGranted}
-                                        onPress={toggleAudioMuted}
-                                    />
-                                    <VButton
-                                        videoMuted={videoMuted}
-                                        disabled={false}
-                                        onPress={toggleVideoMuted}
-                                    />
-                                    <HButton
-                                        onPress={() => {
-                                            leaveCall('internal');
-                                        }}
-                                    />
-                                </ToolboxContainer>
-                            </ContentContainer>
-                        }
-                    </View>
-                </SafeAreaView>
-
-                {/* Trigger ringtone */}
-                <Sound
-                    play={!shouldDisplayLoadingScreen}
-                    soundName={isCurrentUserInitiator ? 'outgoingRinging.mp3' : 'ring.mp3'}
-                />
-            </>
-        );
-    }
+    /**
+     * The <JitsiMeeting /> component is mounted as soon as the channel data is
+     * available and stays mounted for the lifetime of this screen. Unmounting and
+     * remounting it mid-call would create a second embedded Jitsi app joining the
+     * same conference twice, so the loading and calling screens are displayed as
+     * overlays on top of it instead of replacing it.
+     */
+    const showMeeting = !shouldDisplayLoadingScreen;
 
     return (
-        <FrozenJitsiMeeting
-            ref={jitsiMeetingRef}
+        <View style={styles.wrapper}>
+            {showMeeting && (
+                <FrozenJitsiMeeting
+                    ref={jitsiMeetingRef}
 
-            // Ref. https://github.com/jitsi/jitsi-meet/blob/master/config.js
-            config={{
-                subject: 'kMeet',
-                disableModeratorIndicator: true,
+                    // Ref. https://github.com/jitsi/jitsi-meet/blob/master/config.js
+                    config={{
+                        subject: 'kMeet',
+                        disableModeratorIndicator: true,
 
-                // Start calls with audio muted
-                // https://github.com/jitsi/jitsi-meet/blob/0913554af97e91f14b5a63ce8c8579755f1405a7/config.js#L187
-                startAudioMuted: 9999,
-                startWithAudioMuted: audioMuted,
+                        // Start calls with audio muted
+                        // https://github.com/jitsi/jitsi-meet/blob/0913554af97e91f14b5a63ce8c8579755f1405a7/config.js#L187
+                        startAudioMuted: 9999,
+                        startWithAudioMuted: audioMuted,
 
-                // Start calls with video muted
-                // https://github.com/jitsi/jitsi-meet/blob/0913554af97e91f14b5a63ce8c8579755f1405a7/config.js#L290
-                startVideoMuted: 9999,
-                startWithVideoMuted: videoMuted,
-            }}
+                        // Start calls with video muted
+                        // https://github.com/jitsi/jitsi-meet/blob/0913554af97e91f14b5a63ce8c8579755f1405a7/config.js#L290
+                        startVideoMuted: 9999,
+                        startWithVideoMuted: videoMuted,
+                    }}
 
-            token={conferenceJWT}
+                    token={conferenceJWT}
 
-            /**
-             * Setup the JitsiMeeting event listeners
-             * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#eventlisteners
-             */
-            eventListeners={eventListeners}
+                    /**
+                     * Setup the JitsiMeeting event listeners
+                     * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#eventlisteners
+                     */
+                    eventListeners={eventListeners}
 
-            // Ref. https://github.com/jitsi/jitsi-meet/blob/master/react/features/base/flags/constants.ts
-            flags={{
+                    // Ref. https://github.com/jitsi/jitsi-meet/blob/master/react/features/base/flags/constants.ts
+                    flags={{
 
-                // Prevent inviting new peoples
-                'add-people.enabled': false,
-                'invite.enabled': false,
-                'invite-dial-in.enabled': false,
+                        // Prevent inviting new peoples
+                        'add-people.enabled': false,
+                        'invite.enabled': false,
+                        'invite-dial-in.enabled': false,
 
-                // Do not display meeting name
-                'meeting-name.enabled': false,
+                        // Do not display meeting name
+                        'meeting-name.enabled': false,
 
-                /**
-                 * For DM channels : Join immediatly like you would when answering a call
-                 * For other channels : Ask if the user wants to enable his audio/video, but only if it's not the one that created the conference
-                 */
-                'prejoinpage.enabled': !isDMorGM && !isCurrentUserInitiator,
+                        /**
+                         * For DM channels : Join immediatly like you would when answering a call
+                         * For other channels : Ask if the user wants to enable his audio/video, but only if it's not the one that created the conference
+                         */
+                        'prejoinpage.enabled': !isDMorGM && !isCurrentUserInitiator,
 
-                // Disable breakout-rooms
-                'breakout-rooms.enabled': false,
+                        // Disable breakout-rooms
+                        'breakout-rooms.enabled': false,
 
-                // 'lobby-mode.enabled': false,
-                // 'server-url-change.enabled': false,
+                        // 'lobby-mode.enabled': false,
+                        // 'server-url-change.enabled': false,
 
-                // Disable CallKit
-                'call-integration.enabled': false,
+                        // Disable CallKit
+                        'call-integration.enabled': false,
 
-                // Disable screensharing on android
-                'android.screensharing.enabled': false,
+                        // Disable screensharing on android
+                        'android.screensharing.enabled': false,
 
-                // Disable live streaming - Same as kMeet
-                'live-streaming.enabled': false,
+                        // Disable live streaming - Same as kMeet
+                        'live-streaming.enabled': false,
 
-                // Disable video share - Same as kMeet
-                'video-share.enabled': false,
-            }}
-            style={styles.flex}
-            room={channelId}
-            serverURL={kMeetServerUrl}
-            userInfo={userInfo}
-        />
+                        // Disable video share - Same as kMeet
+                        'video-share.enabled': false,
+                    }}
+                    style={styles.flex}
+                    room={channelId}
+                    serverURL={kMeetServerUrl}
+                    userInfo={userInfo}
+                />
+            )}
+
+            {(shouldDisplayLoadingScreen || shouldDisplayCallingScreen) && (
+                <View style={styles.overlay}>
+                    <NavigationHeader
+                        isLargeTitle={true}
+                        showBackButton={true}
+                        onBackPress={eventListeners.onReadyToClose}
+                        hasSearch={false}
+                        title={formatMessage({id: 'screen.call.calling', defaultMessage: 'Call in progress'})}
+                        subtitle={hasCallName ? `${callNameRef.current}${isDMorGM ? '' : ` (${participantCountString})`}` : '...'}
+                        scrollValue={scrollValue}
+                    />
+                    <SafeAreaView
+                        style={styles.flex}
+                        edges={EDGES}
+                    >
+                        <View style={paddingTop}>
+                            {/* Recipient avatar */}
+                            <View style={styles.container}>
+                                {
+                                    (shouldDisplayLoadingScreen || typeof recipient === 'undefined') ? (
+                                        <ActivityIndicator
+                                            color='white'
+                                            size='large'
+                                        />
+                                    ) : (
+                                        <>
+                                            <RippleIcon/>
+                                            <Image
+                                                author={recipient}
+                                                iconSize={48}
+                                                size={178}
+                                                url={serverUrl}
+                                            />
+                                        </>
+                                    )
+                                }
+                            </View>
+
+                            {/* Toolbox buttons */}
+                            {
+                                !shouldDisplayLoadingScreen &&
+
+                                // <ContentContainer aspectRatio={isWide ? 'wide' : 'narrow'}>
+                                <ContentContainer>
+                                    <ToolboxContainer>
+                                        <MuteButton
+                                            audioMuted={audioMuted}
+                                            disabled={!micPermissionsGranted}
+                                            onPress={toggleAudioMuted}
+                                        />
+                                        <VButton
+                                            videoMuted={videoMuted}
+                                            disabled={false}
+                                            onPress={toggleVideoMuted}
+                                        />
+                                        <HButton
+                                            onPress={() => {
+                                                leaveCall('internal');
+                                            }}
+                                        />
+                                    </ToolboxContainer>
+                                </ContentContainer>
+                            }
+                        </View>
+                    </SafeAreaView>
+
+                    {/* Trigger ringtone */}
+                    <Sound
+                        play={!shouldDisplayLoadingScreen}
+                        soundName={isCurrentUserInitiator ? 'outgoingRinging.mp3' : 'ring.mp3'}
+                    />
+                </View>
+            )}
+        </View>
     );
 };
 

@@ -1,28 +1,40 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useId, useMemo} from 'react';
-import RNMathView from 'react-native-math-view';
+import {RaTeXView} from 'ratex-react-native';
+import React, {useCallback, useState} from 'react';
+import {Text, type StyleProp, type ViewStyle} from 'react-native';
 
-import type {StyleProp, TextStyle, ViewStyle} from 'react-native';
+import {useTheme} from '@context/theme';
 
-// From node_modules/react-native-math-view/src/common.tsx
-type Props = {
-    math: string;
-    onError?: (error: Error) => any;
-    renderError: ({error}: {error: Error}) => React.JSX.Element;
-    resizeMode: 'cover' | 'contain';
-    style: StyleProp<ViewStyle & Pick<TextStyle, 'color'>>;
+type MathViewProps = {
+    latexCode: string;
+    fontSize?: number;
+    displayMode?: boolean;
+    style?: StyleProp<ViewStyle>;
+    errorStyle?: StyleProp<ViewStyle>;
 }
 
-const MathView = (props: Props) => {
-    const id = useId();
-    const config = useMemo(() => ({id}), [id]);
+const MathView = ({latexCode, fontSize = 14, displayMode = true, style, errorStyle}: MathViewProps) => {
+    const theme = useTheme();
+    const [renderError, setRenderError] = useState<string | null>(null);
+
+    const handleError = useCallback((e: {nativeEvent: {error: string}}) => {
+        setRenderError(e.nativeEvent.error);
+    }, []);
+
+    if (renderError) {
+        return <Text style={errorStyle}>{'Render error: ' + renderError}</Text>;
+    }
 
     return (
-        <RNMathView
-            {...props}
-            config={config}
+        <RaTeXView
+            latex={latexCode}
+            color={theme.centerChannelColor}
+            fontSize={fontSize}
+            displayMode={displayMode}
+            style={style}
+            onError={handleError}
         />
     );
 };

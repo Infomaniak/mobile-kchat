@@ -477,7 +477,7 @@ jest.mock('react-native-localize', () => ({
     ]),
 }));
 
-jest.mock('@react-native-cookies/cookies', () => ({
+jest.mock('@preeternal/react-native-cookie-manager', () => ({
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
     openURL: jest.fn(),
@@ -644,6 +644,14 @@ jest.mock('react-native-nitro-sound', () => ({
         removeRecordBackListener: jest.fn(),
     })),
 }));
+
+jest.mock('ratex-react-native', () => {
+    const React = require('react');
+    return {
+        RaTeXView: 'RaTeXView',
+        RaTeXColorContext: React.createContext({}),
+    };
+});
 
 jest.mock('@mattermost/react-native-paste-input', () => {
     const React = require('react');

@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import CookieManager from '@react-native-cookies/cookies';
+import CookieManager from '@preeternal/react-native-cookie-manager';
 import {useEffect, useMemo, useState} from 'react';
 import RNRestart from 'react-native-restart';
 

@@ -46,7 +46,8 @@ module.exports = {
         '@sayem314/react-native-keep-awake|' +
         '@jitsi/react-native-sdk|' +
         'pusher-js|' +
-        'react-native-get-random-values' +
+        'react-native-get-random-values|' +
+        'ratex-react-native' +
         ')',
     ],
 };
