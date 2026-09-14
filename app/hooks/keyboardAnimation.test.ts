@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {renderHook, act} from '@testing-library/react-hooks';
+import {renderHook, act} from '@testing-library/react-native';
 import {useKeyboardHandler} from 'react-native-keyboard-controller';
 
 import {BOTTOM_TAB_HEIGHT} from '@constants/view';

@@ -64,7 +64,7 @@ const CategoriesList = ({
     const tabletWidth = useSharedValue(isTablet ? getTabletWidth(moreThanOneTeam) : 0);
     const [activeScreen, setActiveScreen] = useState<ScreenType>(isTablet && lastChannelId === Screens.GLOBAL_DRAFTS ? DRAFT : CHANNEL);
     const [showLoadError, setShowLoadError] = useState(false);
-    const loadErrorTimer = useRef<ReturnType<typeof setTimeout>>();
+    const loadErrorTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     useEffect(() => {
         if (hasChannels) {

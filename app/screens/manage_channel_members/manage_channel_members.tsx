@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {useNavigation} from 'expo-router';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {defineMessages, useIntl} from 'react-intl';
 import {DeviceEventEmitter, Keyboard, Platform, StyleSheet, View} from 'react-native';
@@ -10,6 +11,7 @@ import {fetchChannelMemberships} from '@actions/remote/channel';
 import {fetchGroupsForChannel} from '@actions/remote/groups';
 import {fetchUsersByIds, searchProfiles} from '@actions/remote/user';
 import {PER_PAGE_DEFAULT} from '@client/rest/constants';
+import NavigationButton from '@components/navigation_button';
 import Search from '@components/search';
 import SectionNotice from '@components/section_notice';
 import UserList from '@components/user_list';
@@ -19,8 +21,7 @@ import {useTheme} from '@context/theme';
 import {useAccessControlAttributes} from '@hooks/access_control_attributes';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useDidMount from '@hooks/did_mount';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import {openAsBottomSheet, popTopScreen, setButtons} from '@screens/navigation';
+import {openAsBottomSheet, popTopScreen} from '@screens/navigation';
 import NavigationStore from '@store/navigation_store';
 import {showRemoveChannelUserSnackbar} from '@utils/snack_bar';
 import {changeOpacity, getKeyboardAppearanceFromTheme} from '@utils/theme';
@@ -73,7 +74,6 @@ const sortUsers = (a: UserProfile, b: UserProfile, locale: string, teammateDispl
     return aName.localeCompare(bName, locale);
 };
 
-const MANAGE_BUTTON = 'manage-button';
 const EMPTY: UserProfile[] = [];
 const EMPTY_MEMBERS: ChannelMembership[] = [];
 const EMPTY_IDS = new Set<string>();
@@ -94,6 +94,7 @@ export default function ManageChannelMembers({
 }: Props) {
     const serverUrl = useServerUrl();
     const theme = useTheme();
+    const navigation = useNavigation();
     const {formatMessage, locale} = useIntl();
 
     const searchTimeoutId = useRef<NodeJS.Timeout | null>(null);
@@ -182,23 +183,9 @@ export default function ManageChannelMembers({
         }, General.SEARCH_TIMEOUT_MILLISECONDS);
     }, [searchUsers, clearSearch]);
 
-    const updateNavigationButtons = useCallback((manage: boolean) => {
-        setButtons(componentId, {
-            rightButtons: [{
-                color: theme.sidebarHeaderTextColor,
-                enabled: true,
-                id: MANAGE_BUTTON,
-                showAsAction: 'always',
-                testID: `${TEST_ID}.button`,
-                text: formatMessage(manage ? messages.button_done : messages.button_manage),
-            }],
-        });
-    }, [componentId, formatMessage, theme.sidebarHeaderTextColor]);
-
     const toggleManageEnabled = useCallback(() => {
-        updateNavigationButtons(!isManageMode);
         setIsManageMode((prev) => !prev);
-    }, [isManageMode, updateNavigationButtons]);
+    }, []);
 
     const handleRemoveUser = useCallback(async (userId: string) => {
         const pIndex = profiles.findIndex((user) => user.id === userId);
@@ -246,8 +233,6 @@ export default function ManageChannelMembers({
         }
     }, [hasTerm]);
 
-    useNavButtonPressed(MANAGE_BUTTON, componentId, toggleManageEnabled, [toggleManageEnabled]);
-
     const getFetchChannelMembers = useCallback(async () => {
         const options: GetUsersOptions = {sort: 'admin', active: true, per_page: PER_PAGE_DEFAULT, page: pageRef.current};
         const {users, members} = await fetchChannelMemberships(serverUrl, channelId, options, true);
@@ -287,13 +272,17 @@ export default function ManageChannelMembers({
     });
 
     useEffect(() => {
-        if (canManageAndRemoveMembers) {
-            updateNavigationButtons(false);
-        }
-
-        // We only want to update the navigation buttons when the permission changes
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [canManageAndRemoveMembers]);
+        navigation.setOptions({
+            headerRight: canManageAndRemoveMembers ? () => (
+                <NavigationButton
+                    onPress={toggleManageEnabled}
+                    text={formatMessage(isManageMode ? messages.button_done : messages.button_manage)}
+                    testID={`${TEST_ID}.button`}
+                    color={theme.sidebarHeaderTextColor}
+                />
+            ) : undefined,
+        });
+    }, [navigation, canManageAndRemoveMembers, toggleManageEnabled, isManageMode, formatMessage, theme.sidebarHeaderTextColor]);
 
     const refetchMembers = useCallback(() => {
         pageRef.current = 0;

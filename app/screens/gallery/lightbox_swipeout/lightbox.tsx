@@ -30,8 +30,8 @@ export interface RenderItemInfo {
 
 interface LightboxProps {
     children: React.ReactNode;
-    renderBackdropComponent?: (info: BackdropProps) => JSX.Element;
-    renderItem: (info: RenderItemInfo) => JSX.Element | null;
+    renderBackdropComponent?: (info: BackdropProps) => React.JSX.Element;
+    renderItem: (info: RenderItemInfo) => React.JSX.Element | null;
     sharedValues: GalleryManagerSharedValues;
     source: ImageSource | string;
 }
@@ -61,7 +61,7 @@ export default function Lightbox({
         targetDimensions,
     } = useLightboxSharedValues();
     const [renderChildren, setRenderChildren] = useState<boolean>(false);
-    const childLayoutTimeoutRef = React.useRef<NodeJS.Timeout>();
+    const childLayoutTimeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
     const animateOnMount = () => {
         'worklet';

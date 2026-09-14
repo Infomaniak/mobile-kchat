@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import PasteInput, {type PasteInputRef} from '@mattermost/react-native-paste-input';
+import PasteInput, {type PasteTextInputInstance} from '@mattermost/react-native-paste-input';
 import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
 import {type NativeSyntheticEvent, Platform, type TextInputSelectionChangeEventData, View} from 'react-native';
@@ -44,7 +44,7 @@ type PostInputProps = {
     version?: string;
     onTextSelectionChange: (curPos: number) => void;
     onChangeText: (text: string) => void;
-    inputRef: React.MutableRefObject<PasteInputRef | undefined>;
+    inputRef: React.MutableRefObject<PasteTextInputInstance | null>;
     addFiles: (file: FileInfo[]) => void;
 }
 

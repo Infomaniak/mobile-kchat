@@ -28,7 +28,7 @@ type Props = {
     teamId: string;
     thread?: ThreadModel;
     version?: string;
-    listRef: React.RefObject<FlatList<string | PostModel>>;
+    listRef: React.RefObject<FlatList<string | PostModel> | null>;
     onTouchMove?: (event: GestureResponderEvent) => void;
     onTouchEnd?: () => void;
 }

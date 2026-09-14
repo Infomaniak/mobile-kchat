@@ -51,7 +51,7 @@ export LC_ALL=en_US.UTF-8
 
 ```bash
 cd ios
-RCT_NEW_ARCH_ENABLED=0 arch -x86_64 pod install
+arch -x86_64 pod install
 ```
 
 ### Common CocoaPods Issues
@@ -65,7 +65,7 @@ RCT_NEW_ARCH_ENABLED=0 arch -x86_64 pod install
 cd ios
 rm -rf Pods Podfile.lock build
 export LANG=en_US.UTF-8 && export LC_ALL=en_US.UTF-8
-RCT_NEW_ARCH_ENABLED=0 arch -x86_64 pod install
+arch -x86_64 pod install
 ```
 
 #### Issue: GitHub SSH timeouts during pod install
@@ -141,7 +141,7 @@ rm -rf ~/Library/Developer/Xcode/DerivedData/Mattermost-*
 cd ios
 rm -rf Pods build
 export LANG=en_US.UTF-8 && export LC_ALL=en_US.UTF-8
-RCT_NEW_ARCH_ENABLED=0 arch -x86_64 pod install
+arch -x86_64 pod install
 ```
 
 ### Opening in Xcode
@@ -159,7 +159,7 @@ Then select your simulator target and press Cmd+B to build.
 ```bash
 # Full setup sequence (Apple Silicon)
 export LANG=en_US.UTF-8 && export LC_ALL=en_US.UTF-8
-cd ios && RCT_NEW_ARCH_ENABLED=0 arch -x86_64 pod install && cd ..
+cd ios && arch -x86_64 pod install && cd ..
 npm start &
 sleep 10
 npm run ios -- --simulator="iPhone 17 Pro"
@@ -169,4 +169,4 @@ npm run ios -- --simulator="iPhone 17 Pro"
 
 - **Git configuration:** Never permanently change git URL rewrites without reverting
 - **Podfile:** Don't add modular_headers to pods unless you understand the implications
-- **New Architecture:** Keep `RCT_NEW_ARCH_ENABLED=0` as the project uses the old architecture
+- **New Architecture:** Nothing to set: React Native 0.83 removed the old architecture, the New Architecture is always enabled

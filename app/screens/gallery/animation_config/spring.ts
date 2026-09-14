@@ -7,12 +7,10 @@ import type {WithSpringConfig} from 'react-native-reanimated';
 export const pagerPanSpringConfig = (evt: GestureStateChangeEvent<PanGestureHandlerEventPayload>) => {
     'worklet';
     return {
-        stiffness: Math.min(500, Math.max(100, Math.abs(evt.velocityX) * 10)), // 🔥 More velocity = less stiffness
-        damping: Math.max(20, Math.abs(evt.velocityX) * 0.2), // 🔥 More velocity = less damping
-        mass: 1.5, // 🔥 A little extra mass for smooth movement
-        overshootClamping: true, // 🔥 Prevents bounce
-        restDisplacementThreshold: 0.01,
-        restSpeedThreshold: 0.01,
+        stiffness: Math.min(500, Math.max(100, Math.abs(evt.velocityX) * 10)),
+        damping: Math.max(20, Math.abs(evt.velocityX) * 0.2),
+        mass: 1.5,
+        overshootClamping: true,
     };
 };
 
@@ -27,8 +25,6 @@ export function pagerSpringVelocityConfig(velocity: number): WithSpringConfig {
         stiffness,
         mass,
         damping: ratio * 2.0 * Math.sqrt(mass * stiffness),
-        restDisplacementThreshold: 1,
-        restSpeedThreshold: 5,
         velocity,
     };
 }
@@ -38,6 +34,4 @@ export const transformerSpringConfig: WithSpringConfig = {
     damping: 25,
     mass: 1,
     overshootClamping: true,
-    restDisplacementThreshold: 0.00001,
-    restSpeedThreshold: 0.00001,
 };

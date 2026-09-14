@@ -25,7 +25,7 @@ export default function BrowseChannelsRoute() {
     return (
         <BrowseChannelsScreen
             componentId={Screens.BROWSE_CHANNELS}
-            {...({closeButton: null, currentUserId: ''} as any)}
+            {...({currentUserId: ''} as any)}
         />
     );
 }

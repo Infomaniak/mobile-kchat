@@ -4,7 +4,7 @@
 import React, {createContext, useContext, useMemo, useRef, useCallback, type ReactNode} from 'react';
 import {useSharedValue, type SharedValue} from 'react-native-reanimated';
 
-import type {PasteInputRef} from '@mattermost/react-native-paste-input';
+import type {PasteTextInputInstance} from '@mattermost/react-native-paste-input';
 
 interface KeyboardAnimationContextType {
     keyboardTranslateY: SharedValue<number>;
@@ -14,7 +14,7 @@ interface KeyboardAnimationContextType {
     scrollPosition: SharedValue<number>;
     onScroll: (event: unknown) => void;
     postInputContainerHeight: number;
-    inputRef: React.MutableRefObject<PasteInputRef | undefined>;
+    inputRef: React.MutableRefObject<PasteTextInputInstance | null>;
     blurInput: () => void;
     focusInput: () => void;
     blurAndDismissKeyboard: () => Promise<void>;
@@ -75,7 +75,7 @@ export const useKeyboardAnimationContext = () => {
     const defaultIsKeyboardFullyOpen = useSharedValue(false);
     const defaultIsKeyboardFullyClosed = useSharedValue(true);
     const defaultIsKeyboardInTransition = useSharedValue(false);
-    const defaultInputRef = useRef<PasteInputRef | undefined>(undefined);
+    const defaultInputRef = useRef<PasteTextInputInstance | null>(null);
     const defaultIsInputAccessoryViewMode = useSharedValue(false);
     const defaultIsTransitioningFromCustomView = useSharedValue(false);
     const defaultInputAccessoryViewAnimatedHeight = useSharedValue(0);

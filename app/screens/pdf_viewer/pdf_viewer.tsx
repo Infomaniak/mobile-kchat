@@ -20,7 +20,6 @@ import {setFileAsBlocked} from '@actions/local/file';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {dismissModal} from '@screens/navigation';
 import {logError} from '@utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -51,7 +50,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
 }));
 
-const PdfViewer = ({allowPdfLinkNavigation, closeButtonId, componentId, fileId, filePath, onDismiss, siteURL}: Props) => {
+const PdfViewer = ({allowPdfLinkNavigation, componentId, fileId, filePath, onDismiss, siteURL}: Props) => {
     const theme = useTheme();
     const serverUrl = useServerUrl();
     const intl = useIntl();
@@ -122,7 +121,6 @@ const PdfViewer = ({allowPdfLinkNavigation, closeButtonId, componentId, fileId, 
         toggleNavbar(navBarVisible);
     }, [navBarVisible, toggleNavbar]);
 
-    useNavButtonPressed(closeButtonId, componentId, onClose, [onClose]);
     useAndroidHardwareBackHandler(componentId, onClose);
 
     const promptForPassword = (maxAttempts !== undefined && maxAttempts > 0);

@@ -9,6 +9,20 @@ import type {NetworkPerformanceState} from '@managers/network_performance_manage
 import type {NetInfoState} from '@react-native-community/netinfo';
 import type {IntlShape} from 'react-intl';
 
+type UseConnectionBannerParams = {
+    websocketState: WebsocketConnectedState;
+    networkPerformanceState: NetworkPerformanceState;
+    netInfo: NetInfoState;
+    appState: string;
+    intl: IntlShape;
+};
+
+type UseConnectionBannerReturn = {
+    visible: boolean;
+    bannerText: string;
+    isShowingConnectedBanner: boolean;
+};
+
 const createMockIntl = (): IntlShape => ({
     formatMessage: jest.fn(({defaultMessage}) => defaultMessage || ''),
     formatDate: jest.fn(),
@@ -195,7 +209,7 @@ describe('useConnectionBanner', () => {
 
     describe('state transitions', () => {
         it('should show connection restored banner on reconnection', async () => {
-            const {result, rerender} = renderHook(
+            const {result, rerender} = renderHook<UseConnectionBannerReturn, UseConnectionBannerParams>(
                 (props) => useConnectionBanner(props),
                 {
                     initialProps: {
@@ -234,7 +248,7 @@ describe('useConnectionBanner', () => {
         it('should auto-close connection restored banner after 2 seconds', () => {
             jest.useFakeTimers({doNotFake: ['nextTick']});
 
-            const {result, rerender} = renderHook(
+            const {result, rerender} = renderHook<UseConnectionBannerReturn, UseConnectionBannerParams>(
                 (props) => useConnectionBanner(props),
                 {
                     initialProps: {
@@ -278,7 +292,7 @@ describe('useConnectionBanner', () => {
         it('should reset connected banner state when network drops during auto-close window', () => {
             jest.useFakeTimers({doNotFake: ['nextTick']});
 
-            const {result, rerender} = renderHook(
+            const {result, rerender} = renderHook<UseConnectionBannerReturn, UseConnectionBannerParams>(
                 (props) => useConnectionBanner(props),
                 {
                     initialProps: {
@@ -324,7 +338,7 @@ describe('useConnectionBanner', () => {
         it('should show connection restored when internet recovers while websocket was already connected', () => {
             jest.useFakeTimers({doNotFake: ['nextTick']});
 
-            const {result, rerender} = renderHook(
+            const {result, rerender} = renderHook<UseConnectionBannerReturn, UseConnectionBannerParams>(
                 (props) => useConnectionBanner(props),
                 {
                     initialProps: {
@@ -382,7 +396,7 @@ describe('useConnectionBanner', () => {
         it('should hide banner when problem is resolved', () => {
             jest.useFakeTimers({doNotFake: ['nextTick']});
 
-            const {result, rerender} = renderHook(
+            const {result, rerender} = renderHook<UseConnectionBannerReturn, UseConnectionBannerParams>(
                 (props) => useConnectionBanner(props),
                 {
                     initialProps: {
@@ -485,7 +499,7 @@ describe('useConnectionBanner', () => {
 
     describe('app state changes', () => {
         it('should hide banner when app goes to background', async () => {
-            const {result, rerender} = renderHook(
+            const {result, rerender} = renderHook<UseConnectionBannerReturn, UseConnectionBannerParams>(
                 ({appState, ...rest}) => useConnectionBanner({
                     appState,
                     ...rest,
@@ -523,7 +537,7 @@ describe('useConnectionBanner', () => {
         });
 
         it('should show slow banner again when returning from background to active', async () => {
-            const {result, rerender} = renderHook(
+            const {result, rerender} = renderHook<UseConnectionBannerReturn, UseConnectionBannerParams>(
                 ({appState, ...rest}) => useConnectionBanner({
                     appState,
                     ...rest,
@@ -575,7 +589,7 @@ describe('useConnectionBanner', () => {
         });
 
         it('should not show connection restored banner when returning from background if websocket stayed connected', async () => {
-            const {result, rerender} = renderHook(
+            const {result, rerender} = renderHook<UseConnectionBannerReturn, UseConnectionBannerParams>(
                 ({appState, ...rest}) => useConnectionBanner({
                     appState,
                     ...rest,

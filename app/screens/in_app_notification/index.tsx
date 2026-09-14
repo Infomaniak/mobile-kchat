@@ -1,12 +1,14 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {Portal} from '@gorhom/portal';
 import {useNavigation} from 'expo-router';
 import React, {useCallback, useRef, useState} from 'react';
 import {DeviceEventEmitter, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {GestureDetector, Gesture, GestureHandlerRootView} from 'react-native-gesture-handler';
 import Animated, {runOnJS, useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 import {initialWindowMetrics} from 'react-native-safe-area-context';
+import {FullWindowOverlay} from 'react-native-screens';
 
 import {openNotification} from '@actions/remote/notifications';
 import {Navigation as NavigationTypes} from '@constants';
@@ -14,7 +16,7 @@ import DatabaseManager from '@database/manager';
 import {useIsTablet} from '@hooks/device';
 import useDidMount from '@hooks/did_mount';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {dismissOverlay} from '@screens/navigation';
+import InAppNotificationStore from '@store/in_app_notification_store';
 import {changeOpacity} from '@utils/theme';
 import {secureGetFromRecord} from '@utils/types';
 
@@ -22,11 +24,8 @@ import Icon from './icon';
 import Server from './server';
 import Title from './title';
 
-import type {AvailableScreens} from '@typings/screens/navigation';
-
 type InAppNotificationProps = {
-    componentId?: AvailableScreens;
-    notification?: NotificationWithData;
+    notification: NotificationWithData;
     serverName?: string;
     serverUrl?: string;
 }
@@ -69,7 +68,7 @@ const styles = StyleSheet.create({
     },
 });
 
-const InAppNotification = ({componentId, serverName, serverUrl, notification}: InAppNotificationProps) => {
+function InAppNotificationContent({serverName, serverUrl, notification}: InAppNotificationProps) {
     const navigation = useNavigation();
     const [animate, setAnimate] = useState(false);
     const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -92,10 +91,8 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
 
     const dismiss = useCallback(() => {
         cancelDismissTimer();
-        if (componentId) {
-            dismissOverlay(componentId);
-        }
-    }, [componentId]);
+        InAppNotificationStore.dismiss();
+    }, []);
 
     const notificationTapped = usePreventDoubleTap(useCallback(() => {
         tapped.current = true;
@@ -157,7 +154,7 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
                 <Animated.View
                     style={[styles.container, isTablet ? styles.tablet : undefined, animatedStyle]}
                     testID='in_app_notification.screen'
-                    nativeID={`${componentId}.screen`}
+                    nativeID='in_app_notification.screen'
                 >
                     <View style={styles.flex}>
                         <TouchableOpacity
@@ -195,6 +192,32 @@ const InAppNotification = ({componentId, serverName, serverUrl, notification}: I
             </GestureDetector>
         </GestureHandlerRootView>
     );
-};
+}
+
+function InAppNotification() {
+    const [state, setState] = useState(InAppNotificationStore.getState());
+
+    useDidMount(() => {
+        const sub = InAppNotificationStore.observe().subscribe(setState);
+        return () => sub.unsubscribe();
+    });
+
+    if (!state.visible || !state.notification) {
+        return null;
+    }
+
+    return (
+        <Portal hostName='notification'>
+            <FullWindowOverlay>
+                <InAppNotificationContent
+                    key={state.id}
+                    notification={state.notification}
+                    serverName={state.serverName}
+                    serverUrl={state.serverUrl}
+                />
+            </FullWindowOverlay>
+        </Portal>
+    );
+}
 
 export default InAppNotification;

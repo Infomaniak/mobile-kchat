@@ -123,7 +123,7 @@ export default function ChannelInfoForm({
 
     const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
 
-    const updateScrollTimeout = useRef<NodeJS.Timeout>();
+    const updateScrollTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
 
     const mainView = useRef<View>(null);
     const [wrapperHeight, setWrapperHeight] = useState(0);

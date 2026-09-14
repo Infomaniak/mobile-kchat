@@ -119,7 +119,7 @@ describe('DialogRouter', () => {
             expect(mockInteractiveDialog).toHaveBeenCalledWith({
                 config: mockConfig,
                 componentId: 'interactive_dialog',
-            }, {});
+            }, undefined);
         });
 
         it('should not call dialog conversion when feature flag is disabled', () => {
@@ -153,7 +153,7 @@ describe('DialogRouter', () => {
                 submit: expect.any(Function),
                 performLookupCall: expect.any(Function),
                 refreshOnSelect: expect.any(Function),
-            }, {});
+            }, undefined);
         });
 
         it('should call dialog conversion with correct config', () => {
@@ -392,7 +392,7 @@ describe('DialogRouter', () => {
                 expect.objectContaining({
                     componentId: 'interactive_dialog',
                 }),
-                expect.any(Object),
+                undefined,
             );
 
             rerender(
@@ -412,7 +412,7 @@ describe('DialogRouter', () => {
                 expect.objectContaining({
                     componentId: 'apps_form',
                 }),
-                expect.any(Object),
+                undefined,
             );
         });
     });

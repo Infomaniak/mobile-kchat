@@ -80,7 +80,7 @@ const ChannelListRow = ({
         onPress(channel);
     }, [onPress, channel]);
 
-    const renderPurpose = (channelPurpose: string): JSX.Element | null => {
+    const renderPurpose = (channelPurpose: string): React.JSX.Element | null => {
         if (!channelPurpose) {
             return null;
         }

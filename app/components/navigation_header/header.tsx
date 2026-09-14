@@ -3,7 +3,7 @@
 
 import React, {useMemo} from 'react';
 import {Platform, Text, View} from 'react-native';
-import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
+import Animated, {useAnimatedStyle, withTiming, type SharedValue} from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import CompassIcon from '@components/compass_icon';
@@ -34,7 +34,7 @@ type Props = {
     onTitlePress?: () => void;
     rightButtons?: HeaderRightButton[];
     rightComponent?: React.ReactNode;
-    scrollValue?: Animated.SharedValue<number>;
+    scrollValue?: SharedValue<number>;
     showBackButton?: boolean;
     subtitle?: string;
     subtitleCompanion?: React.ReactElement;

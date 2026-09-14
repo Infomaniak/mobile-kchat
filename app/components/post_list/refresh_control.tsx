@@ -12,6 +12,12 @@ type Props = {
     style?: StyleProp<ViewStyle>;
 }
 
+interface ScrollViewChildProps {
+    refreshControl?: React.ReactElement;
+    inverted?: boolean;
+    [key: string]: unknown;
+}
+
 const PostListRefreshControl = ({children, enabled, onRefresh, refreshing, style}: Props) => {
     const props = {
         onRefresh,
@@ -33,7 +39,7 @@ const PostListRefreshControl = ({children, enabled, onRefresh, refreshing, style
     const refreshControl = <RefreshControl {...props}/>;
 
     return React.cloneElement(
-        children,
+        children as React.ReactElement<ScrollViewChildProps>,
         {refreshControl, inverted: true},
     );
 };

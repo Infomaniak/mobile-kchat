@@ -23,7 +23,7 @@ type SelectedChipProps = {
     };
     showAnimation?: boolean;
     label: string;
-    prefix?: JSX.Element;
+    prefix?: React.JSX.Element;
     maxWidth?: number;
     type?: 'normal' | 'link' | 'danger';
     boldText?: boolean;

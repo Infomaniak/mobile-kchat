@@ -7,7 +7,6 @@ import {getFullErrorMessage} from '@utils/errors';
 import {logDebug} from '@utils/log';
 
 import {convertAppFormValuesToDialogSubmission, convertDialogToAppForm} from './dialog_conversion';
-import {DialogErrorMessages} from './dialog_utils';
 
 import type {IntlShape} from 'react-intl';
 
@@ -101,24 +100,24 @@ export class InteractiveDialogAdapter {
                 if (error instanceof Error) {
                     if (error.message.includes('network') || error.message.includes('fetch')) {
                         userFriendlyMessage = intl.formatMessage({
-                            id: DialogErrorMessages.SUBMISSION_FAILED_NETWORK,
+                            id: 'interactive_dialog.submission_failed_network',
                             defaultMessage: 'Submission failed due to network error. Please check your connection and try again.',
                         });
                     } else if (error.message.includes('conversion') || error.message.includes('validation')) {
                         userFriendlyMessage = intl.formatMessage({
-                            id: DialogErrorMessages.SUBMISSION_FAILED_VALIDATION,
+                            id: 'interactive_dialog.submission_failed_validation',
                             defaultMessage: 'Submission failed due to form validation. Please check your inputs and try again.',
                         });
                     } else {
                         // Don't expose internal error details for security
                         userFriendlyMessage = intl.formatMessage({
-                            id: DialogErrorMessages.SUBMISSION_FAILED,
+                            id: 'interactive_dialog.submission_failed',
                             defaultMessage: 'Submission failed. Please try again.',
                         });
                     }
                 } else {
                     userFriendlyMessage = intl.formatMessage({
-                        id: DialogErrorMessages.SUBMISSION_FAILED,
+                        id: 'interactive_dialog.submission_failed',
                         defaultMessage: 'Submission failed. Please try again.',
                     });
                 }

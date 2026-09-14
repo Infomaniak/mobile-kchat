@@ -2,13 +2,12 @@
 // See LICENSE.txt for license information.
 
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
-import React, {useCallback, useRef} from 'react';
-import {type ListRenderItemInfo, type NativeScrollEvent, type NativeSyntheticEvent} from 'react-native';
+import React, {useCallback} from 'react';
+import {type ListRenderItemInfo} from 'react-native';
 import {FlatList} from 'react-native-gesture-handler';
 
 import {fetchUsersByIds} from '@actions/remote/user';
 import {useServerUrl} from '@context/server';
-import {useBottomSheetListsFix} from '@hooks/bottom_sheet_lists_fix';
 import useDidMount from '@hooks/did_mount';
 
 import Reactor from './reactor';
@@ -24,21 +23,12 @@ type Props = {
 
 const ReactorsList = ({location, reactions, type = 'FlatList'}: Props) => {
     const serverUrl = useServerUrl();
-    const {direction, enabled, panResponder, setEnabled} = useBottomSheetListsFix();
-    const listRef = useRef<FlatList>(null);
     const renderItem = useCallback(({item}: ListRenderItemInfo<ReactionModel>) => (
         <Reactor
             location={location}
             reaction={item}
         />
     ), [location]);
-
-    const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
-        if (e.nativeEvent.contentOffset.y <= 0 && enabled && direction === 'down') {
-            setEnabled(false);
-            listRef.current?.scrollToOffset({animated: true, offset: 0});
-        }
-    }, [enabled, direction, setEnabled]);
 
     useDidMount(() => {
         const userIds = reactions.map((r) => r.userId);
@@ -54,8 +44,6 @@ const ReactorsList = ({location, reactions, type = 'FlatList'}: Props) => {
                 renderItem={renderItem}
                 overScrollMode={'always'}
                 testID='reactions.reactors_list.flat_list'
-                scrollEnabled={enabled}
-                {...panResponder.panHandlers}
             />
         );
     }
@@ -63,13 +51,8 @@ const ReactorsList = ({location, reactions, type = 'FlatList'}: Props) => {
     return (
         <FlatList
             data={reactions}
-            ref={listRef}
             renderItem={renderItem}
-            onScroll={onScroll}
             overScrollMode={'always'}
-            scrollEnabled={enabled}
-            scrollEventThrottle={60}
-            {...panResponder.panHandlers}
             testID='reactions.reactors_list.flat_list'
         />
     );

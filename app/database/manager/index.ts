@@ -5,7 +5,7 @@ import {Database, Q} from '@nozbe/watermelondb';
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 import logger from '@nozbe/watermelondb/utils/common/logger';
 import {nativeApplicationVersion, nativeBuildVersion} from 'expo-application';
-import {deleteAsync, documentDirectory, getInfoAsync, makeDirectoryAsync, moveAsync} from 'expo-file-system';
+import {Directory, File, Paths} from 'expo-file-system';
 import {DeviceEventEmitter, Platform} from 'react-native';
 
 import {Events} from '@constants';
@@ -28,6 +28,7 @@ import {schema as appSchema} from '@database/schema/app';
 import {serverSchema} from '@database/schema/server';
 import {beforeUpgrade} from '@helpers/database/upgrade';
 import {getActiveServer, getServer, getServerByIdentifier} from '@queries/app/servers';
+import {deleteFile} from '@utils/file';
 import {logDebug, logError} from '@utils/log';
 import {deleteIOSDatabase, getIOSAppGroupDetails, renameIOSDatabase} from '@utils/mattermost_managed';
 import {urlSafeBase64Encode} from '@utils/security';
@@ -94,7 +95,7 @@ class DatabaseManagerSingleton {
             CloudUsageModel,
         ];
 
-        this.databaseDirectory = Platform.OS === 'ios' ? getIOSAppGroupDetails().appGroupDatabase : `${documentDirectory}/databases/`;
+        this.databaseDirectory = Platform.OS === 'ios' ? getIOSAppGroupDetails().appGroupDatabase : `${Paths.document.uri}/databases/`;
     }
 
     /**
@@ -130,7 +131,7 @@ class DatabaseManagerSingleton {
             const databaseName = APP_DATABASE;
 
             if (Platform.OS === 'android') {
-                await makeDirectoryAsync(this.databaseDirectory!, {intermediates: true});
+                new Directory(this.databaseDirectory!).create({intermediates: true, idempotent: true});
             }
             const databaseFilePath = this.getDatabaseFilePath(databaseName);
             const modelClasses = this.appModels;
@@ -510,9 +511,9 @@ class DatabaseManagerSingleton {
         const databaseShm = `${androidFilesDir}${databaseName}.db-shm`;
         const databaseWal = `${androidFilesDir}${databaseName}.db-wal`;
 
-        await deleteAsync(databaseFile, {idempotent: true});
-        await deleteAsync(databaseShm, {idempotent: true});
-        await deleteAsync(databaseWal, {idempotent: true});
+        await deleteFile(databaseFile);
+        await deleteFile(databaseShm);
+        await deleteFile(databaseWal);
     };
 
     /**
@@ -538,20 +539,20 @@ class DatabaseManagerSingleton {
         const newDatabaseShm = `${androidFilesDir}${newDBName}.db-shm`;
         const newDatabaseWal = `${androidFilesDir}${newDBName}.db-wal`;
 
-        if ((await getInfoAsync(newDatabaseFile)).exists) {
+        if (new File(newDatabaseFile).exists) {
             // Already renamed, do not try
             return;
         }
 
-        if (!(await getInfoAsync(databaseFile)).exists) {
+        if (!new File(databaseFile).exists) {
             // Nothing to rename, do not try
             return;
         }
 
         try {
-            await moveAsync({from: databaseFile, to: newDatabaseFile});
-            await moveAsync({from: databaseShm, to: newDatabaseShm});
-            await moveAsync({from: databaseWal, to: newDatabaseWal});
+            new File(databaseFile).move(new File(newDatabaseFile));
+            new File(databaseShm).move(new File(newDatabaseShm));
+            new File(databaseWal).move(new File(newDatabaseWal));
         } catch (error) {
             // Do nothing
         }
@@ -572,7 +573,7 @@ class DatabaseManagerSingleton {
 
             // On Android, we'll remove the databases folder under the Document Directory
             const androidFilesDir = `${this.databaseDirectory}databases/`;
-            await deleteAsync(androidFilesDir);
+            new Directory(androidFilesDir).delete();
             return true;
         } catch (e) {
             return false;

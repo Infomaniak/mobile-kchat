@@ -12,7 +12,7 @@ import {getQuotaDescription, type PackName} from './plans';
 
 const useFileUploadError = (currentPackName: PackName, isCurrentUserAdmin: boolean) => {
     const [uploadError, setUploadError] = useState<React.ReactNode>(null);
-    const uploadErrorTimeout = useRef<NodeJS.Timeout>();
+    const uploadErrorTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
     const theme = useTheme();
 
     const newUploadError = useCallback((error: React.ReactNode) => {

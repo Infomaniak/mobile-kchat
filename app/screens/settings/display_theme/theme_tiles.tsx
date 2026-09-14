@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useMemo} from 'react';
-import {useIntl} from 'react-intl';
+import {defineMessages, useIntl} from 'react-intl';
 import {Appearance, Text, TouchableOpacity, useWindowDimensions, View} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
@@ -15,6 +15,21 @@ import {typography} from '@utils/typography';
 import illustrations from './illustrations';
 
 const TILE_PADDING = 16;
+
+const tileMessages = defineMessages({
+    light: {
+        id: 'display_theme.tile.light',
+        defaultMessage: 'Light',
+    },
+    auto: {
+        id: 'display_theme.tile.auto',
+        defaultMessage: 'Automatic',
+    },
+    dark: {
+        id: 'display_theme.tile.dark',
+        defaultMessage: 'Dark',
+    },
+});
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
     return {
@@ -142,7 +157,7 @@ export const ThemeTiles = ({allowedThemeKeys, onThemeChange, selectedTheme}: The
                             key={themeKey}
                             label={(
                                 <Text style={styles.label}>
-                                    {intl.formatMessage({id: `display_theme.tile.${Preferences.THEMES[themeKey].ksuiteTheme}`, defaultMessage: Preferences.THEMES[themeKey].ikName})}
+                                    {intl.formatMessage(tileMessages[Preferences.THEMES[themeKey].ksuiteTheme as keyof typeof tileMessages] ?? tileMessages.light)}
                                 </Text>
                             )}
                             action={onThemeChange}

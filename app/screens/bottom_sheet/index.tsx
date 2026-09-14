@@ -10,7 +10,6 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Events} from '@constants';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import {useBottomSheetListsFix} from '@hooks/bottom_sheet_lists_fix';
 import {useIsTablet} from '@hooks/device';
 import {navigateBack} from '@screens/navigation';
 import BottomSheetStore from '@store/bottom_sheet_store';
@@ -89,8 +88,6 @@ export const animatedConfig: Omit<WithSpringConfig, 'velocity'> = {
     mass: 0.3,
     stiffness: 121.6,
     overshootClamping: true,
-    restSpeedThreshold: 0.3,
-    restDisplacementThreshold: 0.3,
 };
 
 const BottomSheet = ({
@@ -115,8 +112,6 @@ const BottomSheet = ({
     const insets = useSafeAreaInsets();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
-
-    const {enabled, panResponder} = useBottomSheetListsFix();
 
     const animationConfigs = useMemo(() => ({
         ...animatedConfig,
@@ -197,8 +192,6 @@ const BottomSheet = ({
     const scrollViewProps = {
         style: styles.view,
         showsVerticalScrollIndicator: false,
-        scrollEnabled: enabled,
-        ...panResponder.panHandlers,
     };
 
     if (isTablet) {

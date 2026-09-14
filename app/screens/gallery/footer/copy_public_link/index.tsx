@@ -4,7 +4,7 @@
 import Clipboard from '@react-native-clipboard/clipboard';
 import React, {useEffect, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {StyleSheet} from 'react-native';
+import {type StyleProp, StyleSheet, type ViewStyle} from 'react-native';
 import {useAnimatedStyle, withTiming} from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
@@ -93,7 +93,7 @@ const CopyPublicLink = ({item, galleryView = true, setAction}: Props) => {
 
     return (
         <Toast
-            animatedStyle={animatedStyle}
+            animatedStyle={animatedStyle as StyleProp<ViewStyle>}
             style={error ? styles.error : styles.toast}
             message={error || formatMessage({id: 'public_link_copied', defaultMessage: 'Link copied to clipboard'})}
             iconName='link-variant'

@@ -8,11 +8,24 @@ def node_require(script)
 end
 
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
-
-node_require('react-native/scripts/react_native_pods.rb')
+require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
 node_require('react-native-permissions/scripts/setup.rb')
 
-platform :ios, '16.6' #min_ios_version_supported
+require 'json'
+podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
+
+def ccache_enabled?(podfile_properties)
+  return ENV['USE_CCACHE'] == '1' if ENV['USE_CCACHE']
+  podfile_properties['ccacheEnabled'] == 'true'
+end
+
+ENV['EX_DEV_CLIENT_NETWORK_INSPECTOR'] ||= podfile_properties['EX_DEV_CLIENT_NETWORK_INSPECTOR']
+ENV['RCT_USE_RN_DEP'] ||= '1' if podfile_properties['buildReactNativeFromSource'] != 'true'
+ENV['RCT_USE_PREBUILT_RNCORE'] ||= '1' if podfile_properties['buildReactNativeFromSource'] != 'true'
+ENV['EXPO_USE_PRECOMPILED_MODULES'] ||= '1' if podfile_properties['buildExpoModulesFromSource'] != 'true'
+ENV['RCT_HERMES_V1_ENABLED'] ||= '1' if podfile_properties['useHermesV1'] == 'true'
+
+platform :ios, podfile_properties['deploymentTarget'] || '16.4'
 prepare_react_native_project!
 
 Pod::UI.puts "Configuring Pod with statically linked Frameworks".green
@@ -25,52 +38,63 @@ setup_permissions([
   "PhotoLibrary"
 ])
 
+if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
+  config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
+else
+  config_command = [
+    'node',
+    '--no-warnings',
+    '--eval',
+    'require(\'expo/bin/autolinking\')',
+    'expo-modules-autolinking',
+    'react-native-config',
+    '--json',
+    '--platform',
+    'ios'
+  ]
+end
 
-config = use_native_modules!
+config = use_native_modules!(config_command)
 
 target 'kChat' do
-  # Pods for Mattermost
+  # Pods for kChat
 
   use_expo_modules!
 
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/..",
-    :hermes_enabled => false
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  # because of jitsi activating hermes & conflicting
-  pod 'React-jsi', :path => '../node_modules/react-native/ReactCommon/jsi', :modular_headers => true
-  pod 'React-jsc', :path => '../node_modules/react-native/ReactCommon/jsc', :modular_headers => true
   pod 'simdjson', path: '../node_modules/@nozbe/simdjson', :modular_headers => true
   pod 'Gekidou', :path => './Gekidou'
   pod 'CocoaLumberjack', :modular_headers => true
   pod 'TurboLogIOSNative', :git => 'https://github.com/larkox/react-native-turbo-log-ios-native.git', :modular_headers => true
-  pod 'JitsiMeetSDKLite', :git => 'https://github.com/jitsi/jitsi-meet-ios-sdk-releases.git', :tag => '11.3.1-lite'
+  # pod 'JitsiMeetSDKLite', :podspec => './JitsiMeetSDKLite.podspec'
   
 end
 
 target 'kChatNotificationService' do
   inherit! :search_paths
   pod 'TurboLogIOSNative', :git => 'https://github.com/larkox/react-native-turbo-log-ios-native.git', :modular_headers => true
-  pod 'Sentry/HybridSDK', '8.48.0'
+  pod 'Sentry', '9.12.1'
   pod 'Gekidou', :path => './Gekidou'
 end
 
 target 'kChatShareExtension' do
   inherit! :search_paths
-  pod 'Sentry/HybridSDK', '8.48.0'
+  pod 'Sentry', '9.12.1'
   pod 'Gekidou', :path => './Gekidou'
   pod 'OpenGraph', '1.4.1'
 end
 
 post_install do |installer|
-  # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
   react_native_post_install(
     installer,
     config[:reactNativePath],
-    :mac_catalyst_enabled => false
+    :mac_catalyst_enabled => false,
+    :ccache_enabled => ccache_enabled?(podfile_properties),
   )
 
   # Bitcode stripping for frameworks
@@ -101,17 +125,8 @@ post_install do |installer|
       bc.build_settings['OTHER_LDFLAGS']        = ['$(inherited)', '-ObjC']
       bc.build_settings['STRIP_SWIFT_SYMBOLS']  = 'NO'
       bc.build_settings['ENABLE_BITCODE']       = 'NO'
-      # Force minimum deployment target for Xcode 26 compatibility
       if bc.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 16.0
         bc.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
-      end
-    end
-
-    # react-native-worklets-core (Jitsi fork) expects jsc/JSCRuntime.h but we use JSC via React-jsc
-    if t.name == 'react-native-worklets-core'
-      t.build_configurations.each do |bc|
-        jsc_path = File.join(Pod::Config.instance.installation_root, '..', 'node_modules', 'react-native', 'ReactCommon')
-        bc.build_settings['HEADER_SEARCH_PATHS'] = "$(inherited) \"#{jsc_path}\""
       end
     end
   end
@@ -160,4 +175,38 @@ post_install do |installer|
       Pod::UI.puts "Patched fmt/base.h for Xcode 26 compatibility".green
     end
   end
+
+  # # Strip JitsiMeetSDK internal JS bundle to prevent it from loading its own JS runtime
+  # jitsi_sdk_dir = File.join(Dir.pwd, 'Pods', 'JitsiMeetSDKLite', 'lite', 'Frameworks')
+  # jitsi_framework_paths = [
+  #   File.join(jitsi_sdk_dir, 'JitsiMeetSDK.xcframework/ios-arm64_x86_64-simulator/JitsiMeetSDK.framework'),
+  #   File.join(jitsi_sdk_dir, 'JitsiMeetSDK.xcframework/ios-arm64/JitsiMeetSDK.framework'),
+  # ]
+  #
+  # jitsi_framework_paths.each do |fw_dir|
+  #   fw_bundle = File.join(fw_dir, 'main.jsbundle')
+  #   if File.exist?(fw_bundle)
+  #     File.delete(fw_bundle)
+  #     Pod::UI.puts "Removed JitsiMeetSDK main.jsbundle from #{File.dirname(fw_dir)}".yellow
+  #   end
+  # end
+
+  # # Lazy-load JitsiMeetSDK framework so it doesn't initialize at app launch.
+  # # The framework is still embedded in the app bundle but dyld won't load it until
+  # # a symbol from it is first referenced (e.g. when joining a call).
+  # # This prevents the 178 +load methods in JitsiMeetSDK from running at startup.
+  # installer.aggregate_targets.each do |aggregate_target|
+  #   next unless aggregate_target.name == 'Pods-kChat'
+  #   aggregate_target.xcconfigs.each do |config_name, config|
+  #     flags = config.other_linker_flags[:simple]
+  #     flags.delete('-framework') if flags.include?('-framework')
+  #     # Remove JitsiMeetSDK from the -framework pair
+  #     flags.delete('JitsiMeetSDK') if flags.include?('JitsiMeetSDK')
+  #     flags.add('-lazy_framework')
+  #     flags.add('JitsiMeetSDK')
+  #     xcconfig_path = aggregate_target.xcconfig_path(config_name)
+  #     config.save_as(xcconfig_path)
+  #     Pod::UI.puts "Patched #{config_name} xcconfig for lazy JitsiMeetSDK loading".yellow
+  #   end
+  # end
 end

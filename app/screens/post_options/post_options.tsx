@@ -3,7 +3,6 @@
 
 import {BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import React, {useMemo} from 'react';
-import {ScrollView} from 'react-native';
 
 import {CopyPermalinkOption, FollowThreadOption, ReplyOption, SaveOption, ShowTranslationOption} from '@components/common_post_options';
 import CopyTextOption from '@components/copy_text_option';
@@ -11,8 +10,6 @@ import {ITEM_HEIGHT} from '@components/option_item';
 import {Screens} from '@constants';
 import {PostTypes} from '@constants/post';
 import {REACTION_PICKER_HEIGHT, REACTION_PICKER_MARGIN} from '@constants/reaction_picker';
-import {useBottomSheetListsFix} from '@hooks/bottom_sheet_lists_fix';
-import {useIsTablet} from '@hooks/device';
 import BottomSheet from '@screens/bottom_sheet';
 import IKReminderOption from '@screens/post_options/options/ik_reminder_option';
 import IKTranslateOption from '@screens/post_options/options/ik_translate_option';
@@ -27,7 +24,6 @@ import MarkAsUnreadOption from './options/mark_unread_option';
 import PinChannelOption from './options/pin_channel_option';
 import ReactionBar from './reaction_bar';
 
-import type {CloudUsageModel, LimitModel} from '@database/models/server';
 import type PostModel from '@typings/database/models/servers/post';
 import type ThreadModel from '@typings/database/models/servers/thread';
 import type UserModel from '@typings/database/models/servers/user';
@@ -52,8 +48,6 @@ type PostOptionsProps = {
     componentId?: AvailableScreens;
     bindings: AppBinding[];
     serverUrl: string;
-    limits: LimitModel;
-    usage: CloudUsageModel;
     currentUser?: UserModel;
 };
 const PostOptions = ({
@@ -61,14 +55,9 @@ const PostOptions = ({
     canMarkAsUnread, canPin, canReply, canViewTranslation,
     combinedPost, isSaved,
     sourceScreen, post, thread, bindings, serverUrl,
-    usage, limits,
     currentUser,
     isChannelMember = true,
 }: PostOptionsProps) => {
-    const isTablet = useIsTablet();
-    const {enabled, panResponder} = useBottomSheetListsFix();
-    const Scroll = useMemo(() => (isTablet ? ScrollView : BottomSheetScrollView), [isTablet]);
-
     const isSystemPost = isSystemMessage(post);
 
     const canShowPermalink = !isSystemPost;
@@ -118,10 +107,8 @@ const PostOptions = ({
 
     const renderContent = () => {
         return (
-            <Scroll
+            <BottomSheetScrollView
                 bounces={false}
-                scrollEnabled={enabled}
-                {...panResponder.panHandlers}
             >
                 {isChannelMember && (
                     <>
@@ -154,8 +141,6 @@ const PostOptions = ({
                         {canShowReminder &&
                             <IKReminderOption
                                 post={post}
-                                usage={usage}
-                                limits={limits}
                             />
                         }
                         {canViewTranslation &&
@@ -217,7 +202,7 @@ const PostOptions = ({
                         />}
                     </>
                 )}
-            </Scroll>
+            </BottomSheetScrollView>
         );
     };
 

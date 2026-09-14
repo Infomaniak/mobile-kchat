@@ -6,7 +6,7 @@ import React from 'react';
 import PostInput from '../post_input';
 import Uploads from '../uploads';
 
-import type {PasteInputRef} from '@mattermost/react-native-paste-input';
+import type {PasteTextInputInstance} from '@mattermost/react-native-paste-input';
 
 type Props = {
     testID?: string;
@@ -25,7 +25,7 @@ type Props = {
     // Draft Handler
     addFiles: (files: FileInfo[]) => void;
     files: FileInfo[];
-    inputRef: React.MutableRefObject<PasteInputRef | undefined>;
+    inputRef: React.MutableRefObject<PasteTextInputInstance | null>;
     setIsFocused: (isFocused: boolean) => void;
     uploadFileError: React.ReactNode;
     updateValue: (value: string) => void;

@@ -28,7 +28,7 @@ const SettingItem = ({
     const intl = useIntl();
     const config = Options[optionName];
 
-    const label = props.label || intl.formatMessage({id: config.i18nId, defaultMessage: config.defaultMessage});
+    const label = props.label || intl.formatMessage({id: config.i18nId, defaultMessage: config.defaultMessage} as any);
 
     return (
         <>

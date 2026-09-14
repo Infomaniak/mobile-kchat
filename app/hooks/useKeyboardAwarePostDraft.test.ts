@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {renderHook, act} from '@testing-library/react-hooks';
+import {renderHook, act} from '@testing-library/react-native';
 import {KeyboardController} from 'react-native-keyboard-controller';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
@@ -99,7 +99,7 @@ describe('useKeyboardAwarePostDraft', () => {
 
             expect(result.current.postInputContainerHeight).toBe(91);
             expect(result.current.listRef.current).toBeNull();
-            expect(result.current.inputRef.current).toBeUndefined();
+            expect(result.current.inputRef.current).toBeNull();
             expect(result.current.keyboardTranslateY).toBe(mockKeyboardAnimationReturn.keyboardTranslateY);
             expect(result.current.contentInset).toBe(mockKeyboardAnimationReturn.bottomInset);
             expect(result.current.onScroll).toBe(mockKeyboardAnimationReturn.onScroll);

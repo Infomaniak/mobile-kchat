@@ -14,7 +14,6 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useDidMount from '@hooks/did_mount';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {dismissModal} from '@screens/navigation';
 import {logDebug} from '@utils/log';
 import {alertTeamAddError} from '@utils/navigation';
@@ -26,7 +25,6 @@ import type {AvailableScreens} from '@typings/screens/navigation';
 type Props = {
     joinedIds: Set<string>;
     componentId: AvailableScreens;
-    closeButtonId: string;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
@@ -61,7 +59,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 export default function JoinTeam({
     joinedIds,
     componentId,
-    closeButtonId,
 }: Props) {
     const serverUrl = useServerUrl();
     const theme = useTheme();
@@ -116,7 +113,6 @@ export default function JoinTeam({
         return dismissModal({componentId});
     }, [componentId]);
 
-    useNavButtonPressed(closeButtonId, componentId, onClosePressed, []);
     useAndroidHardwareBackHandler(componentId, onClosePressed);
 
     const hasOtherTeams = Boolean(otherTeams.length);

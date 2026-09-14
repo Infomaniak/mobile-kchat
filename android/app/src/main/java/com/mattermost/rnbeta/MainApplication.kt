@@ -1,5 +1,6 @@
 package com.mattermost.rnbeta
 
+
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
@@ -9,66 +10,50 @@ import android.os.Bundle
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
-import com.facebook.react.ReactNativeHost
-import com.facebook.react.ReactPackage
+import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
 import com.facebook.react.bridge.UiThreadUtil
-import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
-import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
-import com.facebook.react.defaults.DefaultReactNativeHost
-import com.facebook.react.soloader.OpenSourceMergedSoMapping
+import com.facebook.react.common.ReleaseLevel
+import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint
 import com.facebook.react.modules.network.OkHttpClientProvider
-import com.facebook.react.ReactInstanceManager
-import com.facebook.soloader.SoLoader
-import com.mattermost.call.IkCallPackage
-import com.mattermost.ikstorage.IkStoragePackage
-import com.oney.WebRTCModule.WebRTCModuleOptions
-
 import com.mattermost.networkclient.RCTOkHttpClientFactory
 import com.mattermost.notification.NotificationUtils.createCallNotificationChannel
 import com.mattermost.rnshare.helpers.RealPathUtil
 import com.mattermost.turbolog.TurboLog
 import com.mattermost.turbolog.ConfigureOptions
+import com.mattermost.call.IkCallPackage
+import com.mattermost.ikstorage.IkStoragePackage
+import com.oney.WebRTCModule.WebRTCModuleOptions
 import com.nozbe.watermelondb.jsi.WatermelonDBJSIPackage
-
 import com.wix.reactnativenotifications.core.AppLaunchHelper
 import com.wix.reactnativenotifications.core.AppLifecycleFacade
 import com.wix.reactnativenotifications.core.JsIOHelper
 import com.wix.reactnativenotifications.core.notification.INotificationsApplication
 import com.wix.reactnativenotifications.core.notification.IPushNotification
 import com.wix.reactnativenotifications.RNNotificationsPackage
-
 import expo.modules.ApplicationLifecycleDispatcher
-import expo.modules.ReactNativeHostWrapper
+import expo.modules.ExpoReactHostFactory
 import expo.modules.image.okhttp.ExpoImageOkHttpClientGlideModule
-
 import java.io.File
 
 class MainApplication : Application(), ReactApplication, INotificationsApplication {
-    private var listenerAdded = false
 
-    override val reactNativeHost: ReactNativeHost =
-        ReactNativeHostWrapper(this,
-            object : DefaultReactNativeHost(this) {
-                override fun getPackages(): List<ReactPackage> =
-                    PackageList(this).packages.apply {
-                        // Packages that cannot be autolinked yet can be added manually here, for example:
-                        // add(MyReactNativePackage())
-                        add(RNNotificationsPackage(this@MainApplication))
-                        add(WatermelonDBJSIPackage())
-                        add(IkStoragePackage())
-                        add(IkCallPackage())
-                    }
-
-                override fun getJSMainModuleName(): String = "index"
-
-                override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
-
-                override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
-                override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
-            })
-
-    override val reactHost: ReactHost
-        get() = getDefaultReactHost(applicationContext, reactNativeHost)
+    override val reactHost: ReactHost by lazy {
+        DefaultNewArchitectureEntryPoint.releaseLevel = try {
+            ReleaseLevel.valueOf(BuildConfig.REACT_NATIVE_RELEASE_LEVEL.uppercase())
+        } catch (e: IllegalArgumentException) {
+            ReleaseLevel.STABLE
+        }
+        ExpoReactHostFactory.getDefaultReactHost(
+            context = applicationContext,
+            packageList = PackageList(this).packages.apply {
+                add(RNNotificationsPackage(this@MainApplication))
+                add(WatermelonDBJSIPackage())
+                add(IkStoragePackage())
+                add(IkCallPackage())
+            },
+            jsMainModulePath = "index"
+        )
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -86,12 +71,6 @@ class MainApplication : Application(), ReactApplication, INotificationsApplicati
         OkHttpClientProvider.setOkHttpClientFactory(RCTOkHttpClientFactory())
         ExpoImageOkHttpClientGlideModule.okHttpClient = RCTOkHttpClientFactory().createNewNetworkModuleClient()
 
-        SoLoader.init(this, OpenSourceMergedSoMapping)
-        if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
-            // If you opted-in for the New Architecture, we load the native entry point for this app.
-            load(bridgelessEnabled = false)
-        }
-
         // @jitsi/react-native-sdk setup
         // Ref https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-react-native-sdk#android
         val options: WebRTCModuleOptions = WebRTCModuleOptions.getInstance()
@@ -100,6 +79,7 @@ class MainApplication : Application(), ReactApplication, INotificationsApplicati
             createCallNotificationChannel()
         }
 
+        loadReactNative(this)
         ApplicationLifecycleDispatcher.onApplicationCreate(this)
     }
 
@@ -125,10 +105,10 @@ class MainApplication : Application(), ReactApplication, INotificationsApplicati
 
     @SuppressLint("VisibleForTests")
     private fun runOnJSQueueThread(action: () -> Unit) {
-        reactNativeHost.reactInstanceManager.currentReactContext?.runOnJSQueueThread {
+        reactHost.currentReactContext?.runOnJSQueueThread {
             action()
         } ?: UiThreadUtil.runOnUiThread {
-            reactNativeHost.reactInstanceManager.currentReactContext?.runOnJSQueueThread {
+            reactHost.currentReactContext?.runOnJSQueueThread {
                 action()
             }
         }

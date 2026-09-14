@@ -27,12 +27,12 @@ type Props = {
     canRefresh?: boolean;
     loading?: boolean;
     loadingComponent?: React.ReactElement<any, string> | null;
-    noResults: () => JSX.Element | null;
+    noResults: () => React.JSX.Element | null;
     refreshing?: boolean;
     onRefresh?: () => void;
     onLoadMore: () => void;
     onRowPress: (item: Channel | DialogOption) => void;
-    renderItem: (props: ListItemProps) => JSX.Element;
+    renderItem: (props: ListItemProps) => React.JSX.Element;
     selectable?: boolean;
     theme: Theme;
     shouldRenderSeparator?: boolean;

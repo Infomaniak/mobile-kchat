@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useLayoutEffect} from 'react';
+import React, {useLayoutEffect} from 'react';
 import {makeMutable, runOnUI, type AnimatedRef, type SharedValue} from 'react-native-reanimated';
 
 import useDidMount from '@hooks/did_mount';
@@ -18,7 +18,7 @@ export interface GalleryManagerItems {
 }
 
 interface GalleryInitProps {
-    children: JSX.Element;
+    children: React.JSX.Element;
     galleryIdentifier: string;
 }
 

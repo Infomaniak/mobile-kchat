@@ -20,7 +20,6 @@ import {useTheme} from '@context/theme';
 import {useAccessControlAttributes} from '@hooks/access_control_attributes';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useKeyboardOverlap} from '@hooks/device';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {dismissModal} from '@screens/navigation';
 import {alertErrorWithFallback} from '@utils/draft';
 import {mergeNavigationOptions} from '@utils/navigation';
@@ -243,7 +242,6 @@ export default function ChannelAddMembers({
         };
     }, []);
 
-    useNavButtonPressed(CLOSE_BUTTON_ID, componentId, close, [close]);
     useAndroidHardwareBackHandler(componentId, close);
 
     useEffect(() => {

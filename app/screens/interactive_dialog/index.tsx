@@ -120,7 +120,7 @@ function InteractiveDialog({
 
                 const newError = checkDialogElementForError(elem, secureGetFromRecord(submission, elem.name));
                 if (newError) {
-                    newErrors[elem.name] = intl.formatMessage({id: newError.id, defaultMessage: newError.defaultMessage}, newError.values);
+                    newErrors[elem.name] = intl.formatMessage(newError as any, newError.values);
                     hasErrors = true;
                 }
             });

@@ -14,7 +14,6 @@ import {navigateBack} from '@screens/navigation';
 import type ServersModel from '@typings/database/models/app/servers';
 
 type Props = {
-    closeButtonId?: string;
     server: ServersModel;
 }
 

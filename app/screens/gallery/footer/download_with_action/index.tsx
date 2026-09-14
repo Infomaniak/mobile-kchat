@@ -7,7 +7,7 @@ import {applicationName} from 'expo-application';
 import {deleteAsync} from 'expo-file-system';
 import React, {useEffect, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {Platform, StyleSheet, Text, View} from 'react-native';
+import {Platform, type StyleProp, StyleSheet, Text, View, type ViewStyle} from 'react-native';
 import FileViewer from 'react-native-file-viewer';
 import {useAnimatedStyle, withTiming} from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -84,7 +84,7 @@ const DownloadWithAction = ({action, enableSecureFilePreview, item, onDownloadSu
     const [saved, setSaved] = useState(false);
     const [progress, setProgress] = useState(0);
     const mounted = useRef(false);
-    const downloadPromise = useRef<ProgressPromise<ClientResponse>>();
+    const downloadPromise = useRef<ProgressPromise<ClientResponse> | undefined>(undefined);
 
     let title;
     let iconName;
@@ -345,7 +345,7 @@ const DownloadWithAction = ({action, enableSecureFilePreview, item, onDownloadSu
 
     return (
         <Toast
-            animatedStyle={animatedStyle}
+            animatedStyle={animatedStyle as StyleProp<ViewStyle>}
             style={toastStyle}
             message={message}
             iconName={iconName}

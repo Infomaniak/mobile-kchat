@@ -13,6 +13,8 @@ import RadioItem from './radio_item';
 
 import OptionItem from './index';
 
+import type {ReactTestInstance} from 'react-test-renderer';
+
 jest.mock('./option_icon');
 jest.mocked(OptionIcon).mockImplementation((props) => React.createElement('OptionIcon', {...props, testID: 'option-item.icon.mock'}));
 
@@ -246,7 +248,7 @@ describe.skip('OptionItem', () => {
         props.selected = false;
         rerender(<OptionItem {...props}/>);
 
-        selectedIcon = queryByTestId('option-item.selected');
+        selectedIcon = queryByTestId('option-item.selected') as ReactTestInstance;
         expect(selectedIcon).toBeNull();
     });
 
@@ -266,7 +268,7 @@ describe.skip('OptionItem', () => {
         props.selected = false;
         rerender(<OptionItem {...props}/>);
 
-        radioItem = queryByTestId('option-item.not_selected');
+        radioItem = queryByTestId('option-item.not_selected') as ReactTestInstance;
         expect(radioItem).toBeTruthy();
         expect(radioItem.props.checkedBody).toBe(true);
         expect(radioItem.props.selected).toBe(false);
@@ -274,7 +276,7 @@ describe.skip('OptionItem', () => {
         props.isRadioCheckmark = false;
         rerender(<OptionItem {...props}/>);
 
-        radioItem = queryByTestId('option-item.not_selected');
+        radioItem = queryByTestId('option-item.not_selected') as ReactTestInstance;
         expect(radioItem).toBeTruthy();
         expect(radioItem.props.checkedBody).toBe(false);
         expect(radioItem.props.selected).toBe(false);

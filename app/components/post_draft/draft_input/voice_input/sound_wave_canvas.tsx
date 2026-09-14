@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {memo, useCallback, useEffect, useMemo, useRef} from 'react';
-import Canvas, {type CanvasRenderingContext2D} from 'react-native-canvas';
+import Canvas, {type CanvasRenderingContext2D, type CanvasComponent} from 'react-native-canvas';
 
 import {useTheme} from '@context/theme';
 
@@ -49,12 +49,12 @@ type SoundWaveCanvasProps = {
 
 const SoundWaveCanvas = ({data, isRecording}: SoundWaveCanvasProps) => {
     const theme = useTheme();
-    const canvasRef = useRef<Canvas | null>(null);
+    const canvasRef = useRef<CanvasComponent | null>(null);
     const canvasContextRef = useRef<CanvasRenderingContext2D | null>(null);
 
     const formattedData = useMemo(() => data.slice(0, 30), [data]);
 
-    const initCanvas = useCallback((canvas: Canvas) => {
+    const initCanvas = useCallback((canvas: CanvasComponent) => {
         if (canvas) {
             canvas.width = canvasWidth;
             canvas.height = canvasHeight;

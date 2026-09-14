@@ -1,25 +1,26 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {useNavigation} from 'expo-router';
 import moment, {type Moment} from 'moment-timezone';
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, SafeAreaView, View} from 'react-native';
 
 import {updateScheduledPost} from '@actions/remote/scheduled_post';
 import DateTimeSelector from '@components/data_time_selector';
 import Loading from '@components/loading';
+import NavigationButton from '@components/navigation_button';
 import UpgradeButton from '@components/upgrade/ik_upgrade';
 import {Screens} from '@constants';
 import {MESSAGE_TYPE, SNACK_BAR_TYPE} from '@constants/snack_bar';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {quotaGate} from '@hooks/plans';
 import {useGetUsageDeltas} from '@hooks/usage';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {buildNavigationButton, dismissModal, openAsBottomSheet, setButtons} from '@screens/navigation';
+import {dismissModal, openAsBottomSheet} from '@screens/navigation';
 import PickerOption from '@screens/post_priority_picker/components/picker_option';
 import {logDebug} from '@utils/log';
 import {showSnackBar} from '@utils/snack_bar';
@@ -34,7 +35,6 @@ import type {AvailableScreens} from '@typings/screens/navigation';
 type Props = {
     currentUserTimezone?: UserTimezone | null;
     componentId: AvailableScreens;
-    closeButtonId: string;
     draft: ScheduledPostModel;
     limits: LimitModel;
     usage: CloudUsageModel;
@@ -63,17 +63,15 @@ const optionKeyOptionTomorrow = 'scheduledPostOptionTomorrow';
 const optionKeyOptionNextMonday = 'scheduledPostOptionNextMonday';
 const optionKeyOptionCustom = 'scheduledPostOptionCustom';
 
-const RIGHT_BUTTON = buildNavigationButton('reschedule-draft', 'reschedule_draft.save.button');
-
 const RescheduledDraft: React.FC<Props> = ({
     currentUserTimezone,
     componentId,
-    closeButtonId,
     draft,
     usage,
     limits,
 }) => {
     const styles = getStyleSheet(useTheme());
+    const navigation = useNavigation();
     const theme = useTheme();
     const intl = useIntl();
     const serverUrl = useServerUrl();
@@ -85,17 +83,11 @@ const RescheduledDraft: React.FC<Props> = ({
     const {scheduled_draft_custom_date: scheduledDraftCustomDate} = useGetUsageDeltas(usage, limits);
     const {isQuotaExceeded} = quotaGate(scheduledDraftCustomDate);
 
+    const [saveEnabled, setSaveEnabled] = useState(false);
+
     const toggleSaveButton = useCallback((enabled = false) => {
-        setButtons(componentId, {
-            rightButtons: [{
-                ...RIGHT_BUTTON,
-                color: theme.sidebarHeaderTextColor,
-                disabledColor: changeOpacity(theme.sidebarHeaderTextColor, 0.32),
-                text: intl.formatMessage({id: 'edit_post.save', defaultMessage: 'Save'}),
-                enabled,
-            }],
-        });
-    }, [componentId, intl, theme]);
+        setSaveEnabled(enabled);
+    }, []);
 
     const onClose = useCallback(() => {
         Keyboard.dismiss();
@@ -135,8 +127,19 @@ const RescheduledDraft: React.FC<Props> = ({
         handleUIUpdates(res);
     }, [draft, handleUIUpdates, intl, selectedTime, serverUrl, toggleSaveButton]));
 
-    useNavButtonPressed(closeButtonId, componentId, onClose, []);
-    useNavButtonPressed(RIGHT_BUTTON.id, componentId, onSavePostMessage, []);
+    useEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <NavigationButton
+                    onPress={onSavePostMessage}
+                    disabled={!saveEnabled || isUpdating}
+                    testID='reschedule_draft.save.button'
+                    text={intl.formatMessage({id: 'edit_post.save', defaultMessage: 'Save'})}
+                />
+            ),
+        });
+    }, [navigation, onSavePostMessage, saveEnabled, isUpdating, intl]);
+
     useAndroidHardwareBackHandler(componentId, onClose);
 
     const onPressEvolve = useCallback(async () => {

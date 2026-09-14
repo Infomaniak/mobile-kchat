@@ -4,6 +4,7 @@
 import {BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import moment from 'moment';
 import React, {useCallback, useMemo, useState} from 'react';
+import {defineMessage} from 'react-intl';
 import {Platform, ScrollView, TouchableOpacity, View} from 'react-native';
 
 import {BaseOption} from '@components/common_post_options';
@@ -14,7 +15,6 @@ import {Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {quotaGate} from '@hooks/plans';
 import {useGetUsageDeltas} from '@hooks/usage';
 import NetworkManager from '@managers/network_manager';
@@ -28,19 +28,19 @@ import ClearAfterMenuItem from '../custom_status_clear_after/components/clear_af
 
 import type {PostReminderTimestamp} from '@client/rest/ikcustomactions';
 import type {CloudUsageModel, LimitModel} from '@database/models/server';
-import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
+import type {AvailableScreens} from '@typings/screens/navigation';
 
 const POST_OPTIONS_BUTTON = 'close-post-options';
 
 type Props = {
-    post: PostModel;
-    componentId: string;
-    postId: string;
-    postpone: boolean;
+    componentId?: AvailableScreens;
     currentUser?: UserModel;
-    limits: LimitModel;
-    usage: CloudUsageModel;
+    limits?: LimitModel | null;
+    postId: string;
+    postpone?: boolean;
+    postponePostId?: string;
+    usage?: CloudUsageModel | null;
 };
 
 const getStyleFromTheme = makeStyleSheetFromTheme(() => {
@@ -74,7 +74,52 @@ const IkPostReminder = {
 
 export type PredefinedTimestamp = typeof IkPostReminder[keyof typeof IkPostReminder];
 
-const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, usage}: Props) => {
+const postReminderTimes = [
+    {
+        id: 'thirty_minutes',
+        message: defineMessage({
+            id: 'infomaniak.post_info.post_reminder.sub_menu.thirty_minutes',
+            defaultMessage: '30 mins',
+        }),
+    },
+    {
+        id: 'one_hour',
+        message: defineMessage({
+            id: 'infomaniak.post_info.post_reminder.sub_menu.one_hour',
+            defaultMessage: '1 hour',
+        }),
+    },
+    {
+        id: 'two_hours',
+        message: defineMessage({
+            id: 'infomaniak.post_info.post_reminder.sub_menu.two_hours',
+            defaultMessage: '2 hours',
+        }),
+    },
+    {
+        id: 'tomorrow',
+        message: defineMessage({
+            id: 'infomaniak.post_info.post_reminder.sub_menu.tomorrow',
+            defaultMessage: 'Tomorrow',
+        }),
+    },
+    {
+        id: 'monday',
+        message: defineMessage({
+            id: 'infomaniak.post_info.post_reminder.sub_menu.monday',
+            defaultMessage: 'Monday',
+        }),
+    },
+    {
+        id: 'custom',
+        message: defineMessage({
+            id: 'infomaniak.post_info.post_reminder.sub_menu.custom',
+            defaultMessage: 'Custom',
+        }),
+    },
+];
+
+const IKReminder = ({postId, postpone = false, postponePostId, currentUser, limits, usage}: Props) => {
     const serverUrl = useServerUrl();
     const isTablet = useIsTablet();
     const theme = useTheme();
@@ -87,26 +132,11 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
     const isAndroid = Platform.OS === 'android';
     const showExpiryTime = Boolean(expiresAt);
 
-    const postReminderTimes = [
-        {
-            id: 'thirty_minutes',
-            label: 'infomaniak.post_info.post_reminder.sub_menu.thirty_minutes',
-            labelDefault: '30 mins',
-        },
-        {id: 'one_hour', label: 'infomaniak.post_info.post_reminder.sub_menu.one_hour', labelDefault: '1 hour'},
-        {id: 'two_hours', label: 'infomaniak.post_info.post_reminder.sub_menu.two_hours', labelDefault: '2 hours'},
-        {id: 'tomorrow', label: 'infomaniak.post_info.post_reminder.sub_menu.tomorrow', labelDefault: 'Tomorrow'},
-        {id: 'monday', label: 'infomaniak.post_info.post_reminder.sub_menu.monday', labelDefault: 'Monday'},
-        {id: 'custom', label: 'infomaniak.post_info.post_reminder.sub_menu.custom', labelDefault: 'Custom'},
-    ];
-
     const close = async () => {
         await dismissBottomSheet();
     };
 
     const {reminder_custom_date: reminderCustomDate} = useGetUsageDeltas(usage, limits);
-
-    useNavButtonPressed(POST_OPTIONS_BUTTON, componentId, close, []);
 
     const handleItemClick = useCallback((dur: string, expires: string) => {
         setExpiresAt(expires);
@@ -122,7 +152,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         }
         items.push(bottomSheetSnapPoint(optionsCount, ITEM_HEIGHT) + space);
         return items;
-    }, [postReminderTimes.length, showCustomPicker, isAndroid]);
+    }, [showCustomPicker, isAndroid]);
 
     const handleCustomValidate = () => {
         if (!expiresAt) {
@@ -168,7 +198,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
     const addPostReminder = async (timestamp: PostReminderTimestamp) => {
         try {
             const client = NetworkManager.getClient(serverUrl);
-            await client.addPostReminder(post.id, timestamp);
+            await client.addPostReminder(postId, timestamp);
         } catch (e) {
             // do nothing
         }
@@ -179,9 +209,8 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
         try {
             const client = NetworkManager.getClient(serverUrl);
             const reschedule = true;
-            const reminderPostId = post.id;
 
-            await client.addPostReminder(postId, timestamp, reschedule, reminderPostId);
+            await client.addPostReminder(postponePostId ?? postId, timestamp, reschedule, postId);
         } catch (e) {
             // do nothing
         }
@@ -197,10 +226,10 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
             theme,
             title: '',
             props: {
-                post,
+                postId,
             },
         });
-    }, [post, theme]);
+    }, [postId, theme]);
 
     const renderContent = () => {
         const {isQuotaExceeded} = quotaGate(reminderCustomDate);
@@ -219,7 +248,7 @@ const IKReminder = ({post, postId, postpone, componentId, currentUser, limits, u
                     return (
                         <BaseOption
                             key={item.id}
-                            message={{id: item.label, defaultMessage: item.labelDefault}}
+                            message={item.message}
                             onPress={shouldUpgrade ? onPressEvolve : () => onPress(item.id)}
                             iconName=''
                             testID={item.id}

@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {renderHook} from '@testing-library/react-hooks';
+import {renderHook} from '@testing-library/react-native';
 
 import {buildFilePreviewUrl, buildFileUrl} from '@actions/remote/file';
 import {useServerUrl} from '@context/server';
@@ -113,7 +113,7 @@ describe('useImageAttachments', () => {
 
         const firstResult = result.current;
 
-        rerender();
+        rerender(undefined);
 
         const secondResult = result.current;
 

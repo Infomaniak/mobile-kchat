@@ -33,6 +33,8 @@ jest.mock('@screens/navigation', () => ({
 
 jest.mock('@actions/local/draft', () => ({
     removeDraft: jest.fn(),
+    updateDraftMessage: jest.fn(),
+    updateDraftPriority: jest.fn(),
 }));
 
 jest.mock('@actions/remote/post', () => ({

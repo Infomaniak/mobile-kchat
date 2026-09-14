@@ -1,5 +1,5 @@
 diff --git a/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts b/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts
-index 1cfd45e..c1dc838 100644
+index 90e0725..fcd8218 100644
 --- a/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts
 +++ b/node_modules/@mattermost/react-native-network-client/lib/typescript/WebSocketClient/index.d.ts
 @@ -1,6 +1,8 @@
@@ -11,7 +11,7 @@ index 1cfd45e..c1dc838 100644
  /**
   * Configurable WebSocket client
   */
-@@ -24,8 +26,8 @@ declare class WebSocketClient implements WebSocketClientInterface {
+@@ -25,8 +27,8 @@ declare class WebSocketClient implements WebSocketClientInterface {
      onClientError: (callback: WebSocketClientErrorEventHandler) => void;
      invalidate: () => Promise<void>;
  }
@@ -23,7 +23,7 @@ index 1cfd45e..c1dc838 100644
  }>;
  export { getOrCreateWebSocketClient };
 diff --git a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/NativeWebSocketClient.ts b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/NativeWebSocketClient.ts
-index e8f60de..da0f015 100644
+index 0755f46..0c6256f 100644
 --- a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/NativeWebSocketClient.ts
 +++ b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/NativeWebSocketClient.ts
 @@ -1,4 +1,6 @@
@@ -34,7 +34,7 @@ index e8f60de..da0f015 100644
      Double,
      Int32,
 diff --git a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
-index c4389f2..d4d997e 100644
+index 4e30f5a..d1ec9c5 100644
 --- a/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
 +++ b/node_modules/@mattermost/react-native-network-client/src/WebSocketClient/index.tsx
 @@ -3,6 +3,7 @@
@@ -54,7 +54,7 @@ index c4389f2..d4d997e 100644
  const CREATING_CLIENT: { [key: string]: boolean } = {};
  
  /**
-@@ -146,13 +147,9 @@ class WebSocketClient implements WebSocketClientInterface {
+@@ -148,13 +149,9 @@ class WebSocketClient implements WebSocketClientInterface {
  
  async function getOrCreateWebSocketClient(
      url: string,
@@ -70,7 +70,7 @@ index c4389f2..d4d997e 100644
      let created = false;
      let client = CLIENTS[url];
      if (!client) {
-@@ -161,11 +158,20 @@ async function getOrCreateWebSocketClient(
+@@ -163,11 +160,20 @@ async function getOrCreateWebSocketClient(
          }
          CREATING_CLIENT[url] = true;
          created = true;

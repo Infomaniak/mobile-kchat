@@ -129,7 +129,7 @@ const ObservableChannelPostList = withDatabase(enhanced(ChannelPostList));
 
 type ChannelPostListWrapperProps = {
     channelId: string;
-    listRef: React.RefObject<FlatList<string | PostModel>>;
+    listRef: React.RefObject<FlatList<string | PostModel> | null>;
     onTouchMove?: (event: GestureResponderEvent) => void;
     onTouchEnd?: () => void;
 }

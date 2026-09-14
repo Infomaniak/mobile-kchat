@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {getInfoAsync, deleteAsync} from 'expo-file-system';
+import {Directory} from 'expo-file-system';
 import {Platform} from 'react-native';
 import Permissions from 'react-native-permissions';
 
@@ -35,7 +35,6 @@ import {
     uploadDisabledWarning,
 } from '.';
 
-jest.mock('expo-file-system');
 jest.mock('react-native', () => {
     const RN = jest.requireActual('react-native');
     return {
@@ -117,25 +116,26 @@ describe('Image utils', () => {
     describe('deleteV1Data', () => {
         it('should delete V1 data', async () => {
             await deleteV1Data();
-            expect(deleteAsync).toHaveBeenCalled();
+            expect(jest.mocked(Directory).mock.instances.length).toBeGreaterThan(0);
+            jest.mocked(Directory).mockClear();
             Platform.OS = 'android';
             await deleteV1Data();
-            expect(deleteAsync).toHaveBeenCalled();
+            expect(jest.mocked(Directory).mock.instances.length).toBeGreaterThan(0);
             Platform.OS = 'ios';
         });
     });
 
     describe('deleteFileCache', () => {
-        it('should delete file cache', async () => {
-            await deleteFileCache('http://server.com');
-            expect(deleteAsync).toHaveBeenCalled();
+        it('should delete file cache', () => {
+            deleteFileCache('http://server.com');
+            expect(jest.mocked(Directory).mock.instances.length).toBeGreaterThan(0);
         });
     });
 
     describe('deleteFileCacheByDir', () => {
-        it('should delete file cache by dir', async () => {
-            await deleteFileCacheByDir('someDir');
-            expect(deleteAsync).toHaveBeenCalled();
+        it('should delete file cache by dir', () => {
+            deleteFileCacheByDir('someDir');
+            expect(jest.mocked(Directory).mock.instances.length).toBeGreaterThan(0);
         });
     });
 
@@ -274,10 +274,8 @@ describe('Image utils', () => {
     });
 
     describe('fileExists', () => {
-        it('should check if file exists', async () => {
-            // @ts-expect-error type def
-            getInfoAsync.mockResolvedValue({exists: true});
-            const exists = await fileExists('somePath');
+        it('should check if file exists', () => {
+            const exists = fileExists('somePath');
             expect(exists).toBe(true);
         });
     });
@@ -292,8 +290,8 @@ describe('Image utils', () => {
     });
 
     describe('getAllFilesInCachesDirectory', () => {
-        it('should get all files in caches directory', async () => {
-            const result = await getAllFilesInCachesDirectory('http://server.com');
+        it('should get all files in caches directory', () => {
+            const result = getAllFilesInCachesDirectory('http://server.com');
             expect(result.files).toEqual(expect.any(Array));
         });
     });

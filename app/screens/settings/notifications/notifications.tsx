@@ -121,10 +121,7 @@ const Notifications = ({
             <SettingItem
                 onPress={goToNotificationSettingsMentions}
                 optionName='mentions'
-                label={intl.formatMessage({
-                    id: isCRTEnabled ? mentionTexts.crtOn.id : mentionTexts.crtOff.id,
-                    defaultMessage: isCRTEnabled ? mentionTexts.crtOn.defaultMessage : mentionTexts.crtOff.defaultMessage,
-                })}
+                label={intl.formatMessage(isCRTEnabled ? mentionTexts.crtOn : mentionTexts.crtOff)}
                 testID='notification_settings.mentions.option'
             />
             {enableAutoResponder && (

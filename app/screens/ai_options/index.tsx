@@ -12,16 +12,14 @@ import BottomSheet from '@screens/bottom_sheet';
 // import ReactForMe from '../post_options/options/ai_options/react_for_me';
 import SummarizeThread from '../post_options/options/ai_options/summarize_thread';
 
-import type PostModel from '@typings/database/models/servers/post';
+type Props = {
+    postId: string;
+};
 
 const POST_AI_BUTTON = 'close-ai-options';
 
-type Props = {
-    post: PostModel;
-};
-
 const AiOptions = (props: Props) => {
-    const {post} = props;
+    const {postId} = props;
 
     const isTablet = useIsTablet();
     const Scroll = useMemo(() => (isTablet ? ScrollView : BottomSheetScrollView), [isTablet]);
@@ -31,11 +29,11 @@ const AiOptions = (props: Props) => {
         return (
             <Scroll bounces={false}>
                 <SummarizeThread
-                    post={post}
+                    postId={postId}
                 />
                 {/*React for me feature is disabled for the moment*/}
                 {/* <ReactForMe
-                    post={post}
+                    postId={postId}
                 /> */}
             </Scroll>
         );

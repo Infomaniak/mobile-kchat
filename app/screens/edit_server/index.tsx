@@ -9,7 +9,6 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import DatabaseManager from '@database/manager';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {getServerByDisplayName} from '@queries/app/servers';
 import Background from '@screens/background';
 import {dismissModal} from '@screens/navigation';
@@ -22,7 +21,6 @@ import type ServersModel from '@typings/database/models/app/servers';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 interface ServerProps {
-    closeButtonId?: string;
     componentId: AvailableScreens;
     server: ServersModel;
     theme: Theme;
@@ -42,7 +40,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
 }));
 
-const EditServer = ({closeButtonId, componentId, server, theme}: ServerProps) => {
+const EditServer = ({componentId, server, theme}: ServerProps) => {
     const intl = useIntl();
     const {formatMessage} = intl;
     const keyboardAwareRef = useRef<KeyboardAwareScrollView>(null);
@@ -94,7 +92,6 @@ const EditServer = ({closeButtonId, componentId, server, theme}: ServerProps) =>
         setDisplayNameError(undefined);
     }, []);
 
-    useNavButtonPressed(closeButtonId || '', componentId, close, []);
     useAndroidHardwareBackHandler(componentId, close);
 
     return (

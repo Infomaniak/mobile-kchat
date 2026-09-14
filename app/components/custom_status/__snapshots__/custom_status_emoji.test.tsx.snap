@@ -19,6 +19,7 @@ exports[`components/custom_status/custom_status_emoji should match snapshot 1`] 
   onProgress={[Function]}
   placeholder={[]}
   recyclingKey="calendar.png-16-16"
+  sfEffect={null}
   source={
     [
       {
@@ -35,6 +36,8 @@ exports[`components/custom_status/custom_status_emoji should match snapshot 1`] 
       "width": 16,
     }
   }
+  symbolSize={null}
+  symbolWeight={null}
   transition={
     {
       "duration": 0,
@@ -63,6 +66,7 @@ exports[`components/custom_status/custom_status_emoji should match snapshot with
   onProgress={[Function]}
   placeholder={[]}
   recyclingKey="calendar.png-34-34"
+  sfEffect={null}
   source={
     [
       {
@@ -79,6 +83,8 @@ exports[`components/custom_status/custom_status_emoji should match snapshot with
       "width": 34,
     }
   }
+  symbolSize={null}
+  symbolWeight={null}
   transition={
     {
       "duration": 0,

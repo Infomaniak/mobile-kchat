@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {type LayoutChangeEvent, Platform, ScrollView, View} from 'react-native';
+import {type LayoutChangeEvent, Platform, type StyleProp, ScrollView, View, type ViewStyle} from 'react-native';
 import Animated, {useAnimatedStyle, useDerivedValue, useSharedValue, withTiming} from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
@@ -248,7 +248,7 @@ export default function SelectedUsers({
         <Animated.View style={animatedContainerStyle}>
             {showToast &&
             <Toast
-                animatedStyle={animatedToastStyle}
+                animatedStyle={animatedToastStyle as StyleProp<ViewStyle>}
                 iconName={toastIcon}
                 style={style.toast}
                 message={toastMessage}

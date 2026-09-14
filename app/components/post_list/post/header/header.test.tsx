@@ -14,7 +14,7 @@ jest.mock('@components/compass_icon', () => ({
     default: jest.fn(),
 }));
 jest.mocked(CompassIcon).mockImplementation(
-    (props) => React.createElement('CompassIcon', {testID: `compass-icon${props.name ? '-' + props.name : ''}`, ...props}) as any,
+    (props: any) => React.createElement('CompassIcon', {testID: `compass-icon${props.name ? '-' + props.name : ''}`, ...props}) as any,
 );
 
 describe('Header', () => {

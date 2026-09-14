@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {useNavigation} from 'expo-router';
 import moment from 'moment-timezone';
 import React, {useCallback, useEffect, useMemo, useReducer, useState} from 'react';
 import {useIntl} from 'react-intl';
@@ -9,7 +10,7 @@ import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {updateLocalCustomStatus} from '@actions/local/user';
 import {removeRecentCustomStatus, updateCustomStatus, unsetCustomStatus} from '@actions/remote/user';
-import CompassIcon from '@components/compass_icon';
+import NavigationButton from '@components/navigation_button';
 import TabletTitle from '@components/tablet_title';
 import {Events, Screens} from '@constants';
 import {CUSTOM_STATUS_TIME_PICKER_INTERVALS_IN_MINUTES, CustomStatusDurationEnum, SET_CUSTOM_STATUS_FAILURE} from '@constants/custom_status';
@@ -17,12 +18,10 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useIsTablet} from '@hooks/device';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
 import {usePreventDoubleTap} from '@hooks/utils';
 import {dismissModal, goToScreen, openAsBottomSheet, showModal} from '@screens/navigation';
 import {getCurrentMomentForTimezone, getRoundedTime} from '@utils/helpers';
 import {logDebug} from '@utils/log';
-import {mergeNavigationOptions} from '@utils/navigation';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {
     getTimezone,
@@ -79,7 +78,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 });
 
 const DEFAULT_DURATION: CustomStatusDuration = 'today';
-const BTN_UPDATE_STATUS = 'update-custom-status';
 const edges: Edge[] = ['bottom', 'left', 'right'];
 
 export const calculateExpiryTime = (duration: CustomStatusDuration, currentUser: UserModel | undefined, expiresAt?: moment.Moment): string => {
@@ -156,8 +154,6 @@ const dismissModalAndKeyboard = (isTablet: boolean, options?: Record<string, any
     Keyboard.dismiss();
 };
 
-const closeCustomStatusModalId = 'close-custom-status';
-
 const CustomStatus = ({
     customStatusExpirySupported,
     currentUser,
@@ -167,12 +163,10 @@ const CustomStatus = ({
     const intl = useIntl();
     const isTablet = useIsTablet();
     const theme = useTheme();
+    const navigation = useNavigation();
     const style = getStyleSheet(theme);
     const serverUrl = useServerUrl();
     const [isBtnEnabled, setIsBtnEnabled] = useState(true);
-    useNavButtonPressed('close-custom-status', componentId, () => {
-        dismissModalAndKeyboard(isTablet, {componentId});
-    }, [componentId, isTablet]);
     const storedStatus = useMemo(() => {
         return getUserCustomStatus(currentUser);
     }, [currentUser]);
@@ -328,30 +322,19 @@ const CustomStatus = ({
     }, [componentId, isTablet]);
 
     useAndroidHardwareBackHandler(componentId, handleBackButton);
-    useNavButtonPressed(BTN_UPDATE_STATUS, componentId, handleSetStatus, [handleSetStatus]);
-
     useEffect(() => {
-        const closeButton = CompassIcon.getImageSourceSync('close', 24, theme.sidebarHeaderTextColor);
-        mergeNavigationOptions(componentId, {
-            topBar: {
-                rightButtons: [
-                    {
-                        enabled: isBtnEnabled,
-                        id: BTN_UPDATE_STATUS,
-                        showAsAction: 'always',
-                        testID: 'custom_status.done.button',
-                        text: intl.formatMessage({id: 'mobile.custom_status.modal_confirm', defaultMessage: 'Done'}),
-                        color: theme.sidebarHeaderTextColor,
-                    },
-                ],
-                leftButtons: [{
-                    id: closeCustomStatusModalId,
-                    icon: closeButton,
-                    testID: 'close.custom_status.button',
-                }],
-            },
+        navigation.setOptions({
+            headerRight: () => (
+                <NavigationButton
+                    onPress={handleSetStatus}
+                    text={intl.formatMessage({id: 'mobile.custom_status.modal_confirm', defaultMessage: 'Done'})}
+                    testID='custom_status.done.button'
+                    color={theme.sidebarHeaderTextColor}
+                    disabled={!isBtnEnabled}
+                />
+            ),
         });
-    }, [componentId, intl, isBtnEnabled, theme.sidebarHeaderTextColor]);
+    }, [navigation, handleSetStatus, isBtnEnabled, intl, theme.sidebarHeaderTextColor]);
 
     return (
         <View

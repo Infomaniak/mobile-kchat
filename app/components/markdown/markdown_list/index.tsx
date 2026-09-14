@@ -3,6 +3,13 @@
 
 import React, {type ReactElement} from 'react';
 
+interface MarkdownListItemProps {
+    bulletWidth?: number;
+    ordered?: boolean;
+    tight?: boolean;
+    [key: string]: unknown;
+}
+
 type MarkdownListProps = {
    children: ReactElement[];
    ordered: boolean;
@@ -18,7 +25,7 @@ const MarkdownList = ({start = 1, tight, ordered, children}: MarkdownListProps) 
     }
 
     const childrenElements = React.Children.map(children, (child) => {
-        return React.cloneElement(child, {
+        return React.cloneElement(child as ReactElement<MarkdownListItemProps>, {
             bulletWidth,
             ordered,
             tight,

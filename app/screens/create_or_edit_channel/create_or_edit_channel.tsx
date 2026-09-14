@@ -1,19 +1,19 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useMemo, useReducer, useState} from 'react';
+import {useNavigation} from 'expo-router';
+import React, {useCallback, useEffect, useReducer, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {type ImageSourcePropType, Keyboard, StyleSheet, View} from 'react-native';
+import {Keyboard, StyleSheet, View} from 'react-native';
 
 import {createChannel, patchChannel as handlePatchChannel, switchToChannelById} from '@actions/remote/channel';
-import CompassIcon from '@components/compass_icon';
+import NavigationButton from '@components/navigation_button';
 import {General} from '@constants';
 import {MIN_CHANNEL_NAME_LENGTH} from '@constants/channel';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import useNavButtonPressed from '@hooks/navigation_button_pressed';
-import {buildNavigationButton, dismissModal, popTopScreen, setButtons} from '@screens/navigation';
+import {dismissModal, popTopScreen} from '@screens/navigation';
 import {validateDisplayName} from '@utils/channel';
 
 import ChannelInfoForm from './channel_info_form';
@@ -32,10 +32,6 @@ type Props = {
     headerOnly?: boolean;
     isModal: boolean;
 }
-
-const CLOSE_BUTTON_ID = 'close-channel';
-const EDIT_BUTTON_ID = 'update-channel';
-const CREATE_BUTTON_ID = 'create-channel';
 
 enum RequestActions {
     START = 'Start',
@@ -66,10 +62,6 @@ const isDirect = (channel?: ChannelModel): boolean => {
     return channel?.type === General.DM_CHANNEL || channel?.type === General.GM_CHANNEL;
 };
 
-const makeCloseButton = (icon: ImageSourcePropType) => {
-    return buildNavigationButton(CLOSE_BUTTON_ID, 'close.create_or_edit_channel.button', icon);
-};
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -88,6 +80,7 @@ const CreateOrEditChannel = ({
     const intl = useIntl();
     const {formatMessage} = intl;
     const theme = useTheme();
+    const navigation = useNavigation();
     const serverUrl = useServerUrl();
 
     const editing = Boolean(channel);
@@ -126,33 +119,7 @@ const CreateOrEditChannel = ({
         saving: false,
     });
 
-    const rightButton = useMemo(() => {
-        const base = buildNavigationButton(
-            editing ? EDIT_BUTTON_ID : CREATE_BUTTON_ID,
-            editing ? 'create_or_edit_channel.save.button' : 'create_or_edit_channel.create.button',
-            undefined,
-            editing ? formatMessage({id: 'mobile.edit_channel', defaultMessage: 'Save'}) : formatMessage({id: 'mobile.create_channel', defaultMessage: 'Create'}),
-        );
-        base.enabled = canSave;
-        base.showAsAction = 'always';
-        base.color = theme.sidebarHeaderTextColor;
-        return base;
-    }, [editing, formatMessage, canSave, theme.sidebarHeaderTextColor]);
-
-    useEffect(() => {
-        setButtons(componentId, {
-            rightButtons: [rightButton],
-        });
-    }, [rightButton, componentId]);
-
-    useEffect(() => {
-        if (isModal) {
-            const icon = CompassIcon.getImageSourceSync('close', 24, theme.sidebarHeaderTextColor);
-            setButtons(componentId, {
-                leftButtons: [makeCloseButton(icon)],
-            });
-        }
-    }, [theme, isModal, componentId]);
+    const isEnabled = canSave && !appState.saving;
 
     useEffect(() => {
         const hasValidName = displayName.length >= MIN_CHANNEL_NAME_LENGTH;
@@ -239,9 +206,21 @@ const CreateOrEditChannel = ({
         close(componentId, isModal);
     }, [componentId, isModal]);
 
-    useNavButtonPressed(CLOSE_BUTTON_ID, componentId, handleClose, [handleClose]);
-    useNavButtonPressed(CREATE_BUTTON_ID, componentId, onCreateChannel, [onCreateChannel]);
-    useNavButtonPressed(EDIT_BUTTON_ID, componentId, onUpdateChannel, [onUpdateChannel]);
+    useEffect(() => {
+        const buttonText = editing ? formatMessage({id: 'mobile.edit_channel', defaultMessage: 'Save'}) : formatMessage({id: 'mobile.create_channel', defaultMessage: 'Create'});
+        navigation.setOptions({
+            headerRight: () => (
+                <NavigationButton
+                    onPress={editing ? onUpdateChannel : onCreateChannel}
+                    text={buttonText}
+                    testID={editing ? 'create_or_edit_channel.save.button' : 'create_or_edit_channel.create.button'}
+                    color={theme.sidebarHeaderTextColor}
+                    disabled={!isEnabled}
+                />
+            ),
+        });
+    }, [editing, formatMessage, navigation, onUpdateChannel, onCreateChannel, isEnabled, theme.sidebarHeaderTextColor]);
+
     useAndroidHardwareBackHandler(componentId, handleClose);
 
     return (

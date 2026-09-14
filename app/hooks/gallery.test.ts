@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {renderHook, act} from '@testing-library/react-hooks';
+import {renderHook, act} from '@testing-library/react-native';
 import {useSharedValue} from 'react-native-reanimated';
 
 import {useGallery} from '@context/gallery';
@@ -128,7 +128,7 @@ describe('gallery hooks', () => {
 
         const {result} = renderHook(() => useGalleryItem(identifier, index, onPress));
 
-        expect(result.current.styles.opacity).toBe(1);
+        expect((result.current.styles as unknown as {opacity: number}).opacity).toBe(1);
 
         act(() => {
             result.current.onGestureEvent();

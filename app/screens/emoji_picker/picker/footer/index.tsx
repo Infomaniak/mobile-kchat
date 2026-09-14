@@ -3,7 +3,7 @@
 
 import {BottomSheetFooter, type BottomSheetFooterProps, SHEET_STATE, useBottomSheet, useBottomSheetInternal} from '@gorhom/bottom-sheet';
 import React, {useCallback} from 'react';
-import {Platform} from 'react-native';
+import {Platform, type ViewStyle} from 'react-native';
 import Animated, {useAnimatedStyle, withTiming, type SharedValue} from 'react-native-reanimated';
 
 import EmojiCategoryBar from '@components/emoji_category_bar';
@@ -60,7 +60,7 @@ const PickerFooter = (props: BottomSheetFooterProps) => {
 
     return (
         <BottomSheetFooter
-            style={heightAnimatedStyle}
+            style={heightAnimatedStyle as ViewStyle}
             {...props}
         >
             <Animated.View style={[animatedStyle]}>
