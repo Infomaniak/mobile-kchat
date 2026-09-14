@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {type StyleProp, StyleSheet, type ViewStyle, DeviceEventEmitter, type FlatList, type GestureResponderEvent} from 'react-native';
+import {type StyleProp, StyleSheet, type ViewStyle, DeviceEventEmitter} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {markChannelAsRead, unsetActiveChannelOnServer} from '@actions/remote/channel';
@@ -32,9 +32,6 @@ type Props = {
     forceShowScrollToEndBtn?: boolean;
     highlightedPostId?: string;
     highlightedPostSelectedAt?: number;
-    listRef: React.RefObject<FlatList<string | PostModel> | null>;
-    onTouchMove?: (event: GestureResponderEvent) => void;
-    onTouchEnd?: () => void;
     requestMorePosts?: () => void;
     resetJumpTarget?: () => boolean;
 }
@@ -51,7 +48,6 @@ const ChannelPostList = ({
     lastViewedAt, posts, shouldShowJoinLeaveMessages,
     forceShowScrollToEndBtn,
     highlightedPostId, highlightedPostSelectedAt,
-    listRef, onTouchMove, onTouchEnd,
     requestMorePosts,
     resetJumpTarget,
 }: Props) => {
@@ -193,9 +189,6 @@ const ChannelPostList = ({
             shouldShowJoinLeaveMessages={shouldShowJoinLeaveMessages}
             showMoreMessages={true}
             testID='channel.post_list'
-            listRef={listRef}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
         />
     );
 

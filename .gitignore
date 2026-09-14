@@ -138,3 +138,6 @@ node_modules/@mattermost/intune
 # Jest reports
 reports/
 junit-jest.xml
+
+# Expo local state
+.expo/

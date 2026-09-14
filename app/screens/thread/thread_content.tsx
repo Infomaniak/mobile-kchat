@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {PortalProvider} from '@gorhom/portal';
+import {PortalHost} from '@gorhom/portal';
 import React from 'react';
 import {StyleSheet} from 'react-native';
 
@@ -9,6 +9,7 @@ import {KeyboardAwarePostDraftContainer} from '@components/keyboard_aware_post_d
 import PostDraft from '@components/post_draft';
 import ScheduledPostIndicator from '@components/scheduled_post_indicator';
 import {Screens} from '@constants';
+import {KeyboardStateProvider} from '@context/keyboard_state';
 
 import ThreadPostList from './thread_post_list';
 
@@ -20,13 +21,14 @@ type ThreadContentProps = {
     scheduledPostCount: number;
     containerHeight: number;
     enabled?: boolean;
-    onEmojiSearchFocusChange?: (focused: boolean) => void;
 }
 
 const THREAD_POST_DRAFT_TESTID = 'thread.post_draft';
 
 // This follows the same pattern as draft_input.tsx: `${testID}.post.input`
 const THREAD_POST_INPUT_NATIVE_ID = `${THREAD_POST_DRAFT_TESTID}.post.input`;
+
+const PORTAL_NAME = 'thread_autocomplete';
 
 const styles = StyleSheet.create({
     flex: {
@@ -40,22 +42,18 @@ const ThreadContent = ({
     scheduledPostCount,
     containerHeight,
     enabled = true,
-    onEmojiSearchFocusChange,
 }: ThreadContentProps) => {
     return (
-        <PortalProvider>
+        <KeyboardStateProvider
+            tabBarHeight={0}
+            enabled={enabled}
+        >
             <KeyboardAwarePostDraftContainer
                 textInputNativeID={THREAD_POST_INPUT_NATIVE_ID}
                 containerStyle={styles.flex}
-                isThreadView={true}
-                enabled={enabled}
-                onEmojiSearchFocusChange={onEmojiSearchFocusChange}
-                renderList={({listRef, onTouchMove, onTouchEnd}) => (
+                renderList={() => (
                     <ThreadPostList
                         rootPost={rootPost}
-                        listRef={listRef}
-                        onTouchMove={onTouchMove}
-                        onTouchEnd={onTouchEnd}
                     />
                 )}
             >
@@ -72,11 +70,12 @@ const ThreadContent = ({
                     containerHeight={containerHeight}
                     isChannelScreen={false}
                     location={Screens.THREAD}
+                    portalName={PORTAL_NAME}
                 />
             </KeyboardAwarePostDraftContainer>
-        </PortalProvider>
+            <PortalHost name={PORTAL_NAME}/>
+        </KeyboardStateProvider>
     );
 };
 
 export default ThreadContent;
-

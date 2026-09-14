@@ -9,11 +9,10 @@ import CompassIcon from '@components/compass_icon';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {Screens} from '@constants';
 import {ICON_SIZE} from '@constants/post_draft';
-import {useKeyboardAnimationContext} from '@context/keyboard_animation';
+import {useKeyboardState} from '@context/keyboard_state';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import {openAsBottomSheet} from '@screens/navigation';
-import {dismissKeyboard} from '@utils/keyboard';
 import {changeOpacity} from '@utils/theme';
 
 type Props = {
@@ -40,11 +39,10 @@ export default function PostPriorityAction({
     const intl = useIntl();
     const isTablet = useIsTablet();
     const theme = useTheme();
-    const {closeInputAccessoryView} = useKeyboardAnimationContext();
+    const {blurAndDismissKeyboard} = useKeyboardState();
 
     const onPress = useCallback(async () => {
-        closeInputAccessoryView();
-        await dismissKeyboard();
+        await blurAndDismissKeyboard();
 
         const title = isTablet ? intl.formatMessage({id: 'post_priority.picker.title', defaultMessage: 'Message priority'}) : '';
 
@@ -59,7 +57,7 @@ export default function PostPriorityAction({
                 closeButtonId: POST_PRIORITY_PICKER_BUTTON,
             },
         });
-    }, [closeInputAccessoryView, isTablet, intl, theme, postPriority, updatePostPriority]);
+    }, [blurAndDismissKeyboard, isTablet, intl, theme, postPriority, updatePostPriority]);
 
     const iconName = 'alert-circle-outline';
     const iconColor = changeOpacity(theme.centerChannelColor, 0.64);

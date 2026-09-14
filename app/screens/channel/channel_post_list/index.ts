@@ -4,7 +4,7 @@
 import {Q, type Database} from '@nozbe/watermelondb';
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import {createElement, memo, useCallback, useEffect, useRef, useState} from 'react';
-import {DeviceEventEmitter, type FlatList, type GestureResponderEvent} from 'react-native';
+import {DeviceEventEmitter} from 'react-native';
 import {combineLatest, of as of$} from 'rxjs';
 import {switchMap, distinctUntilChanged, map as map$} from 'rxjs/operators';
 
@@ -129,9 +129,6 @@ const ObservableChannelPostList = withDatabase(enhanced(ChannelPostList));
 
 type ChannelPostListWrapperProps = {
     channelId: string;
-    listRef: React.RefObject<FlatList<string | PostModel> | null>;
-    onTouchMove?: (event: GestureResponderEvent) => void;
-    onTouchEnd?: () => void;
 }
 
 const ChannelPostListWrapper = ({channelId, ...otherProps}: ChannelPostListWrapperProps) => {
