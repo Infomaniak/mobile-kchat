@@ -177,7 +177,7 @@ const RewriteOptions = ({
     const hasHistory = rewriteHistory !== null && !isInGenerationMode;
 
     const closeBottomSheet = useCallback(async () => {
-        await dismissBottomSheet(Screens.AGENTS_REWRITE_OPTIONS);
+        await dismissBottomSheet();
     }, []);
 
     useNavButtonPressed(closeButtonId, componentId, closeBottomSheet, []);

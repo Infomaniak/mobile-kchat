@@ -22,7 +22,6 @@ import {getFullName} from '@utils/user';
 import {forceLogoutIfNecessary} from './session';
 
 import type ConferenceModel from '@typings/database/models/servers/conference';
-import type {Options} from 'react-native-navigation';
 
 export const fetchConference = async (serverUrl: string, conferenceId: string) => {
     try {
@@ -150,7 +149,7 @@ export const switchToConferenceByChannelId = async (
         };
 
         // - options
-        const options: Options = {
+        const options: Record<string, any> = {
             layout: {
                 backgroundColor: '#000',
                 componentBackgroundColor: '#000',

@@ -82,20 +82,17 @@ const DraftScheduledPostOptions: React.FC<Props> = ({
                     )
                 )}
                 <CopyTextOption
-                    bottomSheetId={Screens.DRAFT_SCHEDULED_POST_OPTIONS}
                     postMessage={draft.message}
                     sourceScreen={Screens.DRAFT_SCHEDULED_POST_OPTIONS}
                     key={draft.id}
                 />
                 {draftType === DRAFT_TYPE_DRAFT &&
                     <EditDraft
-                        bottomSheetId={Screens.DRAFT_SCHEDULED_POST_OPTIONS}
                         channel={channel}
                         rootId={rootId}
                     />
                 }
                 <SendHandler
-                    bottomSheetId={Screens.DRAFT_SCHEDULED_POST_OPTIONS}
                     channelId={channel.id}
                     rootId={rootId}
                     files={draft.files}
@@ -115,12 +112,10 @@ const DraftScheduledPostOptions: React.FC<Props> = ({
                 />
                 {draftType === DRAFT_TYPE_SCHEDULED &&
                     <RescheduledDraft
-                        bottomSheetId={Screens.DRAFT_SCHEDULED_POST_OPTIONS}
                         draft={draft as ScheduledPostModel}
                     />
                 }
                 <DeleteDraft
-                    bottomSheetId={Screens.DRAFT_SCHEDULED_POST_OPTIONS}
                     channelId={channel.id}
                     rootId={rootId}
                     draftType={draftType}

@@ -11,7 +11,6 @@ import {type CameraOptions} from 'react-native-image-picker';
 
 import FormattedText from '@components/formatted_text';
 import SlideUpPanelItem, {ITEM_HEIGHT} from '@components/slide_up_panel_item';
-import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import BottomSheet from '@screens/bottom_sheet';
@@ -95,7 +94,7 @@ const AttachmentOptions: React.FC<Props> = ({
     };
 
     const onChooseFromPhotoLibrary = async () => {
-        await dismissBottomSheet(Screens.ATTACHMENT_OPTIONS);
+        await dismissBottomSheet();
         if (!checkCanUpload() || checkMaxFiles()) {
             return;
         }
@@ -104,7 +103,7 @@ const AttachmentOptions: React.FC<Props> = ({
     };
 
     const onTakePhoto = async () => {
-        await dismissBottomSheet(Screens.ATTACHMENT_OPTIONS);
+        await dismissBottomSheet();
         if (!checkCanUpload() || checkMaxFiles()) {
             return;
         }
@@ -117,7 +116,7 @@ const AttachmentOptions: React.FC<Props> = ({
     };
 
     const onTakeVideo = async () => {
-        await dismissBottomSheet(Screens.ATTACHMENT_OPTIONS);
+        await dismissBottomSheet();
         if (!checkCanUpload() || checkMaxFiles()) {
             return;
         }
@@ -131,7 +130,7 @@ const AttachmentOptions: React.FC<Props> = ({
     };
 
     const onAttachFile = async () => {
-        await dismissBottomSheet(Screens.ATTACHMENT_OPTIONS);
+        await dismissBottomSheet();
         if (!checkCanUpload() || checkMaxFiles()) {
             return;
         }
@@ -144,7 +143,7 @@ const AttachmentOptions: React.FC<Props> = ({
         }
         attachingLogsRef.current = true;
         try {
-            await dismissBottomSheet(Screens.ATTACHMENT_OPTIONS);
+            await dismissBottomSheet();
             if (!checkCanUpload() || checkMaxFiles()) {
                 return;
             }

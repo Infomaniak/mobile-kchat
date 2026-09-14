@@ -28,7 +28,7 @@ const FeedbackOptions = ({options, selected, eventName, title}: Props) => {
 
     const handleSelect = (value: string) => {
         DeviceEventEmitter.emit(eventName, value);
-        dismissBottomSheet(Screens.FEEDBACK_OPTIONS);
+        dismissBottomSheet();
     };
 
     const snapPoints = [1, bottomSheetSnapPoint(options.length, 48) + 60];

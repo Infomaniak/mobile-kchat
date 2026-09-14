@@ -76,7 +76,7 @@ const GlobalDraftsAndScheduledPosts = ({componentId, scheduledPostsEnabled, init
 
     const scheduledPostList = useMemo(() => (
         <GlobalScheduledPostList
-            location={Screens.GLOBAL_DRAFTS_AND_SCHEDULED_POSTS}
+            location={Screens.GLOBAL_DRAFTS}
         />
     ), []);
 

@@ -13,8 +13,6 @@ import {goToScreen} from '@screens/navigation';
 import {isTypeDMorGM} from '@utils/channel';
 import {changeOpacity} from '@utils/theme';
 
-import type {Options} from 'react-native-navigation';
-
 type Props = {
     channelId: string;
     displayName: string;
@@ -79,7 +77,7 @@ const NotificationPreference = ({
     const title = formatMessage({id: 'channel_info.mobile_notifications', defaultMessage: 'Mobile Notifications'});
 
     const goToChannelNotificationPreferences = usePreventDoubleTap(useCallback(() => {
-        const options: Options = {
+        const options: Record<string, any> = {
             topBar: {
                 title: {
                     text: title,

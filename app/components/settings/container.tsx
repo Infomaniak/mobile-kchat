@@ -8,8 +8,6 @@ import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@context/theme';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
-import type {AvailableScreens} from '@typings/screens/navigation';
-
 const edges: Edge[] = ['left', 'right', 'bottom'];
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
@@ -17,19 +15,20 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
         container: {
             flex: 1,
             backgroundColor: theme.centerChannelBg,
-            paddingHorizontal: 20,
         },
         contentContainerStyle: {
             marginTop: 8,
             flexGrow: 1,
+            paddingHorizontal: 20,
         },
     };
 });
 
 type SettingContainerProps = {
-   children: React.ReactNode;
-   testID?: string;
+    children: React.ReactNode;
+    testID?: string;
 }
+
 const SettingContainer = ({children, testID}: SettingContainerProps) => {
     const theme = useTheme();
     const styles = getStyleSheet(theme);
@@ -39,7 +38,6 @@ const SettingContainer = ({children, testID}: SettingContainerProps) => {
             edges={edges}
             style={styles.container}
             testID={`${testID}.screen`}
-            nativeID={`${`${testID}.screen` as AvailableScreens}.screen`}
         >
             <ScrollView
                 contentContainerStyle={styles.contentContainerStyle}

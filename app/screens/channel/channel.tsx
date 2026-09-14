@@ -32,7 +32,7 @@ type ChannelProps = {
     channelId: string;
     componentId?: AvailableScreens;
     isCallsEnabledInChannel: boolean;
-    groupCallsAllowed: boolean;
+    groupCallsAllowed?: boolean;
     isTabletView?: boolean;
     dismissedGMasDMNotice: PreferenceModel[];
     currentUserId: string;

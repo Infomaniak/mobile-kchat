@@ -37,11 +37,10 @@ describe.skip('PostOptions', () => {
 
         renderWithEverything(
             <PostOptions
-                post={regularPost}
+                postId={regularPost.id}
                 serverUrl={serverUrl}
                 showAddReaction={true}
-                sourceScreen={'DraftScheduledPostOptions'}
-                componentId={'DraftScheduledPostOptions'}
+                sourceScreen={'draft_scheduled_post_options'}
             />,
             {database},
         );

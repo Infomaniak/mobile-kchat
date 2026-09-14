@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import {Keyboard, Platform} from 'react-native';
-import {OptionsModalPresentationStyle} from 'react-native-navigation';
 
 import {Screens} from '@constants';
 import {dismissAllModals, showModalOverCurrentContext} from '@screens/navigation';
@@ -25,8 +24,8 @@ export const displayPermalink = async (teamName: string, postId: string, openAsP
 
     const options = {
         modalPresentationStyle: Platform.select({
-            ios: OptionsModalPresentationStyle.overFullScreen,
-            default: OptionsModalPresentationStyle.overCurrentContext,
+            ios: 'overFullScreen',
+            default: 'overCurrentContext',
         }),
         layout: {
             componentBackgroundColor: changeOpacity('#000', 0.2),

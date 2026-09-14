@@ -244,7 +244,7 @@ const Post = ({
 
         openAsBottomSheet({
             closeButtonId: 'close-quota-exceeded',
-            screen: Screens.INFOMANIAK_REMINDER,
+            screen: Screens.IK_REMINDER,
             theme,
             title: '',
             props: {
@@ -279,7 +279,7 @@ const Post = ({
         }
 
         await blurAndDismissKeyboard();
-        const passProps = {sourceScreen: location, post, showAddReaction, serverUrl, isChannelMember};
+        const passProps = {sourceScreen: location, postId: post.id, showAddReaction, serverUrl, isChannelMember};
         const title = isTablet ? intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}) : '';
 
         openAsBottomSheet({
@@ -313,11 +313,11 @@ const Post = ({
             return;
         }
 
-        if (location !== 'Channel' && location !== 'Thread') {
+        if (location !== 'channel' && location !== 'thread') {
             return;
         }
 
-        PerformanceMetricsManager.finishLoad(location === 'Thread' ? 'THREAD' : 'CHANNEL', serverUrl);
+        PerformanceMetricsManager.finishLoad(location === 'thread' ? 'THREAD' : 'CHANNEL', serverUrl);
         PerformanceMetricsManager.endMetric('mobile_channel_switch', serverUrl);
     });
 

@@ -14,7 +14,7 @@ import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useInitialValue from '@hooks/initial_value';
 import useBackNavigation from '@hooks/navigate_back';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {goToScreen, popTopScreen} from '@screens/navigation';
+import {navigateToSettingsScreen, popTopScreen} from '@screens/navigation';
 import {getDeviceTimezone} from '@utils/timezone';
 import {getTimezoneRegion, getUserTimezoneProps} from '@utils/user';
 
@@ -51,15 +51,14 @@ const DisplayTimezone = ({currentUser, componentId}: DisplayTimezoneProps) => {
         };
 
         const screen = Screens.SETTINGS_DISPLAY_TIMEZONE_SELECT;
-        const title = intl.formatMessage({id: 'settings_display.timezone.select', defaultMessage: 'Select Timezone'});
 
         const passProps = {
             currentTimezone: userTimezone.manualTimezone || initialTimezone.manualTimezone || initialTimezone.automaticTimezone,
             onBack: updateManualTimezone,
         };
 
-        goToScreen(screen, title, passProps);
-    }, [initialTimezone.manualTimezone, initialTimezone.automaticTimezone, intl, userTimezone.manualTimezone]));
+        navigateToSettingsScreen(screen, passProps);
+    }, [initialTimezone.manualTimezone, initialTimezone.automaticTimezone, userTimezone.manualTimezone]));
 
     const saveTimezone = useCallback(() => {
         const canSave =

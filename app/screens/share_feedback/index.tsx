@@ -21,7 +21,7 @@ import {typography} from '@utils/typography';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
-    componentId: AvailableScreens;
+    componentId?: AvailableScreens;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
@@ -100,7 +100,7 @@ const ShareFeedback = ({
 
     const [show, setShow] = useState(true);
 
-    const executeAfterDone = useRef<() => void>(() => dismissOverlay(componentId));
+    const executeAfterDone = useRef<() => void>(() => (componentId ? dismissOverlay(componentId) : undefined));
 
     const close = useCallback((afterDone: () => void) => {
         executeAfterDone.current = afterDone;
@@ -109,14 +109,16 @@ const ShareFeedback = ({
 
     const onPressYes = useCallback(async () => {
         close(async () => {
-            await dismissOverlay(componentId);
+            if (componentId) {
+                await dismissOverlay(componentId);
+            }
             await goToNPSChannel(serverUrl);
             giveFeedbackAction(serverUrl);
         });
     }, [close, componentId, serverUrl]);
 
     const onPressNo = useCallback(() => {
-        close(() => dismissOverlay(componentId));
+        close(() => (componentId ? dismissOverlay(componentId) : undefined));
     }, [close, componentId]);
 
     useBackNavigation(onPressNo);

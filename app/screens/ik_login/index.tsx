@@ -6,14 +6,14 @@ import {Image, View} from 'react-native';
 
 import {infomaniakLogin} from '@actions/remote/iksession';
 import FormattedText from '@components/formatted_text';
-import {Launch} from '@constants';
+import {Launch, Screens} from '@constants';
 import {getDefaultThemeByAppearance} from '@context/theme';
 import DatabaseManager from '@database/manager';
 import {login as displayLoginWebView, LoginCancelledError} from '@init/ikauth';
 import {launchToHome} from '@init/launch';
 import PushNotifications from '@init/push_notifications';
 import SessionManager from '@managers/session_manager';
-import {resetToInfomaniakNoTeams} from '@screens/navigation';
+import {navigateToScreen, resetToInfomaniakNoTeams} from '@screens/navigation';
 import {logError} from '@utils/log';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -73,6 +73,7 @@ const Server = ({
     const goToHome = async (serverUrl: string, error?: never) => {
         const hasError = launchError || Boolean(error);
         await launchToHome({extra, launchError: hasError, launchType: Launch.Normal, serverUrl, coldStart: true});
+        navigateToScreen(Screens.HOME, {extra, launchError: hasError, launchType: Launch.Normal, serverUrl, coldStart: true}, true);
     };
 
     return (

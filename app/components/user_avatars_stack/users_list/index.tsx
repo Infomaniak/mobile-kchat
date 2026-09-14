@@ -33,7 +33,7 @@ export const useOpenUserProfile = (channelId: string, location: string) => {
     const theme = useTheme();
 
     return useCallback(async (u: UserModel | UserProfile) => {
-        await dismissBottomSheet(Screens.BOTTOM_SHEET);
+        await dismissBottomSheet();
         const screen = Screens.USER_PROFILE;
         const title = intl.formatMessage({id: 'mobile.routes.user_profile', defaultMessage: 'Profile'});
         const closeButtonId = 'close-user-profile';

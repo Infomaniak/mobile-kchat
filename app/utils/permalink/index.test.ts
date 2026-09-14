@@ -2,8 +2,8 @@
 // See LICENSE.txt for license information.
 
 import {Keyboard, Platform} from 'react-native';
-import {OptionsModalPresentationStyle} from 'react-native-navigation';
 
+import {Screens} from '@constants';
 import {dismissAllModals, showModalOverCurrentContext} from '@screens/navigation';
 
 import {displayPermalink, closePermalink} from '.';
@@ -42,10 +42,10 @@ describe('permalinkUtils', () => {
             await displayPermalink('teamName', 'postId');
             expect(dismiss).toHaveBeenCalled();
             expect(showModalOverCurrentContext).toHaveBeenCalledWith(
-                'Permalink',
+                Screens.PERMALINK,
                 {isPermalink: true, teamName: 'teamName', postId: 'postId'},
                 {
-                    modalPresentationStyle: OptionsModalPresentationStyle.overFullScreen,
+                    modalPresentationStyle: 'overFullScreen',
                     layout: {
                         componentBackgroundColor: 'rgba(0,0,0,0.2)',
                     },
@@ -63,10 +63,10 @@ describe('permalinkUtils', () => {
         it('should handle platform specific options correctly', async () => {
             await displayPermalink('teamName', 'postId');
             expect(showModalOverCurrentContext).toHaveBeenCalledWith(
-                'Permalink',
+                Screens.PERMALINK,
                 {isPermalink: true, teamName: 'teamName', postId: 'postId'},
                 {
-                    modalPresentationStyle: OptionsModalPresentationStyle.overFullScreen,
+                    modalPresentationStyle: 'overFullScreen',
                     layout: {
                         componentBackgroundColor: 'rgba(0,0,0,0.2)',
                     },

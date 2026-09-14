@@ -23,8 +23,8 @@ import {typography} from '@utils/typography';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
-    hasAskedBefore: boolean;
-    componentId: AvailableScreens;
+    hasAskedBefore?: boolean;
+    componentId?: AvailableScreens;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
@@ -109,7 +109,7 @@ const ReviewApp = ({
 
     const [show, setShow] = useState(true);
 
-    const executeAfterDone = useRef<() => void>(() => dismissOverlay(componentId));
+    const executeAfterDone = useRef<() => void>(() => (componentId ? dismissOverlay(componentId) : undefined));
 
     const close = useCallback((afterDone: () => void) => {
         executeAfterDone.current = afterDone;
@@ -119,7 +119,9 @@ const ReviewApp = ({
 
     const onPressYes = useCallback(async () => {
         close(async () => {
-            await dismissOverlay(componentId);
+            if (componentId) {
+                await dismissOverlay(componentId);
+            }
             try {
                 await requestReview();
             } catch (error) {
@@ -133,7 +135,9 @@ const ReviewApp = ({
 
     const onPressNeedsWork = useCallback(async () => {
         close(async () => {
-            await dismissOverlay(componentId);
+            if (componentId) {
+                await dismissOverlay(componentId);
+            }
             if (await isNPSEnabled(serverUrl)) {
                 showShareFeedbackOverlay();
             }
@@ -143,13 +147,17 @@ const ReviewApp = ({
     const onPressDontAsk = useCallback(() => {
         storeDontAskForReview();
         close(async () => {
-            await dismissOverlay(componentId);
+            if (componentId) {
+                await dismissOverlay(componentId);
+            }
         });
     }, [close, componentId]);
 
     const onPressClose = useCallback(() => {
         close(async () => {
-            await dismissOverlay(componentId);
+            if (componentId) {
+                await dismissOverlay(componentId);
+            }
         });
     }, [close, componentId]);
 

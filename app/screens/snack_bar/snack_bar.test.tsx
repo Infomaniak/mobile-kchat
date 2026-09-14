@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 // import React from 'react';
-// import {Navigation} from 'react-native-navigation';
 
 // import {Screens} from '@constants';
 // import {SNACK_BAR_TYPE} from '@constants/snack_bar';
@@ -35,7 +34,6 @@ describe('plugins', () => {
 //     };
 // });
 
-// jest.mock('react-native-navigation', () => ({
 //     Navigation: {
 //         events: jest.fn().mockReturnValue({
 //             registerComponentWillAppearListener: jest.fn(),

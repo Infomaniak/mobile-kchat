@@ -3,7 +3,7 @@
 
 import React, {useCallback, useEffect, useState} from 'react';
 import {type IntlShape, useIntl} from 'react-intl';
-import {Keyboard, Platform, StyleSheet, View} from 'react-native';
+import {type ImageSourcePropType, Keyboard, Platform, StyleSheet, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {joinChannel, switchToChannelById} from '@actions/remote/channel';
@@ -22,7 +22,6 @@ import ChannelDropdown from './channel_dropdown';
 import ChannelList from './channel_list';
 
 import type {AvailableScreens, NavButtons} from '@typings/screens/navigation';
-import type {ImageResource, OptionsTopBarButton} from 'react-native-navigation';
 
 const CLOSE_BUTTON_ID = 'close-browse-channels';
 const CREATE_BUTTON_ID = 'create-pub-channel';
@@ -31,7 +30,7 @@ export const PUBLIC = 'public';
 export const SHARED = 'shared';
 export const ARCHIVED = 'archived';
 
-const makeLeftButton = (icon: ImageResource): OptionsTopBarButton => {
+const makeLeftButton = (icon: ImageSourcePropType): Record<string, any> => {
     return {
         id: CLOSE_BUTTON_ID,
         icon,
@@ -39,7 +38,7 @@ const makeLeftButton = (icon: ImageResource): OptionsTopBarButton => {
     };
 };
 
-const makeRightButton = (theme: Theme, formatMessage: IntlShape['formatMessage'], enabled: boolean): OptionsTopBarButton => {
+const makeRightButton = (theme: Theme, formatMessage: IntlShape['formatMessage'], enabled: boolean): Record<string, any> => {
     return {
         color: theme.sidebarHeaderTextColor,
         id: CREATE_BUTTON_ID,
@@ -75,7 +74,7 @@ type Props = {
 
     // Screen Props (do not change during the lifetime of the screen)
     componentId: AvailableScreens;
-    closeButton: ImageResource;
+    closeButton: ImageSourcePropType;
 
     // Properties not changing during the lifetime of the screen)
     currentTeamId: string;

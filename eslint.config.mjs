@@ -87,6 +87,8 @@ export default defineConfig([
           args: "after-used",
           caughtErrors: "none",
           ignoreRestSiblings: true,
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
         }
       ],
       "@typescript-eslint/no-shadow": ["error"],

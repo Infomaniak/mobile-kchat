@@ -97,7 +97,7 @@ describe.skip('Edit Post', () => {
     let database: Database;
 
     const baseProps: Parameters<typeof EditPost>[0] = {
-        componentId: 'EditPost',
+        componentId: 'edit_post',
         closeButtonId: 'edit-post',
         post: {
             id: '1',
@@ -143,7 +143,7 @@ describe.skip('Edit Post', () => {
 
     const triggerFileUpload = async (screen: ReturnType<typeof renderEditPost>) => {
         let onUploadFilesCallback: ((files: ExtractedFileInfo[]) => void) | undefined;
-        jest.mocked(Navigation.openAttachmentOptions).mockImplementation((intl, theme, props) => {
+        jest.mocked(Navigation.openAttachmentOptions).mockImplementation((props: Record<string, any>) => {
             onUploadFilesCallback = props?.onUploadFiles;
             return undefined;
         });

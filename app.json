@@ -1,4 +1,10 @@
 {
   "name": "kChat",
-  "displayName": "kChat"
+  "displayName": "kChat",
+  "expo": {
+    "scheme": "kchat",
+    "plugins": [
+      "expo-router"
+    ]
+  }
 }

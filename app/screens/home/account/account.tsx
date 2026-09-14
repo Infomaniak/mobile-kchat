@@ -1,12 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useIsFocused, useRoute} from '@react-navigation/native';
+import {useRoute} from '@react-navigation/native';
 import React, {useCallback, useState} from 'react';
-import {Freeze} from 'react-freeze';
 import {ScrollView, View} from 'react-native';
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {View as ViewConstants} from '@constants';
 import {useTheme} from '@context/theme';
@@ -27,9 +26,8 @@ type AccountScreenProps = {
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     return {
-        container: {
+        flex: {
             flex: 1,
-            backgroundColor: theme.sidebarBg,
         },
         flexRow: {
             flex: 1,
@@ -48,7 +46,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
             borderLeftWidth: 1,
             borderLeftColor: changeOpacity(theme.centerChannelColor, 0.16),
         },
-        totalHeight: {flexGrow: 1},
+        totalHeight: {height: '100%'},
     };
 });
 
@@ -56,8 +54,10 @@ const AccountScreen = ({currentUser, enableCustomUserStatuses, showFullName}: Ac
     const theme = useTheme();
     const [start, setStart] = useState(false);
     const route = useRoute();
+    const insets = useSafeAreaInsets();
     const isTablet = useIsTablet();
-    const isFocused = useIsFocused();
+
+    // useAndroidHomeTabBackHandler(Screens.ACCOUNT);
 
     let tabletSidebarStyle;
     if (isTablet) {
@@ -93,6 +93,7 @@ const AccountScreen = ({currentUser, enableCustomUserStatuses, showFullName}: Ac
             alwaysBounceVertical={false}
             style={tabletSidebarStyle}
             contentContainerStyle={styles.totalHeight}
+            testID='account.scroll_view'
         >
             <AccountUserInfo
                 user={currentUser}
@@ -109,29 +110,26 @@ const AccountScreen = ({currentUser, enableCustomUserStatuses, showFullName}: Ac
     ) : null;
 
     return (
-        <Freeze freeze={!isFocused}>
-            <SafeAreaView
-                mode='padding'
-                style={[styles.container]}
-                testID='account.screen'
+        <View
+            style={styles.flex}
+            testID='account.screen'
+        >
+            <View style={[{height: insets.top, flexDirection: 'row', backgroundColor: theme.sidebarBg}]}>
+                <View style={[styles.flex, tabletSidebarStyle]}/>
+                {isTablet && <View style={styles.tabletContainer}/>}
+            </View>
+            <Animated.View
+                onLayout={onLayout}
+                style={[styles.flexRow, animated]}
             >
-                <View style={[{flexDirection: 'row'}]}>
-                    <View style={[styles.container, tabletSidebarStyle]}/>
-                    {isTablet && <View style={styles.tabletContainer}/>}
-                </View>
-                <Animated.View
-                    onLayout={onLayout}
-                    style={[styles.flexRow, animated]}
-                >
-                    {content}
-                    {isTablet &&
+                {content}
+                {isTablet &&
                     <View style={[styles.tabletContainer, styles.tabletDivider]}>
                         <AccountTabletView/>
                     </View>
-                    }
-                </Animated.View>
-            </SafeAreaView>
-        </Freeze>
+                }
+            </Animated.View>
+        </View>
     );
 };
 

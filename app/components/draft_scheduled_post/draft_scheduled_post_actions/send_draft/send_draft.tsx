@@ -80,7 +80,6 @@ const SendDraft: React.FC<Props> = ({
     draftType,
     postId,
     channelType,
-    bottomSheetId,
     currentUserId,
     enableConfirmNotificationsToChannel,
     maxMessageLength,
@@ -162,7 +161,7 @@ const SendDraft: React.FC<Props> = ({
     });
 
     const draftSendHandler = async () => {
-        await dismissBottomSheet(bottomSheetId);
+        await dismissBottomSheet();
         if (persistentNotificationsEnabled) {
             persistentNotificationsConfirmation(serverUrl, value, mentionsList, intl, handleSendMessage, persistentNotificationMaxRecipients, persistentNotificationInterval, currentUserId, channelName, channelType);
         } else {

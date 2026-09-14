@@ -6,34 +6,20 @@ import React, {useCallback} from 'react';
 import {BaseOption} from '@components/common_post_options';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
-import {dismissBottomSheet, openAsBottomSheet} from '@screens/navigation';
+import {dismissBottomSheet, navigateToScreen} from '@screens/navigation';
 
 import IconAI from '../../../components/illustrations/icon_ai';
 
 import type PostModel from '@typings/database/models/servers/post';
-import type {AvailableScreens} from '@typings/screens/navigation';
 
-type Props = {
-    bottomSheetId: AvailableScreens;
-    post: PostModel;
-}
-const AskAi = (props: Props) => {
-    const {bottomSheetId, post} = props;
+const AskAi = ({post}: {post: PostModel}) => {
     const theme = useTheme();
 
     const onPress = useCallback(async () => {
-        await dismissBottomSheet(bottomSheetId);
+        await dismissBottomSheet();
+        navigateToScreen(Screens.AI_OPTIONS, {post});
+    }, [post]);
 
-        openAsBottomSheet({
-            closeButtonId: 'close-quota-exceeded',
-            screen: Screens.AI_OPTIONS,
-            theme,
-            title: '',
-            props: {
-                post,
-            },
-        });
-    }, [bottomSheetId, post, theme]);
     return (
         <BaseOption
             message={{id: 'ai.actions', defaultMessage: 'AI Actions'}}

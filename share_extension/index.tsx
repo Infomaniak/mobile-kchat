@@ -3,7 +3,7 @@
 
 import MattermostShare, {type ShareExtensionDataToSend, type SharedItem} from '@mattermost/rnshare';
 import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React, {useEffect, useMemo, useState} from 'react';
 import {IntlProvider} from 'react-intl';
 import {Appearance, BackHandler} from 'react-native';
@@ -18,7 +18,7 @@ import ChannelsScreen from './screens/channels';
 import ServersScreen from './screens/servers';
 import ShareScreen from './screens/share';
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 const closeExtension = (data: ShareExtensionDataToSend | null) => {
     MattermostShare.close(data);
@@ -33,17 +33,10 @@ const ShareExtension = () => {
             backgroundColor: theme.sidebarHeaderBg,
         },
         headerTitleStyle: {
-            marginHorizontal: 0,
-            left: 0,
             color: theme.sidebarHeaderTextColor,
-        },
-        headerBackTitleStyle: {
-            color: theme.sidebarHeaderTextColor,
-            margin: 0,
         },
         headerTintColor: theme.sidebarHeaderTextColor,
-        headerTopInsetEnabled: false,
-        cardStyle: {backgroundColor: theme.centerChannelBg},
+        contentStyle: {backgroundColor: theme.centerChannelBg},
     }), [theme]);
 
     const {text: message, link: linkPreviewUrl} = useMemo(() => {

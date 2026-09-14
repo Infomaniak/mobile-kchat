@@ -3,7 +3,7 @@
 
 import React, {useCallback, useEffect, useMemo, useReducer, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {Keyboard, ScrollView, View} from 'react-native';
+import {type ImageSourcePropType, Keyboard, ScrollView, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {handleGotoLocation} from '@actions/remote/command';
@@ -29,7 +29,6 @@ import {buildNavigationButton, dismissModal, setButtons} from '../navigation';
 import AppsFormField from './apps_form_field';
 
 import type {AvailableScreens} from '@typings/screens/navigation';
-import type {ImageResource} from 'react-native-navigation';
 
 const getStyleFromTheme = makeStyleSheetFromTheme((theme: Theme) => {
     return {
@@ -86,7 +85,7 @@ const close = () => {
     dismissModal();
 };
 
-const makeCloseButton = (icon: ImageResource) => {
+const makeCloseButton = (icon: ImageSourcePropType) => {
     return buildNavigationButton(CLOSE_BUTTON_ID, 'close.more_direct_messages.button', icon);
 };
 

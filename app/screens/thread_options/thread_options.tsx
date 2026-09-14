@@ -60,35 +60,30 @@ const ThreadOptions = ({
     const style = getStyleSheet(theme);
 
     const close = () => {
-        return dismissBottomSheet(Screens.THREAD_OPTIONS);
+        return dismissBottomSheet();
     };
 
     useNavButtonPressed(THREAD_OPTIONS_BUTTON, componentId, close, []);
 
     const options = [
         <ReplyOption
-            bottomSheetId={Screens.THREAD_OPTIONS}
             key='reply'
             post={post}
         />,
         <FollowThreadOption
-            bottomSheetId={Screens.THREAD_OPTIONS}
             key='unfollow'
             thread={thread}
         />,
         <OpenInChannelOption
-            bottomSheetId={Screens.THREAD_OPTIONS}
             key='open-in-channel'
             threadId={thread.id}
         />,
         <MarkAsUnreadOption
-            bottomSheetId={Screens.THREAD_OPTIONS}
             key='mark-as-unread'
             teamId={team.id}
             thread={thread}
         />,
         <SaveOption
-            bottomSheetId={Screens.THREAD_OPTIONS}
             key='save'
             isSaved={isSaved}
             postId={thread.id}
@@ -97,7 +92,6 @@ const ThreadOptions = ({
 
     options.push(
         <CopyPermalinkOption
-            bottomSheetId={Screens.THREAD_OPTIONS}
             key='copy-link'
             post={post}
             sourceScreen={Screens.THREAD_OPTIONS}

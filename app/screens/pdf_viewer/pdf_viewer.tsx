@@ -10,10 +10,10 @@ import {
     type OnPasswordRequiredEvent,
 } from '@mattermost/secure-pdf-viewer';
 import {deleteAsync} from 'expo-file-system';
+import {useNavigation} from 'expo-router';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Alert} from 'react-native';
-import {Navigation} from 'react-native-navigation';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {setFileAsBlocked} from '@actions/local/file';
@@ -55,6 +55,7 @@ const PdfViewer = ({allowPdfLinkNavigation, closeButtonId, componentId, fileId, 
     const theme = useTheme();
     const serverUrl = useServerUrl();
     const intl = useIntl();
+    const navigation = useNavigation();
     const styles = getStyleSheet(theme);
     const [password, setPassword] = useState<string | undefined>(undefined);
     const passwordRef = useRef<PasswordRef>(null);
@@ -64,12 +65,8 @@ const PdfViewer = ({allowPdfLinkNavigation, closeButtonId, componentId, fileId, 
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
     const toggleNavbar = useCallback((visible: boolean) => {
-        Navigation.mergeOptions(componentId, {
-            topBar: {
-                visible,
-                animate: true,
-            }});
-    }, [componentId]);
+        navigation.setOptions({headerShown: visible});
+    }, [navigation]);
 
     const onClose = useCallback(() => {
         onDismiss?.();

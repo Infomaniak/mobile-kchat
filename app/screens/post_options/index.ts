@@ -8,6 +8,7 @@ import {switchMap} from 'rxjs/operators';
 import {Permissions, Post, Screens} from '@constants';
 import {AppBindingLocations} from '@constants/apps';
 import {MAX_ALLOWED_REACTIONS} from '@constants/emoji';
+import {withServerUrl} from '@context/server';
 import AppsManager from '@managers/apps_manager';
 import {observeChannel, observeIsReadOnlyChannel} from '@queries/servers/channel';
 import {observeLimits} from '@queries/servers/limit';
@@ -33,12 +34,22 @@ import type ReactionModel from '@typings/database/models/servers/reaction';
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
+export type PostOptionsProps = {
+    postId?: string;
+    post?: Post;
+    sourceScreen: AvailableScreens;
+    showAddReaction: boolean;
+    serverUrl: string;
+    isChannelMember?: boolean;
+}
+
 type EnhancedProps = WithDatabaseArgs & {
     combinedPost?: Post | PostModel;
     post: PostModel;
     showAddReaction: boolean;
     sourceScreen: AvailableScreens;
     serverUrl: string;
+    isChannelMember?: boolean;
 }
 
 const observeCanEditPost = (database: Database, isOwner: boolean, post: PostModel, postEditTimeLimit: number, isLicensed: boolean, channel: ChannelModel, user: UserModel) => {
@@ -61,7 +72,7 @@ const observeCanEditPost = (database: Database, isOwner: boolean, post: PostMode
     }));
 };
 
-const withPost = withObservables([], ({post, database}: {post: Post | PostModel} & WithDatabaseArgs) => {
+const withPost = withObservables([], ({post, postId, database}: {post?: Post; postId?: string} & WithDatabaseArgs) => {
     let id: string | undefined;
     let combinedPost: Observable<Post | PostModel | undefined> = of$(undefined);
     if (post?.type === Post.POST_TYPES.COMBINED_USER_ACTIVITY && post.props?.system_post_ids) {
@@ -69,14 +80,19 @@ const withPost = withObservables([], ({post, database}: {post: Post | PostModel}
         id = systemPostIds?.pop();
         combinedPost = of$(post);
     }
-    const thePost = id ? observePost(database, id) : post;
+
+    if (postId) {
+        id = postId;
+    }
+
+    const thePost = id ? observePost(database, id) : of$(undefined);
     return {
         combinedPost,
         post: thePost,
     };
 });
 
-const enhanced = withObservables([], ({combinedPost, post, showAddReaction, sourceScreen, database, serverUrl}: EnhancedProps) => {
+const enhanced = withObservables([], ({combinedPost, post, showAddReaction, sourceScreen, database, serverUrl, isChannelMember}: EnhancedProps) => {
     const channel = observeChannel(database, post.channelId);
     const channelIsArchived = channel.pipe(switchMap((ch: ChannelModel | undefined) => of$(ch ? ch.deleteAt !== 0 : false)));
     const currentUser = observeCurrentUser(database);
@@ -178,7 +194,8 @@ const enhanced = withObservables([], ({combinedPost, post, showAddReaction, sour
         usage,
         limits,
         currentUser,
+        isChannelMember: of$(isChannelMember ?? true),
     };
 });
 
-export default withDatabase(withPost(enhanced(PostOptions)));
+export default withDatabase(withPost(withServerUrl(enhanced(PostOptions))));
