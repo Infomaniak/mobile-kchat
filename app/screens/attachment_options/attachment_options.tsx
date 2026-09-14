@@ -11,6 +11,7 @@ import {type CameraOptions} from 'react-native-image-picker';
 
 import FormattedText from '@components/formatted_text';
 import SlideUpPanelItem, {ITEM_HEIGHT} from '@components/slide_up_panel_item';
+import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import BottomSheet from '@screens/bottom_sheet';
@@ -23,8 +24,6 @@ import {logError} from '@utils/log';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import type {AvailableScreens} from '@typings/screens/navigation';
-
 const TITLE_HEIGHT = 54;
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     title: {
@@ -35,8 +34,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 }));
 
 type Props = {
-    componentId: AvailableScreens;
-    closeButtonId?: string;
     onUploadFiles: (files: ExtractedFileInfo[]) => void;
     maxFileCount?: number;
     fileCount?: number;
@@ -47,8 +44,6 @@ type Props = {
 }
 
 const AttachmentOptions: React.FC<Props> = ({
-    componentId,
-    closeButtonId = 'attachment-close-id',
     onUploadFiles,
     maxFileCount,
     fileCount = 0,
@@ -242,9 +237,8 @@ const AttachmentOptions: React.FC<Props> = ({
 
     return (
         <BottomSheet
-            componentId={componentId}
+            screen={Screens.ATTACHMENT_OPTIONS}
             renderContent={renderContent}
-            closeButtonId={closeButtonId}
             snapPoints={snapPoints}
             testID={testID}
         />

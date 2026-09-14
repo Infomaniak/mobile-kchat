@@ -16,8 +16,6 @@ type Props = {
     postId: string;
 };
 
-const POST_AI_BUTTON = 'close-ai-options';
-
 const AiOptions = (props: Props) => {
     const {postId} = props;
 
@@ -42,8 +40,7 @@ const AiOptions = (props: Props) => {
     return (
         <BottomSheet
             renderContent={renderContent}
-            closeButtonId={POST_AI_BUTTON}
-            componentId={Screens.AI_OPTIONS}
+            screen={Screens.AI_OPTIONS}
             initialSnapIndex={1}
             snapPoints={snapPoints}
         />

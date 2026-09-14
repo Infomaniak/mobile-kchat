@@ -3,7 +3,7 @@
 
 import RNUtils, {type SplitViewResult} from '@mattermost/rnutils';
 import {defineMessages} from 'react-intl';
-import {Alert, DeviceEventEmitter, Linking, NativeEventEmitter, NativeModules, Platform} from 'react-native';
+import {Alert, DeviceEventEmitter, Linking, NativeEventEmitter, NativeModules} from 'react-native';
 import semver from 'semver';
 
 import {switchToChannelById} from '@actions/remote/channel';
@@ -20,7 +20,7 @@ import {queryTeamDefaultChannel} from '@queries/servers/channel';
 import {getCommonSystemValues} from '@queries/servers/system';
 import {getTeamChannelHistory} from '@queries/servers/team';
 import {setScreensOrientation} from '@screens/navigation';
-import CallManager, {CallAnsweredEvent, CallEndedEvent, CallMutedEvent, CallVideoMutedEvent} from '@store/CallManager';
+import CallManager, {CallAnsweredEvent, CallEndedEvent} from '@store/CallManager';
 import {alertInvalidDeepLink, parseAndHandleDeepLink} from '@utils/deep_link';
 import {getFullErrorMessage} from '@utils/errors';
 import {getIntlShape} from '@utils/general';
@@ -55,11 +55,11 @@ class GlobalEventHandlerSingleton {
         DeviceEventEmitter.addListener(Events.SERVER_VERSION_CHANGED, this.onServerVersionChanged);
         callManagerEmitter.addListener('CallAnswered', this.onCallAnswered);
         callManagerEmitter.addListener('CallEnded', this.onCallEnded);
-        if (Platform.OS === 'ios') {
-            callManagerEmitter.addListener('CallMuted', this.onCallMuted);
-        }
 
-        // callManagerEmitter.addListener('CallVideoMuted', this.onCallMuted);
+        // Note: the native iOS CallManagerModule only supports 'CallAnswered' and 'CallEnded'
+        // events since the Jitsi RN SDK migration, so subscribing to 'CallMuted' here would
+        // throw "`CallMuted` is not a supported event type" and crash the module graph.
+
         splitViewEmitter.addListener('SplitViewChanged', this.onSplitViewChanged);
         Linking.addEventListener('url', this.onDeepLink);
 
@@ -151,24 +151,6 @@ class GlobalEventHandlerSingleton {
             CallManager.leaveCallScreen(parsed.data);
         } else {
             logError('UNABLE TO PARSE CallEndedEvent', parsed.error);
-        }
-    };
-
-    onCallMuted = async (event: unknown) => {
-        const parsed = CallMutedEvent.safeParse(event);
-        if (parsed.success) {
-            CallManager.toggleAudioMuted(parsed.data.isMuted === 'true');
-        } else {
-            logError('UNABLE TO PARSE CallMutedEvent', parsed.error);
-        }
-    };
-
-    onCallVideoMuted = async (event: unknown) => {
-        const parsed = CallVideoMutedEvent.safeParse(event);
-        if (parsed.success) {
-            CallManager.toggleAudioMuted(parsed.data.isMuted === 'true');
-        } else {
-            logError('UNABLE TO PARSE CallVideoMutedEvent', parsed.error);
         }
     };
 

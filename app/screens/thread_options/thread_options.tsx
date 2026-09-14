@@ -44,8 +44,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const THREAD_OPTIONS_BUTTON = 'close-thread-options';
-
 const ThreadOptions = ({
     isSaved,
     post,
@@ -109,8 +107,7 @@ const ThreadOptions = ({
     return (
         <BottomSheet
             renderContent={renderContent}
-            closeButtonId={THREAD_OPTIONS_BUTTON}
-            componentId={Screens.THREAD_OPTIONS}
+            screen={Screens.THREAD_OPTIONS}
             initialSnapIndex={1}
             snapPoints={[1, snapPoint]}
             testID='thread_options'

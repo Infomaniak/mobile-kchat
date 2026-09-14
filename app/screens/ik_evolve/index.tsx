@@ -201,7 +201,7 @@ const IKEvolve = () => {
     return (
         <BottomSheet
             renderContent={renderContent}
-            componentId={Screens.IK_EVOLVE}
+            screen={Screens.IK_EVOLVE}
             initialSnapIndex={1}
             snapPoints={['10%', '80%']}
             contentStyle={{paddingHorizontal: 0}}

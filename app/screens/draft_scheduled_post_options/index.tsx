@@ -127,9 +127,8 @@ const DraftScheduledPostOptions: React.FC<Props> = ({
 
     return (
         <BottomSheet
-            componentId={Screens.DRAFT_SCHEDULED_POST_OPTIONS}
+            screen={Screens.DRAFT_SCHEDULED_POST_OPTIONS}
             renderContent={renderContent}
-            closeButtonId={DRAFT_OPTIONS_BUTTON}
             snapPoints={snapPoints}
             testID='draft_options'
         />

@@ -28,8 +28,6 @@ const OPTIONS_SEPARATOR_HEIGHT = 1;
 const TITLE_HEIGHT = 54;
 const ITEM_HEIGHT = 48;
 
-export const SCHEDULED_POST_OPTIONS_BUTTON = 'close-scheduled-post-options';
-
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     container: {
         backgroundColor: theme.centerChannelBg,
@@ -154,8 +152,7 @@ export function ScheduledPostOptions({currentUserTimezone, onSchedule}: Props) {
     return (
         <BottomSheet
             renderContent={renderContent}
-            componentId={Screens.SCHEDULED_POST_OPTIONS}
-            closeButtonId={SCHEDULED_POST_OPTIONS_BUTTON}
+            screen={Screens.SCHEDULED_POST_OPTIONS}
             snapPoints={snapPoints}
             testID='scheduled_post_options_bottom_sheet'
             footerComponent={renderFooter}

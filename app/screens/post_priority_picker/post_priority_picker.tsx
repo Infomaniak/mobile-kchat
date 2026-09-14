@@ -32,7 +32,6 @@ type Props = {
     isPersistenNotificationsEnabled: boolean;
     postPriority: PostPriority;
     updatePostPriority: (data: PostPriority) => void;
-    closeButtonId: string;
     persistentNotificationInterval: number;
 };
 
@@ -85,7 +84,6 @@ const PostPriorityPicker = ({
     persistentNotificationInterval,
     postPriority,
     updatePostPriority,
-    closeButtonId,
 }: Props) => {
     const intl = useIntl();
     const isTablet = useIsTablet();
@@ -231,8 +229,7 @@ const PostPriorityPicker = ({
     return (
         <BottomSheet
             renderContent={renderContent}
-            closeButtonId={closeButtonId}
-            componentId={Screens.POST_PRIORITY_PICKER}
+            screen={Screens.POST_PRIORITY_PICKER}
             footerComponent={renderFooter}
             initialSnapIndex={1}
             snapPoints={snapPoints}

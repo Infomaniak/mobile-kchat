@@ -29,8 +29,6 @@ import type ThreadModel from '@typings/database/models/servers/thread';
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
 
-const POST_OPTIONS_BUTTON = 'close-post-options';
-
 type PostOptionsProps = {
     canAddReaction: boolean;
     canDelete: boolean;
@@ -45,7 +43,6 @@ type PostOptionsProps = {
     sourceScreen: AvailableScreens;
     post: PostModel;
     thread?: ThreadModel;
-    componentId?: AvailableScreens;
     bindings: AppBinding[];
     serverUrl: string;
     currentUser?: UserModel;
@@ -109,6 +106,7 @@ const PostOptions = ({
         return (
             <BottomSheetScrollView
                 bounces={false}
+                testID='post_options.scroll_view'
             >
                 {isChannelMember && (
                     <>
@@ -209,11 +207,9 @@ const PostOptions = ({
     return (
         <BottomSheet
             renderContent={renderContent}
-            closeButtonId={POST_OPTIONS_BUTTON}
-            componentId={Screens.POST_OPTIONS}
+            screen={Screens.POST_OPTIONS}
             initialSnapIndex={1}
             snapPoints={snapPoints}
-            scrollable={true}
             testID='post_options'
         />
     );

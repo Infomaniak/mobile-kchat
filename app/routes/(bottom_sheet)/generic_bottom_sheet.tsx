@@ -21,7 +21,7 @@ export default function GenericBottomSheetRoute() {
 
     return (
         <BottomSheet
-            componentId={Screens.GENERIC_BOTTOM_SHEET}
+            screen={Screens.GENERIC_BOTTOM_SHEET}
             renderContent={renderContent!}
             footerComponent={BottomSheetStore.getFooterComponent()}
             snapPoints={snapPoints}
