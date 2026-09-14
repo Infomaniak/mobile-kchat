@@ -133,7 +133,6 @@ const Channel = ({
         <FreezeScreen>
             <SafeAreaView
                 style={styles.flex}
-                mode='margin'
                 edges={safeAreaViewEdges}
                 testID='channel.screen'
                 onLayout={onLayout}

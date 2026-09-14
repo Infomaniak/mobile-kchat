@@ -162,9 +162,12 @@ const MarkdownTable = ({children, numColumns, theme}: MarkdownTableInputProps) =
     });
 
     const handleContainerLayout = (e: LayoutChangeEvent) => {
+        // Read the event synchronously: React may run the state updater after
+        // the synthetic event has been nullified (RN 0.83 / Fabric).
+        const {width} = e.nativeEvent.layout;
         setState((prev) => ({
             ...prev,
-            containerWidth: e.nativeEvent.layout.width,
+            containerWidth: width,
         }));
     };
 

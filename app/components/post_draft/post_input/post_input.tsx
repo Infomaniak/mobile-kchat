@@ -21,7 +21,6 @@ import {useKeyboardState} from '@context/keyboard_state';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
-import {useInputPropagation} from '@hooks/input';
 import {useFocusAfterEmojiDismiss} from '@hooks/use_focus_after_emoji_dismiss';
 import NavigationStore from '@store/navigation_store';
 import {handleDraftUpdate} from '@utils/draft';
@@ -159,7 +158,6 @@ export default function PostInput({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [registerPostInputCallbacks]);
 
-    const [propagateValue, shouldProcessEvent] = useInputPropagation();
     const {isProcessing} = useRewrite();
 
     const lastTypingEventSent = useRef(0);
@@ -282,9 +280,6 @@ export default function PostInput({
     }, [showInputAccessoryView, cursorPosition, updateCursorPosition]);
 
     const handleTextChange = useCallback((newValue: string) => {
-        if (!shouldProcessEvent(newValue)) {
-            return;
-        }
         updateValue(newValue);
         lastNativeValue.current = newValue;
 
@@ -300,7 +295,6 @@ export default function PostInput({
             lastTypingEventSent.current = Date.now();
         }
     }, [
-        shouldProcessEvent,
         updateValue,
         checkMessageLength,
         timeBetweenUserTypingUpdatesMilliseconds,
@@ -343,15 +337,10 @@ export default function PostInput({
         }
 
         if (topScreen === sourceScreen) {
-            let newValue: string;
-            updateValue((v) => {
-                newValue = v.substring(0, cursorPosition) + '\n' + v.substring(cursorPosition);
-                return newValue;
-            });
+            updateValue((v) => v.substring(0, cursorPosition) + '\n' + v.substring(cursorPosition));
             updateCursorPosition((pos) => pos + 1);
-            propagateValue(newValue!);
         }
-    }, [rootId, isTablet, updateValue, updateCursorPosition, cursorPosition, propagateValue]);
+    }, [rootId, isTablet, updateValue, updateCursorPosition, cursorPosition]);
 
     const onAppStateChange = useCallback((appState: AppStateStatus) => {
         if (appState !== 'active' && previousAppState.current === 'active') {
@@ -376,7 +365,6 @@ export default function PostInput({
                 const draft = value ? `${value} ${text} ` : `${text} `;
                 updateValue(draft);
                 updateCursorPosition(draft.length);
-                propagateValue(draft);
                 inputRef.current?.focus();
             }
         });
@@ -385,7 +373,7 @@ export default function PostInput({
             updateDraftMessage(serverUrl, channelId, rootId, lastNativeValue.current); // safe draft on unmount
         };
 
-    // - updateValue, updateCursorPosition, propagateValue are stable setState/hook functions
+    // - updateValue and updateCursorPosition are stable setState/hook functions
     // - inputRef is a ref (stable reference, doesn't need to be in deps)
     // - serverUrl, value, lastNativeValue are either stable or we want their latest values when event fires
     // - We need to recreate the listener when channelId/rootId changes to check the correct source screen
@@ -394,13 +382,8 @@ export default function PostInput({
 
     useEffect(() => {
         if (value !== lastNativeValue.current) {
-            propagateValue(value);
             lastNativeValue.current = value;
         }
-
-    // - propagateValue is from useInputPropagation hook (stable reference, doesn't need to be in deps)
-    // - lastNativeValue is a ref (stable reference, doesn't need to be in deps)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value]);
 
     const events = useMemo(() => ({

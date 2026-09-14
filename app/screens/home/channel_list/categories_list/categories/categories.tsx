@@ -22,11 +22,17 @@ import UnreadCategories from './unreads';
 
 import type CategoryModel from '@typings/database/models/servers/category';
 import type ChannelModel from '@typings/database/models/servers/channel';
+import type PreferenceModel from '@typings/database/models/servers/preference';
+import type {Observable} from 'rxjs';
 
 type Props = {
     categories: CategoryModel[];
     onlyUnreads: boolean;
     unreadsOnTop: boolean;
+    manuallyClosedPrefs$: Observable<PreferenceModel[]>;
+    autoclosePrefs$: Observable<PreferenceModel[]>;
+    currentChannelId$: Observable<string>;
+    notifyPropsByChannelId$: Observable<Record<string, Partial<ChannelNotifyProps>>>;
 }
 
 const styles = StyleSheet.create({
@@ -46,6 +52,10 @@ const Categories = ({
     categories,
     onlyUnreads,
     unreadsOnTop,
+    manuallyClosedPrefs$,
+    autoclosePrefs$,
+    currentChannelId$,
+    notifyPropsByChannelId$,
 }: Props) => {
     const intl = useIntl();
     const listRef = useRef<FlatList>(null);
@@ -85,21 +95,31 @@ const Categories = ({
                     isTablet={isTablet}
                     onChannelSwitch={onChannelSwitch}
                     onlyUnreads={showOnlyUnreadsCategory}
+                    unreadsOnTop={unreadsOnTop}
+                    notifyPropsByChannelId$={notifyPropsByChannelId$}
                 />
             );
         }
         return (
             <>
-                <CategoryHeader category={data.item}/>
+                <CategoryHeader
+                    category={data.item}
+                    currentChannelId$={currentChannelId$}
+                />
                 <CategoryBody
                     category={data.item}
                     isTablet={isTablet}
                     locale={intl.locale}
                     onChannelSwitch={onChannelSwitch}
+                    unreadsOnTop={unreadsOnTop}
+                    manuallyClosedPrefs$={manuallyClosedPrefs$}
+                    autoclosePrefs$={autoclosePrefs$}
+                    currentChannelId$={currentChannelId$}
+                    notifyPropsByChannelId$={notifyPropsByChannelId$}
                 />
             </>
         );
-    }, [teamId, intl.locale, isTablet, onChannelSwitch, showOnlyUnreadsCategory]);
+    }, [teamId, intl.locale, isTablet, onChannelSwitch, showOnlyUnreadsCategory, unreadsOnTop, manuallyClosedPrefs$, autoclosePrefs$, currentChannelId$, notifyPropsByChannelId$]);
 
     useEffect(() => {
         const t = setTimeout(() => {
@@ -130,6 +150,8 @@ const Categories = ({
                     isTablet={isTablet}
                     onChannelSwitch={onChannelSwitch}
                     onlyUnreads={showOnlyUnreadsCategory}
+                    unreadsOnTop={unreadsOnTop}
+                    notifyPropsByChannelId$={notifyPropsByChannelId$}
                 />
             </View>
             }
