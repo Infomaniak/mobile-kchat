@@ -3,46 +3,52 @@
 
 import {BehaviorSubject} from 'rxjs';
 
-type InAppNotificationConfig = {
-    notification: NotificationWithData;
-    serverName?: string;
-    serverUrl: string;
-};
-
 type InAppNotificationState = {
-    id: number;
     visible: boolean;
     notification: NotificationWithData | null;
     serverName?: string;
-    serverUrl: string;
+    serverUrl?: string;
 };
 
 class InAppNotificationStoreSingleton {
     private subject = new BehaviorSubject<InAppNotificationState>({
-        id: 0,
         visible: false,
         notification: null,
-        serverUrl: '',
+        serverName: undefined,
+        serverUrl: undefined,
     });
 
-    private counter = 0;
-
-    show = (config: InAppNotificationConfig) => {
-        this.counter += 1;
-        this.subject.next({visible: true, id: this.counter, ...config});
+    /**
+     * Show notification - replaces any existing notification
+     */
+    show = (notification: NotificationWithData, serverUrl: string, serverName?: string) => {
+        this.subject.next({
+            visible: true,
+            notification,
+            serverUrl,
+            serverName,
+        });
     };
 
+    /**
+     * Dismiss current notification
+     */
     dismiss = () => {
-        this.subject.next({visible: false, id: 0, notification: null, serverUrl: ''});
+        this.subject.next({
+            visible: false,
+            notification: null,
+            serverUrl: undefined,
+            serverName: undefined,
+        });
     };
 
-    observe = () => {
+    observe() {
         return this.subject.asObservable();
-    };
+    }
 
-    getState = () => {
+    getState() {
         return this.subject.value;
-    };
+    }
 }
 
 const InAppNotificationStore = new InAppNotificationStoreSingleton();

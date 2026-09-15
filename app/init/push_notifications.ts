@@ -168,7 +168,7 @@ class PushNotificationsSingleton {
 
             if (condition1 || condition2 || condition3) {
                 // Dismiss the screen if it's already visible or else it blocks the navigation
-                InAppNotificationStore.show({notification, serverName, serverUrl});
+                InAppNotificationStore.show(notification, serverUrl, serverName);
             }
         }
     };

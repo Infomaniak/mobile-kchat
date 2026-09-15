@@ -22,6 +22,7 @@ import {cleanup, initialize} from '@init/app';
 import InAppNotificationContainer from '@screens/in_app_notification';
 import SnackBarContainer from '@screens/snack_bar';
 import NavigationStore, {useCurrentScreen} from '@store/navigation_store';
+import {logError} from '@utils/log';
 
 import type {NativeStackNavigationOptions} from '@react-navigation/native-stack';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -68,10 +69,10 @@ export default function RootLayout() {
             try {
                 await initialize();
                 RNUtils.lockPortrait();
-
                 setAppReady(true);
             } catch (error) {
-                setAppReady(true); // Still show UI with error state
+                logError('[RootLayout.initializeApp] failed', error);
+                setAppReady(true);
             }
         }
 
