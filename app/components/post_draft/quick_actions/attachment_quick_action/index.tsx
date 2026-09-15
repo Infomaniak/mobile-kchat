@@ -8,7 +8,7 @@ import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {ICON_SIZE} from '@constants/post_draft';
 import {useKeyboardState} from '@context/keyboard_state';
 import {useTheme} from '@context/theme';
-import {openAttachmentOptions} from '@screens/navigation';
+import {openAttachmentOptions} from '@utils/navigation';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import type {QuickActionAttachmentProps} from '@typings/components/post_draft_quick_action';

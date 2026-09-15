@@ -7,7 +7,6 @@ const ABOUT = 'about';
 const ACCOUNT = 'account';
 const AI_OPTIONS = 'ai_options';
 const APPS_FORM = 'apps_form';
-const ATTACHMENT_OPTIONS = 'attachment_options';
 const BOTTOM_SHEET = '(bottom_sheet)';
 const GENERIC_BOTTOM_SHEET = 'generic_bottom_sheet';
 const BROWSE_CHANNELS = 'browse_channels';
@@ -106,7 +105,6 @@ export default {
     ACCOUNT,
     AI_OPTIONS,
     APPS_FORM,
-    ATTACHMENT_OPTIONS,
     BOTTOM_SHEET,
     GENERIC_BOTTOM_SHEET,
     BROWSE_CHANNELS,
@@ -234,7 +232,6 @@ export const MODAL_SCREENS = new Set<string>([
 
 export const SCREENS_AS_BOTTOM_SHEET = new Set<string>([
     GENERIC_BOTTOM_SHEET,
-    ATTACHMENT_OPTIONS,
     CALL_PARTICIPANTS,
     CALL_HOST_CONTROLS,
     DRAFT_SCHEDULED_POST_OPTIONS,
@@ -305,7 +302,6 @@ export {
     ACCOUNT,
     AI_OPTIONS,
     APPS_FORM,
-    ATTACHMENT_OPTIONS,
     BOTTOM_SHEET,
     GENERIC_BOTTOM_SHEET,
     BROWSE_CHANNELS,

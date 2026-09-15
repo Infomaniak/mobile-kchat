@@ -6,10 +6,10 @@ import React from 'react';
 import {Alert} from 'react-native';
 
 import DraftEditPostUploadManager from '@managers/draft_upload_manager';
-import * as Navigation from '@screens/navigation';
 import {fireEvent, renderWithEverything} from '@test/intl-test-helper';
 import TestHelper from '@test/test_helper';
 import PickerUtil from '@utils/file/file_picker';
+import * as NavigationUtils from '@utils/navigation';
 
 import EditPost from './edit_post';
 
@@ -26,11 +26,13 @@ jest.mock('@managers/draft_upload_manager', () => ({
     cancel: jest.fn(),
 }));
 jest.mock('@screens/navigation', () => ({
-    openAttachmentOptions: jest.fn(),
     buildNavigationButton: jest.fn((id: string, testID: string) => ({id, testID})),
     dismissBottomSheet: jest.fn(() => Promise.resolve()),
     dismissModal: jest.fn(),
     setButtons: jest.fn(),
+}));
+jest.mock('@utils/navigation', () => ({
+    openAttachmentOptions: jest.fn(),
 }));
 
 const TEST_CONFIG = {
@@ -143,7 +145,7 @@ describe.skip('Edit Post', () => {
 
     const triggerFileUpload = async (screen: ReturnType<typeof renderEditPost>) => {
         let onUploadFilesCallback: ((files: ExtractedFileInfo[]) => void) | undefined;
-        jest.mocked(Navigation.openAttachmentOptions).mockImplementation((props: Record<string, any>) => {
+        jest.mocked(NavigationUtils.openAttachmentOptions).mockImplementation((props: Record<string, any>) => {
             onUploadFilesCallback = props?.onUploadFiles;
             return undefined;
         });

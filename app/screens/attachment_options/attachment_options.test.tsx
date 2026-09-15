@@ -7,7 +7,6 @@ import {fireEvent, waitFor} from '@testing-library/react-native';
 import {File} from 'expo-file-system';
 import {Alert} from 'react-native';
 
-import {Screens} from '@constants';
 import {dismissBottomSheet} from '@screens/navigation';
 import {renderWithIntlAndTheme} from '@test/intl-test-helper';
 import PickerUtil from '@utils/file/file_picker';
@@ -36,10 +35,6 @@ jest.mock('@utils/log', () => ({
     logError: jest.fn(),
 }));
 
-jest.mock('@hooks/device', () => ({
-    useIsTablet: jest.fn(() => false),
-}));
-
 describe('AttachmentOptions', () => {
     const mockDismissBottomSheet = dismissBottomSheet as jest.Mock;
     const mockAttachFileFromPhotoGallery = jest.fn();
@@ -47,7 +42,6 @@ describe('AttachmentOptions', () => {
     const mockAttachFileFromFiles = jest.fn();
 
     const baseProps = {
-        componentId: Screens.ATTACHMENT_OPTIONS,
         onUploadFiles: jest.fn(),
         maxFileCount: 10,
         fileCount: 0,
@@ -544,30 +538,6 @@ describe('AttachmentOptions', () => {
             // dismissBottomSheet is called once for the first press,
             // the second press is blocked by the ref guard
             expect(mockDismissBottomSheet).toHaveBeenCalledTimes(1);
-        });
-    });
-
-    describe('tablet rendering', () => {
-        it('should not render title when isTablet is true', () => {
-            const useIsTablet = require('@hooks/device').useIsTablet;
-            useIsTablet.mockReturnValue(true);
-
-            const {queryByText} = renderWithIntlAndTheme(
-                <AttachmentOptions {...baseProps}/>,
-            );
-
-            expect(queryByText('Files and media')).toBeNull();
-        });
-
-        it('should render title when isTablet is false', () => {
-            const useIsTablet = require('@hooks/device').useIsTablet;
-            useIsTablet.mockReturnValue(false);
-
-            const {getByText} = renderWithIntlAndTheme(
-                <AttachmentOptions {...baseProps}/>,
-            );
-
-            expect(getByText('Files and media')).toBeTruthy();
         });
     });
 });

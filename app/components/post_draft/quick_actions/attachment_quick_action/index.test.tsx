@@ -4,8 +4,8 @@
 import {fireEvent, waitFor} from '@testing-library/react-native';
 
 import {useKeyboardState} from '@context/keyboard_state';
-import {openAttachmentOptions} from '@screens/navigation';
 import {renderWithIntlAndTheme} from '@test/intl-test-helper';
+import {openAttachmentOptions} from '@utils/navigation';
 
 import AttachmentQuickAction from './index';
 
@@ -13,7 +13,7 @@ jest.mock('@context/keyboard_state', () => ({
     useKeyboardState: jest.fn(),
 }));
 
-jest.mock('@screens/navigation', () => ({
+jest.mock('@utils/navigation', () => ({
     openAttachmentOptions: jest.fn(),
 }));
 

@@ -271,10 +271,6 @@ export function openAsBottomSheet({screen, props}: {
     navigateToScreen(screen, props);
 }
 
-export function openAttachmentOptions(props: Record<string, any>) {
-    navigateToScreen(Screens.ATTACHMENT_OPTIONS, props);
-}
-
 export function showAppForm(form: any, context: any) {
     navigateToScreen(Screens.APPS_FORM, {form, context});
 }

@@ -4,8 +4,9 @@
 import {Alert} from 'react-native';
 
 import {Screens, ServerErrors} from '@constants';
-import {navigateToScreen} from '@screens/navigation';
+import {bottomSheet, navigateToScreen} from '@screens/navigation';
 import {isErrorWithMessage, isServerError} from '@utils/errors';
+import {bottomSheetSnapPoint} from '@utils/helpers';
 
 import type {GalleryItemType} from '@typings/screens/gallery';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -104,4 +105,25 @@ export function previewPdf(item: FileInfo | GalleryItemType, path: string, theme
         closeButtonId: 'close-pdf-viewer',
         onDismiss,
     });
+}
+
+export function openAttachmentOptions(
+    props: {
+        onUploadFiles: (files: ExtractedFileInfo[]) => void;
+        maxFilesReached: boolean;
+        canUploadFiles: boolean;
+        showAttachLogs?: boolean;
+        testID?: string;
+        fileCount?: number;
+        maxFileCount?: number;
+    }) {
+    // Lazy require to avoid a circular module initialization:
+    // utils/navigation → screens/attachment_options → utils/theme → utils/navigation
+    const {ITEM_HEIGHT} = require('@components/slide_up_panel_item');
+    const AttachmentOptions = require('@screens/attachment_options').default;
+
+    const TITLE_HEIGHT = 54;
+    const renderContent = () => (<AttachmentOptions {...props}/>);
+    const componentHeight = TITLE_HEIGHT + bottomSheetSnapPoint(4 + (props.showAttachLogs ? 1 : 0), ITEM_HEIGHT);
+    bottomSheet({renderContent, snapPoints: [1, componentHeight]});
 }
