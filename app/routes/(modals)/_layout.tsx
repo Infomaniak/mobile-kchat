@@ -7,7 +7,12 @@ import {withServerDatabase} from '@database/components';
 
 function ModalsLayout() {
     return (
-        <Stack screenOptions={{headerShown: true, headerBackButtonMenuEnabled: false}}/>
+        <Stack screenOptions={{headerShown: true, headerBackButtonMenuEnabled: false}}>
+            <Stack.Screen
+                name='(channel_info)'
+                options={{headerShown: false}}
+            />
+        </Stack>
     );
 }
 

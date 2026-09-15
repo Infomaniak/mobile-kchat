@@ -39,7 +39,7 @@ const InfoBox = ({channelId, containerStyle, showAsLabel = false, testID}: Props
                 }],
             },
         };
-        showModal(Screens.CHANNEL_INFO, title, {channelId, closeButtonId}, options);
+        showModal(Screens.CHANNEL_INFO, title, {channelId, closeButtonId, title}, options);
     }, [intl, channelId, theme]);
 
     if (showAsLabel) {

@@ -140,7 +140,7 @@ const ChannelHeader = ({
                 }],
             },
         };
-        showModal(Screens.CHANNEL_INFO, title, {channelId, closeButtonId}, options);
+        showModal(Screens.CHANNEL_INFO, title, {channelId, closeButtonId, title}, options);
     }), [channelId, channelType, intl, theme]));
 
     const onChannelQuickAction = useCallback(() => {

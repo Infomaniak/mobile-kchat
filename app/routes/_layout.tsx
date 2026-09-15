@@ -4,6 +4,7 @@
 import {PortalHost, PortalProvider} from '@gorhom/portal';
 import RNUtils from '@mattermost/rnutils';
 import {Stack, useNavigationContainerRef} from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {IntlProvider} from 'react-intl';
 import {Keyboard, Platform, StyleSheet} from 'react-native';
@@ -41,7 +42,6 @@ const styles = StyleSheet.create({
     },
 });
 
-// SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
     const [appReady, setAppReady] = useState(false);
     const navigationRef = useNavigationContainerRef();
@@ -66,17 +66,12 @@ export default function RootLayout() {
     useDidMount(() => {
         async function initializeApp() {
             try {
-                // eslint-disable-next-line no-console
-                console.log('[Layout] initialize() starting...');
                 await initialize();
                 RNUtils.lockPortrait();
-                // eslint-disable-next-line no-console
-                console.log('[Layout] initialize() done, setting appReady=true');
+
                 setAppReady(true);
             } catch (error) {
-                // eslint-disable-next-line no-console
-                console.error('[Layout] initialize() failed', error);
-                setAppReady(true);
+                setAppReady(true); // Still show UI with error state
             }
         }
 
@@ -89,7 +84,7 @@ export default function RootLayout() {
 
     useEffect(() => {
         if (appReady) {
-            // SplashScreen.hideAsync();
+            SplashScreen.hideAsync();
         }
     }, [appReady]);
 
