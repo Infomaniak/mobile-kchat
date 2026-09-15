@@ -8,17 +8,17 @@ import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area
 import {storeLastViewedChannelIdAndServer, removeLastViewedChannelIdAndServer} from '@actions/app/global';
 import {fetchPostsForChannel} from '@actions/remote/post';
 import FreezeScreen from '@components/freeze_screen';
-import {Events} from '@constants';
+import {Events, Screens} from '@constants';
 import {useServerUrl} from '@context/server';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useChannelSwitch} from '@hooks/channel_switch';
 import {useIsTablet} from '@hooks/device';
 import {useDefaultHeaderHeight} from '@hooks/header';
 import {useTeamSwitch} from '@hooks/team_switch';
-import {useIsScreenVisible} from '@hooks/use_screen_visibility';
 import WebsocketManager from '@managers/websocket_manager';
 import {popTopScreen} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
+import {useCurrentScreen} from '@store/navigation_store';
 
 import ChannelContent from './channel_content';
 import ChannelHeader from './header';
@@ -69,7 +69,14 @@ const Channel = ({
     const [containerHeight, setContainerHeight] = useState(0);
     const serverUrl = useServerUrl();
     const shouldRender = !switchingTeam && !switchingChannels && shouldRenderPosts && Boolean(channelId);
-    const isVisible = useIsScreenVisible(componentId);
+    const currentScreen = useCurrentScreen();
+    const isVisible = useMemo(() => {
+        if (isTablet) {
+            return currentScreen === Screens.CHANNEL_LIST;
+        }
+
+        return currentScreen === Screens.CHANNEL;
+    }, [currentScreen, isTablet]);
 
     const safeAreaViewEdges: Edge[] = useMemo(() => {
         if (isTablet) {
@@ -151,7 +158,7 @@ const Channel = ({
                         marginTop={marginTop}
                         scheduledPostCount={scheduledPostCount}
                         containerHeight={containerHeight}
-                        enabled={isVisible || shouldRender}
+                        enabled={isVisible}
                     />
                 )}
             </SafeAreaView>
