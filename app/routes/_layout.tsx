@@ -19,6 +19,7 @@ import {useThemeByAppearanceWithDefault} from '@context/theme';
 import useDidMount from '@hooks/did_mount';
 import {DEFAULT_LOCALE, getTranslations} from '@i18n';
 import {cleanup, initialize} from '@init/app';
+import SessionManager from '@managers/session_manager';
 import InAppNotificationContainer from '@screens/in_app_notification';
 import SnackBarContainer from '@screens/snack_bar';
 import NavigationStore, {useCurrentScreen} from '@store/navigation_store';
@@ -68,6 +69,9 @@ export default function RootLayout() {
         async function initializeApp() {
             try {
                 await initialize();
+
+                // Trigger initial data sync for cold start (onAppStateChange won't fire if already active)
+                SessionManager.triggerInitialResync();
                 RNUtils.lockPortrait();
                 setAppReady(true);
             } catch (error) {
