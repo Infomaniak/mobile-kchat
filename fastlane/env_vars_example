@@ -39,7 +39,6 @@ export PILOT_USERNAME=<itunes connect account>
 export PILOT_SKIP_WAITING_FOR_BUILD_PROCESSING=true
 
 ############ NEEDED TO UPLOAD THE BUILD TO GOOGLE PLAY ############
-export SUPPLY_TRACK=alpha
 export SUPPLY_PACKAGE_NAME=com.mattermost.rnbeta
 export SUPPLY_JSON_KEY=<The path to the service account json file used to authenticate with Google>
 export SUPPLY_VALIDATE_ONLY=false
