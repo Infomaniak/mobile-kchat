@@ -100,7 +100,6 @@ describe.skip('Edit Post', () => {
 
     const baseProps: Parameters<typeof EditPost>[0] = {
         componentId: 'edit_post',
-        closeButtonId: 'edit-post',
         post: {
             id: '1',
             channelId: '1',

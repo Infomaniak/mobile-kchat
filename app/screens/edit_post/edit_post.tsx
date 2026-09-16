@@ -58,7 +58,6 @@ const safeAreaEdges: Edge[] = ['top', 'left', 'right'];
 
 type EditPostProps = {
     componentId: AvailableScreens;
-    closeButtonId: string;
     post: PostModel;
     maxPostSize: number;
     canDelete: boolean;
