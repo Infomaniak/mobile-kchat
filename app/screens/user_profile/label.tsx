@@ -8,6 +8,7 @@ import {useTheme} from '@context/theme';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
+import UserProfileEmail from './label_email';
 import UserProfileLink from './label_link';
 
 type Props = {
@@ -48,6 +49,14 @@ const UserProfileLabel = ({title, description, testID, type = 'text'}: Props) =>
                 <UserProfileLink
                     description={description}
                     linkType={type}
+                    testID={testID}
+                />
+            );
+            break;
+        case 'email':
+            descriptionComponent = (
+                <UserProfileEmail
+                    description={description}
                     testID={testID}
                 />
             );

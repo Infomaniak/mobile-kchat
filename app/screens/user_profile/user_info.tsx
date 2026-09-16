@@ -16,6 +16,7 @@ import type {CustomAttribute, CustomAttributeSet} from '@typings/api/custom_prof
 type Props = {
     localTime?: string;
     showCustomStatus: boolean;
+    showEmail: boolean;
     showLocalTime: boolean;
     showNickname: boolean;
     showPosition: boolean;
@@ -29,6 +30,7 @@ const emptyList: CustomAttribute[] = []; /** avoid re-renders **/
 const UserInfo = ({
     localTime,
     showCustomStatus,
+    showEmail,
     showLocalTime,
     showNickname,
     showPosition,
@@ -68,6 +70,7 @@ const UserInfo = ({
                 nickname={showNickname ? user.nickname : undefined}
                 position={showPosition ? user.position : undefined}
                 localTime={showLocalTime ? localTime : undefined}
+                email={showEmail ? user.email : undefined}
                 customAttributes={customAttributes}
             />
         </>

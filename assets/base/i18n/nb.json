@@ -1515,6 +1515,7 @@
     "upgrade_banner.title": "Lås opp det fulle potensialet i kChat!",
     "upload_item.unknown_file": "Ukjent fil",
     "user_profile.channel_admin": "Kanaladministrator",
+  "user_profile.email": "E-post",
     "user_profile.custom_status": "Egendefinert status",
     "user_profile.system_admin": "Systemadministrator",
     "user_profile.team_admin": "Teamadministrator",

@@ -139,6 +139,7 @@ const UserProfile = ({
     const showNickname = Boolean(user.nickname) && !override && !user.isBot && !manageMode;
     const showPosition = Boolean(user.position) && !override && !user.isBot && !manageMode;
     const showLocalTime = Boolean(localTime) && !override && !user.isBot && !manageMode;
+    const showEmail = Boolean(user.email) && !override && !user.isBot && !manageMode;
 
     const headerText = manageMode ? formatMessage(messages.manageMember) : undefined;
 
@@ -158,6 +159,7 @@ const UserProfile = ({
             showNickname,
             showPosition,
             showLocalTime,
+            showEmail,
         ].reduce((acc, v) => {
             return v ? acc + 1 : acc;
         }, 0);
@@ -186,6 +188,7 @@ const UserProfile = ({
         showNickname,
         showPosition,
         showLocalTime,
+        showEmail,
         manageMode,
         bottom,
         showOptions,
@@ -232,6 +235,7 @@ const UserProfile = ({
                         showNickname={showNickname}
                         showPosition={showPosition}
                         showLocalTime={showLocalTime}
+                        showEmail={showEmail}
                         user={user}
                         enableCustomAttributes={enableCustomAttributes}
                         customAttributesSet={customAttributesSet}

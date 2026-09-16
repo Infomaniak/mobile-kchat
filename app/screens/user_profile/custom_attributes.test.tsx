@@ -15,6 +15,7 @@ describe('CustomAttributes', () => {
         nickname: undefined,
         position: undefined,
         localTime: undefined,
+        email: undefined,
         customAttributes: undefined,
     };
 
@@ -69,6 +70,28 @@ describe('CustomAttributes', () => {
         expect(screen.getByText('2:00 PM')).toBeVisible();
         expect(screen.getByTestId('custom_attribute.local_time.title')).toBeVisible();
         expect(screen.getByTestId('custom_attribute.local_time.text')).toBeVisible();
+    });
+
+    it('renders email attribute when provided', () => {
+        renderWithIntlAndTheme(
+            <CustomAttributes
+                {...defaultProps}
+                email='user@example.com'
+            />,
+        );
+
+        expect(screen.getByText('Email')).toBeVisible();
+        expect(screen.getByText('user@example.com')).toBeVisible();
+        expect(screen.getByTestId('custom_attribute.email.title')).toBeVisible();
+        expect(screen.getByTestId('custom_attribute.email.email')).toBeVisible();
+    });
+
+    it('does not render email attribute when not provided', () => {
+        renderWithIntlAndTheme(
+            <CustomAttributes {...defaultProps}/>,
+        );
+
+        expect(screen.queryByText('Email')).toBeNull();
     });
 
     it('renders custom attributes when provided', () => {
@@ -165,6 +188,7 @@ describe('CustomAttributes', () => {
                 nickname='JohnDoe'
                 position='Senior Developer'
                 localTime='3:30 PM'
+                email='johndoe@example.com'
                 customAttributes={customAttributes}
             />,
         );
@@ -176,6 +200,8 @@ describe('CustomAttributes', () => {
         expect(screen.getByText('Senior Developer')).toBeVisible();
         expect(screen.getByText('Local Time')).toBeVisible();
         expect(screen.getByText('3:30 PM')).toBeVisible();
+        expect(screen.getByText('Email')).toBeVisible();
+        expect(screen.getByText('johndoe@example.com')).toBeVisible();
 
         // Custom attributes
         expect(screen.getByText('Skills')).toBeVisible();

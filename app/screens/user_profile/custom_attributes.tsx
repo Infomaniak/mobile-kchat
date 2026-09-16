@@ -14,6 +14,7 @@ type Props = {
     nickname?: string;
     position?: string;
     localTime?: string;
+    email?: string;
     customAttributes?: CustomAttribute[];
 }
 
@@ -26,7 +27,7 @@ const renderAttribute: ListRenderItem<CustomAttribute> = ({item}) => (
     />
 );
 
-const CustomAttributes = ({nickname, position, localTime, customAttributes}: Props) => {
+const CustomAttributes = ({nickname, position, localTime, email, customAttributes}: Props) => {
     const {formatMessage} = useIntl();
 
     // Combine standard and custom attributes
@@ -53,6 +54,14 @@ const CustomAttributes = ({nickname, position, localTime, customAttributes}: Pro
             name: formatMessage({id: 'channel_info.local_time', defaultMessage: 'Local Time'}),
             type: 'text',
             value: localTime,
+        });
+    }
+    if (email) {
+        mergeAttributes.push({
+            id: 'email',
+            name: formatMessage({id: 'user_profile.email', defaultMessage: 'Email'}),
+            type: 'email',
+            value: email,
         });
     }
     mergeAttributes.push(...(customAttributes ?? []));
