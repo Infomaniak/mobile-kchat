@@ -27,9 +27,10 @@ jest.mock('@screens/navigation', () => ({
     dismissAllModalsAndPopToRoot: jest.fn(),
     dismissAllOverlays: jest.fn(),
     goToScreen: jest.fn(),
+    navigateToScreen: jest.fn(),
 }));
 
-const {dismissAllModals, dismissAllOverlays, goToScreen} = jest.requireMock('@screens/navigation');
+const {dismissAllModals, dismissAllOverlays, navigateToScreen} = jest.requireMock('@screens/navigation');
 
 const serverUrl = 'baseHandler.test.com';
 let operator: ServerDataOperator;
@@ -50,6 +51,7 @@ jest.mock('@store/navigation_store', () => {
     const original = jest.requireActual('@store/navigation_store');
     return {
         ...original,
+        waitUntilScreenHasLoaded: jest.fn(() => Promise.resolve()),
         waitUntilScreenIsTop: jest.fn(() => Promise.resolve()),
         getScreensInStack: jest.fn(() => []),
         hasModalsOpened: jest.fn(() => false),
@@ -65,6 +67,7 @@ const channel: Channel = {
     id: channelId,
     team_id: teamId,
     total_msg_count: 0,
+    display_name: 'Channel 1',
 } as Channel;
 const user: UserProfile = {
     id: 'userid',
@@ -248,7 +251,7 @@ describe('switchToThread', () => {
         expect(error).toBeUndefined();
         expect(dismissAllModals).toHaveBeenCalledTimes(1);
         expect(dismissAllOverlays).toHaveBeenCalledTimes(1);
-        expect(goToScreen).toHaveBeenCalledWith(Screens.THREAD, '', {rootId: post.id}, expect.anything());
+        expect(navigateToScreen).toHaveBeenCalledWith(Screens.THREAD, {rootId: post.id, channelName: 'Channel 1'});
     });
 });
 
