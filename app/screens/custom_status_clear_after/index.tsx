@@ -15,6 +15,7 @@ import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {observeCurrentUser} from '@queries/servers/user';
 import {navigateBack} from '@screens/navigation';
+import CallbackStore from '@store/callback_store';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import ClearAfterMenuItem from './components/clear_after_menu_item';
@@ -24,7 +25,6 @@ import type UserModel from '@typings/database/models/servers/user';
 
 export interface CustomStatusClearAfterProps {
     currentUser?: UserModel;
-    handleClearAfterClick?: (duration: CustomStatusDuration, expiresAt: string) => void;
     initialDuration: CustomStatusDuration;
     isModal?: boolean;
 }
@@ -51,7 +51,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-function CustomStatusClearAfter({currentUser, handleClearAfterClick, initialDuration}: CustomStatusClearAfterProps) {
+function CustomStatusClearAfter({currentUser, initialDuration}: CustomStatusClearAfterProps) {
     const navigation = useNavigation();
     const intl = useIntl();
     const theme = useTheme();
@@ -61,9 +61,10 @@ function CustomStatusClearAfter({currentUser, handleClearAfterClick, initialDura
     const [showExpiryTime, setShowExpiryTime] = useState(false);
 
     const onDone = useCallback(() => {
-        handleClearAfterClick?.(duration, expiresAt);
+        const callback = CallbackStore.getCallback<((duration: CustomStatusDuration, expiresAt: string) => void)>();
+        callback?.(duration, expiresAt);
         navigateBack();
-    }, [duration, expiresAt, handleClearAfterClick]);
+    }, [duration, expiresAt]);
 
     const handleItemClick = useCallback((itemDuration: CustomStatusDuration, itemExpiresAt: string) => {
         setDuration(itemDuration);

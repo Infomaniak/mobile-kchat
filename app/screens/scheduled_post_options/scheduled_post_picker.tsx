@@ -13,6 +13,7 @@ import BottomSheet from '@screens/bottom_sheet';
 import {dismissBottomSheet} from '@screens/navigation';
 import {FOOTER_HEIGHT} from '@screens/post_priority_picker/footer';
 import ScheduledPostCoreOptions from '@screens/scheduled_post_options/core_options';
+import CallbackStore from '@store/callback_store';
 import {logDebug} from '@utils/log';
 import {showScheduledPostCreationErrorSnackbar} from '@utils/snack_bar';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -56,10 +57,9 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 
 type Props = {
     currentUserTimezone?: UserTimezone | null;
-    onSchedule: (schedulingInfo: SchedulingInfo) => Promise<void | {data?: boolean; error?: unknown}>;
 }
 
-export function ScheduledPostOptions({currentUserTimezone, onSchedule}: Props) {
+export function ScheduledPostOptions({currentUserTimezone}: Props) {
     const isTablet = useIsTablet();
     const theme = useTheme();
     const [isScheduling, setIsScheduling] = useState(false);
@@ -99,7 +99,8 @@ export function ScheduledPostOptions({currentUserTimezone, onSchedule}: Props) {
             scheduled_at: parseInt(selectedTime, 10),
         };
 
-        const response = await onSchedule(schedulingInfo);
+        const onSchedule = CallbackStore.getCallback<((schedulingInfo: SchedulingInfo) => Promise<void | {data?: boolean; error?: unknown}>)>();
+        const response = await onSchedule?.(schedulingInfo);
         setIsScheduling(false);
 
         if (response?.error) {
@@ -107,8 +108,9 @@ export function ScheduledPostOptions({currentUserTimezone, onSchedule}: Props) {
             showScheduledPostCreationErrorSnackbar(errorMessage);
             return;
         }
+        CallbackStore.removeCallback();
         dismissBottomSheet();
-    }, [onSchedule, selectedTime]));
+    }, [selectedTime]));
 
     const renderContent = () => {
         return (

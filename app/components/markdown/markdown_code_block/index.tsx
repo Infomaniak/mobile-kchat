@@ -10,7 +10,7 @@ import FormattedText from '@components/formatted_text';
 import SlideUpPanelItem, {ITEM_HEIGHT} from '@components/slide_up_panel_item';
 import {Screens} from '@constants';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {bottomSheet, dismissBottomSheet, goToScreen} from '@screens/navigation';
+import {bottomSheet, dismissBottomSheet, navigateToScreen} from '@screens/navigation';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {getHighlightLanguageFromNameOrAlias, getHighlightLanguageName} from '@utils/markdown';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -77,13 +77,6 @@ const MarkdownCodeBlock = ({language = '', content, textStyle, theme}: MarkdownC
     }, []);
 
     const handlePress = usePreventDoubleTap(useCallback(() => {
-        const screen = Screens.CODE;
-        const passProps = {
-            code: content,
-            language: getHighlightLanguageFromNameOrAlias(language),
-            textStyle,
-        };
-
         const languageDisplayName = getHighlightLanguageName(language);
         let title: string;
         if (languageDisplayName) {
@@ -103,9 +96,16 @@ const MarkdownCodeBlock = ({language = '', content, textStyle, theme}: MarkdownC
             });
         }
 
+        const passProps = {
+            code: content,
+            language: getHighlightLanguageFromNameOrAlias(language),
+            textStyle,
+            title,
+        };
+
         Keyboard.dismiss();
         requestAnimationFrame(() => {
-            goToScreen(screen, title, passProps);
+            navigateToScreen(Screens.CODE, passProps);
         });
     }, [content, intl, language, textStyle]));
 

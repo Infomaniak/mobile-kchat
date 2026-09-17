@@ -20,6 +20,7 @@ import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import useDidMount from '@hooks/did_mount';
 import {useDebounce} from '@hooks/utils';
 import {popTopScreen} from '@screens/navigation';
+import SettingsStore from '@store/settings_store';
 import {filterChannelsMatchingTerm} from '@utils/channel';
 import {filterOptions} from '@utils/message_attachment';
 import {changeOpacity, getKeyboardAppearanceFromTheme, makeStyleSheetFromTheme} from '@utils/theme';
@@ -44,6 +45,8 @@ const VALID_DATASOURCES = [
     ViewConstants.DATA_SOURCE_DYNAMIC];
 
 const close = () => {
+    SettingsStore.removeIntegrationsSelectCallback();
+    SettingsStore.removeIntegrationsDynamicOptionsCallback();
     popTopScreen();
 };
 
@@ -108,15 +111,12 @@ const handleIdSelection = (dataSource: string, currentIds: {[id: string]: DataTy
 };
 
 export type Props = {
-    getDynamicOptions?: (userInput?: string) => Promise<DialogOption[]>;
     options?: PostActionOption[];
     currentTeamId: string;
     data?: DataTypeList;
     dataSource: string;
-    handleSelect: (opt: Selection) => void;
     isMultiselect?: boolean;
     selected: SelectedDialogValue;
-    theme: Theme;
     componentId: AvailableScreens;
 }
 
@@ -172,8 +172,8 @@ const messages = defineMessages({
 });
 
 function IntegrationSelector(
-    {dataSource, data, isMultiselect = false, selected, handleSelect,
-        currentTeamId, componentId, getDynamicOptions, options}: Props) {
+    {dataSource, data, isMultiselect = false, selected,
+        currentTeamId, componentId, options}: Props) {
     const serverUrl = useServerUrl();
     const theme = useTheme();
     const searchTimeoutId = useRef<NodeJS.Timeout | null>(null);
@@ -221,7 +221,8 @@ function IntegrationSelector(
 
     const handleSelectItem = useCallback((item: Selection) => {
         if (!isMultiselect) {
-            handleSelect(item);
+            const selectCallback = SettingsStore.getIntegrationsSelectCallback();
+            selectCallback?.(item);
             close();
             return;
         }
@@ -237,7 +238,7 @@ function IntegrationSelector(
                 setMultiselectSelected((current) => toggleFromMap(current, itemKey, item as DialogOption));
             }
         }
-    }, [isMultiselect, dataSource, handleSelect]);
+    }, [isMultiselect, dataSource]);
 
     const handleRemoveOption = useCallback((item: Channel | DialogOption | UserProfile) => {
         const itemKey = extractItemKey(dataSource, item);
@@ -289,6 +290,7 @@ function IntegrationSelector(
             setIntegrationData(filteredOptions);
         }
 
+        const getDynamicOptions = SettingsStore.getIntegrationsDynamicOptionsCallback();
         if (!getDynamicOptions) {
             return;
         }
@@ -301,27 +303,30 @@ function IntegrationSelector(
         } else {
             setIntegrationData(searchData);
         }
-    }, [filteredOptions, getDynamicOptions, integrationData]);
+    }, [filteredOptions, integrationData]);
 
     const handleSelectProfile = useCallback((user: UserProfile): void => {
         if (!isMultiselect) {
-            handleSelect(user);
+            const selectCallback = SettingsStore.getIntegrationsSelectCallback();
+            selectCallback?.(user);
             close();
         }
 
         setSelectedIds((current) => handleIdSelection(dataSource, current, user));
-    }, [isMultiselect, handleSelect, dataSource]);
+    }, [isMultiselect, dataSource]);
 
     const onHandleMultiselectSubmit = useCallback(() => {
+        const selectCallback = SettingsStore.getIntegrationsSelectCallback();
+
         if (dataSource === ViewConstants.DATA_SOURCE_USERS) {
             // New multiselect
-            handleSelect(Object.values(selectedIds) as UserProfile[]);
+            selectCallback?.(Object.values(selectedIds) as UserProfile[]);
         } else {
             // Legacy multiselect
-            handleSelect(Object.values(multiselectSelected));
+            selectCallback?.(Object.values(multiselectSelected));
         }
         close();
-    }, [dataSource, handleSelect, selectedIds, multiselectSelected]);
+    }, [dataSource, selectedIds, multiselectSelected]);
 
     const onSearch = useCallback((text: string) => {
         if (!text) {

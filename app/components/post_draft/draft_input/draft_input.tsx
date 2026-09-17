@@ -13,9 +13,9 @@ import {Screens} from '@constants';
 import {useKeyboardState} from '@context/keyboard_state';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
-import {useIsTablet} from '@hooks/device';
 import {usePersistentNotificationProps} from '@hooks/persistent_notification_props';
 import {openAsBottomSheet} from '@screens/navigation';
+import CallbackStore from '@store/callback_store';
 import {logInfo} from '@utils/log';
 import {persistentNotificationsConfirmation} from '@utils/post';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -154,7 +154,6 @@ function DraftInput({
     const intl = useIntl();
     const serverUrl = useServerUrl();
     const theme = useTheme();
-    const isTablet = useIsTablet();
 
     const {inputRef, blurAndDismissKeyboard} = useKeyboardState();
 
@@ -246,19 +245,15 @@ function DraftInput({
         }
 
         Keyboard.dismiss();
-        const title = isTablet ? intl.formatMessage({id: 'scheduled_post.picker.title', defaultMessage: 'Schedule draft'}) : '';
-
+        CallbackStore.setCallback<((schedulingInfo: SchedulingInfo) => Promise<void | {data?: boolean; error?: unknown}>)>(handleSendMessage);
         openAsBottomSheet({
             closeButtonId: SCHEDULED_POST_PICKER_BUTTON,
             screen: Screens.SCHEDULED_POST_OPTIONS,
             theme,
-            title,
-            props: {
-                closeButtonId: SCHEDULED_POST_PICKER_BUTTON,
-                onSchedule: handleSendMessage,
-            },
+            title: '',
+            props: {},
         });
-    }, [handleSendMessage, intl, isTablet, scheduledPostsEnabled, theme]);
+    }, [handleSendMessage, scheduledPostsEnabled, theme]);
 
     const getActionButton = useCallback(() => {
         if (value.length === 0 && files.length === 0 && voiceMessageEnabled) {

@@ -1,4 +1,22 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-export {default} from '@screens/latex';
+import {useTheme} from '@context/theme';
+import {getHeaderOptions, useNavigationHeader} from '@hooks/navigation_header';
+import {usePropsFromParams} from '@hooks/props_from_params';
+import LatexScreen, {type LatexScreenProps} from '@screens/latex';
+
+export default function LatexRoute() {
+    const theme = useTheme();
+    const {title, ...props} = usePropsFromParams<LatexScreenProps & {title?: string}>();
+
+    useNavigationHeader({
+        showWhenPushed: true,
+        headerOptions: {
+            headerTitle: title || '',
+            ...getHeaderOptions(theme),
+        },
+    });
+
+    return (<LatexScreen {...props}/>);
+}

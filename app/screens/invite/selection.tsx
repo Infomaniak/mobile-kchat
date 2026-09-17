@@ -28,6 +28,7 @@ import {useTheme} from '@context/theme';
 import {useAutocompleteDefaultAnimatedValues} from '@hooks/autocomplete';
 import {useAvoidKeyboard, useIsTablet} from '@hooks/device';
 import {goToScreen} from '@screens/navigation';
+import SettingsStore from '@store/settings_store';
 import {makeStyleSheetFromTheme, changeOpacity} from '@utils/theme';
 
 import SelectionSearchBar from './selection_search_bar';
@@ -292,16 +293,18 @@ export default function Selection({
         const title = intl.formatMessage({id: 'invite.selected_channels', defaultMessage: 'Selected channels'});
 
         const handleSelectChannels = (channels: Channel[]) => {
+            SettingsStore.removeIntegrationsSelectCallback();
             onSendOptionsChange((options) => ({
                 ...options,
                 selectedChannels: channels.map(extractChannelId),
             }));
         };
 
+        SettingsStore.setIntegrationsSelectCallback(handleSelectChannels);
         goToScreen(screen, title, {
             dataSource: 'channels',
-            handleSelect: handleSelectChannels,
             selected: selectedChannels,
+            title,
             isMultiselect: true,
         });
     }), [intl, selectedChannels, onSendOptionsChange]);

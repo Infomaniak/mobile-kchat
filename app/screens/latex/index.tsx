@@ -1,24 +1,22 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback} from 'react';
+import React from 'react';
 import {useIntl} from 'react-intl';
 import {Platform, ScrollView, View} from 'react-native';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 
 import ErrorBoundary from '@components/error_boundary';
 import MathView from '@components/math_view';
+import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import {popTopScreen} from '@screens/navigation';
+import {navigateBack} from '@screens/navigation';
 import {splitLatexCodeInLines} from '@utils/markdown/latex';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import type {AvailableScreens} from '@typings/screens/navigation';
-
-type Props = {
-    componentId: AvailableScreens;
+export type LatexScreenProps = {
     content: string;
 }
 
@@ -57,23 +55,18 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
     };
 });
 
-const Latex = ({componentId, content}: Props) => {
+const Latex = ({content}: LatexScreenProps) => {
     const intl = useIntl();
     const theme = useTheme();
     const style = getStyleSheet(theme);
     const lines = splitLatexCodeInLines(content);
 
-    const close = useCallback(() => {
-        popTopScreen(componentId);
-    }, [componentId]);
-
-    useAndroidHardwareBackHandler(componentId, close);
+    useAndroidHardwareBackHandler(Screens.LATEX, navigateBack);
 
     return (
         <SafeAreaView
             edges={edges}
             style={style.scrollContainer}
-            nativeID={`${componentId}.screen`}
         >
             <ScrollView
                 style={style.scrollContainer}

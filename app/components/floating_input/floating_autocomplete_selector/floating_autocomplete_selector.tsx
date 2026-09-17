@@ -15,6 +15,7 @@ import {usePreventDoubleTap} from '@hooks/utils';
 import {getChannelById} from '@queries/servers/channel';
 import {getUserById} from '@queries/servers/user';
 import {goToScreen} from '@screens/navigation';
+import SettingsStore from '@store/settings_store';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {secureGetFromRecord} from '@utils/types';
 import {typography} from '@utils/typography';
@@ -152,7 +153,9 @@ function AutoCompleteSelector({
 
     const goToSelectorScreen = usePreventDoubleTap(useCallback((() => {
         const screen = Screens.INTEGRATION_SELECTOR;
-        goToScreen(screen, title, {dataSource, handleSelect, options, getDynamicOptions, selected, isMultiselect});
+        SettingsStore.setIntegrationsDynamicOptionsCallback(getDynamicOptions);
+        SettingsStore.setIntegrationsSelectCallback(handleSelect);
+        goToScreen(screen, title, {dataSource, options, selected, title, isMultiselect});
     }), [title, dataSource, handleSelect, options, getDynamicOptions, selected, isMultiselect]));
 
     // Handle the text for the default value.

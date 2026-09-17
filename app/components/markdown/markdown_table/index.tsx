@@ -3,7 +3,6 @@
 
 import {LinearGradient} from 'expo-linear-gradient';
 import React, {useRef, useState, type ReactNode} from 'react';
-import {useIntl} from 'react-intl';
 import {Dimensions, type EventSubscription, type LayoutChangeEvent, Platform, type ScaledSize, ScrollView, type StyleProp, TouchableOpacity, View, type ViewStyle} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
@@ -11,7 +10,8 @@ import {CELL_MAX_WIDTH, CELL_MIN_WIDTH} from '@components/markdown/markdown_tabl
 import {Screens, Device} from '@constants';
 import useDidMount from '@hooks/did_mount';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {goToScreen} from '@screens/navigation';
+import {navigateToScreen} from '@screens/navigation';
+import CallbackStore from '@store/callback_store';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 const MAX_HEIGHT = 300;
@@ -110,7 +110,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
 });
 
 const MarkdownTable = ({children, numColumns, theme}: MarkdownTableInputProps) => {
-    const intl = useIntl();
     const [state, setState] = useState<MarkdownTableState>({
         containerWidth: 0,
         contentHeight: 0,
@@ -147,18 +146,13 @@ const MarkdownTable = ({children, numColumns, theme}: MarkdownTableInputProps) =
     };
 
     const handlePress = usePreventDoubleTap(() => {
-        const screen = Screens.TABLE;
-        const title = intl.formatMessage({
-            id: 'mobile.routes.table',
-            defaultMessage: 'Table',
-        });
         const passProps = {
             renderAsFlex: shouldRenderAsFlex(true),
-            renderRows,
             width: getTableWidth(true),
         };
 
-        goToScreen(screen, title, passProps);
+        CallbackStore.setCallback(renderRows);
+        navigateToScreen(Screens.TABLE, passProps);
     });
 
     const handleContainerLayout = (e: LayoutChangeEvent) => {

@@ -6,6 +6,7 @@ import React from 'react';
 
 import {dismissBottomSheet} from '@screens/navigation';
 import {ScheduledPostOptions} from '@screens/scheduled_post_options/scheduled_post_picker';
+import CallbackStore from '@store/callback_store';
 import {renderWithEverything} from '@test/intl-test-helper';
 import TestHelper from '@test/test_helper';
 import {showScheduledPostCreationErrorSnackbar} from '@utils/snack_bar';
@@ -32,7 +33,6 @@ describe('ScheduledPostOptions', () => {
     };
 
     const baseProps = {
-        onSchedule: jest.fn().mockResolvedValue({data: true}),
         currentUserTimezone: timezone,
     };
     let database: Database;
@@ -44,6 +44,7 @@ describe('ScheduledPostOptions', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        CallbackStore.removeCallback();
         jest.useFakeTimers();
     });
 
@@ -78,25 +79,25 @@ describe('ScheduledPostOptions', () => {
 
     it.skip('prevents scheduling without time selection', () => {
         // IK change : skipped on CI temporarily, will fix later
+        const onSchedule = jest.fn().mockResolvedValue({data: true});
+        CallbackStore.setCallback(onSchedule);
         renderWithEverything(<ScheduledPostOptions {...baseProps}/>, {database});
 
         const scheduleButton = screen.getByTestId('scheduled_post_create_button');
         fireEvent.press(scheduleButton);
 
-        expect(baseProps.onSchedule).not.toHaveBeenCalled();
+        expect(onSchedule).not.toHaveBeenCalled();
         expect(dismissBottomSheet).not.toHaveBeenCalled();
     });
 
     it.skip('handles successful scheduling flow', () => {
         // IK change : skipped on CI temporarily, will fix later
         const onSchedule = jest.fn().mockResolvedValue({data: true});
+        CallbackStore.setCallback(onSchedule);
         jest.spyOn(Date, 'now').mockImplementation(() => 1735693200000); //1st Jan 2025, Wednesday 12:00 AM (New year!!!)
 
         renderWithEverything(
-            <ScheduledPostOptions
-                {...baseProps}
-                onSchedule={onSchedule}
-            />,
+            <ScheduledPostOptions {...baseProps}/>,
             {database},
         );
 
@@ -122,11 +123,9 @@ describe('ScheduledPostOptions', () => {
         // IK change : skipped on CI temporarily, will fix later
         const error = 'Network error';
         const onSchedule = jest.fn().mockResolvedValue({error});
+        CallbackStore.setCallback(onSchedule);
         renderWithEverything(
-            <ScheduledPostOptions
-                {...baseProps}
-                onSchedule={onSchedule}
-            />,
+            <ScheduledPostOptions {...baseProps}/>,
             {database},
         );
 
@@ -156,12 +155,10 @@ describe('ScheduledPostOptions', () => {
                 }, 5000);
             });
         });
+        CallbackStore.setCallback(slowSchedule);
 
         renderWithEverything(
-            <ScheduledPostOptions
-                {...baseProps}
-                onSchedule={slowSchedule}
-            />,
+            <ScheduledPostOptions {...baseProps}/>,
             {database},
         );
 

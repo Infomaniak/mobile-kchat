@@ -227,21 +227,17 @@ const CustomStatus = ({
 
     const openClearAfterModal = useCallback(() => {
         const screen = Screens.CUSTOM_STATUS_CLEAR_AFTER;
-        const title = intl.formatMessage({id: 'mobile.custom_status.clear_after.title', defaultMessage: 'Clear Custom Status After'});
+        CallbackStore.setCallback(handleClearAfterClick);
         const passProps = {
-            handleClearAfterClick,
             initialDuration: newStatus.duration,
-            intl,
-            theme,
-            closeButtonId: 'close-custom-status',
         };
 
         if (isTablet) {
-            showModal(screen, title, passProps);
+            showModal(screen, '', passProps);
         } else {
-            goToScreen(screen, title, passProps);
+            goToScreen(screen, '', passProps);
         }
-    }, [intl, theme, isTablet, newStatus.duration, handleClearAfterClick]);
+    }, [isTablet, newStatus.duration, handleClearAfterClick]);
 
     const handleRecentCustomStatusSuggestionClick = useCallback((status: UserCustomStatus) => {
         dispatchStatus({type: 'fromUserCustomStatusIgnoringExpire', status: {...status, duration: status.duration || CustomStatusDurationEnum.DONT_CLEAR}});

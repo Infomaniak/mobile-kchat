@@ -13,7 +13,7 @@ import SlideUpPanelItem, {ITEM_HEIGHT} from '@components/slide_up_panel_item';
 import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {Screens} from '@constants';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {bottomSheet, dismissBottomSheet, goToScreen} from '@screens/navigation';
+import {bottomSheet, dismissBottomSheet, navigateToScreen} from '@screens/navigation';
 import {bottomSheetSnapPoint} from '@utils/helpers';
 import {getHighlightLanguageName} from '@utils/markdown';
 import {splitLatexCodeInLines} from '@utils/markdown/latex';
@@ -107,10 +107,6 @@ const LatexCodeBlock = ({content, theme, baseFontSize}: Props) => {
     }, [content]);
 
     const handlePress = usePreventDoubleTap(useCallback(() => {
-        const screen = Screens.LATEX;
-        const passProps = {
-            content,
-        };
         const title = intl.formatMessage({
             id: 'mobile.routes.code',
             defaultMessage: '{language} Code',
@@ -120,7 +116,7 @@ const LatexCodeBlock = ({content, theme, baseFontSize}: Props) => {
 
         Keyboard.dismiss();
         requestAnimationFrame(() => {
-            goToScreen(screen, title, passProps);
+            navigateToScreen(Screens.LATEX, {content, title});
         });
     }, [content, intl, languageDisplayName]));
 
