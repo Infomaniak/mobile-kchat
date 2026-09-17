@@ -23,6 +23,7 @@ type Props = {
     canManageMembers: boolean;
     isCRTEnabled: boolean;
     hasChannelSettingsActions: boolean;
+    channelDisplayName: string;
 }
 
 const Options = ({
@@ -32,13 +33,17 @@ const Options = ({
     canManageMembers,
     isCRTEnabled,
     hasChannelSettingsActions,
+    channelDisplayName,
 }: Props) => {
     const isDMorGM = isTypeDMorGM(type);
 
     return (
         <>
             {hasChannelSettingsActions && (
-                <ChannelSettings channelId={channelId}/>
+                <ChannelSettings
+                    channelId={channelId}
+                    channelDisplayName={channelDisplayName}
+                />
             )}
             {type !== General.DM_CHANNEL && (
                 <>

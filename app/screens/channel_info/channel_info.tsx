@@ -24,6 +24,7 @@ type Props = {
     channelId: string;
     componentId: AvailableScreens;
     type?: ChannelType;
+    channelDisplayName: string;
     isCallsEnabledInChannel: boolean;
     canManageMembers: boolean;
     isCRTEnabled: boolean;
@@ -51,6 +52,7 @@ const ChannelInfo = ({
     canManageMembers,
     channelId,
     componentId,
+    channelDisplayName,
     isCallsEnabledInChannel,
     isCRTEnabled,
     type,
@@ -105,6 +107,7 @@ const ChannelInfo = ({
                         canManageMembers={canManageMembers}
                         isCRTEnabled={isCRTEnabled}
                         hasChannelSettingsActions={hasChannelSettingsActions}
+                        channelDisplayName={channelDisplayName}
                     />
                     <View style={styles.separator}/>
                     <ChannelInfoAppBindings

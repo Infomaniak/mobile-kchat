@@ -152,6 +152,7 @@ const enhanced = withObservables([], ({serverUrl, database}: Props) => {
 
     return {
         type,
+        channelDisplayName: channel.pipe(switchMap((c) => of$(c?.displayName || ''))),
         isCallsEnabledInChannel,
         canManageMembers,
         isCRTEnabled: observeIsCRTEnabled(database),

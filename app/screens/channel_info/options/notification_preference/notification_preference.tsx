@@ -7,11 +7,9 @@ import {Platform} from 'react-native';
 
 import OptionItem from '@components/option_item';
 import {NotificationLevel, Screens} from '@constants';
-import {useTheme} from '@context/theme';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {goToScreen} from '@screens/navigation';
+import {navigateToChannelInfoScreen} from '@screens/navigation';
 import {isTypeDMorGM} from '@utils/channel';
-import {changeOpacity} from '@utils/theme';
 
 type Props = {
     channelId: string;
@@ -73,26 +71,11 @@ const NotificationPreference = ({
     hasGMasDMFeature,
 }: Props) => {
     const {formatMessage} = useIntl();
-    const theme = useTheme();
     const title = formatMessage({id: 'channel_info.mobile_notifications', defaultMessage: 'Mobile Notifications'});
 
     const goToChannelNotificationPreferences = usePreventDoubleTap(useCallback(() => {
-        const options: Record<string, any> = {
-            topBar: {
-                title: {
-                    text: title,
-                },
-                subtitle: {
-                    color: changeOpacity(theme.sidebarHeaderTextColor, 0.72),
-                    text: displayName,
-                },
-                backButton: {
-                    popStackOnPress: false,
-                },
-            },
-        };
-        goToScreen(Screens.CHANNEL_NOTIFICATION_PREFERENCES, title, {channelId}, options);
-    }, [channelId, displayName, theme.sidebarHeaderTextColor, title]));
+        navigateToChannelInfoScreen(Screens.CHANNEL_NOTIFICATION_PREFERENCES, {channelId, displayName});
+    }, [channelId, displayName]));
 
     const notificationLevelToText = () => {
         let notifyLevelToUse = notifyLevel;

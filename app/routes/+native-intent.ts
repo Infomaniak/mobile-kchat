@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {Linking} from 'react-native';
+import urlParse from 'url-parse';
 
 import {DEFAULT_LOCALE} from '@i18n';
 import {alertInvalidDeepLink, parseAndHandleDeepLink} from '@utils/deep_link';
@@ -25,23 +26,36 @@ const LIBRARY_URL_SCHEMES = ['com.infomaniak.chat://', 'mmauth://', 'mmauthbeta:
 const isCustomSchemeUrl = (url: string) => LIBRARY_URL_SCHEMES.some((scheme) => url.startsWith(scheme));
 
 const handleUrl = async (event: {url: string}) => {
-    if (!event.url || isCustomSchemeUrl(event.url)) {
+    // Custom scheme URLs with no host (e.g. kchat:/// redelivered by iOS as
+    // the initial URL after a previous session was opened with a kchat://
+    // link, or mailto:) carry no deep link destination: ignore them silently
+    // like upstream instead of alerting on cold start.
+    const parsed = urlParse(event.url);
+    if (parsed.protocol && !parsed.host) {
         return false;
     }
 
-    const {error} = await parseAndHandleDeepLink(
-        event.url,
-        undefined,
-        undefined,
-        true,
-    );
-
-    if (error) {
-        alertInvalidDeepLink(getIntlShape(DEFAULT_LOCALE));
+    if (isCustomSchemeUrl(event.url)) {
         return false;
     }
 
-    return true;
+    if (event.url) {
+        const {error} = await parseAndHandleDeepLink(
+            event.url,
+            undefined,
+            undefined,
+            true,
+        );
+
+        if (error) {
+            alertInvalidDeepLink(getIntlShape(DEFAULT_LOCALE));
+            return false;
+        }
+
+        return true;
+    }
+
+    return false;
 };
 
 /**

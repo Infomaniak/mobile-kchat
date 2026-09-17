@@ -24,12 +24,12 @@ const SetHeaderBox = ({channelId, containerStyle, isHeaderSet, inModal, testID}:
     const onSetHeader = useCallback(async () => {
         const title = intl.formatMessage({id: 'screens.channel_edit_header', defaultMessage: 'Edit Channel Header'});
         if (inModal) {
-            goToScreen(Screens.CREATE_OR_EDIT_CHANNEL, title, {channelId, headerOnly: true});
+            goToScreen(Screens.CREATE_OR_EDIT_CHANNEL, '', {channelId, headerOnly: true, title});
             return;
         }
 
         await dismissBottomSheet();
-        showModal(Screens.CREATE_OR_EDIT_CHANNEL, title, {channelId, headerOnly: true});
+        showModal(Screens.CREATE_OR_EDIT_CHANNEL, '', {channelId, headerOnly: true, title});
     }, [intl, inModal, channelId]);
 
     let text;
