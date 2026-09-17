@@ -15,6 +15,7 @@ import useInitialValue from '@hooks/initial_value';
 import useBackNavigation from '@hooks/navigate_back';
 import {usePreventDoubleTap} from '@hooks/utils';
 import {navigateToSettingsScreen, popTopScreen} from '@screens/navigation';
+import SettingsStore from '@store/settings_store';
 import {getDeviceTimezone} from '@utils/timezone';
 import {getTimezoneRegion, getUserTimezoneProps} from '@utils/user';
 
@@ -48,16 +49,14 @@ const DisplayTimezone = ({currentUser, componentId}: DisplayTimezoneProps) => {
                 automaticTimezone: '',
                 manualTimezone: mtz,
             });
+            SettingsStore.removeUpdateAutomaticTimezoneCallback();
         };
 
-        const screen = Screens.SETTINGS_DISPLAY_TIMEZONE_SELECT;
+        SettingsStore.setUpdateAutomaticTimezoneCallback(updateManualTimezone);
 
-        const passProps = {
+        navigateToSettingsScreen(Screens.SETTINGS_DISPLAY_TIMEZONE_SELECT, {
             currentTimezone: userTimezone.manualTimezone || initialTimezone.manualTimezone || initialTimezone.automaticTimezone,
-            onBack: updateManualTimezone,
-        };
-
-        navigateToSettingsScreen(screen, passProps);
+        });
     }, [initialTimezone.manualTimezone, initialTimezone.automaticTimezone, userTimezone.manualTimezone]));
 
     const saveTimezone = useCallback(() => {

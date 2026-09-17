@@ -7,7 +7,7 @@ import {Navigation, Screens} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import {DRAFT_SCREEN_TAB_DRAFTS, DRAFT_SCREEN_TAB_SCHEDULED_POSTS} from '@constants/draft';
 import DatabaseManager from '@database/manager';
-import {goToScreen, popTo} from '@screens/navigation';
+import {dismissAllRoutesAndPopToScreen} from '@screens/navigation';
 import NavigationStore from '@store/navigation_store';
 import {isTablet} from '@utils/helpers';
 
@@ -61,8 +61,7 @@ jest.mock('@utils/helpers', () => ({
 }));
 
 jest.mock('@screens/navigation', () => ({
-    popTo: jest.fn(),
-    goToScreen: jest.fn(),
+    dismissAllRoutesAndPopToScreen: jest.fn(),
 }));
 
 describe('updateDraftFile', () => {
@@ -310,27 +309,27 @@ describe('switchToGlobalDrafts', () => {
         expect(emitSpy).not.toHaveBeenCalled();
     });
 
-    it('should call goToScreen on non-tablet', async () => {
+    it('should call dismissAllRoutesAndPopToScreen on non-tablet', async () => {
         jest.mocked(isTablet).mockReturnValue(false);
         const emitSpy = jest.spyOn(DeviceEventEmitter, 'emit');
 
-        const goToScreenMock = jest.mocked(goToScreen);
+        const dismissMock = jest.mocked(dismissAllRoutesAndPopToScreen);
 
         await operator.handleSystem({systems: [{id: SYSTEM_IDENTIFIERS.CURRENT_TEAM_ID, value: teamId}], prepareRecordsOnly: false});
         await switchToGlobalDrafts(serverUrl);
 
-        expect(goToScreenMock).toHaveBeenCalledWith(Screens.GLOBAL_DRAFTS, '', {}, {topBar: {visible: false}});
+        expect(dismissMock).toHaveBeenCalledWith(Screens.GLOBAL_DRAFTS, {});
         expect(emitSpy).not.toHaveBeenCalled();
     });
 
-    it('should not call goToScreen on non-tablet when server url is a non existent URL', async () => {
+    it('should not call dismissAllRoutesAndPopToScreen on non-tablet when server url is a non existent URL', async () => {
         jest.mocked(isTablet).mockReturnValue(false);
         const emitSpy = jest.spyOn(DeviceEventEmitter, 'emit');
-        const goToScreenMock = jest.mocked(goToScreen);
+        const dismissMock = jest.mocked(dismissAllRoutesAndPopToScreen);
 
         await switchToGlobalDrafts('nonexistent');
 
-        expect(goToScreenMock).not.toHaveBeenCalled();
+        expect(dismissMock).not.toHaveBeenCalled();
         expect(emitSpy).not.toHaveBeenCalled();
     });
 
@@ -348,24 +347,24 @@ describe('switchToGlobalDrafts', () => {
     it('should pass initialTab param when provided on non-tablet', async () => {
         jest.mocked(isTablet).mockReturnValue(false);
         const emitSpy = jest.spyOn(DeviceEventEmitter, 'emit');
-        const goToScreenMock = jest.mocked(goToScreen);
+        const dismissMock = jest.mocked(dismissAllRoutesAndPopToScreen);
 
         await switchToGlobalDrafts(serverUrl, teamId, DRAFT_SCREEN_TAB_SCHEDULED_POSTS);
-        expect(goToScreenMock).toHaveBeenCalledWith(Screens.GLOBAL_DRAFTS, '', {initialTab: DRAFT_SCREEN_TAB_SCHEDULED_POSTS}, {topBar: {visible: false}});
+        expect(dismissMock).toHaveBeenCalledWith(Screens.GLOBAL_DRAFTS, {initialTab: DRAFT_SCREEN_TAB_SCHEDULED_POSTS});
 
         await switchToGlobalDrafts(serverUrl, teamId, DRAFT_SCREEN_TAB_DRAFTS);
-        expect(goToScreenMock).toHaveBeenCalledWith(Screens.GLOBAL_DRAFTS, '', {initialTab: DRAFT_SCREEN_TAB_DRAFTS}, {topBar: {visible: false}});
+        expect(dismissMock).toHaveBeenCalledWith(Screens.GLOBAL_DRAFTS, {initialTab: DRAFT_SCREEN_TAB_DRAFTS});
         expect(emitSpy).not.toHaveBeenCalled();
     });
 
-    it('should call popto from navigation store if Global draft is alreay present', async () => {
+    it('should call dismissAllRoutesAndPopToScreen if Global draft is alreay present', async () => {
         NavigationStore.addScreenToStack(Screens.GLOBAL_DRAFTS);
         NavigationStore.addScreenToStack(Screens.CHANNEL);
         NavigationStore.addScreenToStack(Screens.THREAD);
 
         await switchToGlobalDrafts(serverUrl, teamId, DRAFT_SCREEN_TAB_SCHEDULED_POSTS);
 
-        expect(popTo).toHaveBeenCalledWith(Screens.GLOBAL_DRAFTS);
+        expect(dismissAllRoutesAndPopToScreen).toHaveBeenCalledWith(Screens.GLOBAL_DRAFTS);
     });
 });
 

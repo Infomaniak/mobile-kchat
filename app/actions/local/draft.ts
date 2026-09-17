@@ -9,7 +9,7 @@ import DatabaseManager from '@database/manager';
 import {getDraft} from '@queries/servers/drafts';
 import {getCurrentChannelId, getCurrentTeamId, setCurrentTeamAndChannelId} from '@queries/servers/system';
 import {addChannelToTeamHistory} from '@queries/servers/team';
-import {goToScreen, popTo} from '@screens/navigation';
+import {dismissAllRoutesAndPopToScreen} from '@screens/navigation';
 import NavigationStore from '@store/navigation_store';
 import {getExtensionFromMime} from '@utils/file';
 import {isTablet} from '@utils/helpers';
@@ -51,7 +51,7 @@ export const switchToGlobalDrafts = async (serverUrl: string, teamId?: string, i
 
         const isDraftAlreadyInNavigationStack = NavigationStore.getScreensInStack().includes(Screens.GLOBAL_DRAFTS);
         if (isDraftAlreadyInNavigationStack) {
-            popTo(Screens.GLOBAL_DRAFTS);
+            dismissAllRoutesAndPopToScreen(Screens.GLOBAL_DRAFTS);
             return {models};
         }
 
@@ -61,7 +61,8 @@ export const switchToGlobalDrafts = async (serverUrl: string, teamId?: string, i
         if (isTabletDevice) {
             DeviceEventEmitter.emit(Navigation.NAVIGATION_HOME, Screens.GLOBAL_DRAFTS, params);
         } else {
-            goToScreen(Screens.GLOBAL_DRAFTS, '', params, {topBar: {visible: false}});
+            await NavigationStore.waitUntilScreenHasLoaded(Screens.HOME);
+            dismissAllRoutesAndPopToScreen(Screens.GLOBAL_DRAFTS, params);
         }
 
         return {models};

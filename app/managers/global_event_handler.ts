@@ -3,7 +3,7 @@
 
 import RNUtils, {type SplitViewResult} from '@mattermost/rnutils';
 import {defineMessages} from 'react-intl';
-import {Alert, DeviceEventEmitter, Linking, NativeEventEmitter, NativeModules} from 'react-native';
+import {Alert, DeviceEventEmitter, NativeEventEmitter, NativeModules} from 'react-native';
 import semver from 'semver';
 
 import {switchToChannelById} from '@actions/remote/channel';
@@ -21,14 +21,10 @@ import {getCommonSystemValues} from '@queries/servers/system';
 import {getTeamChannelHistory} from '@queries/servers/team';
 import {setScreensOrientation} from '@screens/navigation';
 import CallManager, {CallAnsweredEvent, CallEndedEvent} from '@store/CallManager';
-import {alertInvalidDeepLink, parseAndHandleDeepLink} from '@utils/deep_link';
 import {getFullErrorMessage} from '@utils/errors';
-import {getIntlShape} from '@utils/general';
 import {logDebug, logError} from '@utils/log';
 
 import type {Database} from '@nozbe/watermelondb';
-
-type LinkingCallbackArg = {url: string};
 
 const callManagerEmitter = new NativeEventEmitter(NativeModules.CallManagerModule);
 const splitViewEmitter = new NativeEventEmitter(RNUtils);
@@ -61,7 +57,6 @@ class GlobalEventHandlerSingleton {
         // throw "`CallMuted` is not a supported event type" and crash the module graph.
 
         splitViewEmitter.addListener('SplitViewChanged', this.onSplitViewChanged);
-        Linking.addEventListener('url', this.onDeepLink);
 
         this.initialized();
         DeviceEventEmitter.addListener(Events.POST_DELETED_FOR_CHANNEL, this.onPostDeletedForChannel);
@@ -97,15 +92,6 @@ class GlobalEventHandlerSingleton {
         attemptServerDatabaseRecovery(serverUrl, error, source).catch((recoveryError) => {
             logError('onDatabaseCorruptionDetected: unhandled recovery error', getFullErrorMessage(recoveryError));
         });
-    };
-
-    onDeepLink = async (event: LinkingCallbackArg) => {
-        if (event.url) {
-            const {error} = await parseAndHandleDeepLink(event.url, undefined, undefined, true);
-            if (error) {
-                alertInvalidDeepLink(getIntlShape(DEFAULT_LOCALE));
-            }
-        }
     };
 
     onServerVersionChanged = async ({serverUrl, serverVersion}: {serverUrl: string; serverVersion?: string}) => {

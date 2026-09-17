@@ -1,10 +1,23 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {usePropsFromParams} from '@hooks/props_from_params';
-import Screen from '@screens/terms_of_service';
+import {useNavigation} from 'expo-router';
+import {useEffect} from 'react';
 
-export default function Route() {
-    const props = usePropsFromParams<any>();
-    return <Screen {...props}/>;
+import TermsOfServiceScreen from '@screens/terms_of_service';
+
+export default function TermsOfServiceRoute() {
+    const navigation = useNavigation();
+
+    useEffect(() => {
+        navigation.setOptions({
+            animation: 'none',
+            presentation: 'transparentModal',
+            contentStyle: {backgroundColor: 'transparent'},
+            headerShown: false,
+            gestureEnabled: false,
+        });
+    }, [navigation]);
+
+    return <TermsOfServiceScreen/>;
 }

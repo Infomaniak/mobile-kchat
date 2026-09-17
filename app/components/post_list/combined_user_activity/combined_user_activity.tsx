@@ -105,6 +105,9 @@ const CombinedUserActivity = ({
             return;
         }
 
+        // PostModels embedded in props serialize as garbage through route params
+        // and bloat them; post_options only needs type/props.system_post_ids.
+        delete post.props?.user_activity_posts;
         const passProps = {post, sourceScreen: location};
         Keyboard.dismiss();
         const title = isTablet ? intl.formatMessage({id: 'post.options.title', defaultMessage: 'Options'}) : '';

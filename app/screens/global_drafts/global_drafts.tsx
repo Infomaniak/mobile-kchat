@@ -31,6 +31,11 @@ type Props = {
     initialTab?: DraftScreenTab;
 };
 
+export type GlobalDraftProps = {
+    scheduledPostsEnabled?: boolean;
+    initialTab?: DraftScreenTab;
+};
+
 const styles = StyleSheet.create({
     flex: {
         flex: 1,
