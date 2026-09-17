@@ -8,21 +8,12 @@ import {useTheme} from '@context/theme';
 import {getModalHeaderOptions, useNavigationHeader} from '@hooks/navigation_header';
 import {usePropsFromParams} from '@hooks/props_from_params';
 import {navigateBack} from '@screens/navigation';
-import RescheduleDraftScreen from '@screens/reschedule_draft';
-
-import type {AvailableScreens} from '@typings/screens/navigation';
-
-type Props = {
-    componentId: AvailableScreens;
-    closeButtonId: string;
-    draft: any;
-    [key: string]: any;
-}
+import RescheduleDraftScreen, {type RescheduleDraftProps} from '@screens/reschedule_draft';
 
 export default function RescheduleDraftRoute() {
     const intl = useIntl();
     const theme = useTheme();
-    const {componentId, ...props} = usePropsFromParams<Props>();
+    const props = usePropsFromParams<RescheduleDraftProps>();
 
     useNavigationHeader({
         showWhenPushed: true,
@@ -34,8 +25,8 @@ export default function RescheduleDraftRoute() {
 
     return (
         <RescheduleDraftScreen
-            componentId={componentId ?? Screens.RESCHEDULE_DRAFT}
             {...props}
+            componentId={Screens.RESCHEDULE_DRAFT}
         />
     );
 }

@@ -3,6 +3,7 @@
 
 import {Database, Q} from '@nozbe/watermelondb';
 import {of as of$} from 'rxjs';
+import {switchMap} from 'rxjs/operators';
 
 import {MM_TABLES} from '@constants/database';
 import DraftModel from '@typings/database/models/servers/draft';
@@ -29,6 +30,13 @@ export const queryDraft = (database: Database, channelId: string, rootId = '') =
 export function observeFirstDraft(v: DraftModel[]) {
     return v[0]?.observe() || of$(undefined);
 }
+
+export const observeDraftById = (database: Database, draftId: string) => {
+    return database.collections.get<DraftModel>(DRAFT).
+        query(Q.where('id', draftId)).observe().pipe(
+            switchMap((drafts) => observeFirstDraft(drafts)),
+        );
+};
 
 export const queryDraftsForTeam = (database: Database, teamId: string) => {
     return database.collections.get<DraftModel>(DRAFT).query(

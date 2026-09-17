@@ -11,16 +11,14 @@ import Tag from '@components/tag';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
-import {popTopScreen} from '@screens/navigation';
+import {navigateBack} from '@screens/navigation';
 import {getPostTranslation} from '@utils/post';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
 import type PostModel from '@typings/database/models/servers/post';
-import type {AvailableScreens} from '@typings/screens/navigation';
 
 type Props = {
-    componentId: AvailableScreens;
     post?: PostModel;
     appsEnabled: boolean;
     customEmojiNames: string[];
@@ -62,7 +60,6 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 });
 
 function ShowTranslation({
-    componentId,
     post,
     appsEnabled,
     customEmojiNames,
@@ -73,12 +70,10 @@ function ShowTranslation({
     const style = getStyleSheet(theme);
 
     const close = useCallback(() => {
-        if (componentId) {
-            popTopScreen(componentId);
-        }
-    }, [componentId]);
+        navigateBack();
+    }, []);
 
-    useAndroidHardwareBackHandler(componentId, close);
+    useAndroidHardwareBackHandler(Screens.SHOW_TRANSLATION, close);
 
     if (!post) {
         return null;

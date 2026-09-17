@@ -39,6 +39,13 @@ export function observeFirstScheduledPost(v: ScheduledPostModel[]) {
     return v[0]?.observe() || of$(undefined);
 }
 
+export const observeScheduledPostById = (database: Database, scheduledPostId: string) => {
+    return database.get<ScheduledPostModel>(SCHEDULED_POST).
+        query(Q.where('id', scheduledPostId)).observe().pipe(
+            switchMap((scheduledPosts) => observeFirstScheduledPost(scheduledPosts)),
+        );
+};
+
 export const observeScheduledPostsForTeam = (database: Database, teamId: string, includeDirectChannelPosts?: boolean) => {
     return queryScheduledPostsForTeam(database, teamId, includeDirectChannelPosts).observeWithColumns(['update_at', 'error_code']);
 };

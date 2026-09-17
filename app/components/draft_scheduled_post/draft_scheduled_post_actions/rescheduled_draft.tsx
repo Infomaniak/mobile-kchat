@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback} from 'react';
-import {useIntl} from 'react-intl';
 
 import CompassIcon from '@components/compass_icon';
 import FormattedText from '@components/formatted_text';
@@ -10,14 +9,12 @@ import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {Screens} from '@constants';
 import {ICON_SIZE} from '@constants/post_draft';
 import {useTheme} from '@context/theme';
-import {dismissBottomSheet, showModal} from '@screens/navigation';
+import {dismissBottomSheet, navigateToScreen} from '@screens/navigation';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 
-import type ScheduledPostModel from '@typings/database/models/servers/scheduled_post';
-
 type Props = {
-    draft: ScheduledPostModel;
+    draftId: string;
 }
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
@@ -35,28 +32,14 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 }));
 
 const RescheduledDraft: React.FC<Props> = ({
-    draft,
+    draftId,
 }) => {
     const theme = useTheme();
     const style = getStyleSheet(theme);
-    const intl = useIntl();
     const rescheduledDraft = useCallback(async () => {
         await dismissBottomSheet();
-        const title = intl.formatMessage({id: 'mobile.reschedule_draft.title', defaultMessage: 'Change Schedule'});
-        const closeButton = CompassIcon.getImageSourceSync('close', 24, theme.sidebarHeaderTextColor);
-        const closeButtonId = 'close-rescheduled-draft';
-        const passProps = {closeButtonId, draft};
-        const options = {
-            topBar: {
-                leftButtons: [{
-                    id: closeButtonId,
-                    testID: 'close.reschedule_draft.button',
-                    icon: closeButton,
-                }],
-            },
-        };
-        showModal(Screens.RESCHEDULE_DRAFT, title, passProps, options);
-    }, [draft, intl, theme.sidebarHeaderTextColor]);
+        navigateToScreen(Screens.RESCHEDULE_DRAFT, {draftId});
+    }, [draftId]);
 
     return (
         <TouchableWithFeedback

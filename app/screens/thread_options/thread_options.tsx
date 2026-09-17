@@ -25,7 +25,6 @@ import type TeamModel from '@typings/database/models/servers/team';
 import type ThreadModel from '@typings/database/models/servers/thread';
 
 type ThreadOptionsProps = {
-    componentId: string;
     isSaved: boolean;
     post: PostModel;
     team: TeamModel;

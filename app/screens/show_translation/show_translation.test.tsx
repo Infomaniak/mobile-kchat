@@ -5,17 +5,15 @@ import React, {type ComponentProps} from 'react';
 
 import Post from '@components/post_list/post';
 import {Screens} from '@constants';
-import {popTopScreen} from '@screens/navigation';
+import {navigateBack} from '@screens/navigation';
 import {act, renderWithIntlAndTheme} from '@test/intl-test-helper';
 import TestHelper from '@test/test_helper';
 import {getPostTranslation} from '@utils/post';
 
 import ShowTranslation from './show_translation';
 
-import type {AvailableScreens} from '@typings/screens/navigation';
-
 jest.mock('@screens/navigation', () => ({
-    popTopScreen: jest.fn(),
+    navigateBack: jest.fn(),
 }));
 jest.mock('@hooks/android_back_handler', () => ({
     __esModule: true,
@@ -36,7 +34,6 @@ jest.mocked(Post).mockImplementation((props) =>
 describe.skip('ShowTranslation', () => {
     function getBaseProps(): ComponentProps<typeof ShowTranslation> {
         return {
-            componentId: Screens.SHOW_TRANSLATION as AvailableScreens,
             post: undefined,
             appsEnabled: false,
             customEmojiNames: [],
@@ -104,19 +101,17 @@ describe.skip('ShowTranslation', () => {
         expect(translatedPost).toHaveProp('isChannelAutotranslated', true);
     });
 
-    it('sets up Android back handler with componentId and close callback', () => {
+    it('sets up Android back handler with close callback', () => {
         const useAndroidHardwareBackHandler = require('@hooks/android_back_handler').default;
-        const componentId = Screens.SHOW_TRANSLATION as AvailableScreens;
         const post = TestHelper.fakePostModel({id: 'post1'});
         const props = {
             ...getBaseProps(),
             post,
-            componentId,
         };
         renderWithIntlAndTheme(<ShowTranslation {...props}/>);
 
         expect(useAndroidHardwareBackHandler).toHaveBeenCalledWith(
-            componentId,
+            Screens.SHOW_TRANSLATION,
             expect.any(Function),
         );
 
@@ -124,7 +119,7 @@ describe.skip('ShowTranslation', () => {
         act(() => {
             closeHandler();
         });
-        expect(popTopScreen).toHaveBeenCalledWith(componentId);
+        expect(navigateBack).toHaveBeenCalled();
     });
 
     it('displays ORIGINAL and AUTO-TRANSLATED badges when translation is available', () => {

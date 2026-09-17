@@ -160,15 +160,14 @@ const Thread = ({author, channel, location, post, teammateNameDisplay, testID, t
     }, [serverUrl, channel?.id]));
 
     const showThreadOptions = useCallback(() => {
-        const passProps = {thread};
-        const title = isTablet ? intl.formatMessage({id: 'thread.options.title', defaultMessage: 'Thread Actions'}) : '';
+        const passProps = {threadId: thread.id};
 
         if (isTablet) {
-            showModal(Screens.THREAD_OPTIONS, title, passProps, bottomSheetModalOptions(theme, 'close-thread-options'));
+            showModal(Screens.THREAD_OPTIONS, '', passProps, bottomSheetModalOptions(theme, 'close-thread-options'));
         } else {
             showModalOverCurrentContext(Screens.THREAD_OPTIONS, passProps);
         }
-    }, [intl, isTablet, theme, thread]);
+    }, [isTablet, theme, thread]);
 
     if (!post || !channel) {
         return null;
