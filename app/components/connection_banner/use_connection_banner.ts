@@ -10,6 +10,7 @@ import type {NetInfoState} from '@react-native-community/netinfo';
 import type {IntlShape} from 'react-intl';
 
 const CLOSE_TIMEOUT_DURATION_MS = 2000;
+const UNREACHABLE_GRACE_TIMEOUT_MS = 5000;
 
 const clearTimeoutRef = (ref: React.MutableRefObject<NodeJS.Timeout | null | undefined>) => {
     if (ref.current) {
@@ -74,10 +75,15 @@ export const useConnectionBanner = ({
         if (netInfo.isInternetReachable === false) {
             setBannerText(intl.formatMessage({id: 'connection_banner.not_reachable', defaultMessage: 'The server is not reachable'}));
             openCallback();
+
+            // RM-621906: a live websocket proves the server is reachable, but netinfo may never emit the recovery (VPN/captive portal), so auto-dismiss
+            if (websocketState === 'connected') {
+                closeTimeout.current = setTimeout(closeCallback, UNREACHABLE_GRACE_TIMEOUT_MS);
+            }
             return true;
         }
         return false;
-    }, [netInfo.isInternetReachable, intl, openCallback]);
+    }, [netInfo.isInternetReachable, websocketState, intl, openCallback, closeCallback]);
 
     const handleSlowNetworkState = useCallback((): boolean => {
         if (networkPerformanceState === 'slow') {
@@ -140,6 +146,10 @@ export const useConnectionBanner = ({
         }
 
         const priorities = () => {
+            if (handleConnectedState()) {
+                return;
+            }
+
             const shouldHideBanner =
                 handleInternetUnreachableState() ||
                 handleDisconnectedState() ||
@@ -149,10 +159,6 @@ export const useConnectionBanner = ({
             if (shouldHideBanner) {
                 setIsShowingConnectedBanner(false);
                 isShowingConnectedBannerRef.current = false;
-                return;
-            }
-
-            if (handleConnectedState()) {
                 return;
             }
 

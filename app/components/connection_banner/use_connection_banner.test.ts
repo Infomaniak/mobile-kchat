@@ -638,4 +638,88 @@ describe('useConnectionBanner', () => {
             });
         });
     });
+
+    describe('unreachable banner auto-dismiss', () => {
+        it('should auto-dismiss unreachable banner after grace period while websocket is connected', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
+
+            const {result} = renderHook(() => useConnectionBanner({
+                websocketState: 'connected' as WebsocketConnectedState,
+                networkPerformanceState: 'normal' as NetworkPerformanceState,
+                netInfo: createMockNetInfo(false),
+                appState: 'active',
+                intl: mockIntl,
+            }));
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('The server is not reachable');
+
+            act(() => {
+                jest.advanceTimersByTime(5100);
+            });
+
+            expect(result.current.visible).toBe(false);
+        });
+
+        it('should keep unreachable banner visible while websocket is not connected', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
+
+            const {result} = renderHook(() => useConnectionBanner({
+                websocketState: 'not_connected' as WebsocketConnectedState,
+                networkPerformanceState: 'normal' as NetworkPerformanceState,
+                netInfo: createMockNetInfo(false),
+                appState: 'active',
+                intl: mockIntl,
+            }));
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('The server is not reachable');
+
+            act(() => {
+                jest.advanceTimersByTime(5100);
+            });
+
+            expect(result.current.visible).toBe(true);
+        });
+
+        it('should show connection restored when websocket reconnects while internet is still unreachable', () => {
+            jest.useFakeTimers({doNotFake: ['nextTick']});
+
+            const {result, rerender} = renderHook<UseConnectionBannerReturn, UseConnectionBannerParams>(
+                (props) => useConnectionBanner(props),
+                {
+                    initialProps: {
+                        websocketState: 'not_connected' as WebsocketConnectedState,
+                        networkPerformanceState: 'normal' as NetworkPerformanceState,
+                        netInfo: createMockNetInfo(false),
+                        appState: 'active',
+                        intl: mockIntl,
+                    },
+                },
+            );
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('The server is not reachable');
+
+            act(() => {
+                rerender({
+                    websocketState: 'connected' as WebsocketConnectedState,
+                    networkPerformanceState: 'normal' as NetworkPerformanceState,
+                    netInfo: createMockNetInfo(false),
+                    appState: 'active',
+                    intl: mockIntl,
+                });
+            });
+
+            expect(result.current.visible).toBe(true);
+            expect(result.current.bannerText).toBe('Connection restored');
+            expect(result.current.isShowingConnectedBanner).toBe(true);
+
+            act(() => {
+                jest.advanceTimersByTime(2100);
+            });
+
+            expect(result.current.visible).toBe(false);
+        });
+    });
 });
