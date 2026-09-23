@@ -20,10 +20,17 @@ private let notificationSessionAction = "session"
 class AppDelegate: ExpoAppDelegate, OrientationLockable, RNAppAuthAuthorizationFlowManager {
     @objc var orientationLock: UIInterfaceOrientationMask = .allButUpsideDown
 
+    var launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+
+    // Reference to the key window owned by the SceneDelegate. Kept for legacy
+    // consumers that read UIApplicationDelegate.window (RNAppAuth, Sentry...).
     var window: UIWindow?
 
+    // React Native is started from the SceneDelegate when the UI scene connects.
+    var hasStartedReactNative = false
+
     var reactNativeDelegate: ExpoReactNativeFactoryDelegate?
-    var reactNativeFactory: RCTReactNativeFactory?
+    var reactNativeFactory: ExpoReactNativeFactory?
 
     weak var authorizationFlowManagerDelegate: (any RNAppAuthAuthorizationFlowManagerDelegate)?
 
@@ -98,15 +105,7 @@ class AppDelegate: ExpoAppDelegate, OrientationLockable, RNAppAuthAuthorizationF
 
         reactNativeDelegate = delegate
         reactNativeFactory = factory
-
-        #if os(iOS) || os(tvOS)
-        window = UIWindow(frame: UIScreen.main.bounds)
-        factory.startReactNative(
-            withModuleName: "kChat",
-            in: window,
-            launchOptions: launchOptions
-        )
-        #endif
+        self.launchOptions = launchOptions
 
         let result = super.application(application, didFinishLaunchingWithOptions: launchOptions)
 
@@ -148,6 +147,15 @@ class AppDelegate: ExpoAppDelegate, OrientationLockable, RNAppAuthAuthorizationF
 
         if isTestAction {
             completionHandler(.noData)
+            return
+        }
+
+        // Scene lifecycle: a background launch connects no UI scene, so React
+        // Native never starts and JS background handlers cannot respond. Handle
+        // the receipt natively instead of blocking on RNNotifications' semaphore.
+        if UIApplication.shared.connectedScenes.isEmpty {
+            GekidouWrapper.default.postNotificationReceipt(userInfo)
+            completionHandler(.newData)
             return
         }
 
@@ -194,16 +202,31 @@ class AppDelegate: ExpoAppDelegate, OrientationLockable, RNAppAuthAuthorizationF
 
     // MARK: - Deep Linking
 
+    func handleOpenURL(_ url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        if let authDelegate = authorizationFlowManagerDelegate,
+           authDelegate.resumeExternalUserAgentFlow(with: url) {
+            return true
+        }
+        return RCTLinkingManager.application(UIApplication.shared, open: url, options: options)
+    }
+
+    func handleUserActivity(_ userActivity: NSUserActivity) -> Bool {
+        if userActivity.activityType == NSUserActivityTypeBrowsingWeb {
+            if let authDelegate = authorizationFlowManagerDelegate,
+               let webpageURL = userActivity.webpageURL,
+               authDelegate.resumeExternalUserAgentFlow(with: webpageURL) {
+                return true
+            }
+        }
+        return RCTLinkingManager.application(UIApplication.shared, continue: userActivity, restorationHandler: { _ in [] })
+    }
+
     override func application(
         _ app: UIApplication,
         open url: URL,
         options: [UIApplication.OpenURLOptionsKey: Any] = [:]
     ) -> Bool {
-        if let authDelegate = authorizationFlowManagerDelegate,
-           authDelegate.resumeExternalUserAgentFlow(with: url) {
-            return true
-        }
-        return RCTLinkingManager.application(app, open: url, options: options)
+        return handleOpenURL(url, options: options)
     }
 
     func application(
@@ -212,11 +235,7 @@ class AppDelegate: ExpoAppDelegate, OrientationLockable, RNAppAuthAuthorizationF
         sourceApplication: String?,
         annotation: Any
     ) -> Bool {
-        if let authDelegate = authorizationFlowManagerDelegate,
-           authDelegate.resumeExternalUserAgentFlow(with: url) {
-            return true
-        }
-        return RCTLinkingManager.application(application, open: url, sourceApplication: sourceApplication, annotation: annotation)
+        return handleOpenURL(url)
     }
 
     override func application(
@@ -224,14 +243,7 @@ class AppDelegate: ExpoAppDelegate, OrientationLockable, RNAppAuthAuthorizationF
         continue userActivity: NSUserActivity,
         restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
     ) -> Bool {
-        if userActivity.activityType == NSUserActivityTypeBrowsingWeb {
-            if let authDelegate = authorizationFlowManagerDelegate,
-               let webpageURL = userActivity.webpageURL,
-               authDelegate.resumeExternalUserAgentFlow(with: webpageURL) {
-                return true
-            }
-        }
-        return RCTLinkingManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
+        return handleUserActivity(userActivity)
     }
 
     // MARK: - App Lifecycle
