@@ -70,7 +70,11 @@ const throwFunc = () => {
     throw Error('error');
 };
 
-const getThreadsMock = jest.fn((_userId: string, _teamId: string, _before: unknown, _after: unknown, _perPage: unknown, _deleted: unknown, _unread?: boolean, _since?: number) => {
+let unreadFetchError = false;
+const getThreadsMock = jest.fn((userId: string, _teamId: string, _before: unknown, _after: unknown, _perPage: unknown, _deleted: unknown, unread?: boolean, _since?: number) => {
+    if (unread && unreadFetchError) {
+        return Promise.reject(new Error('unread fetch failed'));
+    }
     return Promise.resolve({threads, total: threads.length, total_unread_mentions: 0, total_unread_threads: 0});
 });
 
@@ -172,6 +176,24 @@ describe('get threads', () => {
         expect(result2.error).toBeFalsy();
         expect(result2.models).toBeDefined();
         expect(result2.models?.length).toBe(1); // 1 team thread sync
+    });
+
+    it('syncTeamThreads - surfaces unread threads fetch error on incremental sync [RM-591015]', async () => {
+        await operator.handleSystem({systems: [{id: SYSTEM_IDENTIFIERS.CURRENT_USER_ID, value: user1.id}], prepareRecordsOnly: false});
+        await operator.handleUsers({users: [user1], prepareRecordsOnly: false});
+
+        // First sync populates the sync data so the next sync takes the incremental path
+        const first = await syncTeamThreads(serverUrl, team.id);
+        expect(first.error).toBeFalsy();
+
+        unreadFetchError = true;
+        try {
+            const result = await syncTeamThreads(serverUrl, team.id);
+            expect(result).toBeDefined();
+            expect(result.error).toBeTruthy();
+        } finally {
+            unreadFetchError = false;
+        }
     });
 
     it('syncTeamThreads - keeps the incremental since on every sync so a refresh does not re-fetch all threads [RM-625222]', async () => {

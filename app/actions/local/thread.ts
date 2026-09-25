@@ -138,13 +138,24 @@ export const switchToThread = async (serverUrl: string, rootId: string, isFromNo
 // 2. Else add the post as a thread
 export async function createThreadFromNewPost(serverUrl: string, post: Post, prepareRecordsOnly = false) {
     try {
-        const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        const {database, operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
         const models: Model[] = [];
         if (post.root_id) {
-            // Update the thread data: `reply_count`
-            const {model: threadModel} = await updateThread(serverUrl, post.root_id, {reply_count: post.reply_count}, true);
-            if (threadModel) {
-                models.push(threadModel);
+            const thread = await getThreadById(database, post.root_id);
+            if (thread) {
+                const currentUserId = await getCurrentUserId(database);
+                const isThreadVisible = EphemeralStore.getCurrentThreadId() === post.root_id;
+                const replyUnseen = thread.isFollowing && post.user_id !== currentUserId && post.create_at > thread.lastViewedAt && !isThreadVisible;
+                const model = thread.prepareUpdate((record) => {
+                    record.replyCount = post.reply_count ?? record.replyCount;
+                    if (replyUnseen) {
+                        // RM-591015
+                        record.unreadReplies = Math.max(record.unreadReplies, 1);
+                    }
+                });
+                models.push(model);
+            } else {
+                logDebug('[createThreadFromNewPost] thread not found for reply', post.root_id);
             }
 
             // Add user as a participant to the thread

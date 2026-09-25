@@ -413,8 +413,8 @@ export const syncTeamThreads = async (
                 ),
             ]);
 
-            if (allNewThreads.error) {
-                return {error: allNewThreads.error};
+            if (allNewThreads.error || allUnreadThreads.error) {
+                return {error: allNewThreads.error || allUnreadThreads.error};
             }
             if (allNewThreads.threads?.length) {
                 // As we are syncing, we get all new threads and we will update the "latest" value.

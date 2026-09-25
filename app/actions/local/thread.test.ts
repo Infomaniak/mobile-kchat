@@ -5,6 +5,7 @@ import {ActionType, Screens} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import Preferences from '@constants/preferences';
 import DatabaseManager from '@database/manager';
+import {getThreadById} from '@queries/servers/thread';
 import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore from '@store/navigation_store';
 import TestHelper from '@test/test_helper';
@@ -282,6 +283,77 @@ describe('createThreadFromNewPost', () => {
         expect(error).toBeUndefined();
         expect(models).toBeDefined();
         expect(models?.length).toBe(1); // thread
+    });
+
+    it('should mark a followed unviewed thread as unread when a reply from another user arrives [RM-591015]', async () => {
+        await operator.handleUsers({users: [user, user2], prepareRecordsOnly: false});
+        await operator.handleSystem({systems: [{id: SYSTEM_IDENTIFIERS.CURRENT_USER_ID, value: user.id}], prepareRecordsOnly: false});
+        await operator.handleThreads({threads, prepareRecordsOnly: false, teamId: team.id});
+        const post = TestHelper.fakePost({channel_id: channelId, user_id: user2.id, id: 'postid', create_at: 456, root_id: rootPost.id, reply_count: 1});
+
+        const {error} = await createThreadFromNewPost(serverUrl, post, false);
+        expect(error).toBeUndefined();
+
+        const thread = await getThreadById(operator.database, rootPost.id);
+        expect(thread?.replyCount).toBe(1);
+        expect(thread?.unreadReplies).toBe(1);
+    });
+
+    it('should not mark the thread unread when the reply is from the current user [RM-591015]', async () => {
+        await operator.handleUsers({users: [user, user2], prepareRecordsOnly: false});
+        await operator.handleSystem({systems: [{id: SYSTEM_IDENTIFIERS.CURRENT_USER_ID, value: user.id}], prepareRecordsOnly: false});
+        await operator.handleThreads({threads, prepareRecordsOnly: false, teamId: team.id});
+        const post = TestHelper.fakePost({channel_id: channelId, user_id: user.id, id: 'postid', create_at: 456, root_id: rootPost.id, reply_count: 1});
+
+        const {error} = await createThreadFromNewPost(serverUrl, post, false);
+        expect(error).toBeUndefined();
+
+        const thread = await getThreadById(operator.database, rootPost.id);
+        expect(thread?.unreadReplies).toBe(0);
+    });
+
+    it('should not mark the thread unread when the thread is currently being viewed [RM-591015]', async () => {
+        await operator.handleUsers({users: [user, user2], prepareRecordsOnly: false});
+        await operator.handleSystem({systems: [{id: SYSTEM_IDENTIFIERS.CURRENT_USER_ID, value: user.id}], prepareRecordsOnly: false});
+        await operator.handleThreads({threads, prepareRecordsOnly: false, teamId: team.id});
+        EphemeralStore.setCurrentThreadId(rootPost.id);
+        const post = TestHelper.fakePost({channel_id: channelId, user_id: user2.id, id: 'postid', create_at: 456, root_id: rootPost.id, reply_count: 1});
+
+        try {
+            const {error} = await createThreadFromNewPost(serverUrl, post, false);
+            expect(error).toBeUndefined();
+
+            const thread = await getThreadById(operator.database, rootPost.id);
+            expect(thread?.unreadReplies).toBe(0);
+        } finally {
+            EphemeralStore.setCurrentThreadId('');
+        }
+    });
+
+    it('should not mark the thread unread when the thread is already viewed past the reply [RM-591015]', async () => {
+        await operator.handleUsers({users: [user, user2], prepareRecordsOnly: false});
+        await operator.handleSystem({systems: [{id: SYSTEM_IDENTIFIERS.CURRENT_USER_ID, value: user.id}], prepareRecordsOnly: false});
+        await operator.handleThreads({threads: [{...threads[0], last_viewed_at: 456}], prepareRecordsOnly: false, teamId: team.id});
+        const post = TestHelper.fakePost({channel_id: channelId, user_id: user2.id, id: 'postid', create_at: 456, root_id: rootPost.id, reply_count: 1});
+
+        const {error} = await createThreadFromNewPost(serverUrl, post, false);
+        expect(error).toBeUndefined();
+
+        const thread = await getThreadById(operator.database, rootPost.id);
+        expect(thread?.unreadReplies).toBe(0);
+    });
+
+    it('should not corrupt an authoritative unread count set by thread_updated [RM-591015]', async () => {
+        await operator.handleUsers({users: [user, user2], prepareRecordsOnly: false});
+        await operator.handleSystem({systems: [{id: SYSTEM_IDENTIFIERS.CURRENT_USER_ID, value: user.id}], prepareRecordsOnly: false});
+        await operator.handleThreads({threads: [{...threads[0], unread_replies: 2}], prepareRecordsOnly: false, teamId: team.id});
+        const post = TestHelper.fakePost({channel_id: channelId, user_id: user2.id, id: 'postid', create_at: 456, root_id: rootPost.id, reply_count: 2});
+
+        const {error} = await createThreadFromNewPost(serverUrl, post, false);
+        expect(error).toBeUndefined();
+
+        const thread = await getThreadById(operator.database, rootPost.id);
+        expect(thread?.unreadReplies).toBe(2);
     });
 });
 
