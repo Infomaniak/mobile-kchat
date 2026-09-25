@@ -156,6 +156,7 @@ export function ScheduledPostOptions({currentUserTimezone}: Props) {
             renderContent={renderContent}
             screen={Screens.SCHEDULED_POST_OPTIONS}
             snapPoints={snapPoints}
+            enableContentPanningGesture={!customTimeSelected}
             testID='scheduled_post_options_bottom_sheet'
             footerComponent={renderFooter}
         />

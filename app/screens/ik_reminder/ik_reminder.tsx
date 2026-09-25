@@ -291,6 +291,7 @@ const IKReminder = ({postId, postpone = false, postponePostId, currentUser, limi
             screen={Screens.IK_REMINDER}
             initialSnapIndex={1}
             snapPoints={snapPoints}
+            enableContentPanningGesture={!showCustomPicker}
             testID='post_options'
         />
     );

@@ -44,6 +44,9 @@ type Props = {
     enableDynamicSizing?: boolean;
     testID?: string;
 
+    // kChat: disable drag-to-dismiss by content when a native picker is rendered inside the sheet
+    enableContentPanningGesture?: boolean;
+
     // kChat: custom top border used by ik_evolve and ik_quota_exceeded
     headerStyle?: StyleProp<ViewStyle>;
     keyboardBehavior?: 'extend' | 'fillParent' | 'interactive';
@@ -106,6 +109,7 @@ const BottomSheet = forwardRef<BottomSheetRef, Props>(({
     snapPoints = [1, '50%', '80%'],
     testID,
     enableDynamicSizing = false,
+    enableContentPanningGesture = true,
     headerStyle,
     keyboardBehavior = 'extend',
     keyboardBlurBehavior = 'restore',
@@ -222,6 +226,7 @@ const BottomSheet = forwardRef<BottomSheetRef, Props>(({
             onClose={onBottomSheetClose}
             bottomInset={footerComponent ? 0 : insets.bottom}
             enableDynamicSizing={enableDynamicSizing}
+            enableContentPanningGesture={enableContentPanningGesture}
             accessible={false}
         >
             <View style={[screenStyle, styles.bottomSheet]}>
