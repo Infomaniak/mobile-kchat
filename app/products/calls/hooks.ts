@@ -4,40 +4,33 @@
 // Check if calls is enabled. If it is, then run fn; if it isn't, show an alert and set
 // msgPostfix to ' (Not Available)'.
 import {useEffect} from 'react';
+import {Platform} from 'react-native';
+import Permissions from 'react-native-permissions';
 
-// import {Platform} from 'react-native';
-// import Permissions from 'react-native-permissions';
-
-// import {setMicPermissionsGranted} from '@calls/state';
+import {setMicPermissionsGranted} from '@calls/state/actions';
 import {useAppState} from '@hooks/device';
 
-// import { initializeVoiceTrack } from './actions';
-
-// const micPermission = Platform.select({
-//     ios: Permissions.PERMISSIONS.IOS.MICROPHONE,
-//     default: Permissions.PERMISSIONS.ANDROID.RECORD_AUDIO,
-// });
+const micPermission = Platform.select({
+    ios: Permissions.PERMISSIONS.IOS.MICROPHONE,
+    default: Permissions.PERMISSIONS.ANDROID.RECORD_AUDIO,
+});
 
 export const usePermissionsChecker = (micPermissionsGranted: boolean) => {
     const appState = useAppState();
 
-    // const [hasPermission, setHasPermission] = useState(micPermissionsGranted);
-
     useEffect(() => {
-        // const asyncFn = async () => {
-        //     if (appState === 'active') {
-        //         const result = (await Permissions.check(micPermission)) === Permissions.RESULTS.GRANTED;
-        //         setHasPermission(result);
-        //         if (result) {
-        //             initializeVoiceTrack();
-        //             setMicPermissionsGranted(result);
-        //         }
-        //     }
-        // };
-        // if (!micPermissionsGranted) {
-        //     asyncFn();
-        // }
-    }, [appState]);
-
-    return micPermissionsGranted;
+        const asyncFn = async () => {
+            if (appState === 'active') {
+                // Request rather than check: this triggers the OS prompt when the
+                // permission is undetermined and resolves as soon as it is answered,
+                // so the mute button does not stay disabled if the user grants the
+                // permission while the app stays foregrounded.
+                const result = (await Permissions.request(micPermission)) === Permissions.RESULTS.GRANTED;
+                if (result !== micPermissionsGranted) {
+                    setMicPermissionsGranted(result);
+                }
+            }
+        };
+        asyncFn();
+    }, [appState, micPermissionsGranted]);
 };

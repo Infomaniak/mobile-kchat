@@ -1,7 +1,12 @@
 diff --git a/node_modules/@jitsi/react-native-sdk/index.tsx b/node_modules/@jitsi/react-native-sdk/index.tsx
 --- a/node_modules/@jitsi/react-native-sdk/index.tsx
 +++ b/node_modules/@jitsi/react-native-sdk/index.tsx
-@@ -5,7 +5,6 @@
+@@ -1,3 +1,4 @@
++// @ts-nocheck
+ /* eslint-disable lines-around-comment,  no-undef, no-unused-vars  */
+ 
+ // NB: This import must always come first.
+@@ -5,7 +6,6 @@ import './react/bootstrap.native';
  
  import React, {
      forwardRef,
@@ -9,7 +14,15 @@ diff --git a/node_modules/@jitsi/react-native-sdk/index.tsx b/node_modules/@jits
      useImperativeHandle,
      useLayoutEffect,
      useRef,
-@@ -66,7 +65,6 @@
+@@ -19,6 +19,7 @@ import { appNavigate } from './react/features/app/actions.native';
+ import { App } from './react/features/app/components/App.native';
+ import { setAudioOnly } from './react/features/base/audio-only/actions';
+ import { setAudioMuted, setVideoMuted } from './react/features/base/media/actions';
++import { VIDEO_MUTISM_AUTHORITY } from './react/features/base/media/constants';
+ import { getRoomsInfo } from './react/features/breakout-rooms/functions';
+ 
+ 
+@@ -66,7 +67,6 @@ export interface JitsiRefProps {
   * Main React Native SDK component that displays a Jitsi Meet conference and gets all required params as props
   */
  export const JitsiMeeting = forwardRef<JitsiRefProps, IAppProps>((props, ref) => {
@@ -17,7 +30,26 @@ diff --git a/node_modules/@jitsi/react-native-sdk/index.tsx b/node_modules/@jits
      const app = useRef(null);
      const {
          config,
-@@ -108,57 +106,54 @@
+@@ -94,12 +94,16 @@ export const JitsiMeeting = forwardRef<JitsiRefProps, IAppProps>((props, ref) =>
+         setAudioMuted: muted => {
+             const dispatch = app.current.state.store.dispatch;
+ 
+-            dispatch(setAudioMuted(muted));
++            dispatch(setAudioMuted(muted, /* ensureTrack */ true));
+         },
+         setVideoMuted: muted => {
+             const dispatch = app.current.state.store.dispatch;
+ 
+-            dispatch(setVideoMuted(muted));
++            // ensureTrack is required: the local video track does not exist until
++            // the first unmute (unlike audio which is always created early), and
++            // without it the middleware only flips the redux bit without creating
++            // the track nor attaching it to the conference.
++            dispatch(setVideoMuted(muted, VIDEO_MUTISM_AUTHORITY.USER, /* ensureTrack */ true));
+         },
+         getRoomsInfo: () => {
+             const state = app.current.state.store.getState();
+@@ -108,49 +112,46 @@ export const JitsiMeeting = forwardRef<JitsiRefProps, IAppProps>((props, ref) =>
          }
      }));
  
@@ -27,27 +59,9 @@ diff --git a/node_modules/@jitsi/react-native-sdk/index.tsx b/node_modules/@jits
 -                config,
 -                jwt: token
 -            };
-+    // Build the App props synchronously: mounting the embedded App with empty
-+    // props and updating them right after would make its componentDidUpdate
-+    // dispatch a second appNavigate (the url goes from undefined to the room's)
-+    // once the boot completes, loading the config and starting the connection
-+    // twice.
-+    const [ appProps ] = useState(() => {
-+        const urlObj = {
-+            config,
-+            jwt: token
-+        };
- 
+-
 -            let urlProps;
-+        const urlProps = room.includes('://') ? {
-+            ...urlObj,
-+            url: room
-+        } : {
-+            ...urlObj,
-+            room,
-+            serverURL
-+        };
- 
+-
 -            if (room.includes('://')) {
 -                urlProps = {
 -                    ...urlObj,
@@ -60,27 +74,7 @@ diff --git a/node_modules/@jitsi/react-native-sdk/index.tsx b/node_modules/@jits
 -                    serverURL
 -                };
 -            }
-+        return {
-+            'flags': flags,
-+            'rnSdkHandlers': {
-+                onAudioMutedChanged: eventListeners?.onAudioMutedChanged,
-+                onVideoMutedChanged: eventListeners?.onVideoMutedChanged,
-+                onConferenceBlurred: eventListeners?.onConferenceBlurred,
-+                onConferenceFocused: eventListeners?.onConferenceFocused,
-+                onConferenceJoined: eventListeners?.onConferenceJoined,
-+                onConferenceWillJoin: eventListeners?.onConferenceWillJoin,
-+                onConferenceLeft: eventListeners?.onConferenceLeft,
-+                onEnterPictureInPicture: eventListeners?.onEnterPictureInPicture,
-+                onEndpointMessageReceived: eventListeners?.onEndpointMessageReceived,
-+                onParticipantJoined: eventListeners?.onParticipantJoined,
-+                onParticipantLeft: eventListeners?.onParticipantLeft,
-+                onReadyToClose: eventListeners?.onReadyToClose
-+            },
-+            'url': urlProps,
-+            'userInfo': userInfo
-+        };
-+    });
- 
+-
 -            setAppProps({
 -                'flags': flags,
 -                'rnSdkHandlers': {
@@ -102,10 +96,50 @@ diff --git a/node_modules/@jitsi/react-native-sdk/index.tsx b/node_modules/@jits
 -            });
 -        }, []
 -    );
--
++    // Build the App props synchronously: mounting the embedded App with empty
++    // props and updating them right after would make its componentDidUpdate
++    // dispatch a second appNavigate (the url goes from undefined to the room's)
++    // once the boot completes, loading the config and starting the connection
++    // twice.
++    const [ appProps ] = useState(() => {
++        const urlObj = {
++            config,
++            jwt: token
++        };
++
++        const urlProps = room.includes('://') ? {
++            ...urlObj,
++            url: room
++        } : {
++            ...urlObj,
++            room,
++            serverURL
++        };
++
++        return {
++            'flags': flags,
++            'rnSdkHandlers': {
++                onAudioMutedChanged: eventListeners?.onAudioMutedChanged,
++                onVideoMutedChanged: eventListeners?.onVideoMutedChanged,
++                onConferenceBlurred: eventListeners?.onConferenceBlurred,
++                onConferenceFocused: eventListeners?.onConferenceFocused,
++                onConferenceJoined: eventListeners?.onConferenceJoined,
++                onConferenceWillJoin: eventListeners?.onConferenceWillJoin,
++                onConferenceLeft: eventListeners?.onConferenceLeft,
++                onEnterPictureInPicture: eventListeners?.onEnterPictureInPicture,
++                onEndpointMessageReceived: eventListeners?.onEndpointMessageReceived,
++                onParticipantJoined: eventListeners?.onParticipantJoined,
++                onParticipantLeft: eventListeners?.onParticipantLeft,
++                onReadyToClose: eventListeners?.onReadyToClose
++            },
++            'url': urlProps,
++            'userInfo': userInfo
++        };
++    });
+ 
      // eslint-disable-next-line arrow-body-style
      useLayoutEffect(() => {
-         /**
+@@ -158,7 +159,7 @@ export const JitsiMeeting = forwardRef<JitsiRefProps, IAppProps>((props, ref) =>
           * When you close the component you need to reset it.
           * In some cases it needs to be added as the parent component may have been destroyed.
           * Without this change the call remains active without having the jitsi screen.

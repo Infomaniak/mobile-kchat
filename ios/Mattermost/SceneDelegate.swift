@@ -1,6 +1,7 @@
 internal import Expo
 import React
 import UIKit
+import os.log
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
@@ -65,12 +66,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             launchOptions: launchOptions
         )
 
-        for urlContext in connectionOptions.urlContexts {
-            appDelegate.handleOpenURL(urlContext.url, options: [:])
-        }
-        for activity in connectionOptions.userActivities {
-            appDelegate.handleUserActivity(activity)
-        }
+        // No explicit forwarding of connectionOptions here: on cold start the JS
+        // Linking module is not observing yet, so forwards would be dropped. The
+        // launchOptions re-injection above feeds getInitialURL() instead.
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

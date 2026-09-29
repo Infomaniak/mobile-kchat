@@ -17,6 +17,7 @@ import RippleIcon from '@calls/screens/call_screen/ripple_icon';
 import NavigationHeader from '@components/navigation_header';
 import {postListRef} from '@components/post_list/post_list';
 import Image from '@components/profile_picture/image';
+import {Screens} from '@constants';
 import {useServerId} from '@context/server';
 import {useTheme} from '@context/theme';
 import DatabaseManager from '@database/manager';
@@ -25,6 +26,7 @@ import {useMountedRef, useRerender, useTransientRef} from '@hooks/utils';
 import {getCommonSystemValues} from '@queries/servers/system';
 import {navigateBack} from '@screens/navigation';
 import CallManager from '@store/CallManager';
+import {NavigationStore} from '@store/navigation_store';
 import {isDMorGM as isChannelDMorGM} from '@utils/channel';
 import {logError} from '@utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -93,6 +95,15 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => ({
         right: 0,
         bottom: 0,
         backgroundColor: '#000',
+    },
+
+    /** In-meeting app-side toolbox, anchored above the bottom safe area */
+    inMeetingToolbox: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 24,
+        alignItems: 'center',
     },
     container: {
         flex: 1,
@@ -199,6 +210,13 @@ const CallScreen = ({
     const [videoMuted, setVideoMuted] = useState(true); // Start with video muted
     const audioMutedRef = useTransientRef(audioMuted);
     const videoMutedRef = useTransientRef(videoMuted);
+
+    /**
+     * The app-side toolbox must not render on top of the SDK's pre-join page
+     * (which provides its own audio/video toggles): only show it once the
+     * conference has actually been joined.
+     */
+    const [isConferenceJoined, setIsConferenceJoined] = useState(false);
 
     /**
      * Mute/Unmute audio
@@ -341,7 +359,7 @@ const CallScreen = ({
      * Also trigger the "leaveCall" API
      */
     const leavingRef = useRef(false);
-    const leaveCallRef = useTransientRef((leaveInitiator: 'api' | 'internal' | 'native' = 'internal') => {
+    const leaveCallRef = useTransientRef(async (leaveInitiator: 'api' | 'internal' | 'native' = 'internal') => {
         // The <JitsiMeeting /> component is mounted (and joins) as soon as the channel
         // is loaded, even while the calling screen overlay is displayed: "inside the
         // call" means the conference interface has actually been displayed, i.e. the
@@ -366,9 +384,16 @@ const CallScreen = ({
             ) &&
             hasUpdatedRef(leavingRef, true)
         ) {
-            // Remove the call screen, and in some situations it needs to be removed twice before actually being removed
-            navigateBack();
-            navigateBack();
+            // Remove the call screen: a single pop returns to the channel screen the call
+            // was started from. Only pop again if a duplicated CALL route is still stacked
+            // (e.g. re-opened from a notification while already in the call). Popping twice
+            // in the common case would also unmount the channel screen while its call card
+            // re-renders (call ended), which races with the Jitsi teardown and crashes
+            // Fabric's view mounting (SvgView "already has a parent" → white screen).
+            await navigateBack();
+            if (NavigationStore.isScreenInStack(Screens.CALL)) {
+                navigateBack();
+            }
 
             // Return back to the channel where this meeting has been started
             const database = DatabaseManager.serverDatabases[serverUrl]?.database;
@@ -427,6 +452,8 @@ const CallScreen = ({
             jitsiMeetingMountedRef.current = true;
             jitsiMeetingMountedAtRef.current = Date.now();
 
+            setIsConferenceJoined(true);
+
             // The <JitsiMeeting /> is mounted while the calling screen overlay may
             // still be displayed: re-apply the mute states the user could have
             // toggled between the mount (where the config is frozen) and the join
@@ -465,18 +492,22 @@ const CallScreen = ({
             }
         },
         onAudioMutedChanged: (isMuted: boolean) => {
-            if (
-                typeof jitsiMeetingMountedAtRef.current === 'number' &&
-                hasUpdatedRef(audioMutedRef, isMuted)
-            ) {
+            if (typeof jitsiMeetingMountedAtRef.current !== 'number') {
+                return;
+            }
+
+            // Keep the call controls UI in sync with the conference mute state
+            setAudioMuted(isMuted);
+            if (hasUpdatedRef(audioMutedRef, isMuted)) {
                 CallManager.nativeReporters.callMuted(conferenceId, isMuted);
             }
         },
         onVideoMutedChanged: (isMuted: boolean) => {
-            if (
-                typeof jitsiMeetingMountedAtRef.current === 'number' &&
-                hasUpdatedRef(videoMutedRef, isMuted)
-            ) {
+            if (typeof jitsiMeetingMountedAtRef.current !== 'number') {
+                return;
+            }
+            setVideoMuted(isMuted);
+            if (hasUpdatedRef(videoMutedRef, isMuted)) {
                 CallManager.nativeReporters.callVideoMuted(conferenceId, isMuted);
             }
         },
@@ -612,6 +643,16 @@ const CallScreen = ({
                         'meeting-name.enabled': false,
 
                         /**
+                         * The SDK's toolbox and filmstrip embed SVG icons rendered on the app's
+                         * own React surface; at screen exit a stranded recycled view re-inserts
+                         * with a stale parent and hard-crashes the ReactInstance (white screen).
+                         * We disable both and render an app-side toolbox instead.
+                         * Ref. react-native-screens#3249.
+                         */
+                        'toolbox.enabled': false,
+                        'filmstrip.enabled': false,
+
+                        /**
                          * For DM channels : Join immediatly like you would when answering a call
                          * For other channels : Ask if the user wants to enable his audio/video, but only if it's not the one that created the conference
                          */
@@ -640,6 +681,34 @@ const CallScreen = ({
                     serverURL={kMeetServerUrl}
                     userInfo={userInfo}
                 />
+            )}
+
+            {/* In-meeting app toolbox (SDK's own toolbox is disabled, ref. flags above) */}
+            {isConferenceJoined && !shouldDisplayCallingScreen && (
+                <View
+                    pointerEvents='box-none'
+                    style={styles.inMeetingToolbox}
+                >
+                    <ContentContainer>
+                        <ToolboxContainer>
+                            <MuteButton
+                                audioMuted={audioMuted}
+                                disabled={!micPermissionsGranted}
+                                onPress={toggleAudioMuted}
+                            />
+                            <VButton
+                                videoMuted={videoMuted}
+                                disabled={false}
+                                onPress={toggleVideoMuted}
+                            />
+                            <HButton
+                                onPress={() => {
+                                    leaveCall('internal');
+                                }}
+                            />
+                        </ToolboxContainer>
+                    </ContentContainer>
+                </View>
             )}
 
             {(shouldDisplayLoadingScreen || shouldDisplayCallingScreen) && (

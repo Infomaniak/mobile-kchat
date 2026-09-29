@@ -2,22 +2,26 @@
 // See LICENSE.txt for license information.
 
 import {getSdkBundlePath} from '@jitsi/react-native-sdk/react/features/app/functions.native';
-import {translate} from '@jitsi/react-native-sdk/react/features/base/i18n/functions';
-import {DEFAULT_ICON as JitsiIcon} from '@jitsi/react-native-sdk/react/features/base/icons/svg/constants';
 import {Audio} from '@jitsi/react-native-sdk/react/features/base/media/components/index.native';
-import {combineStyles} from '@jitsi/react-native-sdk/react/features/base/styles/functions.any';
-import {type Styles as AbstractToolboxItemStyles} from '@jitsi/react-native-sdk/react/features/base/toolbox/components/AbstractToolboxItem';
-import ToolboxItem from '@jitsi/react-native-sdk/react/features/base/toolbox/components/ToolboxItem.native';
 import BaseTheme from '@jitsi/react-native-sdk/react/features/base/ui/components/BaseTheme.native';
-import React, {useCallback, useEffect, useMemo, useRef} from 'react';
-import {type WithTranslation} from 'react-i18next';
-import {Platform, View, type ViewStyle} from 'react-native';
+import React, {useCallback, useEffect, useRef} from 'react';
+import {defineMessages, useIntl} from 'react-intl';
+import {Platform, Pressable, View, type ViewStyle} from 'react-native';
 
+import CompassIcon from '@components/compass_icon';
 import {noop} from '@helpers/api/general';
 
 import type {AudioElement} from '@jitsi/react-native-sdk/react/features/base/media/components/AbstractAudio';
 
 const BUTTON_SIZE = 48;
+
+const messages = defineMessages({
+    mute: {id: 'mobile.calls_mute', defaultMessage: 'Mute'},
+    unmute: {id: 'mobile.calls_unmute', defaultMessage: 'Unmute'},
+    turnCameraOn: {id: 'mobile.calls_turn_camera_on', defaultMessage: 'Turn camera on'},
+    turnCameraOff: {id: 'mobile.calls_turn_camera_off', defaultMessage: 'Turn camera off'},
+    leaveCall: {id: 'mobile.calls_leave_call', defaultMessage: 'Leave call'},
+});
 
 // STYLES
 const styles = {
@@ -59,91 +63,47 @@ const styles = {
     } as ViewStyle,
 
     /* Borderless buttons */
-    buttonStylesBorderless: {
-        iconStyle: {
-            color: BaseTheme.palette.icon01,
-            fontSize: 24,
-        },
-        style: {
-            flexDirection: 'row',
-            justifyContent: 'center',
-            margin: BaseTheme.spacing[3],
-            height: 24,
-            width: 24,
-        },
-        underlayColor: 'transparent',
+    borderlessButton: {
+        alignItems: 'center',
+        height: 24,
+        justifyContent: 'center',
+        margin: BaseTheme.spacing[3],
+        width: 24,
+    } as ViewStyle,
+
+    /* Toggled buttons */
+    toggledButton: {
+        alignItems: 'center',
+        borderRadius: BaseTheme.shape.borderRadius,
+        height: BUTTON_SIZE,
+        justifyContent: 'center',
+        marginHorizontal: 4,
+        marginVertical: 4,
+        width: BUTTON_SIZE,
+    } as ViewStyle,
+
+    /* Hangup button */
+    hangupButton: {
+        alignItems: 'center',
+        backgroundColor: 'rgb(227,79,86)',
+        borderRadius: BaseTheme.shape.borderRadius,
+        height: BUTTON_SIZE,
+        justifyContent: 'center',
+        marginHorizontal: 6,
+        marginVertical: 6,
+        width: BUTTON_SIZE,
+    } as ViewStyle,
+
+    /* Pressed feedback */
+    buttonPressed: {
+        opacity: 0.72,
     },
 
     /* Disabled buttons */
-    disabledButtonStyles: {
-        iconStyle: {opacity: 0.5},
-        labelStyle: {opacity: 0.5},
-        style: undefined,
-        underlayColor: undefined,
-    },
-
-    /* Toggled buttons */
-    toggledButtonStyles: {
-        iconStyle: {
-            alignSelf: 'center',
-            fontSize: 24,
-            color: BaseTheme.palette.icon01,
-        },
-        labelStyle: undefined,
-        style: {
-            borderRadius: BaseTheme.shape.borderRadius,
-            borderWidth: 0,
-            flex: 0,
-            flexDirection: 'row',
-            height: BUTTON_SIZE,
-            justifyContent: 'center',
-            marginHorizontal: 4,
-            marginVertical: 4,
-            width: BUTTON_SIZE,
-        },
-        underlayColor: 'transparent',
-    },
-
-    /* Hangup button */
-    hangupButtonStyles: {
-        iconStyle: {
-            alignSelf: 'center',
-            fontSize: 24,
-            color: BaseTheme.palette.icon01,
-        },
-        style: {
-            borderRadius: BaseTheme.shape.borderRadius,
-            borderWidth: 0,
-            flex: 0,
-            flexDirection: 'row',
-            height: BUTTON_SIZE,
-            justifyContent: 'center',
-            marginHorizontal: 6,
-            marginVertical: 6,
-            width: BUTTON_SIZE,
-
-            // backgroundColor: schemeColor('hangup'),
-            backgroundColor: 'rgb(227,79,86)',
-        },
-        underlayColor: BaseTheme.palette.ui04,
+    buttonDisabled: {
+        opacity: 0.5,
     },
 };
-
-// HOOKS
-const useButtonStyles = (style: AbstractToolboxItemStyles, isToggled: boolean, isDisabled: boolean) => useMemo(() => {
-    const buttonStyles = (isToggled ? styles.toggledButtonStyles : style) || style;
-
-    if (isDisabled && buttonStyles && styles.disabledButtonStyles) {
-        return {
-            iconStyle: combineStyles(buttonStyles.iconStyle ?? {}, styles.disabledButtonStyles.iconStyle ?? {}),
-            labelStyle: combineStyles(buttonStyles.labelStyle ?? {}, styles.disabledButtonStyles.labelStyle ?? {}),
-            style: combineStyles(buttonStyles.style ?? {}, styles.disabledButtonStyles.style ?? {}),
-            underlayColor: styles.disabledButtonStyles.underlayColor || buttonStyles.underlayColor,
-        };
-    }
-
-    return buttonStyles;
-}, [style, isToggled, isDisabled]);
 
 // COMPONENTS
 export const ContentContainer = ({aspectRatio, ...props}: {aspectRatio?: 'narrow' | 'wide'} & View['props']) => (
@@ -160,79 +120,75 @@ export const ToolboxContainer = (props: View['props']) => (
     />
 );
 
-export const AudioMuteButton = translate((
-    {audioMuted, disabled, onPress, ...props}:
-    {audioMuted: boolean; disabled: boolean; onPress: ToolboxItem['props']['onClick']} & WithTranslation,
+export const AudioMuteButton = (
+    {audioMuted, disabled, onPress}:
+    {audioMuted: boolean; disabled: boolean; onPress: () => void},
 ) => {
-    const buttonStyles = useButtonStyles(styles.buttonStylesBorderless, audioMuted, disabled);
+    const {formatMessage} = useIntl();
 
     return (
-        <ToolboxItem
+        <Pressable
+            accessibilityLabel={formatMessage(audioMuted ? messages.unmute : messages.mute)}
+            accessibilityRole='button'
+            accessibilityState={{selected: audioMuted}}
             disabled={disabled}
-            toggled={audioMuted}
-
-            onClick={onPress}
-
-            label={audioMuted ? 'toolbar.unmute' : 'toolbar.mute'}
-            labelProps={undefined}
-            accessibilityLabel={audioMuted ? 'toolbar.accessibilityLabel.unmute' : 'toolbar.accessibilityLabel.mute'}
-            tooltip={audioMuted ? 'toolbar.unmute' : 'toolbar.mute'}
-
-            elementAfter={null}
-            icon={audioMuted ? JitsiIcon.IconMicSlash : JitsiIcon.IconMic}
-            styles={buttonStyles}
-
-            {...props}
-        />
+            onPress={onPress}
+            style={({pressed}) => [audioMuted ? styles.toggledButton : styles.borderlessButton, pressed && styles.buttonPressed, disabled && styles.buttonDisabled]}
+        >
+            <CompassIcon
+                color={BaseTheme.palette.icon01}
+                name={audioMuted ? 'microphone-off' : 'microphone'}
+                size={24}
+            />
+        </Pressable>
     );
-});
+};
 
-export const VideoMuteButton = translate((
-    {videoMuted, disabled, onPress, ...props}:
-    {videoMuted: boolean; disabled: boolean; onPress: ToolboxItem['props']['onClick']} & WithTranslation,
+export const VideoMuteButton = (
+    {videoMuted, disabled, onPress}:
+    {videoMuted: boolean; disabled: boolean; onPress: () => void},
 ) => {
-    const buttonStyles = useButtonStyles(styles.buttonStylesBorderless, videoMuted, disabled);
+    const {formatMessage} = useIntl();
 
     return (
-        <ToolboxItem
+        <Pressable
+            accessibilityLabel={formatMessage(videoMuted ? messages.turnCameraOn : messages.turnCameraOff)}
+            accessibilityRole='button'
+            accessibilityState={{selected: videoMuted}}
             disabled={disabled}
-            toggled={videoMuted}
-
-            onClick={onPress}
-
-            label={videoMuted ? 'toolbar.videounmute' : 'toolbar.videomute'}
-            labelProps={undefined}
-            accessibilityLabel={videoMuted ? 'toolbar.accessibilityLabel.videounmute' : 'toolbar.accessibilityLabel.videomute'}
-            tooltip={videoMuted ? 'toolbar.videounmute' : 'toolbar.videomute'}
-
-            elementAfter={null}
-            icon={videoMuted ? JitsiIcon.IconVideoOff : JitsiIcon.IconVideo}
-            styles={buttonStyles}
-
-            {...props}
-        />
+            onPress={onPress}
+            style={({pressed}) => [videoMuted ? styles.toggledButton : styles.borderlessButton, pressed && styles.buttonPressed, disabled && styles.buttonDisabled]}
+        >
+            <CompassIcon
+                color={BaseTheme.palette.icon01}
+                name={videoMuted ? 'video-off-outline' : 'video-outline'}
+                size={24}
+            />
+        </Pressable>
     );
-});
+};
 
-export const HangupButton = translate((
-    {onPress, ...props}:
-    {onPress: ToolboxItem['props']['onClick']} & WithTranslation,
-) => (
-    <ToolboxItem
-        onClick={onPress}
+export const HangupButton = (
+    {onPress}:
+    {onPress: () => void},
+) => {
+    const {formatMessage} = useIntl();
 
-        label={'toolbar.hangup'}
-        labelProps={undefined}
-        accessibilityLabel={'toolbar.accessibilityLabel.hangup'}
-        tooltip={'toolbar.hangup'}
-
-        elementAfter={null}
-        icon={JitsiIcon.IconHangup}
-        styles={styles.hangupButtonStyles}
-
-        {...props}
-    />
-));
+    return (
+        <Pressable
+            accessibilityLabel={formatMessage(messages.leaveCall)}
+            accessibilityRole='button'
+            onPress={onPress}
+            style={({pressed}) => [styles.hangupButton, pressed && styles.buttonPressed]}
+        >
+            <CompassIcon
+                color={BaseTheme.palette.icon01}
+                name='phone-hangup'
+                size={24}
+            />
+        </Pressable>
+    );
+};
 
 export const Sound = (
     {play = true, soundName = 'outgoingRinging.mp3'}:
