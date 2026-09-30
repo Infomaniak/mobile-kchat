@@ -93,7 +93,14 @@ public class Network: NSObject {
         
         if let credentials = try? Keychain.default.getCredentials(for: serverUrl) {
             if let token = credentials.token {
-                request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                // Same-ORIGIN guard (scheme + host + explicit port), mirroring the JS-side origin check:
+                // the bearer is only attached to requests toward the server origin itself.
+                let serverUrl_ = URL(string: serverUrl)
+                let requestOrigin = [url.scheme?.lowercased(), url.host?.lowercased(), url.port.map(String.init)].compactMap { $0 }.joined(separator: ":")
+                let serverOrigin = [serverUrl_?.scheme?.lowercased(), serverUrl_?.host?.lowercased(), serverUrl_?.port.map(String.init)].compactMap { $0 }.joined(separator: ":")
+                if !requestOrigin.isEmpty, requestOrigin == serverOrigin {
+                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                }
             }
         }
         

@@ -37,6 +37,23 @@ function shouldAttachServerAuthHeaders(uri: string | undefined, serverUrl: strin
     }
 }
 
+function stripExternalAuthorization(uri: string | undefined, headers: Record<string, string> | undefined, serverUrl: string) {
+    if (!uri || !headers) {
+        return;
+    }
+
+    try {
+        const requestUrl = new URL(uri);
+        const serverBaseUrl = new URL(serverUrl);
+
+        if (requestUrl.origin !== serverBaseUrl.origin) {
+            delete headers.Authorization;
+        }
+    } catch {
+        // On any parsing error, do not strip (keep caller headers)
+    }
+}
+
 const ExpoImage = forwardRef<Image, ExpoImageProps>(({id, ...props}, ref) => {
     const serverUrl = useServerUrl();
     const requestHeaders = useMemo(() => {
@@ -59,8 +76,14 @@ const ExpoImage = forwardRef<Image, ExpoImageProps>(({id, ...props}, ref) => {
             return props.source;
         }
 
-        const sourceHeaders = shouldAttachServerAuthHeaders(props.source?.uri, serverUrl) && requestHeaders ? {...requestHeaders, ...props.source?.headers} : props.source?.headers;
+        let sourceHeaders: Record<string, string> | undefined;
+        if (shouldAttachServerAuthHeaders(props.source?.uri, serverUrl) && requestHeaders) {
+            sourceHeaders = {...requestHeaders, ...props.source?.headers};
+        } else if (props.source?.headers) {
+            sourceHeaders = {...props.source.headers};
+        }
         delete sourceHeaders?.Accept;
+        stripExternalAuthorization(props.source?.uri, sourceHeaders, serverUrl);
 
         // Only add cacheKey and cachePath if id is provided (i.e., not memory-only caching)
         if (id) {
@@ -84,8 +107,14 @@ const ExpoImage = forwardRef<Image, ExpoImageProps>(({id, ...props}, ref) => {
             return props.placeholder;
         }
 
-        const placeholderHeaders = shouldAttachServerAuthHeaders(props.placeholder?.uri, serverUrl) && requestHeaders ? {...requestHeaders, ...props.placeholder?.headers} : props.placeholder?.headers;
+        let placeholderHeaders: Record<string, string> | undefined;
+        if (shouldAttachServerAuthHeaders(props.placeholder?.uri, serverUrl) && requestHeaders) {
+            placeholderHeaders = {...requestHeaders, ...props.placeholder?.headers};
+        } else if (props.placeholder?.headers) {
+            placeholderHeaders = {...props.placeholder.headers};
+        }
         delete placeholderHeaders?.Accept;
+        stripExternalAuthorization(props.placeholder?.uri, placeholderHeaders, serverUrl);
 
         // If placeholder has a uri and id is provided, add cachePath and cacheKey
         if (props.placeholder.uri && id) {

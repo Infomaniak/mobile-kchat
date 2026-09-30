@@ -13,6 +13,7 @@ import ExpoImage from '@components/expo_image';
 import NetworkManager from '@managers/network_manager';
 import {observeConfigBooleanValue} from '@queries/servers/system';
 import {observeUser} from '@queries/servers/user';
+import {buildAuthorizedImageSource} from '@utils/image_source';
 import {urlSafeBase64Encode} from '@utils/security';
 import {getLastPictureUpdate} from '@utils/user';
 
@@ -46,10 +47,7 @@ const NotificationIcon = ({author, enablePostIconOverride, fromWebhook, override
     let icon;
     if (fromWebhook && !useUserIcon && enablePostIconOverride) {
         if (overrideIconUrl) {
-            const source: ImageSource = {
-                uri: buildAbsoluteUrl(serverUrl, overrideIconUrl),
-                headers: overrideIconUrl.startsWith('/') ? authorizedHeaders : {},
-            };
+            const source: ImageSource = buildAuthorizedImageSource(serverUrl, overrideIconUrl, token);
             icon = (
                 <ExpoImage
                     id={`user-override-icon-${urlSafeBase64Encode(overrideIconUrl)}`}

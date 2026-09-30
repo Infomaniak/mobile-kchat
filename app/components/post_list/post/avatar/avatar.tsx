@@ -15,6 +15,7 @@ import {useTheme} from '@context/theme';
 import {usePreventDoubleTap} from '@hooks/utils';
 import NetworkManager from '@managers/network_manager';
 import {openUserProfileModal} from '@screens/navigation';
+import {buildAuthorizedImageSource} from '@utils/image_source';
 import {ensureString} from '@utils/types';
 
 import type {Client} from '@client/rest';
@@ -61,17 +62,7 @@ const Avatar = ({author, enablePostIconOverride, isAutoReponse, location, post}:
 
         let iconComponent: ReactNode;
         if (overrideIconUrl) {
-            const source = {
-                uri: overrideIconUrl,
-                headers: {},
-            };
-
-            if (typeof post.props?.override_icon_url === 'string' && post.props?.override_icon_url.startsWith('/')) {
-
-                // @ts-ignore
-                source.headers.Authorization = client?.getCurrentBearerToken();
-            }
-
+            const source = buildAuthorizedImageSource(serverUrl, propsIconUrl, client?.getCurrentBearerToken());
             iconComponent = (
                 <ExpoImage
                     id={`user-override-icon-${post.id}`}
