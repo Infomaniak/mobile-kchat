@@ -60,6 +60,12 @@ const ChannelPostList = ({
     const [activeHighlightedPostId, setActiveHighlightedPostId] = useState(highlightedPostId);
     const oldPostsCount = useRef<number>(posts.length);
 
+    // Posts are sorted newest-first. The newest createAt is the reliable growth signal: when the
+    // visible window is full (posts.length === postsLimit), a new post evicts the oldest one and
+    // posts.length stays the same, so it cannot be used alone to detect a new post.
+    const newestPostAt = posts[0]?.createAt ?? 0;
+    const oldNewestPostAt = useRef<number>(newestPostAt);
+
     const postsRef = useRef(posts);
     postsRef.current = posts;
 
@@ -111,11 +117,16 @@ const ChannelPostList = ({
     }, [fetchingPosts, posts]);
 
     useDidUpdate(() => {
-        if (oldPostsCount.current < posts.length && appState === 'active') {
-            oldPostsCount.current = posts.length;
+        const isNewPost = oldPostsCount.current < posts.length || newestPostAt > oldNewestPostAt.current;
+
+        // Always keep the refs in sync with reality so a shrinking change (e.g. a deletion) cannot
+        // make a subsequent post with an older createAt be missed.
+        oldPostsCount.current = posts.length;
+        oldNewestPostAt.current = newestPostAt;
+        if (appState === 'active' && isNewPost) {
             markChannelAsRead(serverUrl, channelId, true);
         }
-    }, [posts.length]);
+    }, [posts.length, newestPostAt]);
 
     useEffect(() => {
         if (highlightedPostId) {
