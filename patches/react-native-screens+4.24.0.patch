@@ -1,5 +1,7 @@
---- a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/Screen.kt	1985-10-26 09:15:00
-+++ b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/Screen.kt	2026-09-18 13:47:40
+diff --git a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/Screen.kt b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/Screen.kt
+index 000000..000000 100644
+--- a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/Screen.kt
++++ b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/Screen.kt
 @@ -614,6 +614,12 @@
  
      var nativeBackButtonDismissalEnabled: Boolean = true
@@ -73,8 +75,10 @@
                  }
  
                  if (child is ScreenStackHeaderConfig) {
---- a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStack.kt	1985-10-26 09:15:00
-+++ b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStack.kt	2026-09-18 13:47:46
+diff --git a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStack.kt b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStack.kt
+index 000000..000000 100644
+--- a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStack.kt
++++ b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStack.kt
 @@ -76,6 +76,10 @@
      }
  
