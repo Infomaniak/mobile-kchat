@@ -11,6 +11,7 @@ import InitialsFallback from '@components/profile_picture/initials_fallback';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
+import {buildAuthorizedImageSource} from '@utils/image_source';
 import {extractDisplayName, getAvatarColor, getLastPictureUpdate} from '@utils/user';
 
 import type UserModel from '@typings/database/models/servers/user';
@@ -63,7 +64,15 @@ const Avatar = ({
 
     const {headers, uri} = useMemo(() => {
         if (overrideUri) {
-            return {headers: undefined, uri: buildAbsoluteUrl(resolvedServerUrl, overrideUri)};
+            let token: string | undefined;
+            try {
+                const client = NetworkManager.getClient(resolvedServerUrl);
+                token = client.getCurrentBearerToken();
+            } catch {
+                // Client may not be available in share extension
+            }
+            const source = buildAuthorizedImageSource(resolvedServerUrl, overrideUri, token);
+            return {headers: source?.headers, uri: source?.uri};
         }
 
         if (!author) {

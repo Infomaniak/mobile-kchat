@@ -9,6 +9,7 @@ import {ExpoImageAnimated} from '@components/expo_image';
 import ProfilePicture from '@components/profile_picture';
 import {useServerUrl} from '@context/server';
 import NetworkManager from '@managers/network_manager';
+import {buildAuthorizedImageSource} from '@utils/image_source';
 import {urlSafeBase64Encode} from '@utils/security';
 
 import type UserModel from '@typings/database/models/servers/user';
@@ -40,12 +41,7 @@ const UserProfileAvatar = ({enablePostIconOverride, forwardRef, imageSize, user,
 
     if (enablePostIconOverride && userIconOverride) {
         const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
-        let source;
-        if (userIconOverride.startsWith('http')) {
-            source = {uri: userIconOverride, headers: {Authorization: token}};
-        } else {
-            source = {uri: serverUrl + userIconOverride, headers: {Authorization: token}};
-        }
+        const source = buildAuthorizedImageSource(serverUrl, userIconOverride, token);
         return (
             <View style={styles.avatar}>
                 <ExpoImageAnimated

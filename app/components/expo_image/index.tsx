@@ -41,6 +41,23 @@ function shouldAttachServerAuthHeaders(uri: string | undefined, serverUrl: strin
     }
 }
 
+function stripExternalAuthorization(uri: string | undefined, headers: Record<string, string> | undefined, serverUrl: string) {
+    if (!uri || !headers) {
+        return;
+    }
+
+    try {
+        const requestUrl = new URL(uri);
+        const serverBaseUrl = new URL(serverUrl);
+
+        if (requestUrl.origin !== serverBaseUrl.origin) {
+            delete headers.Authorization;
+        }
+    } catch {
+        // On any parsing error, do not strip (keep caller headers)
+    }
+}
+
 const ExpoImage = forwardRef<Image, ExpoImageProps>(({id, ...props}, ref) => {
     const serverUrl = useServerUrl();
     const requestHeaders = useMemo(() => {
@@ -64,8 +81,14 @@ const ExpoImage = forwardRef<Image, ExpoImageProps>(({id, ...props}, ref) => {
         }
 
         const sourceObj = isImageSource(props.source) ? props.source : undefined;
-        const sourceHeaders = shouldAttachServerAuthHeaders(sourceObj?.uri, serverUrl) && requestHeaders ? {...requestHeaders, ...sourceObj?.headers} : sourceObj?.headers;
+        let sourceHeaders: Record<string, string> | undefined;
+        if (shouldAttachServerAuthHeaders(sourceObj?.uri, serverUrl) && requestHeaders) {
+            sourceHeaders = {...requestHeaders, ...sourceObj?.headers};
+        } else if (sourceObj?.headers) {
+            sourceHeaders = {...sourceObj.headers};
+        }
         delete sourceHeaders?.Accept;
+        stripExternalAuthorization(sourceObj?.uri, sourceHeaders, serverUrl);
 
         // Only add cacheKey and cachePath if id is provided (i.e., not memory-only caching)
         if (id && sourceObj) {
@@ -94,8 +117,14 @@ const ExpoImage = forwardRef<Image, ExpoImageProps>(({id, ...props}, ref) => {
         }
 
         const placeholderObj = isImageSource(props.placeholder) ? props.placeholder : undefined;
-        const placeholderHeaders = shouldAttachServerAuthHeaders(placeholderObj?.uri, serverUrl) && requestHeaders ? {...requestHeaders, ...placeholderObj?.headers} : placeholderObj?.headers;
+        let placeholderHeaders: Record<string, string> | undefined;
+        if (shouldAttachServerAuthHeaders(placeholderObj?.uri, serverUrl) && requestHeaders) {
+            placeholderHeaders = {...requestHeaders, ...placeholderObj?.headers};
+        } else if (placeholderObj?.headers) {
+            placeholderHeaders = {...placeholderObj.headers};
+        }
         delete placeholderHeaders?.Accept;
+        stripExternalAuthorization(placeholderObj?.uri, placeholderHeaders, serverUrl);
 
         // If placeholder has a uri and id is provided, add cachePath and cacheKey
         if (placeholderObj?.uri && id) {

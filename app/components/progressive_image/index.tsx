@@ -9,6 +9,7 @@ import Animated from 'react-native-reanimated';
 import ExpoImage, {ExpoImageAnimated, ExpoImageBackground} from '@components/expo_image';
 import {useServerUrl} from '@context/server';
 import NetworkManager from '@managers/network_manager';
+import {buildAuthorizedImageSource} from '@utils/image_source';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 type Props = ProgressiveImageProps & {
@@ -66,9 +67,8 @@ const ProgressiveImage = ({
 
     const serverUrl = useServerUrl();
     const token = NetworkManager.getClient(serverUrl).getCurrentBearerToken();
-    const headers = {Authorization: token};
-    const imgSource = {uri: imageUri, headers};
-    const thumbnailSource = {uri: thumbnailUri, headers};
+    const imgSource = buildAuthorizedImageSource(serverUrl, imageUri, token);
+    const thumbnailSource = buildAuthorizedImageSource(serverUrl, thumbnailUri, token);
     const showImage = showHighResImage || !thumbnailUri;
 
     const dismissLoader = () => {
@@ -91,12 +91,19 @@ const ProgressiveImage = ({
     }
 
     if (defaultSource) {
+        let dsSource = defaultSource;
+        if (typeof defaultSource === 'object' && 'uri' in defaultSource && typeof defaultSource.uri === 'string') {
+            const authorizedSource = buildAuthorizedImageSource(serverUrl, defaultSource.uri, token);
+            if (authorizedSource.uri) {
+                dsSource = {uri: authorizedSource.uri, headers: authorizedSource.headers};
+            }
+        }
         return (
             <View style={[styles.defaultImageContainer, style]}>
                 <ExpoImageAnimated
                     id={id}
                     ref={forwardRef}
-                    source={{...defaultSource, headers}}
+                    source={dsSource}
                     style={[
                         StyleSheet.absoluteFill,
                         imageStyle,
@@ -121,7 +128,7 @@ const ProgressiveImage = ({
             <ExpoImage
                 id={id}
                 ref={forwardRef}
-                placeholder={thumbnailSource}
+                placeholder={thumbnailSource.uri ? thumbnailSource : undefined}
                 placeholderContentFit='cover'
                 nativeID={`image-${id}`}
                 recyclingKey={`image-${id}`}
