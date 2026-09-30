@@ -39,7 +39,7 @@ export CPPFLAGS="-I/opt/homebrew/opt/openjdk@17/include"
 
 ## Project launch :
 
-1. To avoid errors related to the Infomaniak font, you can run the shell command `npm run font-download`
+1. To avoid errors related to the Infomaniak font, run `npm run font-download` (requires Infomaniak internal network + SSH access to the private fonts repo)
 2. Run `npm start`
 
 ## Common errors
