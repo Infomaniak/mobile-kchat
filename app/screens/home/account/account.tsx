@@ -65,8 +65,8 @@ const AccountScreen = ({currentUser, enableCustomUserStatuses, showFullName}: Ac
         tabletSidebarStyle = {maxWidth: TABLET_SIDEBAR_WIDTH};
     }
 
-    const params = route.params! as {direction: string};
-    const toLeft = params.direction === 'left';
+    const params = route.params as {direction?: string} | undefined;
+    const toLeft = params?.direction === 'left';
 
     const onLayout = useCallback(() => {
         setStart(true);

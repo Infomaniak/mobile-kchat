@@ -61,8 +61,8 @@ function SavedMessages({appsEnabled, posts, currentTimezone, customEmojiNames}: 
     const route = useRoute();
     const isFocused = useIsFocused();
 
-    const params = route.params as {direction: string};
-    const toLeft = params.direction === 'left';
+    const params = route.params as {direction?: string} | undefined;
+    const toLeft = params?.direction === 'left';
     const translateSide = toLeft ? -25 : 25;
     const opacity = useSharedValue(isFocused ? 1 : 0);
     const translateX = useSharedValue(isFocused ? 0 : translateSide);
