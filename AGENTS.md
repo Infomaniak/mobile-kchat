@@ -31,6 +31,7 @@ When testing features that require mobile device interaction:
 
 ```bash
 # Setup
+npm install -g npm@12         # npm 12 (CI target) — dep install scripts gated by allowScripts (package.json) + allow-git/allow-remote (.npmrc)
 npm run pod-install           # iOS CocoaPods (or pod-install-m1 for M1 Macs)
 npm run ios-gems              # Ruby gems for iOS (or ios-gems-m1 for M1 Macs)
 

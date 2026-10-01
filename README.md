@@ -33,9 +33,10 @@ export CPPFLAGS="-I/opt/homebrew/opt/openjdk@17/include"
 
 ## Project installation :
 
-1. Install the right node version using `nvm install` command or `nvm use` if already installed
-2. Run the command `npm install` (This will install node_modules & pods)
-3. Run `npm run build:ios-sim` to launch your app
+1. Install the right node version using `nvm install` command or `nvm use` if already installed (Node 24.15.0)
+2. Use npm 12: `npm install -g npm@12` (CI runs npm 12; dependency install scripts are gated by the `allowScripts` list in `package.json`)
+3. Run the command `npm install` (This will install node_modules & pods)
+4. Run `npm run build:ios-sim` to launch your app
 
 ## Project launch :
 

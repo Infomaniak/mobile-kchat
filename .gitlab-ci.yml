@@ -21,6 +21,7 @@ default:
 
 variables:
   NODE_VERSION: 24.15.0
+  NPM_VERSION: 12.1.0
   npm_config_cache: "$CI_PROJECT_DIR/.npm"
 
 .rule-mr: &rule-mr
@@ -55,6 +56,7 @@ install:
     policy: pull-push
   script:
     - |
+      npm install -g npm@${NPM_VERSION}
       if [ -f node_modules/.ci-package-lock.json ] && diff -q node_modules/.ci-package-lock.json package-lock.json > /dev/null 2>&1; then
         echo "Cache hit — node_modules matches package-lock.json, skipping npm ci"
       else

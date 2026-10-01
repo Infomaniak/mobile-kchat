@@ -9,7 +9,7 @@
   "main": "index.tsx",
   "engines": {
     "node": "^22.11.0 || ^24.15.0",
-    "npm": "^10 || ^11"
+    "npm": "^10 || ^11 || ^12"
   },
   "dependencies": {
     "@amplitude/analytics-react-native": "1.5.16",
@@ -293,5 +293,13 @@
         ]
       }
     }
+  },
+  "allowScripts": {
+    "core-js-pure@3.50.0": true,
+    "mmjstool@1.0.0": true,
+    "strophe.js@1.5.0": true,
+    "@jitsi/react-native-sdk@13.1.1": true,
+    "@sentry/cli@3.4.1": true,
+    "fsevents@2.3.3": true
   }
 }
