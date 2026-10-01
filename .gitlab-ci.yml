@@ -65,6 +65,7 @@ install:
         npx patch-package
         cp package-lock.json node_modules/.ci-package-lock.json
       fi
+    - test "$(npm config get min-release-age)" = "7" && test "$(npm --prefix detox config get min-release-age)" = "7"
     - node scripts/generate-assets.js
     - node scripts/jitsi-ts-nocheck.js
   artifacts:

@@ -65,6 +65,6 @@
     "tsc": "NODE_OPTIONS=--max_old_space_size=12000 tsc --noEmit"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.56.0"
+    "@anthropic-ai/sdk": "0.56.0"
   }
 }
