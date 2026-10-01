@@ -80,6 +80,28 @@ describe('post.auxilary', () => {
         expect(fetchPostAuthors).not.toHaveBeenCalled();
     });
 
+    it('should not throw when the server database is removed mid-flight', async () => {
+        let resolveFetch: (value: {posts: Post[]}) => void = () => {};
+        let resolveCalled!: () => void;
+        const called = new Promise<void>((resolve) => {
+            resolveCalled = resolve;
+        });
+        (fetchPostsForChannel as jest.Mock).mockImplementationOnce(() => {
+            resolveCalled();
+            return new Promise((resolve) => {
+                resolveFetch = resolve;
+            });
+        });
+
+        const promise = processChannelPostsByTeam(serverUrl, ['channelid1']);
+        await called;
+        delete DatabaseManager.serverDatabases[serverUrl];
+        resolveFetch({posts: [post1, post2]});
+
+        await expect(promise).resolves.toBeUndefined();
+        expect(spyOnBatchRecords).not.toHaveBeenCalled();
+    });
+
     it('should still batch record even if some posts are returning errors', async () => {
         (fetchPostsForChannel as jest.Mock).mockRejectedValueOnce(new Error('error'));
         (fetchPostsForChannel as jest.Mock).mockResolvedValue({

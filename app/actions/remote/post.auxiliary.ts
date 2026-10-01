@@ -7,6 +7,7 @@ import {prepareModelsForChannelPosts} from '@actions/local/post';
 import {ActionType} from '@constants';
 import DatabaseManager from '@database/manager';
 import {removeDuplicatesModels} from '@helpers/database';
+import {logDebug, logError} from '@utils/log';
 
 import {fetchPostAuthors, fetchPostsForChannel} from './post';
 
@@ -66,10 +67,27 @@ export async function processChannelPostsByTeam(
     }
 
     if (prepareModelsPromises.length) {
-        const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        const results = await Promise.allSettled(prepareModelsPromises);
 
-        const models = await Promise.all(prepareModelsPromises);
-        operator.batchRecords(removeDuplicatesModels(models.flat()), 'processTeamChannels');
+        // The server database may have been removed mid-flight (e.g. logout)
+        const server = DatabaseManager.serverDatabases[serverUrl];
+        if (!server) {
+            logDebug('processChannelPostsByTeam: server database removed mid-flight, aborting');
+            return;
+        }
+
+        const models: Model[] = [];
+        for (const result of results) {
+            if (result.status === 'fulfilled') {
+                models.push(...result.value);
+            } else {
+                logError('processChannelPostsByTeam: failed to prepare models for channel posts', result.reason);
+            }
+        }
+
+        if (models.length) {
+            server.operator.batchRecords(removeDuplicatesModels(models), 'processTeamChannels');
+        }
     }
     if (!skipAuthors && allPosts.length) {
         await fetchPostAuthors(serverUrl, allPosts, false, groupLabel);

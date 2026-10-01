@@ -118,7 +118,7 @@ export async function restDeferredAppEntryActions(
 
         const processFinalInitializationTasks = async (uniqueChannelsData: MyChannelsRequest) => {
             try {
-                fetchRoles(serverUrl, teamData.memberships, chData?.memberships, meData?.user, false, true, groupLabel);
+                fetchRoles(serverUrl, teamData.memberships, chData?.memberships, meData?.user, false, true, groupLabel).catch(logError);
 
                 if (initialTeamId) {
                     const initialTeam = teamMap.get(initialTeamId);
@@ -136,7 +136,7 @@ export async function restDeferredAppEntryActions(
                         await syncTeamThreads(serverUrl, initialTeamId, {groupLabel: requestLabel});
                     }
 
-                    fetchPostsForUnreadChannels(serverUrl, mySortedTeams, uniqueChannelsData.channels, uniqueChannelsData.memberships, initialChannelId, isCRTEnabled, requestLabel);
+                    fetchPostsForUnreadChannels(serverUrl, mySortedTeams, uniqueChannelsData.channels, uniqueChannelsData.memberships, initialChannelId, isCRTEnabled, requestLabel).catch(logError);
                 }
 
                 if (myOtherSortedTeams.length) {
