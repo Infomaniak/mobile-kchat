@@ -46,7 +46,7 @@ export const getActiveServerUrl = async () => {
     return serverUrl || undefined;
 };
 
-export const setServerCredentials = (serverUrl: string, token: string) => {
+export const setServerCredentials = async (serverUrl: string, token: string) => {
     if (!(serverUrl && token)) {
         return;
     }
@@ -64,11 +64,11 @@ export const setServerCredentials = (serverUrl: string, token: string) => {
         };
 
         // Store main token credentials (clean format)
-        KeyChain.setInternetCredentials(serverUrl, token, token, options);
+        await KeyChain.setInternetCredentials(serverUrl, token, token, options);
 
         // ik: ensure the credentials are also stored in IkStorage for Android Reply receiver
         if (Platform.OS === 'android') {
-            IkStorage.setItem(serverUrl, token);
+            await IkStorage.setItem(serverUrl, token);
         }
     } catch (e) {
         logWarning('could not set credentials', e);

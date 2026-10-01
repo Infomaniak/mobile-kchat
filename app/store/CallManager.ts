@@ -75,7 +75,7 @@ class CallManager {
                 try {
                     const {reportCallStarted} = NativeModules.CallManagerModule;
                     if (typeof reportCallStarted === 'function') {
-                        reportCallStarted(serverId, channelId, conferenceId, callName);
+                        reportCallStarted(serverId, channelId, conferenceId, callName)?.catch(logError);
                     }
                 } catch (error) {
                     logError(error);
@@ -87,7 +87,7 @@ class CallManager {
                 try {
                     const {reportCallStarted} = NativeModules.CallManagerModule;
                     if (typeof reportCallStarted === 'function') {
-                        reportCallStarted(serverId, channelId, callName, conferenceId, conferenceJWT, conferenceURL);
+                        reportCallStarted(serverId, channelId, callName, conferenceId, conferenceJWT, conferenceURL)?.catch(logError);
                     }
                 } catch (error) {
                     logError(error);
@@ -99,7 +99,7 @@ class CallManager {
             try {
                 const {reportCallEnded} = NativeModules.CallManagerModule;
                 if (typeof reportCallEnded === 'function') {
-                    reportCallEnded(conferenceId);
+                    reportCallEnded(conferenceId)?.catch(logError);
                 }
             } catch (error) {
                 logError(error);
@@ -109,7 +109,7 @@ class CallManager {
             try {
                 const {reportCallMuted} = NativeModules.CallManagerModule;
                 if (typeof reportCallMuted === 'function') {
-                    reportCallMuted(conferenceId, isMuted);
+                    reportCallMuted(conferenceId, isMuted)?.catch(logError);
                 }
             } catch (error) {
                 logError(error);
@@ -119,7 +119,7 @@ class CallManager {
             try {
                 const {reportCallVideoMuted} = NativeModules.CallManagerModule;
                 if (typeof reportCallVideoMuted === 'function') {
-                    reportCallVideoMuted(conferenceId, isMuted);
+                    reportCallVideoMuted(conferenceId, isMuted)?.catch(logError);
                 }
             } catch (error) {
                 logError(error);
