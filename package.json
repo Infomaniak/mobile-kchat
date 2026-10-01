@@ -9,7 +9,7 @@
   "main": "index.tsx",
   "engines": {
     "node": "^22.11.0 || ^24.15.0",
-    "npm": "^10 || ^11 || ^12"
+    "npm": "^12"
   },
   "dependencies": {
     "@amplitude/analytics-react-native": "1.5.16",
