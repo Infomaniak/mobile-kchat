@@ -3,13 +3,11 @@
 
 import {match} from 'path-to-regexp';
 import {defineMessage, type IntlShape} from 'react-intl';
-import {Alert} from 'react-native';
 import urlParse from 'url-parse';
 
 import {joinIfNeededAndSwitchToChannel, makeDirectChannel} from '@actions/remote/channel';
 import {switchToConferenceByChannelId} from '@actions/remote/conference';
 import {showPermalink} from '@actions/remote/permalink';
-import {magicLinkLogin} from '@actions/remote/session';
 import {fetchUsersByUsernames} from '@actions/remote/user';
 import {DeepLink, Launch, Screens} from '@constants';
 import DeepLinkType from '@constants/deep_linking';
@@ -29,7 +27,6 @@ import {
     TEAM_NAME_PATH_PATTERN,
     IDENTIFIER_PATH_PATTERN,
     ID_PATH_PATTERN,
-    TOKEN_PATH_PATTERN,
 } from '@utils/url/path';
 
 import type {DeepLinkChannel, DeepLinkConference, DeepLinkDM, DeepLinkGM, DeepLinkPermalink, DeepLinkWithData, LaunchProps} from '@typings/launch';
@@ -48,17 +45,10 @@ export async function handleDeepLink(deepLink: DeepLinkWithData, intlShape?: Int
 
         // After checking the server for http & https then we add it
         if (!existingServerUrl) {
-            if (deepLink.type === DeepLink.MagicLink && 'token' in deepLink.data) {
-                const result = await magicLinkLogin(deepLink.data.serverUrl, deepLink.data.token);
-                if (result.error) {
-                    logError('Failed to do magic link login', result.error);
-                    return {error: true};
-                }
-                return {error: false};
-            }
-
             // The kChat app does not support the add-server flow (Screens.SERVER is not
-            // registered). Report the link as unhandled so the caller shows an alert.
+            // registered). kChat servers are joined through the kSuite ecosystem and the
+            // Infomaniak SSO login, never through deep links. Report the link as unhandled
+            // so the caller shows an alert.
             return {error: true};
         }
 
@@ -122,16 +112,6 @@ export async function handleDeepLink(deepLink: DeepLinkWithData, intlShape?: Int
                 });
                 break;
             }
-            case DeepLink.MagicLink: {
-                Alert.alert(
-                    intl.formatMessage({id: 'magic_link.already_logged_in_error.title', defaultMessage: 'Already logged in'}),
-                    intl.formatMessage({id: 'magic_link.already_logged_in_error.description', defaultMessage: 'You are already logged in to this server. Log out and follow the link again.'}),
-                    [{
-                        text: intl.formatMessage({id: 'magic_link.already_logged_in_error.ok', defaultMessage: 'OK'}),
-                    }],
-                );
-                break;
-            }
         }
         return {error: false};
     } catch (error) {
@@ -155,14 +135,6 @@ type ChannelPathParams = {
 
 const CHANNEL_PATH = '*serverUrl/:teamName/:path/:identifier';
 export const matchChannelDeeplink = match<ChannelPathParams>(CHANNEL_PATH);
-
-type MagicLinkPathParams = {
-    serverUrl: string[];
-    token: string;
-};
-
-const MAGIC_LINK_PATH = '*serverUrl/login/one_time_link';
-export const matchMagicLinkDeeplink = match<MagicLinkPathParams>(MAGIC_LINK_PATH);
 
 type PermalinkPathParams = {
     serverUrl: string[];
@@ -252,14 +224,6 @@ function isValidId(id: string): boolean {
     return regex.test(id);
 }
 
-function isValidToken(token?: string): boolean {
-    if (!token) {
-        return false;
-    }
-    const regex = new RegExp(`^${TOKEN_PATH_PATTERN}$`);
-    return regex.test(token);
-}
-
 export function parseDeepLink(deepLinkUrl: string, asServer = false): DeepLinkWithData {
     try {
         const parsedUrl = urlParse(deepLinkUrl, true);
@@ -287,16 +251,6 @@ export function parseDeepLink(deepLinkUrl: string, asServer = false): DeepLinkWi
         if (permalinkMatch && isValidTeamName(permalinkMatch.params.teamName) && isValidId(permalinkMatch.params.postId)) {
             const {params: {serverUrl, teamName, postId}} = permalinkMatch;
             return {type: DeepLink.Permalink, url: deepLinkUrl, data: {serverUrl: serverUrl.join('/'), teamName, postId}};
-        }
-
-        const magicLinkMatch = matchMagicLinkDeeplink(url);
-        if (magicLinkMatch) {
-            const token = parsedUrl.query.t;
-            const {params: {serverUrl}} = magicLinkMatch;
-            if (!isValidToken(token)) {
-                return {type: DeepLink.Invalid, url: deepLinkUrl};
-            }
-            return {type: DeepLink.MagicLink, url: deepLinkUrl, data: {serverUrl: serverUrl.join('/'), token}};
         }
 
         if (asServer) {

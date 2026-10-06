@@ -21,7 +21,7 @@ import {getThemeForCurrentTeam} from '@queries/servers/preference';
 import {getCurrentUserId} from '@queries/servers/system';
 import {resetToHome, resetToOnboarding, resetToInfomaniakLogin} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
-import {getLaunchPropsFromDeepLink, handleDeepLink} from '@utils/deep_link';
+import {getLaunchPropsFromDeepLink} from '@utils/deep_link';
 import {logInfo} from '@utils/log';
 import {convertToNotificationData} from '@utils/notification';
 import {captureMessage} from '@utils/sentry';
@@ -84,14 +84,7 @@ export const launchApp = async (props: LaunchProps) => {
                 const existingServer = DatabaseManager.searchUrl(extra.data!.serverUrl);
                 serverUrl = existingServer;
                 props.serverUrl = serverUrl || extra.data?.serverUrl;
-                if (extra.type === DeepLink.MagicLink && extra.data && 'token' in extra.data) {
-                    const result = await handleDeepLink(extra);
-                    if (result.error) {
-                        props.launchError = true;
-                    } else {
-                        return '';
-                    }
-                } else if (!serverUrl && extra.type !== DeepLink.Server) {
+                if (!serverUrl && extra.type !== DeepLink.Server) {
                     props.launchError = true;
                 } else if (extra.type === DeepLink.Server) {
                     if (removeProtocol(serverUrl) === extra.data?.serverUrl) {

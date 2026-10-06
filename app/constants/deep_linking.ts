@@ -10,7 +10,6 @@ const DeepLinkType = {
     Conference: 'conference',
     Redirect: '_redirect',
     Server: 'server',
-    MagicLink: 'magic_link',
 } as const;
 
 export default DeepLinkType;

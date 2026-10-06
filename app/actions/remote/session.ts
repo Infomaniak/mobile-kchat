@@ -4,7 +4,6 @@
 import {defineMessages, type IntlShape} from 'react-intl';
 import {Alert, DeviceEventEmitter, type AlertButton} from 'react-native';
 
-import {doPing} from '@actions/remote/general';
 import {Database, Events} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
@@ -13,15 +12,11 @@ import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {getDeviceToken} from '@queries/app/global';
 import {getCurrentUserId} from '@queries/servers/system';
-import {resetToHome} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
 import {getFullErrorMessage, isErrorWithStatusCode, isErrorWithUrl} from '@utils/errors';
-import {getIntlShape} from '@utils/general';
 import {logWarning, logError, logDebug} from '@utils/log';
-import {canReceiveNotifications} from '@utils/push_proxy';
 import {getCSRFFromCookie} from '@utils/security';
 import {captureException} from '@utils/sentry';
-import {getServerUrlAfterRedirect} from '@utils/url';
 
 import {loginEntry} from './entry';
 
@@ -276,78 +271,5 @@ export const getUserLoginType = async (serverUrl: string, loginId: string) => {
     } catch (error) {
         logError('error on getUserLoginType', getFullErrorMessage(error));
         return {error};
-    }
-};
-
-export const magicLinkLogin = async (serverUrl: string, token: string): Promise<LoginActionResponse> => {
-    const httpsHeadRequest = await getServerUrlAfterRedirect(serverUrl);
-    let serverUrlToUse;
-    if (httpsHeadRequest.error || !httpsHeadRequest.url) {
-        // Retry with HTTP
-        const httpHeadRequest = await getServerUrlAfterRedirect(serverUrl, true);
-        if (httpHeadRequest.error || !httpHeadRequest.url) {
-            return {error: httpsHeadRequest.error || httpHeadRequest.error || 'empty server url', failed: true};
-        }
-        serverUrlToUse = httpHeadRequest.url;
-    } else {
-        serverUrlToUse = httpsHeadRequest.url;
-    }
-
-    const database = DatabaseManager.appDatabase?.database;
-    if (!database) {
-        return {error: 'App database not found', failed: true};
-    }
-
-    try {
-        const client = await NetworkManager.createClient(serverUrlToUse, undefined);
-        const config = await client.getClientConfigOld();
-        const deviceId = await getDeviceToken();
-        const serverDisplayName = config.SiteName;
-
-        const user = await client.loginByMagicLinkLogin(token, deviceId);
-
-        const server = await DatabaseManager.createServerDatabase({
-            config: {
-                dbName: serverUrlToUse,
-                serverUrl: serverUrlToUse,
-                identifier: config.DiagnosticId,
-                displayName: serverDisplayName,
-            },
-        });
-
-        await server?.operator.handleUsers({users: [user], prepareRecordsOnly: false});
-        await server?.operator.handleSystem({
-            systems: [{
-                id: Database.SYSTEM_IDENTIFIERS.CURRENT_USER_ID,
-                value: user.id,
-            }],
-            prepareRecordsOnly: false,
-        });
-        const csrfToken = await getCSRFFromCookie(serverUrlToUse);
-        client.setCSRFToken(csrfToken);
-
-        // Check push notification capability (similar to normal login flow)
-        const pingResult = await doPing(
-            serverUrlToUse,
-            true, // verifyPushProxy
-            undefined, // timeoutInterval
-            client, // client
-        );
-        if (!pingResult.error && pingResult.canReceiveNotifications) {
-            const intl = getIntlShape(user.locale);
-            await canReceiveNotifications(serverUrlToUse, pingResult.canReceiveNotifications as string, intl);
-        }
-    } catch (error) {
-        return {error, failed: true};
-    }
-
-    try {
-        await addPushProxyVerificationStateFromLogin(serverUrlToUse);
-        const {error} = await loginEntry({serverUrl: serverUrlToUse});
-        await DatabaseManager.setActiveServerDatabase(serverUrlToUse);
-        await resetToHome();
-        return {error, failed: false};
-    } catch (error) {
-        return {error, failed: false};
     }
 };
