@@ -20,7 +20,7 @@
 
 -->
 
-## Ticket liée
+## Ticket lié
 
 ## Checklist
 
