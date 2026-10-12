@@ -1,5 +1,5 @@
 name: compute-ios-version
-description: Computes iOS version and build number from Git tag (format X.Y.Z-beta.N.ios)
+description: Computes iOS version and build number from Git tag (format X.Y.Z-rc.N.ios)
 
 inputs:
   tag:
@@ -25,8 +25,8 @@ runs:
         TAG="${{ inputs.tag }}"
         echo "Parsing tag: $TAG"
 
-        # Extract version parts from tag (e.g., 1.2.3-beta.4.ios)
-        if [[ "$TAG" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-beta\.([0-9]+)\.ios$ ]]; then
+        # Extract version parts from tag (e.g., 1.2.3-rc.4.ios)
+        if [[ "$TAG" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-rc\.([0-9]+)\.ios$ ]]; then
           MAJOR="${BASH_REMATCH[1]}"
           MINOR="${BASH_REMATCH[2]}"
           PATCH="${BASH_REMATCH[3]}"
@@ -39,7 +39,7 @@ runs:
           echo "✅ Computed versionNumber: $VERSION_NUMBER"
           echo "✅ Computed buildNumber: $BUILD"
         else
-          echo "❌ Error: Tag format invalid. Expected: X.Y.Z-beta.N.ios"
+          echo "❌ Error: Tag format invalid. Expected: X.Y.Z-rc.N.ios"
           echo "   Got: $TAG"
           exit 1
         fi

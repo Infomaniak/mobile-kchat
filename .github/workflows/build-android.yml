@@ -4,7 +4,7 @@ name: build-android
 on:
   push:
     tags:
-      - '[0-9]+.[0-9]+.[0-9]+-beta.[0-9]+.android'
+      - '[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+.android'
 
 env:
   NODE_VERSION: 22.14.0
@@ -21,8 +21,8 @@ jobs:
         id: env
         run: |
           TAG="${{ github.ref_name }}"
-          if [[ "$TAG" =~ -beta\. ]]; then
-            echo "environment=beta" >> "$GITHUB_OUTPUT"
+          if [[ "$TAG" =~ -rc\. ]]; then
+            echo "environment=rc" >> "$GITHUB_OUTPUT"
             echo "track=internal" >> "$GITHUB_OUTPUT"
           fi
   test:

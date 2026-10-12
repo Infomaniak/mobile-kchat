@@ -1,5 +1,5 @@
 name: compute-android-version
-description: Computes Android versionCode from Git tag (format X.Y.Z-alpha.N.android or X.Y.Z-beta.N.android)
+description: Computes Android versionCode from Git tag (format X.Y.Z-rc.N.android)
 
 inputs:
   tag:
@@ -25,8 +25,8 @@ runs:
         TAG="${{ inputs.tag }}"
         echo "Parsing tag: $TAG"
 
-        # Extract version parts from tag (e.g., 1.0.46-alpha.1.android or 1.0.46-beta.1.android)
-        if [[ "$TAG" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-(alpha|beta)\.([0-9]+)\.android$ ]]; then
+        # Extract version parts from tag (e.g., 1.0.46-rc.1.android)
+        if [[ "$TAG" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-(rc)\.([0-9]+)\.android$ ]]; then
           MAJOR="${BASH_REMATCH[1]}"
           MINOR="${BASH_REMATCH[2]}"
           PATCH="${BASH_REMATCH[3]}"
@@ -43,7 +43,7 @@ runs:
           echo "✅ Computed versionCode: $VERSION_CODE (readable: $DISPLAY_VERSION_CODE)"
           echo "✅ Computed versionName: $VERSION_NAME"
         else
-          echo "❌ Error: Tag format invalid. Expected: X.Y.Z-alpha.N.android or X.Y.Z-beta.N.android"
+          echo "❌ Error: Tag format invalid. Expected: X.Y.Z-rc.N.android"
           echo "   Got: $TAG"
           exit 1
         fi

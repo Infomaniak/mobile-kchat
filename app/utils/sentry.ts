@@ -59,7 +59,7 @@ export function initializeSentry() {
 }
 
 // Beta and App Store builds share the same bundle id, so the install source is
-// the only iOS discriminator: TestFlight installs resolve to "beta", App Store
+// the only iOS discriminator: TestFlight installs resolve to "rc", App Store
 // installs to "production", whatever the binary was originally built for.
 function resolveSentryEnvironment() {
     if (__DEV__) {
@@ -67,7 +67,7 @@ function resolveSentryEnvironment() {
     }
 
     if (Platform.OS === 'ios') {
-        return DeviceInfo.getInstallerPackageNameSync() === 'AppStore' ? 'production' : 'beta';
+        return DeviceInfo.getInstallerPackageNameSync() === 'AppStore' ? 'production' : 'rc';
     }
 
     return Config.SentryEnvironment;

@@ -98,7 +98,7 @@ describe('initializeSentry function', () => {
         expect(log.logWarning).toHaveBeenCalledWith('Sentry is enabled, but not configured on this platform');
     });
 
-    it('should resolve TestFlight installs to beta on iOS', () => {
+    it('should resolve TestFlight installs to rc on iOS', () => {
         const originalDev = __DEV__;
         (global as any).__DEV__ = false;
         Config.SentryEnabled = true;
@@ -108,7 +108,7 @@ describe('initializeSentry function', () => {
         try {
             initializeSentry();
 
-            expect(Sentry.init).toHaveBeenCalledWith(expect.objectContaining({environment: 'beta'}));
+            expect(Sentry.init).toHaveBeenCalledWith(expect.objectContaining({environment: 'rc'}));
             expect(Sentry.setTag).toHaveBeenCalledWith('install_source', 'testflight');
         } finally {
             (global as any).__DEV__ = originalDev;
@@ -132,7 +132,7 @@ describe('initializeSentry function', () => {
         }
     });
 
-    it('should fail safe to beta when the install source is unknown on iOS', () => {
+    it('should fail safe to rc when the install source is unknown on iOS', () => {
         const originalDev = __DEV__;
         (global as any).__DEV__ = false;
         Config.SentryEnabled = true;
@@ -142,7 +142,7 @@ describe('initializeSentry function', () => {
         try {
             initializeSentry();
 
-            expect(Sentry.init).toHaveBeenCalledWith(expect.objectContaining({environment: 'beta'}));
+            expect(Sentry.init).toHaveBeenCalledWith(expect.objectContaining({environment: 'rc'}));
         } finally {
             (global as any).__DEV__ = originalDev;
         }
@@ -155,7 +155,7 @@ describe('initializeSentry function', () => {
         Platform.OS = 'android';
         Config.SentryEnabled = true;
         Config.SentryDsnAndroid = 'YOUR_ANDROID_DSN_HERE';
-        Config.SentryEnvironment = 'alpha';
+        Config.SentryEnvironment = 'rc';
         (DeviceInfo.getInstallerPackageNameSync as jest.Mock).mockReturnValue('AppStore');
 
         try {
@@ -181,7 +181,7 @@ describe('initializeSentry function', () => {
         expect(Sentry.init).toHaveBeenCalledWith({
             dsn: 'YOUR_IOS_DSN_HERE',
             sendDefaultPii: false,
-            environment: 'beta', // Assuming isBetaApp() returns true in this test
+            environment: 'rc', // Assuming isBetaApp() returns true in this test
             tracesSampleRate: 1.0,
             sampleRate: 1.0,
             attachStacktrace: true, // Adjust based on your actual logic
