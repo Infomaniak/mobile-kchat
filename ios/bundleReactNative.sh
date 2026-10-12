@@ -16,7 +16,16 @@ if [[ "${SENTRY_ENABLED}" = "true" ]]; then
 	chmod +x $SENTRY_XCODE
 
 	export SENTRY_PROPERTIES=sentry.properties
-	/bin/sh -c "$WITH_ENVIRONMENT $SENTRY_XCODE"
+	BUILD_START=$(date +%s)
+	/bin/sh -c "$WITH_ENVIRONMENT $SENTRY_XCODE" || {
+		BUNDLE_PATH="${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/main.jsbundle"
+		if [[ -s "$BUNDLE_PATH" && $(stat -f %m "$BUNDLE_PATH") -ge $BUILD_START ]]; then
+			echo "WARNING: Sentry upload failed but the JS bundle was produced, continuing build"
+		else
+			echo "ERROR: Sentry integration failed and no JS bundle was produced"
+			exit 1
+		fi
+	}
 else
 	echo "Sentry native integration is not enabled"
 	/bin/sh -c "$WITH_ENVIRONMENT $REACT_NATIVE_XCODE"

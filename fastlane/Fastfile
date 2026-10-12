@@ -1088,6 +1088,11 @@ platform :android do
   end
 
   def build_android
+    # read by sentry-cli (not the SDK's sentry.gradle) so upload failures exit 0.
+    # NOTE: Gradle does not forward client env changes to a reused daemon
+    # (github.com/gradle/gradle/issues/10483): this only takes effect once the
+    # daemon is (re)started by a lane that sets it
+    ENV['SENTRY_ALLOW_FAILURE'] = 'true'
     config_mode = ENV['BUILD_FOR_RELEASE'] == 'true' ? 'Release' : 'Debug'
     build_task = ENV['ANDROID_BUILD_TASK'].nil? || ENV['ANDROID_BUILD_TASK'].empty? ? 'assemble,bundle' : ENV['ANDROID_BUILD_TASK']
     build_task = build_task.split(",")
