@@ -10,4 +10,4 @@
  * before building.
  */
 
-export const ENABLE_PERF_MONITOR = true;
+export const ENABLE_PERF_MONITOR = false;

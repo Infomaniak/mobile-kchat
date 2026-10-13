@@ -98,13 +98,13 @@ class DatabaseManagerSingleton {
         this.databaseDirectory = Platform.OS === 'ios' ? getIOSAppGroupDetails().appGroupDatabase : `${Paths.document.uri}/databases/`;
     }
 
-    /**
-    * init : Retrieves all the servers registered in the default database
-    * @param {string[]} serverUrls
-    * @returns {Promise<void>}
-    */
-    public init = async (serverUrls: string[]): Promise<void> => {
-        await this.createAppDatabase();
+    public initAppDatabase = async (): Promise<void> => {
+        if (!this.appDatabase) {
+            await this.createAppDatabase();
+        }
+    };
+
+    public initServerDatabases = async (serverUrls: string[]): Promise<void> => {
         const buildNumber = nativeBuildVersion;
         const versionNumber = nativeApplicationVersion;
         await beforeUpgrade.call(this, serverUrls, versionNumber, buildNumber);
@@ -119,6 +119,17 @@ class DatabaseManagerSingleton {
             }],
             prepareRecordsOnly: false,
         });
+    };
+
+    /**
+    * init : Retrieves all the servers registered in the default database
+    * @param {string[]} serverUrls
+    * @returns {Promise<void>}
+    */
+    public init = async (serverUrls: string[]): Promise<void> => {
+        logDebug('DatabaseManager: Initializing');
+        await this.initAppDatabase();
+        await this.initServerDatabases(serverUrls);
     };
 
     /**

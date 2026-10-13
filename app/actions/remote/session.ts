@@ -8,7 +8,7 @@ import {doPing} from '@actions/remote/general';
 import {Database, Events} from '@constants';
 import {SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
-import {getAllServerCredentials} from '@init/credentials';
+import {getServerCredentials, listAllKeychainServerUrls} from '@init/credentials';
 import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {getDeviceToken} from '@queries/app/global';
@@ -188,7 +188,13 @@ export const logout = async (
     if (!skipServerLogout) {
         try {
             const appDatabase = DatabaseManager.appDatabase?.database;
-            const serverCredentials = await getAllServerCredentials();
+
+            // Sweep the full keychain (rare operation, listing cost acceptable) so credentials
+            // outside the DB-active set still get revoked and removed from the keychain.
+            const serverUrls = await listAllKeychainServerUrls();
+            const serverCredentials = (await Promise.all(
+                serverUrls.map((listedServerUrl) => getServerCredentials(listedServerUrl)),
+            )).filter((credential): credential is ServerCredential => Boolean(credential));
 
             await Promise.allSettled(
                 serverCredentials.map(async (credential) => {

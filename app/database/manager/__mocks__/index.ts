@@ -58,8 +58,13 @@ class DatabaseManagerSingleton {
         this.databaseDirectory = '';
     }
 
-    public init = async (serverUrls: string[]): Promise<void> => {
-        await this.createAppDatabase();
+    public initAppDatabase = async (): Promise<void> => {
+        if (!this.appDatabase) {
+            await this.createAppDatabase();
+        }
+    };
+
+    public initServerDatabases = async (serverUrls: string[]): Promise<void> => {
         for await (const serverUrl of serverUrls) {
             await this.destroyServerDatabase(serverUrl);
             await this.initServerDatabase(serverUrl);
@@ -72,6 +77,11 @@ class DatabaseManagerSingleton {
             }],
             prepareRecordsOnly: false,
         });
+    };
+
+    public init = async (serverUrls: string[]): Promise<void> => {
+        await this.initAppDatabase();
+        await this.initServerDatabases(serverUrls);
     };
 
     private createAppDatabase = async (): Promise<AppDatabase|undefined> => {

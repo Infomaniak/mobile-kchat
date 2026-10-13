@@ -4,7 +4,7 @@
 import {Alert, DeviceEventEmitter} from 'react-native';
 
 import {Events} from '@constants';
-import {getAllServerCredentials} from '@init/credentials';
+import {getServerCredentials, listAllKeychainServerUrls} from '@init/credentials';
 import NetworkManager from '@managers/network_manager';
 import WebsocketManager from '@managers/websocket_manager';
 import {getDeviceToken} from '@queries/app/global';
@@ -13,7 +13,7 @@ import {captureException} from '@utils/sentry';
 import {logout} from './session';
 
 jest.mock('@utils/sentry', () => ({captureException: jest.fn()}));
-jest.mock('@init/credentials', () => ({getAllServerCredentials: jest.fn()}));
+jest.mock('@init/credentials', () => ({listAllKeychainServerUrls: jest.fn(), getServerCredentials: jest.fn()}));
 jest.mock('@queries/app/global', () => ({getDeviceToken: jest.fn()}));
 jest.mock('@managers/network_manager', () => ({__esModule: true, default: {getClient: jest.fn()}}));
 jest.mock('@managers/websocket_manager', () => ({__esModule: true, default: {getClient: jest.fn().mockReturnValue({close: jest.fn()})}}));
@@ -38,9 +38,8 @@ describe('logout - removeServer default', () => {
         (NetworkManager.getClient as jest.Mock).mockReturnValue(mockClient);
         (WebsocketManager.getClient as jest.Mock).mockReturnValue({close: jest.fn()});
         DeviceEventEmitter.emit = jest.fn();
-        (getAllServerCredentials as jest.Mock).mockResolvedValue([
-            {serverUrl: 'https://server1.com'},
-        ]);
+        (listAllKeychainServerUrls as jest.Mock).mockResolvedValue(['https://server1.com']);
+        (getServerCredentials as jest.Mock).mockResolvedValue({serverUrl: 'https://server1.com', userId: 'user1', token: 'token1'});
         (getDeviceToken as jest.Mock).mockResolvedValue('token123');
     });
 
@@ -75,9 +74,6 @@ describe.skip('logout', () => {
     });
 
     it('should call captureException if deviceToken is undefined', async () => {
-        (getAllServerCredentials as jest.Mock).mockResolvedValue([
-            {serverUrl: 'https://server1.com'},
-        ]);
         (getDeviceToken as jest.Mock).mockResolvedValue(undefined);
 
         await logout('https://server1.com', undefined);
@@ -91,26 +87,26 @@ describe.skip('logout', () => {
     });
 
     it('calls logout on all servers with correct deviceToken', async () => {
-        const servers = [
-            {serverUrl: 'https://server1.com'},
-            {serverUrl: 'https://server2.com'},
-        ];
-        (getAllServerCredentials as jest.Mock).mockResolvedValue(servers);
+        const serverUrls = ['https://server1.com', 'https://server2.com'];
+        (listAllKeychainServerUrls as jest.Mock).mockResolvedValue(serverUrls);
+        (getServerCredentials as jest.Mock).mockImplementation(async (serverUrl: string) => (
+            {serverUrl, userId: 'user1', token: 'token1'}
+        ));
         (getDeviceToken as jest.Mock).mockResolvedValue('token123');
 
         await logout('https://server1.com', undefined);
 
         expect(mockClient.logout).toHaveBeenCalledTimes(2);
 
-        servers.forEach((server, index) => {
+        serverUrls.forEach((_, index) => {
             expect(mockClient.logout).toHaveBeenNthCalledWith(index + 1, 'token123');
         });
 
         expect(DeviceEventEmitter.emit).toHaveBeenCalledTimes(2);
-        servers.forEach((server) => {
+        serverUrls.forEach((serverUrl) => {
             expect(DeviceEventEmitter.emit).toHaveBeenCalledWith(
                 Events.SERVER_LOGOUT,
-                expect.objectContaining({serverUrl: server.serverUrl}),
+                expect.objectContaining({serverUrl}),
             );
         });
     });
@@ -125,9 +121,8 @@ describe('logout - server failure', () => {
         (WebsocketManager.getClient as jest.Mock).mockReturnValue({close: jest.fn()});
         DeviceEventEmitter.emit = jest.fn();
         Alert.alert = jest.fn();
-        (getAllServerCredentials as jest.Mock).mockResolvedValue([
-            {serverUrl: 'https://server1.com'},
-        ]);
+        (listAllKeychainServerUrls as jest.Mock).mockResolvedValue(['https://server1.com']);
+        (getServerCredentials as jest.Mock).mockResolvedValue({serverUrl: 'https://server1.com', userId: 'user1', token: 'token1'});
         (getDeviceToken as jest.Mock).mockResolvedValue('token123');
     });
 
