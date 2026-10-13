@@ -113,6 +113,36 @@ describe('AnimatedNumber', () => {
         });
     });
 
+    describe('animation timing', () => {
+        const timingMock = jest.mocked(Animated.timing);
+
+        it('should not start any timing animation on mount', () => {
+            timingMock.mockClear();
+
+            render(<AnimatedNumber animateToNumber={123}/>);
+
+            const text = screen.getByTestId('no-animation-number');
+            fireEvent(text, 'onLayout', {nativeEvent: {layout: {height: NUMBER_HEIGHT}}});
+
+            // on mount the digit column already sits at the target value
+            expect(timingMock).not.toHaveBeenCalled();
+        });
+
+        it('should start the timing animations when the number changes after mount', () => {
+            timingMock.mockClear();
+
+            render(<AnimatedNumber animateToNumber={123}/>);
+
+            const text = screen.getByTestId('no-animation-number');
+            fireEvent(text, 'onLayout', {nativeEvent: {layout: {height: NUMBER_HEIGHT}}});
+
+            timingMock.mockClear();
+            screen.rerender(<AnimatedNumber animateToNumber={124}/>);
+
+            expect(timingMock).toHaveBeenCalled();
+        });
+    });
+
     it('KNOWN UI BUG: should show that there will be an issue if the text height changes, due to the non-animated number view has been removed', async () => {
         // the number text will get cut-off if the user changes the text size on their mobile devices
         render(<AnimatedNumber animateToNumber={123}/>);

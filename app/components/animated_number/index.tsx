@@ -70,6 +70,13 @@ const AnimatedNumber = ({
             return;
         }
 
+        // On mount previousNumber === animateToNumber and the digit column is
+        // already positioned at the target value, so animating would only run
+        // a no-op timing for every digit (expensive while scrolling lists).
+        if (previousNumber === animateToNumber) {
+            return;
+        }
+
         const animateToNumberArray = Array.from(animateToNumberString, Number);
         animations.forEach((animation, index) => {
             Animated.timing(animation, {
@@ -80,11 +87,13 @@ const AnimatedNumber = ({
             }).start();
         });
     }, [
+        animateToNumber,
         animateToNumberString,
         animationDuration,
         animations,
         easing,
         numberHeight,
+        previousNumber,
     ]);
 
     const setButtonLayout = useCallback((e: LayoutChangeEvent) => {
