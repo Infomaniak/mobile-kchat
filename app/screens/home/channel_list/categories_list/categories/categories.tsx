@@ -48,6 +48,11 @@ const styles = StyleSheet.create({
 
 const extractKey = (item: CategoryModel | 'UNREADS') => (item === 'UNREADS' ? 'UNREADS' : item.id);
 
+// Startup perf: mount a bounded slice of categories at launch and let the FlatList
+// recycle the rest, instead of hydrating every category before the first frame.
+const INITIAL_CATEGORIES_TO_RENDER = 8;
+const CATEGORY_LIST_WINDOW_SIZE = 5;
+
 const Categories = ({
     categories,
     onlyUnreads,
@@ -164,7 +169,8 @@ const Categories = ({
                     showsHorizontalScrollIndicator={false}
                     showsVerticalScrollIndicator={false}
                     keyExtractor={extractKey}
-                    initialNumToRender={categoriesToShow.length}
+                    initialNumToRender={INITIAL_CATEGORIES_TO_RENDER}
+                    windowSize={CATEGORY_LIST_WINDOW_SIZE}
 
                     // @ts-expect-error strictMode not included in the types
                     strictMode={true}

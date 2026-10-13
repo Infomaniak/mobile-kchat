@@ -59,7 +59,9 @@ const observeCategoryChannels = (category: CategoryModel, myChannels: Observable
     );
 };
 
-const enhanced = withObservables(['unreadsOnTop'], ({category, currentUserId, database, isTablet, locale, unreadsOnTop, manuallyClosedPrefs$, autoclosePrefs$, currentChannelId$, notifyPropsByChannelId$}: EnhanceProps) => {
+// `unreadsOnTop` only toggles display order: it stays a plain prop so a preference
+// change can't re-subscribe every category's channel queries.
+const enhanced = withObservables([], ({category, currentUserId, database, isTablet, locale, manuallyClosedPrefs$, autoclosePrefs$, currentChannelId$, notifyPropsByChannelId$}: EnhanceProps) => {
     const categoryMyChannels = category.myChannels.observeWithColumns(['is_unread']);
     const channelsWithMyChannel = observeCategoryChannels(category, categoryMyChannels);
     const currentChannelId = isTablet ? currentChannelId$ : of$('');
@@ -105,7 +107,6 @@ const enhanced = withObservables(['unreadsOnTop'], ({category, currentUserId, da
         category,
         sortedChannels,
         unreadIds,
-        unreadsOnTop: of$(unreadsOnTop),
     };
 });
 
