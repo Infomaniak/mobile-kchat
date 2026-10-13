@@ -7,7 +7,6 @@ import {of as of$} from 'rxjs';
 import {switchMap, distinctUntilChanged} from 'rxjs/operators';
 
 import {General} from '@constants';
-import {withServerUrl} from '@context/server';
 import {observeIsMutedSetting, observeMyChannel, queryChannelMembers} from '@queries/servers/channel';
 import {queryDraft} from '@queries/servers/drafts';
 import {observeCurrentChannelId, observeCurrentUserId} from '@queries/servers/system';
@@ -21,22 +20,21 @@ import type ChannelModel from '@typings/database/models/servers/channel';
 type EnhanceProps = WithDatabaseArgs & {
     channel: ChannelModel | Channel;
     showTeamName?: boolean;
-    serverUrl?: string;
     shouldHighlightActive?: boolean;
     shouldHighlightState?: boolean;
 }
 
-const enhance = withObservables(['channel', 'showTeamName', 'shouldHighlightActive', 'shouldHighlightState'], ({
+// Only `channel` and `showTeamName` re-create the observables: the highlight booleans
+// stay plain props so a screen change can't re-subscribe every item of the list.
+const enhance = withObservables(['channel', 'showTeamName'], ({
     channel,
     database,
     showTeamName = false,
-    shouldHighlightActive = false,
-    shouldHighlightState = false,
 }: EnhanceProps) => {
     const currentUserId = observeCurrentUserId(database);
     const myChannel = observeMyChannel(database, channel.id);
 
-    const hasDraft = shouldHighlightState ? queryDraft(database, channel.id).observeWithColumns(['message', 'files', 'metadata']).pipe(
+    const hasDraft = queryDraft(database, channel.id).observeWithColumns(['message', 'files', 'metadata']).pipe(
         switchMap((drafts) => {
             if (!drafts.length) {
                 return of$(false);
@@ -52,21 +50,21 @@ const enhance = withObservables(['channel', 'showTeamName', 'shouldHighlightActi
             return of$(true);
         }),
         distinctUntilChanged(),
-    ) : of$(false);
+    );
 
-    const isActive = shouldHighlightActive ? observeCurrentChannelId(database).pipe(
+    const isActive = observeCurrentChannelId(database).pipe(
         switchMap((id) => of$(id ? id === channel.id : false)),
         distinctUntilChanged(),
-    ) : of$(false);
+    );
 
-    const isMuted = shouldHighlightState ? myChannel.pipe(
+    const isMuted = myChannel.pipe(
         switchMap((mc) => {
             if (!mc) {
                 return of$(false);
             }
             return observeIsMutedSetting(database, mc.id);
         }),
-    ) : of$(false);
+    );
 
     const teamId = 'teamId' in channel ? channel.teamId : channel.team_id;
     const teamDisplayName = (teamId && showTeamName) ? observeTeam(database, teamId).pipe(
@@ -76,15 +74,15 @@ const enhance = withObservables(['channel', 'showTeamName', 'shouldHighlightActi
 
     const membersCount = channel.type === General.GM_CHANNEL ? queryChannelMembers(database, channel.id).observeCount(false) : of$(0);
 
-    const isUnread = shouldHighlightState ? myChannel.pipe(
+    const isUnread = myChannel.pipe(
         switchMap((mc) => of$(mc?.isUnread)),
         distinctUntilChanged(),
-    ) : of$(false);
+    );
 
-    const mentionsCount = shouldHighlightState ? myChannel.pipe(
+    const mentionsCount = myChannel.pipe(
         switchMap((mc) => of$(mc?.mentionsCount)),
         distinctUntilChanged(),
-    ) : of$(0);
+    );
 
     return {
         channel: 'observe' in channel ? channel.observe() : of$(channel),
@@ -99,4 +97,4 @@ const enhance = withObservables(['channel', 'showTeamName', 'shouldHighlightActi
     };
 });
 
-export default React.memo(withDatabase(withServerUrl(enhance(ChannelItem))));
+export default React.memo(withDatabase(enhance(ChannelItem)));

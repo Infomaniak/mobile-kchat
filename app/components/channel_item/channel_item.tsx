@@ -35,6 +35,8 @@ type Props = {
     isOnCenterBg?: boolean;
     showChannelName?: boolean;
     isOnHome?: boolean;
+    shouldHighlightActive?: boolean;
+    shouldHighlightState?: boolean;
 }
 
 export const ROW_HEIGHT = 40;
@@ -117,6 +119,8 @@ const ChannelItem = ({
     isOnCenterBg = false,
     showChannelName = false,
     isOnHome = false,
+    shouldHighlightActive = false,
+    shouldHighlightState = false,
 }: Props) => {
     const {formatMessage} = useIntl();
     const theme = useTheme();
@@ -125,9 +129,15 @@ const ChannelItem = ({
 
     const channelName = (showChannelName && !isDMorGM(channel)) ? channel.name : '';
 
+    // The observables are always subscribed; the highlight booleans only gate the display
+    // so contexts like autocomplete keep their previous rendering.
+    const shownHasDraft = shouldHighlightState && hasDraft;
+    const shownIsMuted = shouldHighlightState && isMuted;
+    const shownMentionsCount = shouldHighlightState ? mentionsCount : 0;
+
     // Make it bolded if it has unreads or mentions
-    const isBolded = isUnread || mentionsCount > 0;
-    const showActive = isActive && isTablet;
+    const isBolded = shouldHighlightState && (isUnread || shownMentionsCount > 0);
+    const showActive = isActive && shouldHighlightActive && isTablet;
 
     const teammateId = (channel.type === General.DM_CHANNEL) ? getUserIdFromChannelName(currentUserId, channel.name) : undefined;
     const isOwnDirectMessage = (channel.type === General.DM_CHANNEL) && currentUserId === teammateId;
@@ -149,14 +159,14 @@ const ChannelItem = ({
     }, [channel, onPress]);
 
     const textStyles = useMemo(() => [
-        isBolded && !isMuted ? textStyle.bold : textStyle.regular,
+        isBolded && !shownIsMuted ? textStyle.bold : textStyle.regular,
         styles.text,
         isBolded && styles.highlight,
         showActive ? styles.textActive : null,
         isOnCenterBg ? styles.textOnCenterBg : null,
-        isMuted && styles.muted,
-        isMuted && isOnCenterBg && styles.mutedOnCenterBg,
-    ], [isBolded, styles, isMuted, showActive, isOnCenterBg]);
+        shownIsMuted && styles.muted,
+        shownIsMuted && isOnCenterBg && styles.mutedOnCenterBg,
+    ], [isBolded, styles, shownIsMuted, showActive, isOnCenterBg]);
 
     const containerStyle = useMemo(() => [
         styles.container,
@@ -175,8 +185,8 @@ const ChannelItem = ({
                 testID={channelItemTestId}
             >
                 <ChannelIcon
-                    hasDraft={hasDraft}
-                    isActive={isTablet && isActive}
+                    hasDraft={shownHasDraft}
+                    isActive={isTablet && isActive && shouldHighlightActive}
                     isOnCenterBg={isOnCenterBg}
                     isUnread={isBolded}
                     isArchived={deleteAt > 0}
@@ -185,12 +195,12 @@ const ChannelItem = ({
                     shared={channel.shared}
                     size={24}
                     type={channel.type}
-                    isMuted={isMuted}
+                    isMuted={shownIsMuted}
                     style={styles.icon}
                 />
                 <ChannelBody
                     displayName={displayName}
-                    isMuted={isMuted}
+                    isMuted={shownIsMuted}
                     teamDisplayName={teamDisplayName}
                     teammateId={teammateId}
                     testId={channelItemTestId}
@@ -199,13 +209,14 @@ const ChannelItem = ({
                 />
                 <View style={styles.filler}/>
                 <Badge
-                    visible={mentionsCount > 0}
-                    value={mentionsCount}
-                    style={[styles.badge, isMuted && styles.mutedBadge, isOnCenterBg && styles.badgeOnCenterBg]}
+                    visible={shownMentionsCount > 0}
+                    value={shownMentionsCount}
+                    style={[styles.badge, shownIsMuted && styles.mutedBadge, isOnCenterBg && styles.badgeOnCenterBg]}
                 />
             </View>
         </TouchableOpacity>
     );
 };
 
-export default ChannelItem;
+// Memoized so HOC re-renders carrying identical observable values don't re-render the item
+export default React.memo(ChannelItem);
