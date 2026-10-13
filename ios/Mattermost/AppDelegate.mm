@@ -69,8 +69,11 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
 
   [RNNotifications startMonitorNotifications];
 
+  // Keep the launch options for the SceneDelegate: React Native bootstraps when
+  // the UI scene connects (required by the iOS 27 SDK, see TN3187), not here.
+  self.launchOptions = launchOptions;
+
   os_log(OS_LOG_DEFAULT, "Mattermost started!!");
-  [ReactNativeNavigation bootstrapWithDelegate:self launchOptions:launchOptions];
 
   return YES;
 }
@@ -98,6 +101,21 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
 
   if (isTestAction) {
     completionHandler(UIBackgroundFetchResultNoData);
+    return;
+  }
+
+  // Scene lifecycle: a background launch connects no UI scene, so React Native
+  // never starts and JS background handlers cannot respond. Handle the receipt
+  // natively (same signature guard and clear handling as the scene path below)
+  // instead of blocking on RNNotifications' semaphore.
+  if ([UIApplication sharedApplication].connectedScenes.count == 0) {
+    if ([[GekidouWrapper default] verifySignature:userInfo]) {
+      if (isClearAction) {
+        [[NotificationHelper default] clearChannelOrThreadNotificationsWithUserInfo:userInfo];
+      }
+      [[GekidouWrapper default] postNotificationReceipt:userInfo];
+    }
+    completionHandler(UIBackgroundFetchResultNewData);
     return;
   }
 
@@ -146,22 +164,20 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
   }
 }
 
-// Required for deeplinking
+// Required for deeplinking. With the scene life cycle adopted these
+// UIApplicationDelegate callbacks are no longer called by UIKit; the
+// SceneDelegate forwards to the shared handlers below.
 - (BOOL) application: (UIApplication *)application
              openURL: (NSURL *)url
              options: (NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
 {
-  // https://commerce.nearform.com/open-source/react-native-app-auth/docs#define-openurl-callback-in-appdelegate
-  if ([self.authorizationFlowManagerDelegate resumeExternalUserAgentFlowWithURL:url]) {
-    return YES;
-  }
-  return [RCTLinkingManager application:application openURL:url options:options];
+  return [self handleOpenURL:url options:options];
 }
 
 - (BOOL) application: (UIApplication *)application
              openURL: (NSURL *)url
-   sourceApplication: (NSString *)sourceApplication
-          annotation: (id)annotation
+    sourceApplication: (NSString *)sourceApplication
+           annotation: (id)annotation
 {
   return [RCTLinkingManager application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
 }
@@ -171,6 +187,20 @@ NSString* const NOTIFICATION_TEST_ACTION = @"test";
 - (BOOL) application: (UIApplication *)application
 continueUserActivity: (nonnull NSUserActivity *)userActivity
   restorationHandler: (nonnull void (^)(NSArray<id<UIUserActivityRestoring>> *_Nullable))restorationHandler
+{
+  return [self handleUserActivity:userActivity];
+}
+
+- (BOOL)handleOpenURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
+{
+  // https://commerce.nearform.com/open-source/react-native-app-auth/docs#define-openurl-callback-in-appdelegate
+  if ([self.authorizationFlowManagerDelegate resumeExternalUserAgentFlowWithURL:url]) {
+    return YES;
+  }
+  return [RCTLinkingManager application:[UIApplication sharedApplication] openURL:url options:options];
+}
+
+- (BOOL)handleUserActivity:(NSUserActivity *)userActivity
 {
   if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
     if (self.authorizationFlowManagerDelegate) {
@@ -192,12 +222,14 @@ continueUserActivity: (nonnull NSUserActivity *)userActivity
         NSString *rawStartCall = contactHandle.value;
         NSURL *startCallURL = [NSURL URLWithString:rawStartCall];
         if (startCallURL) {
-          return [RCTLinkingManager application:application openURL:startCallURL options:@{}];
+          return [RCTLinkingManager application:[UIApplication sharedApplication] openURL:startCallURL options:@{}];
         }
       }
   }
 
-  return [RCTLinkingManager application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
+  // RN 0.77's RCTLinkingManager only reads the activity here, so the original
+  // restorationHandler cannot cross this extracted-handler seam and is dropped.
+  return [RCTLinkingManager application:[UIApplication sharedApplication] continueUserActivity:userActivity restorationHandler:^(NSArray<id<UIUserActivityRestoring>> *_Nullable restorableObjects) {}];
 }
 
 -(void)applicationDidBecomeActive:(UIApplication *)application {

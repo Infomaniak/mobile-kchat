@@ -15,5 +15,12 @@
 @property (nonatomic) UIInterfaceOrientationMask orientationLock;
 @property (nonatomic, assign) UIBackgroundTaskIdentifier databaseLockBackgroundTask;
 @property (nonatomic, weak) id<RNAppAuthAuthorizationFlowManagerDelegate> authorizationFlowManagerDelegate;
+@property (nonatomic, strong) NSDictionary *launchOptions;
+
+// Shared deep-link handlers, also called by the SceneDelegate (URLs and user
+// activities are delivered through the scene once the scene life cycle is
+// adopted instead of the UIApplicationDelegate).
+- (BOOL)handleOpenURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options;
+- (BOOL)handleUserActivity:(NSUserActivity *)userActivity;
 
 @end
