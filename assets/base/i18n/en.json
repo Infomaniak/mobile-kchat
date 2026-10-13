@@ -584,6 +584,7 @@
   "mobile.create_post.read_only": "This channel is read-only.",
   "mobile.custom_list.no_results": "No Results",
   "mobile.custom_status.clear_after": "Clear After",
+  "mobile.custom_status.clear_after.title": "Clear Custom Status After",
   "mobile.custom_status.modal_confirm": "Done",
   "mobile.deep_link.invalid": "This link you are trying to open is invalid.",
   "mobile.direct_message.error": "We couldn't open a DM with {displayName}.",

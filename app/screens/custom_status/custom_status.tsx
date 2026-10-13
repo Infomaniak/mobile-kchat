@@ -19,7 +19,7 @@ import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {useIsTablet} from '@hooks/device';
 import {usePreventDoubleTap} from '@hooks/utils';
-import {dismissModal, goToScreen, navigateToScreen, showModal} from '@screens/navigation';
+import {dismissModal, navigateToScreen, navigateToScreenWithBaseRoute} from '@screens/navigation';
 import CallbackStore from '@store/callback_store';
 import {getCurrentMomentForTimezone, getRoundedTime} from '@utils/helpers';
 import {logDebug} from '@utils/log';
@@ -230,12 +230,13 @@ const CustomStatus = ({
         CallbackStore.setCallback(handleClearAfterClick);
         const passProps = {
             initialDuration: newStatus.duration,
+            isModal: isTablet,
         };
 
         if (isTablet) {
-            showModal(screen, '', passProps);
+            navigateToScreen(screen, passProps);
         } else {
-            goToScreen(screen, '', passProps);
+            navigateToScreenWithBaseRoute(`/(modals)/${Screens.CUSTOM_STATUS}/`, screen, passProps);
         }
     }, [isTablet, newStatus.duration, handleClearAfterClick]);
 
