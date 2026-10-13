@@ -10,7 +10,9 @@ import * as postFunctions from '@actions/remote/post';
 import {Events, Screens} from '@constants';
 import {renderWithEverything} from '@test/intl-test-helper';
 import TestHelper from '@test/test_helper';
+import {advanceTimers, disableFakeTimers, enableFakeTimers} from '@test/timer_helpers';
 
+import {INITIAL_BATCH_TO_RENDER} from './config';
 import PostList from './post_list';
 
 jest.mock('@components/post_list/post', () => 'Post');
@@ -20,8 +22,8 @@ jest.mock('@components/post_list/combined_user_activity', () => 'CombinedUserAct
 jest.mock('@components/post_list/scroll_to_end_view', () => 'ScrollToEndView');
 jest.mock('@actions/remote/post', () => {
     return {
-        fetchPosts: jest.fn(),
         fetchPostThread: jest.fn(),
+        refreshPostsForChannel: jest.fn(),
     };
 });
 jest.mock('@actions/local/post', () => ({
@@ -34,7 +36,7 @@ import type Database from '@nozbe/watermelondb/Database';
 describe('components/post_list/PostList', () => {
     let database: Database;
     const serverUrl = 'https://server.com';
-    const fetchPostsSpy = jest.spyOn(postFunctions, 'fetchPosts');
+    const refreshPostsForChannelSpy = jest.spyOn(postFunctions, 'refreshPostsForChannel');
     const fetchPostThreadSpy = jest.spyOn(postFunctions, 'fetchPostThread');
     const removePostSpy = jest.spyOn(localPostFunctions, 'removePost');
     const unrelatedNativeEventsAttributes = {
@@ -126,7 +128,8 @@ describe('components/post_list/PostList', () => {
             flatList.props.onRefresh();
         });
 
-        expect(fetchPostsSpy).toHaveBeenCalledWith('https://server.com', 'channel-id');
+        // false: the list is not blank, so a plain page fetch runs (no cache reset)
+        expect(refreshPostsForChannelSpy).toHaveBeenCalledWith('https://server.com', 'channel-id', false);
     });
 
     it('handles refresh in thread', async () => {
@@ -409,6 +412,137 @@ describe('components/post_list/PostList', () => {
             flatList.props.onRefresh();
         });
 
-        expect(fetchPostsSpy).not.toHaveBeenCalled();
+        expect(refreshPostsForChannelSpy).not.toHaveBeenCalled();
+    });
+
+    describe('progressive loading', () => {
+        // Newest-first per the posts prop contract (posts[0] is the newest post)
+        const manyPosts = Array.from({length: 25}, (_, i) =>
+            mockPostModel({id: `post-${i}`, createAt: Date.now() - i}),
+        );
+        const viewableFirstPost = [{
+            item: {type: 'post', value: {currentPost: manyPosts[0]}},
+            isViewable: true,
+        }];
+        const countPosts = (data: Array<{type: string}>) => data.filter((item) => item.type === 'post').length;
+
+        it('renders only the initial batch of posts on first render', () => {
+            const {getByTestId} = renderWithEverything(
+                <PostList
+                    {...baseProps}
+                    posts={manyPosts}
+                />,
+                {database, serverUrl},
+            );
+
+            const flatList = getByTestId('post_list.flat_list');
+            const data = flatList.props.data;
+            expect(countPosts(data)).toBe(INITIAL_BATCH_TO_RENDER);
+
+            // The newest post must be part of the initial batch: the inverted list
+            // anchors on it so the channel opens on the last message
+            const batchIds = data.map((item: {type: string; value?: {currentPost: {id: string}}}) => (item.type === 'post' ? item.value?.currentPost.id : ''));
+            expect(batchIds).toContain(manyPosts[0].id);
+        });
+
+        it('expands to all posts once the initial batch becomes viewable', async () => {
+            enableFakeTimers();
+            try {
+                const {getByTestId} = renderWithEverything(
+                    <PostList
+                        {...baseProps}
+                        posts={manyPosts}
+                    />,
+                    {database, serverUrl},
+                );
+                const flatList = getByTestId('post_list.flat_list');
+                expect(countPosts(flatList.props.data)).toBe(INITIAL_BATCH_TO_RENDER);
+
+                act(() => {
+                    flatList.props.onViewableItemsChanged({viewableItems: viewableFirstPost});
+                });
+
+                await act(async () => {
+                    await advanceTimers(250);
+                });
+
+                expect(countPosts(flatList.props.data)).toBe(manyPosts.length);
+            } finally {
+                disableFakeTimers();
+            }
+        });
+
+        it('resets progressive loading when the channel changes', async () => {
+            enableFakeTimers();
+            try {
+                const props = {
+                    ...baseProps,
+                    posts: manyPosts,
+                };
+                const {getByTestId, rerender} = renderWithEverything(
+                    <PostList {...props}/>,
+                    {database, serverUrl},
+                );
+                const flatList = getByTestId('post_list.flat_list');
+
+                act(() => {
+                    flatList.props.onViewableItemsChanged({viewableItems: viewableFirstPost});
+                });
+                await act(async () => {
+                    await advanceTimers(250);
+                });
+                expect(countPosts(flatList.props.data)).toBe(manyPosts.length);
+
+                rerender(
+                    <PostList
+                        {...baseProps}
+                        channelId='channel-2'
+                        posts={manyPosts}
+                    />,
+                );
+
+                expect(countPosts(flatList.props.data)).toBe(INITIAL_BATCH_TO_RENDER);
+            } finally {
+                disableFakeTimers();
+            }
+        });
+
+        it('renders all posts when a scroll target is set', () => {
+            const props = {
+                ...baseProps,
+                posts: manyPosts,
+                scrollTargetId: 'post-20',
+            };
+            const {getByTestId} = renderWithEverything(
+                <PostList {...props}/>,
+                {database, serverUrl},
+            );
+
+            const flatList = getByTestId('post_list.flat_list');
+            expect(countPosts(flatList.props.data)).toBe(manyPosts.length);
+        });
+
+        it('exposes the new message line index from the full list while progressively loading', () => {
+            // Newest-first posts with 19 unread: the start-of-new-messages line lands at
+            // index 19, outside the initial batch — the index must come from the full list
+            // so the "N new messages" banner stays wired during progressive loading.
+            const unreadPosts = Array.from({length: 25}, (_, i) =>
+                mockPostModel({id: `post-${i}`, createAt: Date.now() - i}),
+            );
+            const props = {
+                ...baseProps,
+                posts: unreadPosts,
+                showMoreMessages: true,
+                showNewMessageLine: true,
+                lastViewedAt: unreadPosts[19].createAt,
+            };
+            const {getByTestId} = renderWithEverything(
+                <PostList {...props}/>,
+                {database, serverUrl},
+            );
+
+            const moreMessages = getByTestId('post_list.more_messages_button');
+            expect(moreMessages.props.newMessageLineIndex).toBeGreaterThan(INITIAL_BATCH_TO_RENDER);
+        });
     });
 });

@@ -3,7 +3,7 @@
 
 import {DEFAULT_INPUT_ACCESSORY_HEIGHT} from '@keyboard';
 import React, {type ReactElement, useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {DeviceEventEmitter, type ListRenderItemInfo, Platform, type StyleProp, StyleSheet, type ViewStyle, type NativeSyntheticEvent, type NativeScrollEvent} from 'react-native';
+import {DeviceEventEmitter, type ListRenderItemInfo, Platform, type StyleProp, StyleSheet, type ViewStyle, type NativeSyntheticEvent, type NativeScrollEvent, type ViewToken} from 'react-native';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import {KeyboardState, useAnimatedKeyboard, useKeyboardState as useControllerKeyboardState} from 'react-native-keyboard-controller';
 import Animated, {scrollTo, useAnimatedProps, useAnimatedReaction, useAnimatedStyle, type AnimatedStyle} from 'react-native-reanimated';
@@ -11,7 +11,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {scheduleOnRN, scheduleOnUI} from 'react-native-worklets';
 
 import {removePost} from '@actions/local/post';
-import {fetchPosts, fetchPostThread} from '@actions/remote/post';
+import {fetchPostThread, refreshPostsForChannel} from '@actions/remote/post';
 import CombinedUserActivity from '@components/post_list/combined_user_activity';
 import DateSeparator from '@components/post_list/date_separator';
 import LimitedMessages, {type KSuiteLimit} from '@components/post_list/limited_messages/limited_messages';
@@ -168,6 +168,8 @@ const PostList = ({
     const didHandleInitialHighlightedScroll = useRef(false);
     const hasUserTouchedList = useRef(false);
     const highlightedScrollRetryCount = useRef(0);
+    const initialRenderTracked = useRef(false);
+    const viewableItemsDebounceTimer = useRef<NodeJS.Timeout | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [limit, setLimit] = useState<KSuiteLimit | undefined>(undefined);
     const [showScrollToEndBtn, setShowScrollToEndBtn] = useState(false);
@@ -196,11 +198,22 @@ const PostList = ({
         [],
     );
 
-    const orderedPosts = useMemo(() => {
-        return preparePostList(posts, lastViewedAt, showNewMessageLine, currentUserId, currentUsername, shouldShowJoinLeaveMessages, currentTimezone, location === Screens.THREAD, savedPostIds);
-    }, [posts, lastViewedAt, showNewMessageLine, currentUserId, currentUsername, shouldShowJoinLeaveMessages, currentTimezone, location, savedPostIds]);
+    // Progressive loading: start with an initial batch, then add the rest once the
+    // initial batch becomes viewable. On channel change the list shrinks back to the
+    // initial batch which re-anchors the inverted list on the last message.
+    const [showAllPosts, setShowAllPosts] = useState(false);
 
-    const initialIndex = orderedPosts.findIndex((i) => i.type === 'start-of-new-messages');
+    const {orderedPosts, initialIndex} = useMemo(() => {
+        const result = preparePostList(posts, lastViewedAt, showNewMessageLine, currentUserId, currentUsername, shouldShowJoinLeaveMessages, currentTimezone, location === Screens.THREAD, savedPostIds);
+        const unreadIndex = result.findIndex((i) => i.type === 'start-of-new-messages');
+
+        // Skipped for scroll targets: the target post may sit outside the initial batch
+        if (!showAllPosts && !activeScrollTargetId) {
+            return {orderedPosts: result.slice(0, INITIAL_BATCH_TO_RENDER), initialIndex: unreadIndex};
+        }
+
+        return {orderedPosts: result, initialIndex: unreadIndex};
+    }, [posts, lastViewedAt, showNewMessageLine, currentUserId, currentUsername, shouldShowJoinLeaveMessages, currentTimezone, location, savedPostIds, showAllPosts, activeScrollTargetId]);
 
     const scrollTargetIndex = useMemo(() => {
         if (!activeScrollTargetId) {
@@ -283,13 +296,29 @@ const PostList = ({
         };
     }, [handleScrollToEndPress, location, serverUrl]);
 
+    // Reset progressive loading when the channel/thread changes so the list re-anchors
+    // on the last message. ONLY channelId and rootId - NOT posts.length!
+    useEffect(() => {
+        initialRenderTracked.current = false;
+        setShowAllPosts(false);
+
+        return () => {
+            if (viewableItemsDebounceTimer.current) {
+                clearTimeout(viewableItemsDebounceTimer.current);
+                viewableItemsDebounceTimer.current = null;
+            }
+        };
+    }, [channelId, rootId]);
+
     const onRefresh = useCallback(async () => {
         if (disablePullToRefresh) {
             return;
         }
         setRefreshing(true);
         if (location === Screens.CHANNEL && channelId) {
-            await fetchPosts(serverUrl, channelId);
+            // Blankness is measured from orderedPosts rather than posts so it accounts for
+            // hidden posts (replies with CRT on, join/leave messages)
+            await refreshPostsForChannel(serverUrl, channelId, orderedPosts.length === 0);
         } else if (location === Screens.THREAD && rootId) {
             const options: FetchPaginatedThreadOptions = {};
             const lastPost = posts[0];
@@ -306,7 +335,7 @@ const PostList = ({
         await Promise.all(removalPromises);
         setRefreshing(false);
         setLimit(EphemeralStore.serverHasLimit(serverUrl));
-    }, [disablePullToRefresh, location, channelId, rootId, posts, serverUrl]);
+    }, [disablePullToRefresh, location, channelId, rootId, posts, serverUrl, orderedPosts.length]);
 
     const scrollToIndex = useCallback((index: number, animated = true, applyOffset = true) => {
         if (index < 0 || !listRef?.current) {
@@ -369,7 +398,36 @@ const PostList = ({
         scrollToIndex(index);
     }, [activeScrollTargetId, channelId, location, scrollToHighlightedIndex, scrollToIndex]);
 
+    const trackInitialRenderMetrics = useCallback((viewableItems: ViewToken[]) => {
+        // Count posts that are viewable in viewport (excludes date separators, etc.)
+        const viewablePostCount = viewableItems.filter((viewToken) => {
+            const item = viewToken.item as PostListItem | PostListOtherItem;
+            return item.type === 'post' || item.type === 'user-activity';
+        }).length;
+
+        // Only expand when we actually have viewable posts
+        if (viewablePostCount > 0 || viewableItems.length === 0) {
+            initialRenderTracked.current = true;
+
+            // Progressive loading: the initial batch has rendered, load the remaining posts
+            if (!showAllPosts) {
+                setShowAllPosts(true);
+            }
+        }
+    }, [showAllPosts]);
+
     const onViewableItemsChanged = useCallback(({viewableItems}: ViewableItemsChanged) => {
+        // Debounce to wait for viewable items to stabilize (FlatList renders in batches)
+        if (!initialRenderTracked.current && viewableItems.length > 0) {
+            if (viewableItemsDebounceTimer.current) {
+                clearTimeout(viewableItemsDebounceTimer.current);
+            }
+
+            viewableItemsDebounceTimer.current = setTimeout(() => {
+                trackInitialRenderMetrics(viewableItems);
+            }, 250);
+        }
+
         if (!viewableItems.length) {
             return;
         }
@@ -386,7 +444,7 @@ const PostList = ({
         if (onViewableItemsChangedListener.current) {
             onViewableItemsChangedListener.current(viewableItems);
         }
-    }, [location]);
+    }, [location, trackInitialRenderMetrics]);
 
     function onCloseLimitView() {
         if (!limit) {
