@@ -10,6 +10,44 @@ import {logError} from '@utils/log';
 
 import availableLanguages from './languages';
 
+// Hermes (RN 0.83) only ships Intl.DateTimeFormat and Intl.NumberFormat.
+// react-intl plural and relative-time formatting need the two APIs below,
+// so hydrate their polyfills with the locale data of every supported
+// language. The guards keep this a no-op once Hermes ships them natively.
+if (!Intl.PluralRules) {
+    require('@formatjs/intl-pluralrules/polyfill');
+    require('@formatjs/intl-pluralrules/locale-data/da');
+    require('@formatjs/intl-pluralrules/locale-data/de');
+    require('@formatjs/intl-pluralrules/locale-data/el');
+    require('@formatjs/intl-pluralrules/locale-data/en');
+    require('@formatjs/intl-pluralrules/locale-data/es');
+    require('@formatjs/intl-pluralrules/locale-data/fi');
+    require('@formatjs/intl-pluralrules/locale-data/fr');
+    require('@formatjs/intl-pluralrules/locale-data/it');
+    require('@formatjs/intl-pluralrules/locale-data/nb');
+    require('@formatjs/intl-pluralrules/locale-data/nl');
+    require('@formatjs/intl-pluralrules/locale-data/pl');
+    require('@formatjs/intl-pluralrules/locale-data/pt');
+    require('@formatjs/intl-pluralrules/locale-data/sv');
+}
+
+if (!Intl.RelativeTimeFormat) {
+    require('@formatjs/intl-relativetimeformat/polyfill');
+    require('@formatjs/intl-relativetimeformat/locale-data/da');
+    require('@formatjs/intl-relativetimeformat/locale-data/de');
+    require('@formatjs/intl-relativetimeformat/locale-data/el');
+    require('@formatjs/intl-relativetimeformat/locale-data/en');
+    require('@formatjs/intl-relativetimeformat/locale-data/es');
+    require('@formatjs/intl-relativetimeformat/locale-data/fi');
+    require('@formatjs/intl-relativetimeformat/locale-data/fr');
+    require('@formatjs/intl-relativetimeformat/locale-data/it');
+    require('@formatjs/intl-relativetimeformat/locale-data/nb');
+    require('@formatjs/intl-relativetimeformat/locale-data/nl');
+    require('@formatjs/intl-relativetimeformat/locale-data/pl');
+    require('@formatjs/intl-relativetimeformat/locale-data/pt');
+    require('@formatjs/intl-relativetimeformat/locale-data/sv');
+}
+
 const PRIMARY_LOCALE = 'en';
 const deviceLocale = getLocales()[0]?.languageTag || PRIMARY_LOCALE;
 export const DEFAULT_LOCALE = getLocaleFromLanguage(deviceLocale);

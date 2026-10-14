@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@amplitude/analytics-react-native": "1.5.16",
+    "@formatjs/intl-pluralrules": "6.3.15",
+    "@formatjs/intl-relativetimeformat": "12.3.15",
     "@giphy/react-native-sdk": "6.0.3",
     "@gorhom/bottom-sheet": "5.2.13",
     "@gorhom/portal": "1.0.14",
