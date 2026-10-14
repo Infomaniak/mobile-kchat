@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 /* eslint-disable max-lines */
-import {DeviceEventEmitter} from 'react-native';
+import {DeviceEventEmitter, InteractionManager} from 'react-native';
 
 import {addChannelToDefaultCategory, handleConvertedGMCategories, storeCategories} from '@actions/local/category';
 import {markChannelAsViewed, removeCurrentUserFromChannel, setChannelDeleteAt, storeAllMyChannels, storeMyChannelsForTeam, switchToChannel} from '@actions/local/channel';
@@ -1197,16 +1197,25 @@ export async function switchToChannelById(serverUrl: string, channelId: string, 
 
         logDebug('[switchToChannelById] completed switch to', channelId, 'in', Date.now() - switchDt, 'ms');
         openChannelIfNeeded(serverUrl, channelId, groupLabel);
-        markChannelAsRead(serverUrl, channelId, false, groupLabel);
-        fetchChannelStats(serverUrl, channelId, false, groupLabel);
-        fetchGroupsForChannelIfConstrained(serverUrl, channelId, false);
+
+        // Post-switch fetches are not needed for the first rendered post: run
+        // them after the navigation animation so they don't compete with it.
+        InteractionManager.runAfterInteractions(() => {
+            markChannelAsRead(serverUrl, channelId, false, groupLabel);
+            fetchChannelStats(serverUrl, channelId, false, groupLabel);
+            fetchGroupsForChannelIfConstrained(serverUrl, channelId, false);
+            AppsManager.isAppsEnabled(serverUrl).then((appsEnabled) => {
+                if (appsEnabled) {
+                    AppsManager.fetchBindings(serverUrl, channelId, false, groupLabel);
+                }
+            }).catch((appsError) => {
+                logError('[switchToChannelById] Failed to check if apps are enabled:', appsError);
+                captureException(appsError as Error);
+            });
+        });
 
         clearTimeout(switchTimeout);
         switchTimeout = undefined;
-
-        if (await AppsManager.isAppsEnabled(serverUrl)) {
-            AppsManager.fetchBindings(serverUrl, channelId, false, groupLabel);
-        }
 
         return {};
     } catch (error) {
