@@ -11,6 +11,7 @@ import ViewReactNativeStyleAttributes from 'react-native/Libraries/Components/Vi
 
 import setFontFamily from './app/utils/font_family';
 import {logInfo} from './app/utils/log';
+import {wrapSentryRoot} from './app/utils/sentry';
 
 ViewReactNativeStyleAttributes.scaleY = true;
 
@@ -52,4 +53,4 @@ export function App() {
     return <ExpoRoot context={ctx}/>;
 }
 
-AppRegistry.registerComponent('kChat', () => App);
+AppRegistry.registerComponent('kChat', () => wrapSentryRoot(App));

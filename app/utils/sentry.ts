@@ -15,6 +15,7 @@ import {logDebug, logError, logWarning} from './log';
 
 import type {Database} from '@nozbe/watermelondb';
 import type {Breadcrumb, Span} from '@sentry/types';
+import type {ComponentType} from 'react';
 
 export const BREADCRUMB_UNCAUGHT_APP_ERROR = 'uncaught-app-error';
 export const BREADCRUMB_UNCAUGHT_NON_ERROR = 'uncaught-non-error';
@@ -30,6 +31,20 @@ let channelSwitchSpan: Span | undefined;
 let channelSwitchSpanChannelId = '';
 let channelSwitchSpanStartedAt = 0;
 let sentryReady = false;
+
+// The app root must be wrapped for Sentry to create the app-start transaction
+// that carries auto-instrumented spans (app start, HTTP client) and standalone
+// spans such as mobile.channel_switch. The Expo Router refactor dropped the
+// wrap from the root registration, silencing all performance data on 1.1.0.
+export function wrapSentryRoot<P>(Component: ComponentType<P>): ComponentType<P> {
+    if (!Config.SentryEnabled) {
+        return Component;
+    }
+
+    Sentry = Sentry || require('@sentry/react-native');
+
+    return Sentry.wrap(Component);
+}
 
 export function initializeSentry() {
     sentryReady = false;

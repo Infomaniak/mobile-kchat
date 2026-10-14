@@ -13,7 +13,7 @@ import {getConfig} from '@queries/servers/system';
 import {getCurrentUser} from '@queries/servers/user';
 
 import * as log from './log';
-import {initializeSentry, captureException, captureJSException, addSentryContext, startChannelSwitchSpan, endChannelSwitchSpan} from './sentry';
+import {initializeSentry, captureException, captureJSException, addSentryContext, startChannelSwitchSpan, endChannelSwitchSpan, wrapSentryRoot} from './sentry';
 
 // Mocks
 jest.mock('@sentry/react-native', () => ({
@@ -23,6 +23,7 @@ jest.mock('@sentry/react-native', () => ({
     addBreadcrumb: jest.fn(),
     setContext: jest.fn(),
     setTag: jest.fn(),
+    wrap: jest.fn((component) => component),
     ReactNativeTracing: jest.fn(),
     reactNativeNavigationIntegration: jest.fn().mockImplementation(() => ({
         name: 'reactNativeNavigation',
@@ -442,5 +443,26 @@ describe('channel switch span', () => {
         startChannelSwitchSpan('channel-id-1');
 
         expect(Sentry.startInactiveSpan).not.toHaveBeenCalled();
+    });
+});
+
+describe('wrapSentryRoot', () => {
+    it('should wrap the root component when Sentry is enabled', () => {
+        Config.SentryEnabled = true;
+        const MockComponent = () => null;
+
+        wrapSentryRoot(MockComponent);
+
+        expect(Sentry.wrap).toHaveBeenCalledWith(MockComponent);
+    });
+
+    it('should return the component unchanged when Sentry is disabled', () => {
+        Config.SentryEnabled = false;
+        const MockComponent = () => null;
+
+        const result = wrapSentryRoot(MockComponent);
+
+        expect(Sentry.wrap).not.toHaveBeenCalledWith(MockComponent);
+        expect(result).toBe(MockComponent);
     });
 });
