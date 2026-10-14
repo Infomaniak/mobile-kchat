@@ -12,8 +12,6 @@ import ViewReactNativeStyleAttributes from 'react-native/Libraries/Components/Vi
 import setFontFamily from './app/utils/font_family';
 import {logInfo} from './app/utils/log';
 
-declare const global: { HermesInternal: null | {} };
-
 ViewReactNativeStyleAttributes.scaleY = true;
 
 TurboLogger.configure({
@@ -33,18 +31,6 @@ if (__DEV__) {
 }
 
 setFontFamily();
-
-if (global.HermesInternal) {
-    require('@formatjs/intl-getcanonicallocales/polyfill-force');
-    require('@formatjs/intl-locale/polyfill-force');
-    require('@formatjs/intl-pluralrules/polyfill-force');
-    require('@formatjs/intl-numberformat/polyfill-force');
-    require('@formatjs/intl-datetimeformat/polyfill-force');
-    require('@formatjs/intl-datetimeformat/add-all-tz');
-    require('@formatjs/intl-listformat/polyfill-force');
-    require('@formatjs/intl-relativetimeformat/polyfill-force');
-    require('@formatjs/intl-displaynames/polyfill-force');
-}
 
 if (Platform.OS === 'android') {
     const ShareExtension = require('./share_extension/index.tsx').default;

@@ -20,98 +20,42 @@ function loadTranslation(locale?: string): {[x: string]: string} {
 
         switch (locale) {
             case 'de':
-                require('@formatjs/intl-pluralrules/locale-data/de');
-                require('@formatjs/intl-numberformat/locale-data/de');
-                require('@formatjs/intl-datetimeformat/locale-data/de');
-                require('@formatjs/intl-relativetimeformat/locale-data/de');
-
                 translations = require('@assets/i18n/de.json');
                 break;
             case 'es':
-                require('@formatjs/intl-pluralrules/locale-data/es');
-                require('@formatjs/intl-numberformat/locale-data/es');
-                require('@formatjs/intl-datetimeformat/locale-data/es');
-                require('@formatjs/intl-datetimeformat/locale-data/es');
-
                 translations = require('@assets/i18n/es.json');
                 break;
             case 'fr':
-                require('@formatjs/intl-pluralrules/locale-data/fr');
-                require('@formatjs/intl-numberformat/locale-data/fr');
-                require('@formatjs/intl-datetimeformat/locale-data/fr');
-                require('@formatjs/intl-relativetimeformat/locale-data/fr');
-
                 translations = require('@assets/i18n/fr.json');
                 break;
             case 'it':
-                require('@formatjs/intl-pluralrules/locale-data/it');
-                require('@formatjs/intl-numberformat/locale-data/it');
-                require('@formatjs/intl-datetimeformat/locale-data/it');
-                require('@formatjs/intl-relativetimeformat/locale-data/it');
-
                 translations = require('@assets/i18n/it.json');
                 break;
             case 'nb':
-                require('@formatjs/intl-pluralrules/locale-data/nb');
-                require('@formatjs/intl-numberformat/locale-data/nb');
-                require('@formatjs/intl-datetimeformat/locale-data/nb');
-
                 translations = require('@assets/i18n/nb.json');
                 break;
             case 'sv':
-                require('@formatjs/intl-pluralrules/locale-data/sv');
-                require('@formatjs/intl-numberformat/locale-data/sv');
-                require('@formatjs/intl-datetimeformat/locale-data/sv');
-
                 translations = require('@assets/i18n/sv.json');
                 break;
             case 'el':
-                require('@formatjs/intl-pluralrules/locale-data/el');
-                require('@formatjs/intl-numberformat/locale-data/el');
-                require('@formatjs/intl-datetimeformat/locale-data/el');
-
                 translations = require('@assets/i18n/el.json');
                 break;
             case 'da':
-                require('@formatjs/intl-pluralrules/locale-data/da');
-                require('@formatjs/intl-numberformat/locale-data/da');
-                require('@formatjs/intl-datetimeformat/locale-data/da');
-
                 translations = require('@assets/i18n/da.json');
                 break;
             case 'fi':
-                require('@formatjs/intl-pluralrules/locale-data/fi');
-                require('@formatjs/intl-numberformat/locale-data/fi');
-                require('@formatjs/intl-datetimeformat/locale-data/fi');
-
                 translations = require('@assets/i18n/fi.json');
                 break;
             case 'pt':
-                require('@formatjs/intl-pluralrules/locale-data/pt');
-                require('@formatjs/intl-numberformat/locale-data/pt');
-                require('@formatjs/intl-datetimeformat/locale-data/pt');
-                require('@formatjs/intl-relativetimeformat/locale-data/pt');
-
                 translations = require('@assets/i18n/pt.json');
                 break;
             case 'nl':
-                require('@formatjs/intl-pluralrules/locale-data/nl');
-                require('@formatjs/intl-numberformat/locale-data/nl');
-                require('@formatjs/intl-datetimeformat/locale-data/nl');
-
                 translations = require('@assets/i18n/nl.json');
                 break;
             case 'pl':
-                require('@formatjs/intl-pluralrules/locale-data/pl');
-                require('@formatjs/intl-numberformat/locale-data/pl');
-                require('@formatjs/intl-datetimeformat/locale-data/pl');
-
                 translations = require('@assets/i18n/pl.json');
                 break;
             default:
-                require('@formatjs/intl-pluralrules/locale-data/en');
-                require('@formatjs/intl-numberformat/locale-data/en');
-                require('@formatjs/intl-datetimeformat/locale-data/en');
 
                 translations = en;
                 break;
