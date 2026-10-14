@@ -6,11 +6,11 @@ import {z} from 'zod';
 
 import {fetchChannelMemberships} from '@actions/remote/channel';
 import {handleConferenceDeletedById} from '@actions/websocket/conference';
-import {callScreenRef} from '@calls/screens/call_screen/call_screen';
 import ClientError from '@client/rest/error';
 import {General} from '@constants';
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
+import {callScreenRef} from '@store/call_screen_ref';
 import {isDMorGM as isChannelDMorGM} from '@utils/channel';
 import {logError} from '@utils/log';
 

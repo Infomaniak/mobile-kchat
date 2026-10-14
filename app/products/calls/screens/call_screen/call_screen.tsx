@@ -25,6 +25,7 @@ import {useCollapsibleHeader} from '@hooks/header';
 import {useMountedRef, useRerender, useTransientRef} from '@hooks/utils';
 import {getCommonSystemValues} from '@queries/servers/system';
 import {navigateBack} from '@screens/navigation';
+import {callScreenRef} from '@store/call_screen_ref';
 import CallManager from '@store/CallManager';
 import {NavigationStore} from '@store/navigation_store';
 import {isDMorGM as isChannelDMorGM} from '@utils/channel';
@@ -63,8 +64,6 @@ export type CallScreenHandle = {
     toggleAudioMuted: (isMuted?: boolean) => void;
     toggleVideoMuted: (isMuted?: boolean) => void;
 };
-
-export const callScreenRef = React.createRef<CallScreenHandle>();
 
 type Props = PassedProps & InjectedProps
 
