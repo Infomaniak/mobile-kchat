@@ -14,6 +14,7 @@ import {useIsTablet} from '@hooks/device';
 import {useTeamSwitch} from '@hooks/team_switch';
 import {usePreventDoubleTap} from '@hooks/utils';
 import PerformanceMetricsManager from '@managers/performance_metrics_manager';
+import {startChannelSwitchSpan} from '@utils/sentry';
 
 import CategoryBody from './body';
 import LoadCategoriesError from './error';
@@ -89,6 +90,7 @@ const Categories = ({
     const onChannelSwitch = usePreventDoubleTap(useCallback((c: Channel | ChannelModel) => {
         DeviceEventEmitter.emit(Events.ACTIVE_SCREEN, CHANNEL);
         PerformanceMetricsManager.startMetric('mobile_channel_switch');
+        startChannelSwitchSpan(c.id);
         switchToChannelById(serverUrl, c.id);
     }, [serverUrl]));
 

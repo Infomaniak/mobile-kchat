@@ -13,12 +13,13 @@ import {getConfig} from '@queries/servers/system';
 import {getCurrentUser} from '@queries/servers/user';
 
 import * as log from './log';
-import {initializeSentry, captureException, captureJSException, addSentryContext} from './sentry';
+import {initializeSentry, captureException, captureJSException, addSentryContext, startChannelSwitchSpan, endChannelSwitchSpan} from './sentry';
 
 // Mocks
 jest.mock('@sentry/react-native', () => ({
     init: jest.fn(),
     captureException: jest.fn(),
+    startInactiveSpan: jest.fn(),
     addBreadcrumb: jest.fn(),
     setContext: jest.fn(),
     setTag: jest.fn(),
@@ -43,6 +44,7 @@ jest.mock('@assets/config.json', () => ({
 }));
 
 jest.mock('./log', () => ({
+    logDebug: jest.fn(),
     logWarning: jest.fn(),
     logError: jest.fn(),
 }));
@@ -343,5 +345,102 @@ describe('addSentryContext function', () => {
 
         expect(log.logError).toHaveBeenCalledWith('addSentryContext for serverUrl https://example.com', expect.any(Error));
         expect(Sentry.setContext).not.toHaveBeenCalled();
+    });
+});
+
+describe('channel switch span', () => {
+    let mockSpan: {end: jest.Mock; setAttribute: jest.Mock};
+
+    beforeEach(() => {
+        Config.SentryEnabled = true;
+        Config.SentryDsnAndroid = 'YOUR_ANDROID_DSN_HERE';
+        Config.SentryDsnIos = 'YOUR_IOS_DSN_HERE';
+        mockSpan = {end: jest.fn(), setAttribute: jest.fn()};
+        (Sentry.startInactiveSpan as jest.Mock).mockReturnValue(mockSpan);
+        initializeSentry();
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('should start an inactive span with the channel switch operation', () => {
+        startChannelSwitchSpan('channel-id-1');
+
+        expect(Sentry.startInactiveSpan).toHaveBeenCalledWith({
+            name: 'channel_switch',
+            op: 'mobile.channel_switch',
+            attributes: {'kchat.channel_id': 'channel-id-1'},
+        });
+        endChannelSwitchSpan('channel-id-1');
+    });
+
+    it('should end the started span', () => {
+        startChannelSwitchSpan('channel-id-1');
+        endChannelSwitchSpan('channel-id-1');
+
+        expect(mockSpan.end).toHaveBeenCalledTimes(1);
+    });
+
+    it('should ignore an end from another channel', () => {
+        startChannelSwitchSpan('channel-id-1');
+        endChannelSwitchSpan('channel-id-2');
+
+        expect(mockSpan.end).not.toHaveBeenCalled();
+        endChannelSwitchSpan('channel-id-1');
+    });
+
+    it('should not start a second span while one is still in flight', () => {
+        startChannelSwitchSpan('channel-id-1');
+        startChannelSwitchSpan('channel-id-2');
+
+        expect(Sentry.startInactiveSpan).toHaveBeenCalledTimes(1);
+        endChannelSwitchSpan('channel-id-1');
+    });
+
+    it('should abandon a span in flight past the staleness limit', () => {
+        jest.useFakeTimers({doNotFake: ['nextTick']});
+        try {
+            startChannelSwitchSpan('channel-id-1');
+            jest.advanceTimersByTime(31_000);
+            startChannelSwitchSpan('channel-id-2');
+
+            expect(mockSpan.end).toHaveBeenCalledTimes(1);
+            expect(mockSpan.setAttribute).toHaveBeenCalledWith('kchat.channel_switch.abandoned', true);
+            expect(Sentry.startInactiveSpan).toHaveBeenCalledTimes(2);
+            expect(Sentry.startInactiveSpan).toHaveBeenLastCalledWith({
+                name: 'channel_switch',
+                op: 'mobile.channel_switch',
+                attributes: {'kchat.channel_id': 'channel-id-2'},
+            });
+        } finally {
+            jest.useRealTimers();
+            endChannelSwitchSpan('channel-id-2');
+        }
+    });
+
+    it('should be a no-op when ending without a started span', () => {
+        endChannelSwitchSpan('channel-id-1');
+
+        expect(mockSpan.end).not.toHaveBeenCalled();
+    });
+
+    it('should not start a span when Sentry is disabled', () => {
+        Config.SentryEnabled = false;
+        initializeSentry();
+
+        startChannelSwitchSpan('channel-id-1');
+
+        expect(Sentry.startInactiveSpan).not.toHaveBeenCalled();
+    });
+
+    it('should not start spans when Sentry has no DSN', () => {
+        Config.SentryDsnAndroid = '';
+        Config.SentryDsnIos = '';
+        initializeSentry();
+
+        startChannelSwitchSpan('channel-id-1');
+
+        expect(Sentry.startInactiveSpan).not.toHaveBeenCalled();
     });
 });

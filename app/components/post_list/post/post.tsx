@@ -38,6 +38,7 @@ import {
     isPostPendingOrFailed,
     isSystemMessage,
 } from '@utils/post';
+import {endChannelSwitchSpan} from '@utils/sentry';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {isBot} from '@utils/user';
 
@@ -318,6 +319,7 @@ const Post = ({
 
         PerformanceMetricsManager.finishLoad(location === 'thread' ? 'THREAD' : 'CHANNEL', serverUrl);
         PerformanceMetricsManager.endMetric('mobile_channel_switch', serverUrl);
+        endChannelSwitchSpan(post.channelId);
     });
 
     const onLayout = useCallback((e: LayoutChangeEvent) => {

@@ -11,16 +11,28 @@ import {getConfig} from '@queries/servers/system';
 import {getCurrentUser} from '@queries/servers/user';
 import {getFullErrorMessage} from '@utils/errors';
 
-import {logError, logWarning} from './log';
+import {logDebug, logError, logWarning} from './log';
 
 import type {Database} from '@nozbe/watermelondb';
-import type {Breadcrumb} from '@sentry/types';
+import type {Breadcrumb, Span} from '@sentry/types';
 
 export const BREADCRUMB_UNCAUGHT_APP_ERROR = 'uncaught-app-error';
 export const BREADCRUMB_UNCAUGHT_NON_ERROR = 'uncaught-non-error';
 
 let Sentry: any;
+
+const CHANNEL_SWITCH_SPAN_OP = 'mobile.channel_switch';
+
+// A channel open outliving this limit missed its end hook (empty channel,
+// interrupted navigation): the span is abandoned at the next switch.
+const MAX_CHANNEL_SWITCH_SPAN_MS = 30_000;
+let channelSwitchSpan: Span | undefined;
+let channelSwitchSpanChannelId = '';
+let channelSwitchSpanStartedAt = 0;
+let sentryReady = false;
+
 export function initializeSentry() {
+    sentryReady = false;
     if (!Config.SentryEnabled) {
         return;
     }
@@ -53,6 +65,7 @@ export function initializeSentry() {
         ...sentryOptions,
         enableCaptureFailedRequests: false,
     });
+    sentryReady = true;
 
     const installSource = DeviceInfo.getInstallerPackageNameSync();
     Sentry.setTag('install_source', installSource?.toLowerCase() ?? 'other');
@@ -230,3 +243,45 @@ export const addSentryContext = async (serverUrl: string) => {
         logError(`addSentryContext for serverUrl ${serverUrl}`, e);
     }
 };
+
+export function startChannelSwitchSpan(channelId: string) {
+    if (!sentryReady) {
+        return;
+    }
+
+    // A new tap before the previous channel rendered would truncate its span:
+    // skip this measurement instead of corrupting the previous one.
+    if (channelSwitchSpan) {
+        if (Date.now() - channelSwitchSpanStartedAt < MAX_CHANNEL_SWITCH_SPAN_MS) {
+            logDebug('startChannelSwitchSpan skipped: previous channel switch span still in flight');
+            return;
+        }
+
+        channelSwitchSpan.setAttribute('kchat.channel_switch.abandoned', true);
+        channelSwitchSpan.end();
+        channelSwitchSpan = undefined;
+    }
+
+    channelSwitchSpan = Sentry.startInactiveSpan({
+        name: 'channel_switch',
+        op: CHANNEL_SWITCH_SPAN_OP,
+        attributes: {'kchat.channel_id': channelId},
+    });
+    channelSwitchSpanChannelId = channelId;
+    channelSwitchSpanStartedAt = Date.now();
+}
+
+export function endChannelSwitchSpan(channelId: string) {
+    if (!channelSwitchSpan) {
+        return;
+    }
+
+    if (channelSwitchSpanChannelId !== channelId) {
+        logDebug(`endChannelSwitchSpan ignored for ${channelId}: span belongs to ${channelSwitchSpanChannelId}`);
+        return;
+    }
+
+    const span = channelSwitchSpan;
+    channelSwitchSpan = undefined;
+    span.end();
+}
