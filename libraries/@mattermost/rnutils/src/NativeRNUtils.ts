@@ -41,6 +41,15 @@ export type WindowDimensionsChanged = Readonly<{
   height: Double;
 }>
 
+export type AvatarOptions = Readonly<{
+  uri?: string;
+  headers?: UnsafeObject;
+  size: Double;
+  initials: string;
+  backgroundColor: string;
+  ringColor?: string;
+}>
+
 type HasRegisteredLoadResponse = {
   hasRegisteredLoad: boolean;
 }
@@ -75,6 +84,8 @@ export interface Spec extends TurboModule {
     setSoftKeyboardToAdjustNothing(): void;
 
     createZipFile: (paths: string[]) => Promise<string>;
+
+    renderTabAvatar: (options: AvatarOptions) => Promise<string>;
 
     // Android only
     setNavigationBarColor: (color: string, lightIcons: boolean) => void;

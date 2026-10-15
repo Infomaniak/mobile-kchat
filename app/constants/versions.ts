@@ -9,3 +9,5 @@ export const OS_VERSION = {
 };
 
 export const ANDROID_33 = 33;
+
+export const IOS_26 = 26;

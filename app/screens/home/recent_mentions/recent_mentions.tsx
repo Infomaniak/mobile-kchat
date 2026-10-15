@@ -17,6 +17,7 @@ import {Events, Screens} from '@constants';
 import {ExtraKeyboardProvider} from '@context/extra_keyboard';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import useBottomContentInset from '@hooks/bottom_content_inset';
 import {useCollapsibleHeader} from '@hooks/header';
 import {getDateForDateLine, selectOrderedPosts} from '@utils/post_list';
 import {makeStyleSheetFromTheme} from '@utils/theme';
@@ -88,6 +89,7 @@ const RecentMentionsScreen = ({appsEnabled, customEmojiNames, mentions, currentT
     }, [serverUrl, isFocused]);
 
     const {scrollPaddingTop, scrollRef, scrollValue, onScroll, headerHeight} = useCollapsibleHeader<Animated.FlatList<string>>(true, onSnap);
+    const contentInset = useBottomContentInset();
     const paddingTop = useMemo(() => ({paddingTop: scrollPaddingTop, flexGrow: 1}), [scrollPaddingTop]);
     const posts = useMemo(() => selectOrderedPosts(mentions, 0, false, '', '', false, currentTimezone, false).reverse(), [currentTimezone, mentions]);
 
@@ -186,6 +188,7 @@ const RecentMentionsScreen = ({appsEnabled, customEmojiNames, mentions, currentT
                         <Animated.FlatList
                             ref={scrollRef}
                             contentContainerStyle={paddingTop}
+                            contentInset={contentInset}
                             ListEmptyComponent={renderEmptyList()}
                             data={posts}
                             scrollToOverflowEnabled={true}

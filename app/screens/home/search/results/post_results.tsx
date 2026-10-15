@@ -31,6 +31,7 @@ const getStyles = makeStyleSheetFromTheme((theme: Theme) => ({
 
 type Props = {
     appsEnabled: boolean;
+    contentInset?: {bottom: number};
     customEmojiNames: string[];
     currentTimezone: string;
     posts: PostModel[];
@@ -41,6 +42,7 @@ type Props = {
 
 const PostResults = ({
     appsEnabled,
+    contentInset,
     currentTimezone,
     customEmojiNames,
     posts,
@@ -127,6 +129,7 @@ const PostResults = ({
                 }
                 ListEmptyComponent={noResults}
                 contentContainerStyle={containerStyle}
+                contentInset={contentInset}
                 data={orderedPosts}
                 indicatorStyle='black'
                 initialNumToRender={5}

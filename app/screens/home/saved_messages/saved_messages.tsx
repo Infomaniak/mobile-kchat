@@ -19,6 +19,7 @@ import {Events, Screens} from '@constants';
 import {ExtraKeyboardProvider} from '@context/extra_keyboard';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import useBottomContentInset from '@hooks/bottom_content_inset';
 import {useCollapsibleHeader} from '@hooks/header';
 import {getDateForDateLine, selectOrderedPosts} from '@utils/post_list';
 import {makeStyleSheetFromTheme} from '@utils/theme';
@@ -92,6 +93,7 @@ function SavedMessages({appsEnabled, posts, currentTimezone, customEmojiNames}: 
     }, [serverUrl, isFocused]);
 
     const {scrollPaddingTop, scrollRef, scrollValue, onScroll, headerHeight} = useCollapsibleHeader<Animated.FlatList<string>>(true, onSnap);
+    const contentInset = useBottomContentInset();
     const paddingTop = useMemo(() => ({paddingTop: scrollPaddingTop, flexGrow: 1}), [scrollPaddingTop]);
     const data = useMemo(() => selectOrderedPosts(posts, 0, false, '', '', false, currentTimezone, false).reverse(), [currentTimezone, posts]);
 
@@ -192,6 +194,7 @@ function SavedMessages({appsEnabled, posts, currentTimezone, customEmojiNames}: 
                         <Animated.FlatList
                             ref={scrollRef}
                             contentContainerStyle={paddingTop}
+                            contentInset={contentInset}
                             ListEmptyComponent={emptyList}
                             data={data}
                             onRefresh={handleRefresh}

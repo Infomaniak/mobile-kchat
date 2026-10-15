@@ -22,6 +22,7 @@ import {ALL_TEAMS_ID} from '@constants/team';
 import {BOTTOM_TAB_HEIGHT} from '@constants/view';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
+import useBottomContentInset from '@hooks/bottom_content_inset';
 import {useKeyboardHeight} from '@hooks/device';
 import useDidUpdate from '@hooks/did_update';
 import {useCollapsibleHeader} from '@hooks/header';
@@ -166,6 +167,7 @@ const SearchScreen = ({teamId, teams, crossTeamSearchEnabled}: Props) => {
         setAutoScroll,
         unlock,
     } = useCollapsibleHeader<FlatList>(true, onSnap);
+    const contentInset = useBottomContentInset();
 
     const resetToInitial = useCallback(() => {
         setShowResults(false);
@@ -458,6 +460,7 @@ const SearchScreen = ({teamId, teams, crossTeamSearchEnabled}: Props) => {
                             onLayout={onFlatLayout}
                             data={dummyData}
                             contentContainerStyle={initialContainerStyle}
+                            contentInset={contentInset}
                             keyboardShouldPersistTaps='handled'
                             keyboardDismissMode={'interactive'}
                             nestedScrollEnabled={true}
@@ -480,6 +483,7 @@ const SearchScreen = ({teamId, teams, crossTeamSearchEnabled}: Props) => {
                             matches={matches}
                             fileInfos={fileInfos}
                             scrollPaddingTop={lockValue}
+                            contentInset={contentInset}
                             fileChannelIds={fileChannelIds}
                         />
                         }

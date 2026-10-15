@@ -4,10 +4,12 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {DeviceEventEmitter, FlatList, StyleSheet, View} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {switchToChannelById} from '@actions/remote/channel';
 import Loading from '@components/loading';
 import {Events} from '@constants';
+import {supportsNativeTabs} from '@constants/device';
 import {CHANNEL} from '@constants/screens';
 import {useServerUrl} from '@context/server';
 import {useIsTablet} from '@hooks/device';
@@ -67,9 +69,11 @@ const Categories = ({
     const listRef = useRef<FlatList>(null);
     const serverUrl = useServerUrl();
     const isTablet = useIsTablet();
+    const {bottom: bottomInset} = useSafeAreaInsets();
     const switchingTeam = useTeamSwitch();
     const teamId = categories[0]?.teamId;
     const showOnlyUnreadsCategory = onlyUnreads && !unreadsOnTop;
+    const contentInset = supportsNativeTabs ? {bottom: bottomInset} : undefined;
 
     const categoriesToShow = useMemo(() => {
         if (showOnlyUnreadsCategory) {
@@ -173,6 +177,7 @@ const Categories = ({
                     keyExtractor={extractKey}
                     initialNumToRender={INITIAL_CATEGORIES_TO_RENDER}
                     windowSize={CATEGORY_LIST_WINDOW_SIZE}
+                    contentInset={contentInset}
 
                     // @ts-expect-error strictMode not included in the types
                     strictMode={true}

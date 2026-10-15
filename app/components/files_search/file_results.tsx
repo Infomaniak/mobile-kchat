@@ -40,6 +40,7 @@ const getStyles = makeStyleSheetFromTheme((theme: Theme) => ({
 
 type Props = {
     canDownloadFiles: boolean;
+    contentInset?: {bottom: number};
     enableSecureFilePreview: boolean;
     fileChannels: ChannelModel[];
     fileInfos: FileInfo[];
@@ -57,6 +58,7 @@ const Separator = () => <View style={separatorStyle}/>;
 
 const FileResults = ({
     canDownloadFiles,
+    contentInset,
     enableSecureFilePreview,
     fileChannels,
     fileInfos,
@@ -167,6 +169,7 @@ const FileResults = ({
                 ItemSeparatorComponent={Separator}
                 ListEmptyComponent={noResults}
                 contentContainerStyle={containerStyle}
+                contentInset={contentInset}
                 data={orderedFileInfos}
                 indicatorStyle='black'
                 initialNumToRender={10}

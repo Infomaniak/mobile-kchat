@@ -14,6 +14,11 @@ using namespace JS::NativeRNUtils;
 #endif
 
 @interface RNUtils() <RNUtilsDelegate>
++ (UIImage *)circularImageFromImage:(UIImage *)image size:(CGFloat)size ringColor:(NSString *)ringColor;
++ (UIImage *)initialsAvatarWithSize:(CGFloat)size initials:(NSString *)initials backgroundColor:(NSString *)backgroundColor ringColor:(NSString *)ringColor;
++ (UIColor *)colorFromHex:(NSString *)hex;
++ (NSString *)base64UriFromImage:(UIImage *)image;
+- (void)renderTabAvatarWithOptions:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 @end
 
 @implementation RNUtils {
@@ -137,6 +142,12 @@ RCT_EXPORT_METHOD(createZipFile:(NSArray<NSString *> *)paths
     [self createZipFile:paths resolve:resolve reject:reject];
 }
 
+RCT_EXPORT_METHOD(renderTabAvatar:(NSDictionary *)options
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject) {
+    [self renderTabAvatarWithOptions:options resolve:resolve reject:reject];
+}
+
 // Don't compile this code when we build for the old architecture.
 #ifdef RCT_NEW_ARCH_ENABLED
 - (std::shared_ptr<TurboModule>)getTurboModule:
@@ -248,11 +259,169 @@ RCT_EXPORT_METHOD(createZipFile:(NSArray<NSString *> *)paths
     // Do nothing as it does not apply to iOS
 }
 
+// Codegen dispatch (turbo module): the generated spec calls this exact selector.
+#ifdef RCT_NEW_ARCH_ENABLED
+- (void)renderTabAvatar:(JS::NativeRNUtils::AvatarOptions &)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [self renderTabAvatarWithOptions:@{
+        @"uri": options.uri() ?: @"",
+        @"headers": options.headers() ?: @{},
+        @"size": @(options.size()),
+        @"initials": options.initials() ?: @"",
+        @"backgroundColor": options.backgroundColor() ?: @"",
+        @"ringColor": options.ringColor() ?: @"",
+    } resolve:resolve reject:reject];
+}
+#endif
+
+- (void)renderTabAvatarWithOptions:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    CGFloat size = [options[@"size"] doubleValue] ?: 28.0;
+    NSString *initials = options[@"initials"];
+    NSString *backgroundColor = options[@"backgroundColor"];
+    NSString *ringColor = options[@"ringColor"];
+    NSString *uri = options[@"uri"];
+    NSDictionary<NSString *, NSString *> *headers = options[@"headers"];
+
+    NSURL *url = [NSURL URLWithString:uri];
+    if (url == nil) {
+        UIImage *image = [RNUtils initialsAvatarWithSize:size initials:initials backgroundColor:backgroundColor ringColor:ringColor];
+        resolve([RNUtils base64UriFromImage:image]);
+        return;
+    }
+
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    for (NSString *key in headers) {
+        NSString *value = headers[key];
+        if (value != nil) {
+            [request addValue:value forHTTPHeaderField:key];
+        }
+    }
+    request.timeoutInterval = 10.0;
+
+    NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        UIImage *avatar = nil;
+        if (data.length > 0 && !error) {
+            avatar = [RNUtils circularImageFromImage:[UIImage imageWithData:data] size:size ringColor:ringColor];
+        }
+
+        if (avatar == nil) {
+            NSLog(@"[RNUtils] tab avatar download failed (%@), rendering initials fallback", error.localizedDescription);
+            avatar = [RNUtils initialsAvatarWithSize:size initials:initials backgroundColor:backgroundColor ringColor:ringColor];
+        }
+
+        NSString *result = [RNUtils base64UriFromImage:avatar];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            resolve(result);
+        });
+    }];
+    [task resume];
+}
+
 #pragma helpers
 -(void)getNotifications:(RCTPromiseResolveBlock)resolve {
     [[NotificationManager shared] getDeliveredNotificationsWithCompletionHandler:^(NSArray<NSDictionary *> * _Nonnull notifications) {
         resolve(notifications);
     }];
+}
+
+#pragma mark - Tab avatar helpers
+
++ (UIImage *)circularImageFromImage:(UIImage *)image size:(CGFloat)size ringColor:(NSString *)ringColor {
+    if (image == nil || size <= 0) {
+        return nil;
+    }
+
+    CGFloat ring = ringColor.length > 0 ? 2.0 : 0.0;
+    UIGraphicsImageRendererFormat *format = [[UIGraphicsImageRendererFormat alloc] init];
+    format.scale = [UIScreen mainScreen].scale;
+    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(size, size) format:format];
+
+    return [renderer imageWithActions:^(UIGraphicsImageRendererContext *context) {
+        // The photo fills the whole canvas, the ring is stroked over its
+        // outer edge, matching the kDrive tab bar profile icon.
+        [[UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, size, size)] addClip];
+
+        CGFloat scale = MAX(size / image.size.width, size / image.size.height);
+        CGSize scaled = CGSizeMake(image.size.width * scale, image.size.height * scale);
+        CGRect drawRect = CGRectMake((size - scaled.width) / 2.0, (size - scaled.height) / 2.0, scaled.width, scaled.height);
+        [image drawInRect:drawRect];
+
+        if (ring > 0) {
+            UIBezierPath *ringPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(ring / 2.0, ring / 2.0, size - ring, size - ring)];
+            ringPath.lineWidth = ring;
+            [[RNUtils colorFromHex:ringColor] setStroke];
+            [ringPath stroke];
+        }
+    }];
+}
+
++ (UIImage *)initialsAvatarWithSize:(CGFloat)size initials:(NSString *)initials backgroundColor:(NSString *)backgroundColor ringColor:(NSString *)ringColor {
+    if (size <= 0) {
+        return nil;
+    }
+
+    CGFloat ring = ringColor.length > 0 ? 2.0 : 0.0;
+    UIColor *background = backgroundColor.length ? [RNUtils colorFromHex:backgroundColor] : [UIColor lightGrayColor];
+    UIGraphicsImageRendererFormat *format = [[UIGraphicsImageRendererFormat alloc] init];
+    format.scale = [UIScreen mainScreen].scale;
+    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(size, size) format:format];
+
+    return [renderer imageWithActions:^(UIGraphicsImageRendererContext *context) {
+        [[UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, size, size)] addClip];
+        CGRect rect = CGRectMake(0, 0, size, size);
+        [background setFill];
+        [[UIBezierPath bezierPathWithOvalInRect:rect] fill];
+
+        UIFont *font = [UIFont fontWithName:@"Metropolis-SemiBold" size:size * 0.4];
+        if (font == nil) {
+            font = [UIFont systemFontOfSize:size * 0.4 weight:UIFontWeightSemibold];
+        }
+
+        NSDictionary *attributes = @{
+            NSFontAttributeName: font,
+            NSForegroundColorAttributeName: UIColor.whiteColor,
+        };
+
+        NSString *text = initials.length ? [initials uppercaseString] : @"";
+        CGSize textSize = [text sizeWithAttributes:attributes];
+        CGRect textRect = CGRectMake(0, (size - textSize.height) / 2.0, size, textSize.height);
+        [text drawInRect:textRect withAttributes:attributes];
+
+        if (ring > 0) {
+            UIBezierPath *ringPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(ring / 2.0, ring / 2.0, size - ring, size - ring)];
+            ringPath.lineWidth = ring;
+            [[RNUtils colorFromHex:ringColor] setStroke];
+            [ringPath stroke];
+        }
+    }];
+}
+
++ (UIColor *)colorFromHex:(NSString *)hex {
+    NSString *clean = [[hex stringByReplacingOccurrencesOfString:@"#" withString:@""] uppercaseString];
+    if (clean.length < 6) {
+        return [UIColor lightGrayColor];
+    }
+
+    NSScanner *scanner = [NSScanner scannerWithString:clean];
+    unsigned int value = 0;
+    [scanner scanHexInt:&value];
+
+    CGFloat red = ((value >> 16) & 0xFF) / 255.0;
+    CGFloat green = ((value >> 8) & 0xFF) / 255.0;
+    CGFloat blue = (value & 0xFF) / 255.0;
+    return [UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+}
+
++ (NSString *)base64UriFromImage:(UIImage *)image {
+    if (image == nil) {
+        return nil;
+    }
+
+    NSData *data = UIImagePNGRepresentation(image);
+    if (data == nil) {
+        return nil;
+    }
+
+    return [NSString stringWithFormat:@"data:image/png;base64,%@", [data base64EncodedStringWithOptions:0]];
 }
 
 

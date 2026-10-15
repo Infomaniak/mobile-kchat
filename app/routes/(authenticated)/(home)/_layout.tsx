@@ -1,15 +1,17 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Tabs, router} from 'expo-router';
+import {Tabs, router, useSegments} from 'expo-router';
 import {NativeTabs} from 'expo-router/unstable-native-tabs';
 import React from 'react';
-import {DeviceEventEmitter, Platform} from 'react-native';
+import {DeviceEventEmitter} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
 import {Navigation as NavigationConstants, Screens} from '@constants';
+import {supportsNativeTabs} from '@constants/device';
 import {useTheme} from '@context/theme';
 import useDidMount from '@hooks/did_mount';
+import useCurrentUserAvatar from '@hooks/use_current_user_avatar';
 import {useTotalUnreadAndMentions} from '@hooks/use_total_unread_mentions';
 import TabBar from '@screens/home/tab_bar';
 import {getExpoRouterPath} from '@screens/navigation';
@@ -23,11 +25,21 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     },
 }));
 
-const supportsNativeTabs = Platform.OS === 'ios';
-
 function NativeTabLayout() {
     const theme = useTheme();
+    const segments = useSegments();
+    const avatarSource = useCurrentUserAvatar();
     const {mentions, unread} = useTotalUnreadAndMentions();
+    const isAccountFocused = segments[segments.length - 1] === Screens.ACCOUNT;
+    const plainAvatarSource = avatarSource?.default ?? avatarSource?.selected;
+
+    // The selected variant follows the focused route: the native tab bar does
+    // not refresh a deselected item's icon, so the selected image is also
+    // reset to the plain avatar when the tab loses focus.
+    const accountIconSource = plainAvatarSource ? {
+        default: plainAvatarSource,
+        selected: isAccountFocused ? (avatarSource?.selected ?? plainAvatarSource) : plainAvatarSource,
+    } : undefined;
 
     useDidMount(() => {
         const homeListener = DeviceEventEmitter.addListener(NavigationConstants.NAVIGATION_HOME, () => {
@@ -127,7 +139,14 @@ function NativeTabLayout() {
                 contentStyle={{backgroundColor: theme.centerChannelBg}}
                 unstable_nativeProps={{freezeContents: true}}
             >
-                <NativeTabs.Trigger.Icon sf='person.crop.circle'/>
+                {accountIconSource ? (
+                    <NativeTabs.Trigger.Icon
+                        src={accountIconSource}
+                        renderingMode='original'
+                    />
+                ) : (
+                    <NativeTabs.Trigger.Icon sf='person.crop.circle'/>
+                )}
                 <NativeTabs.Trigger.Label hidden={true}/>
             </NativeTabs.Trigger>
         </NativeTabs>

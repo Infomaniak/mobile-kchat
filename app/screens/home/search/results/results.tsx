@@ -19,6 +19,10 @@ import type PostModel from '@typings/database/models/servers/post';
 
 const duration = 250;
 
+type ContentInset = {
+    bottom: number;
+};
+
 const getStyles = (width: number) => {
     return StyleSheet.create({
         container: {
@@ -41,6 +45,7 @@ const getStyles = (width: number) => {
 type Props = {
     appsEnabled: boolean;
     canDownloadFiles: boolean;
+    contentInset?: ContentInset;
     currentTimezone: string;
     customEmojiNames: string[];
     enableSecureFilePreview: boolean;
@@ -58,6 +63,7 @@ type Props = {
 const Results = ({
     appsEnabled,
     canDownloadFiles,
+    contentInset,
     currentTimezone,
     customEmojiNames,
     enableSecureFilePreview,
@@ -106,6 +112,7 @@ const Results = ({
                     <Freeze freeze={selectedTab !== TabTypes.MESSAGES}>
                         <PostResults
                             appsEnabled={appsEnabled}
+                            contentInset={contentInset}
                             currentTimezone={currentTimezone}
                             customEmojiNames={customEmojiNames}
                             posts={posts}
@@ -119,6 +126,7 @@ const Results = ({
                     <Freeze freeze={selectedTab !== TabTypes.FILES}>
                         <FileResults
                             canDownloadFiles={canDownloadFiles}
+                            contentInset={contentInset}
                             enableSecureFilePreview={enableSecureFilePreview}
                             fileChannels={fileChannels}
                             fileInfos={fileInfos}
