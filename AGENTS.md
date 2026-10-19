@@ -27,7 +27,9 @@ When testing features that require mobile device interaction:
 
 ## Key Commands
 
-> **iOS Simulator Setup:** For detailed iOS simulator setup instructions, troubleshooting CocoaPods issues, and build debugging, see [CLAUDE-IOS-SIMULATOR.md](./CLAUDE-IOS-SIMULATOR.md).
+> **iOS Simulator Setup:** For detailed iOS simulator setup instructions, troubleshooting CocoaPods issues, and build debugging, see [AGENTS-IOS-SIMULATOR.md](./AGENTS-IOS-SIMULATOR.md).
+
+> **Harness note:** some sections below reference a previous harness's subagent/Task-tool vocabulary. Keep the principles and map them to your own harness's equivalent tools (see your system prompt / available tools).
 
 ```bash
 # Setup
