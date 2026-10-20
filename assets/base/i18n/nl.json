@@ -752,7 +752,6 @@
     "mobile.ios.plist.NSLocationWhenInUseUsageDescription": "Door toegang te verlenen tot uw locatiegegevens kunnen we locatiegegevens toevoegen aan de foto's en video's die u deelt in {applicationName}.",
     "mobile.ios.plist.NSMicrophoneUsageDescription": "Door toegang te verlenen tot de microfoons van uw apparaat, kunt u audio opnemen voor telefoongesprekken of video's die u in {applicationName} wilt delen.",
     "mobile.ios.plist.NSPhotoLibraryAddUsageDescription": "Door schrijftoegang tot je fotobibliotheek in te schakelen, kun je gedownloade foto's en video's van {applicationName} op je apparaat opslaan.",
-    "mobile.ios.plist.NSPhotoLibraryUsageDescription": "Door toegang te verlenen tot je fotobibliotheek, kun je foto's of video's selecteren en aan berichten toevoegen.",
     "mobile.ios.plist.NSSpeechRecognitionUsageDescription": "Als u uw apparaat toestaat om gebruikersgegevens naar Apple te verzenden, kunt u spraakberichten naar {applicationName} sturen.",
     "mobile.join_channel.error": "We konden niet deelnemen aan het kanaal {displayName}.",
     "mobile.link.error.text": "De link kan niet worden geopend.",

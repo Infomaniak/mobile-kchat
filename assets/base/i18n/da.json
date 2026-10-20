@@ -752,7 +752,6 @@
     "mobile.ios.plist.NSLocationWhenInUseUsageDescription": "Hvis du giver adgang til dine placeringsdata, kan vi tilføje placeringsmetadata til de billeder og videoer, du deler i {applicationName}.",
     "mobile.ios.plist.NSMicrophoneUsageDescription": "Hvis du giver adgang til din enheds mikrofoner, kan du optage lyd til opkald eller videoer, som du vil dele i {applicationName}.",
     "mobile.ios.plist.NSPhotoLibraryAddUsageDescription": "Hvis du aktiverer skriveadgang til dit fotobibliotek, kan du gemme downloadede fotos og videoer fra {applicationName} på din enhed.",
-    "mobile.ios.plist.NSPhotoLibraryUsageDescription": "Hvis du giver adgang til dit fotobibliotek, kan du vælge billeder eller videoer og vedhæfte dem til beskeder.",
     "mobile.ios.plist.NSSpeechRecognitionUsageDescription": "Hvis du tillader, at din enhed sender brugerdata til Apple, kan du sende talebeskeder til {applicationName}.",
     "mobile.join_channel.error": "Vi kunne ikke tilslutte os kanalen {displayName}.",
     "mobile.link.error.text": "Det var ikke muligt at åbne linket.",

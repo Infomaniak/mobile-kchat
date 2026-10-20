@@ -40,10 +40,6 @@ export const iosPermissions = defineMessages({
         id: 'mobile.ios.plist.NSPhotoLibraryAddUsageDescription',
         defaultMessage: 'Enabling write access to your photo library means you can save downloaded photos and videos from {applicationName} to your device.',
     },
-    NSPhotoLibraryUsageDescription: {
-        id: 'mobile.ios.plist.NSPhotoLibraryUsageDescription',
-        defaultMessage: 'Allowing access to your photo library enables you to select photos or videos and attach them to messages.',
-    },
     NSSpeechRecognitionUsageDescription: {
         id: 'mobile.ios.plist.NSSpeechRecognitionUsageDescription',
         defaultMessage: 'Enabling your device to send user data to Apple means you can send voice messages to {applicationName}.',

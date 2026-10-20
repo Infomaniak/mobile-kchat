@@ -752,7 +752,6 @@
     "mobile.ios.plist.NSLocationWhenInUseUsageDescription": "Genom att tillåta åtkomst till dina platsdata kan vi lägga till platsmetadata till de bilder och videor du delar i {applicationName}.",
     "mobile.ios.plist.NSMicrophoneUsageDescription": "Genom att aktivera åtkomst till din enhets mikrofoner kan du spela in ljud för samtal eller videor som du vill dela i {applicationName}.",
     "mobile.ios.plist.NSPhotoLibraryAddUsageDescription": "Genom att aktivera skrivåtkomst till ditt fotobibliotek kan du spara nedladdade foton och videor från {applicationName} på din enhet.",
-    "mobile.ios.plist.NSPhotoLibraryUsageDescription": "Genom att tillåta åtkomst till ditt fotobibliotek kan du välja foton eller videor och bifoga dem till meddelanden.",
     "mobile.ios.plist.NSSpeechRecognitionUsageDescription": "Genom att tillåta din enhet att skicka användardata till Apple kan du skicka röstmeddelanden till {applicationName}.",
     "mobile.join_channel.error": "Vi kunde inte ansluta till kanalen {displayName}.",
     "mobile.link.error.text": "Länken kan inte öppnas.",

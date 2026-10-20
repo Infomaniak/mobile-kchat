@@ -34,8 +34,7 @@ use_frameworks! :linkage => :static
 setup_permissions([
   "Camera",
   "Microphone",
-  "Notifications",
-  "PhotoLibrary"
+  "Notifications"
 ])
 
 if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'

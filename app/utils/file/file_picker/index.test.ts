@@ -631,18 +631,7 @@ describe.skip('FilePickerUtil', () => {
     });
 
     describe('attachFileFromPhotoGallery', () => {
-        test('should not open the image library if permission is denied', async () => {
-            (Permissions.check as jest.Mock).mockResolvedValue(Permissions.RESULTS.DENIED);
-            (Permissions.request as jest.Mock).mockResolvedValue(Permissions.RESULTS.DENIED);
-
-            await filePickerUtil.attachFileFromPhotoGallery();
-
-            expect(launchImageLibrary).not.toHaveBeenCalled();
-        });
-
-        test('should open the image library if permission is granted', async () => {
-            (Permissions.check as jest.Mock).mockResolvedValue(Permissions.RESULTS.GRANTED);
-
+        test('should open the image library without requesting any gallery permission', async () => {
             const response: ImagePickerResponse = {
                 assets: [{uri: 'file://image1.jpg'}],
             };
@@ -655,11 +644,14 @@ describe.skip('FilePickerUtil', () => {
 
             await filePickerUtil.attachFileFromPhotoGallery();
 
+            expect(Permissions.check).not.toHaveBeenCalled();
+            expect(Permissions.request).not.toHaveBeenCalled();
             expect(launchImageLibrary).toHaveBeenCalledWith({
                 quality: 1,
                 mediaType: 'mixed',
                 includeBase64: false,
                 selectionLimit: 1,
+                assetRepresentationMode: 'compatible',
             }, expect.any(Function));
 
             await TestHelper.wait(100);
@@ -669,8 +661,6 @@ describe.skip('FilePickerUtil', () => {
         });
 
         test('should handle error or cancellation in image library response', async () => {
-            (Permissions.check as jest.Mock).mockResolvedValue(Permissions.RESULTS.GRANTED);
-
             const response: ImagePickerResponse = {
                 errorMessage: 'An error occurred',
                 didCancel: false,
@@ -695,8 +685,6 @@ describe.skip('FilePickerUtil', () => {
         });
 
         test('should handle selection limit parameter', async () => {
-            (Permissions.check as jest.Mock).mockResolvedValue(Permissions.RESULTS.GRANTED);
-
             const response: ImagePickerResponse = {
                 assets: [{uri: 'file://image1.jpg'}, {uri: 'file://image2.jpg'}],
             };
@@ -713,6 +701,7 @@ describe.skip('FilePickerUtil', () => {
                 mediaType: 'mixed',
                 includeBase64: false,
                 selectionLimit: 2,
+                assetRepresentationMode: 'compatible',
             }, expect.any(Function));
         });
     });

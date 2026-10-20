@@ -752,7 +752,6 @@
     "mobile.ios.plist.NSLocationWhenInUseUsageDescription": "Kun sallit pääsyn sijaintitietoihisi, voimme lisätä sijaintimetatietoja kuviin ja videoihin, jotka jaat {applicationName}-palvelussa.",
     "mobile.ios.plist.NSMicrophoneUsageDescription": "Kun sallit pääsyn laitteesi mikrofoneihin, voit tallentaa ääntä puheluita tai videoita varten, jotka voit jakaa {applicationName}-palvelussa.",
     "mobile.ios.plist.NSPhotoLibraryAddUsageDescription": "Kun sallit kirjoitusoikeudet valokuvakirjastoosi, voit tallentaa {applicationName}-sovelluksesta ladatut valokuvat ja videot laitteellesi.",
-    "mobile.ios.plist.NSPhotoLibraryUsageDescription": "Kun sallit pääsyn valokuvakirjastoosi, voit valita valokuvia tai videoita ja liittää ne viesteihin.",
     "mobile.ios.plist.NSSpeechRecognitionUsageDescription": "Kun sallit laitteesi lähettää käyttäjätietoja Applelle, voit lähettää ääniviestejä sovellukseen {applicationName}.",
     "mobile.join_channel.error": "Emme voineet liittyä kanavaan {displayName}.",
     "mobile.link.error.text": "Linkkiä ei voitu avata.",

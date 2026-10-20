@@ -627,7 +627,6 @@
   "mobile.ios.plist.NSLocationWhenInUseUsageDescription": "Autoriser l'accès à vos données de localisation signifie que vous pouvez ajouter des métadonnées de localisation aux photos et vidéos que vous partagez dans {applicationName}.",
   "mobile.ios.plist.NSMicrophoneUsageDescription": "Autoriser l'accès aux microphones de votre appareil signifie que vous pouvez enregistrer le son des appels et vidéos que vous partagez dans {applicationName}.",
   "mobile.ios.plist.NSPhotoLibraryAddUsageDescription": "Autoriser l'accès en écriture sur votre photothèque signifie que vous pouvez enregistrer photos et vidéos de {applicationName} sur votre appareil.",
-  "mobile.ios.plist.NSPhotoLibraryUsageDescription": "Autoriser l'accès en lecture sur votre photothèque signifie que vous pouvez téléverser des photos et vidéos de votre appareil vers {applicationName}.",
   "mobile.ios.plist.NSSpeechRecognitionUsageDescription": "Permettre à votre appareil d'envoyer des données utilisateur à Apple vous permet d'envoyer des messages vocaux à {applicationName}.",
   "mobile.join_channel.error": "Nous n'avons pas pu rejoindre le canal {displayName}.",
   "mobile.link.error.text": "Impossible d'ouvrir le lien.",

@@ -752,7 +752,6 @@
     "mobile.ios.plist.NSLocationWhenInUseUsageDescription": "Umożliwienie dostępu do danych o Twojej lokalizacji oznacza, że będziemy mogli dodawać metadane dotyczące lokalizacji do zdjęć i filmów, które udostępniasz w {applicationName}.",
     "mobile.ios.plist.NSMicrophoneUsageDescription": "Włączenie dostępu do mikrofonów urządzenia umożliwia nagrywanie dźwięku podczas rozmów lub nagrywanie filmów, które chcesz udostępnić w {applicationName}.",
     "mobile.ios.plist.NSPhotoLibraryAddUsageDescription": "Włączenie uprawnień do zapisu w bibliotece zdjęć oznacza, że możesz zapisywać pobrane zdjęcia i filmy z {applicationName} na swoim urządzeniu.",
-    "mobile.ios.plist.NSPhotoLibraryUsageDescription": "Umożliwienie dostępu do biblioteki zdjęć pozwala na wybieranie zdjęć lub filmów i dołączanie ich do wiadomości.",
     "mobile.ios.plist.NSSpeechRecognitionUsageDescription": "Umożliwienie Twojemu urządzeniu przesyłania danych użytkownika do firmy Apple pozwala na wysyłanie wiadomości głosowych do aplikacji {applicationName}.",
     "mobile.join_channel.error": "Nie udało się dołączyć do kanału {displayName}.",
     "mobile.link.error.text": "Nie można otworzyć linku.",

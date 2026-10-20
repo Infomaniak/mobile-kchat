@@ -15,7 +15,7 @@ import {safeDecodeURIComponent} from '@utils/url';
 
 import type {IntlShape} from 'react-intl';
 
-type PermissionSource = 'camera' | 'storage' | 'photo_android' | 'photo_ios' | 'photo';
+type PermissionSource = 'camera' | 'storage' | 'photo_android' | 'photo_ios';
 
 export default class FilePickerUtil {
     private readonly uploadFiles: (files: ExtractedFileInfo[]) => void;
@@ -143,11 +143,11 @@ export default class FilePickerUtil {
         return files;
     };
 
-    private hasPhotoPermission = async (source: PermissionSource) => {
+    private hasPhotoPermission = async (source: 'camera') => {
         let permissionRequest;
 
         const targetSource = Platform.select({
-            ios: source === 'camera' ? Permissions.PERMISSIONS.IOS.CAMERA : Permissions.PERMISSIONS.IOS.PHOTO_LIBRARY,
+            ios: Permissions.PERMISSIONS.IOS.CAMERA,
             default: Permissions.PERMISSIONS.ANDROID.CAMERA,
         });
 
@@ -340,20 +340,21 @@ export default class FilePickerUtil {
             mediaType: 'mixed',
             includeBase64: false,
             selectionLimit,
+
+            // System photo pickers (PHPicker on iOS, Photo Picker on Android) require no gallery permission.
+            // On iOS, 'compatible' makes PHPicker convert HEIC assets to JPEG for broader upload compatibility.
+            assetRepresentationMode: 'compatible',
         };
 
-        const hasPermission = await this.hasPhotoPermission('photo');
-        if (hasPermission) {
-            launchImageLibrary(options, async (response: ImagePickerResponse) => {
-                StatusBar.setHidden(false);
-                if (response.errorMessage || response.didCancel) {
-                    logWarning('Attach failed', response.errorMessage || (response.didCancel ? 'cancelled' : ''));
-                    return;
-                }
+        launchImageLibrary(options, async (response: ImagePickerResponse) => {
+            StatusBar.setHidden(false);
+            if (response.errorMessage || response.didCancel) {
+                logWarning('Attach failed', response.errorMessage || (response.didCancel ? 'cancelled' : ''));
+                return;
+            }
 
-                const files = await this.getFilesFromResponse(response);
-                await this.prepareFileUpload(files);
-            });
-        }
+            const files = await this.getFilesFromResponse(response);
+            await this.prepareFileUpload(files);
+        });
     };
 }
