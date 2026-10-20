@@ -23,7 +23,7 @@ import {getThemeForCurrentTeam} from '@queries/servers/preference';
 import {getCurrentUserId} from '@queries/servers/system';
 import {getExpoRouterPath, propsToParams} from '@screens/navigation';
 import EphemeralStore from '@store/ephemeral_store';
-import {handleDeepLink, getLaunchPropsFromDeepLink} from '@utils/deep_link';
+import {getLaunchPropsFromDeepLink} from '@utils/deep_link';
 import {logError} from '@utils/log';
 import {convertToNotificationData} from '@utils/notification';
 import {captureMessage} from '@utils/sentry';
@@ -104,15 +104,7 @@ export const determineRoute = async (props: LaunchProps): Promise<ExpoRouterLaun
                 const existingServer = DatabaseManager.searchUrl(extra.data!.serverUrl);
                 serverUrl = existingServer;
                 props.serverUrl = serverUrl || extra.data?.serverUrl;
-                if (extra.type === DeepLink.MagicLink && extra.data && 'token' in extra.data) {
-                    const result = await handleDeepLink(extra);
-                    if (result.error) {
-                        props.launchError = true;
-                    } else {
-                        serverUrl = await getActiveServerUrl();
-                        return determineAuthenticatedRoute({...props, serverUrl});
-                    }
-                } else if (!serverUrl && extra.type !== DeepLink.Server) {
+                if (!serverUrl && extra.type !== DeepLink.Server) {
                     props.launchError = true;
                 } else if (extra.type === DeepLink.Server) {
                     if (removeProtocol(serverUrl) === extra.data?.serverUrl) {

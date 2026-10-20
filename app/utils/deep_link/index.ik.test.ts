@@ -5,16 +5,11 @@
 // Screens.SERVER is NOT registered in kChat (Infomaniak uses its own login flow),
 // so deep links to unknown servers must return {error: true} instead of crashing.
 
-import {magicLinkLogin} from '@actions/remote/session';
 import DatabaseManager from '@database/manager';
 import {getActiveServerUrl} from '@queries/app/servers';
 import {addNewServer} from '@utils/server';
 
 import {parseAndHandleDeepLink} from '.';
-
-jest.mock('@actions/remote/session', () => ({
-    magicLinkLogin: jest.fn(),
-}));
 
 jest.mock('@queries/app/servers', () => ({
     getActiveServerUrl: jest.fn(),
@@ -105,17 +100,15 @@ describe('IK deep link: unknown server handling', () => {
         expect(addNewServer).not.toHaveBeenCalled();
     });
 
-    it('should still attempt magic link login for an unregistered server', async () => {
-        jest.mocked(magicLinkLogin).mockResolvedValueOnce({error: false, failed: false});
-
+    it('should reject magic-link deeplinks to unknown servers without attempting any login', async () => {
+        // Security regression: magic-link deeplinks used to trigger magicLinkLogin()
+        // against any attacker-controlled host with no host validation, silently
+        // provisioning the attacker server and leaking the device push token.
         const result = await parseAndHandleDeepLink(
-            'https://kchat.infomaniakgroup.com/login/one_time_link?t=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            'https://attacker.example.com/login/one_time_link?t=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
         );
 
-        expect(magicLinkLogin).toHaveBeenCalledWith(
-            'kchat.infomaniakgroup.com',
-            'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-        );
-        expect(result).toEqual({error: false});
+        expect(result).toEqual({error: true});
+        expect(addNewServer).not.toHaveBeenCalled();
     });
 });
