@@ -22,6 +22,7 @@ import {cleanup, initialize} from '@init/app';
 import SessionManager from '@managers/session_manager';
 import InAppNotificationContainer from '@screens/in_app_notification';
 import SnackBarContainer from '@screens/snack_bar';
+import EphemeralStore from '@store/ephemeral_store';
 import NavigationStore, {useCurrentScreen} from '@store/navigation_store';
 import {logError} from '@utils/log';
 
@@ -43,6 +44,13 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 });
+
+// Hold the native splash screen while the initial route is determined, so the
+// launch imagery covers the navigation bootstrap (as on iOS) instead of an
+// unpainted Stack. The root layout releases it once the first real route is
+// committed.
+SplashScreen.setOptions({fade: true});
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
     const [appReady, setAppReady] = useState(false);
@@ -87,10 +95,31 @@ export default function RootLayout() {
         };
     });
 
+    // Hold the splash screen until the initial route has been determined and
+    // the real screen is committed: hiding earlier exposes the Stack while the
+    // bootstrapping index route (still unpainted) is up. The theme is already
+    // resolved at that point (EphemeralStore), so the first revealed frame
+    // matches the user's theme.
     useEffect(() => {
-        if (appReady) {
+        if (!appReady) {
+            return;
+        }
+
+        // The ref is typed against the root params, which resolve to never for
+        // the bootstrapping index route; read the name as a plain string.
+        const route = navigationRef.getCurrentRoute() as {name?: string} | undefined;
+        if (route?.name && route.name !== 'index') {
             SplashScreen.hideAsync();
         }
+    }, [appReady, currentScreen, navigationRef]);
+
+    // Safety net: if the initial route bootstrap fails, don't hold the splash forever.
+    useEffect(() => {
+        if (!appReady) {
+            return undefined;
+        }
+        const fallback = setTimeout(() => SplashScreen.hideAsync(), 5000);
+        return () => clearTimeout(fallback);
     }, [appReady]);
 
     useEffect(() => {
@@ -143,12 +172,20 @@ export default function RootLayout() {
         return unsubscribe;
     }, [navigationRef]);
 
+    // EphemeralStore.theme is hydrated during the initial route determination
+    // (before any screen is committed), earlier than any DB-backed theme
+    // source reachable from this layout. Until it is known, keep the Stack
+    // content transparent so the window background (the launch splash) shows
+    // through instead of flashing the appearance default color.
+    const bootCenterChannelBg = EphemeralStore.theme?.centerChannelBg ?? 'transparent';
+    const bootSidebarBg = (EphemeralStore.theme ?? theme).sidebarBg;
+
     const stackScreenOptions = useMemo<NativeStackNavigationOptions>(() => ({
         headerShown: false,
         animation: 'none',
-        contentStyle: {backgroundColor: theme.centerChannelBg},
-        ...Platform.select({android: {statusBarBackgroundColor: theme.sidebarBg, statusBarTranslucent: isEdgeToEdge, statusBarStyle: tinycolor(theme.sidebarBg).isLight() ? 'dark' : 'light'}}),
-    }), [theme.centerChannelBg, theme.sidebarBg]);
+        contentStyle: {backgroundColor: bootCenterChannelBg},
+        ...Platform.select({android: {statusBarBackgroundColor: bootSidebarBg, statusBarTranslucent: isEdgeToEdge, statusBarStyle: tinycolor(bootSidebarBg).isLight() ? 'dark' : 'light'}}),
+    }), [bootCenterChannelBg, bootSidebarBg]);
 
     const modalScreenOptions = useMemo<NativeStackNavigationOptions>(() => ({
         presentation: 'modal',

@@ -2,6 +2,7 @@ package com.mattermost.rnutils
 
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.bridge.ReadableArray
 
@@ -24,6 +25,13 @@ class RNUtilsModule(val reactContext: ReactApplicationContext) : NativeRNUtilsSp
 
     override fun saveFile(filePath: String?, promise: Promise?) {
         implementation.saveFile(filePath, promise)
+    }
+
+    // Required by codegen: the shared TurboModule spec declares
+    // renderTabAvatar, but native tab bars (and the avatar icon) are iOS 26+
+    // only (supportsNativeTabs), so Android resolves without rendering.
+    override fun renderTabAvatar(options: ReadableMap?, promise: Promise?) {
+        promise?.resolve(null)
     }
 
     override fun isRunningInSplitView(): WritableMap? = implementation.isRunningInSplitView()
