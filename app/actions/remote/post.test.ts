@@ -1044,6 +1044,17 @@ describe('get posts', () => {
         expect(result.authors?.length).toBe(0);
     });
 
+    it('fetchPostAuthors - does not fetch usernames already in the database', async () => {
+        await operator.handleSystem({systems: [{id: SYSTEM_IDENTIFIERS.CURRENT_USER_ID, value: user1.id}], prepareRecordsOnly: false});
+        await operator.handleUsers({users: [user1, user2], prepareRecordsOnly: false});
+
+        const result = await fetchPostAuthors(serverUrl, [{...post1, message: 'hi @user2 and @user3'}]);
+        expect(result).toBeDefined();
+        expect(result.error).toBeUndefined();
+        expect(mockClient.getProfilesByUsernames).toHaveBeenCalledWith(['user3'], undefined);
+        expect(result.authors?.length).toBe(1);
+    });
+
     it('fetchPostThread - handle database not found', async () => {
         const result = await fetchPostThread('foo', '');
         expect(result).toBeDefined();

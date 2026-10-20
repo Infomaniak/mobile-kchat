@@ -5,10 +5,10 @@ import {General} from '@constants';
 import {MENTIONS_REGEX} from '@constants/autocomplete';
 import {isMessageAttachmentArray} from '@utils/message_attachment';
 
-export const getNeededAtMentionedUsernames = (usernames: Set<string>, posts: Post[], excludeUsername?: string) => {
-    const usernamesToLoad = new Set<string>();
+export const extractAtMentionedUsernames = (posts: Post[], excludeUsername?: string) => {
+    const mentionedUsernames = new Set<string>();
 
-    const findNeededUsernames = (text?: string) => {
+    const findMentionedUsernames = (text?: string) => {
         if (!text || !text.includes('@')) {
             return;
         }
@@ -25,26 +25,22 @@ export const getNeededAtMentionedUsernames = (usernames: Set<string>, posts: Pos
                 continue;
             }
 
-            if (usernames.has(lowercaseMatch)) {
-                continue;
-            }
-
-            usernamesToLoad.add(lowercaseMatch);
+            mentionedUsernames.add(lowercaseMatch);
         }
     };
 
     for (const post of posts) {
         // These correspond to the fields searched by getMentionsEnabledFields on the server
-        findNeededUsernames(post.message);
+        findMentionedUsernames(post.message);
 
         const attachments = isMessageAttachmentArray(post.props?.attachments) ? post.props.attachments : undefined;
         if (attachments) {
             for (const attachment of attachments) {
-                findNeededUsernames(attachment.pretext);
-                findNeededUsernames(attachment.text);
+                findMentionedUsernames(attachment.pretext);
+                findMentionedUsernames(attachment.text);
             }
         }
     }
 
-    return usernamesToLoad;
+    return mentionedUsernames;
 };

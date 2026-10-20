@@ -12,7 +12,7 @@ import {fetchChannelStats} from '@actions/remote/channel';
 import {ActionType, General, Post, ServerErrors} from '@constants';
 import DatabaseManager from '@database/manager';
 import {filterPostsInOrderedArray} from '@helpers/api/post';
-import {getNeededAtMentionedUsernames} from '@helpers/api/user';
+import {extractAtMentionedUsernames} from '@helpers/api/user';
 import NetworkManager from '@managers/network_manager';
 import {getMyChannel, prepareMissingChannelsForAllTeams, queryAllMyChannel} from '@queries/servers/channel';
 import {queryAllCustomEmojis} from '@queries/servers/custom_emoji';
@@ -20,7 +20,7 @@ import {getFilesByIds, queryFilesForPost} from '@queries/servers/file';
 import {getPostById, getRecentPostsInChannel, queryPostsInChannel} from '@queries/servers/post';
 import {getCurrentUserId} from '@queries/servers/system';
 import {getIsCRTEnabled, prepareThreadsFromReceivedPosts} from '@queries/servers/thread';
-import {queryAllUsers} from '@queries/servers/user';
+import {queryUsersById, queryUsersByUsername} from '@queries/servers/user';
 import EphemeralStore from '@store/ephemeral_store';
 import {setFetchingThreadState} from '@store/fetching_thread_store';
 import {getValidEmojis, matchEmoticons} from '@utils/emoji/helpers';
@@ -675,19 +675,19 @@ export const fetchPostAuthors = async (serverUrl: string, posts: Post[], fetchOn
         const client = NetworkManager.getClient(serverUrl);
 
         const currentUserId = await getCurrentUserId(database);
-        const users = await queryAllUsers(database).fetch();
-        const existingUserIds = new Set<string>();
-        const existingUserNames = new Set<string>();
-        let excludeUsername;
-        users.forEach((u) => {
-            existingUserIds.add(u.id);
-            existingUserNames.add(u.username);
-            if (u.id === currentUserId) {
-                excludeUsername = u.username;
-            }
-        });
+        const currentUser = await queryUsersById(database, [currentUserId]).fetch();
+        const excludeUsername = currentUser[0]?.username;
 
-        const usernamesToLoad = getNeededAtMentionedUsernames(existingUserNames, posts, excludeUsername);
+        // Extract the @-mentioned usernames from the posts first, then look up
+        // only those in the database, instead of loading the whole users table.
+        const mentionedUsernames = extractAtMentionedUsernames(posts, excludeUsername);
+        let usernamesToLoad = mentionedUsernames;
+        if (mentionedUsernames.size) {
+            const existingUsers = await queryUsersByUsername(database, Array.from(mentionedUsernames)).fetch();
+            const existingUsernames = new Set(existingUsers.map((u) => u.username));
+            usernamesToLoad = new Set([...mentionedUsernames].filter((username) => !existingUsernames.has(username)));
+        }
+
         const userIdsToLoad = new Set<string>();
         for (const p of posts) {
             const {user_id} = p;
