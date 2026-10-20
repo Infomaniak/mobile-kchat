@@ -148,7 +148,10 @@ export const ThemeTiles = ({allowedThemeKeys, onThemeChange, selectedTheme}: The
         <View style={styles.tilesContainer}>
             {
                 allowedThemeKeys.map((themeKey: ThemeKey) => {
-                    if (!Preferences.THEMES[themeKey] || !selectedTheme) {
+                    // selectedTheme may be undefined for custom themes (no
+                    // ksuiteTheme): the tiles must stay visible so the user
+                    // can switch back to a preset theme.
+                    if (!Preferences.THEMES[themeKey]) {
                         return null;
                     }
 

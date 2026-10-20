@@ -4,6 +4,7 @@
 import {withObservables} from '@nozbe/watermelondb/react';
 import React, {type ComponentType, createContext, useEffect, useState} from 'react';
 import {Appearance} from 'react-native';
+import tinyColor from 'tinycolor2';
 
 import {Preferences} from '@constants';
 import useDidUpdate from '@hooks/did_update';
@@ -73,6 +74,23 @@ const getTheme = (teamId: string | undefined, themes: PreferenceModel[]): Theme 
     return newTheme;
 };
 
+// Keep the native interface style (iOS 26 Liquid Glass tab bar, status bar,
+// keyboard) in sync with the selected kSuite theme. 'auto' clears the
+// override so native chrome keeps following the system appearance. Legacy
+// and custom themes have no ksuiteTheme: classify them from their colors,
+// like getKeyboardAppearanceFromTheme does.
+const getNativeColorScheme = (theme: Theme) => {
+    if (theme.ksuiteTheme === 'dark' || theme.ksuiteTheme === 'light') {
+        return theme.ksuiteTheme;
+    }
+
+    if (theme.ksuiteTheme === 'auto') {
+        return 'unspecified';
+    }
+
+    return tinyColor(theme.centerChannelBg).isLight() ? 'light' : 'dark';
+};
+
 const ThemeProvider = ({currentTeamId, children, themes}: Props) => {
     const [theme, setTheme] = useState(() => getTheme(currentTeamId, themes));
 
@@ -88,7 +106,13 @@ const ThemeProvider = ({currentTeamId, children, themes}: Props) => {
 
     useEffect(() => {
         updateThemeIfNeeded(theme);
-    }, [theme]);
+
+        // Only pin the native scheme for a user-selected theme: with no theme
+        // preference the theme is derived from the system appearance, and the
+        // RCTAppearance override would freeze the window traits so the
+        // Appearance listener above would never fire on system switches.
+        Appearance.setColorScheme(themes.length > 0 ? getNativeColorScheme(theme) : 'unspecified');
+    }, [theme, themes]);
 
     useDidUpdate(() => {
         clearThemeCache();

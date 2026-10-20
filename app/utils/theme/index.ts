@@ -259,7 +259,10 @@ export function setThemeDefaults(theme: ExtendedTheme): Theme {
     }
 
     for (const property in defaultTheme) {
-        if (property === 'type' || (property === 'sidebarTeamBarBg' && theme.sidebarHeaderBg)) {
+        // ksuiteTheme is skipped so custom themes keep it undefined and get
+        // classified by their own colors for the native interface style,
+        // instead of inheriting the infomaniak light default.
+        if (property === 'type' || property === 'ksuiteTheme' || (property === 'sidebarTeamBarBg' && theme.sidebarHeaderBg)) {
             continue;
         }
         if (theme[property] == null) {
