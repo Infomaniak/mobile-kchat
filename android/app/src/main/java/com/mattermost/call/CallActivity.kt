@@ -6,10 +6,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -36,7 +39,11 @@ class CallActivity : AppCompatActivity() {
     private val conferenceJWT by lazy { intent.getStringExtra(NotificationUtils.CONFERENCE_JWT_KEY) }
 
     private val ringtone by lazy { RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE) }
-    private val ringtonePlayer by lazy { MediaPlayer.create(applicationContext, ringtone) }
+    private val ringtoneAudioAttributes = AudioAttributes.Builder()
+        .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+        .build()
+    private var ringtonePlayer: MediaPlayer? = null
 
     private val localBroadcastManager by lazy { LocalBroadcastManager.getInstance(this) }
     private val keyguardManager by lazy { getSystemService(KEYGUARD_SERVICE) as KeyguardManager }
@@ -77,17 +84,48 @@ class CallActivity : AppCompatActivity() {
         }
 
         callViewModel.getUserImage(serverId, conferenceId)
-        ringtonePlayer.start()
+        startRingtone()
     }
 
     override fun onStop() {
         super.onStop()
-        ringtonePlayer.stop()
+        stopRingtone()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        stopRingtone()
         localBroadcastManager.unregisterReceiver(dismissCallReceiver)
+    }
+
+    private fun startRingtone() {
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        if (audioManager.ringerMode != AudioManager.RINGER_MODE_NORMAL) {
+            Log.d(TAG, "Ringtone not started: ringer mode is ${audioManager.ringerMode}")
+            return
+        }
+
+        val player = MediaPlayer()
+        ringtonePlayer = try {
+            player.apply {
+                setAudioAttributes(ringtoneAudioAttributes)
+                setDataSource(applicationContext, ringtone)
+                prepare()
+                start()
+            }
+        } catch (e: Exception) {
+            player.release()
+            Log.e(TAG, "Ringtone failed to start", e)
+            null
+        }
+    }
+
+    private fun stopRingtone() {
+        ringtonePlayer?.let { player ->
+            runCatching { if (player.isPlaying) player.stop() }
+            player.release()
+        }
+        ringtonePlayer = null
     }
 
     @Suppress("DEPRECATION")
@@ -134,6 +172,7 @@ class CallActivity : AppCompatActivity() {
     }
 
     companion object {
+        const val TAG = "CallActivity"
         const val BROADCAST_RECEIVER_DISMISS_CALL_TAG = "DismissCall"
         const val MAX_CALLERS = 3
     }
