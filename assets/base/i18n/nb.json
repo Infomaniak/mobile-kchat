@@ -749,6 +749,7 @@
     "mobile.ios.plist.NSLocationWhenInUseUsageDescription": "Ved å tillate tilgang til posisjonsdataene dine, kan vi legge til posisjonsmetadata i bilder og videoer du deler i {applicationName}.",
     "mobile.ios.plist.NSMicrophoneUsageDescription": "Ved å aktivere tilgang til enhetens mikrofoner, kan du ta opp lyd for samtaler eller videoer som du vil dele i {applicationName}.",
     "mobile.ios.plist.NSPhotoLibraryAddUsageDescription": "Hvis du aktiverer skriveadgang til fotobiblioteket ditt, kan du lagre nedlastede bilder og videoer fra {applicationName} på enheten din.",
+    "mobile.ios.plist.NSPhotoLibraryUsageDescription": "Ved å tillate tilgang til fotobiblioteket ditt, kan du velge bilder eller videoer og legge dem ved i meldinger.",
     "mobile.ios.plist.NSSpeechRecognitionUsageDescription": "Hvis du tillater at enheten din sender brukerdata til Apple, kan du sende talebeskjeder til {applicationName}.",
     "mobile.join_channel.error": "Vi kunne ikke koble oss til kanalen {displayName}.",
     "mobile.link.error.text": "Kunne ikke åpne lenken.",

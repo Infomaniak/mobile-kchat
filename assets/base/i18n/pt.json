@@ -749,6 +749,7 @@
     "mobile.ios.plist.NSLocationWhenInUseUsageDescription": "Ao permitir o acesso aos seus dados de localização, podemos adicionar metadados de localização às fotos e vídeos que você compartilha no {applicationName}.",
     "mobile.ios.plist.NSMicrophoneUsageDescription": "Ativar o acesso aos microfones do seu dispositivo permite que você grave áudio para chamadas ou vídeos para compartilhar no {applicationName}.",
     "mobile.ios.plist.NSPhotoLibraryAddUsageDescription": "Ativar o acesso de gravação à sua biblioteca de fotos significa que você pode salvar fotos e vídeos baixados do {applicationName} no seu dispositivo.",
+    "mobile.ios.plist.NSPhotoLibraryUsageDescription": "Permitir o acesso à sua biblioteca de fotos permite enviar fotos e vídeos do seu dispositivo para {applicationName}.",
     "mobile.ios.plist.NSSpeechRecognitionUsageDescription": "Ao permitir que seu dispositivo envie dados do usuário para a Apple, você poderá enviar mensagens de voz para o {applicationName}.",
     "mobile.join_channel.error": "Não foi possível entrar no canal {displayName}.",
     "mobile.link.error.text": "Não foi possível abrir o link.",

@@ -735,6 +735,7 @@
   "mobile.ios.plist.NSLocationWhenInUseUsageDescription": "Durch die Freigabe des Zugriffs auf deine Standortdaten können wir den Bildern und Videos, die du auf {applicationName} teilst, Standort-Metadaten hinzufügen.",
   "mobile.ios.plist.NSMicrophoneUsageDescription": "Wenn du den Zugriff auf die Mikrofone deines Geräts aktivierst, kannst du Audio für Anrufe oder Videos aufnehmen, die du auf {applicationName} teilen möchtest.",
   "mobile.ios.plist.NSPhotoLibraryAddUsageDescription": "Wenn du den Schreibzugriff auf deine Fotobibliothek aktivierst, kannst du heruntergeladene Fotos und Videos von {applicationName} auf deinem Gerät speichern.",
+  "mobile.ios.plist.NSPhotoLibraryUsageDescription": "Wenn du den Lesezugriff auf deine Fotobibliothek aktivierst, kannst du Fotos und Videos von deinem Gerät auf {applicationName} hochladen.",
   "mobile.ios.plist.NSSpeechRecognitionUsageDescription": "Wenn du dein Gerät aktivierst, um Benutzerdaten an Apple zu senden, kannst du Sprachnachrichten an {applicationName} senden.",
   "mobile.join_channel.error": "Wir konnten dem Kanal {displayName} nicht beitreten.",
   "mobile.link.error.text": "Link kann nicht geöffnet werden.",
