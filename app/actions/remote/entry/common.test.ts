@@ -152,6 +152,29 @@ describe('actions/remote/entry/common', () => {
                 error: mockError,
             });
         });
+
+        it('should return error and not treat channel fetch failure as channel removal', async () => {
+            const mockConfig = {Version: '7.8.0'};
+            (fetchConfigAndLicense as jest.Mock).mockResolvedValue({config: mockConfig, license: {}});
+
+            (fetchMyPreferences as jest.Mock).mockResolvedValue({preferences: []});
+
+            const mockTeams = {teams: [{id: 'team1'}], memberships: [{team_id: 'team1', delete_at: 0}]};
+            (fetchMyTeams as jest.Mock).mockResolvedValue(mockTeams);
+
+            (fetchMe as jest.Mock).mockResolvedValue({user: {id: 'user1', locale: 'en'}});
+
+            // Simulates a network failure during reconnection: fetchMyChannelsForTeam resolves
+            // with only an error and no channels/memberships data (RM-634571)
+            const networkError = new Error('Network request failed');
+            (fetchMyChannelsForTeam as jest.Mock).mockResolvedValue({error: networkError});
+
+            (prepareEntryModels as jest.Mock).mockResolvedValue([]);
+
+            const result = await entry(serverUrl, 'team1');
+
+            expect(result).toEqual({error: networkError});
+        });
     });
 
     describe('entryInitialChannelId', () => {

@@ -171,6 +171,12 @@ const entryRest = async (serverUrl: string, teamId?: string, channelId?: string,
         };
         if (initialTeamId) {
             chData = await fetchMyChannelsForTeam(serverUrl, initialTeamId, false, lastDisconnectedAt, true, false, isCRTEnabled, groupLabel);
+            if (chData.error) {
+                // Do not treat a failed channels fetch as channel membership removal;
+                // letting this through would trigger a kick-from-channel alert on network loss (RM-634571)
+                logError('entryRest', groupLabel, chData.error);
+                return {error: chData.error};
+            }
         }
 
         initialChannelId = await entryInitialChannelId(database, initialChannelId, teamId, initialTeamId, meData?.user?.locale || '', chData?.channels, chData?.memberships);
