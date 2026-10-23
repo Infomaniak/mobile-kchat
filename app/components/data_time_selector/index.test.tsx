@@ -35,6 +35,19 @@ describe('DateTimeSelector', () => {
         jest.clearAllMocks();
     });
 
+    it('passes the IANA timezone to the native picker instead of a fixed UTC offset', () => {
+        const {getByTestId} = renderWithEverything(
+            <DateTimeSelector
+                {...baseProps}
+            />,
+            {database},
+        );
+
+        const picker = getByTestId('custom_status_clear_after.date_time_picker');
+        expect(picker.props.timeZoneName).toBe(timezone);
+        expect(picker.props.timeZoneOffsetInMinutes).toBeUndefined();
+    });
+
     it('renders with initialDate and uses it when date is selected', () => {
         const initialDate = moment().add(2, 'days').hour(14).minute(30);
         const {getByTestId, getByText} = renderWithEverything(

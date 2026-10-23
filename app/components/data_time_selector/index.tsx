@@ -14,7 +14,7 @@ import {Preferences} from '@constants';
 import {CUSTOM_STATUS_TIME_PICKER_INTERVALS} from '@constants/custom_status';
 import {getDisplayNamePreferenceAsBool} from '@helpers/api/preference';
 import {queryDisplayNamePreferences} from '@queries/servers/preference';
-import {getCurrentMomentForTimezone, getRoundedTime, getUtcOffsetForTimeZone} from '@utils/helpers';
+import {getCurrentMomentForTimezone, getRoundedTime} from '@utils/helpers';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import type {WithDatabaseArgs} from '@typings/database/database';
@@ -53,7 +53,6 @@ const DateTimeSelector = ({timezone, handleChange, isMilitaryTime, theme, showIn
     const styles = getStyleSheet(theme);
     const currentTime = getCurrentMomentForTimezone(timezone);
     const minimumDate = getRoundedTime(currentTime, minuteInterval);
-    const timezoneOffSetInMinutes = timezone ? getUtcOffsetForTimeZone(timezone) : undefined;
 
     const defaultDate = initialDate && initialDate.isAfter(minimumDate) ? initialDate : minimumDate;
     const [date, setDate] = useState<Moment>(defaultDate);
@@ -118,7 +117,7 @@ const DateTimeSelector = ({timezone, handleChange, isMilitaryTime, theme, showIn
                         textColor={theme.centerChannelColor}
                         minimumDate={minimumDate.toDate()}
                         minuteInterval={CUSTOM_STATUS_TIME_PICKER_INTERVALS}
-                        timeZoneOffsetInMinutes={timezoneOffSetInMinutes}
+                        timeZoneName={timezone || undefined}
                     />
                 ) : (
                     <DateTimePicker
@@ -130,7 +129,7 @@ const DateTimeSelector = ({timezone, handleChange, isMilitaryTime, theme, showIn
                         textColor={theme.centerChannelColor}
                         minimumDate={minimumDate.toDate()}
                         minuteInterval={CUSTOM_STATUS_TIME_PICKER_INTERVALS}
-                        timeZoneOffsetInMinutes={timezoneOffSetInMinutes}
+                        timeZoneName={timezone || undefined}
                     />
                 )
             )}
