@@ -47,6 +47,12 @@ class NavigationStoreSingleton {
         return this.isModalOpen();
     }
 
+    // Bottom-sheet screens (gallery, pickers, post options…) are not modals but
+    // were dismissed as RNN overlays in clean-slate flows before expo-router.
+    hasOverlaysOpened(): boolean {
+        return this.isModalOpen() || this.isScreenInStack('(bottom_sheet)');
+    }
+
     addScreenToStack(screenId: AvailableScreens) {
         const screenStack = [...this.state.screenStack];
         const index = screenStack.indexOf(screenId);

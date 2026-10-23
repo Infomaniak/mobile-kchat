@@ -110,7 +110,9 @@ export const switchToThread = async (serverUrl: string, rootId: string, isFromNo
 
         DeviceEventEmitter.emit(Events.CLOSE_INPUT_ACCESSORY_VIEW);
 
-        if (NavigationStore.getScreensInStack().includes(Screens.THREAD) && NavigationStore.hasModalsOpened()) {
+        // Bottom-sheet screens (gallery, pickers) are not modals but were
+        // dismissed as RNN overlays in this flow before expo-router.
+        if (NavigationStore.getScreensInStack().includes(Screens.THREAD) && NavigationStore.hasOverlaysOpened()) {
             await dismissAllModals();
             await dismissAllOverlays();
         }

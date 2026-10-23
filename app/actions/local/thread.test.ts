@@ -55,6 +55,7 @@ jest.mock('@store/navigation_store', () => {
         waitUntilScreenIsTop: jest.fn(() => Promise.resolve()),
         getScreensInStack: jest.fn(() => []),
         hasModalsOpened: jest.fn(() => false),
+        hasOverlaysOpened: jest.fn(() => false),
     };
 });
 
@@ -245,7 +246,7 @@ describe('switchToThread', () => {
         });
 
         (NavigationStore as any).getScreensInStack.mockReturnValue([Screens.THREAD]);
-        (NavigationStore as any).hasModalsOpened.mockReturnValue(true);
+        (NavigationStore as any).hasOverlaysOpened.mockReturnValue(true);
 
         const {error} = await switchToThread(serverUrl, post.id, false);
         expect(error).toBeUndefined();

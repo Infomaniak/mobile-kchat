@@ -194,6 +194,41 @@ describe('NavigationStore', () => {
         });
     });
 
+    describe('hasOverlaysOpened', () => {
+        it('should return true when modals group is in stack', () => {
+            const navState = createNavigationState([
+                {key: 'channel-1', name: 'channel'},
+                {key: '(modals)-2', name: '(modals)'},
+            ]);
+
+            NavigationStore.updateFromNavigationState(navState);
+
+            expect(NavigationStore.hasOverlaysOpened()).toBe(true);
+        });
+
+        it('should return true when bottom sheet group is in stack', () => {
+            const navState = createNavigationState([
+                {key: 'channel-1', name: 'channel'},
+                {key: '(bottom_sheet)-2', name: '(bottom_sheet)'},
+            ]);
+
+            NavigationStore.updateFromNavigationState(navState);
+
+            expect(NavigationStore.hasOverlaysOpened()).toBe(true);
+        });
+
+        it('should return false when only regular screens are open', () => {
+            const navState = createNavigationState([
+                {key: 'channel-1', name: 'channel'},
+                {key: 'thread-2', name: 'thread'},
+            ]);
+
+            NavigationStore.updateFromNavigationState(navState);
+
+            expect(NavigationStore.hasOverlaysOpened()).toBe(false);
+        });
+    });
+
     describe('reset', () => {
         it('should clear all state', () => {
             const navState = createNavigationState([

@@ -143,7 +143,9 @@ export async function dismissAllRoutesAndPopToScreen(screenId: AvailableScreens,
             // a CallKit call): the home navigation lands after the push and buries
             // the target screen. Push the target on top of the current state
             // instead; open modal stacks are dismissed first.
-            if (NavigationStore.hasModalsOpened()) {
+            // Bottom-sheet screens (gallery, pickers) are not modals but were
+            // dismissed as RNN overlays in these flows before expo-router.
+            if (NavigationStore.hasOverlaysOpened()) {
                 router.dismissAll();
             }
             navigateToScreen(screenId, passProps);
