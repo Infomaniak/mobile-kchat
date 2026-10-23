@@ -695,6 +695,8 @@
     "mobile.custom_status.clear_after": "Slet efter",
     "mobile.custom_status.clear_after.title": "Fjern brugerdefineret status efter",
     "mobile.custom_status.modal_confirm": "Færdig",
+    "mobile.date_time_selector.select_date": "Vælg dato",
+    "mobile.date_time_selector.select_time": "Vælg tid",
     "mobile.deep_link.invalid": "Det link, du forsøger at åbne, er ugyldigt.",
     "mobile.direct_message.error": "Vi kunne ikke åbne en privat besked med {displayName}.",
     "mobile.display_settings.clockDisplay": "Visning af ur",

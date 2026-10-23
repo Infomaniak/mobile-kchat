@@ -695,6 +695,8 @@
     "mobile.custom_status.clear_after": "Verwijderen na",
     "mobile.custom_status.clear_after.title": "Aangepaste status verwijderen na",
     "mobile.custom_status.modal_confirm": "Klaar",
+    "mobile.date_time_selector.select_date": "Datum selecteren",
+    "mobile.date_time_selector.select_time": "Tijd selecteren",
     "mobile.deep_link.invalid": "De link die u probeert te openen is ongeldig.",
     "mobile.direct_message.error": "We konden geen privébericht openen met {displayName}.",
     "mobile.display_settings.clockDisplay": "Klokweergave",

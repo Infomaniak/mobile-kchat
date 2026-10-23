@@ -695,6 +695,8 @@
     "mobile.custom_status.clear_after": "Rensa efter",
     "mobile.custom_status.clear_after.title": "Ta bort anpassad status efter",
     "mobile.custom_status.modal_confirm": "Klart",
+    "mobile.date_time_selector.select_date": "Välj datum",
+    "mobile.date_time_selector.select_time": "Välj tid",
     "mobile.deep_link.invalid": "Länken du försöker öppna är ogiltig.",
     "mobile.direct_message.error": "Vi kunde inte öppna ett direktmeddelande med {displayName}.",
     "mobile.display_settings.clockDisplay": "Klockvisning",

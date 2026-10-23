@@ -695,6 +695,8 @@
     "mobile.custom_status.clear_after": "Limpar após",
     "mobile.custom_status.clear_after.title": "Remover o status personalizado após",
     "mobile.custom_status.modal_confirm": "Concluído",
+    "mobile.date_time_selector.select_date": "Selecionar data",
+    "mobile.date_time_selector.select_time": "Selecionar hora",
     "mobile.deep_link.invalid": "O link que você está tentando abrir é inválido.",
     "mobile.direct_message.error": "Não foi possível abrir uma mensagem direta com {displayName}.",
     "mobile.display_settings.clockDisplay": "Exibição do relógio",

@@ -585,6 +585,8 @@
   "mobile.custom_status.clear_after": "Supprimer après",
   "mobile.custom_status.clear_after.title": "Supprimer le statut personnalisé après",
   "mobile.custom_status.modal_confirm": "Terminé",
+  "mobile.date_time_selector.select_date": "Choisir la date",
+  "mobile.date_time_selector.select_time": "Choisir l'heure",
   "mobile.deep_link.invalid": "Le lien que vous essayez d'ouvrir est invalide.",
   "mobile.direct_message.error": "Nous n'avons pas pu ouvrir de message direct avec {displayName}.",
   "mobile.display_settings.clockDisplay": "Affichage de l'horloge",

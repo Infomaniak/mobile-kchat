@@ -544,6 +544,8 @@
   "mobile.custom_status.clear_after": "Quitar después",
   "mobile.custom_status.clear_after.title": "Borrar estado personalizado después",
   "mobile.custom_status.modal_confirm": "Listo",
+  "mobile.date_time_selector.select_date": "Seleccionar fecha",
+  "mobile.date_time_selector.select_time": "Seleccionar hora",
   "mobile.direct_message.error": "No pudimos abrir un mensaje directo con {displayName}.",
   "mobile.display_settings.clockDisplay": "Pantalla del reloj",
   "mobile.display_settings.theme": "Tema",

@@ -5,6 +5,7 @@ import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 import DateTimePicker, {type DateTimePickerEvent} from '@react-native-community/datetimepicker';
 import moment, {type Moment} from 'moment-timezone';
 import React, {useState} from 'react';
+import {useIntl} from 'react-intl';
 import {View, Button, Platform} from 'react-native';
 import {of as of$} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
@@ -48,6 +49,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 });
 
 const DateTimeSelector = ({timezone, handleChange, isMilitaryTime, theme, showInitially, showDate, showDateTimePickerButton = true, initialDate, minuteInterval = 30}: Props) => {
+    const intl = useIntl();
     const styles = getStyleSheet(theme);
     const currentTime = getCurrentMomentForTimezone(timezone);
     const minimumDate = getRoundedTime(currentTime, minuteInterval);
@@ -93,13 +95,13 @@ const DateTimeSelector = ({timezone, handleChange, isMilitaryTime, theme, showIn
                         <Button
                             testID={'custom_status_clear_after.menu_item.date_and_time.button.date'}
                             onPress={showDatepicker}
-                            title='Select Date'
+                            title={intl.formatMessage({id: 'mobile.date_time_selector.select_date', defaultMessage: 'Select Date'})}
                             color={theme.buttonBg}
                         />
                         <Button
                             testID={'custom_status_clear_after.menu_item.date_and_time.button.time'}
                             onPress={showTimepicker}
-                            title='Select Time'
+                            title={intl.formatMessage({id: 'mobile.date_time_selector.select_time', defaultMessage: 'Select Time'})}
                             color={theme.buttonBg}
                         />
                     </>)}

@@ -695,6 +695,8 @@
     "mobile.custom_status.clear_after": "Usuń po",
     "mobile.custom_status.clear_after.title": "Usuń niestandardowy status po",
     "mobile.custom_status.modal_confirm": "Gotowe",
+    "mobile.date_time_selector.select_date": "Wybierz datę",
+    "mobile.date_time_selector.select_time": "Wybierz godzinę",
     "mobile.deep_link.invalid": "Ten link, który próbujesz otworzyć, jest nieprawidłowy.",
     "mobile.direct_message.error": "Nie udało się otworzyć prywatnej wiadomości z użytkownikiem {displayName}.",
     "mobile.display_settings.clockDisplay": "Wyświetlanie zegara",

@@ -695,6 +695,8 @@
     "mobile.custom_status.clear_after": "Διαγραφή μετά από",
     "mobile.custom_status.clear_after.title": "Διαγραφή προσαρμοσμένης κατάστασης μετά από",
     "mobile.custom_status.modal_confirm": "Ολοκληρώθηκε",
+    "mobile.date_time_selector.select_date": "Επιλογή ημερομηνίας",
+    "mobile.date_time_selector.select_time": "Επιλογή ώρας",
     "mobile.deep_link.invalid": "Ο σύνδεσμος που προσπαθείτε να ανοίξετε δεν είναι έγκυρος.",
     "mobile.direct_message.error": "Δεν καταφέραμε να ανοίξουμε ένα ιδιωτικό μήνυμα με τον/την {displayName}.",
     "mobile.display_settings.clockDisplay": "Εμφάνιση ώρας",

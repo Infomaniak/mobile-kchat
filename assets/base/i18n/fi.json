@@ -695,6 +695,8 @@
     "mobile.custom_status.clear_after": "Poista viiveen jälkeen",
     "mobile.custom_status.clear_after.title": "Poista mukautettu tila määritetyn ajan kuluttua",
     "mobile.custom_status.modal_confirm": "Valmis",
+    "mobile.date_time_selector.select_date": "Valitse päivä",
+    "mobile.date_time_selector.select_time": "Valitse aika",
     "mobile.deep_link.invalid": "Yrität avata virheellistä linkkiä.",
     "mobile.direct_message.error": "Emme pystynyt avaamaan yksityisviestiä käyttäjän {displayName} kanssa.",
     "mobile.display_settings.clockDisplay": "Kellon näyttö",

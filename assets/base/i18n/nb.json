@@ -695,6 +695,8 @@
     "mobile.custom_status.clear_after": "Slett etter",
     "mobile.custom_status.clear_after.title": "Slett egendefinert status etter",
     "mobile.custom_status.modal_confirm": "Ferdig",
+    "mobile.date_time_selector.select_date": "Velg dato",
+    "mobile.date_time_selector.select_time": "Velg klokkeslett",
     "mobile.deep_link.invalid": "Lenken du prøver å åpne, er ugyldig.",
     "mobile.direct_message.error": "Vi kunne ikke åpne en direktemelding med {displayName}.",
     "mobile.display_settings.clockDisplay": "Vis klokkeslett",
