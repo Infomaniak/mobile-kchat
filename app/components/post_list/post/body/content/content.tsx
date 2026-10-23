@@ -1,11 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React from 'react';
+import React, {useMemo} from 'react';
 
 import {isMessageAttachmentArray} from '@utils/message_attachment';
 import {isPostEphemeral} from '@utils/post';
-import {isYoutubeLink} from '@utils/url';
+import {getPermalinkInfoFromMessage, isYoutubeLink} from '@utils/url';
 
 import EmbeddedBindings from './embedded_bindings';
 import ImagePreview from './image_preview';
@@ -36,7 +36,17 @@ const contentType: Record<string, string> = {
 };
 
 const Content = ({isReplyPost, layoutWidth, location, post, theme, showPermalinkPreviews}: ContentProps) => {
-    let type: string | undefined = post.metadata?.embeds?.[0].type;
+    // A message that is only a permalink URL may have no embed data (stale server
+    // metadata): treat it as a permalink so the preview renders from the referenced post.
+    // Memoized so the synthetic embed data keeps a stable identity across renders.
+    const barePermalink = useMemo(() => (
+        post.metadata?.embeds?.[0]?.type ? null : getPermalinkInfoFromMessage(post.message)
+    ), [post.metadata, post.message]);
+
+    let type: string | undefined = post.metadata?.embeds?.[0]?.type;
+    if (!type && barePermalink) {
+        type = contentType.permalink;
+    }
 
     const nAppBindings = Array.isArray(post.props?.app_bindings) ? post.props.app_bindings.length : 0;
     if (!type && nAppBindings) {
@@ -63,6 +73,17 @@ const Content = ({isReplyPost, layoutWidth, location, post, theme, showPermalink
         return null;
     };
     const embed = getEmbed();
+
+    const fallbackEmbedData = useMemo<PermalinkEmbedData | undefined>(() => {
+        if (!barePermalink) {
+            return undefined;
+        }
+        return {
+            post_id: barePermalink.postId,
+            team_name: barePermalink.teamName,
+        };
+    }, [barePermalink]);
+    const embedData: PermalinkEmbedData | undefined = embed ? embed.data as PermalinkEmbedData : fallbackEmbedData;
 
     const attachments = isMessageAttachmentArray(post.props?.attachments) ? post.props.attachments : [];
     switch (contentType[type]) {
@@ -116,7 +137,7 @@ const Content = ({isReplyPost, layoutWidth, location, post, theme, showPermalink
             break;
 
         case contentType.permalink:
-            if (!embed) {
+            if (!embedData) {
                 return null;
             }
             if (!showPermalinkPreviews) {
@@ -144,7 +165,7 @@ const Content = ({isReplyPost, layoutWidth, location, post, theme, showPermalink
 
             return (
                 <PermalinkPreview
-                    embedData={post.metadata!.embeds![0].data as PermalinkEmbedData}
+                    embedData={embedData}
                     location={location}
                     parentLocation={location}
                     parentPostId={post.id}

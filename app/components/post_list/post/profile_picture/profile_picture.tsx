@@ -1,82 +1,96 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import {Image, type ImageProps} from 'expo-image';
+import {type ImageSource, Image} from 'expo-image';
 import React from 'react';
-import Animated from 'react-native-reanimated';
+import {View} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
+import ProfilePictureImage from '@components/profile_picture/image';
 import {useServerUrl} from '@context/server';
 import NetworkManager from '@managers/network_manager';
 
-import type {Client} from '@client/rest';
+import type UserModel from '@typings/database/models/servers/user';
 
 type ProfilePictureProps = {
-    author: any;
-    source?: ImageProps['source'];
-}
-const AnimatedImage = Animated.createAnimatedComponent(Image);
+    author: UserModel | UserProfile | Post | undefined;
+    size?: number;
+    source?: ImageSource;
+};
 
-export const ProfilePictureMessage = ({author, source}: ProfilePictureProps) => {
-    let client: Client | undefined;
+const AVATAR_MARGIN = {marginRight: 8};
+
+// Accepts a user model (bare permalink previews resolve one from the database) or an
+// embedded API post (which carries user_id instead of id and no picture timestamp)
+// and renders the shared avatar image with the rotating avatar cache id.
+export const ProfilePictureMessage = ({author, size = 30, source}: ProfilePictureProps) => {
     const serverUrl = useServerUrl();
 
-    try {
-        client = NetworkManager.getClient(serverUrl);
-    } catch {
-        // handle below that the client is not set
+    if (!author) {
+        return null;
     }
-    if (author && client) {
-        let pictureUrl = null;
 
-        if (author.props && author.props.override_icon_url?.startsWith('/')) {
-            pictureUrl = author.props.override_icon_url;
-        } else if (author.props.from_webhook && author.props.override_icon_url?.startsWith('http')) {
-            return (
-                <AnimatedImage
-                    source={{uri: author.props.override_icon_url}}
-                    style={{width: 30, height: 30, borderRadius: 50, marginRight: 8}}
-                />
-            );
-        } else if (author.props && author.props.from_webhook && author.props.override_icon_url == null) {
-            return (
-                <CompassIcon
-                    name='webhook'
-                    size={32}
-                />
-            );
-        } else {
-            pictureUrl = client.getProfilePictureUrl(author.user_id, 0);
-        }
+    const postProps = 'props' in author ? author.props : undefined;
+    const overrideIconUrl = typeof postProps?.override_icon_url === 'string' ? postProps.override_icon_url : undefined;
+    const fromWebhook = postProps?.from_webhook === 'true';
 
-        const imgSource = source ?? {
-            uri: `${serverUrl}${pictureUrl}`,
-            headers: {
-                Authorization: client.getCurrentBearerToken(),
-            },
-        };
-        if (
-            typeof imgSource === 'object' &&
-            !Array.isArray(imgSource) &&
-            'uri' in imgSource &&
-            imgSource.uri?.startsWith('file://')
-        ) {
-            return (
-                <AnimatedImage
-                    key={pictureUrl}
-                    source={{uri: imgSource.uri}}
-                />
-            );
+    if (fromWebhook && overrideIconUrl && !overrideIconUrl.startsWith('/')) {
+        return (
+            <Image
+                key={overrideIconUrl}
+                source={{uri: overrideIconUrl}}
+                style={[{width: size, height: size, borderRadius: size / 2}, AVATAR_MARGIN]}
+            />
+        );
+    }
+
+    if (fromWebhook && !overrideIconUrl) {
+        return (
+            <CompassIcon
+                name='webhook'
+                size={size}
+                style={AVATAR_MARGIN}
+            />
+        );
+    }
+
+    if (overrideIconUrl?.startsWith('/')) {
+        let client: ReturnType<typeof NetworkManager.getClient>;
+        try {
+            client = NetworkManager.getClient(serverUrl);
+        } catch {
+            // No client for this server (e.g. logout in progress): no way to build
+            // an authorized request for a server-relative override icon.
+            return null;
         }
 
         return (
             <Image
-                key={pictureUrl}
-                source={imgSource}
-                style={{width: 30, height: 30, borderRadius: 50, marginRight: 8}}
+                key={overrideIconUrl}
+                source={{
+                    uri: `${serverUrl}${overrideIconUrl}`,
+                    headers: {
+                        Authorization: client.getCurrentBearerToken(),
+                    },
+                }}
+                style={[{width: size, height: size, borderRadius: size / 2}, AVATAR_MARGIN]}
             />
         );
     }
-    return null;
+
+    const userId = 'user_id' in author && author.user_id ? author.user_id : author.id;
+
+    // Embedded posts carry user_id and none of the profile display fields the shared
+    // image reads; the avatar URL and cache id only need the user id and the picture
+    // timestamp, which the spread preserves when present.
+    return (
+        <View style={AVATAR_MARGIN}>
+            <ProfilePictureImage
+                author={{...author, id: userId} as UserProfile}
+                size={size}
+                source={source}
+            />
+        </View>
+    );
 };
 
 export default ProfilePictureMessage;

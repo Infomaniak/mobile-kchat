@@ -13,6 +13,34 @@ import {latinise} from './latinise';
 
 const ytRegex = /(?:http|https):\/\/(?:www\.|m\.)?(?:(?:youtube\.com\/(?:(?:v\/)|(?:(?:watch|embed\/watch)(?:\/|.*v=))|(?:embed\/)|(?:user\/[^/]+\/u\/[0-9]\/)))|(?:youtu\.be\/))([^#&?]*)/;
 
+// Supports servers deployed under a subpath, like the deep-link system does
+// (PERMALINK_PATH = '*serverUrl/:teamName/pl/:postId').
+const barePermalinkMessageRegex = /^https?:\/\/[^/?#\s]+(?:\/[^/?#\s]+)*\/([^/?#\s]+)\/pl\/([a-z0-9-]{36})$/i;
+
+export type PermalinkMessageInfo = {
+    teamName: string;
+    postId: string;
+};
+
+// Matches a message whose whole content is a permalink URL and extracts the team name
+// and referenced post id. Servers do not recompute permalink embeds for historical
+// messages and the app never refetches old posts (since-fetch), so such messages can
+// stay without metadata.embeds forever: the client detects them to render a preview
+// from the referenced post itself.
+export function getPermalinkInfoFromMessage(message: string): PermalinkMessageInfo | null {
+    const trimmed = message.trim();
+    if (!trimmed) {
+        return null;
+    }
+
+    const match = barePermalinkMessageRegex.exec(trimmed);
+    if (!match) {
+        return null;
+    }
+
+    return {teamName: match[1], postId: match[2]};
+}
+
 export function isValidUrl(url = '') {
     const regex = /^https?:\/\//i;
     return regex.test(url);

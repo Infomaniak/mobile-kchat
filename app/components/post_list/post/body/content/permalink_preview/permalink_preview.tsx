@@ -5,7 +5,7 @@ import {LinearGradient} from 'expo-linear-gradient';
 import React, {useMemo, useCallback, useEffect, useState} from 'react';
 import {Text, View, Pressable, type LayoutChangeEvent} from 'react-native';
 
-import {openPermalinkInChannel} from '@actions/remote/permalink';
+import {fetchReferencedPost, openPermalinkInChannel} from '@actions/remote/permalink';
 import {fetchUsersByIds} from '@actions/remote/user';
 import EditedIndicator from '@components/edited_indicator';
 import FormattedText from '@components/formatted_text';
@@ -19,6 +19,7 @@ import {useUserLocale} from '@context/user_locale';
 import {useIsTablet, useWindowDimensions} from '@hooks/device';
 import {usePreventDoubleTap} from '@hooks/utils';
 import {logDebug} from '@utils/log';
+import {isMessageAttachmentArray} from '@utils/message_attachment';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
 import {displayUsername, getUserTimezone} from '@utils/user';
@@ -28,6 +29,8 @@ import Opengraph from '../opengraph';
 
 import PermalinkFiles from './permalink_files';
 
+import type ChannelModel from '@typings/database/models/servers/channel';
+import type FileModel from '@typings/database/models/servers/file';
 import type PostModel from '@typings/database/models/servers/post';
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
@@ -40,7 +43,9 @@ const TABLET_PADDING_OFFSET = 40;
 type PermalinkPreviewProps = {
     embedData: PermalinkEmbedData;
     author?: UserModel;
+    channel?: ChannelModel;
     currentUser?: UserModel;
+    files?: FileModel[];
     isMilitaryTime: boolean;
     teammateNameDisplay: string;
     post?: PostModel;
@@ -122,7 +127,9 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 const PermalinkPreview = ({
     embedData,
     author,
+    channel,
     currentUser,
+    files,
     isMilitaryTime,
     teammateNameDisplay,
     post,
@@ -153,7 +160,17 @@ const PermalinkPreview = ({
 
     const maxPermalinkHeight = Math.round(dimensions.height * 0.5);
 
-    const userId = embedData?.post?.user_id;
+    const embedPost = embedData?.post;
+    const embedChannelType = embedData.channel_type ?? channel?.type;
+    const embedChannelName = embedData.channel_display_name ?? channel?.displayName;
+
+    // Bare permalink messages carry no embed post: fall back to the database record
+    // (present, or brought in by fetchReferencedPost below).
+    const referencedMessage = embedPost?.message ?? post?.message ?? '';
+    const referencedCreateAt = embedPost?.create_at ?? post?.createAt ?? 0;
+    const referencedEditAt = embedPost?.edit_at ?? post?.editAt ?? 0;
+
+    const userId = embedData?.post?.user_id ?? post?.userId;
 
     useEffect(() => {
         if (userId && !author) {
@@ -161,32 +178,33 @@ const PermalinkPreview = ({
         }
     }, [userId, author, serverUrl]);
 
-    if (isOriginPostDeleted) {
-        return null;
-    }
+    const referencedPostId = embedData?.post_id;
+    const referencedPostDeleted = Boolean(embedData?.post?.delete_at) || embedData?.post?.state === 'DELETED';
 
-    const {
-        post: embedPost,
-        channel_display_name,
-        channel_type,
-    } = embedData;
+    // The referenced post may not be in the local database yet (e.g. cross-channel permalink
+    // or a bare permalink message whose embeds were never computed): one fetch brings the
+    // full post in.
+    useEffect(() => {
+        if (referencedPostId && !post && !referencedPostDeleted) {
+            fetchReferencedPost(serverUrl, referencedPostId);
+        }
+    }, [referencedPostId, post, referencedPostDeleted, serverUrl]);
 
     const truncatedMessage = useMemo(() => {
-        const msg = embedPost?.message ?? '';
-        if (!msg || typeof msg !== 'string') {
+        if (!referencedMessage || typeof referencedMessage !== 'string') {
             return '';
         }
 
-        const cleanMessage = msg.trim();
+        const cleanMessage = referencedMessage.trim();
 
         if (cleanMessage.length > MAX_PERMALINK_PREVIEW_CHARACTERS) {
             return cleanMessage.substring(0, MAX_PERMALINK_PREVIEW_CHARACTERS) + '...';
         }
 
         return cleanMessage;
-    }, [embedPost?.message]);
+    }, [referencedMessage]);
 
-    const isEdited = useMemo(() => embedData && embedData.post && embedData.post.edit_at > 0, [embedData]);
+    const isEdited = referencedEditAt > 0;
 
     const authorDisplayName = useMemo(() => {
         const props = embedPost?.props;
@@ -197,17 +215,23 @@ const PermalinkPreview = ({
     }, [author, locale, teammateNameDisplay, embedPost?.props]);
 
     const channelContextText = useMemo(() => {
-        const displayName = channel_type === 'D' ? authorDisplayName : channel_display_name;
-        return `~${displayName}`;
-    }, [channel_display_name, channel_type, authorDisplayName]);
+        if (embedChannelType === 'D') {
+            return authorDisplayName ? `~${authorDisplayName}` : '';
+        }
+        return embedChannelName ? `~${embedChannelName}` : '';
+    }, [embedChannelType, embedChannelName, authorDisplayName]);
 
     const filesInfo = useMemo(() => {
         return embedData?.post?.metadata?.files || [];
     }, [embedData?.post?.metadata?.files]);
 
-    const hasFiles = filesInfo.length > 0;
+    // Bare permalink messages resolve files and attachments from the database record
+    // (embedded posts carry their own copies in the embed data).
+    const hasFiles = filesInfo.length > 0 || (files?.length ?? 0) > 0;
 
-    const hasAttachments = Array.isArray(embedPost?.props?.attachments) && embedPost.props.attachments.length > 0;
+    const attachmentsProp = embedPost?.props?.attachments ?? post?.props?.attachments;
+    const firstAttachment = isMessageAttachmentArray(attachmentsProp) ? attachmentsProp[0] : undefined;
+    const hasAttachments = Boolean(firstAttachment);
 
     const handlePress = usePreventDoubleTap(useCallback(() => {
         const teamName = embedData.team_name;
@@ -215,7 +239,7 @@ const PermalinkPreview = ({
 
         if (postId) {
             logDebug('[PermalinkPreview] pressed', {postId, teamName});
-            openPermalinkInChannel(serverUrl, teamName, postId);
+            openPermalinkInChannel(serverUrl, teamName ?? '', postId);
         } else {
             logDebug('[PermalinkPreview] pressed without post id', {teamName});
         }
@@ -231,7 +255,11 @@ const PermalinkPreview = ({
     // on every render. We need to trust that changes in the currentUser will trigger the recalculation.
     const mentionKeys = useMemo(() => currentUser?.mentionKeys ?? undefined, [currentUser]);
 
-    if (!post) {
+    if (isOriginPostDeleted) {
+        return null;
+    }
+
+    if (!post && !embedPost) {
         return null;
     }
 
@@ -255,8 +283,11 @@ const PermalinkPreview = ({
             >
                 <View onLayout={handleContentLayout}>
                     <View style={styles.header}>
+                        {/* Prefer the user model: it carries last_picture_update, so
+                            the avatar cache id matches the other surfaces (embedded
+                            posts carry no picture timestamp). */}
                         <ProfilePicture
-                            author={embedPost || author}
+                            author={author ?? embedPost}
                         />
                         <View style={styles.authorInfo}>
                             <Text
@@ -268,7 +299,7 @@ const PermalinkPreview = ({
                             <FormattedTime
                                 timezone={getUserTimezone(currentUser)}
                                 isMilitaryTime={isMilitaryTime}
-                                value={embedPost?.create_at ?? 0}
+                                value={referencedCreateAt}
                                 style={styles.timestamp}
                             />
                         </View>
@@ -277,7 +308,7 @@ const PermalinkPreview = ({
                     <View style={styles.messageContainer}>
                         <Markdown
                             baseTextStyle={styles.messageText}
-                            channelId={embedData.channel_id}
+                            channelId={embedData.channel_id ?? post?.channelId ?? ''}
                             location={location}
                             theme={theme}
                             value={truncatedMessage}
@@ -304,10 +335,10 @@ const PermalinkPreview = ({
                         isEmbedded={true}
                     />
 
-                    {Array.isArray(embedPost?.props?.attachments) && embedPost?.props?.attachments[0] && (
+                    {firstAttachment && (
                         <MessageAttachment
-                            attachment={embedPost.props.attachments[0]}
-                            channelId={embedData.channel_id}
+                            attachment={firstAttachment}
+                            channelId={embedData.channel_id ?? post?.channelId ?? ''}
                             layoutWidth={layoutWidth}
                             location={location}
                             metadata={embedData?.post?.metadata || null}
@@ -336,16 +367,18 @@ const PermalinkPreview = ({
                 )}
             </View>
 
-            <Text style={styles.channelContext}>
-                <FormattedText
-                    id='mobile.permalink_preview.originally_posted'
-                    defaultMessage='Originally posted in '
-                    style={styles.channelContext}
-                />
-                <Text style={styles.channelName}>
-                    {channelContextText}
+            {channelContextText ? (
+                <Text style={styles.channelContext}>
+                    <FormattedText
+                        id='mobile.permalink_preview.originally_posted'
+                        defaultMessage='Originally posted in '
+                        style={styles.channelContext}
+                    />
+                    <Text style={styles.channelName}>
+                        {channelContextText}
+                    </Text>
                 </Text>
-            </Text>
+            ) : null}
         </Pressable>
     );
 };

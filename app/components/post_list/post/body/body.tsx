@@ -15,6 +15,7 @@ import {PostTypes} from '@constants/post';
 import {THREAD} from '@constants/screens';
 import {isEdited as postEdited, isPostFailed} from '@utils/post';
 import {makeStyleSheetFromTheme} from '@utils/theme';
+import {getPermalinkInfoFromMessage} from '@utils/url';
 
 import Acknowledgements from './acknowledgements';
 import ChannelMemberMention from './add_members';
@@ -124,7 +125,11 @@ const Body = ({
     const nAttachments = Array.isArray(post.props?.attachments) ? post.props?.attachments.length : 0;
 
     const isReplyPost = Boolean(post.rootId && (!isEphemeral || !hasBeenDeleted) && location !== THREAD);
-    const hasContent = Boolean((post.metadata?.embeds?.length || (appsEnabled && nBindings)) || nAttachments);
+
+    // Bare permalink messages may have no embed data at all (the server does not recompute
+    // embeds for historical posts and the app never refetches them): they still carry content.
+    const isBarePermalink = !post.metadata?.embeds?.length && Boolean(getPermalinkInfoFromMessage(post.message));
+    const hasContent = Boolean((post.metadata?.embeds?.length || isBarePermalink || (appsEnabled && nBindings)) || nAttachments);
 
     const replyBarStyle = useMemo<StyleProp<ViewStyle>|undefined>(() => {
         if (!isReplyPost || (isCRTEnabled && location === Screens.PERMALINK)) {
