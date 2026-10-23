@@ -3,7 +3,7 @@
   "account.logout": "Abmelden",
   "account.logout_from": "Abmelden von {serverName}",
   "account.settings": "Einstellungen",
-  "account.send_feedback": "Feedback senden",
+  "account.send_feedback": "Berichts-Tools",
   "send_feedback.description.label": "Beschreibung",
   "send_feedback.error.generic": "Feedback konnte nicht gesendet werden: {error}",
   "send_feedback.error.no_server": "Nicht mit einem Server verbunden. Bitte versuchen Sie es später erneut.",

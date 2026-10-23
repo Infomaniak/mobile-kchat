@@ -3,7 +3,7 @@
   "account.logout": "Disconnettersi",
   "account.logout_from": "Esci da {serverName}",
   "account.settings": "Impostazioni",
-  "account.send_feedback": "Invia feedback",
+  "account.send_feedback": "Strumenti di reporting",
   "send_feedback.description.label": "Descrizione",
   "send_feedback.error.generic": "Impossibile inviare il feedback: {error}",
   "send_feedback.error.no_server": "Non connesso a un server. Riprova più tardi.",

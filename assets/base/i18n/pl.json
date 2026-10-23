@@ -4,7 +4,7 @@
     "account.server_preprod": "Przejdź do wersji NEXT",
     "account.server_prod": "Przejdź do wersji STABILNEJ",
     "account.settings": "Ustawienia",
-    "account.send_feedback": "Wyślij opinię",
+    "account.send_feedback": "Narzędzia do raportowania",
     "send_feedback.description.label": "Opis",
     "send_feedback.error.generic": "Nie udało się wysłać opinii: {error}",
     "send_feedback.error.no_server": "Brak połączenia z serwerem. Spróbuj ponownie później.",

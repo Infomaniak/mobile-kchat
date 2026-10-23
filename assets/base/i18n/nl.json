@@ -4,7 +4,7 @@
     "account.server_preprod": "Ga naar NEXT",
     "account.server_prod": "Schakel over naar de STABIELE versie",
     "account.settings": "Instellingen",
-    "account.send_feedback": "Feedback versturen",
+    "account.send_feedback": "Rapportagetools",
     "send_feedback.description.label": "Beschrijving",
     "send_feedback.error.generic": "Feedback versturen mislukt: {error}",
     "send_feedback.error.no_server": "Niet verbonden met een server. Probeer het later opnieuw.",

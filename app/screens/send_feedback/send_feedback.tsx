@@ -14,7 +14,7 @@ import {
 import {type Asset, type ImagePickerResponse, launchImageLibrary} from 'react-native-image-picker';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-import {sendFeedback} from '@actions/remote/feedback/send_feedback';
+import {sendFeedback, type SendFeedbackParams} from '@actions/remote/feedback/send_feedback';
 import Button from '@components/button';
 import FloatingTextInput from '@components/floating_input/floating_text_input_label';
 import MenuDivider from '@components/menu_divider';
@@ -22,6 +22,7 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import useAndroidHardwareBackHandler from '@hooks/android_back_handler';
 import {popTopScreen} from '@screens/navigation';
+import {buildFeedbackDescription, cleanupLogsAttachment, createLogsAttachment, isPayloadTooLargeError, type LogsAttachment} from '@utils/feedback_report';
 import {logDebug, logError} from '@utils/log';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {typography} from '@utils/typography';
@@ -30,6 +31,7 @@ import FeedbackSelector from './feedback_selector';
 
 import type UserModel from '@typings/database/models/servers/user';
 import type {AvailableScreens} from '@typings/screens/navigation';
+import type {ReportAProblemMetadata} from '@typings/screens/report_a_problem';
 
 type FeedbackType = 'bug' | 'feature';
 type Priority = 'low' | 'normal' | 'high' | 'urgent' | 'immediate';
@@ -122,6 +124,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
 type Props = {
     componentId: AvailableScreens;
     currentUser: UserModel | undefined;
+    metadata: ReportAProblemMetadata;
 };
 
 type FileItemProps = {
@@ -161,7 +164,7 @@ const FileItem = ({file, index, onRemove}: FileItemProps) => {
     );
 };
 
-const SendFeedback = ({componentId, currentUser}: Props) => {
+const SendFeedback = ({componentId, currentUser, metadata}: Props) => {
     const intl = useIntl();
     const theme = useTheme();
     const styles = getStyleSheet(theme);
@@ -245,22 +248,30 @@ const SendFeedback = ({componentId, currentUser}: Props) => {
 
         const prefix = Platform.OS === 'android' ? '[Android]' : '[iOS]';
         const fullSubject = `${prefix}: ${subject}`;
+        const fullDescription = buildFeedbackDescription(description, metadata);
 
         setErrorMessage('');
         setIsSubmitting(true);
+        let logsAttachment: LogsAttachment | null = null;
         try {
-            const result = await sendFeedback({
+            logsAttachment = await createLogsAttachment();
+            const submitFiles = files.map((f) => ({uri: f.uri!, type: f.type, fileName: f.fileName}));
+            if (logsAttachment) {
+                submitFiles.push({uri: logsAttachment.uri, type: 'application/zip', fileName: logsAttachment.fileName});
+            }
+
+            const params: SendFeedbackParams = {
                 serverUrl,
                 bucketIdentifier: BUCKET_IDENTIFIER,
                 type: feedbackType === 'bug' ? 'bugs' : 'features',
                 subject: fullSubject,
-                description,
+                description: fullDescription,
                 priorityValue: PriorityValueMap[priority],
                 priorityLabel: intl.formatMessage(
                     {id: 'send_feedback.priority.label_format', defaultMessage: 'Priority: {text}'},
                     {text: priorityOptions.find((p) => p.value === priority)?.text || priority},
                 ),
-                files: files.map((f) => ({uri: f.uri!, type: f.type, fileName: f.fileName})),
+                files: submitFiles,
                 extra: {
                     project: 'kchat',
                     route: 'null',
@@ -269,8 +280,18 @@ const SendFeedback = ({componentId, currentUser}: Props) => {
                     userMail: currentUser.email,
                     userDisplayName: currentUser.firstName || currentUser.lastName ? `${currentUser.firstName} ${currentUser.lastName}`.trim() : currentUser.username,
                     pageLink: serverUrl,
+                    appVersion: metadata.appVersion,
+                    appPlatform: metadata.appPlatform,
                 },
-            });
+            };
+
+            let result = await sendFeedback(params);
+            if (result.error && isPayloadTooLargeError(result.error) && logsAttachment) {
+                const attachmentFileName = logsAttachment.fileName;
+                logDebug('[SendFeedback] Server rejected the payload size, retrying without app logs');
+                params.files = submitFiles.filter((f) => f.fileName !== attachmentFileName);
+                result = await sendFeedback(params);
+            }
 
             if (result.error) {
                 throw result.error;
@@ -283,9 +304,10 @@ const SendFeedback = ({componentId, currentUser}: Props) => {
             setErrorMessage(intl.formatMessage({id: 'send_feedback.error.generic', defaultMessage: 'Failed to send feedback: {error}'}, {error: msg}));
             logError('SendFeedback', error);
         } finally {
+            cleanupLogsAttachment(logsAttachment);
             setIsSubmitting(false);
         }
-    }, [currentUser, serverUrl, subject, description, feedbackType, priority, files, handleClose, intl, priorityOptions]);
+    }, [currentUser, serverUrl, subject, description, feedbackType, priority, files, handleClose, intl, priorityOptions, metadata]);
 
     const canSubmit = subject.trim().length > 0 && !isSubmitting && currentUser && serverUrl;
 

@@ -3,7 +3,7 @@
   "account.logout": "Salir",
   "account.logout_from": "Desconectar de {serverName}",
   "account.settings": "Ajustes",
-  "account.send_feedback": "Enviar comentarios",
+  "account.send_feedback": "Herramientas de reporting",
   "send_feedback.description.label": "Descripción",
   "send_feedback.error.generic": "Error al enviar comentarios: {error}",
   "send_feedback.error.no_server": "No conectado a un servidor. Por favor, inténtelo más tarde.",

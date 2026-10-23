@@ -4,7 +4,7 @@
     "account.server_preprod": "Bytt til NEXT",
     "account.server_prod": "Bytt til STABIL versjon",
     "account.settings": "Innstillinger",
-    "account.send_feedback": "Send tilbakemelding",
+    "account.send_feedback": "Rapportverktøy",
     "send_feedback.description.label": "Beskrivelse",
     "send_feedback.error.generic": "Kunne ikke sende tilbakemelding: {error}",
     "send_feedback.error.no_server": "Ikke koblet til en server. Prøv igjen senere.",

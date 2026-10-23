@@ -4,7 +4,7 @@
     "account.server_preprod": "Siirry NEXT-versioon",
     "account.server_prod": "Vaihda STABIILIIN versioon",
     "account.settings": "Asetukset",
-    "account.send_feedback": "Lähetä palautetta",
+    "account.send_feedback": "Raportointityökalut",
     "send_feedback.description.label": "Kuvaus",
     "send_feedback.error.generic": "Palautteen lähettäminen epäonnistui: {error}",
     "send_feedback.error.no_server": "Ei yhteyttä palvelimeen. Yritä myöhemmin uudelleen.",

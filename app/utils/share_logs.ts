@@ -5,6 +5,7 @@ import {defineMessages} from 'react-intl';
 import {Alert, Platform} from 'react-native';
 import Share from 'react-native-share';
 
+import en from '@assets/i18n/en.json';
 import {pathWithPrefix} from '@utils/file';
 
 import {tryOpenURL} from './url';
@@ -62,9 +63,12 @@ export const getDefaultReportAProblemLink = (isLicensed: boolean) => {
     return isLicensed ? 'https://mattermost.com/pl/report_a_problem_licensed' : 'https://mattermost.com/pl/report_a_problem_unlicensed';
 };
 
-export function metadataToString(metadata: ReportAProblemMetadata): string {
+export function metadataToString(metadata: Partial<ReportAProblemMetadata>): string {
+    // Labels come from en.json, not from reportAProblemMessages.defaultMessage:
+    // with babel-plugin-formatjs (ast: true) defaultMessage is a compiled AST
+    // object in the app bundle, not a string.
     return Object.entries(metadata).
-        map(([key, value]) => `${reportAProblemMessages[key as keyof ReportAProblemMetadata].defaultMessage}: ${value}`).
+        map(([key, value]) => `${en[`report_a_problem.metadata.${key}`] || key}: ${value}`).
         join('\n');
 }
 

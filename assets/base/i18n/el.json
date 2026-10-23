@@ -4,7 +4,7 @@
     "account.server_preprod": "Μεταβείτε στην έκδοση NEXT",
     "account.server_prod": "Μετάβαση στην ΣΤΑΘΕΡΗ έκδοση",
     "account.settings": "Ρυθμίσεις",
-    "account.send_feedback": "Αποστολή σχολίου",
+    "account.send_feedback": "Εργαλεία αναφοράς",
     "send_feedback.description.label": "Περιγραφή",
     "send_feedback.error.generic": "Αποτυχία αποστολής σχολίου: {error}",
     "send_feedback.error.no_server": "Δεν συνδέθηκε με διακομιστή. Παρακαλώ δοκιμάστε ξανά αργότερα.",

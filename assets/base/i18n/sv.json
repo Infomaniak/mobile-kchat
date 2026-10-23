@@ -4,7 +4,7 @@
     "account.server_preprod": "Byt till NEXT",
     "account.server_prod": "Växla till STABIL version",
     "account.settings": "Inställningar",
-    "account.send_feedback": "Skicka feedback",
+    "account.send_feedback": "Rapporteringsverktyg",
     "send_feedback.description.label": "Beskrivning",
     "send_feedback.error.generic": "Det gick inte att skicka feedback: {error}",
     "send_feedback.error.no_server": "Inte ansluten till en server. Försök igen senare.",

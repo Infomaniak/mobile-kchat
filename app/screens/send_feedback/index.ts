@@ -3,6 +3,7 @@
 
 import {withDatabase, withObservables} from '@nozbe/watermelondb/react';
 
+import {observeReportAProblemMetadata} from '@queries/servers/system';
 import {observeCurrentUser} from '@queries/servers/user';
 
 import SendFeedback from './send_feedback';
@@ -12,6 +13,7 @@ import type {WithDatabaseArgs} from '@typings/database/database';
 const enhanced = withObservables([], ({database}: WithDatabaseArgs) => {
     return {
         currentUser: observeCurrentUser(database),
+        metadata: observeReportAProblemMetadata(database),
     };
 });
 

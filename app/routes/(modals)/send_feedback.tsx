@@ -16,7 +16,7 @@ export default function SendFeedbackRoute() {
     useNavigationHeader({
         showWhenPushed: true,
         headerOptions: {
-            headerTitle: intl.formatMessage({id: 'account.send_feedback', defaultMessage: 'Send Feedback'}),
+            headerTitle: intl.formatMessage({id: 'account.send_feedback', defaultMessage: 'Reporting tools'}),
             ...getModalHeaderOptions(theme, navigateBack, 'close.send_feedback.button'),
         },
     });

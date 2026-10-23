@@ -4,7 +4,7 @@
     "account.server_preprod": "Mudar para a versão NEXT",
     "account.server_prod": "Mudar para a versão ESTÁVEL",
     "account.settings": "Configurações",
-    "account.send_feedback": "Enviar feedback",
+    "account.send_feedback": "Ferramentas de relatório",
     "send_feedback.description.label": "Descrição",
     "send_feedback.error.generic": "Falha ao enviar feedback: {error}",
     "send_feedback.error.no_server": "Não ligado a um servidor. Tente novamente mais tarde.",
