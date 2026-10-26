@@ -1,9 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {Q} from '@nozbe/watermelondb';
 import {DeviceEventEmitter} from 'react-native';
 
 import {ActionType, Events, Navigation, Screens} from '@constants';
+import {MM_TABLES} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import {getChannelById} from '@queries/servers/channel';
 import {getPostById} from '@queries/servers/post';
@@ -18,6 +20,9 @@ import {isTablet} from '@utils/helpers';
 import {logDebug, logError} from '@utils/log';
 
 import type Model from '@nozbe/watermelondb/Model';
+import type ThreadModel from '@typings/database/models/servers/thread';
+
+const {SERVER: {THREAD}} = MM_TABLES;
 
 export const switchToGlobalThreads = async (serverUrl: string, teamId?: string, prepareRecordsOnly = false) => {
     const dt = Date.now();
@@ -311,6 +316,38 @@ export async function updateTeamThreadsSync(serverUrl: string, data: TeamThreads
         return {models};
     } catch (error) {
         logError('Failed updateTeamThreadsSync', error);
+        return {error};
+    }
+}
+
+/**
+ * Permanently removes a locally stored thread and its relations (team entries and participants).
+ *
+ * When the root post of a thread is deleted, the kChat server hard-deletes the thread row and the
+ * threads sync never reports the deletion (threads are returned without any delete_at), so this is
+ * the only way the app learns about it: the websocket post_deleted event on the root post.
+ */
+export async function deleteThread(serverUrl: string, threadId: string) {
+    try {
+        const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        const threads = await database.get<ThreadModel>(THREAD).query(Q.where('id', threadId)).fetch();
+        if (!threads.length) {
+            return {models: []};
+        }
+
+        await database.write(async () => {
+            const promises: Array<Promise<void>> = [];
+            for (const thread of threads) {
+                promises.push(thread.destroyPermanently());
+                promises.push(thread.threadsInTeam.destroyAllPermanently());
+                promises.push(thread.participants.destroyAllPermanently());
+            }
+            await Promise.all(promises);
+        });
+
+        return {models: []};
+    } catch (error) {
+        logError('Failed deleteThread', error);
         return {error};
     }
 }

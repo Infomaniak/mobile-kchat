@@ -5,7 +5,7 @@ import {DeviceEventEmitter} from 'react-native';
 
 import {storeMyChannelsForTeam, markChannelAsUnread, markChannelAsViewed, updateLastPostAt} from '@actions/local/channel';
 import {addPostAcknowledgement, markPostAsDeleted, removePostAcknowledgement, updatePostTranslation} from '@actions/local/post';
-import {createThreadFromNewPost, updateThread} from '@actions/local/thread';
+import {createThreadFromNewPost, deleteThread, updateThread} from '@actions/local/thread';
 import {getCurrentUserLocale} from '@actions/local/user';
 import {fetchChannelStats, fetchMyChannel} from '@actions/remote/channel';
 import {fetchPollMetadataIfPoll} from '@actions/remote/integrations';
@@ -320,6 +320,10 @@ export async function handlePostDeleted(serverUrl: string, msg: WebSocketMessage
                     fetchThread(serverUrl, teamId, post.root_id);
                 }
             }
+        } else {
+            // The root post of the thread was deleted: the server removes the whole thread and the
+            // threads sync never reports deletions, so purge the local thread now.
+            await deleteThread(serverUrl, post.id);
         }
 
         if (models.length) {

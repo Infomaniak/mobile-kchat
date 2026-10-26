@@ -328,7 +328,6 @@ export const syncThreadsIfNeeded = async (
 type SyncThreadOptions = {
     excludeDirect?: boolean;
     fetchOnly?: boolean;
-    refresh?: boolean;
     groupLabel?: RequestGroupLabel;
 }
 
@@ -338,7 +337,6 @@ export const syncTeamThreads = async (
     {
         excludeDirect = false,
         fetchOnly = false,
-        refresh = false,
         groupLabel,
     }: SyncThreadOptions = {},
 ) => {
@@ -408,7 +406,7 @@ export const syncTeamThreads = async (
                 fetchThreads(
                     serverUrl,
                     teamId,
-                    {deleted: true, since: refresh ? undefined : syncData.latest + 1, excludeDirect},
+                    {deleted: true, since: syncData.latest + 1, excludeDirect},
                     Direction.Down,
                     undefined,
                     groupLabel,
@@ -466,6 +464,84 @@ export const syncTeamThreads = async (
         return {error: false, models};
     } catch (error) {
         return {error};
+    }
+};
+
+/**
+ * Full re-fetch of every team thread the user follows, without the incremental `since` window.
+ *
+ * The incremental sync only receives threads whose `last_reply_at` or membership `last_updated_at`
+ * changed since the last sync. When that window is poisoned — e.g. by a device clock running ahead
+ * of the server pushing `last_viewed_at` timestamps into the future through markThreadAsRead —
+ * subsequent updates are silently missed until a thread catches up with the skewed value. This
+ * rescan re-fetches everything and re-applies it, repairing the local state.
+ *
+ * It downloads the whole team thread list, so it must never be awaited by the UI: callers fire it
+ * in the background (e.g. right after a pull-to-refresh) so the loader stays fast. Concurrent calls
+ * for the same server/team are dropped (an in-flight rescan skips new ones), so the rescan can
+ * never race another rescan of the same team.
+ */
+const rescansInProgress = new Set<string>();
+
+export const rescanTeamThreads = async (
+    serverUrl: string,
+    teamId: string,
+    {
+        excludeDirect = false,
+        groupLabel,
+    }: SyncThreadOptions = {},
+) => {
+    const rescanKey = `${serverUrl}/${teamId}`;
+    if (rescansInProgress.has(rescanKey)) {
+        return {error: false, models: []};
+    }
+
+    rescansInProgress.add(rescanKey);
+    try {
+        const fetchedThreads = await fetchThreads(
+            serverUrl,
+            teamId,
+            {deleted: true, excludeDirect},
+            Direction.Down,
+            undefined,
+            groupLabel,
+        );
+        if (fetchedThreads.error) {
+            return {error: fetchedThreads.error, models: undefined};
+        }
+
+        const threads = fetchedThreads.threads || [];
+        if (!threads.length) {
+            return {error: false, models: []};
+        }
+
+        for (const thread of threads) {
+            thread.is_following = thread.is_following ?? true;
+        }
+
+        const {models, error} = await processReceivedThreads(serverUrl, threads, teamId, true);
+        if (error) {
+            return {error, models: undefined};
+        }
+
+        if (!models?.length) {
+            return {error: false, models: []};
+        }
+
+        const {operator} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        try {
+            await operator.batchRecords(models, 'rescanTeamThreads');
+        } catch (err) {
+            logError('rescanTeamThreads: failed to batch records', err);
+            return {error: err, models: undefined};
+        }
+
+        return {error: false, models};
+    } catch (error) {
+        logError('rescanTeamThreads: error', error);
+        return {error, models: undefined};
+    } finally {
+        rescansInProgress.delete(rescanKey);
     }
 };
 
@@ -592,7 +668,7 @@ export const batchTeamThreadSync = async (serverUrl: string, teamId: string) => 
 
             const includeDirect = batch.teamIds.has('');
             const teamIds = Array.from(batch.teamIds).filter((t) => t !== '');
-            const promises = teamIds.map((t, idx) => syncTeamThreads(serverUrl, t, {excludeDirect: !includeDirect || idx !== 0, refresh: true, fetchOnly: false}));
+            const promises = teamIds.map((t, idx) => syncTeamThreads(serverUrl, t, {excludeDirect: !includeDirect || idx !== 0, fetchOnly: false}));
             const results = await Promise.all(promises);
             for (const r of results) {
                 if (r.error) {

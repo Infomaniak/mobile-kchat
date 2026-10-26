@@ -4,7 +4,7 @@
 import React, {useCallback, useEffect, useMemo, useState, useRef} from 'react';
 import {FlatList, type ListRenderItemInfo, StyleSheet} from 'react-native';
 
-import {loadEarlierThreads, syncTeamThreads} from '@actions/remote/thread';
+import {loadEarlierThreads, rescanTeamThreads, syncTeamThreads} from '@actions/remote/thread';
 import Loading from '@components/loading';
 import {General, Screens} from '@constants';
 import {useServerUrl} from '@context/server';
@@ -16,6 +16,9 @@ import EndOfList from './end_of_list';
 import Thread from './thread';
 
 import type ThreadModel from '@typings/database/models/servers/thread';
+
+// The rescan downloads the whole team thread list, so throttle it: at most one per 30 minutes.
+const RESCAN_INTERVAL = 30 * 60 * 1000;
 
 type Props = {
     tab: GlobalThreadsTab;
@@ -56,6 +59,7 @@ const ThreadsList = ({
     const theme = useTheme();
 
     const hasFetchedOnce = useRef(false);
+    const lastRescanAtRef = useRef(0);
     const [isLoading, setIsLoading] = useState(false);
     const [endReached, setEndReached] = useState(false);
     const [isRefreshing, setRefreshing] = useState(false);
@@ -127,13 +131,32 @@ const ThreadsList = ({
         return null;
     }, [tab, hasThreads, endReached, isLoading, theme.buttonBg]);
 
+    const triggerRescan = useCallback(() => {
+        if (Date.now() - lastRescanAtRef.current <= RESCAN_INTERVAL) {
+            return;
+        }
+        lastRescanAtRef.current = Date.now();
+        rescanTeamThreads(serverUrl, teamId).then((result) => {
+            if (result.error) {
+                // Reset the throttle so the next pull retries a failed rescan
+                lastRescanAtRef.current = 0;
+            }
+        });
+    }, [serverUrl, teamId]);
+
     const handleRefresh = useCallback(() => {
         setRefreshing(true);
 
-        syncTeamThreads(serverUrl, teamId, {refresh: true}).finally(() => {
+        syncTeamThreads(serverUrl, teamId).finally(() => {
             setRefreshing(false);
+
+            // Sequenced after the incremental sync so the two sync flows never race on the same
+            // rows, and throttled since it downloads the whole team thread list. The UI never
+            // awaits it: the loader stays fast (RM-625222). On failure the throttle is reset so
+            // the next pull retries, and an in-flight rescan drops concurrent ones.
+            triggerRescan();
         });
-    }, [serverUrl, teamId]);
+    }, [serverUrl, teamId, triggerRescan]);
 
     const handleEndReached = useCallback(() => {
         if (tab === 'unreads' || endReached || !lastThread) {

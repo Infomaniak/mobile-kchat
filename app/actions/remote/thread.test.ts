@@ -3,8 +3,9 @@
 
 import {waitFor} from '@testing-library/react-native';
 
+import {deleteThread, processReceivedThreads} from '@actions/local/thread';
 import {ActionType} from '@constants';
-import {SYSTEM_IDENTIFIERS} from '@constants/database';
+import {MM_TABLES, SYSTEM_IDENTIFIERS} from '@constants/database';
 import DatabaseManager from '@database/manager';
 import NetworkManager from '@managers/network_manager';
 import TestHelper from '@test/test_helper';
@@ -17,6 +18,7 @@ import {
     updateThreadFollowing,
     fetchThreads,
     syncTeamThreads,
+    rescanTeamThreads,
     loadEarlierThreads,
     fetchAndSwitchToThread,
     syncThreadsIfNeeded,
@@ -25,6 +27,9 @@ import {
 
 import type {Client} from '@client/rest';
 import type ServerDataOperator from '@database/operator/server_data_operator';
+import type ThreadModel from '@typings/database/models/servers/thread';
+
+const {SERVER: {THREAD, THREADS_IN_TEAM, THREAD_PARTICIPANT}} = MM_TABLES;
 
 const serverUrl = 'baseHandler.test.com';
 let operator: ServerDataOperator;
@@ -38,6 +43,7 @@ const team: Team = {
 } as Team;
 
 const user1 = {id: 'userid1', username: 'user1', email: 'user1@mattermost.com', roles: ''} as UserProfile;
+const user2 = {id: 'userid2', username: 'user2', email: 'user2@mattermost.com', roles: ''} as UserProfile;
 
 const post1 = TestHelper.fakePost({channel_id: channelId, id: 'postid1'});
 
@@ -64,13 +70,17 @@ const throwFunc = () => {
     throw Error('error');
 };
 
+const getThreadsMock = jest.fn((_userId: string, _teamId: string, _before: unknown, _after: unknown, _perPage: unknown, _deleted: unknown, _unread?: boolean, _since?: number) => {
+    return Promise.resolve({threads, total: threads.length, total_unread_mentions: 0, total_unread_threads: 0});
+});
+
 const partialClient: Partial<Client> = {
     getThread: jest.fn((userId: string, _teamId: string, threadId: string) => Promise.resolve({...thread1, id: threadId})),
     updateTeamThreadsAsRead: jest.fn(),
     markThreadAsRead: jest.fn(),
     markThreadAsUnread: jest.fn(),
     updateThreadFollow: jest.fn(),
-    getThreads: jest.fn(() => Promise.resolve({threads, total: threads.length, total_unread_mentions: 0, total_unread_threads: 0})),
+    getThreads: getThreadsMock,
 };
 const mockClient = partialClient as Client;
 
@@ -162,6 +172,86 @@ describe('get threads', () => {
         expect(result2.error).toBeFalsy();
         expect(result2.models).toBeDefined();
         expect(result2.models?.length).toBe(1); // 1 team thread sync
+    });
+
+    it('syncTeamThreads - keeps the incremental since on every sync so a refresh does not re-fetch all threads [RM-625222]', async () => {
+        await operator.handleSystem({systems: [{id: SYSTEM_IDENTIFIERS.CURRENT_USER_ID, value: user1.id}], prepareRecordsOnly: false});
+        await operator.handleUsers({users: [user1], prepareRecordsOnly: false});
+
+        // First sync populates the sync data so the next sync takes the incremental path
+        const first = await syncTeamThreads(serverUrl, team.id);
+        expect(first.error).toBeFalsy();
+
+        getThreadsMock.mockClear();
+        const second = await syncTeamThreads(serverUrl, team.id);
+        expect(second.error).toBeFalsy();
+
+        // Every all-threads fetch must use the incremental since, never a full re-fetch (the unread fetch is a full re-fetch by design)
+        const allThreadsCalls = getThreadsMock.mock.calls.filter((call) => call[5] === true);
+        expect(allThreadsCalls.length).toBeGreaterThan(0);
+        for (const call of allThreadsCalls) {
+            expect(call[7]).toBeGreaterThan(0);
+        }
+    });
+
+    it('rescanTeamThreads - re-applies thread data without the incremental since window [RM-625222]', async () => {
+        await operator.handleSystem({systems: [{id: SYSTEM_IDENTIFIERS.CURRENT_USER_ID, value: user1.id}], prepareRecordsOnly: false});
+        await operator.handleUsers({users: [user1], prepareRecordsOnly: false});
+
+        const getThreadRow = async () => {
+            const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+            const rows = await database.get(THREAD).query().fetch();
+            return rows.find((t) => t.id === thread1.id) as ThreadModel | undefined;
+        };
+
+        // Seed the local thread with stale data
+        const seeded = await rescanTeamThreads(serverUrl, team.id);
+        expect(seeded.error).toBeFalsy();
+        expect((await getThreadRow())?.replyCount).toBe(1);
+
+        // The server now reports newer data, the rescan must re-apply it even though the
+        // incremental window would consider the thread already seen
+        getThreadsMock.mockImplementationOnce(() => Promise.resolve({
+            threads: [{...thread1, reply_count: 5} as ThreadWithLastFetchedAt],
+            total: 1,
+            total_unread_mentions: 0,
+            total_unread_threads: 0,
+        }));
+
+        const rescan = await rescanTeamThreads(serverUrl, team.id);
+        expect(rescan.error).toBeFalsy();
+        expect((await getThreadRow())?.replyCount).toBe(5);
+
+        // The rescan fetches without a since window
+        const lastCall = getThreadsMock.mock.calls[getThreadsMock.mock.calls.length - 1];
+        expect(lastCall[7]).toBeUndefined();
+    });
+
+    it('deleteThread - removes the local thread, its team entries and participants [RM-625222]', async () => {
+        await operator.handleSystem({systems: [{id: SYSTEM_IDENTIFIERS.CURRENT_USER_ID, value: user1.id}], prepareRecordsOnly: false});
+        await operator.handleUsers({users: [user1], prepareRecordsOnly: false});
+
+        const {database} = DatabaseManager.getServerDatabaseAndOperator(serverUrl);
+        const countRows = async (table: string) => (await database.get(table).query().fetch()).length;
+
+        // Seed the thread with a second participant so children rows exist
+        const seeded = await processReceivedThreads(serverUrl, [{...thread1, participants: [user1, user2]}], team.id);
+        expect(seeded.error).toBeFalsy();
+
+        const getThreadRow = async () => {
+            const rows = await database.get(THREAD).query().fetch();
+            return rows.find((t) => t.id === thread1.id);
+        };
+        expect(await getThreadRow()).toBeDefined();
+        expect(await countRows(THREADS_IN_TEAM)).toBeGreaterThan(0);
+        expect(await countRows(THREAD_PARTICIPANT)).toBeGreaterThan(0);
+
+        const res = await deleteThread(serverUrl, thread1.id);
+        expect(res.error).toBeFalsy();
+
+        expect(await getThreadRow()).toBeUndefined();
+        expect(await countRows(THREADS_IN_TEAM)).toBe(0);
+        expect(await countRows(THREAD_PARTICIPANT)).toBe(0);
     });
 
     it('syncThreadsIfNeeded - handle error', async () => {
