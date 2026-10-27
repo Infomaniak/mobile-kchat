@@ -13,6 +13,7 @@ import ExpoImage from '@components/expo_image';
 import NetworkManager from '@managers/network_manager';
 import {observeConfigBooleanValue} from '@queries/servers/system';
 import {observeUser} from '@queries/servers/user';
+import {getAvatarCacheId} from '@utils/avatar_cache';
 import {buildAuthorizedImageSource} from '@utils/image_source';
 import {urlSafeBase64Encode} from '@utils/security';
 import {getLastPictureUpdate} from '@utils/user';
@@ -68,7 +69,7 @@ const NotificationIcon = ({author, enablePostIconOverride, fromWebhook, override
         const lastPictureUpdateAt = getLastPictureUpdate(author);
         icon = (
             <ExpoImage
-                id={`user-${author.id}-${lastPictureUpdateAt}`}
+                id={getAvatarCacheId(author.id, lastPictureUpdateAt)}
                 key={pictureUrl}
                 style={{width: IMAGE_SIZE, height: IMAGE_SIZE, borderRadius: (IMAGE_SIZE / 2)}}
                 source={{

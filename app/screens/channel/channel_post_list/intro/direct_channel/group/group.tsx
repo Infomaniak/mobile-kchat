@@ -10,6 +10,7 @@ import {buildProfileImageUrlFromUser} from '@actions/remote/user';
 import ExpoImage from '@components/expo_image';
 import {useServerUrl} from '@context/server';
 import NetworkManager from '@managers/network_manager';
+import {getAvatarCacheId} from '@utils/avatar_cache';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 import {getLastPictureUpdate} from '@utils/user';
 
@@ -50,7 +51,7 @@ const Group = ({theme, users}: Props) => {
             const lastPictureUpdateAt = getLastPictureUpdate(u);
             return (
                 <ExpoImage
-                    id={`user-${u.id}-${lastPictureUpdateAt}`}
+                    id={getAvatarCacheId(u.id, lastPictureUpdateAt)}
                     key={pictureUrl + i.toString()}
                     style={[styles.profile, {transform: [{translateX: -(i * 24)}]}]}
                     source={{uri: buildAbsoluteUrl(serverUrl, pictureUrl), headers}}

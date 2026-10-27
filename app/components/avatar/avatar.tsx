@@ -11,6 +11,7 @@ import InitialsFallback from '@components/profile_picture/initials_fallback';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
+import {getAvatarCacheId} from '@utils/avatar_cache';
 import {buildAuthorizedImageSource} from '@utils/image_source';
 import {extractDisplayName, getAvatarColor, getLastPictureUpdate} from '@utils/user';
 
@@ -53,7 +54,7 @@ const Avatar = ({
 
     const lastPictureUpdate = author ? getLastPictureUpdate(author) : 0;
     const id = author
-        ? `user-${author.id}-${lastPictureUpdate}`
+        ? getAvatarCacheId(author.id, lastPictureUpdate)
         : (overrideUriId || 'avatar');
 
     const hasImageError = errorUserId === id && errorUserId !== '';

@@ -11,6 +11,7 @@ import InitialsFallback from '@components/profile_picture/initials_fallback';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import NetworkManager from '@managers/network_manager';
+import {getAvatarCacheId} from '@utils/avatar_cache';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 import {extractDisplayName, getAvatarColor, getLastPictureUpdate} from '@utils/user';
 
@@ -69,7 +70,7 @@ const Image = ({author, forwardRef, grayscale, iconSize, size, source, url}: Pro
 
     const id = useMemo(() => {
         if (author) {
-            return `user-${author.id}-${lastPictureUpdateAt}`;
+            return getAvatarCacheId(author.id, lastPictureUpdateAt);
         }
         return undefined;
     }, [author, lastPictureUpdateAt]);

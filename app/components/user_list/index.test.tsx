@@ -14,6 +14,12 @@ import type Database from '@nozbe/watermelondb/Database';
 
 const mockClient = TestHelper.createClient();
 
+// The avatar cache id embeds a day bucket computed from the wall clock: mock it so
+// the snapshots stay deterministic across days.
+jest.mock('@utils/avatar_cache', () => ({
+    getAvatarCacheId: (userId: string, lastPictureUpdate: number) => `user-${userId}-${lastPictureUpdate}-test`,
+}));
+
 jest.mock('@managers/network_manager', () => {
     const original = jest.requireActual('@managers/network_manager');
     return {

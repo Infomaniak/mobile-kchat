@@ -12,6 +12,7 @@ import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useIsTablet} from '@hooks/device';
 import {useGalleryItem} from '@hooks/gallery';
+import {getAvatarCacheId} from '@utils/avatar_cache';
 import {openGalleryAtIndex} from '@utils/gallery';
 import {urlSafeBase64Encode} from '@utils/security';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
@@ -108,7 +109,7 @@ const UserProfileTitle = ({
             if (enablePostIconOverride && userIconOverride) {
                 cacheKey = `user-override-icon-${urlSafeBase64Encode(userIconOverride)}`;
             } else {
-                cacheKey = `user-${user.id}-${user.lastPictureUpdate}`;
+                cacheKey = getAvatarCacheId(user.id, user.lastPictureUpdate);
             }
 
             const item: GalleryItemType = {
