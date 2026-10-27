@@ -581,7 +581,7 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         models.push(...await this._mergePostInChannelChunks(targetChunk, chunks, prepareRecordsOnly));
 
         if (!prepareRecordsOnly) {
-            this.batchRecords(models, 'handleReceivedPostsInChannel');
+            await this.batchRecords(models, 'handleReceivedPostsInChannel');
         }
 
         return models;
@@ -622,7 +622,7 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         })];
 
         if (!prepareRecordsOnly) {
-            this.batchRecords(models, 'handleReceivedPostsInChannelSince');
+            await this.batchRecords(models, 'handleReceivedPostsInChannelSince');
         }
 
         return models;
@@ -667,7 +667,7 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         models.push(...(await this._mergePostInChannelChunks(targetChunk, chunks, prepareRecordsOnly)));
 
         if (!prepareRecordsOnly) {
-            this.batchRecords(models, 'handleReceivedPostsInChannelBefore');
+            await this.batchRecords(models, 'handleReceivedPostsInChannelBefore');
         }
 
         return models;
@@ -717,7 +717,7 @@ const PostHandler = <TBase extends Constructor<ServerDataOperatorBase>>(supercla
         models.push(...await this._mergePostInChannelChunks(targetChunk, chunks, prepareRecordsOnly));
 
         if (!prepareRecordsOnly) {
-            this.batchRecords(models, 'handleReceivedNewPostForChannel');
+            await this.batchRecords(models, 'handleReceivedNewPostForChannel');
         }
         return models;
     };

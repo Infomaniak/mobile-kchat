@@ -302,7 +302,7 @@ export async function updateMyChannelFromWebsocket(serverUrl: string, channelMem
                 m.roles = channelMember.roles;
             });
             if (!prepareRecordsOnly) {
-                operator.batchRecords([member], 'updateMyChannelFromWebsocket');
+                await operator.batchRecords([member], 'updateMyChannelFromWebsocket');
             }
         }
         return {model: member};
@@ -322,7 +322,7 @@ export async function updateChannelInfoFromChannel(serverUrl: string, channel: C
         }],
         prepareRecordsOnly: true});
         if (!prepareRecordsOnly) {
-            operator.batchRecords(newInfo, 'updateChannelInfoFromChannel');
+            await operator.batchRecords(newInfo, 'updateChannelInfoFromChannel');
         }
         return {model: newInfo};
     } catch (error) {

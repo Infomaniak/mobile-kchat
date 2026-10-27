@@ -1088,7 +1088,7 @@ export async function createGroupChannel(serverUrl: string, userIds: string[]) {
                 }
 
                 models.push(...userModels);
-                operator.batchRecords(models, 'createGroupChannel');
+                await operator.batchRecords(models, 'createGroupChannel');
             }
         }
         EphemeralStore.creatingDMorGMTeammates = [];

@@ -16,6 +16,7 @@ import com.mattermost.hardware.keyboard.MattermostHardwareKeyboardImpl
 import com.mattermost.notification.NotificationUtils
 import com.mattermost.notification.NotificationUtils.dismissCallNotification
 import com.mattermost.rnutils.helpers.FoldableObserver
+import com.swmansion.rnscreens.fragment.restoration.RNScreensFragmentFactory
 import com.oney.WebRTCModule.WebRTCModuleOptions
 import expo.modules.ReactActivityDelegateWrapper
 
@@ -40,6 +41,11 @@ class MainActivity : ReactActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Backport MM #9871: let react-native-screens handle fragment restoration.
+        // Without this, restoring a saved ScreenStackFragment after process death
+        // throws IllegalStateException and crashes the app on launch (e.g. when
+        // tapping a notification that cold-starts a killed process).
+        supportFragmentManager.fragmentFactory = RNScreensFragmentFactory()
         setContentView(R.layout.launch_screen)
         super.onCreate(savedInstanceState)
         handleIntentExtras(getIntent())

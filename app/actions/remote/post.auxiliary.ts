@@ -86,7 +86,7 @@ export async function processChannelPostsByTeam(
         }
 
         if (models.length) {
-            server.operator.batchRecords(removeDuplicatesModels(models), 'processTeamChannels');
+            await server.operator.batchRecords(removeDuplicatesModels(models), 'processTeamChannels');
         }
     }
     if (!skipAuthors && allPosts.length) {
