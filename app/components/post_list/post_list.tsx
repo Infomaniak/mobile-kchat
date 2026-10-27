@@ -597,7 +597,10 @@ const PostList = ({
     );
 
     const contentContainerStyleWithMargin = useMemo(() => {
-        const marginStyle = {marginTop: location === Screens.PERMALINK || !isEdgeToEdge ? 0 : postInputContainerHeight + emojiPickerPadding};
+        // On Android a margin on the content container is excluded from the scrollable range of an
+        // inverted FlatList, so the top of the list (e.g. the thread root post header) can't be
+        // scrolled into view. A padding is part of the content size, which keeps it scrollable.
+        const marginStyle = {paddingTop: location === Screens.PERMALINK || !isEdgeToEdge ? 0 : postInputContainerHeight + emojiPickerPadding};
         return contentContainerStyle ? [contentContainerStyle, marginStyle] : marginStyle;
     }, [location, postInputContainerHeight, emojiPickerPadding, contentContainerStyle]);
 
