@@ -6,10 +6,13 @@ import React, {useCallback, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {Keyboard, type LayoutChangeEvent, Platform, ScrollView, View} from 'react-native';
 import Permissions, {openSettings} from 'react-native-permissions';
-import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
+import {useAnimatedReaction} from 'react-native-reanimated';
+import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {scheduleOnRN} from 'react-native-worklets';
 
 import {userTyping} from '@actions/websocket/users';
 import {Screens} from '@constants';
+import {isAndroidEdgeToEdge} from '@constants/device';
 import {useKeyboardState} from '@context/keyboard_state';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
@@ -151,11 +154,13 @@ function DraftInput({
     scheduledPostsEnabled,
 }: Props) {
     const [recording, setRecording] = useState(false);
+    const [layoutHeight, setLayoutHeight] = useState(0);
     const intl = useIntl();
     const serverUrl = useServerUrl();
     const theme = useTheme();
+    const {bottom} = useSafeAreaInsets();
 
-    const {inputRef, blurAndDismissKeyboard} = useKeyboardState();
+    const {inputRef, blurAndDismissKeyboard, stateContext} = useKeyboardState();
 
     const focus = useCallback(() => {
         inputRef.current?.focus();
@@ -164,8 +169,32 @@ function DraftInput({
     }, []);
 
     const handleLayout = useCallback((e: LayoutChangeEvent) => {
-        updatePostInputTop(e.nativeEvent.layout.height);
+        const height = e.nativeEvent.layout.height;
+        setLayoutHeight(height);
+
+        // Android edge-to-edge tracks the input top from the keyboard animation instead, see the
+        // reaction below: pushing the bare height here would reset the anchor without the open
+        // keyboard offset whenever the input height changes while the keyboard is open.
+        if (!isAndroidEdgeToEdge) {
+            updatePostInputTop(height);
+        }
     }, [updatePostInputTop]);
+
+    // On Android edge-to-edge (API 30+), the window does not resize for the keyboard: the input
+    // container is translated by postInputTranslateY instead, and the autocomplete is mounted
+    // through a Portal outside that translated container. The autocomplete anchor (postInputTop)
+    // must therefore track the input container translation to stay above the keyboard.
+    // Folds upstream's reaction (layoutHeight + translateY + 2*bottom) with the -bottom applied in
+    // upstream's post_draft anchor, which this tree does not have, for the same net position.
+    useAnimatedReaction(
+        () => stateContext.postInputTranslateY.value,
+        (translateY) => {
+            if (isAndroidEdgeToEdge) {
+                scheduleOnRN(updatePostInputTop, layoutHeight + translateY + bottom);
+            }
+        },
+        [layoutHeight, updatePostInputTop, bottom, stateContext.postInputTranslateY],
+    );
 
     const onPresRecording = useCallback(async () => {
         const permission = Platform.select({
