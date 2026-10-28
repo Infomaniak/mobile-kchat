@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {type ImageContentFit, type ImageStyle} from 'expo-image';
+import {type ImageContentFit, type ImageLoadEventData, type ImageStyle} from 'expo-image';
 import React, {type ReactNode, useEffect, useState} from 'react';
 import {ActivityIndicator, type StyleProp, StyleSheet, View, type ViewStyle} from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -19,6 +19,7 @@ type Props = ProgressiveImageProps & {
     imageStyle?: StyleProp<ImageStyle>;
     isBackgroundImage?: boolean;
     onError: () => void;
+    onImageLoad?: (event: ImageLoadEventData) => void;
     contentFit?: ImageContentFit;
     style?: StyleProp<ViewStyle>;
     tintDefaultSource?: boolean;
@@ -49,6 +50,7 @@ const ProgressiveImage = ({
     inViewPort,
     isBackgroundImage,
     onError,
+    onImageLoad,
     contentFit = 'contain',
     style = {},
     thumbnailUri,
@@ -73,6 +75,11 @@ const ProgressiveImage = ({
 
     const dismissLoader = () => {
         setLoading(false);
+    };
+
+    const handleLoad = (event: ImageLoadEventData) => {
+        dismissLoader();
+        onImageLoad?.(event);
     };
 
     if (isBackgroundImage && imageUri) {
@@ -139,7 +146,7 @@ const ProgressiveImage = ({
                 // Ik change : we need to pass the full image source with headers for authentication
                 source={(showImage) ? imgSource : undefined}
                 autoplay={true}
-                onLoad={dismissLoader}
+                onLoad={handleLoad}
                 onError={onError}
             />
         </Animated.View>

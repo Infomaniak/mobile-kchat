@@ -45,8 +45,10 @@ jest.mock('./attachment_author', () => {
     };
 });
 
+const mockAttachmentImage = jest.fn().mockReturnValue(null);
 jest.mock('./attachment_image', () => {
-    return function MockAttachmentImage() {
+    return function MockAttachmentImage(props: {imageUrl: string; imageMetadata?: PostImage}) {
+        mockAttachmentImage(props);
         return null;
     };
 });
@@ -309,8 +311,9 @@ describe('MessageAttachment', () => {
                 text: 'This is the text of an attachment with mixed falsy properties',
                 thumb_url: '',
                 fields: undefined,
-                actions: [],
-                footer: '',
+                actions: undefined,
+                footer: undefined,
+                image_url: '',
             },
         };
 
@@ -320,5 +323,75 @@ describe('MessageAttachment', () => {
         expect(mockAttachmentFields).not.toHaveBeenCalled();
         expect(mockAttachmentFooter).not.toHaveBeenCalled();
         expect(mockAttachmentActions).not.toHaveBeenCalled();
+        expect(mockAttachmentImage).not.toHaveBeenCalled();
+    });
+
+    // Regression test for RM-643385: attachment images must render even when the
+    // server did not provide dimensions in metadata.images (e.g. signed external
+    // URLs). The webapp renders such images; the mobile app hid them.
+    test('it renders AttachmentImage when image_url has no entry in metadata.images', () => {
+        const props = {
+            ...baseProps,
+            attachment: {
+                ...baseProps.attachment,
+                image_url: 'https://example.com/image.jpg',
+            },
+            metadata: {
+                embeds: [{
+                    type: 'message_attachment' as PostEmbedType,
+                    url: '',
+                    data: {},
+                }],
+            },
+        };
+
+        render(<MessageAttachment {...props}/>);
+        expect(mockAttachmentImage).toHaveBeenCalledWith(
+            expect.objectContaining({
+                imageUrl: 'https://example.com/image.jpg',
+                imageMetadata: undefined,
+            }),
+        );
+    });
+
+    test('it renders AttachmentImage when image_url has an entry in metadata.images', () => {
+        const props = {
+            ...baseProps,
+            attachment: {
+                ...baseProps.attachment,
+                image_url: 'https://example.com/image.png',
+            },
+            metadata: {
+                images: {
+                    'https://example.com/image.png': {
+                        width: 200,
+                        height: 200,
+                        format: 'png',
+                        frame_count: 0,
+                    },
+                },
+            },
+        };
+
+        render(<MessageAttachment {...props}/>);
+        expect(mockAttachmentImage).toHaveBeenCalledWith(
+            expect.objectContaining({
+                imageUrl: 'https://example.com/image.png',
+                imageMetadata: {width: 200, height: 200, format: 'png', frame_count: 0},
+            }),
+        );
+    });
+
+    test('it does not render AttachmentImage without image_url', () => {
+        const props = {
+            ...baseProps,
+            attachment: {
+                ...baseProps.attachment,
+                image_url: undefined,
+            },
+        };
+
+        render(<MessageAttachment {...props}/>);
+        expect(mockAttachmentImage).not.toHaveBeenCalled();
     });
 });

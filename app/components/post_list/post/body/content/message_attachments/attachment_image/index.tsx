@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {type ImageLoadEventData} from 'expo-image';
 import React, {useCallback, useMemo, useRef, useState} from 'react';
 import {TouchableWithoutFeedback, View} from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -44,7 +45,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => {
 });
 
 export type Props = {
-    imageMetadata: PostImage;
+    imageMetadata?: PostImage;
     imageUrl: string;
     layoutWidth?: number;
     location: string;
@@ -52,15 +53,37 @@ export type Props = {
     theme: Theme;
 }
 
+// Server-provided dimensions are optional (e.g. signed external URLs have no
+// entry in metadata.images): render a bounded box and adopt the real aspect
+// ratio once the image has loaded.
+const FALLBACK_ATTACHMENT_IMAGE_DIMENSIONS = {height: 200, width: 200};
+
+type MeasuredDimensions = {height: number; width: number};
+
+// Tagged with the URL it belongs to so a stale measurement from a previous
+// image never drives the box after the attachment image URL changes.
+type MeasuredImage = MeasuredDimensions & {url: string};
+
 const AttachmentImage = ({imageUrl, imageMetadata, layoutWidth, location, postId, theme}: Props) => {
     const galleryIdentifier = `${postId}-AttachmentImage-${location}`;
     const [error, setError] = useState(false);
+    const [measured, setMeasured] = useState<MeasuredImage | null>(null);
     const fileId = useRef<string | null>(null);
     if (fileId.current === null) {
         fileId.current = `uid-${urlSafeBase64Encode(imageUrl)}`;
     }
     const isTablet = useIsTablet();
-    const {height, width} = calculateDimensions(imageMetadata.height, imageMetadata.width, layoutWidth || getViewPortWidth(false, isTablet, true));
+    const imageWidth = imageMetadata?.width;
+    const imageHeight = imageMetadata?.height;
+    const activeMeasured = measured?.url === imageUrl ? measured : null;
+    const viewportWidth = layoutWidth || getViewPortWidth(false, isTablet, true);
+    let dimensions: MeasuredDimensions;
+    if (imageWidth && imageHeight) {
+        dimensions = calculateDimensions(imageHeight, imageWidth, viewportWidth);
+    } else {
+        dimensions = activeMeasured ? calculateDimensions(activeMeasured.height, activeMeasured.width, viewportWidth) : FALLBACK_ATTACHMENT_IMAGE_DIMENSIONS;
+    }
+    const {height, width} = dimensions;
     const style = getStyleSheet(theme);
     const progressiveImageStyle = useMemo(() => ({width, height}), [width, height]);
 
@@ -68,13 +91,20 @@ const AttachmentImage = ({imageUrl, imageMetadata, layoutWidth, location, postId
         setError(true);
     }, []);
 
+    const onImageLoad = useCallback((event: ImageLoadEventData) => {
+        const {height: measuredHeight, width: measuredWidth} = event.source;
+        if (measuredWidth > 0 && measuredHeight > 0) {
+            setMeasured({height: measuredHeight, width: measuredWidth, url: imageUrl});
+        }
+    }, [imageUrl]);
+
     const onPress = () => {
         const item: GalleryItemType = {
             id: fileId.current || '',
             postId,
             uri: imageUrl,
-            width: imageMetadata.width,
-            height: imageMetadata.height,
+            width: imageWidth ?? activeMeasured?.width ?? width,
+            height: imageHeight ?? activeMeasured?.height ?? height,
             name: extractFilenameFromUrl(imageUrl) || 'attachmentImage.png',
             mime_type: lookupMimeType(imageUrl) || 'image/png',
             type: 'image',
@@ -110,9 +140,11 @@ const AttachmentImage = ({imageUrl, imageMetadata, layoutWidth, location, postId
                         <ProgressiveImage
                             forwardRef={ref}
                             id={fileId.current}
+                            key={`${width}x${height}`}
                             imageStyle={style.attachmentMargin}
                             imageUri={imageUrl}
                             onError={onError}
+                            onImageLoad={onImageLoad}
                             contentFit='contain'
                             style={progressiveImageStyle}
                             theme={theme}

@@ -145,10 +145,10 @@ export default function MessageAttachment({attachment, channelId, layoutWidth, l
                     location={location}
                 />
                 }
-                {attachment.image_url && Boolean(metadata?.images?.[attachment.image_url]) &&
+                {attachment.image_url &&
                     <AttachmentImage
                         imageUrl={attachment.image_url}
-                        imageMetadata={metadata!.images![attachment.image_url]!}
+                        imageMetadata={metadata?.images?.[attachment.image_url]}
                         layoutWidth={layoutWidth}
                         location={location}
                         postId={postId}
