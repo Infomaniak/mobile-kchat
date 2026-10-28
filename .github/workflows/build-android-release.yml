@@ -71,6 +71,54 @@ jobs:
           echo "::endgroup::"
         working-directory: ./fastlane
 
+      - name: ci/sentry-maps-check
+        # Read-only diagnostic, fail-open by design: this check never fails the build. Sourcemaps are
+        # uploaded by debug ID into artifact bundles, invisible to `sentry-cli releases files`
+        # (subcommand removed in sentry-cli 2.42.4), so the artifact-bundles API is queried instead.
+        # Parity with webapp (release:sentry) and desktop (sentry-maps-check): warn and notify kChat
+        # when the release ends up with 0 sourcemap bundles. The release name matches the default
+        # naming of @sentry/react-native sentry.gradle: <applicationId>@<versionName>+<versionCode>.
+        # Skipped if the version could not be computed (earlier step failed), to avoid querying for
+        # a mangled release name.
+        if: ${{ !cancelled() && steps.version.outputs.version-code != '' && steps.version.outputs.version-name != '' }}
+        env:
+          SENTRY_URL: https://sentry-kchat.infomaniak.com
+          SENTRY_ORG: sentry
+          SENTRY_PROJECT: mobile
+          SENTRY_RELEASE: "com.infomaniak.chat@${{ steps.version.outputs.version-name }}+${{ steps.version.outputs.version-code }}"
+          SENTRY_AUTH_TOKEN: ${{ secrets.MM_MOBILE_SENTRY_AUTH_TOKEN }}
+          MATTERMOST_WEBHOOK_URL: ${{ secrets.KCHAT_SENTRY_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SENTRY_AUTH_TOKEN" ]; then
+            echo "::notice::MM_MOBILE_SENTRY_AUTH_TOKEN secret not set, Sentry maps check skipped"
+            exit 0
+          fi
+          if ! curl -sf --connect-timeout 10 --max-time 30 --get "${SENTRY_URL%/}/api/0/projects/$SENTRY_ORG/$SENTRY_PROJECT/files/artifact-bundles/" \
+                  --data-urlencode "query=$SENTRY_RELEASE" \
+                  -H "Authorization: Bearer $SENTRY_AUTH_TOKEN" > /tmp/sentry-bundles.json 2>/tmp/sentry-bundles-error.txt; then
+            cat /tmp/sentry-bundles-error.txt
+            echo "::notice::sentry artifact-bundles list unavailable (API down or token may not cover it), skipping maps check"
+            exit 0
+          fi
+          COUNT=$(python3 -c "import json,os; data=json.load(open('/tmp/sentry-bundles.json')); release=os.environ['SENTRY_RELEASE']; print(sum(1 for b in data if b.get('fileCount',0)>0 and any(a.get('release')==release for a in (b.get('associations') or []))))" 2>/dev/null) || { echo "::notice::could not parse the artifact-bundles response, skipping maps check"; exit 0; }
+          if [ -z "$COUNT" ]; then
+            echo "::notice::could not parse the artifact-bundles response, skipping maps check"
+            exit 0
+          fi
+          if [ "$COUNT" -eq 0 ]; then
+            echo "::warning::Sentry release $SENTRY_RELEASE has no sourcemaps, the upload may have failed silently (check build logs for [sentry] warnings)"
+            if [ -n "$MATTERMOST_WEBHOOK_URL" ]; then
+              TEXT="[$GITHUB_REF_NAME] Warning: Sentry release $SENTRY_RELEASE has no sourcemaps, the upload may have failed silently."
+              printf '{"username":"MobileReleaseBot","icon_url":"https://infomaniak.kchat.infomaniak.com/static/emoji/kchat.png","text":"%s"}' "$TEXT" > /tmp/sentry-maps-notify.json
+              curl -sf --connect-timeout 10 --max-time 30 -H "Content-Type: application/json" -X POST -d @/tmp/sentry-maps-notify.json "$MATTERMOST_WEBHOOK_URL" \
+                || echo "::warning::kChat notification failed (check KCHAT_SENTRY_WEBHOOK_URL secret), message was: $TEXT"
+            else
+              echo "::notice::KCHAT_SENTRY_WEBHOOK_URL secret not set, kChat notification skipped"
+            fi
+          else
+            echo "OK: $COUNT sourcemap bundle(s) found on release $SENTRY_RELEASE"
+          fi
+
       - name: ci/upload-android-build
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
