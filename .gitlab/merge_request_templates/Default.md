@@ -30,6 +30,14 @@ En cas de doute entre deux niveaux, choisir le plus élevé.
 
 ## Ticket lié
 
+<!-- Convention "Fixes <REF>" dans la DESCRIPTION de la MR : une ref déclenche
+     la résolution seulement avec un mot-clé de résolution (Fixes / Closes /
+     Resolves, etc). Formats : Fixes MOBILE-XXX (short ID Sentry) ou Fixes
+     RM-XXXXXX. Une URL nue sans mot-clé = simple mention, aucune action.
+     Multi-refs OK. -->
+
+Fixes MOBILE-XXX
+
 ## Checklist
 
 - [ ] J'ai ajouté/modifié les tests unitaires pour cette feature/bug

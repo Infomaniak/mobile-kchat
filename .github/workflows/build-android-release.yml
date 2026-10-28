@@ -76,3 +76,10 @@ jobs:
         with:
           name: android-build-release-${{ github.run_id }}
           path: "*.apk"
+
+  sentry-resolve:
+    # Gate sur le build : jamais d'ancre/Redmine si l'upload a echoue.
+    needs:
+      - build-and-deploy
+    uses: ./.github/workflows/sentry-resolve.yaml
+    secrets: inherit

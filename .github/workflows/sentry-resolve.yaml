@@ -1,0 +1,39 @@
+name: sentry-resolve
+
+on:
+  workflow_call:
+
+jobs:
+  sentry-resolve:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ci/checkout-repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: ci/script-tests
+        run: |
+          ruby .github/scripts/test/sentry_refs_test.rb
+          ruby .github/scripts/test/sentry_resolve_test.rb
+      - name: ci/sentry-resolve
+        # Fully fail-open: the script exits 0 in every case, the release
+        # is never blocked. A WARN result only emits a GitHub warning
+        # annotation; no kChat alert is wired.
+        env:
+          SENTRY_URL: ${{ secrets.SENTRY_URL || 'https://sentry-kchat.infomaniak.com' }}
+          SENTRY_ORG: sentry
+          SENTRY_PROJECT: mobile
+          SENTRY_AUTH_TOKEN: ${{ secrets.MM_MOBILE_SENTRY_AUTH_TOKEN }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
+          REDMINE_DOMAIN: redmine.infomaniak.ch
+          REDMINE_API_KEY: ${{ secrets.REDMINE_API_KEY }}
+        run: |
+          set +e
+          OUTPUT=$(ruby .github/scripts/sentry_resolve.rb 2>&1)
+          echo "$OUTPUT"
+          if echo "$OUTPUT" | grep -q "SENTRY_RESOLVE_RESULT: WARN"; then
+            echo "::warning::sentry-resolve reported warnings, see logs above"
+          fi
+          exit 0
