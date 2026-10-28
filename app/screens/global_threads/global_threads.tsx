@@ -3,7 +3,7 @@
 
 import React, {useCallback, useEffect, useMemo, useRef} from 'react';
 import {defineMessage, useIntl} from 'react-intl';
-import {FlatList, Keyboard, StyleSheet, View} from 'react-native';
+import {FlatList, Keyboard, Platform, StyleSheet, View} from 'react-native';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
 import {setGlobalThreadsTab} from '@actions/local/systems';
@@ -32,7 +32,9 @@ type Props = {
     teamId: string;
 };
 
-const edges: Edge[] = ['left', 'right'];
+// iOS foldable inner displays report a trailing safe-area inset: render edge-to-edge and
+// let the shared Header compensate its right controls. Android cutout behavior unchanged.
+const edges: Edge[] = Platform.OS === 'ios' ? ['left'] : ['left', 'right'];
 
 const styles = StyleSheet.create({
     flex: {

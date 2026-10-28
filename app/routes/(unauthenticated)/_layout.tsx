@@ -13,7 +13,9 @@ import {useHasCredentials} from '@hooks/use_has_credentials';
 
 import type {NativeStackNavigationOptions} from '@react-navigation/native-stack';
 
-const edges: Edge[] = ['left', 'right'];
+// iOS foldable inner displays report a trailing safe-area inset: render edge-to-edge.
+// Android cutout behavior unchanged (no Header compensation on Android).
+const edges: Edge[] = Platform.OS === 'ios' ? ['left'] : ['left', 'right'];
 
 const styles = StyleSheet.create({
     safeAreaView: {

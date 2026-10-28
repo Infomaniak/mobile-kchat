@@ -73,7 +73,9 @@ type Props = PassedProps & InjectedProps
  */
 const MINIMUM_CONFERENCE_DURATION = 2000; // ms
 
-const EDGES: Edge[] = ['bottom', 'left', 'right'];
+// iOS foldable inner displays report a trailing safe-area inset: render edge-to-edge and
+// let the shared Header compensate its right controls. Android cutout behavior unchanged.
+const EDGES: Edge[] = Platform.OS === 'ios' ? ['bottom', 'left'] : ['bottom', 'left', 'right'];
 
 const MuteButton = AudioMuteButton as unknown as ComponentType<{audioMuted: boolean; disabled: boolean; onPress: () => void}>;
 const VButton = VideoMuteButton as unknown as ComponentType<{videoMuted: boolean; disabled: boolean; onPress: () => void}>;

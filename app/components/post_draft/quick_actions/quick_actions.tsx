@@ -44,6 +44,10 @@ const style = StyleSheet.create({
         flexDirection: 'row',
         height: QUICK_ACTIONS_HEIGHT,
         width: '80%',
+
+        // Cap the row on wide screens (foldable inner displays, tablets): the actions
+        // use flex: 1 each, so an uncapped width scatters them across the whole bar.
+        maxWidth: 344,
         marginLeft: 8,
     },
 });

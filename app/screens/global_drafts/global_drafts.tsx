@@ -3,7 +3,7 @@
 
 import React, {useCallback, useMemo} from 'react';
 import {useIntl} from 'react-intl';
-import {Keyboard, StyleSheet, View} from 'react-native';
+import {Keyboard, Platform, StyleSheet, View} from 'react-native';
 import {SafeAreaView, type Edge} from 'react-native-safe-area-context';
 
 import NavigationHeader from '@components/navigation_header';
@@ -23,7 +23,9 @@ import GlobalScheduledPostList from './components/global_scheduled_post_list';
 
 import type {AvailableScreens} from '@typings/screens/navigation';
 
-const edges: Edge[] = ['left', 'right'];
+// iOS foldable inner displays report a trailing safe-area inset: render edge-to-edge and
+// let the shared Header compensate its right controls. Android cutout behavior unchanged.
+const edges: Edge[] = Platform.OS === 'ios' ? ['left'] : ['left', 'right'];
 
 type Props = {
     componentId?: AvailableScreens;

@@ -186,15 +186,24 @@ const Header = ({
     const containerStyle = useMemo(() => (
         [styles.container, containerAnimatedStyle]), [styles, containerAnimatedStyle]);
 
+    // On devices with a trailing safe-area inset (foldable inner displays, iPhone landscape),
+    // the header spans edge-to-edge, so its right-aligned controls must clear that inset.
+    // Invariant: this Header is for full-screen pushed screens only — in a sheet/modal the
+    // window inset would over-shift the controls (cosmetic only).
+    const rightInsetStyle = useMemo(() => Platform.select({
+        ios: {right: 16 + insets.right},
+        default: undefined,
+    }), [insets.right]);
+
     const additionalTitleStyle = useMemo(() => {
         return {
             marginLeft: Platform.select({android: showBackButton && !leftComponent ? 20 : 0}),
             paddingHorizontal: Platform.select({
-                ios: rightButtons?.length === 2 ? 90 : 60,
+                ios: (rightButtons?.length === 2 ? 90 : 60) + insets.right,
                 android: 8,
             }),
         };
-    }, [leftComponent, showBackButton, rightButtons]);
+    }, [leftComponent, showBackButton, rightButtons, insets.right]);
 
     return (
         <Animated.View style={containerStyle}>
@@ -255,7 +264,7 @@ const Header = ({
                     </View>
                 </TouchableWithFeedback>
             </Animated.View>
-            <Animated.View style={styles.rightContainer}>
+            <Animated.View style={[styles.rightContainer, rightInsetStyle]}>
                 {rightComponent}
                 {Boolean(rightButtons?.length) &&
                 rightButtons?.map((r) => (

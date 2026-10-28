@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useState, useMemo} from 'react';
-import {DeviceEventEmitter, type LayoutChangeEvent, StyleSheet} from 'react-native';
+import {DeviceEventEmitter, type LayoutChangeEvent, Platform, StyleSheet} from 'react-native';
 import {type Edge, SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {storeLastViewedChannelIdAndServer, removeLastViewedChannelIdAndServer} from '@actions/app/global';
@@ -79,10 +79,13 @@ const Channel = ({
     }, [currentScreen, isTablet]);
 
     const safeAreaViewEdges: Edge[] = useMemo(() => {
-        if (isTablet) {
-            return ['left', 'right'];
+        // iOS foldable inner displays report a trailing safe-area inset: content renders
+        // edge-to-edge (like home) and the shared Header compensates its right controls.
+        // Android cutout handling is unchanged — the Header compensation is iOS-only.
+        if (Platform.OS === 'ios') {
+            return isTablet ? ['left'] : ['left', 'bottom'];
         }
-        return ['left', 'right', 'bottom'];
+        return isTablet ? ['left', 'right'] : ['left', 'right', 'bottom'];
     }, [isTablet]);
 
     const handleBack = useCallback(() => {

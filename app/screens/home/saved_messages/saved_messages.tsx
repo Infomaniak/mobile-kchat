@@ -5,7 +5,7 @@ import {useIsFocused, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Freeze} from 'react-freeze';
 import {useIntl} from 'react-intl';
-import {DeviceEventEmitter, type ListRenderItemInfo, View} from 'react-native';
+import {DeviceEventEmitter, type ListRenderItemInfo, Platform, View} from 'react-native';
 import Animated, {useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 import {type Edge, SafeAreaView} from 'react-native-safe-area-context';
 
@@ -36,7 +36,9 @@ type Props = {
     posts: PostModel[];
 }
 
-const edges: Edge[] = ['bottom', 'left', 'right'];
+// iOS foldable inner displays report a trailing safe-area inset: render edge-to-edge and
+// let the shared Header compensate its right controls. Android cutout behavior unchanged.
+const edges: Edge[] = Platform.OS === 'ios' ? ['bottom', 'left'] : ['bottom', 'left', 'right'];
 
 const getStyleSheet = makeStyleSheetFromTheme((theme: Theme) => ({
     flex: {
