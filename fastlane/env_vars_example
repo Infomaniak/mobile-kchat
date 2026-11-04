@@ -70,13 +70,6 @@ export SUBMIT_ANDROID_TO_GOOGLE_PLAY=false
 #export SENTRY_DSN_ANDROID=<your sentry DSN for the android project>
 #export SENTRY_AUTH_TOKEN=<your sentry auth token>
 
-############ UPLOAD THE BUILDS TO AWS S3 ############
-#export AWS_ACCESS_KEY_ID=<your aws s3 access id>
-#export AWS_SECRET_ACCESS_KEY=<your aws s3 access key>
-#export AWS_BUCKET_NAME=<your aws bucket name>
-#export AWS_FOLDER_NAME=<the folder to use in you aws bucket>
-#export AWS_REGION=<your aws region>
-
 ############ INTUNE MAM CONFIGURATION ############
 #export INTUNE_ENABLED=false # Set to true to enable Intune MAM SDK
 #export INTUNE_CLIENT_ID=<Entra App Registration Client ID>

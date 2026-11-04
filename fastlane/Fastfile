@@ -1,22 +1,13 @@
 fastlane_version '2.71.0'
-fastlane_require 'aws-sdk-s3'
-fastlane_require 'erb'
 fastlane_require 'json'
 fastlane_require 'pathname'
 
 skip_docs
 
 configured = false
-is_build_pr = false
-
 # Executes before anything else use to setup the script
 before_all do
   ENV['SPACESHIP_SKIP_2FA_UPGRADE'] = '1'
-
-  is_build_pr = ENV['BUILD_PR'] == 'true'
-  if is_build_pr && ENV['CI'] == 'true'
-    ENV['BRANCH_TO_BUILD'] = ENV['GITHUB_REF_NAME']
-  end
 
   if ENV['CI'] != 'true'
     # Raises an error is git is not clean
@@ -247,142 +238,6 @@ lane :link_sentry do |options|
   end
 end
 
-# Uploads built files to S3
-# It's currently uploading to two different buckets depending on the
-# enable_s3_new_bucket option.
-# Default, uploads to the legacy bucket using static credentials (AWS_BUCKET_NAME).
-# To upload to the new bucket AWS_NEW_BUCKET_NAME (using IAM/OIDC), pass :enable_s3_new_bucket => true in options.
-# Example: upload_file_to_s3({:os_type => "ios", :enable_s3_new_bucket => true})
-desc 'Upload file to s3'
-lane :upload_file_to_s3 do |options|
-  os_type = options[:os_type].downcase
-  extensions = os_type == "android" ? ["*.apk", "*.aab"] : ["*.ipa"]
-  build_folder_path = Dir[File.expand_path('..')].first
-  files = []
-  enable_s3_new_bucket = options[:enable_s3_new_bucket] == true
-
-  unless options[:file].nil? || options[:file].empty?
-    files.push("#{build_folder_path}/#{options[:file]}")
-  else
-    extensions.each do |extension|
-      files.push(*Dir.glob("#{build_folder_path}/#{extension}").select { |f| File.file? f})
-    end
-  end
-
-  unless ENV['AWS_BUCKET_NAME'].nil? || ENV['AWS_BUCKET_NAME'].empty? || ENV['AWS_REGION'].nil? || ENV['AWS_REGION'].empty? || files.length == 0
-    version_number = ''
-    build_number = ''
-    pr_file = ''
-    plist_file = ''
-
-    if is_build_pr
-      pr_file = File.basename(files.first)
-      plist_file = "#{File.basename(files.first, '.*')}.plist"
-    else
-      version_number = os_type == "android" ?
-        android_get_version_name(gradle_file: './android/app/build.gradle') :
-        get_version_number(xcodeproj: './ios/kChat.xcodeproj', target: 'kChat')
-      build_number = os_type == "android" ?
-        android_get_version_code(gradle_file: './android/app/build.gradle') :
-        get_build_number(xcodeproj: './ios/kChat.xcodeproj')
-    end
-
-    s3_region = ENV['AWS_REGION']
-    s3_bucket_name = ENV['AWS_BUCKET_NAME']
-    s3_new_bucket_name = ENV['AWS_NEW_BUCKET_NAME']
-    bucket_name = enable_s3_new_bucket ? s3_new_bucket_name : s3_bucket_name
-
-    if is_build_pr
-      # Get the current git commit SHA (short version)
-      commit_sha = sh("git rev-parse --short HEAD").strip
-      s3_folder = "#{ENV['AWS_FOLDER_NAME']}/#{ENV['BRANCH_TO_BUILD']}/#{commit_sha}"
-    else
-      s3_folder = "#{ENV['AWS_FOLDER_NAME']}/#{version_number}/#{build_number}"
-    end
-    if enable_s3_new_bucket
-      # Client for new bucket assumes role via GitHub Actions OIDC
-      s3_client = Aws::S3::Client.new(region: s3_region)
-      UI.message("Set S3 Client to upload to new S3 bucket")
-    else
-      s3_client = Aws::S3::Client.new(
-        region: s3_region,
-        access_key_id: ENV['AWS_ACCESS_KEY_ID'],
-        secret_access_key: ENV['AWS_SECRET_ACCESS_KEY']
-      )
-      UI.message("Set S3 Client to upload to existing S3 bucket: #{s3_bucket_name}")
-    end
-    transfer_manager = Aws::S3::TransferManager.new(client: s3_client)
-    mutex = Mutex.new
-    threads = []
-    file_number = 0
-    total_files = files.length
-    links = []
-    total_files.times do |i|
-      threads[i] = Thread.new {
-        until files.empty?
-          mutex.synchronize do
-            file_number += 1
-            Thread.current["file_number"] = file_number
-          end
-          file = files.pop rescue nil
-          next unless file
-
-          filename = File.basename(file)
-          puts "[#{Thread.current["file_number"]}/#{total_files}] #{filename} uploading..."
-          s3_key = "#{s3_folder}/#{filename}"
-          transfer_manager.upload_file(file, bucket: bucket_name, key: s3_key)
-          # Keep s3_bucket_name to support both buckets.
-          links.push("https://#{s3_bucket_name}/#{s3_key}")
-        end
-      }
-    end
-    threads.each { |t| t.join }
-
-    if is_build_pr
-      if os_type == 'android'
-        install_url = "https://#{s3_bucket_name}/#{s3_folder}/#{pr_file}"
-      elsif os_type == 'ios'
-        current_build_number = get_build_number(xcodeproj: './ios/kChat.xcodeproj')
-        plist_template = File.read('plist.erb')
-        plist_body = ERB.new(plist_template).result(binding)
-
-        s3_client.put_object(
-          bucket: bucket_name,
-          key: "#{s3_folder}/#{plist_file}",
-          body: plist_body,
-          content_type: 'application/xml'
-        )
-
-        install_url = "itms-services://?action=download-manifest&url=https://#{s3_bucket_name}/#{s3_folder}/#{plist_file}"
-      end
-
-      if enable_s3_new_bucket == false
-        qa_build_message({
-                              :os_type => os_type,
-                              :install_url => install_url
-                          })
-      end
-    end
-
-    if options[:file]&.start_with?('Mattermost-simulator-') && options[:file]&.end_with?('.app.zip') && enable_s3_new_bucket == false
-      pretext = '#### New iOS build for VM/Simulator'
-      msg = "Download link: #{links.first}"
-      send_message_to_mattermost({
-                                      :version_number => version_number,
-                                      :build_number => build_number,
-                                      :pretext => pretext,
-                                      :title => '',
-                                      :thumb_url => 'https://support.apple.com/library/content/dam/edam/applecare/images/en_US/iOS/move-to-ios-icon.png',
-                                      :msg => msg,
-                                      :default_payloads => [:git_branch, :last_git_commit_hash],
-                                      :success => true,
-                                  })
-    end
-
-    UI.message("S3 public paths:\n#{links.join("\n")}")
-  end
-end
-
 desc 'Create GitHub release'
 lane :github do
   tag = ENV['GITHUB_REF_NAME'] || ENV['TAG']
@@ -461,7 +316,6 @@ platform :ios do
     replace_assets
     link_sentry({:os_type => "ios"})
     build_ios
-    upload_file_to_s3({:os_type => "ios"})
   end
 
   desc 'Build an unsigned ipa'
@@ -483,8 +337,7 @@ platform :ios do
     )
   end
 
-  lane :simulator do |options|
-    skip_upload_to_s3_bucket = options[:skip_upload_to_s3_bucket] == true
+  lane :simulator do
     UI.success('Building iOS app for simulator')
 
     # Detect the host architecture
@@ -506,35 +359,6 @@ platform :ios do
       rel_build_dir: "Release-iphonesimulator",
       output_file: output_file,
     )
-
-    unless skip_upload_to_s3_bucket
-      upload_file_to_s3({
-        :os_type => "ios",
-        :file => output_file
-      })
-    end
-  end
-
-  desc 'Upload artifacts to S3'
-  lane :upload_artifacts_to_s3 do |options|
-    output_file = options[:output_file]
-    UI.message("Uploading to new S3 bucket..." + (output_file ? " file: #{output_file}" : ""))
-    begin
-      if output_file && !output_file.empty?
-        upload_file_to_s3({
-          :os_type => "ios",
-          :file => output_file,
-          :enable_s3_new_bucket => true
-        })
-      else
-        upload_file_to_s3({
-          :os_type => "ios",
-          :enable_s3_new_bucket => true
-        })
-      end
-    rescue SyntaxError, StandardError
-      UI.error("Failed to upload to new S3 bucket")
-    end
   end
 
   lane :update_settings do
@@ -869,7 +693,6 @@ platform :android do
     link_sentry({:os_type => "android"})
     build_android
     move_android_to_root
-    upload_file_to_s3({:os_type => "android"})
   end
 
   desc 'Build an unsigned apk'
@@ -891,16 +714,6 @@ platform :android do
     )
 
     sh "mv #{lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]} #{Pathname.new(File.expand_path(File.dirname(__FILE__))).parent.to_s}/Mattermost-unsigned.apk"
-  end
-
-  desc 'Upload artifacts to S3'
-  lane :upload_artifacts_to_s3 do
-    UI.message("Uploading to new S3 bucket...")
-    begin
-      upload_file_to_s3({:os_type => "android", :enable_s3_new_bucket => true})
-    rescue SyntaxError, StandardError
-      UI.error("Failed to upload to new S3 bucket")
-    end
   end
 
   lane :update_identifiers do
@@ -1261,12 +1074,8 @@ def submit_to_testflight(ipa_path)
     return
   end
 
-  filename = File.basename(ipa)
   version_number = get_version_number(xcodeproj: './ios/kChat.xcodeproj', target: 'kChat')
   build_number = get_build_number(xcodeproj: './ios/kChat.xcodeproj')
-  s3_folder = "#{ENV['AWS_FOLDER_NAME']}/#{version_number}/#{build_number}"
-  public_link = "https://#{ENV['AWS_BUCKET_NAME']}/#{s3_folder}/#{filename}"
-
 
   # Send a build message to Mattermost
   pretext = '#### New iOS released ready to be published'
@@ -1290,7 +1099,6 @@ def submit_to_testflight(ipa_path)
 end
 
 def submit_to_google_play(file_path)
-  filenames = []
   version_number = android_get_version_name(gradle_file: './android/app/build.gradle')
   build_number = android_get_version_code(gradle_file: './android/app/build.gradle')
 
@@ -1315,10 +1123,8 @@ def submit_to_google_play(file_path)
           timeout: 600
       )
     end
-    filenames.push(aab_filename)
   else
     apks = Dir.glob(file_path).select { |f| File.file? f}
-    filenames = apks.map {|f| File.basename(f)}
 
     if(apks.length > 0)
       unless ENV['SUPPLY_JSON_KEY'].nil? || ENV['SUPPLY_JSON_KEY'].empty?
@@ -1342,14 +1148,10 @@ def submit_to_google_play(file_path)
     end
   end
 
-  s3_folder = "#{ENV['AWS_FOLDER_NAME']}/#{version_number}/#{build_number}"
-  public_path = "https://#{ENV['AWS_BUCKET_NAME']}/#{s3_folder}"
-  links = (filenames.map { |f| "* #{public_path}/#{f}"}).join("\n")
-
   # Send a build message to Mattermost
   pretext = '#### New Android release ready to be published'
   release_msg = release_status == 'draft' ? 'Release has been cut and is awaiting manual rollout in the Play Console.' : 'Release has been cut and published.'
-  msg = "#{release_msg}\nDownload links:\n#{links}"
+  msg = release_msg
 
   if ENV['BETA_BUILD'] == 'true'
     pretext = '#### New Android beta published to Google Play'
@@ -1366,24 +1168,4 @@ def submit_to_google_play(file_path)
                                  :default_payloads => [],
                                  :success => true,
                              })
-end
-
-def qa_build_message(options)
-  abbreviated_commit_hash = last_git_commit[:abbreviated_commit_hash]
-  os_type = options[:os_type]
-  install_url = options[:install_url]
-
-  unless ENV['MATTERMOST_WEBHOOK_URL'].nil? || ENV['MATTERMOST_WEBHOOK_URL'].empty?
-    os_type = options[:os_type]
-
-    if os_type == 'android'
-      msg = "QA build [#{abbreviated_commit_hash}](https://github.com/mattermost/mattermost-mobile/commit/#{abbreviated_commit_hash}) - [Android APK Link](#{install_url})"
-      mattermost(message: msg, username: 'Fastlane', icon_url: 'https://lh3.ggpht.com/XL0CrI8skkxnboGct-duyg-bZ_MxJDTrjczyjdU8OP2PM1dmj7SP4jL1K8JQeMIB3AM=w300')
-    elsif os_type == 'ios'
-      msg = "QA build [#{abbreviated_commit_hash}](https://github.com/mattermost/mattermost-mobile/commit/#{abbreviated_commit_hash}) - [iOS pList Link](#{install_url})"
-      mattermost(message: msg, username: 'Fastlane', icon_url: 'https://support.apple.com/library/content/dam/edam/applecare/images/en_US/iOS/move-to-ios-icon.png')
-    end
-  else
-    UI.success("PR Built for #{os_type}: #{install_url}")
-  end
 end

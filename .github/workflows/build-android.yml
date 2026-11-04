@@ -40,7 +40,6 @@ jobs:
       - determine-environment
       - test
     permissions:
-      id-token: write
       contents: read
     steps:
       - name: ci/checkout-repo
@@ -70,8 +69,6 @@ jobs:
 
       - name: ci/build-and-deploy-android
         env:
-          AWS_ACCESS_KEY_ID: "${{ secrets.MM_MOBILE_BETA_AWS_ACCESS_KEY_ID }}"
-          AWS_SECRET_ACCESS_KEY: "${{ secrets.MM_MOBILE_BETA_AWS_SECRET_ACCESS_KEY }}"
           MATTERMOST_WEBHOOK_URL: "${{ secrets.MM_MOBILE_BETA_MATTERMOST_WEBHOOK_URL }}"
           SENTRY_AUTH_TOKEN: "${{ secrets.MM_MOBILE_SENTRY_AUTH_TOKEN }}"
           SENTRY_DSN_ANDROID: ${{ secrets.MM_MOBILE_BETA_SENTRY_DSN_ANDROID }}

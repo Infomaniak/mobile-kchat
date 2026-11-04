@@ -24,7 +24,6 @@ jobs:
     needs:
       - test
     permissions:
-      id-token: write
       contents: read
     steps:
       - name: ci/checkout-repo
@@ -56,10 +55,12 @@ jobs:
 
       - name: ci/build-and-deploy-android
         env:
-          AWS_ACCESS_KEY_ID: "${{ secrets.MM_MOBILE_BETA_AWS_ACCESS_KEY_ID }}"
-          AWS_SECRET_ACCESS_KEY: "${{ secrets.MM_MOBILE_BETA_AWS_SECRET_ACCESS_KEY }}"
           MATTERMOST_WEBHOOK_URL: "${{ secrets.MM_MOBILE_BETA_MATTERMOST_WEBHOOK_URL }}"
           SENTRY_AUTH_TOKEN: "${{ secrets.MM_MOBILE_SENTRY_AUTH_TOKEN }}"
+          # Deliberate: only one Android DSN secret exists on this repo, same
+          # Sentry project as the beta builds. Store events are separated by the
+          # environment tag (production, from fastlane .env.android.release),
+          # not by the DSN.
           SENTRY_DSN_ANDROID: ${{ secrets.MM_MOBILE_BETA_SENTRY_DSN_ANDROID }}
           SUPPLY_JSON_KEY: ${{ github.workspace }}/mobile-private/android/kchat-credentials.json
         run: |
