@@ -13,7 +13,7 @@ import TouchableWithFeedback from '@components/touchable_with_feedback';
 import {useServerUrl} from '@context/server';
 import {useTheme} from '@context/theme';
 import {useDebounce} from '@hooks/utils';
-import {getEmojiByName, getEmojis, searchEmojis} from '@utils/emoji/helpers';
+import {emojiToUnicode, getEmojiByName, getEmojis, searchEmojis} from '@utils/emoji/helpers';
 import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji';
@@ -136,10 +136,7 @@ const EmojiSuggestion = ({
         const emojiPart = value.substring(0, cursorPosition);
         const emojiData = getEmojiByName(emoji, customEmojis);
         if (emojiData?.image && emojiData.category !== 'custom') {
-            const codeArray: string[] = emojiData.image.split('-');
-            const code = codeArray.reduce((acc, c) => {
-                return acc + String.fromCodePoint(parseInt(c, 16));
-            }, '');
+            const code = emojiToUnicode(emojiData);
             completedDraft = emojiPart.replace(EMOJI_REGEX_WITHOUT_PREFIX, `${code} `);
         } else {
             completedDraft = emojiPart.replace(EMOJI_REGEX_WITHOUT_PREFIX, `${prefix}${emoji}: `);

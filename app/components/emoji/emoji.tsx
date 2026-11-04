@@ -14,7 +14,7 @@ import NetworkManager from '@managers/network_manager';
 import {queryCustomEmojisByName} from '@queries/servers/custom_emoji';
 import {observeConfigBooleanValue} from '@queries/servers/system';
 import {EmojiIndicesByAlias, Emojis} from '@utils/emoji';
-import {isUnicodeEmoji} from '@utils/emoji/helpers';
+import {emojiToUnicode, isUnicodeEmoji} from '@utils/emoji/helpers';
 
 import type {EmojiProps} from '@typings/components/emoji';
 import type {WithDatabaseArgs} from '@typings/database/database';
@@ -46,7 +46,7 @@ const Emoji = (props: EmojiProps) => {
     } = props;
     const serverUrl = useServerUrl();
     let assetImage = '';
-    let unicode;
+    let emojiUnicode = '';
     let imageUrl = '';
     const name = emojiName.trim();
     if (EmojiIndicesByAlias.has(name)) {
@@ -54,7 +54,7 @@ const Emoji = (props: EmojiProps) => {
         if (emoji.category === 'custom') {
             assetImage = emoji.fileName;
         } else {
-            unicode = emoji.image;
+            emojiUnicode = emojiToUnicode(emoji);
         }
     } else {
         const custom = customEmojis.find((ce) => ce.name === name);
@@ -78,7 +78,7 @@ const Emoji = (props: EmojiProps) => {
         size = fontSize;
     }
 
-    if (displayTextOnly || (!imageUrl && !assetImage && !unicode)) {
+    if (displayTextOnly || (!imageUrl && !assetImage && !emojiUnicode)) {
         return (
             <Text
                 style={[commonStyle, textStyle]}
@@ -91,18 +91,13 @@ const Emoji = (props: EmojiProps) => {
     const width = size;
     const height = size;
 
-    if (unicode && !imageUrl) {
-        const codeArray = unicode.split('-');
-        const code = codeArray.reduce((acc: string, c: string) => {
-            return acc + String.fromCodePoint(parseInt(c, 16));
-        }, '');
-
+    if (emojiUnicode && !imageUrl) {
         return (
             <Text
                 style={[commonStyle, textStyle, {fontSize: size, color: '#000'}]}
                 testID={testID}
             >
-                {code}
+                {emojiUnicode}
             </Text>
         );
     }

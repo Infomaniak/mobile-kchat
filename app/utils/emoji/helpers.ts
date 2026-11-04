@@ -229,6 +229,33 @@ export function mapCustomEmojiNames(customEmois: CustomEmojiModel[]) {
     return customEmois.map((c) => c.name);
 }
 
+// Emoji presentation: some emojis (e.g. information_source U+2139) default to
+// text presentation and require U+FE0F (VS16) to render as emoji. The `unified`
+// field carries the qualified sequence while `image` (the PNG file name) drops
+// the -FE0F suffix, so always prefer `unified` when building a character.
+export function emojiToUnicode(emoji?: Emoji): string {
+    if (!emoji) {
+        return '';
+    }
+
+    const code = emoji.unified || emoji.image;
+    if (!code) {
+        return '';
+    }
+
+    // Every segment must be a full hex code point, and custom-category rows
+    // carry emoji names ('kchat', or fully-hex names like 'cafe') rather than
+    // code points — parseInt would silently accept those as garbage characters.
+    const codePoints = code.split('-');
+    if (emoji.category === 'custom' || !codePoints.every((c) => /^[\da-fA-F]+$/.test(c))) {
+        return '';
+    }
+
+    return codePoints.reduce((acc, c) => {
+        return acc + String.fromCodePoint(parseInt(c, 16));
+    }, '');
+}
+
 // Since there is no shared logic between the web and mobile app
 // this is copied from the webapp as custom sorting logic for emojis
 

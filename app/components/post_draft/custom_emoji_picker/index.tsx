@@ -9,6 +9,7 @@ import {isEdgeToEdge} from '@constants/device';
 import {useKeyboardState} from '@context/keyboard_state';
 import {useTheme} from '@context/theme';
 import {EmojiIndicesByAlias, Emojis} from '@utils/emoji';
+import {emojiToUnicode} from '@utils/emoji/helpers';
 import {makeStyleSheetFromTheme} from '@utils/theme';
 
 import EmojiPicker from './emoji_picker';
@@ -65,13 +66,9 @@ const CustomEmojiPicker: React.FC = () => {
             if (emoji.category === 'custom') {
                 insertedText = ` :${emojiName}: `;
             } else {
-                const unicode = emoji.image;
+                const unicode = emojiToUnicode(emoji);
                 if (unicode) {
-                    const codeArray = unicode.split('-');
-                    const convertToUnicode = (acc: string, c: string) => {
-                        return acc + String.fromCodePoint(parseInt(c, 16));
-                    };
-                    insertedText = codeArray.reduce(convertToUnicode, '');
+                    insertedText = unicode;
                 } else {
                     insertedText = ` :${emojiName}: `;
                 }

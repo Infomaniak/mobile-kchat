@@ -6,6 +6,7 @@ import React from 'react';
 import {useKeyboardState} from '@context/keyboard_state';
 import {renderWithIntlAndTheme} from '@test/intl-test-helper';
 import {EmojiIndicesByAlias, Emojis} from '@utils/emoji';
+import {emojiToUnicode} from '@utils/emoji/helpers';
 
 import EmojiPicker from './emoji_picker';
 
@@ -149,14 +150,8 @@ describe('CustomEmojiPicker', () => {
                 if (emoji.category === 'custom') {
                     insertedTextLength = ` :${emojiName}: `.length;
                 } else {
-                    const unicode = emoji.image;
-                    if (unicode) {
-                        const codeArray = unicode.split('-');
-                        const convertToUnicode = (acc: string, c: string) => {
-                            return acc + String.fromCodePoint(parseInt(c, 16));
-                        };
-                        insertedTextLength = codeArray.reduce(convertToUnicode, '').length;
-                    } else {
+                    insertedTextLength = emojiToUnicode(emoji).length;
+                    if (!insertedTextLength) {
                         insertedTextLength = ` :${emojiName}: `.length;
                     }
                 }
@@ -177,6 +172,23 @@ describe('CustomEmojiPicker', () => {
             expect(mockSetCursorPosition).toHaveBeenCalled();
             const newPos = mockSetCursorPosition.mock.calls[0][0];
             expect(newPos).toBeGreaterThan(5);
+        });
+
+        it('should account for the emoji presentation selector when inserting a text-presentation-default emoji (RM-645176)', () => {
+            mockCursorPosition = 5;
+            const initialValue = 'Hello world';
+
+            renderWithIntlAndTheme(<CustomEmojiPicker/>);
+
+            const emojiName = 'heart';
+            triggerEmojiPress(emojiName);
+
+            const updateFunction = mockUpdateValue.mock.calls[0][0];
+            const result = updateFunction(initialValue);
+
+            expect(result).toBe('Hello\u2764\uFE0F world');
+            expect(mockUpdateCursorPosition).toHaveBeenCalledWith(7);
+            expect(mockCursorPosition).toBe(7);
         });
     });
 
@@ -203,14 +215,8 @@ describe('CustomEmojiPicker', () => {
                 if (emoji.category === 'custom') {
                     firstEmojiLength = ` :${firstEmojiName}: `.length;
                 } else {
-                    const unicode = emoji.image;
-                    if (unicode) {
-                        const codeArray = unicode.split('-');
-                        const convertToUnicode = (acc: string, c: string) => {
-                            return acc + String.fromCodePoint(parseInt(c, 16));
-                        };
-                        firstEmojiLength = codeArray.reduce(convertToUnicode, '').length;
-                    } else {
+                    firstEmojiLength = emojiToUnicode(emoji).length;
+                    if (!firstEmojiLength) {
                         firstEmojiLength = ` :${firstEmojiName}: `.length;
                     }
                 }

@@ -11,6 +11,7 @@ import emojis from './emoji.json';
 export type Emoji = {
     name: string;
     image?: string;
+    unified?: string;
     short_name: string;
     short_names: string[];
     text: string | null;

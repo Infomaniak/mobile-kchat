@@ -23,8 +23,10 @@ import {
     getSkin,
     getEmojis,
     searchEmojis,
+    emojiToUnicode,
 } from './helpers';
 
+import type {Emoji as EmojiType} from '.';
 import type CustomEmojiModel from '@typings/database/models/servers/custom_emoji';
 import type SystemModel from '@typings/database/models/servers/system';
 
@@ -254,6 +256,48 @@ describe('helpers.ts tests', () => {
             const result = searchEmojis(fuse, 'smile');
             expect(result).toEqual(['smile', 'smile_cat', 'smiley', 'smiley_cat', 'sweat_smile']);
             expect(searchEmojis(fuse, 'cawabunga')).toEqual([]);
+        });
+    });
+
+    describe('emojiToUnicode', () => {
+        it('should return the emoji-presentation character for text-presentation-default emojis (RM-645176)', () => {
+            const informationSource = getEmojiByName('information_source', []);
+            expect(emojiToUnicode(informationSource!)).toBe('\u2139\uFE0F');
+
+            const heart = getEmojiByName('heart', []);
+            expect(emojiToUnicode(heart!)).toBe('\u2764\uFE0F');
+        });
+
+        it('should return the unchanged character for emojis with a default emoji presentation', () => {
+            const grinning = getEmojiByName('grinning', []);
+            expect(emojiToUnicode(grinning!)).toBe('\u{1F600}');
+
+            const thumbsUp = getEmojiByName('thumbsup', []);
+            expect(emojiToUnicode(thumbsUp!)).toBe('\u{1F44D}');
+        });
+
+        it('should fall back to the image field when unified is missing', () => {
+            expect(emojiToUnicode({image: '2764'} as EmojiType)).toBe('\u2764');
+        });
+
+        it('should return an empty string for emojis without image or unified', () => {
+            expect(emojiToUnicode({} as EmojiType)).toBe('');
+            expect(emojiToUnicode(undefined)).toBe('');
+        });
+
+        it('should return an empty string for real custom emoji rows (name is not a hex code point)', () => {
+            const custom = {name: 'kchat', image: 'kchat', unified: 'kchat', short_name: 'kchat', short_names: ['kchat'], text: null, texts: null, category: 'custom', fileName: 'kchat.png'} as EmojiType;
+            expect(emojiToUnicode(custom)).toBe('');
+        });
+
+        it('should return an empty string for custom rows with fully-hex names', () => {
+            const custom = {name: 'cafe', image: 'cafe', unified: 'cafe', short_name: 'cafe', short_names: ['cafe'], text: null, texts: null, category: 'custom', fileName: 'cafe.png'} as EmojiType;
+            expect(emojiToUnicode(custom)).toBe('');
+        });
+
+        it('should return an empty string for partially-hex names that parseInt would accept as garbage', () => {
+            expect(emojiToUnicode({image: 'calendar'} as EmojiType)).toBe('');
+            expect(emojiToUnicode({unified: 'kchat'} as EmojiType)).toBe('');
         });
     });
 });
